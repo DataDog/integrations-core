@@ -1041,3 +1041,312 @@ def test_events(get_current_datetime, dd_run_check, aggregator, expected_events,
     dd_run_check(check)
     for event in expected_events:
         aggregator.assert_event(event['message'], tags=event['tags'], count=1)
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit'),
+    [pytest.param(30, id='high limit'), pytest.param(2, id='low limit')],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_paginated_limit_octopusservernodes(
+    get_current_datetime, dd_run_check, aggregator, paginated_limit, mock_http_get
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        args_list += [(args[0], take, skip)]
+
+    assert args_list.count(('http://localhost:80/api/octopusservernodes', paginated_limit, 0)) == 1
+
+    aggregator.assert_metric(
+        "octopus_deploy.server_node.count",
+        1,
+        count=1,
+        tags=[
+            'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
+            'server_node_name:octopus-i8932-79236734bc234-09h234n',
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.server_node.max_concurrent_tasks",
+        5,
+        count=1,
+        tags=[
+            'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
+            'server_node_name:octopus-i8932-79236734bc234-09h234n',
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.server_node.in_maintenance_mode",
+        0,
+        count=1,
+        tags=[
+            'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
+            'server_node_name:octopus-i8932-79236734bc234-09h234n',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit, expected_skip_take_args'),
+    [
+        pytest.param(
+            30,
+            [
+                (['http://localhost:80/api/Spaces-1/events'], 0, 30),
+                (['http://localhost:80/api/Spaces-1/events'], 0, 30),
+            ],
+            id='high limit',
+        ),
+        pytest.param(
+            2,
+            [
+                (['http://localhost:80/api/Spaces-1/events'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/events'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/events'], 2, 2),
+            ],
+            id='low limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_paginated_limit_events(
+    get_current_datetime,
+    dd_run_check,
+    aggregator,
+    paginated_limit,
+    mock_http_get,
+    expected_skip_take_args,
+    caplog,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+    instance['collect_events'] = True
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
+
+    skip_take_args = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        if 'events' in args[0]:
+            print(kwargs)
+            skip_take_args += [(list(args), skip, take)]
+
+    assert skip_take_args == expected_skip_take_args
+
+    for event in ALL_EVENTS:
+        aggregator.assert_event(event['message'], tags=event['tags'], count=1)
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit, expected_skip_take_args'),
+    [
+        pytest.param(
+            30,
+            [
+                (['http://localhost:80/api/spaces'], 0, 30),
+            ],
+            id='high limit',
+        ),
+        pytest.param(
+            2,
+            [
+                (['http://localhost:80/api/spaces'], 0, 2),
+            ],
+            id='low limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_paginated_limit_spaces(
+    get_current_datetime,
+    dd_run_check,
+    paginated_limit,
+    mock_http_get,
+    expected_skip_take_args,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    skip_take_args = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        if 'http://localhost:80/api/spaces' == args[0]:
+            skip_take_args += [(list(args), skip, take)]
+
+    assert skip_take_args == expected_skip_take_args
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit, expected_skip_take_args'),
+    [
+        pytest.param(
+            30,
+            [
+                (['http://localhost:80/api/Spaces-1/projectgroups'], 0, 30),
+            ],
+            id='high limit',
+        ),
+        pytest.param(
+            2,
+            [
+                (['http://localhost:80/api/Spaces-1/projectgroups'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/projectgroups'], 2, 2),
+            ],
+            id='low limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_paginated_limit_project_groups(
+    get_current_datetime,
+    dd_run_check,
+    paginated_limit,
+    mock_http_get,
+    expected_skip_take_args,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    skip_take_args = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/projectgroups' == args[0]:
+            skip_take_args += [(list(args), skip, take)]
+
+    assert skip_take_args == expected_skip_take_args
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit, expected_skip_take_args'),
+    [
+        pytest.param(
+            30,
+            [
+                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 0, 30),
+            ],
+            id='high limit',
+        ),
+        pytest.param(
+            2,
+            [
+                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 2, 2),
+            ],
+            id='low limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_paginated_limit_projects_projectgroups1(
+    get_current_datetime,
+    dd_run_check,
+    paginated_limit,
+    mock_http_get,
+    expected_skip_take_args,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    skip_take_args = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects' == args[0]:
+            skip_take_args += [(list(args), skip, take)]
+
+    assert skip_take_args == expected_skip_take_args
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit, expected_skip_take_args'),
+    [
+        pytest.param(
+            30,
+            [
+                (['http://localhost:80/api/Spaces-1/tasks'], 0, 30),
+                (['http://localhost:80/api/Spaces-1/tasks'], 0, 30),
+            ],
+            id='high limit',
+        ),
+        pytest.param(
+            2,
+            [
+                (['http://localhost:80/api/Spaces-1/tasks'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/tasks'], 0, 2),
+            ],
+            id='low limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_paginated_limit_tasks(
+    get_current_datetime,
+    dd_run_check,
+    paginated_limit,
+    mock_http_get,
+    expected_skip_take_args,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    skip_take_args = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        project = kwargs.get('params', {}).get('project')
+        if 'http://localhost:80/api/Spaces-1/tasks' == args[0] and project == 'Projects-1':
+            skip_take_args += [(list(args), skip, take)]
+
+    assert skip_take_args == expected_skip_take_args

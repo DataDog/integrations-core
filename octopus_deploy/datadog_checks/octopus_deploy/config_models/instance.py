@@ -110,6 +110,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     ntlm_domain: Optional[str] = None
     octopus_endpoint: str
+    paginated_limit: Optional[int] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     project_groups: Optional[ProjectGroups] = None
