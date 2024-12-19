@@ -2,25 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# TABLE_STATS = {
-#     'name': 'tables_number',
-#     'query': "SELECT table_catalog, COUNT(*) AS num_tables FROM information_schema.tables "
-#     "GROUP BY table_catalog WHERE table_catalog='{}';",
-#     'columns': [
-#         {'name': 'table_catalog', 'type': 'tag'},
-#         {'name': 'num_tables', 'type': 'gauge'},
-#     ],
-# }
 
 DUCKDB_VERSION = {
-    'name': 'duckdb_version',
+    'name': 'version',
     'query': "SELECT version();",
     'columns': [{'name': 'version', 'type': 'source'}],
 }
 
 DUCKDDB_WAL = {
     'name': 'wal_autocheckpoint',
-    'query': " SELECT CAST(SUBSTR(value, 1, LENGTH(value) - 3) AS INTEGER) * "
+    'query': " SELECT CAST(SUBSTR(value, 1, LENGTH(value) - 3) AS BIGINT) * "
     "CASE "
     " WHEN RIGHT(value, 3) = 'KiB' THEN 1024 "
     " WHEN RIGHT(value, 3) = 'MiB' THEN 1024 * 1024 "
@@ -38,4 +29,33 @@ DUCKDDB_THREADS = {
     'columns': [{'name': 'worker_threads', 'type': 'gauge'}],
 }
 
-DEFAULT_QUERIES = [DUCKDDB_THREADS, DUCKDDB_WAL, DUCKDB_VERSION]
+
+DUCKDB_MEMORY_LIMIT = {
+    'name': 'memory_limit',
+    'query': " SELECT CAST(SUBSTR(value, 1, LENGTH(value) - 3) AS BIGINT) * "
+    "CASE "
+    " WHEN RIGHT(value, 3) = 'KiB' THEN 1024 "
+    " WHEN RIGHT(value, 3) = 'MiB' THEN 1024 * 1024 "
+    " WHEN RIGHT(value, 3) = 'GiB' THEN 1024 * 1024 * 1024 "
+    " WHEN RIGHT(value, 3) = 'TiB' THEN 1024 * 1024 * 1024 * 1024 "
+    " ELSE 1 "
+    " END AS value_in_bytes FROM duckdb_settings() WHERE name = 'memory_limit';",
+    'columns': [{'name': 'memory_limit', 'type': 'gauge'}],
+}
+
+
+DUCKDB_PART_WRITE_FLUSH_THRESHOLD = {
+    'name': 'partitioned_write_flush_threshold',
+    'query': " SELECT  CAST(value AS INTEGER) AS value_as_integer "
+    " FROM duckdb_settings() WHERE name = 'partitioned_write_flush_threshold';",
+    'columns': [{'name': 'partitioned_write_flush_threshold', 'type': 'gauge'}], 
+}
+
+DUCKDB_PART_WRITE_MAX_OPEN_FILES = {
+    'name': 'partitioned_write_max_open_files',
+    'query': " SELECT  CAST(value AS INTEGER) AS value_as_integer "
+    " FROM duckdb_settings() WHERE name = 'partitioned_write_max_open_files';",
+    'columns': [{'name': 'partitioned_write_max_open_files', 'type': 'gauge'}], 
+}
+
+DEFAULT_QUERIES = [DUCKDB_VERSION,DUCKDDB_THREADS, DUCKDDB_WAL, DUCKDB_MEMORY_LIMIT, DUCKDB_PART_WRITE_FLUSH_THRESHOLD , DUCKDB_PART_WRITE_MAX_OPEN_FILES ]

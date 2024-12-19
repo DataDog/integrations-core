@@ -13,13 +13,6 @@ from . import common
 
 
 @pytest.fixture(scope='session')
-def connection_db():
-    db_file_path = os.path.join(common.HERE, common.DB_NAME)
-    connection = duckdb.connect(db_file_path)
-    return connection
-
-
-@pytest.fixture(scope='session')
 def dd_environment():
     yield common.DEFAULT_INSTANCE
 

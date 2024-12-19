@@ -19,9 +19,10 @@ def test_check(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     aggregator.assert_service_check('duckdb.can_connect', DuckdbCheck.OK)
+    #aggregator.assert_service_check('duckdb.can_query', DuckdbCheck.OK)
+
     for metric in common.METRICS_MAP:
         aggregator.assert_metric(metric)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 def test_version(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None

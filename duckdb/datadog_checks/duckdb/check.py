@@ -4,6 +4,7 @@
 from contextlib import closing, contextmanager
 from copy import deepcopy
 import json
+import os
 import re
 from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
 
@@ -64,14 +65,20 @@ class DuckdbCheck(AgentCheck):
 
             query = query.format(self.db_name)
             curs = cursor.execute(query)
-            if len(cursor.execute(query).fetchall()) < 1:  # this was returning a -1 with rowcount
+            if len(curs.fetchall()) < 1:  # this was returning a -1 with rowcount
                 self._query_errors += 1
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
             for row in cursor.execute(query).fetchall():
-                # To find the field name from the query
-                pattern = r"(?i)\bname\s*=\s*'([^']+)'"
-                query_name = re.search(pattern, query).group(1)
+                query_version = None
+                pattern_version = r"\bversion\b"
+                query_version = re.search(pattern_version, query)
+                if query_version:
+                    query_name = 'version'
+                else:
+                    # Try to find the field name from the query
+                    pattern = r"(?i)\bname\s*=\s*'([^']+)'"
+                    query_name = re.search(pattern, query).group(1)
                 try:
                     yield self._queries_processor(row, query_name)
                 except Exception as e:
@@ -81,7 +88,6 @@ class DuckdbCheck(AgentCheck):
     def _queries_processor(self, row, query_name):
         # type: (Sequence, AnyStr) -> Sequence
         unprocessed_row = row
-
         # Return database version
         if query_name == 'version':
             self.submit_version(row)
@@ -93,20 +99,22 @@ class DuckdbCheck(AgentCheck):
     @contextmanager
     def connect(self):
         conn = None
-        try:
-            # Try to establish the connection
-            conn = duckdb.connect(self.db_name, read_only=True)
-            self.log.info('Connected to DuckDB database.')
-            yield conn
-        except Exception as e:
-            if 'Conflicting lock' in str(e):
-                self.log.error('Lock conflict detected')
-            else:
-                self.log.error('Unable to connect to DuckDB database. %s.', e)
-                raise e
-        finally:
-            if conn:
-                conn.close()
+        # Only attempt connection if the file exists
+        if os.path.exists(self.db_name):
+            try:
+                # Try to establish the connection
+                conn = duckdb.connect(self.db_name, read_only=True)
+                self.log.info('Connected to DuckDB database.')
+                yield conn
+            except Exception as e:
+                if 'Conflicting lock' in str(e):
+                    self.log.error('Lock conflict detected')
+                else:
+                    self.log.error('Unable to connect to DuckDB database. %s.', e)
+                    raise e
+            finally:
+                if conn:
+                    conn.close()
 
     def initialize_config(self):
         self._connect_params = json.dumps(
@@ -136,7 +144,7 @@ class DuckdbCheck(AgentCheck):
         try:
             duckdb_version_row = row[0]
             duckdb_version = duckdb_version_row[1:]
-            version_split = duckdb_version(".")
+            version_split = duckdb_version.split('.')
 
             if len(version_split) >= 3:
                 major = version_split[0]
@@ -159,6 +167,5 @@ class DuckdbCheck(AgentCheck):
     def _executor_error_handler(self, error):
         # type: (AnyStr) -> AnyStr
         self.log.debug('Error from query "%s"', error)
-
         self._query_errors += 1
         return error
