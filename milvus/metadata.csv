@@ -20,7 +20,7 @@ milvus.cgo.cgo_queue_duration_seconds.bucket,count,,,,Histogram bucket for the d
 milvus.cgo.cgo_queue_duration_seconds.count,count,,,,Counnt of cgo calls in queue,0,milvus,,,
 milvus.cgo.cgo_queue_duration_seconds.sum,count,,second,,Sum of the duration of cgo calls in queue,0,milvus,,,
 milvus.cgo.running_cgo_call_total,gauge,,,,Total number of running cgo calls.,0,milvus,,,
-milvus.datacoord.channel_checkpoint_unix_seconds,gauge,,,,Channel checkpoint timestamp in unix seconds,0,milvus,,,
+milvus.datacoord.channel_checkpoint_unix_seconds,gauge,,,,Channel checkpoint timestamp in Unix seconds,0,milvus,,,
 milvus.datacoord.collection_num,gauge,,,,Number of collections,0,milvus,,,
 milvus.datacoord.consume_datanode_tt_lag_ms,gauge,,millisecond,,Now time minus tt per physical channel,0,milvus,,,
 milvus.datacoord.datanode_num,gauge,,,,Number of data nodes,0,milvus,,,
