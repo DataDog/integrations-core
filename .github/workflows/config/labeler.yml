@@ -441,6 +441,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/quarkus:
+- quarkus/**/*
 integration/rabbitmq:
 - rabbitmq/**/*
 integration/ray:

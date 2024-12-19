@@ -498,6 +498,10 @@ coverage:
         target: 75
         flags:
         - pulsar
+      Quarkus:
+        target: 75
+        flags:
+        - quarkus
       RabbitMQ:
         target: 75
         flags:
@@ -1373,6 +1377,11 @@ flags:
     paths:
     - pulsar/datadog_checks/pulsar
     - pulsar/tests
+  quarkus:
+    carryforward: true
+    paths:
+    - quarkus/datadog_checks/quarkus
+    - quarkus/tests
   rabbitmq:
     carryforward: true
     paths:
