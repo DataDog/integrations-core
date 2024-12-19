@@ -354,7 +354,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             machine_slug = machine.get("Slug")
             roles = machine.get("Roles", [])
             health_status = machine.get("HealthStatus", None)
-            is_healthy = health_status == "Healthy"
+            is_healthy = health_status.startswith("Healthy")
             machine_tags = [
                 f"machine_id:{machine_id}",
                 f"machine_name:{machine_name}",
