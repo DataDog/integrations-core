@@ -277,6 +277,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             task_name = task.get("Name")
             server_node = task.get("ServerNode")
             task_state = task.get("State")
+            pending_interruptions = task.get("HasPendingInterruptions")
+            is_queued = task_state == "Queued"
+            is_executing = task_state == "Executing"
+
             tags = self._base_tags + [
                 f'space_name:{space_name}',
                 f'project_name:{project_name}',
@@ -288,6 +292,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.log.debug("Processing task id %s for project %s", task_id, project_name)
             queued_time, executing_time, completed_time = self._calculate_task_times(task)
             self.gauge("deployment.count", 1, tags=tags)
+            self.gauge("deployment.waiting", pending_interruptions, tags=tags)
+            self.gauge("deployment.queued", is_queued, tags=tags)
+            self.gauge("deployment.executing", is_executing, tags=tags)
             self.gauge("deployment.queued_time", queued_time, tags=tags)
             if executing_time != -1:
                 self.gauge("deployment.executing_time", executing_time, tags=tags)

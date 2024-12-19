@@ -47,7 +47,7 @@
         "HasBeenPickedUpByProcessor": true,
         "IsCompleted": false,
         "FinishedSuccessfully": false,
-        "HasPendingInterruptions": false,
+        "HasPendingInterruptions": true,
         "CanRerun": false,
         "HasWarningsOrErrors": false,
         "UnmetPreconditions": null,
