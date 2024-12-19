@@ -127,7 +127,7 @@ instances:
     #
     autodiscovery_db_service_check: false
 
-    ## Configure the collection of database metrics. Requires `dbm: true`.
+    ## Configure the collection of database metrics
     #
     # database_metrics:
 
