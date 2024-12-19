@@ -131,7 +131,7 @@ files:
         display_default: true
     - name: database_metrics
       description: |
-        Configure the collection of database metrics. Requires `dbm: true`.
+        Configure the collection of database metrics
       options:
         - name: ao_metrics
           description: |
