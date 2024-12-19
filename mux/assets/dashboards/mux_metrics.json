@@ -32,7 +32,7 @@
                 "hide_zero_counts": true,
                 "show_status": true,
                 "last_triggered_format": "relative",
-                "query": "tag:integration:mux $Video_Id",
+                "query": "tag:integration:mux",
                 "sort": "status,asc",
                 "count": 50,
                 "start": 0,
@@ -694,13 +694,28 @@
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Playback Failure Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -786,13 +801,28 @@
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Video Startup Failure Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -886,13 +916,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Exits Before Video Start",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -986,13 +1023,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Video Startup Business Exception Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1086,13 +1130,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Video Startup Business Exception Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1176,6 +1227,7 @@
                             "title": "Top Videos with High Playback Failure Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1190,7 +1242,13 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "sort": {
@@ -2379,12 +2437,19 @@
                             "title": "Average Rebuffer Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2433,13 +2498,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Rebuffer Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2533,13 +2605,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Rebuffer Frequency",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "per_unit_name": "minute"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2896,13 +2975,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Weighted Average Bitrate",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit_scale": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2996,13 +3082,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Upscale Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -3096,13 +3189,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Downscale Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -3197,13 +3297,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Max Upscale Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -3290,13 +3397,28 @@
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Max Downscale Percentage",
-                                            "formula": "query1 * 100"
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
