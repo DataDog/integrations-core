@@ -8,14 +8,20 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Freshservice logs",
+    "description": "Gain insights into Freshservice ticket logs",
     "title": "Freshservice",
-    "media": [],
+    "media": [
+      {
+        "caption": "Freshservice - Tickets",
+        "image_url": "images/freshservice_tickets.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
-      "Offering::Integration",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -29,6 +35,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Freshservice - Tickets": "assets/dashboards/freshservice_tickets.json"
+    },
+    "logs": {
+      "source": "freshservice"
     }
   },
   "author": {
@@ -36,6 +48,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }
