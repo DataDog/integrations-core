@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import tomllib
 from unittest import mock
 
 import pytest
-import tomli
 import tomli_w
 
 
@@ -304,7 +304,7 @@ def fake_repo(tmp_path, config_file):
 
 def assert_dependencies(root, name, dependencies):
     with open(root / name / 'pyproject.toml', 'rb') as f:
-        assert tomli.load(f)['project']['optional-dependencies']['deps'] == dependencies
+        assert tomllib.load(f)['project']['optional-dependencies']['deps'] == dependencies
 
 
 def create_integration(root, name, dependencies):
