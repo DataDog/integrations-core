@@ -33,6 +33,8 @@ E2E_METRICS = [
     "octopus_deploy.server_node.count",
     "octopus_deploy.server_node.in_maintenance_mode",
     "octopus_deploy.server_node.max_concurrent_tasks",
+    "octopus_deploy.machine.count",
+    "octopus_deploy.machine.is_healthy",
 ]
 
 ALL_METRICS = ["octopus_deploy.deployment.completed_time"] + E2E_METRICS
