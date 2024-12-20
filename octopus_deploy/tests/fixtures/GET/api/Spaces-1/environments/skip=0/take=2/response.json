@@ -1,0 +1,50 @@
+{
+    "ItemType": "Environment",
+    "TotalResults": 2,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "Items": [
+        {
+            "Id": "Environments-1",
+            "SpaceId": "Spaces-1",
+            "Slug": "dev",
+            "Name": "dev",
+            "Description": "",
+            "SortOrder": 0,
+            "UseGuidedFailure": false,
+            "AllowDynamicInfrastructure": true,
+            "ExtensionSettings": [],
+            "Links": {
+                "Self": "/api/Spaces-1/environments/Environments-1",
+                "Machines": "/api/Spaces-1/environments/Environments-1/machines{?skip,take,partialName,roles,isDisabled,healthStatuses,commStyles,tenantIds,tenantTags,shellNames,deploymentTargetTypes}",
+                "SinglyScopedVariableDetails": "/api/Spaces-1/environments/Environments-1/singlyScopedVariableDetails",
+                "Metadata": "/api/Spaces-1/environments/Environments-1/metadata"
+            }
+        },
+        {
+            "Id": "Environments-2",
+            "SpaceId": "Spaces-1",
+            "Slug": "staging",
+            "Name": "staging",
+            "Description": "",
+            "SortOrder": 1,
+            "UseGuidedFailure": false,
+            "AllowDynamicInfrastructure": false,
+            "ExtensionSettings": [],
+            "Links": {
+                "Self": "/api/Spaces-1/environments/Environments-21",
+                "Machines": "/api/Spaces-1/environments/Environments-21/machines{?skip,take,partialName,roles,isDisabled,healthStatuses,commStyles,tenantIds,tenantTags,shellNames,deploymentTargetTypes}",
+                "SinglyScopedVariableDetails": "/api/Spaces-1/environments/Environments-21/singlyScopedVariableDetails",
+                "Metadata": "/api/Spaces-1/environments/Environments-21/metadata"
+            }
+        }
+    ],
+    "Links": {
+        "Self": "/api/Spaces-1/environments?skip=0&take=10",
+        "Template": "/api/Spaces-1/environments{?skip,ids,take,partialName}",
+        "Page.All": "/api/Spaces-1/environments?skip=0&take=2147483647",
+        "Page.Current": "/api/Spaces-1/environments?skip=0&take=10",
+        "Page.Last": "/api/Spaces-1/environments?skip=0&take=10"
+    }
+}
