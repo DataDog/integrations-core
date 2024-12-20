@@ -30,9 +30,9 @@
         "SpaceId": "Spaces-1",
         "EstimatedRemainingQueueDurationSeconds": 0,
         "Name": "Deploy",
-        "Description": "Deploy hello release 0.0.36 to staging",
+        "Description": "Deploy hello release 0.0.2 to staging",
         "Arguments": {
-          "DeploymentId": "Deployments-111"
+          "DeploymentId": "Deployments-18"
         },
         "State": "Executing",
         "Completed": "Executing...",

@@ -5,6 +5,7 @@
 import datetime
 from collections.abc import Iterable
 
+from cachetools import TTLCache
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
@@ -14,6 +15,9 @@ from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, Projects
 
 from .config_models import ConfigMixin
+
+TTL_CACHE_MAXSIZE = 50
+TTL_CACHE_TTL = 3600
 
 EVENT_TO_ALERT_TYPE = {
     'MachineHealthy': 'success',
@@ -41,6 +45,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._project_groups_discovery = {}
         self._default_projects_discovery = {}
         self._projects_discovery = {}
+        self._environments_discovery = {}
+        self._environments_cache = {}
+        self._deployments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
+        self._releases_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._base_tags = self.instance.get("tags", [])
         self.collect_events = self.instance.get("collect_events", False)
 
@@ -185,6 +193,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space_name}']
             self.gauge("space.count", 1, tags=tags)
             self.log.debug("Processing space %s", space_name)
+            self._process_environments(space_id, space_name)
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
@@ -239,7 +248,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                         f"api/{space_id}/projectgroups/{project_group_id}/projects"
                     ).get('Items', [])
                 ]
-        self.log.debug("Monitoring %s Projects", len(projects))
+        self.log.debug("Monitoring %s Projects for %s in %s", len(projects), project_group_name, space_name)
         for _, _, project, _ in projects:
             project_id = project.get("Id")
             project_name = project.get("Name")
@@ -253,15 +262,58 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_queued_and_running_tasks(space_id, space_name, project_id, project_name)
             self._process_completed_tasks(space_id, space_name, project_id, project_name)
 
+    def _process_environments(self, space_id, space_name):
+        if self.config.environments:
+            self._init_environments_discovery(space_id)
+            environments = list(self._environments_discovery[space_id].get_items())
+        else:
+            environments = [
+                (None, environment.get("Name"), environment, None)
+                for environment in self._process_paginated_endpoint(f"api/{space_id}/environments").get('Items', [])
+            ]
+
+        self.log.debug("Collecting %s environments for %s", len(environments), space_name)
+
+        for _, _, environment, _ in environments:
+            environment_name = environment.get("Name")
+            environment_slug = environment.get("Slug")
+            environment_id = environment.get("Id")
+            self._environments_cache[environment_id] = environment_name
+            use_guided_failure = int(environment.get("UseGuidedFailure", False))
+            allow_dynamic_infrastructure = int(environment.get("AllowDynamicInfrastructure", False))
+
+            tags = self._base_tags + [
+                f"space_name:{space_name}",
+                f"environment_name:{environment_name}",
+                f"environment_id:{environment_id}",
+                f"environment_slug:{environment_slug}",
+            ]
+            self.gauge("environment.count", 1, tags=tags)
+            self.gauge("environment.use_guided_failure", use_guided_failure, tags=tags)
+            self.gauge("environment.allow_dynamic_infrastructure", allow_dynamic_infrastructure, tags=tags)
+
+    def _init_environments_discovery(self, space_id):
+        self.log.info("Default Environments discovery: %s", self.config.environments)
+        if space_id not in self._environments_discovery:
+            self._environments_discovery[space_id] = Discovery(
+                lambda: self._process_paginated_endpoint(f"api/{space_id}/environments").get('Items', []),
+                limit=self.config.environments.limit,
+                include=normalize_discover_config_include(self.config.environments),
+                exclude=self.config.environments.exclude,
+                interval=self.config.environments.interval,
+                key=lambda environment: environment.get("Name"),
+            )
+
     def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting running and queued tasks for project %s", project_name)
-        params = {'project': project_id, 'states': ["Queued", "Executing"]}
+        params = {'name': 'Deploy', 'project': project_id, 'states': ["Queued", "Executing"]}
         response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
         self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting completed tasks for project %s", project_name)
         params = {
+            'name': 'Deploy',
             'project': project_id,
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
@@ -300,37 +352,77 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
         for task in tasks_json:
             task_id = task.get("Id")
-            task_name = task.get("Name")
             server_node = task.get("ServerNode")
             task_state = task.get("State")
             pending_interruptions = task.get("HasPendingInterruptions")
             is_queued = task_state == "Queued"
             is_executing = task_state == "Executing"
+            deployment_id = task.get("Arguments", {}).get("DeploymentId")
+            environment_name, deployment_tags = self._get_deployment_tags(space_id, deployment_id)
+            if environment_name in self._environments_cache.values():
+                tags = (
+                    self._base_tags
+                    + deployment_tags
+                    + [
+                        f'space_name:{space_name}',
+                        f'project_name:{project_name}',
+                        f'task_state:{task_state}',
+                        f'server_node:{server_node}',
+                    ]
+                )
+                self.log.debug("Processing task id %s for project %s", task_id, project_name)
+                queued_time, executing_time, completed_time = self._calculate_task_times(task)
+                self.gauge("deployment.count", 1, tags=tags)
+                self.gauge("deployment.waiting", pending_interruptions, tags=tags)
+                self.gauge("deployment.queued", is_queued, tags=tags)
+                self.gauge("deployment.executing", is_executing, tags=tags)
+                self.gauge("deployment.queued_time", queued_time, tags=tags)
+                if executing_time != -1:
+                    self.gauge("deployment.executing_time", executing_time, tags=tags)
+                if completed_time != -1:
+                    self.gauge("deployment.completed_time", completed_time, tags=tags)
 
-            tags = self._base_tags + [
-                f'space_name:{space_name}',
-                f'project_name:{project_name}',
-                f'task_id:{task_id}',
-                f'task_name:{task_name}',
-                f'task_state:{task_state}',
-                f'server_node:{server_node}',
-            ]
-            self.log.debug("Processing task id %s for project %s", task_id, project_name)
-            queued_time, executing_time, completed_time = self._calculate_task_times(task)
-            self.gauge("deployment.count", 1, tags=tags)
-            self.gauge("deployment.waiting", pending_interruptions, tags=tags)
-            self.gauge("deployment.queued", is_queued, tags=tags)
-            self.gauge("deployment.executing", is_executing, tags=tags)
-            self.gauge("deployment.queued_time", queued_time, tags=tags)
-            if executing_time != -1:
-                self.gauge("deployment.executing_time", executing_time, tags=tags)
+                    if self.logs_enabled:
+                        self.log.debug("Collecting logs for task id: %s", task_id)
+                        self._collect_deployment_logs(space_id, task_id, tags)
+            else:
+                self.log.debug(
+                    "Skipping task id: %s for project %s in skipped environment: %s",
+                    task_id,
+                    project_name,
+                    environment_name,
+                )
 
-            if completed_time != -1:
-                self.gauge("deployment.completed_time", completed_time, tags=tags)
+    def _get_deployment_tags(self, space_id, deployment_id):
+        self.log.debug("Getting deployment tags for deployment id: %s", deployment_id)
+        cached_deployment = self._deployments_cache.get(deployment_id)
 
-                if self.logs_enabled:
-                    self.log.debug("Collecting logs for task %s, id: %s", task_name, task_id)
-                    self._collect_deployment_logs(space_id, task_id, tags)
+        if cached_deployment is not None:
+            release_version = cached_deployment[0]
+            environment_name = cached_deployment[1]
+        else:
+            self.log.debug("Cached deployment not found for deployment id: %s", deployment_id)
+            deployment = self._process_endpoint(f"api/{space_id}/deployments/{deployment_id}")
+            release_id = deployment.get("ReleaseId")
+            environment_id = deployment.get("EnvironmentId")
+            environment_name = self._environments_cache.get(environment_id)
+            release_version = self._releases_cache.get(release_id)
+            if release_version is None:
+                self.log.debug(
+                    "Cached release not found for deployment id: %s, release id: %s", deployment_id, release_id
+                )
+                release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
+                release_version = release.get("Version")
+                self._releases_cache[release_id] = release_version
+
+            self._deployments_cache[deployment_id] = (release_version, environment_name)
+
+        tags = [
+            f'deployment_id:{deployment_id}',
+            f'release_version:{release_version}',
+            f'environment_name:{environment_name}',
+        ]
+        return environment_name, tags
 
     def _collect_server_nodes_metrics(self):
         self.log.debug("Collecting server node metrics.")
