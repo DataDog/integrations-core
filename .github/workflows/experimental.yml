@@ -6,6 +6,7 @@ on:
       zip_url:
         required: true
         type: string
+        default: 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip'
   pull_request:
     path:
     - datadog_checks_base/datadog_checks/**
@@ -23,7 +24,7 @@ jobs:
         include:
           - platform: "Windows"
             runner: "windows-2022"
-            zip_url: ""
+            zip_url: "https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip"
           - platform: "Linux"
             runner: "ubuntu-22.04"
             zip_url: ""
@@ -108,7 +109,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: powershell
       run: |
-        Invoke-WebRequest -Uri ${{ inputs.zip_url || 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip' }} -OutFile 'python_combined.zip'
+        Invoke-WebRequest -Uri ${{ inputs.zip_url || matrix.zip_url }} -OutFile 'python_combined.zip'
 
     - name: Unzip python_combined.zip
       if: runner.os == 'Windows'
@@ -168,16 +169,13 @@ jobs:
         $env:OPENSSL_CONF = ".\openssl.cnf"
         .\openssl.exe list -providers
 
-    - name: Add Python to PATH Windows
-      if: runner.os == 'Windows'
-      shell: powershell
+    - name: Add Python to PATH
       run: |
-        Add-Content -Path $env:GITHUB_ENV -Value "PATH=$(pwd)\python_dir;$(pwd)\python_dir\Scripts;$env:PATH"
-
-    - name: Add Python to PATH Linux
-      if: runner.os == 'Linux'
-      run: |
-        echo "PATH=$(pwd)/python_dir:$PATH" >> $GITHUB_ENV
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          echo "PATH=$(pwd)\python_dir;$(pwd)\python_dir\Scripts;$PATH" >> $GITHUB_ENV
+        else
+          echo "PATH=$(pwd)/python_dir:$PATH" >> $GITHUB_ENV
+        fi
 
     - name: Install pip
       run: |
@@ -219,6 +217,6 @@ jobs:
         $env:OPENSSL_MODULES = "$(pwd)\ossl-modules"
         .\openssl.exe list -providers
         .\openssl.exe md5
-        ddev test --cov --junit datadog_checks_base -- -m fips_off
-        ddev test --cov --junit datadog_checks_base -- -m fips_on
+        pytest ..\datadog_checks_base -m fips_off
+        pytest ..\datadog_checks_base -m fips_on
         python -c "import ssl; ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT).set_ciphers('MD5')"
