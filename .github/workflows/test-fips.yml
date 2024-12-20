@@ -1,4 +1,4 @@
-name: Test FIPS
+name: Test FIPS E2E
 
 on:
   workflow_dispatch:
@@ -83,9 +83,6 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Lint
-      run: ddev test --lint ${{ inputs.target || 'tls' }}
-
     - name: Prepare for testing
       env:
         PYTHONUNBUFFERED: "1"
@@ -105,41 +102,17 @@ jobs:
         mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
         python .ddev/ci/scripts/traces.py capture --port "8126" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
-    # - name: Run Unit & Integration tests
-    #   env:
-    #     DDEV_TEST_ENABLE_TRACING: "1"
-    #   run: |
-    #     ddev test --cov --junit ${{ inputs.target || 'tls' }} -- '-k fips'
-
-    # - name: Run Unit & Integration tests with minimum version of base package
-    #   run: |
-    #     ddev test --compat --recreate --junit ${{ inputs.target || 'tls' }} -- '-k fips'
-
-    # - name: Run E2E tests with latest base package
-    #   env:
-    #     DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-    #   run: |
-    #     # '-- all' is passed for e2e tests if pytest args are provided
-    #     # This is done to avoid ddev from interpreting the arguments as environments
-    #     #   instead of pytest-args, because by default if no environment is provided
-    #     #   after -- it will run all environments. So when pytests args are provided
-    #     #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-    #     # This is not required when no pytest args are provided and it will run all environments
-    #     #   by default
-    #     ddev env test -e GOFIPS=1 --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k fips
-
-    - name: Run E2E tests
+    - name: Run E2E tests with FIPS disabled
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        ddev env test -e GOFIPS=0 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_inactive"
-        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_active"
+        ddev env test -e GOFIPS=0 --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
-    # - name: Run benchmarks
-    #   run: ddev test --bench --junit ${{ inputs.target || 'tls' }}
-    #
-    # - name: Run tests and verify support for the latest version
-    #   run: ddev test --latest --junit ${{ inputs.target || 'tls' }}
+    - name: Run E2E tests with FIPS enabled
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: |
+        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
 
     - name: View trace log
       if: always()
