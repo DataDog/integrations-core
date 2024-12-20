@@ -169,33 +169,54 @@ jobs:
         $env:OPENSSL_CONF = ".\openssl.cnf"
         .\openssl.exe list -providers
 
-    - name: Add Python to PATH Windows
-      if: runner.os == 'Windows'
-      shell: powershell
+    - name: Add Python to PATH
       run: |
-        Add-Content -Path $env:GITHUB_ENV -Value "PATH=$(pwd)\python_dir;$(pwd)\python_dir\Scripts;$env:PATH"
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          echo "PATH=$(pwd)\python_dir;$(pwd)\python_dir\Scripts;$PATH" >> $GITHUB_ENV
+        else
+          echo "PATH=$(pwd)/python_dir:$PATH" >> $GITHUB_ENV
+        fi
 
-    - name: Add Python to PATH Linux
-      if: runner.os == 'Linux'
-      run: |
-        echo "PATH=$(pwd)/python_dir:$PATH" >> $GITHUB_ENV
-
-    - name: Install pip and pytest
+    - name: Install pip
       run: |
         python -m ensurepip
 
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || '~/.cache/pip' }}
+        key: >-
+          ${{ format(
+            'v01-python-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+        restore-keys: |-
+          v01-python-${{ env.pythonLocation }}
+
+    - name: Install ddev from local folder
+      run: |
+        python -m pip install -e ./datadog_checks_dev[cli]
+        python -m pip install -e ./ddev
+
+    - name: Configure ddev
+      run: |
+        ddev config set repos.core .
+        ddev config set repo core
+
     - name: Test
       if: runner.os == 'Windows'
-      working-directory: .\python_dir
       shell: powershell
       run: |
         $env:PATH_TO_OPENSSL_CONF = "$(pwd)\openssl.cnf"
         $env:PATH_TO_OPENSSL_MODULES = "$(pwd)\ossl-modules"
         $env:OPENSSL_CONF = "$(pwd)\openssl.cnf"
         $env:OPENSSL_MODULES = "$(pwd)\ossl-modules"
-        .\openssl.exe list -providers
-        .\openssl.exe md5
-        python -m pip install pytest
-        python -m pytest ..\datadog_checks_base -m fips_off
-        python -m pytest ..\datadog_checks_base -m fips_on
+        .\python_dir\openssl.exe list -providers
+        .\python_dir\openssl.exe md5
+        ddev datadog_checks_base -m fips_off
+        ddev datadog_checks_base -m fips_on
         python -c "import ssl; ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT).set_ciphers('MD5')"
+        which python
