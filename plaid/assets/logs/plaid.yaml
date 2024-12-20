@@ -10,7 +10,7 @@ facets:
     groups:
       - Plaid
     name: Account id
-    path: account_id
+    path: plaid_account_id
     source: log
     type: string
 pipeline:
