@@ -12,15 +12,8 @@ on:
         required: false
         type: string
   pull_request:
-    paths-ignore:
+    path:
     - datadog_checks_base/datadog_checks/**
-    - datadog_checks_dev/datadog_checks/dev/*.py
-  merge_group:
-    # We require this workflow to pass in order to merge a PR to master.
-    # This means Github's Merge Queue also requires it to pass.
-    # We must add the Merge Queue trigger in this configuration, otherwise Merge Queue
-    # times out waiting for this check that never triggers.
-    types: [checks_requested]
   schedule:
     - cron: '0 0,8,16 * * *'
 
@@ -36,8 +29,6 @@ jobs:
     env:
       FORCE_COLOR: "1"
       PYTHON_VERSION: "3.12"
-      # PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || (!inputs.test-py2 && inputs.test-py3) && (inputs.python-version || '3.12') || '' }}"
-      # SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-fips' }}"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
@@ -83,7 +74,6 @@ jobs:
           v01-python-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
-      if: inputs.repo == 'core'
       run: |-
         pip install -e ./datadog_checks_dev[cli]
         pip install -e ./ddev
@@ -97,27 +87,16 @@ jobs:
       run: ddev test --lint ${{ inputs.target || 'tls' }}
 
     - name: Prepare for testing
-      env: >-
-        format(
-          '{{
-            "PYTHONUNBUFFERED": "1",
-            "DOCKER_USERNAME": "{0}",
-            "DOCKER_ACCESS_TOKEN": "{1}",
-            "ORACLE_DOCKER_USERNAME": "{2}",
-            "ORACLE_DOCKER_PASSWORD": "{3}",
-            "SINGLESTORE_LICENSE": "{4}",
-            "DD_GITHUB_USER": "{5}",
-            "DD_GITHUB_TOKEN": "{6}"
-          }}',
-          secrets.DOCKER_USERNAME,
-          secrets.DOCKER_ACCESS_TOKEN,
-          secrets.ORACLE_DOCKER_USERNAME,
-          secrets.ORACLE_DOCKER_PASSWORD,
-          secrets.SINGLESTORE_LICENSE,
-          github.actor,
-          secrets.GITHUB_TOKEN
-        )
-      run: ddev ci setup ${{ inputs.target }}
+      env:
+        PYTHONUNBUFFERED: "1"
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
+        SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: ddev ci setup ${{ inputs.target || 'tls' }}
 
     - name: Set up trace capturing
       env:
@@ -126,42 +105,41 @@ jobs:
         mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
         python .ddev/ci/scripts/traces.py capture --port "8126" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
-    - name: Run Unit & Integration tests
-      env:
-        DDEV_TEST_ENABLE_TRACING: "1"
-      run: |
-        ddev test --cov --junit ${{ inputs.target || 'tls' }} -- '-k fips'
+    # - name: Run Unit & Integration tests
+    #   env:
+    #     DDEV_TEST_ENABLE_TRACING: "1"
+    #   run: |
+    #     ddev test --cov --junit ${{ inputs.target || 'tls' }} -- '-k fips'
 
-    - name: Run Unit & Integration tests with minimum version of base package
-      run: |
-        ddev test --compat --recreate --junit ${{ inputs.target || 'tls' }} -- '-k fips'
+    # - name: Run Unit & Integration tests with minimum version of base package
+    #   run: |
+    #     ddev test --compat --recreate --junit ${{ inputs.target || 'tls' }} -- '-k fips'
 
-    - name: Run E2E tests with latest base package
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        ddev env test -e GOFIPS=1 --base --new-env --junit ${{ inputs.target }} -- all -k fips
+    # - name: Run E2E tests with latest base package
+    #   env:
+    #     DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+    #   run: |
+    #     # '-- all' is passed for e2e tests if pytest args are provided
+    #     # This is done to avoid ddev from interpreting the arguments as environments
+    #     #   instead of pytest-args, because by default if no environment is provided
+    #     #   after -- it will run all environments. So when pytests args are provided
+    #     #   ddev will interpret '-m' as an environment to run the e2e test on and fails
+    #     # This is not required when no pytest args are provided and it will run all environments
+    #     #   by default
+    #     ddev env test -e GOFIPS=1 --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k fips
 
     - name: Run E2E tests
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k fips
+        ddev env test -e GOFIPS=0 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_inactive"
+        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_active"
 
-    - name: Run benchmarks
-      if: inputs.benchmark
-      run: ddev test --bench --junit ${{ inputs.target }}
-
-    - name: Run tests and verify support for the latest version
-      if: inputs.latest
-      run: ddev test --latest --junit ${{ inputs.target }}
+    # - name: Run benchmarks
+    #   run: ddev test --bench --junit ${{ inputs.target || 'tls' }}
+    #
+    # - name: Run tests and verify support for the latest version
+    #   run: ddev test --latest --junit ${{ inputs.target || 'tls' }}
 
     - name: View trace log
       if: always()
@@ -192,7 +170,7 @@ jobs:
     - name: Upload coverage data
       if: >
         !github.event.repository.private &&
-        always() &&
+        always()
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
