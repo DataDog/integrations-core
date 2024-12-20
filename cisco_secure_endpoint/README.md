@@ -12,12 +12,8 @@ The Cisco Secure Endpoint integration provides out-of-the-box dashboards so you 
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Cisco Secure Endpoint
 
-#### Get API Credentials for Cisco Secure Endpoint 
-
-
-Follow the steps below to create a Client ID and an API key:
 1. Log in to your Cisco Secure Endpoint Console and navigate to the Menu Panel on the left side.
 2. Select `Administration`, then select `Organization Settings`.
 3. Click `Configure API Credentials` under the `Features` section to generate new API credentials.
@@ -27,22 +23,19 @@ Follow the steps below to create a Client ID and an API key:
     - Scope: Select `Read-only`.
     - Click `Create`.
     - Once you click **Create**, the redirected page will display the client ID (like a third party API client ID) and API Key values.
-        - **Note:** Make a note of the API Key, as it will only be displayed once.
 
-#### Cisco Secure Endpoint DataDog Integration Configuration
+### Connect your Cisco Secure Endpoint account to Datadog
 
-Configure the Datadog endpoint to forward Cisco Secure Endpoint logs to Datadog.
+1. Add your Cisco Secure Endpoint credentials.
 
-1. Navigate to `Cisco Secure Endpoint`.
-2. Add your Cisco Secure Endpoint credentials.
+    | Parameters | Description  |
+    | ---------- | ------------ |
+    | API Domain Name | The API domain name for Cisco Secure Endpoint Cloud is "api.\<region\>.amp.cisco.com". Adjust the "region" part based on the region of the Cisco Secure Endpoint server. If Cisco Secure Endpoint is hosted on VPC (Virtual Private Cloud), directly provide the API domain name. |
+    | Client ID | Client ID from Cisco Secure Endpoint. |
+    | API Key | API key from Cisco Secure Endpoint. |
+    | Get Endpoint Details | Keep the default value of "true" to collect endpoint metadata for Cisco Secure Endpoint event logs. Otherwise, set this to "false". |
 
-| Cisco Secure Endpoint Parameters | Description  |
-| -------------------- | ------------ |
-| API Domain Name                | The API Domain Name for Cisco Secure Endpoint Cloud is "api.\<region\>.amp.cisco.com". Adjust the "region" part based on the region of the Cisco Secure Endpoint server. If Cisco Secure Endpoint is hosted on VPC (Virtual Private Cloud), directly provide the API Domain Name. |
-| Client ID      | Client ID from Cisco Secure Endpoint.    |
-| API Key           | API Key from Cisco Secure Endpoint.         |
-| Get Endpoint Details    | Keep it "true" to collect endpoint metadata for Cisco Secure Endpoint event logs, otherwise "false". Default value is "true". |
-
+2. Click the Save button to save your settings.
 
 ## Data Collected
 

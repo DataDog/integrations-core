@@ -14,32 +14,32 @@ The StreamNative integration collects the following types of [metrics][2]:
 
 ## Setup
 
-### Configuration
+### Generate API credentials in StreamNative
 
-#### Get StreamNative credentials
+1. Log into [StreamNative Cloud Console Account][3].
+2. Click the profile icon and navigate to the **Accounts & Accesses** tab.
+3. Find the Service Account with **Admin** permissions set to **Enabled**.
+   - If no Service Account exists, select **New -> Service Account** to create one, and make sure to enable the **Super Admin** option.
+4. On the right side of the chosen Service Account, click the `...` button.
+5. Select **Download OAuth2 Key** to obtain the **Client ID** and **Client Secret**.
 
-Log into the [StreamNative Cloud Console Account][3].
-##### Get the `Organization ID` and `Instance Name`:
+### Get `Organization ID` and `Instance Name`
 
 1. Click the profile icon and select **Organizations**.
 2. Choose the **Organization** for which data needs to be collected.
-3. From the **Select an Instance** dropdown, note the **Instance Name**.
-
-##### Get the `Client ID` and `Client Secret`:
-
-1. Click the profile icon and navigate to the **Accounts & Accesses** tab.
-2. Find the Service Account with **Admin** permissions set to **Enabled**.
-   - If no Service Account exists, select **New -> Service Account** to create one, and make sure to enable the **Super Admin** option.
-3. On the right side of the chosen Service Account, click the `...` button.
-4. Select **Download OAuth2 Key** to obtain the **Client ID** and **Client Secret**.
+3. From the **Select an Instance** dropdown, get the **Instance Name**.
 
 
-#### Add StreamNative credentials
+### Connect your StreamNative account to Datadog
 
-- Organization ID 
-- Instance Name
-- Client ID  
-- Client Secret  
+1. Add your organization ID, instance name, client ID, and client secret.
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Organization ID|Organization ID of your StreamNative account.|
+    |Instance Name|Instance name of the corresponding organization.|
+    |Client ID |Client ID of your service account.|
+    |Client Secret|Client secret of your service account.|
+2. Click the **Save** button to save your settings.
 
 
 ## Data Collected
