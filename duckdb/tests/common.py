@@ -18,4 +18,4 @@ METRICS_MAP = [
     'duckdb.memory_limit',
     'duckdb.partitioned_write_flush_threshold',
     'duckdb.partitioned_write_max_open_files',
-    ]
+]

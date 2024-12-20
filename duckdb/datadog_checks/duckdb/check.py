@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from contextlib import closing, contextmanager
-from copy import deepcopy
 import json
 import os
 import re
-from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
+from contextlib import closing, contextmanager
+from copy import deepcopy
 
 import duckdb
 
@@ -56,21 +55,19 @@ class DuckdbCheck(AgentCheck):
                     self.submit_health_checks()
         except Exception as e:
             self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
-            self.log.debug('Unable to connect to the database:  "%s"', e)
+            # Won't fail the integration if the connection attempt fails, just an error log
+            self.log.error('Unable to connect to the database:  "%s"', e)
             # raise e
 
     def _execute_query_raw(self, query):
-        # type: (AnyStr) -> Iterable[Sequence]
         with closing(self._connection.cursor()) as cursor:
-
             query = query.format(self.db_name)
             curs = cursor.execute(query)
-            if len(curs.fetchall()) < 1:  # this was returning a -1 with rowcount
+            if len(curs.fetchall()) < 1:
                 self._query_errors += 1
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
             for row in cursor.execute(query).fetchall():
-                query_version = None
                 pattern_version = r"\bversion\b"
                 query_version = re.search(pattern_version, query)
                 if query_version:
@@ -82,17 +79,18 @@ class DuckdbCheck(AgentCheck):
                 try:
                     yield self._queries_processor(row, query_name)
                 except Exception as e:
-                    self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query_name, row, e)
+                    self.log.debug(
+                        'Unable to process row returned from query "%s", skipping row %s. %s', query_name, row, e
+                    )
                     yield row
 
     def _queries_processor(self, row, query_name):
-        # type: (Sequence, AnyStr) -> Sequence
         unprocessed_row = row
         # Return database version
         if query_name == 'version':
             self.submit_version(row)
             return unprocessed_row
-        
+
         self.log.debug('Row processor returned: %s. \nFrom query: "%s"', unprocessed_row, query_name)
         return unprocessed_row
 
@@ -102,7 +100,7 @@ class DuckdbCheck(AgentCheck):
         # Only attempt connection if the file exists
         if os.path.exists(self.db_name):
             try:
-                # Try to establish the connection
+                # Try to establish the connection in read only mode
                 conn = duckdb.connect(self.db_name, read_only=True)
                 self.log.info('Connected to DuckDB database.')
                 yield conn
@@ -118,7 +116,10 @@ class DuckdbCheck(AgentCheck):
 
     def initialize_config(self):
         self._connect_params = json.dumps(
-            {'db_name': self.db_name,})
+            {
+                'db_name': self.db_name,
+            }
+        )
         global_tags = [
             'db_name:{}'.format(self.instance.get('db_name')),
         ]
@@ -165,7 +166,6 @@ class DuckdbCheck(AgentCheck):
             self.log.warning("Could not retrieve version metadata: %s", e)
 
     def _executor_error_handler(self, error):
-        # type: (AnyStr) -> AnyStr
         self.log.debug('Error from query "%s"', error)
         self._query_errors += 1
         return error

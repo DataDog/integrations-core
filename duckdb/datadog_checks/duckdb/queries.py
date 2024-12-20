@@ -48,14 +48,21 @@ DUCKDB_PART_WRITE_FLUSH_THRESHOLD = {
     'name': 'partitioned_write_flush_threshold',
     'query': " SELECT  CAST(value AS INTEGER) AS value_as_integer "
     " FROM duckdb_settings() WHERE name = 'partitioned_write_flush_threshold';",
-    'columns': [{'name': 'partitioned_write_flush_threshold', 'type': 'gauge'}], 
+    'columns': [{'name': 'partitioned_write_flush_threshold', 'type': 'gauge'}],
 }
 
 DUCKDB_PART_WRITE_MAX_OPEN_FILES = {
     'name': 'partitioned_write_max_open_files',
     'query': " SELECT  CAST(value AS INTEGER) AS value_as_integer "
     " FROM duckdb_settings() WHERE name = 'partitioned_write_max_open_files';",
-    'columns': [{'name': 'partitioned_write_max_open_files', 'type': 'gauge'}], 
+    'columns': [{'name': 'partitioned_write_max_open_files', 'type': 'gauge'}],
 }
 
-DEFAULT_QUERIES = [DUCKDB_VERSION,DUCKDDB_THREADS, DUCKDDB_WAL, DUCKDB_MEMORY_LIMIT, DUCKDB_PART_WRITE_FLUSH_THRESHOLD , DUCKDB_PART_WRITE_MAX_OPEN_FILES ]
+DEFAULT_QUERIES = [
+    DUCKDB_VERSION,
+    DUCKDDB_THREADS,
+    DUCKDDB_WAL,
+    DUCKDB_MEMORY_LIMIT,
+    DUCKDB_PART_WRITE_FLUSH_THRESHOLD,
+    DUCKDB_PART_WRITE_MAX_OPEN_FILES,
+]
