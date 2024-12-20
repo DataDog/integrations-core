@@ -1,17 +1,21 @@
 name: Test FIPS
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      platform:
-        required: true
+      agent-image:
+        description: "Agent image to use"
+        required: false
         type: string
-      runner:
-        required: true
+      target:
+        description: "Target to test"
+        required: false
         type: string
-      zip_url:
-        required: true
-        type: string
+  pull_request:
+    paths:
+      - datadog_checks_base/datadog_checks/**
+  schedule:
+    - cron: '0 0,8,16 * * *'
 
 defaults:
   run:
@@ -19,166 +23,48 @@ defaults:
 
 jobs:
   run:
-    name: FIPS test on "${{ inputs.platform }}"
-    runs-on: ${{ fromJson(inputs.runner) }}
+    name: "Test FIPS"
+    runs-on: ["ubuntu-22.04"]
 
     env:
       FORCE_COLOR: "1"
-      DEBIAN_FRONTEND: "noninteractive"
-      OPENSSL_FIPS: 1
       PYTHON_VERSION: "3.12"
-      OPENSSL_VERSION: "3.0.15"
-      FIPS_MODULE_VERSION:  "3.0.9"
+      # PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || (!inputs.test-py2 && inputs.test-py3) && (inputs.python-version || '3.12') || '' }}"
+      # SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
+      DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-fips' }}"
+      # Test results for later processing
+      TEST_RESULTS_BASE_DIR: "test-results"
+      # Tracing to monitor our test suite
+      DD_ENV: "ci"
+      DD_SERVICE: "ddev-integrations-core"
+      DD_TAGS: "team:agent-integrations"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
+      # Capture traces for a separate job to do the submission
+      TRACE_CAPTURE_BASE_DIR: "trace-captures"
+      TRACE_CAPTURE_LOG: "trace-captures/output.log"
 
     steps:
 
+    - name: Set environment variables with sanitized paths
+      run: |
+        # We want to replace leading dots as they will make directories hidden, which will cause them to be ignored by upload-artifact and EnricoMi/publish-unit-test-result-action
+        JOB_NAME="FIPS-${{ github.run_id }}"
+
+        echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+
     - uses: actions/checkout@v4
 
-    - name: Install System Dependencies
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt update 
-        sudo apt install -y --no-install-recommends \
-          wget \
-          build-essential \
-          gcc \
-          make \
-          perl \
-          libc6-dev
-
-    - name: Build FIPS Module
-      if: runner.os == 'Linux'
-      run: |
-        wget https://www.openssl.org/source/openssl-${{ env.FIPS_MODULE_VERSION }}.tar.gz \
-        && tar -xvzf openssl-${{ env.FIPS_MODULE_VERSION }}.tar.gz \
-        && cd openssl-${{ env.FIPS_MODULE_VERSION }} \
-        && ./Configure enable-fips \
-        && make \
-        && sudo make install
-
-    - name: Build OpenSSL
-      if: runner.os == 'Linux'
-      run: |
-        wget https://www.openssl.org/source/openssl-${{ env.OPENSSL_VERSION }}.tar.gz \
-        && tar -xvzf openssl-${{ env.OPENSSL_VERSION }}.tar.gz \
-        && cd openssl-${{ env.OPENSSL_VERSION }} \
-        && ./Configure enable-fips \
-        && make \
-        && sudo make install
-
-    - name: Build Python from Source with Custom OpenSSL
-      if: runner.os == 'Linux'
-      run: |
-
-        # Install dependencies for building Python
-        sudo apt-get update && sudo apt-get install -y \
-          build-essential \
-          zlib1g-dev \
-          libffi-dev \
-          libssl-dev \
-          libncurses5-dev \
-          libsqlite3-dev \
-          libreadline-dev \
-          libbz2-dev \
-          liblzma-dev \
-          tk-dev \
-          uuid-dev \
-          libgdbm-dev \
-          wget
-
-        # Download and extract Python source
-        wget https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/Python-${{ env.PYTHON_VERSION }}.tgz
-        tar -xvzf Python-${{ env.PYTHON_VERSION }}.tgz -C python_dir
-        cd python_dir
-
-        # Configure and build Python with custom OpenSSL
-        ./configure --enable-optimizations --with-openssl=$(pwd)/../openssl-${{ env.OPENSSL_VERSION }}
-        make -j$(nproc)
-        sudo make altinstall
-
-    - name: Download python-windows-combined
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        Invoke-WebRequest -Uri '${{ inputs.zip_url }}' -OutFile 'python_combined.zip'
-
-    - name: Unzip python_combined.zip
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        Expand-Archive -Path python_combined.zip -DestinationPath .\python_dir
-
-    - name: Run fipsintall.exe
-      if: runner.os == 'Windows'
-      working-directory: .\python_dir
-      shell: powershell
-      run: |
-        .\openssl.exe fipsinstall -module .\ossl-modules\fips.dll -out fipsmodule.cnf
-
-    - name: Configure OpenSSL for FIPS
-      if: runner.os == 'Windows'
-      working-directory: .\python_dir
-      shell: powershell
-      run: |
-        # Create openssl.cnf to enable FIPS mode
-        $OpenSSLConf = @"
-        config_diagnostics = 1
-        openssl_conf = openssl_init
-
-        .include fipsmodule.cnf
-
-        [openssl_init]
-        providers = provider_sect
-        alg_section = algorithm_sect
-
-        [provider_sect]
-        fips = fips_sect
-        base = base_sect
-
-        [base_sect]
-        activate = 1
-
-        [algorithm_sect]
-        default_properties = fips=yes
-        "@
-        $OpenSSLConf | Set-Content -Path ".\openssl.cnf"
-
-    - name: Verify OpenSSL
-      if: runner.os == 'Windows'
-      working-directory: .\python_dir
-      shell: powershell
-      run: |
-        .\openssl.exe version -a
-        .\openssl.exe list -providers
-
-    - name: Verify OpenSSL with FIPS ENV vars
-      if: runner.os == 'Windows'
-      working-directory: .\python_dir
-      shell: powershell
-      run: |
-        $env:OPENSSL_MODULES = ".\ossl-modules"
-        $env:OPENSSL_CONF = ".\openssl.cnf"
-        .\openssl.exe list -providers
-
-    - name: Add Python to PATH Windows
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        Add-Content -Path $env:GITHUB_ENV -Value "PATH=$(pwd)\python_dir;$(pwd)\python_dir\Scripts;$env:PATH"
-
-    - name: Add Python to PATH Linux
-      if: runner.os == 'Linux'
-      run: |
-        echo "PATH=$(pwd)/python_dir:$PATH" >> $GITHUB_ENV
-
-    - name: Install pip
-      run: |
-        python -m ensurepip
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+        cache: 'pip'
 
     - name: Restore cache
       uses: actions/cache/restore@v4
       with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || '~/.cache/pip' }}
+        path: '~/.cache/pip'
         key: >-
           ${{ format(
             'v01-python-{0}-{1}-{2}-{3}',
@@ -191,28 +77,142 @@ jobs:
           v01-python-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
-      working-directory: .\python_dir
-      run: |
-        which python
-        ./python.exe -m pip install -e ../datadog_checks_dev[cli]
-        ./python.exe -m pip install -e ../ddev
+      if: inputs.repo == 'core'
+      run: |-
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
 
     - name: Configure ddev
-      run: |
+      run: |-
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Test
-      if: runner.os == 'Windows'
-      working-directory: .\python_dir
-      shell: powershell
+    - name: Lint
+      run: ddev test --lint ${{ inputs.target || 'tls' }}
+
+    - name: Prepare for testing
+      env: >-
+        format(
+          '{{
+            "PYTHONUNBUFFERED": "1",
+            "DOCKER_USERNAME": "{0}",
+            "DOCKER_ACCESS_TOKEN": "{1}",
+            "ORACLE_DOCKER_USERNAME": "{2}",
+            "ORACLE_DOCKER_PASSWORD": "{3}",
+            "SINGLESTORE_LICENSE": "{4}",
+            "DD_GITHUB_USER": "{5}",
+            "DD_GITHUB_TOKEN": "{6}"
+          }}',
+          secrets.DOCKER_USERNAME,
+          secrets.DOCKER_ACCESS_TOKEN,
+          secrets.ORACLE_DOCKER_USERNAME,
+          secrets.ORACLE_DOCKER_PASSWORD,
+          secrets.SINGLESTORE_LICENSE,
+          github.actor,
+          secrets.GITHUB_TOKEN
+        )
+      run: ddev ci setup ${{ inputs.target }}
+
+    - name: Set up trace capturing
+      env:
+        PYTHONUNBUFFERED: "1"
+      run: |-
+        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
+        python .ddev/ci/scripts/traces.py capture --port "8126" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+
+    - name: Run Unit & Integration tests
+      env:
+        DDEV_TEST_ENABLE_TRACING: "1"
       run: |
-        $env:PATH_TO_OPENSSL_CONF = "$(pwd)\openssl.cnf"
-        $env:PATH_TO_OPENSSL_MODULES = "$(pwd)\ossl-modules"
-        $env:OPENSSL_CONF = "$(pwd)\openssl.cnf"
-        $env:OPENSSL_MODULES = "$(pwd)\ossl-modules"
-        .\openssl.exe list -providers
-        .\openssl.exe md5
-        ddev test datadog_checks_base -- -k before_fips
-        ddev test datadog_checks_base -- -k after_fips
-        python -c "import ssl; ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT).set_ciphers('MD5')"
+        ddev test --cov --junit ${{ inputs.target || 'tls' }} -- '-k fips'
+
+    - name: Run Unit & Integration tests with minimum version of base package
+      run: |
+        ddev test --compat --recreate --junit ${{ inputs.target || 'tls' }} -- '-k fips'
+
+    - name: Run E2E tests with latest base package
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: |
+        # '-- all' is passed for e2e tests if pytest args are provided
+        # This is done to avoid ddev from interpreting the arguments as environments
+        #   instead of pytest-args, because by default if no environment is provided
+        #   after -- it will run all environments. So when pytests args are provided
+        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
+        # This is not required when no pytest args are provided and it will run all environments
+        #   by default
+        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
+          set +e # Disable immediate exit
+          ddev env test ${{ env.E2E_ENV_VARS }} --base --new-env --junit ${{ inputs.target }} -- all ${{ env.PYTEST_ARGS }}
+          exit_code=$?
+          if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
+            echo "No tests were collected."
+            exit 0
+          else
+            exit $exit_code
+          fi
+        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
+          set +e # Disable immediate exit
+          ddev env test ${{ env.E2E_ENV_VARS }} --base --new-env --junit ${{ inputs.target }} -- all ${{ env.PYTEST_ARGS }}
+          exit_code=$?
+          if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
+            echo "No tests were collected."
+            exit 0
+          else
+            exit $exit_code
+          fi
+        else
+          ddev env test ${{ env.E2E_ENV_VARS }} --base --new-env --junit ${{ inputs.target }} ${{ env.PYTEST_ARGS != '' && format('-- all {0}', env.PYTEST_ARGS) || '' }}
+        fi
+
+    - name: Run E2E tests
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: |
+        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- '-k fips'
+
+    - name: Run benchmarks
+      if: inputs.benchmark
+      run: ddev test --bench --junit ${{ inputs.target }}
+
+    - name: Run tests and verify support for the latest version
+      if: inputs.latest
+      run: ddev test --latest --junit ${{ inputs.target }}
+
+    - name: View trace log
+      if: always()
+      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
+
+    - name: Upload captured traces
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: "traces-${{ inputs.target || 'tls' }}"
+        path: "${{ env.TRACE_CAPTURE_FILE }}"
+
+    - name: Finalize test results
+      if: always()
+      run: |-
+        mkdir -p "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target || 'tls' }}/.junit ]]; then
+          mv ${{ inputs.target || 'tls' }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        fi
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: "test-results-${{ inputs.target || 'tls' }}"
+        path: "${{ env.TEST_RESULTS_BASE_DIR }}"
+
+    - name: Upload coverage data
+      if: >
+        !github.event.repository.private &&
+        always() &&
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        flags: "${{ inputs.target || 'tls' }}"
