@@ -45,7 +45,7 @@ jobs:
 
     - name: Set environment variables with sanitized paths
       run: |
-        JOB_NAME="FIPS-${{ github.run_id }}"
+        JOB_NAME="test-fips"
 
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
