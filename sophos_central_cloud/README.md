@@ -15,23 +15,23 @@ The Sophos Central Cloud integration seamlessly collects all the above listed lo
 
 ### Generate API credentials in Sophos Central Cloud
 
-1. Log in to your [**Sophos Central account**][2].
+1. Log into your [**Sophos Central account**][2].
 2. From Sophos Central Admin, go to **My Products** > **General Settings** > **API Credentials Management**.
 3. Click **Add Credential**.
 4. Provide a credential name, select the appropriate role, add an optional description, and click the **Add** button. The API credential summary page with the client ID is displayed.
 5. Click **Show Client Secret** to display the **Client Secret**.
 
-### Connect your Sophos Central Cloud Account to Datadog
+### Connect your Sophos Central Cloud account to Datadog
 
 1. Add your Sophos Central Cloud credentials.
 
     | Parameters | Description                                                                                     |
     | ------------------------------- | -------------------------------------------------------------------------- |
-    | Client ID                       | The Client ID from Sophos Central Cloud.                                   |
-    | Client Secret                   | The Client Secret from Sophos Central Cloud.                               |
-    | Get Endpoint Details            | Set to "true" to collect endpoint details for Sophos Central Cloud Alert and Event Logs, otherwise set to "false". The Default is "true".                 |
+    | Client ID                       | The client ID from Sophos Central Cloud.                                   |
+    | Client Secret                   | The client secret from Sophos Central Cloud.                               |
+    | Get Endpoint Details            | Keep the default value of "true" to collect endpoint details for Sophos Central Cloud Alert and Event Logs. Otherwise, set to "false".                 |
 
-2. Click the Save button to save your settings.
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 

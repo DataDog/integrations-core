@@ -16,7 +16,7 @@ The StreamNative integration collects the following types of [metrics][2]:
 
 ### Generate API credentials in StreamNative
 
-1. Log in to [StreamNative Cloud Console Account][3].
+1. Log into [StreamNative Cloud Console Account][3].
 2. Click the profile icon and navigate to the **Accounts & Accesses** tab.
 3. Find the Service Account with **Admin** permissions set to **Enabled**.
    - If no Service Account exists, select **New -> Service Account** to create one, and make sure to enable the **Super Admin** option.
@@ -30,16 +30,16 @@ The StreamNative integration collects the following types of [metrics][2]:
 3. From the **Select an Instance** dropdown, get the **Instance Name**.
 
 
-### Connect your StreamNative Account to Datadog
+### Connect your StreamNative account to Datadog
 
-1. Add your Organization ID, Instance Name, Client ID, and Client Secret
+1. Add your organization ID, instance name, client ID, and client secret.
     |Parameters|Description|
     |--------------------|--------------------|
     |Organization ID|Organization ID of your StreamNative account.|
     |Instance Name|Instance name of the corresponding organization.|
     |Client ID |Client ID of your service account.|
-    |Client Secret|Client Secret of your service account.|
-2. Click the Save button to save your settings.
+    |Client Secret|Client secret of your service account.|
+2. Click the **Save** button to save your settings.
 
 
 ## Data Collected

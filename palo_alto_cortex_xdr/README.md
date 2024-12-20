@@ -15,7 +15,7 @@ The Palo Alto Cortex XDR integration seamlessly collects the data of Palo Alto C
 
 ### Generate API credentials in Palo Alto Cortex XDR
 
-1. Log in to your **Palo Alto Cortex XDR account**.
+1. Log into your **Palo Alto Cortex XDR account**.
 2. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys**.
 3. Click on **New Key**.
 4. Choose the type of API key based on your desired security level, **Advanced** or **Standard**.
@@ -24,7 +24,7 @@ The Palo Alto Cortex XDR integration seamlessly collects the data of Palo Alto C
 7. Select the desired level of access for this key from existing **Roles**, or you can select **Custom** to set the permissions granularly.
 8. Click **Generate** to generate the API key.
 
-### Get API Key ID of Palo Alto Cortex XDR
+### Get API key ID of Palo Alto Cortex XDR
 
 1. In the API Keys table, locate the ID field.
 2. Note your corresponding ID number. This value represents the **x-xdr-auth-id:{key_id}** token.
@@ -34,17 +34,17 @@ The Palo Alto Cortex XDR integration seamlessly collects the data of Palo Alto C
 1. Right-click your API key and select **View Examples**.
 2. Copy the **CURL Example** URL. The example contains your unique **FQDN**.
 
-### Connect your Palo Alto Cortex XDR Account to Datadog
+### Connect your Palo Alto Cortex XDR account to Datadog
 
 1. Add your Palo Alto Cortex XDR credentials.
 
     | Parameters   | Description  |
     | -------------| ------------ |
     | API key      | The API key from Palo Alto Cortex XDR. |
-    | API Key ID   | The auth id from Palo Alto Cortex XDR. |
+    | API Key ID   | The auth ID from Palo Alto Cortex XDR. |
     | FQDN         | The FQDN from Palo Alto Cortex XDR. It is the `baseUrl` part of `baseUrl/public_api/v1/{name of api}/{name of call}/` |
 
-2. Click the Save button to save your settings.
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 

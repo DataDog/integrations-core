@@ -16,7 +16,7 @@ reporting events, while out-of-the-box detection rules enhance detection and res
 
 1. Log in to the [Admin Console](https://admin.lastpass.com/) with your email address and master password.
 2. Navigate to **Advanced** > **Enterprise API**.
-3. You can find the Account number and can create a Provisioning hash.
+3. Locate the account number and can create a provisioning hash.
 
 ### Get Timezone of LastPass
 
@@ -31,14 +31,14 @@ reporting events, while out-of-the-box detection rules enhance detection and res
 
 ### Connect your LastPass account to Datadog
 
-1. Add your Account number, Provisioning hash and Time zone  
+1. Add your account number, provisioning hash and time zone.  
     |Parameters|Description|
     |--------------------|--------------------|
     |Account number|The account number of your registered LastPass account.|
     |Provisioning hash|The provisioning hash secret of your registered account on LastPass.|
     |Time zone|The time zone of your registered account on LastPass.|
 
-2. Click the Save button to save your settings.
+2. Click the **Save** button to save your settings.
 
 
 ## Data Collected

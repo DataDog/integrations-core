@@ -26,13 +26,13 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
 8. Click **Save** to apply the changes.
 9. Click **Install app** and get the **Access Token** from the **Admin API access token** section.
 
-### Connect your Shopify Account to Datadog
+### Connect your Shopify account to Datadog
 1. Add your Store Name and Access Token
     |Parameters|Description|
     |--------------------|--------------------|
     |Store Name|Store name of your Shopify admin account.|
     |Access Token|Access Token for your Shopify admin account.|
-2. Click the Save button to save your settings.
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 

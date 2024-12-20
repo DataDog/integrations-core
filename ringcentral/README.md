@@ -2,15 +2,15 @@
 
 ## Overview
 
-[RingCentral][5] is a leading cloud-based communication and collaboration platform for businesses. It offers services such as voice, messaging, and video conferencing, seamlessly integrating with various business applications. Known for its reliability, security, and scalability, RingCentral enhances communication efficiency and collaboration.
+[RingCentral][5] is a leading cloud-based communication and collaboration platform for businesses. It offers services such as voice, messaging, and video conferencing, seamlessly integrating with various business applications.
 
-The RingCentral integration seamlessly collects voice and audit logs, as well as Voice (Analytics) and A2P SMS metrics, and sends them to Datadog for comprehensive analysis.
+The RingCentral integration collects voice and audit logs, as well as Voice (Analytics) and A2P SMS metrics, and sends them to Datadog for comprehensive analysis.
 
 ## Setup
 
 ### Generate API Credentials in RingCentral
 
-1. Login to your [RingCentral Developer][2] account using a user with Super Admin role or [Custom role](#create-and-assign-a-custom-role). 
+1. Log into your [RingCentral Developer][2] account using a user with a Super Admin role or [Custom role](#create-and-assign-a-custom-role).  
 2. Click **Console**.
 3. Under the *Apps* section, click **Register App**.
 4. Select **Rest API app** for the App type .
@@ -22,7 +22,7 @@ The RingCentral integration seamlessly collects voice and audit logs, as well as
    | Auth type | **JWT auth flow** |
    | Issue refresh tokens | **Yes** |
    | Application scopes | Select the following:<br><ul><li>Analytics</li><li>Read Audit Trail</li><li>Read Call Log</li><li>A2P SMS</li></ul>|
-6. Click on create App.
+6. Click on Create App.
 7. After creating the application, find the `clientId` and `clientSecret` in the application settings.
 8. To get the JWT Token, locate the **Credentials** by clicking your username in the top-right corner.
 9. Click **Create JWT**.
@@ -39,32 +39,32 @@ The RingCentral integration seamlessly collects voice and audit logs, as well as
 4. Assign a custom role to a user, following the [RingCentral documentation][4].
 
 
-### Get RingCentral Account ID
+### Get RingCentral account ID
 1. Visit [RingCentral][1] and log in as a Super Admin.
 2. Under the **Users** section, click **Users with Extensions**.
 3. From the list of users, click on the user who has a "Super Admin" suffix in their name to open the user's details panel.
 4. Look at the URL in your web browser's address bar.
-5. Find the 9-digit number within the URL. This is your RingCentral Account ID.
+5. Find the 9-digit number within the URL. This is your RingCentral account ID.
    - **Example URL:** https://service.ringcentral.com/application/users/users/default/123456789/settings/default
    - The `123456789` is your Account ID.
 
 
-### Connect your RingCentral Account to Datadog
+### Connect your RingCentral account to Datadog
 
 1. Add your RingCentral credentials.
 
    | Parameters       |   Description                                                 |
    | ---------------  | --------------------------------------------------------------|
-   |Account ID        | The Account ID of RingCentral.                                |
-   |Client ID         | The Client ID of the RingCentral Application.                 |
-   |Client Secret     | The Client Secret of the RingCentral Application.             |
-   |JWT Token         | The JWT Token from RingCentral.                               |
-   |Get Voice Calls Logs  | Enable to collect Voice Call Logs from RingCentral. The default value is True. |
-   |Get Voice(Analytics) Metrics | Enable to collect Voice(Analytics) Metrics from RingCentral. The default value is True. |
-   |Get SMS Metrics    | Enable to collect SMS Metrics from RingCentral. The default value is True. | 
-   |Get Audit Logs     | Enable to collect Audit Logs from RingCentral. The default value is True.  |
+   |Account ID        | The account ID of RingCentral.                                |
+   |Client ID         | The client ID of the RingCentral application.                 |
+   |Client Secret     | The client secret of the RingCentral application.             |
+   |JWT Token         | The JWT token from RingCentral.                               |
+   |Get Voice Calls Logs  | Enable to collect voice call logs from RingCentral. The default value is "true". |
+   |Get Voice(Analytics) Metrics | Enable to collect Voice(Analytics) metrics from RingCentral. The default value is "true". |
+   |Get SMS Metrics    | Enable to collect SMS metrics from RingCentral. The default value is "true".  | 
+   |Get Audit Logs     | Enable to collect audit logs from RingCentral. The default value is "true".   |
 
-2. Click the Save button to save your settings.
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 

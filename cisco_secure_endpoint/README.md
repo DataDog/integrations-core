@@ -12,7 +12,7 @@ The Cisco Secure Endpoint integration provides out-of-the-box dashboards so you 
 
 ## Setup
 
-### Generate API Credentials in Cisco Secure Endpoint 
+### Generate API credentials in Cisco Secure Endpoint
 
 1. Log in to your Cisco Secure Endpoint Console and navigate to the Menu Panel on the left side.
 2. Select `Administration`, then select `Organization Settings`.
@@ -24,16 +24,16 @@ The Cisco Secure Endpoint integration provides out-of-the-box dashboards so you 
     - Click `Create`.
     - Once you click **Create**, the redirected page will display the client ID (like a third party API client ID) and API Key values.
 
-### Connect your Cisco Secure Endpoint Account to Datadog
+### Connect your Cisco Secure Endpoint account to Datadog
 
-1. Add your Cisco Secure Endpoint credentials
+1. Add your Cisco Secure Endpoint credentials.
 
     | Parameters | Description  |
     | ---------- | ------------ |
-    | API Domain Name | The API Domain Name for Cisco Secure Endpoint Cloud is "api.\<region\>.amp.cisco.com". Adjust the "region" part based on the region of the Cisco Secure Endpoint server. If Cisco Secure Endpoint is hosted on VPC (Virtual Private Cloud), directly provide the API Domain Name. |
+    | API Domain Name | The API domain name for Cisco Secure Endpoint Cloud is "api.\<region\>.amp.cisco.com". Adjust the "region" part based on the region of the Cisco Secure Endpoint server. If Cisco Secure Endpoint is hosted on VPC (Virtual Private Cloud), directly provide the API domain name. |
     | Client ID | Client ID from Cisco Secure Endpoint. |
-    | API Key | API Key from Cisco Secure Endpoint. |
-    | Get Endpoint Details | Keep it "true" to collect endpoint metadata for Cisco Secure Endpoint event logs, otherwise "false". Default value is "true". |
+    | API Key | API key from Cisco Secure Endpoint. |
+    | Get Endpoint Details | Keep the default value of "true" to collect endpoint metadata for Cisco Secure Endpoint event logs. Otherwise, set this to "false". |
 
 2. Click the Save button to save your settings.
 

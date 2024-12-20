@@ -14,7 +14,7 @@ The PingOne integration seamlessly collects the data of PingOne audit logs using
 
 ### Generate API credentials in PingOne
 
-1. Log in to your [PingOne account][2].
+1. Log into your [PingOne account][2].
 2. From the navigation sidebar, expand the **Applications** section and select **Applications**.
 3. Click **+** (plus) to begin creating a new application.
 4. Enter an **Application Name**.
@@ -25,18 +25,18 @@ The PingOne integration seamlessly collects the data of PingOne audit logs using
 9. Under **Available responsibilities**, in the **Environment Admin section**, select the environments to grant access to, then click **Save**.
 10. Select the **Configuration** tab of the application flyout to get **Client ID**, **Client Secret** and **Environment ID**.
 
-### Connect your PingOne Account to Datadog
+### Connect your PingOne account to Datadog
 
 1. Add your PingOne credentials.
 
     | PingOne Parameters | Description                                                                |
     | ----------------------------- | ----------------------------------------------------------------|
-    | Domain                        | The Top level domain from PingOne.                              |
-    | Environment Id                | The Environment Id from PingOne.                                |
-    | Client Id                     | The Client Id from PingOne.                                     |
-    | Client Secret                 | The Client Secret from PingOne.                                 |
+    | Domain                        | The top level domain from PingOne.                              |
+    | Environment ID                | The environment ID from PingOne.                                |
+    | Client ID                     | The client ID from PingOne.                                     |
+    | Client Secret                 | The client secret from PingOne.                                 |
 
-2. Click the Save button to save your settings.
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 

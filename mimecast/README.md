@@ -17,9 +17,9 @@ The Mimecast integration seamlessly collects all the above listed logs, channeli
 
 ## Setup
 
-### Generate API Credentials in Mimecast
+### Generate API credentials in Mimecast
 
-1. Log in to your **Mimecast account**.
+1. Log into your **Mimecast account**.
 2. Navigate to the **Administration Console**, select **Services**, and then choose the **API and Platform Integrations** section.
 3. Proceed to Your **API 2.0 Applications**.
 4. Search for your application in the list provided.
@@ -34,18 +34,18 @@ The Mimecast integration seamlessly collects all the above listed logs, channeli
      - Application Role: Select **Basic Administrator**
      - Description: Enter the description of your choice
    - In **Notifications**, provide the contact details of your technical administrator and click on **Next**
-   - After clicking on **Add and Generate Keys**. There will be a pop up window showing Client ID and Client Secret.
+   - Click on **Add and Generate Keys**. A pop up window appears, showing the client ID and client secret.
 6. If the application is present, click on its name.
 7. Click the **Manage API 2.0 credentials** button and click **Generate**. This generates a new Client ID and Client Secret.
 
-### Connect your Mimecast Account to Datadog
+### Connect your Mimecast account to Datadog
 
 1. Add your Mimecast credentials.
 
     | Parameters | Description                                                           |
     | ------------------- | ------------------------------------------------------------ |
-    | Client ID           | The Client ID of your registered application on Mimecast     |
-    | Client Secret       | The Client Secret of your registered application on Mimecast |
+    | Client ID           | The client ID of your registered application on Mimecast.     |
+    | Client Secret       | The client secret of your registered application on Mimecast. |
 
 2. Click the Save button to save your settings.
 
