@@ -6,10 +6,12 @@ import re
 import shutil
 import sys
 import time
+from fnmatch import fnmatch
 from functools import cache
 from hashlib import sha256
 from pathlib import Path
 from typing import Iterator, NamedTuple
+from zipfile import ZipFile
 
 import urllib3
 from utils import extract_metadata, normalize_project_name
@@ -64,6 +66,14 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
+def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
+    """Returns all found files inside `wheel` that match the given glob-style pattern"""
+    with ZipFile(wheel) as zf:
+        names = zf.namelist()
+
+    return [name for name in names for pat in patterns if fnmatch(name, pat)]
+
+
 class WheelName(NamedTuple):
     """Helper class to manipulate wheel names."""
     # Note: this implementation ignores build tags (it drops them on parsing)
@@ -98,6 +108,12 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
         'libmqic_r.so',
     })
 
+    external_invalid_file_patterns = [
+        # We don't accept OpenSSL in external wheels
+        '*.libs/libssl*.so.3',
+        '*.libs/libcrypto*.so.3',
+    ]
+
     # Hardcoded policy to the minimum we need to currently support
     policies = WheelPolicies()
     policy = policies.get_policy_by_name(os.environ['MANYLINUX_POLICY'])
@@ -109,8 +125,19 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
+
         if not wheel_was_built(wheel):
             print('Using existing wheel')
+
+            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
+            if unacceptable_files:
+                print(
+                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+                    f'(matching {external_invalid_file_patterns}): ',
+                    unacceptable_files,
+                )
+                sys.exit(1)
+
             shutil.move(wheel, external_dir)
             continue
 
@@ -140,11 +167,27 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     exclusions = ['mqic.dll']
 
+    external_invalid_file_patterns = [
+        # We don't accept OpenSSL in external wheels
+        '*.libs/libssl-3*.dll',
+        '*.libs/libcrypto-3*.dll',
+    ]
+
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
 
         if not wheel_was_built(wheel):
             print('Using existing wheel')
+
+            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
+            if unacceptable_files:
+                print(
+                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+                    f'(matching {external_invalid_file_patterns}): ',
+                    unacceptable_files,
+                )
+                sys.exit(1)
+
             shutil.move(wheel, external_dir)
             continue
 
@@ -206,6 +249,7 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
             print('Using existing wheel')
+
             shutil.move(wheel, external_dir)
             continue
 

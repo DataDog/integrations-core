@@ -243,6 +243,17 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 
 # SaaS Integrations
+/authorize_net/                                                      @DataDog/saas-integrations
+/authorize_net/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/authorize_net/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/authorize_net/metadata.csv                                          @DataDog/saas-integrations @DataDog/documentation
+/authorize_net/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/brevo/                                                              @DataDog/saas-integrations
+/brevo/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
+/brevo/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
+/brevo/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /cisco_umbrella_dns/                                                 @DataDog/saas-integrations
 /cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
@@ -360,6 +371,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ringcentral/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
 /ringcentral/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
 /ringcentral/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
+/temporal_cloud/                                                    @DataDog/saas-integrations
+/temporal_cloud/*.md                                                @DataDog/saas-integrations @DataDog/documentation
+/temporal_cloud/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
+/temporal_cloud/metadata.csv                                        @DataDog/saas-integrations @DataDog/documentation
 
 /temporal_cloud/                                                    @DataDog/saas-integrations
 /temporal_cloud/*.md                                                @DataDog/saas-integrations @DataDog/documentation
