@@ -12,6 +12,7 @@ REVOKE SELECT ON ALL tables IN SCHEMA pg_catalog from public;
 GRANT SELECT ON pg_stat_database TO datadog;
 GRANT SELECT ON pg_stat_database TO datadog_no_catalog;
 GRANT SELECT ON ALL tables IN SCHEMA pg_catalog to datadog;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public to datadog;
 CREATE DATABASE datadog_test;
 GRANT ALL PRIVILEGES ON DATABASE datadog_test TO datadog;
 CREATE DATABASE dogs;

@@ -21,7 +21,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.util import get_list_chunks
 
 from .util import payload_pg_version
-from .version_utils import VersionUtils
+from .version_utils import V13, VersionUtils
 
 # default collection intervals in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -181,6 +181,28 @@ WHERE  pi.inhparent = {parent_oid}
 GROUP  BY pi.inhparent;
 """
 
+PG_SEQUENCES_QUERY = """
+SELECT (stavalues1::text::bigint[])[array_upper(stavalues1::text::bigint[],1)] as current_value,
+pg_attribute.attname AS column_name,
+power(2, attlen * 8 - 1) - 1 as max_value,
+t.relname AS table_name,
+nsp.nspname AS schema_name
+FROM pg_attribute
+INNER JOIN pg_attrdef
+    ON adrelid = attrelid AND adnum = attnum AND pg_get_expr(adbin, adrelid) like 'nextval%'
+INNER JOIN pg_class t ON attrelid = t.oid
+INNER JOIN pg_namespace nsp ON t.relnamespace = nsp.oid AND relnamespace IN
+    (SELECT nsp.oid FROM pg_namespace nsp
+    LEFT JOIN pg_roles r on nsp.nspowner = r.oid
+    WHERE nspname NOT IN ( 'information_schema', 'pg_catalog' )
+    AND nspname NOT LIKE 'pg_toast%'
+    AND nspname NOT LIKE 'pg_temp_%'
+    AND r.rolname  !=  'rds_superuser'
+    AND r.rolname  != 'rdsadmin'
+    )
+ INNER JOIN pg_statistic on attrelid = starelid AND attnum = staattnum;
+"""
+
 
 def agent_check_getter(self):
     return self._check
@@ -313,6 +335,9 @@ class PostgresMetadata(DBMAsyncJob):
 
             for database in schema_metadata:
                 dbname = database["name"]
+
+                self.collect_sequences(dbname)
+
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
@@ -701,3 +726,32 @@ class PostgresMetadata(DBMAsyncJob):
                 rows = cursor.fetchall()
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
                 return [dict(row) for row in rows]
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def collect_sequences(self, dbname):
+        if self._check.version < V13:
+            # pg_sequence was introduced in Postgres 13
+            return
+        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                cursor.execute(PG_SEQUENCES_QUERY)
+                rows = cursor.fetchall()
+                # Emit a single gauge for each sequence
+                for row in rows:
+                    if row["current_value"]:
+                        self._check.gauge(
+                            "postgresql.sequence.estimated_remaining",
+                            row["max_value"] - row["current_value"],
+                            tags=self._tags_no_db
+                            + [
+                                "max_value:{:.0f}".format(row["max_value"]),
+                                "current_value:{:.0f}".format(row["current_value"]),
+                                "db:{}".format(dbname),
+                                "schema:{}".format(row["schema_name"]),
+                                "table:{}".format(row["table_name"]),
+                                "column:{}".format(row["column_name"]),
+                            ],
+                            hostname=self._check.resolved_hostname,
+                            raw=True,
+                        )
+                    # TODO: We should eventually collect these on the backend for recommendations/visibility

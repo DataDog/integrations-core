@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .common import POSTGRES_VERSION
-from .utils import run_one_check
+from .utils import requires_over_13, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -402,6 +402,36 @@ def test_collect_schemas_interrupted(integration_check, dbm_instance, aggregator
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         database_metadata = schema_event['metadata']
         assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+
+
+@requires_over_13
+def test_collect_sequences(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
+    dbm_instance['relations'] = []
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    del dbm_instance['dbname']
+
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    aggregator.assert_metric(
+        "postgresql.sequence.estimated_remaining",
+        value=None,
+        tags=[
+            "column:{}".format('personid'),
+            "schema:{}".format('public'),
+            "table:{}".format('persons'),
+            "db:{}".format('datadog_test'),
+            "max_value:{}".format(2147483647),
+            "current_value:{}".format(2),
+            "database_hostname:stubbed.hostname",
+            "foo:bar",
+            "port:5432",
+            "postgresql_cluster_name:primary",
+            f'postgresql_version:{check.raw_version}',
+            f'system_identifier:{check.system_identifier}',
+            "replication_role:master",
+        ],
+    )
 
 
 def assert_fields(keys: List[str], fields: List[str]):

@@ -146,6 +146,7 @@ postgresql.rows_updated,gauge,,row,second,Enabled with `relations`. The number o
 postgresql.running,gauge,,,,The number of instances running.,0,postgres,running,
 postgresql.seq_rows_read,gauge,,row,second,"Enabled with `relations`. The number of live rows fetched by sequential scans. This metric is tagged with db, schema, table.",0,postgres,seq rows rd,
 postgresql.seq_scans,gauge,,scan,second,"Enabled with `relations`. The number of sequential scans initiated on this table. This metric is tagged with db, schema, table.",0,postgres,seq scans,
+postgresql.sequence.estimated_remaining,gauge,,,,"The estimated remaining values of a sequence. This estimate is based on pg_statistics and will be more accurate for smaller tables and when ANALYZE has been run recently. This metric is tagged with db, schema, table, and column.",0,postgres,sequence remaining,
 postgresql.sessions.abandoned,count,,session,,Number of database sessions to this database that were terminated because connection to the client was lost. This metric is tagged with db.,-1,postgres,postgres sessions abandoned,
 postgresql.sessions.active_time,count,,millisecond,,"Time spent executing SQL statements in this database, in milliseconds (this corresponds to the states active and fastpath function call in pg_stat_activity). This metric is tagged with db.",0,postgres,postgres active time,
 postgresql.sessions.count,count,,session,,Total number of sessions established to this database. This metric is tagged with db.,0,postgres,postgres sessions,
