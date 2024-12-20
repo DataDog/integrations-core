@@ -219,6 +219,6 @@ jobs:
         $env:OPENSSL_MODULES = "$(pwd)\ossl-modules"
         .\openssl.exe list -providers
         .\openssl.exe md5
-        ddev test --cov --junit datadog_checks_base -- -k before_fips
-        ddev test --cov --junit datadog_checks_base -- -k after_fips
+        ddev test --cov --junit datadog_checks_base -- -m fips_off
+        ddev test --cov --junit datadog_checks_base -- -m fips_on
         python -c "import ssl; ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT).set_ciphers('MD5')"
