@@ -6,6 +6,7 @@ import functools
 import importlib
 import inspect
 import logging
+import os
 import re
 import traceback
 import unicodedata
@@ -46,6 +47,7 @@ from ..types import (
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.diagnose import Diagnosis
+from ..utils.fips import enable_fips
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -306,6 +308,9 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+
+        if os.environ.get("GOFIPS", "0") == "1":
+            enable_fips()
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
