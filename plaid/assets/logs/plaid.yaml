@@ -21,7 +21,7 @@ pipeline:
     query: "source:plaid"
   processors:
     - type: attribute-remapper
-      name: "Remapper: Map `created` to `timestamp`"
+      name: "Map `created` to `timestamp`"
       enabled: true
       sources:
         - created
@@ -31,7 +31,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: date-remapper
-      name: " Define `timestamp` as the official date of the log"
+      name: "Define `timestamp` as the official date of the log"
       enabled: true
       sources:
         - timestamp
