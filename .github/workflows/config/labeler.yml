@@ -73,6 +73,8 @@ integration/asana:
 - asana/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
+integration/authorize_net:
+- authorize_net/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
 integration/aws_neuron:
@@ -83,6 +85,8 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/boundary:
 - boundary/**/*
+integration/brevo:
+- brevo/**/*
 integration/btrfs:
 - btrfs/**/*
 integration/cacti:
@@ -437,6 +441,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/quarkus:
+- quarkus/**/*
 integration/rabbitmq:
 - rabbitmq/**/*
 integration/ray:

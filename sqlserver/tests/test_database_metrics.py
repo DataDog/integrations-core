@@ -826,19 +826,19 @@ def test_sqlserver_index_usage_metrics(
 
     mocked_results_non_tempdb = [
         [
-            ('master', 'PK__patch_ac__09EA1DC2BD2BC49C', 'patch_action_execution_state', 36, 0, 0, 0),
-            ('master', 'PK__rds_comp__2E7CCD4A9E2910C9', 'rds_component_version', 0, 5, 0, 0),
+            ('master', 'PK__patch_ac__09EA1DC2BD2BC49C', 'dbo', 'patch_action_execution_state', 36, 0, 0, 0),
+            ('master', 'PK__rds_comp__2E7CCD4A9E2910C9', 'dbo', 'rds_component_version', 0, 5, 0, 0),
         ],
         [
-            ('msdb', 'PK__backupse__21F79AAB9439648C', 'backupset', 0, 1, 0, 0),
+            ('msdb', 'PK__backupse__21F79AAB9439648C', 'dbo', 'backupset', 0, 1, 0, 0),
         ],
         [
-            ('datadog_test-1', 'idx_something', 'some_table', 10, 60, 12, 18),
-            ('datadog_test-1', 'idx_something_else', 'some_table', 20, 30, 40, 50),
+            ('datadog_test-1', 'idx_something', 'dbo', 'some_table', 10, 60, 12, 18),
+            ('datadog_test-1', 'idx_something_else', 'dbo', 'some_table', 20, 30, 40, 50),
         ],
     ]
     mocked_results_tempdb = [
-        ('tempdb', 'PK__dmv_view__B5A34EE25D72CBFE', 'dmv_view_run_history', 1500, 0, 0, 49),
+        ('tempdb', 'PK__dmv_view__B5A34EE25D72CBFE', 'dbo', 'dmv_view_run_history', 1500, 0, 0, 49),
     ]
     mocked_results = mocked_results_non_tempdb
     if include_index_usage_metrics_tempdb:
@@ -870,11 +870,12 @@ def test_sqlserver_index_usage_metrics(
         tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
-                db, index_name, table, *metric_values = row
+                db, index_name, schema, table, *metric_values = row
                 metrics = zip(index_usage_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{db}',
                     f'index_name:{index_name}',
+                    f'schema:{schema}',
                     f'table:{table}',
                 ] + tags
                 for metric_name, metric_value in metrics:
@@ -921,29 +922,39 @@ def test_sqlserver_db_fragmentation_metrics(
     print(instance_docker_metrics)
     mocked_results = [
         [
-            ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_monitor', 0, None, 1, 1.0, 1, 0.0),
-            ('master', 'MSreplication_options', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_dev', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_usg', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_monitor', 'dbo', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'MSreplication_options', 'dbo', 0, None, 1, 1.0, 1, 0.0),
         ],
         [
-            ('msdb', 'syscachedcredentials', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
-            ('msdb', 'syscollector_blobs_internal', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
+            ('msdb', 'syscachedcredentials', 'dbo', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
+            (
+                'msdb',
+                'syscollector_blobs_internal',
+                'dbo',
+                1,
+                'PK_syscollector_blobs_internal_paremeter_name',
+                0,
+                0.0,
+                0,
+                0.0,
+            ),
         ],
-        [('datadog_test-1', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
+        [('datadog_test-1', 'ϑings', 'dbo', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
     mocked_results_tempdb = [
-        [('tempdb', '#TempExample__000000000008', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
+        [('tempdb', '#TempExample__000000000008', 'dbo', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
     ]
 
     if db_fragmentation_object_names:
         instance_docker_metrics['db_fragmentation_object_names'] = db_fragmentation_object_names
         mocked_results = [
             [
-                ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
-                ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
-                ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_dev', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_usg', 'dbo', 0, None, 0, 0.0, 0, 0.0),
             ],
             [],
             [],
@@ -982,12 +993,13 @@ def test_sqlserver_db_fragmentation_metrics(
         tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
-                database_name, object_name, index_id, index_name, *metric_values = row
+                database_name, object_name, schema, index_id, index_name, *metric_values = row
                 metrics = zip(db_fragmentation_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{database_name}',
                     f'database_name:{database_name}',
                     f'object_name:{object_name}',
+                    f'schema:{schema}',
                     f'index_id:{index_id}',
                     f'index_name:{index_name}',
                 ] + tags

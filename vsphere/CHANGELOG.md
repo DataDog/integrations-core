@@ -8,7 +8,7 @@
 
 * Added support for vSAN metric/event collection in the vSphere integration ([#18117](https://github.com/DataDog/integrations-core/pull/18117))
 
-## 8.0.1 / 2024-10-31
+## 8.0.1 / 2024-10-31 / Agent 7.60.0
 
 ***Fixed***:
 
