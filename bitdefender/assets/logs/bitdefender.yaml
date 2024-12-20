@@ -448,7 +448,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
-      name: Processing of Netwrok Attack Defense logs
+      name: Processing of Network Attack Defense logs
       enabled: true
       filter:
         query: service:network-attack-defense-monitor
