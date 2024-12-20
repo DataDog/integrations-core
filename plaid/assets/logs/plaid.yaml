@@ -1,7 +1,7 @@
-id: REPLACE_WITH_APP_ID
+id: plaid
 # See app_id in your integration's manifest.json file to learn more:
 # https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-metric_id: REPLACE_WITH_APP_ID
+metric_id: plaid
 # If for some reason id must be different than app_id, add the app_id in this field instead.
 # If id and app_id already match, this field can be left blank.
 backend_only: false
@@ -18,7 +18,7 @@ pipeline:
   name: plaid_logs
   enabled: true
   filter:
-    query: "source:plaid_logs "
+    query: "source:plaid"
   processors:
     - type: attribute-remapper
       name: "Remapper: Map `created` to `timestamp`"
