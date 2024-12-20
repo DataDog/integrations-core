@@ -1,5 +1,5 @@
 services:
-  teleport:
+  teleport-service:
     image: public.ecr.aws/gravitational/teleport:14.3
     ports:
       - 3000:3000
@@ -9,3 +9,4 @@ services:
     volumes:
       - ./etc/teleport:/etc/teleport
     command: --diag-addr=0.0.0.0:3000
+    container_name: teleport-service

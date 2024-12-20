@@ -5,6 +5,24 @@
         "localTime": {
             "$date": "2024-07-01T20:36:49.358Z"
         },
+        "latencyStats": {
+            "reads": {
+                "latency": 13165,
+                "ops": 10
+            },
+            "writes": {
+                "latency": 8542,
+                "ops": 1
+            },
+            "commands": {
+                "latency": 0,
+                "ops": 0
+            },
+            "transactions": {
+                "latency": 0,
+                "ops": 0
+            }
+        },
         "storageStats": {
             "size": 907806,
             "count": 4341,
@@ -196,6 +214,12 @@
             "totalIndexSize": 0,
             "indexSizes": {},
             "scaleFactor": 1
+        },
+        "queryExecStats": {
+            "collectionScans": {
+                "total": 81753,
+                "nonTailable": 81750
+            }
         }
     }
 ]

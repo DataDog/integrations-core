@@ -32,6 +32,10 @@ class IndexStatsCollector(MongoCollector):
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
+            if self.should_skip_system_collection(coll_name):
+                self.log.debug("Skipping indexStats for system collection %s.%s", self.db_name, coll_name)
+                continue
+
             try:
                 for stats in api.index_stats(self.db_name, coll_name):
                     idx_name = stats.get('name', 'unknown')

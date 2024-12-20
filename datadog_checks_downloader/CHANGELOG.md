@@ -8,7 +8,7 @@
 
 * v16 ceremony: bump root layout to v6. ([#19146](https://github.com/DataDog/integrations-core/pull/19146))
 
-## 6.1.0 / 2024-10-31
+## 6.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:
 

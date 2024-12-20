@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "NVIDIA NIM integration with Datadog enables real-time GPU observability by collecting Prometheus metrics for monitoring.",
-    "title": "nvidia_nim",
+    "title": "Nvidia NIM",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -49,6 +49,9 @@
     },
     "monitors": {
       "Average Request Latency is High": "assets/monitors/latency.json"
+    },
+    "saved_views": {
+      "NVIDIA NIM Errors": "assets/saved_views/nim_errors.json"
     }
   },
   "author": {
