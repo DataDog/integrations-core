@@ -17,48 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-linux:
-    uses: ./.github/workflows/test-fips.yml
+  test:
+    uses: ./.github/workflows/pr-test.yml
     with:
-      platform: linux
-      runner: '["ubuntu-22.04"]'
-      zip_url: 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip'
-    secrets: inherit
-
-  test-windows:
-    uses: ./.github/workflows/test-fips.yml
-    with:
-      platform: windows
-      runner: '["windows-2022"]'
-      zip_url: 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip'
-    secrets: inherit
-
-  test-tls-linux-inactive:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: TLS
-      target: tls
-      platform: linux
-      runner: '["ubuntu-22.04"]'
-      repo: "core"
-      standard: true
-      pytest-args: "-s -k test_fips_inactive_e2e"
-      traces-artifact-name: traces-tls-linux-no-fips
-      test-results-name: test-tls-linux-no-fips
-    secrets: inherit
-
-  test-tls-linux-active:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: TLS
-      target: tls
-      platform: linux
-      runner: '["ubuntu-22.04"]'
-      repo: "core"
-      standard: true
-      pytest-args: "-s -k test_fips_active_e2e"
-      traces-artifact-name: traces-tls-linux-fips
-      test-results-name: test-tls-linux-fips
-      agent-image: "datadog/agent-dev:main-fips"
-      e2e-env-vars: "{'GOFIPS':'1'}"
+      repo: core
     secrets: inherit
