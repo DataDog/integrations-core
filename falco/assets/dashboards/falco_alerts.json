@@ -15,7 +15,7 @@
                         "id": 7000735800317906,
                         "definition": {
                             "type": "note",
-                            "content": "Falco is a cloud-native security tool. It provides near real-time threat detection for cloud, container, and Kubernetes workloads by leveraging runtime insights. Falco can monitor events defined via customizable rules from various sources, including the Linux kernel, and enrich them with metadata from the Kubernetes API server, container runtime, and more.\n\nThis dashboard provides information about events, syscalls, process, user, k8s, container, FD, etc logs generated on Falco.\n\nFor more information, see the [Falco Documentation](https://docs.datadoghq.com/integrations/falco/).\n\nTips:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "content": "Falco is a cloud-native security tool. It provides near real-time threat detection for cloud, container, and Kubernetes workloads by leveraging runtime insights. Falco can monitor events defined with customizable rules from various sources, including the Linux kernel, and enrich them with metadata from the Kubernetes API server, container runtime, and more.\n\nThis dashboard provides information about events, syscalls, process, user, k8s, container, FD, and other logs generated on Falco.\n\nFor more information, see the [Falco Documentation](https://docs.datadoghq.com/integrations/falco/).\n\nTips:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -1465,7 +1465,7 @@
                     {
                         "id": 8459276178662880,
                         "definition": {
-                            "title": "Top Kubernates Namespaces",
+                            "title": "Top Kubernetes Namespaces",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1534,7 +1534,7 @@
                     {
                         "id": 179518505970250,
                         "definition": {
-                            "title": "Top Kubernates pod Names",
+                            "title": "Top Kubernetes Pod Names",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
