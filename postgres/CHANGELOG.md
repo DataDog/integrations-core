@@ -13,7 +13,7 @@
 
 * Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL. ([#19061](https://github.com/DataDog/integrations-core/pull/19061))
 
-## 22.2.0 / 2024-11-06
+## 22.2.0 / 2024-11-06 / Agent 7.60.0
 
 ***Added***:
 
