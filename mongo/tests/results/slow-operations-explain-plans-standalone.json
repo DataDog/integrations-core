@@ -197,48 +197,9 @@
                             "direction": "forward"
                         },
                         "rejectedPlans": []
-                    },
-                    "executionStats": {
-                        "executionSuccess": true,
-                        "nReturned": 0,
-                        "executionTimeMillis": 14,
-                        "totalKeysExamined": 0,
-                        "totalDocsExamined": 721,
-                        "executionStages": {
-                            "stage": "COLLSCAN",
-                            "filter": {
-                                "$and": [
-                                    {
-                                        "data": {
-                                            "$gt": "?"
-                                        }
-                                    },
-                                    {
-                                        "message": {
-                                            "$regularExpression": {
-                                                "pattern": "?",
-                                                "options": ""
-                                            }
-                                        }
-                                    }
-                                ]
-                            },
-                            "nReturned": 0,
-                            "executionTimeMillisEstimate": 13,
-                            "works": 722,
-                            "advanced": 0,
-                            "needTime": 721,
-                            "needYield": 0,
-                            "saveState": 1,
-                            "restoreState": 1,
-                            "isEOF": 1,
-                            "direction": "forward",
-                            "docsExamined": 721
-                        },
-                        "allPlansExecution": []
                     }
                 },
-                "signature": "6f93ef1b4ea189ab"
+                "signature": "d5607b22ab14a614"
             },
             "query_signature": "2e0dfc1416f51975",
             "application": null,
@@ -257,7 +218,7 @@
             "op": "command",
             "ns": "test.customers",
             "plan_summary": "IXSCAN { name: 1 }",
-            "microsecs_running": 12000,
+            "microsecs_running": 66666000,
             "num_yields": 0,
             "lock_stats": {
                 "feature_compatibility_version": {
@@ -344,48 +305,9 @@
                             "direction": "forward"
                         },
                         "rejectedPlans": []
-                    },
-                    "executionStats": {
-                        "executionSuccess": true,
-                        "nReturned": 0,
-                        "executionTimeMillis": 14,
-                        "totalKeysExamined": 0,
-                        "totalDocsExamined": 721,
-                        "executionStages": {
-                            "stage": "COLLSCAN",
-                            "filter": {
-                                "$and": [
-                                    {
-                                        "data": {
-                                            "$gt": "?"
-                                        }
-                                    },
-                                    {
-                                        "message": {
-                                            "$regularExpression": {
-                                                "pattern": "?",
-                                                "options": ""
-                                            }
-                                        }
-                                    }
-                                ]
-                            },
-                            "nReturned": 0,
-                            "executionTimeMillisEstimate": 13,
-                            "works": 722,
-                            "advanced": 0,
-                            "needTime": 721,
-                            "needYield": 0,
-                            "saveState": 1,
-                            "restoreState": 1,
-                            "isEOF": 1,
-                            "direction": "forward",
-                            "docsExamined": 721
-                        },
-                        "allPlansExecution": []
                     }
                 },
-                "signature": "6f93ef1b4ea189ab"
+                "signature": "d5607b22ab14a614"
             },
             "query_signature": "6f544fbdad56d0dc",
             "application": null,
@@ -404,7 +326,7 @@
             "op": "command",
             "ns": "test.customers",
             "plan_summary": "IXSCAN { name: 1 }",
-            "microsecs_running": 14000,
+            "microsecs_running": 77777000,
             "num_yields": 0,
             "lock_stats": {
                 "feature_compatibility_version": {
