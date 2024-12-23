@@ -21,26 +21,21 @@ Follow these steps to enable both features:
 3. In the navigation panel, click the **Settings** tab.
 4. In the Tracking section, enable both **Open tracking** and **Link tracking**.
 
-#### Webhook configuration steps for broadcast message streams
-Configure the Datadog endpoint to forward Postmark broadcast message streams activity logs to Datadog. See [Postmark Webhook Overview][2] for more details.
+#### Webhook configuration steps
+Configure the Datadog endpoint to forward below activity logs to Datadog. [See [Postmark Webhook Overview][2] for more details]
+- **Broadcast** message streams
+- **Transactional** message streams
+
+Perform below steps to configure webhook for both message streams mentioned above.
 
 1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 2. Log in to your [Postmark account][3]. This redirects you to the [servers page][4].
 3. Select the desired server. This redirects you to the **Message Streams page**.
-4. On the message streams page, either select an existing broadcast message stream or create a new one. To create a new stream, click the **Create Message Stream** button, enter a stream name, and select **Broadcasts** as the message type.
-5. In the navigation panel, click the **Webhooks** tab.
-6. Click **Add Webhook**.
-7. Enter the webhook URL provided from step 1.
-8. Choose the types of events you want to push to Datadog.
-9. Click **Save webhook**.
-
-#### Webhook configuration steps for transactional message streams
-Configure the Datadog endpoint to forward Postmark transactional message streams activity logs to Datadog. See [Postmark Webhook Overview][2] for more details.
-
-1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
-2. Log in to your [Postmark account][3]. This redirects you to the [servers page][4].
-3. Select the desired server. This redirects you to the **Message Streams page**.
-4. On the message streams page, either select an existing transactional message stream or create a new one. To create a new stream, click **Create Message Stream**, enter a stream name, and select **Transactional** as the message type.
+4. On the message streams page, select an existing broadcast / transactional message stream or create a new one. 
+   - To create a new **Broadcasts** stream: <br/> 
+   Click the **Create Message Stream** button, enter a stream name, and select **Broadcasts** as the message type. <br/> **OR**
+   - To create a new **Transactional** stream: <br/> 
+   Click the **Create Message Stream** button, enter a stream name, and select **Transactional** as the message type.
 5. In the navigation panel, click the **Webhooks** tab.
 6. Click **Add Webhook**.
 7. Enter the webhook URL provided from step 1.
