@@ -36,7 +36,8 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "beautifulsoup4==4.12.3",
+    "beautifulsoup4==4.12.3; python_version > '3.0'",
+    "beautifulsoup4==4.9.3; python_version < '3.0'",
 ]
 
 [project.urls]
