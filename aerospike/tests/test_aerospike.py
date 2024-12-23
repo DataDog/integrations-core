@@ -36,6 +36,7 @@ def test_check(aggregator, instance, dd_run_check):
     _test_check(aggregator)
 
 
+@pytest.mark.integration
 def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
 
     check = AerospikeCheck('aerospike', {}, [instance])
