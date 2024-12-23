@@ -160,6 +160,7 @@ SELECT
   current_database(),
   N.nspname,
   C.relname,
+  Inh.inhparent::regclass AS partition_of,
   pg_stat_get_numscans(C.oid),
   pg_stat_get_tuples_returned(C.oid),
   I.idx_scan,
@@ -191,6 +192,7 @@ SELECT
   C.xmin
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+LEFT JOIN pg_inherits Inh ON (Inh.inhrelid = C.oid)
 LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
 LEFT JOIN pg_index idx_toast ON (idx_toast.indrelid = C.reltoastrelid)
 LEFT JOIN LATERAL (
@@ -207,6 +209,7 @@ WHERE C.relkind = 'r'
         {'name': 'db', 'type': 'tag'},
         {'name': 'schema', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
+        {'name': 'partition_of', 'type': 'tag'},
         {'name': 'seq_scans', 'type': 'rate'},
         {'name': 'seq_rows_read', 'type': 'rate'},
         {'name': 'index_rel_scans', 'type': 'rate'},
