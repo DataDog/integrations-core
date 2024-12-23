@@ -1,0 +1,73 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "81c0f478-e722-454a-83d3-5e3f45e11ca8",
+  "app_id": "shopify",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Shopify Event, Product, Customer and Order logs.",
+    "title": "Shopify",
+    "media": [
+      {
+        "caption": "Shopify - Event Overview",
+        "image_url": "images/shopify_event_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Shopify - Product Overview",
+        "image_url": "images/shopify_product_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Shopify - Customer Overview",
+        "image_url": "images/shopify_customer_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Shopify - Order Overview",
+        "image_url": "images/shopify_order_overview.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 622,
+      "source_type_name": "Shopify",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Shopify - Event Overview" : "assets/dashboards/shopify_event_overview.json",
+      "Shopify - Product Overview" : "assets/dashboards/shopify_product_overview.json",
+      "Shopify - Customer Overview" : "assets/dashboards/shopify_customer_overview.json",
+      "Shopify - Order Overview" : "assets/dashboards/shopify_order_overview.json"
+    },
+    "monitors" : {
+      "Product Inventory is Out of Stock" : "assets/monitors/product_inventory_out_of_stock.json",
+      "Order Cancellation Rate is High" : "assets/monitors/order_cancellation_rate.json"
+    },
+    "logs": {
+      "source": "shopify"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
