@@ -1,0 +1,84 @@
+id: okta-workflows
+tests:
+  - sample: |-
+      {
+            "actor": {
+                "id": "00ulolty88hp4hh24697",
+                "type": "User",
+                "alternateId": "recos73496@merotx.com",
+                "displayName": "Dhruva Patel",
+                "detailEntry": null
+            },
+            "client": {
+                "userAgent": {
+                    "rawUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                    "os": "Windows 10",
+                    "browser": "CHROME"
+                },
+                "zone": "null",
+                "device": "Computer",
+                "id": null,
+                "ipAddress": "103.108.207.58",
+                "geographicalContext": {
+                    "city": "Bharūch",
+                    "state": "Gujarat",
+                    "country": "India",
+                    "postalCode": "392012",
+                    "geolocation": {
+                        "lat": 21.7003,
+                        "lon": 72.9782
+                    }
+                }
+            },
+            "device": null,
+            "authenticationContext": null,
+            "displayMessage": "Flow activated",
+            "eventType": "workflows.user.flow.activate",
+            "outcome": {
+                "result": "SUCCESS",
+                "reason": null
+            },
+            "published": "2024-12-13T06:07:14.333Z",
+            "securityContext": null,
+            "severity": "INFO",
+            "debugContext": {
+                "debugData": {
+                    "sessionId": "e32f71f9-c85e-417f-a70d-e3cfaa817111"
+                }
+            },
+            "legacyEventType": null,
+            "transaction": {
+                "type": "WORKFLOW",
+                "id": "e32f71f9-c85e-417f-a70d-e3cfaa817111",
+                "detail": {}
+            },
+            "uuid": "7fe19b86-b918-11ef-9c37-ffd8e2ef1ae1",
+            "version": "0",
+            "request": {
+                "ipChain": [
+                    {
+                        "ip": "null",
+                        "geographicalContext": null,
+                        "version": null,
+                        "source": null
+                    }
+                ]
+            },
+            "target": [
+                {
+                    "id": "00ololty2yyxOMqqC697",
+                    "type": "AppInstance",
+                    "alternateId": "Okta Workflows",
+                    "displayName": "Okta Workflows",
+                    "detailEntry": null
+                },
+                {
+                    "id": "01JDHH1G2BMMB4HDZG2RDPV55F",
+                    "type": "Flow",
+                    "alternateId": "Timer event",
+                    "displayName": "Timer event",
+                    "detailEntry": null
+                }
+            ]
+        }
+    result: null
