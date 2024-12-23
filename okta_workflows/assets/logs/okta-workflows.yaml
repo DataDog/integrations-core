@@ -67,7 +67,6 @@ facets:
     name: Subdivision Name
     path: network.client.geoip.subdivision.name
     source: log
-    type: string
   - groups:
       - Web Access
     name: Client IP
