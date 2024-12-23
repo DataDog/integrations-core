@@ -39,7 +39,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:(integration:okta-workflows) $Workflow_Name",
+              "query": "tag:(integration:okta-workflows)",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
@@ -146,7 +146,7 @@
                       "name": "query2",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:okta-workflows -@evt.outcome:(FAILURE OR failure) $Workflow_Name"
+                        "query": "source:okta-workflows -@evt.outcome:(FAILURE OR failure) $Workflow_Name $User_Name $User_ID $User_Email"
                       },
                       "indexes": [
                         "*"
@@ -163,7 +163,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:okta-workflows $Workflow_Name"
+                        "query": "source:okta-workflows $Workflow_Name $User_Name $User_ID $User_Email"
                       },
                       "indexes": [
                         "*"
@@ -1114,7 +1114,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.execution.cancel"
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.execution.cancel $User_Name $User_ID $User_Email $Workflow_Name"
                       },
                       "indexes": [
                         "*"
@@ -1436,7 +1436,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.delegatedflow.run"
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.delegatedflow.run $User_Name $User_ID $User_Email $Workflow_Name"
                       },
                       "indexes": [
                         "*"
@@ -1557,7 +1557,8 @@
         "x": 0,
         "y": 42,
         "width": 12,
-        "height": 13
+        "height": 13,
+        "is_column_break": true
       }
     },
     {
