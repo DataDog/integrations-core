@@ -1,6 +1,6 @@
 services:
   milvus:
-    image: milvusdb/milvus
+    image: milvusdb/milvus:v2.5.0
     security_opt:
       - seccomp:unconfined
     environment:

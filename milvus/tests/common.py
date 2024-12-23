@@ -63,6 +63,7 @@ STANDALONE_TEST_METRICS = {
     'milvus.datacoord.consume_datanode_tt_lag_ms': 'gauge',
     'milvus.datacoord.datanode_num': 'gauge',
     'milvus.datacoord.import_tasks': 'gauge',
+    'milvus.datacoord.index.task': 'gauge',
     'milvus.datacoord.index.node_num': 'gauge',
     'milvus.datacoord.index.req.count': 'monotonic_count',
     'milvus.datacoord.segment_num': 'gauge',
@@ -390,7 +391,6 @@ STANDALONE_TEST_METRICS = {
 
 OTHER_TEST_METRICS = {
     'milvus.datacoord.channel_checkpoint_unix_seconds': 'gauge',
-    'milvus.datacoord.index.task_count': 'gauge',
     'milvus.datacoord.stored.binlog_size': 'gauge',
     'milvus.datacoord.stored.index_files_size': 'gauge',
     'milvus.datacoord.stored.rows_num': 'gauge',

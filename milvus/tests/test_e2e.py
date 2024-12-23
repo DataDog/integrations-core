@@ -13,7 +13,10 @@ def test_check_milvus_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric, _ in common.STANDALONE_TEST_METRICS.items():
-        if metric == 'milvus.datacoord.import_tasks':  # this metric needs a more complex setup to appear
+        if metric in [
+            'milvus.datacoord.import_tasks',
+            'milvus.datacoord.index.task',
+        ]:  # these metrics need a more complex setup to appear
             continue
         aggregator.assert_metric(name=metric)
 
