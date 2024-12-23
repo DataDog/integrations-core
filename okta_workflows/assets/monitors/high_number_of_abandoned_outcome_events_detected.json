@@ -3,7 +3,7 @@
 	"created_at": "2024-12-23",
 	"last_updated_at": "2024-12-23",
 	"title": "High Number of Abandoned Outcome Events Detected",
-	"description": "Abandoned outcome events in Okta Workflows occur when workflows start but remain incomplete due to misconfigured processes or user disengagement. This monitor tracks these events to prevent inefficiencies, resource wastage, and ensure reliable automation. Immediate action is needed to resolve issues.",
+	"description": "Abandoned outcome events in Okta Workflows occur when workflows start but remain incomplete due to misconfigurations or user disengagement. This monitor tracks these events to prevent inefficiencies, resource waste, and ensure reliable automation. Immediate action is needed to resolve issues.",
 	"definition": {
 		"id": 159650724,
 		"name": "High Number of Abandoned Outcome Events Detected",
