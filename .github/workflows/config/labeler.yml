@@ -87,6 +87,8 @@ integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
 - boundary/**/*
+integration/brevo:
+- brevo/**/*
 integration/btrfs:
 - btrfs/**/*
 integration/cacti:
@@ -441,6 +443,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/quarkus:
+- quarkus/**/*
 integration/rabbitmq:
 - rabbitmq/**/*
 integration/ray:

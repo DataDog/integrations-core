@@ -254,6 +254,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /blazemeter/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
 /blazemeter/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
 
+/brevo/                                                              @DataDog/saas-integrations
+/brevo/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
+/brevo/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
+/brevo/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /cisco_umbrella_dns/                                                 @DataDog/saas-integrations
 /cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
@@ -407,10 +412,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /hubspot_content_hub/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
 /hubspot_content_hub/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
-vonage/                                                @DataDog/saas-integrations
-vonage/*.md                                            @DataDog/saas-integrations @DataDog/documentation
-vonage/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
-vonage/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+vonage/                                                            @DataDog/saas-integrations
+vonage/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
 /asana/                                                             @DataDog/saas-integrations
 /asana/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
