@@ -72,13 +72,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 0,
         "timeseries_background": {
           "yaxis": {
@@ -171,13 +165,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 0,
         "timeseries_background": {
           "yaxis": {
@@ -227,13 +215,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -280,13 +262,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -333,13 +309,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -386,13 +356,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -477,13 +441,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -530,13 +488,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -583,13 +535,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -636,13 +582,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -689,13 +629,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -742,13 +676,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -833,13 +761,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -886,15 +808,9 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
-        "timeseries_background": {
+        "timeseries_background": { 
           "type": "area"
         }
       },
@@ -939,13 +855,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -992,13 +902,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -1045,13 +949,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -1098,13 +996,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
@@ -1177,13 +1069,7 @@
           }
         ],
         "has_search_bar": "auto",
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ]
+        "custom_links": []
       },
       "layout": {
         "x": 0,
@@ -1244,13 +1130,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "yaxis": {
@@ -1305,13 +1185,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "yaxis": {
@@ -1366,13 +1240,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "yaxis": {
@@ -1427,13 +1295,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "yaxis": {
@@ -1482,13 +1344,7 @@
           }
         ],
         "autoscale": true,
-        "custom_links": [
-          {
-            "override_label": "containers",
-            "link": "/dashboard/c6j-wa7-7h7/cluster-overview?aerospike_cluster={{$aerospike_cluster}}&aerospike_service={{$aerospike_service}}&ns={{$ns}}&live=true",
-            "is_hidden": false
-          }
-        ],
+        "custom_links": [],
         "precision": 2,
         "timeseries_background": {
           "type": "area"
