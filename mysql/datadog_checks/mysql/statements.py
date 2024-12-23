@@ -8,7 +8,7 @@ from operator import attrgetter
 from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
-from cachetools import TTLCache
+from cachetools import TTLCache, Cache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
@@ -91,6 +91,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
         )  # type: TTLCache
 
+        # digest_text_cache: cache the full digest text for statements to avoid querying the db for the same digest
+        self._digest_text_cache = Cache(
+            maxsize=10 * 1000,
+        )  # type: TTLCache
+
     def _get_db_connection(self):
         """
         lazy reconnect db
@@ -166,6 +171,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def _collect_per_statement_metrics(self):
         # type: () -> List[PyMysqlRow]
         monotonic_rows = self._query_summary_per_statement()
+        monotonic_rows = self._add_digest_text(monotonic_rows)
+        monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
         return rows
@@ -182,7 +189,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
         sql_statement_summary = """\
             SELECT `schema_name`,
                    `digest`,
-                   `digest_text`,
                    `count_star`,
                    `sum_timer_wait`,
                    `sum_lock_time`,
@@ -195,7 +201,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_no_index_used`,
                    `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
-            WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
@@ -205,6 +210,49 @@ class MySQLStatementMetrics(DBMAsyncJob):
             rows = cursor.fetchall() or []  # type: ignore
 
         return rows
+
+    def _add_digest_text(self, rows):
+        # type: (List[PyMysqlRow]) -> List[PyMysqlRow]
+        """
+        Add the full statement text to the rows
+        """
+        saturated_rows = []
+        digests = []
+        # Find digests we don't have cached
+        for row in rows:
+            if self._digest_text_cache.get(row['digest']):
+                continue
+            digests.append(row['digest'])
+
+        if digests:
+            # Query for uncached digests
+            sql_statement_text = """\
+                SELECT `digest`, `digest_text`
+                FROM performance_schema.events_statements_summary_by_digest
+                WHERE `digest` IN ({})""".format(
+                ",".join(["%s"] * len(digests))
+            )
+
+            with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                self._log.warning("Querying for digest text %s %s", sql_statement_text, digests)
+                cursor.execute(sql_statement_text, digests)
+                digest_rows = cursor.fetchall() or []
+                for row in digest_rows:
+                    self._digest_text_cache[row['digest']] = row['digest_text']
+
+        for row in rows:
+            row = dict(copy.copy(row))
+            row['digest_text'] = self._digest_text_cache.get(row['digest'], None)
+            saturated_rows.append(row)
+
+        return saturated_rows
+
+    def _filter_query_rows(self, rows):
+        # type: (List[PyMysqlRow]) -> List[PyMysqlRow]
+        """
+        Filter out rows that are EXPLAIN statements
+        """
+        return [row for row in rows if not row['digest_text'].lower().startswith('explain')]
 
     def _normalize_queries(self, rows):
         normalized_rows = []
