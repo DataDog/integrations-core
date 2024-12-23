@@ -155,19 +155,22 @@ jobs:
     - name: Verify OpenSSL
       if: runner.os == 'Windows'
       working-directory: .\python_dir
-      shell: powershell
       run: |
-        .\openssl.exe version -a
-        .\openssl.exe list -providers
+        ./openssl version -a
+        ./openssl list -providers
 
     - name: Verify OpenSSL with FIPS ENV vars
       if: runner.os == 'Windows'
       working-directory: .\python_dir
-      shell: powershell
       run: |
-        $env:OPENSSL_MODULES = ".\ossl-modules"
-        $env:OPENSSL_CONF = ".\openssl.cnf"
-        .\openssl.exe list -providers
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          echo "OPENSSL_MODULES=$(pwd)\ossl-modules" >> $GITHUB_ENV
+          echo "OPENSSL_CONF=$(pwd)\openssl.cnf" >> $GITHUB_ENV
+        else
+          echo "OPENSSL_MODULES=$(pwd)/ossl-modules" >> $GITHUB_ENV
+          echo "OPENSSL_CONF=$(pwd)/openssl.cnf" >> $GITHUB_ENV
+        fi
+        ./openssl list -providers
 
     - name: Add Python to PATH
       run: |
@@ -207,16 +210,19 @@ jobs:
         ddev config set repo core
 
     - name: Test
-      if: runner.os == 'Windows'
-      shell: powershell
+      working-directory: ./python_dir
       run: |
-        $env:PATH_TO_OPENSSL_CONF = "$(pwd)\openssl.cnf"
-        $env:PATH_TO_OPENSSL_MODULES = "$(pwd)\ossl-modules"
-        $env:OPENSSL_CONF = "$(pwd)\openssl.cnf"
-        $env:OPENSSL_MODULES = "$(pwd)\ossl-modules"
-        .\python_dir\openssl.exe list -providers
-        .\python_dir\openssl.exe md5
-        ddev datadog_checks_base -m fips_off
-        ddev datadog_checks_base -m fips_on
-        python -c "import ssl; ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT).set_ciphers('MD5')"
-        which python
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          echo "PATH_TO_OPENSSL_CONF=$(pwd)\openssl.cnf" >> $GITHUB_ENV
+          echo "PATH_TO_OPENSSL_MODULES=$(pwd)\ossl-modules" >> $GITHUB_ENV
+          echo "OPENSSL_CONF=$(pwd)\openssl.cnf" >> $GITHUB_ENV
+          echo "OPENSSL_MODULES=$(pwd)\ossl-modules" >> $GITHUB_ENV
+        else
+          echo "PATH_TO_OPENSSL_CONF=$(pwd)/openssl.cnf" >> $GITHUB_ENV
+          echo "PATH_TO_OPENSSL_MODULES=$(pwd)/ossl-modules" >> $GITHUB_ENV
+          echo "OPENSSL_CONF=$(pwd)/openssl.cnf" >> $GITHUB_ENV
+          echo "OPENSSL_MODULES=$(pwd)/ossl-modules" >> $GITHUB_ENV
+        fi
+        ./openssl list -providers
+        ddev test datadog_checks_base -- -s -m fips_off
+        ddev test datadog_checks_base -- -s -m fips_on

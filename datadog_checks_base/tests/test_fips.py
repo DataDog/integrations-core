@@ -5,6 +5,7 @@ from typing import Any  # noqa: F401
 
 import os
 import pytest
+import sys
 
 from datadog_checks.base.utils.fips import enable_fips
 
@@ -48,6 +49,9 @@ def test_ssl_md5_after_fips(clean_environment):
     MD5 cipher should not be available through ssl after enabling FIPS mode.
     """
     import ssl
+
+    print(f'\nPython Path: {sys.executable}')
+    print(f'\nEnv Vars: {os.environ}')
 
     enable_fips(path_to_openssl_conf=PATH_TO_OPENSSL_CONF, path_to_openssl_modules=PATH_TO_OPENSSL_MODULES)
     with pytest.raises(ssl.SSLError, match='No cipher can be selected.'):
