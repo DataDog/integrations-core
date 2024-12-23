@@ -24,7 +24,7 @@
             "id": 1590631336486164,
             "definition": {
                 "type": "note",
-                "content": "\n\nDelinea Privilege Manager is an endpoint least privilege and application control solution for Windows and macOS, capable of supporting enterprises and fast-growing organizations at scale. Local Security and Application Control are the two major components of Delinea Privilege Manager.\n\nThe Delinea Privilege Manager Overview dashboard offers a summary of Application Control events and Local Security events.\n\nFor more information, see the [Delinea Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/delinea_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "\n\nDelinea Privilege Manager is an endpoint least privilege and application control solution for Windows and macOS, capable of supporting enterprises and fast-growing organizations at scale. Local Security and Application Control are the two major components of Delinea Privilege Manager.\n\nThe Delinea Privilege Manager Overview dashboard offers a summary of Application Control events and Local Security events.\n\nFor more information, see the [Delinea Privilege Manager integration documentation](https://docs.datadoghq.com/integrations/delinea_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations. ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -389,7 +389,7 @@
                         "id": 3505205910141474,
                         "definition": {
                             "type": "note",
-                            "content": "Application Control Events group includes following event types:\n- Application Action Events\n- Application Justification Events\n- Bad Rated Application Action Events",
+                            "content": "Application Control Events group includes the following event types:\n- Application Action Events\n- Application Justification Events\n- Bad Rated Application Action Events",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "left",
@@ -890,7 +890,7 @@
                         "id": 181720701401668,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates Delinea Privilege Manager logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Delinea Privilege Manager logs to detect threats to your environment in real time. If you don't see signals, verify that [Datadog Cloud SIEM](/security) is enabled.",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "left",

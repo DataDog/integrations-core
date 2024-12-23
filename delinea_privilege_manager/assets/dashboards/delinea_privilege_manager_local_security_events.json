@@ -1,6 +1,6 @@
 {
     "title": "Delinea Privilege Manager - Local Security Events",
-    "description": "The Delinea Privilege Manager Local Security Events dashboard provides detailed insights into following types of events:\n\n-   **Password Disclosure Events** : Password Disclosure Events contain any type of password disclosure activity.\n-   **Newly Discovered File Events** : Newly Discovered File Events contain information about newly discovered files on the system.\n-   **Change History Events** : Change History Events contain information about any changes made in Delinea Privilege Manager.",
+    "description": "The Delinea Privilege Manager Local Security Events dashboard provides detailed insights into the following types of events:\n\n-   **Password Disclosure Events** : Password Disclosure Events contain any type of password disclosure activity.\n-   **Newly Discovered File Events** : Newly Discovered File Events contain information about newly discovered files on the system.\n-   **Change History Events** : Change History Events contain information about any changes made in Delinea Privilege Manager.",
     "widgets": [
         {
             "id": 7928874365280550,
@@ -24,7 +24,7 @@
             "id": 404340994634088,
             "definition": {
                 "type": "note",
-                "content": "**Dashboard Overview**\n\nThe Delinea Privilege Manager Local Security Events dashboard provides detailed insights into following types of events:\n- **Password Disclosure Events** : Password Disclosure Events contain any type of password disclosure activity.\n- **Newly Discovered File Events** : Newly Discovered File Events contain information about newly discovered files on the system.\n- **Change History Events** : Change History Events contain information about any changes made in Delinea Privilege Manager.\n\nFor more information, see the [Delinea Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/delinea_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**Dashboard Overview**\n\nThe Delinea Privilege Manager Local Security Events dashboard provides detailed insights into the following types of events:\n- **Password Disclosure Events** : Password Disclosure Events contain any type of password disclosure activity.\n- **Newly Discovered File Events** : Newly Discovered File Events contain information about newly discovered files on the system.\n- **Change History Events** : Change History Events contain information about any changes made in Delinea Privilege Manager.\n\nFor more information, see the [Delinea Privilege Manager integration documentation](https://docs.datadoghq.com/integrations/delinea_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations. ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
