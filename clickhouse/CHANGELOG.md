@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.0 / 2024-11-28
+
+***Added***:
+
+* Add verify option when connecting to ClickHouse server. ([#19018](https://github.com/DataDog/integrations-core/pull/19018))
+
 ## 5.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

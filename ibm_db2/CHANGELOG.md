@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.1 / 2024-11-28
+
+***Fixed***:
+
+* Fixes 'unable to import module' on Windows ([#18908](https://github.com/DataDog/integrations-core/pull/18908))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

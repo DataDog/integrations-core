@@ -131,7 +131,7 @@ instances:
     # namespace: default
 
     ## @param send_ndm_metadata - boolean - optional - default: false
-    ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+    ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
     #
     # send_ndm_metadata: false
 

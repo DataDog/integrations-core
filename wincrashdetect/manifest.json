@@ -14,7 +14,18 @@
     "classifier_tags": [
       "Supported OS::Windows",
       "Category::OS & System",
+      "Category::Windows",
       "Offering::Integration"
+    ], 
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/wincrashdetect/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/troubleshoot-windows-blue-screen-errors/"
+      }
     ]
   },
   "author": {
