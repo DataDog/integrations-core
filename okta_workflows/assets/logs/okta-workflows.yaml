@@ -18,9 +18,60 @@ facets:
     path: http.useragent
     source: log
   - groups:
-      - User
-    name: User ID
-    path: usr.id
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+    type: string
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
     source: log
   - groups:
       - User
@@ -29,70 +80,19 @@ facets:
     source: log
   - groups:
       - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
     name: User Name
     path: usr.name
     source: log
   - groups:
-      - Web Access
-    name: Client IP
-    path: network.client.ip
-    source: log
-  - facetType: list
-    groups:
       - Geoip
     name: AS Domain
     path: network.client.geoip.as.domain
     source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: City Name
-    path: network.client.geoip.city.name
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: Continent Code
-    path: network.client.geoip.continent.code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: Continent Name
-    path: network.client.geoip.continent.name
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: Country ISO Code
-    path: network.client.geoip.country.iso_code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: Country Name
-    path: network.client.geoip.country.name
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: Subdivision ISO Code
-    path: network.client.geoip.subdivision.iso_code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Geoip
-    name: Subdivision Name
-    path: network.client.geoip.subdivision.name
-    source: log
-    type: string
 pipeline:
   type: pipeline
   name: Okta Workflows
@@ -180,7 +180,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `log,actor.displayName` to `usr.name`
+      name: Map `log.actor.displayName` to `usr.name`
       enabled: true
       sources:
         - log.actor.displayName
