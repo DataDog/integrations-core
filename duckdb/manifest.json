@@ -38,7 +38,7 @@
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+        "Duckdb Overview": "assets/dashboards/duckdb_overview.json"
     }
   },
   "author": {
