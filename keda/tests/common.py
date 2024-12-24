@@ -108,7 +108,7 @@ TEST_METRICS = [
     'keda.go.memstats.heap.objects',
     'keda.go.memstats.heap.released_bytes',
     'keda.go.memstats.heap.sys_bytes',
-    'keda.go.memstats.last_gc_time.seconds',
+    'keda.go.memstats.time_since_last_gc.seconds',
     'keda.go.memstats.lookups.count',
     'keda.go.memstats.mallocs.count',
     'keda.go.memstats.mcache.inuse_bytes',
