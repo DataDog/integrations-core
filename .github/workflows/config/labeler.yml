@@ -69,6 +69,8 @@ integration/argo_workflows:
 - argo_workflows/**/*
 integration/argocd:
 - argocd/**/*
+integration/asana:
+- asana/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
@@ -319,6 +321,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/anthropic:
+- anthropic/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
@@ -349,6 +353,8 @@ integration/mimecast:
 - mimecast/**/*
 integration/mongo:
 - mongo/**/*
+integration/mux:
+- mux/**/*
 integration/mysql:
 - mysql/**/*
 integration/nagios:
@@ -367,6 +373,8 @@ integration/ntp:
 - ntp/**/*
 integration/nvidia_jetson:
 - nvidia_jetson/**/*
+integration/nvidia_nim:
+- nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
 integration/oke:
@@ -409,6 +417,8 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/plaid:
+- plaid/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
@@ -445,6 +455,8 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/shopify:
+- shopify/**/*
 integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
@@ -485,6 +497,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonicwall_firewall:
+- sonicwall_firewall/**/*
 integration/sophos_central_cloud:
 - sophos_central_cloud/**/*
 integration/spark:
@@ -497,12 +511,16 @@ integration/ssh_check:
 - ssh_check/**/*
 integration/statsd:
 - statsd/**/*
+integration/streamnative:
+- streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/suricata:
 - suricata/**/*
+integration/symantec_endpoint_protection:
+- symantec_endpoint_protection/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -521,6 +539,8 @@ integration/teleport:
 - teleport/**/*
 integration/temporal:
 - temporal/**/*
+integration/temporal_cloud:
+- temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:
@@ -567,6 +587,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:

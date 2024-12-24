@@ -2,16 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 SINFO_PARTITION_PARAMS = [
-    "-hO",
+    "-ahO",
     "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:",
 ]
-SINFO_NODE_PARAMS = ["-hNO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,Memory:|,Cluster:"]
+SINFO_NODE_PARAMS = ["-haNO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,Memory:|,Cluster:"]
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
 GPU_PARAMS = "|,Gres:|,GresUsed:"
-SQUEUE_PARAMS = ["-ho", "%A|%u|%j|%T|%N|%C|%R|%m"]
-SSHARE_PARAMS = ["-lnPU"]
+SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m"]
+SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
-    "-npo",
+    "-anpo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
     "--units=M",
 ]
