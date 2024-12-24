@@ -41,7 +41,9 @@ The Authorize.Net integration collects and forwards settled transaction logs to 
 
 ### Metrics
 
-The Authorize.Net integration collects and forwards unsettled transaction metrics to Datadog. See [metadata.csv][3] for a list of metrics provided by this integration.
+The Authorize.Net integration collects and forwards unsettled transaction metrics to Datadog.
+
+{{< get-metrics-from-git "authorize-net" >}}
 
 ### Events
 

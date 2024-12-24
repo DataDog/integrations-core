@@ -1,4 +1,4 @@
-# CHANGELOG - Temporal_Cloud
+# CHANGELOG - Temporal Cloud
 
 ## 1.0.0 / 2024-11-26
 
