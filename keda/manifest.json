@@ -35,7 +35,7 @@
       },
       "metrics": {
         "prefix": "keda.",
-        "check": "keda.build.info",
+        "check": "keda.process.uptime.seconds",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
