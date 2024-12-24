@@ -209,7 +209,7 @@ WHERE C.relkind = 'r'
         {'name': 'db', 'type': 'tag'},
         {'name': 'schema', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
-        {'name': 'partition_of', 'type': 'tag'},
+        {'name': 'partition_of', 'type': 'tag_not_null'},
         {'name': 'seq_scans', 'type': 'rate'},
         {'name': 'seq_rows_read', 'type': 'rate'},
         {'name': 'index_rel_scans', 'type': 'rate'},
