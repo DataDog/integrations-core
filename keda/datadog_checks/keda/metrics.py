@@ -15,7 +15,7 @@ METRIC_MAP = {
     "keda_scaler_metrics_latency_seconds": "scaler.metrics_latency_seconds",
     "keda_scaler_detail_errors": "scaler.detail_errors",
     "keda_scaled_object_errors": "scaled_object.errors",
-    "keda_scaled_job_errors": "scaled_job_errors",
+    "keda_scaled_job_errors": "scaled_job.errors",
     "keda_resource_registered": "resource_registered",
     "keda_trigger_registered": "trigger_registered",
     "keda_internal_scale_loop_latency_seconds": "internal_scale.loop_latency_seconds",
