@@ -19,6 +19,11 @@ instances:
     #
   - db_name: /path-to-file/my_database.db
 
+    ## @param connection_attempt - integer - optional - default: 3
+    ## The number of retries to connect to the database in case of failure
+    #
+    # connection_attempt: <CONNECTION_ATTEMPT>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -35,11 +40,13 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    ## @param min_collection_interval - number - optional - default: 60
+    ## This changes the collection interval of this check to avoid 
+    ## the risk of locking the database file.
+    ## If your database file is heavily used in write mode, you changes
+    ## further increase this value to minimise the monitoring acccess.
     #
-    # min_collection_interval: 15
+    min_collection_interval: 60
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

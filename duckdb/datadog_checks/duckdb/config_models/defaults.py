@@ -8,8 +8,8 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
-def instance_collect_profiling_data():
-    return False
+def instance_connection_attempt():
+    return 3
 
 
 def instance_disable_generic_tags():
@@ -21,8 +21,4 @@ def instance_empty_default_hostname():
 
 
 def instance_min_collection_interval():
-    return 15
-
-
-def instance_username():
-    return 'datadog'
+    return 60

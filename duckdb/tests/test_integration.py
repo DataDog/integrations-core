@@ -4,6 +4,7 @@
 from datadog_checks.duckdb import DuckdbCheck
 
 from . import common
+import logging
 
 
 def test_check(dd_run_check, aggregator, instance):
@@ -14,8 +15,16 @@ def test_check(dd_run_check, aggregator, instance):
     for metric in common.METRICS_MAP:
         aggregator.assert_metric(metric)
 
+def test_failed_connection(dd_run_check, instance, caplog):
+    caplog.set_level(logging.ERROR)
+    instance = common.WRONG_INSTANCE
+    check = DuckdbCheck('duckdb', {}, [instance])
+    dd_run_check(check)
 
-def test_version(dd_run_check, aggregator, instance, datadog_agent):
+    expected_error = ("Database file not found")
+    assert expected_error in caplog.text
+
+def test_version(dd_run_check, instance, datadog_agent):
     instance = common.DEFAULT_INSTANCE
     check = DuckdbCheck('duckdb', {}, [instance])
     check.check_id = 'test:123'

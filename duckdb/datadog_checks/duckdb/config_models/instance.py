@@ -34,16 +34,14 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collect_profiling_data: Optional[bool] = None
+    connection_attempt: Optional[int] = None
     db_name: str
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
-    password: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
-    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

@@ -6,6 +6,7 @@ import os
 import re
 from contextlib import closing, contextmanager
 from copy import deepcopy
+import time
 
 import duckdb
 
@@ -14,10 +15,6 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.db import QueryManager
 
 from .queries import DEFAULT_QUERIES
-
-SERVICE_CHECK_CONNECT = 'can_connect'
-SERVICE_CHECK_QUERY = 'can_query'
-
 
 class DuckdbCheck(AgentCheck):
 
@@ -28,6 +25,8 @@ class DuckdbCheck(AgentCheck):
         super(DuckdbCheck, self).__init__(name, init_config, instances)
 
         self.db_name = self.instance.get('db_name')
+        self.connection_attempt = self.instance.get('connection_attempt')
+
         self.tags = self.instance.get('tags', [])
         self._connection = None
         self._connect_params = None
@@ -47,17 +46,21 @@ class DuckdbCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
-        try:
-            with self.connect() as conn:
-                if conn:
-                    self._connection = conn
-                    self._query_manager.execute()
-                    self.submit_health_checks()
-        except Exception as e:
-            self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
-            # Won't fail the integration if the connection attempt fails, just an error log
-            self.log.error('Unable to connect to the database:  "%s"', e)
-            # raise e
+        retry_delay = 5
+        max_retries= self.connection_attempt
+        for attempt in range(1, self.connection_attempt + 1):
+            try:
+                with self.connect() as conn:
+                    if conn:
+                        self._connection = conn
+                        self._query_manager.execute()
+            except Exception as e:
+                self.log.warning('Unable to connect to the database:  "%s" , retrying...', e)
+                if attempt < max_retries:
+                    time.sleep(retry_delay)
+                else:
+                    self.log.error('Max connection retries reached')
+                    raise e
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -97,7 +100,7 @@ class DuckdbCheck(AgentCheck):
     @contextmanager
     def connect(self):
         conn = None
-        # Only attempt connection if the file exists
+        # Only attempt connection if the Database file exists
         if os.path.exists(self.db_name):
             try:
                 # Try to establish the connection in read only mode
@@ -109,10 +112,11 @@ class DuckdbCheck(AgentCheck):
                     self.log.error('Lock conflict detected')
                 else:
                     self.log.error('Unable to connect to DuckDB database. %s.', e)
-                    raise e
             finally:
                 if conn:
                     conn.close()
+        else: 
+            self.log.error('Database file not found')
 
     def initialize_config(self):
         self._connect_params = json.dumps(
@@ -127,15 +131,6 @@ class DuckdbCheck(AgentCheck):
             global_tags.extend(self.tags)
         self._tags = global_tags
         self._query_manager.tags = self._tags
-
-    def submit_health_checks(self):
-        # Check for connectivity
-        connect_status = ServiceCheck.OK
-        self.service_check(SERVICE_CHECK_CONNECT, connect_status, tags=self._tags)
-
-        # Check if the ddagent can query the database
-        query_status = ServiceCheck.CRITICAL if self._query_errors else ServiceCheck.OK
-        self.service_check(SERVICE_CHECK_QUERY, query_status, tags=self._tags)
 
     @AgentCheck.metadata_entrypoint
     def submit_version(self, row):
