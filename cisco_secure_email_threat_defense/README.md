@@ -27,10 +27,10 @@ The Cisco Secure Email Threat Defense integration provides out-of-the-box dashbo
     | Parameters | Description |
     | ---------- | ----------- |
     | Host Name | Host name is based on the region where your Cisco Secure Email Threat Defense server is located. For details, please reach out to your system administrator. |
-    | Client ID | Client ID from Cisco Secure Email Threat Defense Account |
-    | Client Password | Client password from your Cisco Secure Email Threat Defense Account. |
-    | API Key | API key from your Cisco Secure Email Threat Defense Account. |
-    | Verdict Delay | Events are fetched with a delay according to the time(in minute) specified in the Verdict Delay. |
+    | Client ID | Client ID from Cisco Secure Email Threat Defense account |
+    | Client Password | Client password from your Cisco Secure Email Threat Defense account. |
+    | API Key | API key from your Cisco Secure Email Threat Defense account. |
+    | Verdict Delay | Events are fetched with a delay according to the time (in minutes) specified in the Verdict Delay. |
 
 
 2. Click the **Save** button to save your settings.
