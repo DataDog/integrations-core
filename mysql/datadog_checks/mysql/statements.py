@@ -116,7 +116,15 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 self._db = None
 
     def run_job(self):
+        start = time()
         self.collect_per_statement_metrics()
+        self._check.gauge(
+            "dd.mysql.statement_metrics.elapsed_ms",
+            time() - start,
+            tags=self._check.tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def collect_per_statement_metrics(self):
@@ -162,7 +170,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             'mysql_rows': rows,
         }
         self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-        self._check.count(
+        self._check.gauge(
             "dd.mysql.collect_per_statement_metrics.rows",
             len(rows),
             tags=tags + self._check._get_debug_tags(),
@@ -172,7 +180,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def _collect_per_statement_metrics(self, tags):
         # type: () -> List[PyMysqlRow]
         monotonic_rows = self._query_summary_per_statement()
-        self._check.count(
+        self._check.gauge(
             "dd.mysql.statement_metrics.rows",
             len(monotonic_rows),
             tags=tags + self._check._get_debug_tags(),
