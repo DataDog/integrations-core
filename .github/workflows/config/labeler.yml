@@ -353,6 +353,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/milvus:
+- milvus/**/*
 integration/mimecast:
 - mimecast/**/*
 integration/mongo:
