@@ -35,6 +35,9 @@
         "prefix": "duckdb.",
         "check": "duckdb.memory_limit",
         "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
       }
     },
     "dashboards": {
