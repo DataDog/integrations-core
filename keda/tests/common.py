@@ -129,7 +129,7 @@ TEST_METRICS = [
     'keda.process.max_fds',
     'keda.process.open_fds',
     'keda.process.resident_memory.bytes',
-    'process.uptime.seconds',
+    'keda.process.uptime.seconds',
     'keda.process.virtual_memory.bytes',
     'keda.process.virtual_memory.max_bytes',
     'keda.registered_metrics.count',
