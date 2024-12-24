@@ -29,8 +29,6 @@ METRIC_MAP = {
     # Operator soon to be deprecated in v2.16
     "keda_scaler_metrics_latency": "scaler.metrics_latency",
     "keda_scaler_errors": "scaler.errors",
-    "keda_scaled_object_errors": "scaled_object.errors",
-    "keda_scaled_job_errors": "scaled_job.errors",
     "keda_resource_totals": "resource_totals",
     "keda_trigger_totals": "trigger_totals",
     "keda_internal_scale_loop_latency": "internal_scale.loop_latency",
