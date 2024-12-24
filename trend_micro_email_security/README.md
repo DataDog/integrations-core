@@ -13,27 +13,20 @@ Use out-of-the-box dashboards to visualize detailed insights into email traffic 
 
 ### Configuration
 
-#### Get Credentials (API Key) of Trend Micro Email Security
+#### Get Credentials of Trend Micro Email Security
 
 1. Log on to the Trend Micro Email Security administrator console.
-2. Go to **Administration** -> **Service Integration**.<br> The API Access tab displays by default.
-3. Click **Add** to generate an API Key.<br> The API Key is the global unique identifier for your application to authenticate its access to Trend Micro Email Security.
-4. Copy the **API Key** value and save the value. Keep the API Key private.<br> If you want to change your API Key later on, click **Add** to generate a new key and use the new key in your requests. You can click the toggle button under **Status** to disable the old key or delete it, but only do so if both of these conditions have been met:
-   1. Requests can be sent successfully with the new key.
-   2. The old key is not used by any other applications that access Trend Micro Email Security.
+2. Navigate to **Administration** > **Service Integration** > **API Access**.
+3. Click **Add** to generate an API Key.
+4. Switch to the **Log Retrieval** tab and Ensure the **status** for log retrieval is enabled.
+5. To identify the **Host Region** of your Trend Micro Email Security, please refer this [link][3].
+6. **Username** is **Login ID** of your Trend Micro Email Security console.
 
-#### Configure the Trend Micro Email Security and Datadog Integration
+#### Add your Trend Micro Email Security Credentials
 
-Configure the Datadog endpoint to forward Trend Micro Email Security logs to Datadog.
-
-1. Navigate to `Trend Micro Email Security`.
-2. Add your Trend Micro Email Security credentials.
-
-| Trend Micro Email Security Parameters | Description                                                          |
-| ------------------------------------- | -------------------------------------------------------------------- |
-| Host Region                           | The region of the Trend Micro Email Security administrator console.   |
-| Username                              | The username of the Trend Micro Email Security administrator console. |
-| API Key                               | The API Key of the Trend Micro Email Security administrator console.  |
+- Host Region
+- Username
+- API key
 
 ## Data Collected
 
@@ -55,3 +48,4 @@ For any further assistance, contact [Datadog support][2].
 
 [1]: https://www.trendmicro.com/en_in/business/products/user-protection/sps/email-and-collaboration/email-security.html
 [2]: https://docs.datadoghq.com/help/
+[3]: https://success.trendmicro.com/en-US/solution/KA-0016673#:~:text=Trend%20micro%20email%20security

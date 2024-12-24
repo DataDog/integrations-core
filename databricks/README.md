@@ -1,28 +1,49 @@
 # Agent Check: Databricks
 
-<div class="alert alert-warning">
+<div class="alert alert-info">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks cluster utilization metrics and logs.
+This page is limited to documentation for ingesting Databricks model serving metrics and cluster utilization data.
 </div>
 
 ![Databricks default dashboard][21]
 
 ## Overview
 
-Monitor your [Databricks][1] clusters with the Datadog [Spark integration][2].
+Datadog offers several Databricks monitoring capabilities.
 
-This integration unifies logs, infrastructure metrics, and Spark performance metrics, providing real-time visibility into the health of your nodes and the performance of your jobs. It can help you debug errors, fine-tune performance, and identify issues such as inefficient data partitioning or clusters running out of memory.
+[Data Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
 
-For feature details, see [Monitor Databricks with Datadog][22].
+[Cloud Cost Management][26] gives you a view to analyze all your Databricks DBU costs alongside the associated cloud spend.
 
+[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
+
+[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+
+Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
 
 ### Installation
+Gain insight into the health of your model serving infrastructure by following the [Model Serving Configuration](#model-serving-configuration) instructions.
 
-Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#configuration) instructions for your appropriate cluster. After that, install the [Spark integration][23] on Datadog to autoinstall the Databricks Overview dashboard.
+Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#spark-configuration) instructions for your appropriate cluster. Refer to [Spark Configuration](#spark-configuration) instructions.
 
 ### Configuration
+#### Model Serving Configuration
+1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
+2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
 
+   **Important:**
+   * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
+   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
+
+   As an alternative, follow the [official Databricks documentation][31] to generate an access token for a [service principal][31].
+
+3. In Datadog, open the Databricks integration tile.
+4. On the **Configure** tab, click **Add Databricks Workspace**.
+5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
+6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
+
+#### Spark Configuration
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
 
 Each script described below can be modified to suits your needs. For instance, you can:
@@ -447,8 +468,10 @@ chmod a+x /tmp/start_datadog.sh
 ## Data Collected
 
 ### Metrics
-
-See the [Spark integration documentation][8] for a list of metrics collected.
+#### Model Serving Metrics
+See [metadata.csv][29] for a list of metrics provided by this integration.
+#### Spark Metrics
+See the [Spark integration documentation][8] for a list of Spark metrics collected.
 
 ### Service Checks
 
@@ -492,3 +515,10 @@ Additional helpful documentation, links, and articles:
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
 [23]: https://app.datadoghq.com/integrations/spark
 [24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
+[25]: https://www.datadoghq.com/product/data-jobs-monitoring/
+[26]: https://www.datadoghq.com/product/cloud-cost-management/
+[27]: https://www.datadoghq.com/product/log-management/
+[28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
+[29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
+[30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
+[31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal

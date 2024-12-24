@@ -50,6 +50,11 @@ instances:
     #
   - url: <URL>
 
+    ## @param collect_ongoing_duration - boolean - optional - default: true
+    ## Collect ongoing duration metric for DAG task instances.
+    #
+    # collect_ongoing_duration: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

@@ -2,15 +2,48 @@
 
 <!-- towncrier release notes start -->
 
+## 8.3.0 / 2024-11-28
+
+***Added***:
+
+* Add `metrics_collection_interval` config option to customize the collection interval for collection stats, index stats, and sharded data distribution metrics.
+  The default collection interval for collection stats and index stats remains unchanged at check min collection interval of 15 seconds.
+  The default collection interval for sharded data distribution metrics is 300 seconds. ([#19098](https://github.com/DataDog/integrations-core/pull/19098))
+
+***Fixed***:
+
+* Fixes timezone parsing bug in slow query log, preventing incorrect timestamp conversions on non-UTC servers. ([#19057](https://github.com/DataDog/integrations-core/pull/19057))
+* Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
+* Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
+
+## 8.2.1 / 2024-11-06 / Agent 7.60.0
+
+***Fixed***:
+
+* Fix bug in parsing database name from namespace when no collection name is present, affecting database-level commands in MongoDB versions 5 and earlier. ([#18953](https://github.com/DataDog/integrations-core/pull/18953))
+
+## 8.2.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied, query samples, slow queries and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+* Add `aws` to the instance configuration to allow cloud resource linking with Amazon DocumentDB. ([#18921](https://github.com/DataDog/integrations-core/pull/18921))
+
+***Fixed***:
+
+* Skip explain plan collection for mongo administrative aggregation pipeline, including `$collStats`, `$currentOp`, `$indexStats`, `$listSearchIndexes`, `$sample` and `$shardedDataDistribution`. ([#18844](https://github.com/DataDog/integrations-core/pull/18844))
+
+## 8.1.0 / 2024-10-16 / Agent 7.59.0
+
+***Added***:
+
+* Apply `timeoutMS` to integration connection to ensure client-side operation timeouts terminate the server processes. ([#18843](https://github.com/DataDog/integrations-core/pull/18843))
+
 ## 8.0.0 / 2024-10-04
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 * Bump datadog-checks-base dependency ([#18583](https://github.com/DataDog/integrations-core/pull/18583))
 * Add `mongodb.system.cpu.percent` metric to track total CPU usage of the MongoDB process on self-hosted instances (only available on self-hosted MongoDB running on the same host as the Agent). ([#18618](https://github.com/DataDog/integrations-core/pull/18618))
 * Always emit `database_instance` metadata regardless of DBM status; previously emitted only when DBM was enabled. ([#18750](https://github.com/DataDog/integrations-core/pull/18750))
@@ -28,6 +61,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
 
 ## 6.11.0 / 2024-09-10

@@ -145,9 +145,6 @@ instances:
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` enable Database Monitoring.
-    ##
-    ## NOTE: Database Monitoring for MongoDB is currently in private beta.
-    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
     #
     # dbm: false
 
@@ -345,6 +342,34 @@ instances:
     #       type: <METRIC_TYPE>
     #     tags:
     #     - test:mongodb
+
+    ## This block defines the configuration for Amazon DocumentDB instances.
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
+    ## with DocumentDB integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints,
+        ## see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_Endpoint.html
+        #
+        # instance_endpoint: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
+
+        ## @param cluster_identifier - string - optional - default: mydocdb
+        ## Equal to the Cluster identifier of the instance the agent is connecting to.
+        ## This value is optional if the value of `cluster_name` is already configured to the cluster identifier.
+        ##
+        ## For more information on cluster identifiers,
+        ## see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_DBCluster.html
+        #
+        # cluster_identifier: mydocdb
 
     ## @param server - string - optional
     ## Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
