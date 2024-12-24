@@ -268,5 +268,5 @@ class Fabric:
     def submit_interface_status_metric(self, status, tags, hostname):
         if status:
             new_tags = tags.copy()
-            new_tags.extend(["port.status:{}".format(status)])
+            new_tags.extend(["status:{}".format(status)])
             self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)
