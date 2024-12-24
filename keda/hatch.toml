@@ -2,3 +2,4 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
+version = ["2.16.0"]
