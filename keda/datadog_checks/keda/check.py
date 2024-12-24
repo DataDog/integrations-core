@@ -22,4 +22,5 @@ class KedaCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
+            "rename_labels": RENAME_LABELS_MAP,
         }

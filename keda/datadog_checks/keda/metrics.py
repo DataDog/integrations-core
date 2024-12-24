@@ -135,4 +135,7 @@ METRIC_MAP = {
     'rest_client_requests': 'rest.client.requests',
 }
 
-RENAME_LABELS_MAP = {}
+RENAME_LABELS_MAP = {
+    'version': 'keda_version',
+    'host': 'keda_host',
+}
