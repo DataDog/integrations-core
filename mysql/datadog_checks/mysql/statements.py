@@ -139,12 +139,13 @@ class MySQLStatementMetrics(DBMAsyncJob):
             )
             return
 
-        rows = self._collect_per_statement_metrics()
-        if not rows:
-            return
         # Omit internal tags for dbm payloads since those are only relevant to metrics processed directly
         # by the agent
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
+
+        rows = self._collect_per_statement_metrics(tags)
+        if not rows:
+            return
         for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
         payload = {
@@ -168,9 +169,16 @@ class MySQLStatementMetrics(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
         )
 
-    def _collect_per_statement_metrics(self):
+    def _collect_per_statement_metrics(self, tags):
         # type: () -> List[PyMysqlRow]
         monotonic_rows = self._query_summary_per_statement()
+        self._check.count(
+            "dd.mysql.statement_metrics.rows",
+            len(monotonic_rows),
+            tags=tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+
         monotonic_rows = self._add_digest_text(monotonic_rows)
         monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
@@ -185,7 +193,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
         values to get the counts for the elapsed period. This is similar to monotonic_count, but
         several fields must be further processed from the delta values.
         """
-
         sql_statement_summary = """\
             SELECT `schema_name`,
                    `digest`,
@@ -201,8 +208,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_no_index_used`,
                    `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
-            ORDER BY `count_star` DESC
-            LIMIT 10000"""
+            """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             cursor.execute(sql_statement_summary)
@@ -234,7 +240,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             )
 
             with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-                self._log.warning("Querying for digest text %s %s", sql_statement_text, digests)
                 cursor.execute(sql_statement_text, digests)
                 digest_rows = cursor.fetchall() or []
                 for row in digest_rows:
@@ -252,7 +257,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         """
         Filter out rows that are EXPLAIN statements
         """
-        return [row for row in rows if not row['digest_text'].lower().startswith('explain')]
+        return [row for row in rows if row['digest_text'] is None or not row['digest_text'].lower().startswith('explain')]
 
     def _normalize_queries(self, rows):
         normalized_rows = []
