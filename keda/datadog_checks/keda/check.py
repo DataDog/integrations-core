@@ -7,13 +7,13 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
-class KarpenterCheck(OpenMetricsBaseCheckV2):
+class KedaCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'keda'
 
     def __init__(self, name, init_config, instances=None):
 
-        super(KarpenterCheck, self).__init__(
+        super(KedaCheck, self).__init__(
             name,
             init_config,
             instances,
@@ -22,5 +22,4 @@ class KarpenterCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
-            "rename_labels": RENAME_LABELS_MAP,
         }
