@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2024-12-23",
+	"last_updated_at": "2024-12-23",
+	"title": "Automatic asset age out activity detected",
+	"description": "Asset age-out refers to the automatic deletion of assets that have not been scanned within a specified number of days. This monitor tracks asset age out activity to notify the deletion of the asset and its related information including vulnerabilities.",
+	"definition": {
+		"id": 159876435,
+		"name": "Automatic asset age out activity detected",
+		"type": "log alert",
+		"query": "logs(\"source:tenable-io service:activity @evt.name:automatic.asset.age.out\").index(\"*\").rollup(\"count\").last(\"1d\") > 0",
+		"message": "Automatic asset age out activity is detected.\n\n@email@example.com",
+		"tags": [
+			"tenable-io"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:tenable-io"
+	]
+}
