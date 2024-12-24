@@ -106,7 +106,10 @@ METRIC_MAP = {
     'process_max_fds': 'process.max_fds',
     'process_open_fds': 'process.open_fds',
     'process_resident_memory_bytes': 'process.resident_memory.bytes',
-    'process_start_time_seconds': 'process.start_time.seconds',
+    'process_start_time_seconds': {
+        'name': 'process.uptime.seconds',
+        'type': 'time_elapsed',
+    },
     'process_virtual_memory_bytes': 'process.virtual_memory.bytes',
     'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
     'workqueue_adds': 'workqueue.adds',
@@ -128,7 +131,10 @@ METRIC_MAP = {
     'controller_runtime_webhook_panics': 'controller.runtime.webhook_panics',
     'controller_runtime_webhook_requests': 'controller.runtime.webhook_requests',
     'controller_runtime_webhook_requests_in_flight': 'controller.runtime.webhook_requests_in_flight',
-    'go_memstats_last_gc_time_seconds': 'go.memstats.last_gc_time.seconds',
+    'go_memstats_last_gc_time_seconds': {
+        'name': 'go.memstats.time_since_last_gc.seconds',
+        'type': 'time_elapsed',
+    },
     'leader_election_master_status': 'leader_election.master_status',
     'rest_client_requests': 'rest.client.requests',
 }
