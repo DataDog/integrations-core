@@ -3,7 +3,7 @@
 	"created_at": "2024-12-23",
 	"last_updated_at": "2024-12-23",
 	"title": "High Number of Denied Outcome Events Detected",
-	"description": "Deny outcome events in Okta Workflows indicate requests are being blocked or rejected, affecting workflow execution and causing potential disruptions. This monitor tracks denied events to identify issues and ensure smooth operations. Immediate investigation is recommended to resolve the root cause.",
+	"description": "Denied outcome events in Okta Workflows indicate requests are being blocked or rejected, affecting workflow execution and causing potential disruptions. This monitor tracks denied events to identify issues and ensure smooth operations. Immediate investigation is recommended to resolve the root cause.",
 	"definition": {
 		"id": 159650626,
 		"name": "High Number of Denied Outcome Events Detected",

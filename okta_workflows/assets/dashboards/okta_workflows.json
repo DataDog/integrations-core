@@ -2691,7 +2691,7 @@
     },
     {
       "name": "User_ID",
-      "prefix": "@user.id",
+      "prefix": "@usr.id",
       "available_values": [],
       "default": "*"
     },
