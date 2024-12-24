@@ -310,6 +310,10 @@ coverage:
         target: 75
         flags:
         - karpenter
+      Keda:
+        target: 75
+        flags:
+        - keda
       Kong:
         target: 75
         flags:
@@ -1128,6 +1132,11 @@ flags:
     paths:
     - karpenter/datadog_checks/karpenter
     - karpenter/tests
+  keda:
+    carryforward: true
+    paths:
+    - keda/datadog_checks/keda
+    - keda/tests
   kong:
     carryforward: true
     paths:
