@@ -7,7 +7,15 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.supabase import SupabaseCheck
 
-from .common import PRIVILEGED_METRICS_NAMESPACE, STORAGE_API_METRICS_NAMESPACE, PRIVILEGED_METRICS_INSTANCE, STORAGE_API_INSTANCE, STORAGE_API_METRICS, PRIVILEGED_METRICS, get_fixture_path
+from .common import (
+    PRIVILEGED_METRICS,
+    PRIVILEGED_METRICS_INSTANCE,
+    PRIVILEGED_METRICS_NAMESPACE,
+    STORAGE_API_INSTANCE,
+    STORAGE_API_METRICS,
+    STORAGE_API_METRICS_NAMESPACE,
+    get_fixture_path,
+)
 
 
 @pytest.mark.parametrize(
@@ -17,7 +25,9 @@ from .common import PRIVILEGED_METRICS_NAMESPACE, STORAGE_API_METRICS_NAMESPACE,
         (STORAGE_API_METRICS_NAMESPACE, STORAGE_API_INSTANCE, STORAGE_API_METRICS, 'storage_api_metrics.txt'),
     ],
 )
-def test_check_mock_supabase_openmetrics(dd_run_check, instance, aggregator, fixture_name, metrics, mock_http_response, namespace):
+def test_check_mock_supabase_openmetrics(
+    dd_run_check, instance, aggregator, fixture_name, metrics, mock_http_response, namespace
+):
     mock_http_response(file_path=get_fixture_path(fixture_name))
     check = SupabaseCheck('supabase', {}, [instance])
     dd_run_check(check)
@@ -30,6 +40,7 @@ def test_check_mock_supabase_openmetrics(dd_run_check, instance, aggregator, fix
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check(f'{namespace}.openmetrics.health', ServiceCheck.OK)
 
+
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
@@ -37,4 +48,3 @@ def test_empty_instance(dd_run_check):
     ):
         check = SupabaseCheck('supabase', {}, [{}])
         dd_run_check(check)
-

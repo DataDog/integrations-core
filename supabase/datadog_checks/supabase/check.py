@@ -4,10 +4,9 @@
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2  # noqa: F401
+
 from .config_models import ConfigMixin
-
 from .metrics import RENAME_LABELS_MAP, STORAGE_API_METRICS, SUPABASE_METRICS
-
 
 (
     PRIVILEGED_METRICS_NAMESPACE,
@@ -16,6 +15,7 @@ from .metrics import RENAME_LABELS_MAP, STORAGE_API_METRICS, SUPABASE_METRICS
     'supabase',
     'supabase.storage_api',
 ]
+
 
 class SupabaseCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
@@ -31,11 +31,10 @@ class SupabaseCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.scraper_configs = []
         privileged_metrics_endpoint = self.instance.get("privileged_metrics_endpoint")
         storage_api_endpoint = self.instance.get("storage_api_endpoint")
-        
+
         if not privileged_metrics_endpoint and not storage_api_endpoint:
             raise ConfigurationError(
-                "Must specify at least one of the following:"
-                "`privileged_metrics_endpoint` or `storage_api_endpoint`."
+                "Must specify at least one of the following:" "`privileged_metrics_endpoint` or `storage_api_endpoint`."
             )
 
         if privileged_metrics_endpoint:

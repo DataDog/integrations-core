@@ -26,7 +26,7 @@
             "host",
             "endpoint"
         ],
-        "name": "Supabase OpenMetrics endpoint health",
+        "name": "Supabase Storage API OpenMetrics endpoint health",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the Supabase Storage API OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]
