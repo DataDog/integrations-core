@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/supabase_metrics.txt:/usr/share/caddy/supabase_metrics
+      - ../fixtures/supabase-storage_api-metrics.txt:/usr/share/caddy/storage_api-metrics
