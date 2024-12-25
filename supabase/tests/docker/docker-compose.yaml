@@ -8,5 +8,5 @@ services:
       - "9000:9000"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ../fixtures/supabase_metrics.txt:/usr/share/caddy/supabase_metrics
-      - ../fixtures/supabase-storage_api-metrics.txt:/usr/share/caddy/storage_api-metrics
+      - ../fixtures/privileged_metrics.txt:/usr/share/caddy/privileged_metrics
+      - ../fixtures/storage_api_metrics.txt:/usr/share/caddy/storage_api_metrics
