@@ -25,7 +25,7 @@ class DuckdbCheck(AgentCheck):
         super(DuckdbCheck, self).__init__(name, init_config, instances)
 
         self.db_name = self.instance.get('db_name')
-        self.connection_attempt = self.instance.get('connection_attempt')
+        self.connection_attempt = int(self.instance.get('connection_attempt', 3))
 
         self.tags = self.instance.get('tags', [])
         self._connection = None
@@ -47,20 +47,20 @@ class DuckdbCheck(AgentCheck):
 
     def check(self, _):
         retry_delay = 5
-        max_retries= self.connection_attempt
+        max_retries = self.connection_attempt
         for attempt in range(1, max_retries + 1):
             try:
                 with self.connect() as conn:
                     if conn:
                         self._connection = conn
                         self._query_manager.execute()
+                        break
             except Exception as e:
                 self.log.warning('Unable to connect to the database:  "%s" , retrying...', e)
                 if attempt < max_retries:
                     time.sleep(retry_delay)
                 else:
                     self.log.error('Max connection retries reached')
-                    raise e
 
     def _execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
