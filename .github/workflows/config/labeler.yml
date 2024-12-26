@@ -525,6 +525,8 @@ integration/streamnative:
 - streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
+integration/supabase:
+- supabase/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/suricata:
