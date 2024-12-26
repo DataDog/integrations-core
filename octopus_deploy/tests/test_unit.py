@@ -2280,6 +2280,7 @@ def test_machines_metrics(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
             "test-tag",
         ],
     )
@@ -2291,7 +2292,59 @@ def test_machines_metrics(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
             "test-tag",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "tag",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+            "tag",
+        ],
+    )
+
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        0,
+        tags=[
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
         ],
     )
 
@@ -2310,6 +2363,7 @@ def test_machines_metrics(
             2,
             [
                 (['http://localhost:80/api/Spaces-1/machines'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/machines'], 2, 2),
             ],
             id='low limit',
         ),
@@ -2351,6 +2405,7 @@ def test_machines_pagination(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
             "test-tag",
         ],
     )
@@ -2362,6 +2417,58 @@ def test_machines_pagination(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
             "test-tag",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "tag",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+            "tag",
+        ],
+    )
+
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        0,
+        tags=[
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
         ],
     )
