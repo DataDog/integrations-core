@@ -250,6 +250,48 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         ],
     )
     aggregator.assert_metric(
+        'octopus_deploy.deployment.executing',
+        1,
+        count=1,
+        tags=[
+            'deployment_id:Deployments-18',
+            'release_version:0.0.1',
+            'environment_name:staging',
+            'task_state:Executing',
+            'project_name:my-project',
+            'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
+        ],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.queued',
+        0,
+        count=1,
+        tags=[
+            'deployment_id:Deployments-18',
+            'release_version:0.0.1',
+            'environment_name:staging',
+            'task_state:Executing',
+            'project_name:my-project',
+            'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
+        ],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.waiting',
+        1,
+        count=1,
+        tags=[
+            'deployment_id:Deployments-18',
+            'release_version:0.0.1',
+            'environment_name:staging',
+            'task_state:Executing',
+            'project_name:my-project',
+            'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
+        ],
+    )
+    aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         1,
         tags=[
@@ -300,6 +342,48 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'deployment_id:Deployments-19',
             'release_version:0.0.2',
             'environment_name:dev',
+            'server_node:None',
+        ],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.executing',
+        0,
+        count=1,
+        tags=[
+            'deployment_id:Deployments-19',
+            'release_version:0.0.2',
+            'environment_name:dev',
+            'task_state:Queued',
+            'project_name:test',
+            'space_name:Default',
+            'server_node:None',
+        ],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.queued',
+        1,
+        count=1,
+        tags=[
+            'deployment_id:Deployments-19',
+            'release_version:0.0.2',
+            'environment_name:dev',
+            'task_state:Queued',
+            'project_name:test',
+            'space_name:Default',
+            'server_node:None',
+        ],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.waiting',
+        0,
+        count=1,
+        tags=[
+            'deployment_id:Deployments-19',
+            'release_version:0.0.2',
+            'environment_name:dev',
+            'task_state:Queued',
+            'project_name:test',
+            'space_name:Default',
             'server_node:None',
         ],
     )

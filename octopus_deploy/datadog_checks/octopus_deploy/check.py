@@ -353,9 +353,11 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
         for task in tasks_json:
             task_id = task.get("Id")
-            task_name = task.get("Name")
             server_node = task.get("ServerNode")
             task_state = task.get("State")
+            pending_interruptions = task.get("HasPendingInterruptions")
+            is_queued = task_state == "Queued"
+            is_executing = task_state == "Executing"
             deployment_id = task.get("Arguments", {}).get("DeploymentId")
             environment_name, deployment_tags = self._get_deployment_tags(space_id, deployment_id)
             if environment_name in self._environments_cache.values():
@@ -372,15 +374,17 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 self.log.debug("Processing task id %s for project %s", task_id, project_name)
                 queued_time, executing_time, completed_time = self._calculate_task_times(task)
                 self.gauge("deployment.count", 1, tags=tags)
+                self.gauge("deployment.waiting", pending_interruptions, tags=tags)
+                self.gauge("deployment.queued", is_queued, tags=tags)
+                self.gauge("deployment.executing", is_executing, tags=tags)
                 self.gauge("deployment.queued_time", queued_time, tags=tags)
                 if executing_time != -1:
                     self.gauge("deployment.executing_time", executing_time, tags=tags)
-
                 if completed_time != -1:
                     self.gauge("deployment.completed_time", completed_time, tags=tags)
 
                     if self.logs_enabled:
-                        self.log.debug("Collecting logs for task %s, id: %s", task_name, task_id)
+                        self.log.debug("Collecting logs for task id: %s", task_id)
                         self._collect_deployment_logs(space_id, task_id, tags)
             else:
                 self.log.debug(
