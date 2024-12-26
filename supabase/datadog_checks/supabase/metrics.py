@@ -14,7 +14,9 @@ PRIVELEGED_METRICS = {
     'db_sql_connection_wait_duration_milliseconds': 'db.sql.connection_wait_duration',
     'db_sql_connection_wait': 'db.sql.connection_wait',
     'db_transmit_bytes': 'db.transmit_bytes',
-    'http_server_response_size_bytes': 'http.server.response_size_bytes',
+    'http_server_duration_milliseconds': 'http.server.duration',
+    'http_server_request_size_bytes': 'http.server.request.size_bytes',
+    'http_server_response_size_bytes': 'http.server.response.size_bytes',
     'http_status_codes': 'http.status_codes',
     'node_cpu_guest_seconds': 'node.cpu.guest_seconds',
     'node_cpu_seconds': 'node.cpu.seconds',
@@ -111,13 +113,35 @@ PRIVELEGED_METRICS = {
     'node_network_transmit_packets': 'node.network.transmit_packets',
     'node_scrape_collector_duration_seconds': 'node.scrape.collector_duration_seconds',
     'node_scrape_collector_success': 'node.scrape.collector_success',
-    'node_vmstat_oom_kill': 'node.vmstat.oom_kill',  # UNTYPED
-    'node_vmstat_pgfault': 'node.vmstat.pgfault',  # UNTYPED
-    'node_vmstat_pgmajfault': 'node.vmstat.pgmajfault',  # UNTYPED
-    'node_vmstat_pgpgin': 'node.vmstat.pgpgin',  # UNTYPED
-    'node_vmstat_pgpgout': 'node.vmstat.pgpgout',  # UNTYPED
-    'node_vmstat_pswpin': 'node.vmstat.pswpin',  # UNTYPED
-    'node_vmstat_pswpout': 'node.vmstat.pswpout',  # UNTYPED
+    # We force type since node.vmstat.* metrics are untyped
+    'node_vmstat_oom_kill': {
+        'name': 'node.vmstat.oom_kill',
+        'type': 'counter',
+    },
+    'node_vmstat_pgfault': {
+        'name': 'node.vmstat.pgfault',
+        'type': 'counter',
+    },
+    'node_vmstat_pgmajfault': {
+        'name': 'node.vmstat.pgmajfault',
+        'type': 'counter',
+    },
+    'node_vmstat_pgpgin': {
+        'name': 'node.vmstat.pgpgin',
+        'type': 'counter',
+    },
+    'node_vmstat_pgpgout': {
+        'name': 'node.vmstat.pgpgout',
+        'type': 'counter',
+    },
+    'node_vmstat_pswpin': {
+        'name': 'node.vmstat.pswpin',
+        'type': 'counter',
+    },
+    'node_vmstat_pswpout': {
+        'name': 'node.vmstat.pswpout',
+        'type': 'counter',
+    },
     'pg_database_size_bytes': 'pg_database_size.bytes',
     'pg_database_size_mb': 'pg_database_size.mb',
     'pg_exporter_last_scrape_duration_seconds': 'pg_exporter.last_scrape_duration_seconds',
@@ -125,8 +149,9 @@ PRIVELEGED_METRICS = {
     'pg_exporter_scrapes': 'pg_exporter.scrapes',
     'pg_exporter_user_queries_load_error': 'pg_exporter.user_queries_load_error',
     'pg_ls_archive_statusdir_wal_pending_count': 'pg_ls.archive_statusdir_wal_pending_count',
-    'pg_scrape_collector_duration_seconds': 'pg_scrape_collector.duration_seconds',  # GAUGE
+    'pg_scrape_collector_duration_seconds': 'pg_scrape_collector.duration_seconds',
     'pg_scrape_collector_success': 'pg_scrape_collector.success',
+    'pg_settings_default_transaction_read_only': 'pg_settings.default_transaction_read_only',
     'pg_stat_activity_xact_runtime': 'pg_stat_activity.xact_runtime',
     'pg_stat_bgwriter_buffers_alloc': 'pg_stat_bgwriter.buffers_alloc',
     'pg_stat_bgwriter_buffers_backend_fsync': 'pg_stat_bgwriter.buffers_backend_fsync',
@@ -187,7 +212,9 @@ PRIVELEGED_METRICS = {
     'promhttp_metric_handler_requests_in_flight': 'promhttp_metric_handler.requests_in_flight',
     'promhttp_metric_handler_requests': 'promhttp_metric_handler.requests',
     'realtime_postgres_changes_client_subscriptions': 'realtime_postgres_changes.client_subscriptions',
-    'realtime_postgres_changes_subscriptions': 'realtime_postgres_changes.total_subscriptions',
+    'realtime_postgres_changes_total_subscriptions': 'realtime_postgres_changes.total_subscriptions',
+    'replication_slots_max_lag_bytes': 'pg_replication_slots.max_lag_bytes',
+    'runtime_uptime_milliseconds': {'name': 'runtime.uptime_milliseconds', 'type': 'time_elapsed'},
     'storage_storage_size_mb': 'storage.storage_size',
     'supabase_usage_metrics_user_queries': 'usage_metrics.user_queries',
 }
@@ -197,8 +224,8 @@ STORAGE_API_METRICS = [
         'storage_api_upload_started': 'upload_started',
         'storage_api_upload_success': 'upload_success',
         'storage_api_database_query_performance': 'database_query_performance',
+        'storage_api_queue_job_scheduled': 'queue.job_scheduled',
         'storage_api_queue_job_scheduled_time': 'queue.job_scheduled_time',
-        'storage_api_qeue_job_scheduled': 'queue.job_scheduled',
         'storage_api_queue_job_completed': 'queue.job_completed',
         'storage_api_queue_job_retry_failed': 'queue.job_retry_failed',
         'storage_api_queue_job_error': 'queue.job_error',
@@ -209,9 +236,11 @@ STORAGE_API_METRICS = [
         'storage_api_http_pool_free_sockets': 'http_pool.free_sockets',
         'storage_api_http_pool_requests': 'http_pool.requests',
         'storage_api_http_pool_errors': 'http_pool.errors',
+        'storage_api_http_request_summary_seconds': 'http_request.summary_seconds',
         'storage_api_http_request_duration_seconds': 'http_request.duration_seconds',
-        'storage_api_process_cpu_user_seconds': 'process_cpu_user_seconds',
+        'storage_api_process_cpu_seconds': 'process_cpu.seconds',
         'storage_api_process_cpu_system_seconds': 'process_cpu.system.seconds',
+        'storage_api_process_cpu_user_seconds': 'process_cpu.user.seconds',
         'storage_api_process_start_time_seconds': {
             'name': 'process.uptime.seconds',
             'type': 'time_elapsed',
@@ -235,6 +264,7 @@ STORAGE_API_METRICS = [
         'storage_api_nodejs_active_handles_total': 'nodejs.active_handles.total',
         'storage_api_nodejs_active_requests': 'nodejs.active_requests',
         'storage_api_nodejs_active_requests_total': 'nodejs.active_requests.total',
+        'storage_api_nodejs_gc_duration_seconds': 'nodejs.gc_duration.seconds',
         'storage_api_nodejs_heap_size_total_bytes': 'nodejs.heap_size.total_bytes',
         'storage_api_nodejs_heap_size_used_bytes': 'nodejs.heap_size.used_bytes',
         'storage_api_nodejs_external_memory_bytes': 'nodejs.external_memory.bytes',

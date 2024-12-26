@@ -655,7 +655,7 @@ go_memstats_alloc_bytes_total{supabase_project_ref="xdgggqomhgiilfjtepts",servic
 pg_stat_bgwriter_buffers_backend_total{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="postgresql",server="localhost:5432"} 9360
 # HELP replication_slots_max_lag_bytes Max Replication Lag
 # TYPE replication_slots_max_lag_bytes gauge
-replication_slots_max_lag_bytes{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="postgresql",server="localhost:5432"} NaN
+replication_slots_max_lag_bytes{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="postgresql",server="localhost:5432"} 1000
 # HELP pg_stat_activity_xact_runtime Transaction Runtime
 # TYPE pg_stat_activity_xact_runtime gauge
 pg_stat_activity_xact_runtime{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="postgresql",server="localhost:5432"} 0
