@@ -116,11 +116,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 self._db = None
 
     def run_job(self):
-        start = time()
+        start = time.time()
         self.collect_per_statement_metrics()
         self._check.gauge(
             "dd.mysql.statement_metrics.elapsed_ms",
-            time() - start,
+            time.time() - start,
             tags=self._check.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
