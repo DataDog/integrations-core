@@ -85,6 +85,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self.log = get_check_logger()
         self._state = StatementMetrics()
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._last_seen = '1970-01-01'
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=self._config.full_statement_text_cache_max_size,
@@ -124,7 +125,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             tags=self._check.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def collect_per_statement_metrics(self):
@@ -179,6 +179,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     def _collect_per_statement_metrics(self, tags):
         # type: () -> List[PyMysqlRow]
+
+        self._get_statement_count(tags)
+
         monotonic_rows = self._query_summary_per_statement()
         self._check.gauge(
             "dd.mysql.statement_metrics.rows",
@@ -186,12 +189,24 @@ class MySQLStatementMetrics(DBMAsyncJob):
             tags=tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-
         monotonic_rows = self._add_digest_text(monotonic_rows)
         monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
         return rows
+
+    def _get_statement_count(self, tags):
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+            cursor.execute("SELECT count(*) AS count from performance_schema.events_statements_summary_by_digest")
+
+            rows = cursor.fetchall() or []  # type: ignore
+            if rows:
+                self._check.gauge(
+                    "dd.mysql.statement_metrics.total_rows",
+                    rows[0]['count'],
+                    tags=tags + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
 
     def _query_summary_per_statement(self):
         # type: () -> List[PyMysqlRow]
@@ -216,12 +231,15 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_no_index_used`,
                    `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
+            WHERE LAST_SEEN > %s
             """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            cursor.execute(sql_statement_summary)
+            cursor.execute(sql_statement_summary, [self._last_seen])
 
             rows = cursor.fetchall() or []  # type: ignore
+
+        self._last_seen = max(row['last_seen'] for row in rows)
 
         return rows
 
@@ -265,7 +283,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
         """
         Filter out rows that are EXPLAIN statements
         """
-        return [row for row in rows if row['digest_text'] is None or not row['digest_text'].lower().startswith('explain')]
+        return [
+            row for row in rows if row['digest_text'] is None or not row['digest_text'].lower().startswith('explain')
+        ]
 
     def _normalize_queries(self, rows):
         normalized_rows = []
