@@ -14,6 +14,10 @@ PRIVELEGED_METRICS = {
     'db_sql_connection_wait_duration_milliseconds': 'db.sql.connection_wait_duration',
     'db_sql_connection_wait': 'db.sql.connection_wait',
     'db_transmit_bytes': 'db.transmit_bytes',
+    'go_memstats_last_gc_time_seconds': {
+        'name': 'go.memstats.last_gc_time.seconds',
+        'type': 'time_elapsed',
+    },
     'http_server_duration_milliseconds': 'http.server.duration',
     'http_server_request_size_bytes': 'http.server.request.size_bytes',
     'http_server_response_size_bytes': 'http.server.response.size_bytes',
