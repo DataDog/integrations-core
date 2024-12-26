@@ -48,7 +48,7 @@ class DuckdbCheck(AgentCheck):
     def check(self, _):
         retry_delay = 5
         max_retries= self.connection_attempt
-        for attempt in range(1, self.connection_attempt + 1):
+        for attempt in range(1, max_retries + 1):
             try:
                 with self.connect() as conn:
                     if conn:
