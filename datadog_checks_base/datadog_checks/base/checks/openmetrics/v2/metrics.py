@@ -28,7 +28,10 @@ DEFAULT_GO_METRICS = {
     'process_max_fds': 'process.max_fds',
     'process_open_fds': 'process.open_fds',
     'process_resident_memory_bytes': 'process.resident_memory.bytes',
-    'process_start_time_seconds': 'process.start_time.seconds',
+    'process_start_time_seconds': {
+        'name': 'process.start_time.seconds',
+        'type': 'time_elapsed',
+    },
     'process_virtual_memory_bytes': 'process.virtual_memory.bytes',
     'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
 }
