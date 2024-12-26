@@ -31,7 +31,7 @@ class VersionUtils(object):
     @staticmethod
     def get_raw_version(db):
         with db as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
                 return raw_version
@@ -40,7 +40,7 @@ class VersionUtils(object):
         if self._seen_aurora_exception:
             return False
         with db as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 # This query will pollute PG logs in non aurora versions,
                 # but is the only reliable way to detect aurora
                 try:

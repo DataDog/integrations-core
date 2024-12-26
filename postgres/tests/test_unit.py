@@ -4,7 +4,7 @@
 import copy
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from pytest import fail
 from semver import VersionInfo
@@ -125,9 +125,9 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     check = integration_check(pg_instance)
     try:
         check.db_pool.get_connection(pg_instance['dbname'], 100)
-    except psycopg2.ProgrammingError as e:
+    except psycopg.ProgrammingError as e:
         fail(str(e))
-    except psycopg2.OperationalError:
+    except psycopg.OperationalError:
         # could not connect to server because there is no server running
         pass
 

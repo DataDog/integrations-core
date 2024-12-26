@@ -3,13 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
 import re
-import select
 import time
+import select
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
-import psycopg2
+import psycopg
+from psycopg import ClientCursor
 import pytest
 from dateutil import parser
 from semver import VersionInfo
@@ -114,7 +115,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         password = "bob"
         dbname = "datadog_test"
         if dbname not in connections:
-            connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor)
 
         args = ('two',)
         if idx == 1:
@@ -230,7 +231,7 @@ def test_statement_metrics(
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
             if dbname not in connections:
-                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
 
     check = integration_check(dbm_instance)
@@ -408,7 +409,7 @@ def test_statement_metrics_cloud_metadata(
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
             if dbname not in connections:
-                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
 
     check = integration_check(dbm_instance)
@@ -448,7 +449,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
             if dbname not in connections:
-                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
 
     check = integration_check(dbm_instance)
@@ -518,7 +519,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
 @pytest.fixture
 def bob_conn():
-    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
+    conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
     yield conn
     conn.close()
 
@@ -575,42 +576,42 @@ failed_explain_test_repeat_count = 5
     [
         (
             "select * from fake_table",
-            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from fake_schema.fake_table",
-            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-parameterized_query-<class 'psycopg.errors.UndefinedParameter'>",
             None,
             1,
             None,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
-            "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
+            "error:explain-database_error-<class 'psycopg.errors.SyntaxError'>",
             None,
             1,
             None,
         ),
         (
             "select * from persons",
-            "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
+            "error:explain-database_error-<class 'psycopg.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
             None,
         ),
         (
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
-            "error:explain-database_error-<class 'psycopg2.errors.InvalidCursorDefinition'>",
+            "error:explain-database_error-<class 'psycopg.errors.InvalidCursorDefinition'>",
             None,
             1,
             None,
@@ -705,7 +706,7 @@ def test_failed_explain_handling(
             "SELECT * FROM kennel WHERE id = %s",
             123,
             "error:explain-no_plans_possible",
-            [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
+            [{'code': 'invalid_schema', 'message': "<class 'psycopg.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
             [],
         ),
@@ -715,8 +716,8 @@ def test_failed_explain_handling(
             "dogs_nofunc",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-failed_function-<class 'psycopg2.errors.UndefinedFunction'>",
-            [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
+            "error:explain-failed_function-<class 'psycopg.errors.UndefinedFunction'>",
+            [{'code': 'failed_function', 'message': "<class 'psycopg.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
             [
                 "Unable to collect execution plans in dbname=dogs_nofunc. Check that the function "
@@ -784,8 +785,8 @@ def test_statement_samples_collect(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
     # leave connection open until after the check has run to ensure we're able to see the query in
@@ -893,7 +894,7 @@ def test_statement_metadata(
 
     check = integration_check(dbm_instance)
     check._connect()
-    conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
+    conn = psycopg.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
     cursor = conn.cursor()
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -1083,22 +1084,22 @@ def test_activity_snapshot_collection(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password, async_=1)
-    blocking_conn = psycopg2.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password)
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, async_=1)
+    blocking_conn = psycopg.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password)
 
     def wait(conn):
         while True:
             state = conn.poll()
-            if state == psycopg2.extensions.POLL_OK:
+            if state == psycopg.pq.PollingStatus.OK:
                 break
-            elif state == psycopg2.extensions.POLL_WRITE:
+            elif state == psycopg.pq.PollingStatus.WRITING:
                 select.select([], [conn.fileno()], [])
-            elif state == psycopg2.extensions.POLL_READ:
+            elif state == psycopg.pq.PollingStatus.READING:
                 select.select([conn.fileno()], [], [])
             else:
-                raise psycopg2.OperationalError("poll() returned %s" % state)
+                raise psycopg.OperationalError("poll() returned %s" % state)
 
-    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
     # leave connection open until after the check has run to ensure we're able to see the query in
@@ -1354,15 +1355,15 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
     [
         (
             "select * from fake_table",
-            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg.errors.UndefinedTable'>",
             DBExplainError.undefined_table,
-            "<class 'psycopg2.errors.UndefinedTable'>",
+            "<class 'psycopg.errors.UndefinedTable'>",
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-parameterized_query-<class 'psycopg.errors.UndefinedParameter'>",
             DBExplainError.parameterized_query,
-            "<class 'psycopg2.errors.UndefinedParameter'>",
+            "<class 'psycopg.errors.UndefinedParameter'>",
         ),
         (
             "SELECT city as city0, city as city1, city as city2, city as city3, "
@@ -1470,7 +1471,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
 
     connections = []
     for user, password, dbname, query, arg in SAMPLE_QUERIES:
-        conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+        conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
         conn.cursor().execute(query, (arg,))
         connections.append(conn)
 
@@ -1689,7 +1690,7 @@ def test_disabled_activity_or_explain_plans(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
 
     try:
         conn.autocommit = True
@@ -1786,7 +1787,7 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
-class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState):
+class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
     """
     A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
     has it as read-only and not settable at construction-time
@@ -1805,7 +1806,7 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
         return self.pg_error
 
 
-class UndefinedTable(psycopg2.errors.UndefinedTable):
+class UndefinedTable(psycopg.errors.UndefinedTable):
     """
     A fake UndefinedTable that allows setting pg_error on construction since UndefinedTable
     has it as read-only and not settable at construction-time
@@ -1860,7 +1861,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             ],
         ),
         (
-            psycopg2.errors.DatabaseError('connection reset'),
+            psycopg.errors.DatabaseError('connection reset'),
             [],
             'error:database-DatabaseError',
             [
@@ -1996,7 +1997,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
             if dbname not in connections:
-                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
 
     check = integration_check(dbm_instance)
