@@ -179,6 +179,10 @@ PRIVELEGED_METRICS = {
     'postgres_exporter_config_last_reload_success_timestamp_seconds': 'postgres_exporter.config_last_reload_success_timestamp_seconds',  # noqa: E501
     'postgres_exporter_config_last_reload_successful': 'postgres_exporter.config_last_reload_successful',
     'postgresql_restarts': 'postgresql.restarts',
+    'process_start_time_seconds': {
+        'name': 'process.start_time.seconds',
+        'type': 'time_elapsed',
+    },
     'process_runtime_go_mem_live_objects': 'process.runtime.go_mem_live_objects',
     'promhttp_metric_handler_requests_in_flight': 'promhttp_metric_handler.requests_in_flight',
     'promhttp_metric_handler_requests': 'promhttp_metric_handler.requests',
