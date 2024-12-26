@@ -308,8 +308,8 @@ class TestTLSContext:
                 id="Construct ciphers with no config",
             ),
             pytest.param(
-                {'tls_ciphers': ['PSK-CAMELLIA128-SHA256', 'DHE-PSK-CAMELLIA128-SHA256']},
-                'PSK-CAMELLIA128-SHA256:DHE-PSK-CAMELLIA128-SHA256',
+                {'tls_ciphers': ['TLS_RSA_WITH_SEED_CBC_SHA', 'TLS_SM4_GCM_SM3',]},
+                'TLS_RSA_WITH_SEED_CBC_SHA:TLS_SM4_GCM_SM3',
                 id='Construct ciphers with specific ciphers',
             ),
             pytest.param(
