@@ -70,10 +70,18 @@ class StatementMetrics:
             #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
             #    avoids having to send a lot of unnecessary metrics.
 
+
             diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
+
+            # if row['query_signature'] == '94caeb4c54f97849':
+            #     logger.warning("row: %s", row)
+            #     logger.warning("prev: %s", prev)
+            #     logger.warning("diffed: %s", diffed_row)
 
             # Check for negative values, but only in the columns used for metrics
             if any(diffed_row[k] < 0 for k in metric_columns):
+                # if row['query_signature'] == '94caeb4c54f97849':
+                #     logger.warning("- value for %s in %s", row_key, diffed_row)
                 # A "break" might be expected here instead of "continue," but there are cases where a subset of rows
                 # are removed. To avoid situations where all results are discarded every check run, we err on the side
                 # of potentially including truncated rows that exceed previous run counts.
@@ -81,12 +89,17 @@ class StatementMetrics:
 
             # No changes to the query; no metric needed
             if all(diffed_row[k] == 0 for k in metric_columns):
+                # if row['query_signature'] == '94caeb4c54f97849':
+                #     logger.warning("0 value for %s in %s", row_key, diffed_row)
                 continue
 
             result.append(diffed_row)
 
         self._previous_statements.clear()
         self._previous_statements = merged_rows
+        # for _, row in self._previous_statements.items():
+        #     if row['query_signature'] == '94caeb4c54f97849':
+        #         logger.warning("setting prev: %s", row)
 
         return result
 

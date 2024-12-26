@@ -154,8 +154,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = self._collect_per_statement_metrics(tags)
         if not rows:
             return
+        self.log.info("_rows_to_fqt_events start")
         for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+        self.log.info("_rows_to_fqt_events end")
+        self.log.info("payload start")
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -176,23 +179,34 @@ class MySQLStatementMetrics(DBMAsyncJob):
             tags=tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
+        self.log.info("payload end")
 
     def _collect_per_statement_metrics(self, tags):
         # type: () -> List[PyMysqlRow]
 
         self._get_statement_count(tags)
 
+        self.log.info("_query_summary_per_statement start")
         monotonic_rows = self._query_summary_per_statement()
+        self.log.info("_query_summary_per_statement end")
         self._check.gauge(
             "dd.mysql.statement_metrics.rows",
             len(monotonic_rows),
             tags=tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        monotonic_rows = self._add_digest_text(monotonic_rows)
+        # self.log.info("_add_digest_text start")
+        # monotonic_rows = self._add_digest_text(monotonic_rows)
+        # self.log.info("_add_digest_text end")
+        self.log.info("_filter_query_rows start")
         monotonic_rows = self._filter_query_rows(monotonic_rows)
+        self.log.info("_filter_query_rows end")
+        self.log.info("_normalize_queries start")
         monotonic_rows = self._normalize_queries(monotonic_rows)
+        self.log.info("_normalize_queries end")
+        self.log.info("compute_derivative_rows start")
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
+        self.log.info("compute_derivative_rows end")
         return rows
 
     def _get_statement_count(self, tags):
@@ -219,6 +233,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         sql_statement_summary = """\
             SELECT `schema_name`,
                    `digest`,
+                   `digest_text`,
                    `count_star`,
                    `sum_timer_wait`,
                    `sum_lock_time`,
@@ -229,9 +244,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_select_scan`,
                    `sum_select_full_join`,
                    `sum_no_index_used`,
-                   `sum_no_good_index_used`
+                   `sum_no_good_index_used`,
+                   `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
-            WHERE LAST_SEEN > %s
+            WHERE `last_seen` >= %s
             """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
@@ -239,7 +255,13 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
             rows = cursor.fetchall() or []  # type: ignore
 
-        self._last_seen = max(row['last_seen'] for row in rows)
+        # self.log.warning("Rows: %s", len(rows))
+        if rows:
+            self._last_seen = max(row['last_seen'] for row in rows)
+            # self.log.warning("Last seen: %s", self._last_seen)
+            # for row in rows:
+            #     if row['digest'] == '6b5a1b14bbeef4253f3d88bd6d2f41cf' or  row['digest'] == '98c344ecca8effb370ff4296412a2d73': 
+            #         self.log.warning("Row: %s", row)
 
         return rows
 
@@ -270,6 +292,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 digest_rows = cursor.fetchall() or []
                 for row in digest_rows:
                     self._digest_text_cache[row['digest']] = row['digest_text']
+                    # self.log.warning("Row digest: %s %s", row['digest'], row['digest_text'])
 
         for row in rows:
             row = dict(copy.copy(row))
@@ -304,6 +327,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_row['dd_comments'] = metadata.get('comments', None)
+            # if row['digest'] == '6b5a1b14bbeef4253f3d88bd6d2f41cf':
+            #     self.log.warning("Normalized Row: %s", normalized_row)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
