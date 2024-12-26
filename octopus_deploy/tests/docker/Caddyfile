@@ -124,7 +124,15 @@
         rewrite * /GET/api/octopusservernodes/skip=0/take=30/response.json
         file_server
     }
-        @get_tasks_1844 {
+    @get_machines {
+        method GET
+        path /api/Spaces-1/machines
+    }
+    route @get_machines {
+        rewrite * /GET/api/Spaces-1/machines/skip=0/take=30/response.json
+        file_server
+    }
+    @get_tasks_1844 {
         method GET
         path /api/Spaces-1/tasks/ServerTasks-1844/details
     }
