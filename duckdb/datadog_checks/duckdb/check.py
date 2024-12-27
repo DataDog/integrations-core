@@ -4,17 +4,17 @@
 import json
 import os
 import re
+import time
 from contextlib import closing, contextmanager
 from copy import deepcopy
-import time
 
 import duckdb
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.db import QueryManager
 
 from .queries import DEFAULT_QUERIES
+
 
 class DuckdbCheck(AgentCheck):
 
@@ -115,7 +115,7 @@ class DuckdbCheck(AgentCheck):
             finally:
                 if conn:
                     conn.close()
-        else: 
+        else:
             self.log.error('Database file not found')
 
     def initialize_config(self):
