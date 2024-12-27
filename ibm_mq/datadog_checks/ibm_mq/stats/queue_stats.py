@@ -48,6 +48,6 @@ class QueueInfo(object):
 
 
 class QueueStats(BaseStats):
-    def __init__(self, raw_message):
-        super(QueueStats, self).__init__(raw_message)
+    def __init__(self, raw_message, timezone=None):
+        super(QueueStats, self).__init__(raw_message, timezone=timezone)
         self.queues = [QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA]]
