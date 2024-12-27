@@ -57,6 +57,8 @@ PRIVILEGED_METRICS = [
     'supabase.go.gc.duration.seconds.quantile',
     'supabase.go.gc.duration.seconds.sum',
     'supabase.go.goroutines',
+    'supabase.go.memstats.alloc_bytes',
+    'supabase.go.memstats.alloc_bytes.count',
     'supabase.go.memstats.buck_hash.sys_bytes',
     'supabase.go.memstats.frees.count',
     'supabase.go.memstats.gc.sys_bytes',
