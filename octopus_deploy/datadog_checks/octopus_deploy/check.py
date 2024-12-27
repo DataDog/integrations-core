@@ -49,7 +49,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._environments_cache = {}
         self._deployments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._releases_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
-        self._base_tags = self.instance.get("tags", [])
+        endpoint = self.instance.get("octopus_endpoint")
+        octopus_server_tag = [f"octopus_server:{endpoint}"]
+        self._base_tags = self.instance.get("tags", []) + octopus_server_tag
         self.collect_events = self.instance.get("collect_events", False)
 
     def check(self, _):

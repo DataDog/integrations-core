@@ -112,7 +112,11 @@ def test_one_space(get_current_datetime, dd_run_check, aggregator):
 
     dd_run_check(check)
 
-    aggregator.assert_metric('octopus_deploy.space.count', 1, tags=['space_id:Spaces-1', 'space_name:Default'])
+    aggregator.assert_metric(
+        'octopus_deploy.space.count',
+        1,
+        tags=['octopus_server:http://localhost:80', 'space_id:Spaces-1', 'space_name:Default'],
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -127,17 +131,32 @@ def test_project_groups(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
         1,
-        tags=['project_group_id:ProjectGroups-1', 'project_group_name:Default Project Group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
+            'space_name:Default',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
         1,
-        tags=['project_group_id:ProjectGroups-2', 'project_group_name:test-group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-2',
+            'project_group_name:test-group',
+            'space_name:Default',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
         1,
-        tags=['project_group_id:ProjectGroups-3', 'project_group_name:hello', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-3',
+            'project_group_name:hello',
+            'space_name:Default',
+        ],
     )
 
 
@@ -154,6 +173,7 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.project.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'project_id:Projects-1',
             'project_name:test-api',
             'project_group_name:Default Project Group',
@@ -164,6 +184,7 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.project.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'project_id:Projects-2',
             'project_name:my-project',
             'project_group_name:Default Project Group',
@@ -174,6 +195,7 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.project.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'project_id:Projects-3',
             'project_name:test',
             'project_group_name:Default Project Group',
@@ -183,7 +205,13 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.project.count',
         1,
-        tags=['project_id:Projects-4', 'project_name:hi', 'project_group_name:test-group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_id:Projects-4',
+            'project_name:hi',
+            'project_group_name:test-group',
+            'space_name:Default',
+        ],
     )
 
 
@@ -200,6 +228,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -213,6 +242,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.queued_time',
         30,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -226,6 +256,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.executing_time',
         150,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -240,6 +271,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -254,6 +286,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         1,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'deployment_id:Deployments-18',
             'release_version:0.0.1',
             'environment_name:staging',
@@ -268,6 +301,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'deployment_id:Deployments-18',
             'release_version:0.0.1',
             'environment_name:staging',
@@ -282,6 +316,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         1,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'deployment_id:Deployments-18',
             'release_version:0.0.1',
             'environment_name:staging',
@@ -295,6 +330,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -308,6 +344,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.queued_time',
         60,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -322,6 +359,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -336,6 +374,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -350,6 +389,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'deployment_id:Deployments-19',
             'release_version:0.0.2',
             'environment_name:dev',
@@ -364,6 +404,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         1,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'deployment_id:Deployments-19',
             'release_version:0.0.2',
             'environment_name:dev',
@@ -378,6 +419,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'deployment_id:Deployments-19',
             'release_version:0.0.2',
             'environment_name:dev',
@@ -400,6 +442,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'project_name:test',
             'space_name:Default',
             'server_node:None',
@@ -413,6 +456,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'project_name:my-project',
             'server_node:OctopusServerNodes-50c3dfbarc82',
@@ -433,6 +477,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -446,6 +491,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.queued_time',
         110,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -459,6 +505,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.executing_time',
         50,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -472,6 +519,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.completed_time',
         5,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -485,6 +533,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -498,6 +547,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.queued_time',
         90,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -511,6 +561,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.executing_time',
         54,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -524,6 +575,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.completed_time',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -536,6 +588,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -549,6 +602,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.queued_time',
         18,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -562,6 +616,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.executing_time',
         41,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -575,6 +630,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.completed_time',
         14,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -627,8 +683,15 @@ def test_discovery_spaces(get_current_datetime, dd_run_check, aggregator):
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
 
-    aggregator.assert_metric('octopus_deploy.space.count', tags=['space_name:Default', 'space_name:First'], count=0)
-    aggregator.assert_metric('octopus_deploy.space.count', tags=['space_id:Spaces-2', 'space_name:Second'])
+    aggregator.assert_metric(
+        'octopus_deploy.space.count',
+        tags=['octopus_server:http://localhost:80', 'space_name:Default', 'space_name:First'],
+        count=0,
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.space.count',
+        tags=['octopus_server:http://localhost:80', 'space_id:Spaces-2', 'space_name:Second'],
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -647,18 +710,33 @@ def test_discovery_default_project_groups(get_current_datetime, dd_run_check, ag
 
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
-        tags=['project_group_id:ProjectGroups-1', 'project_group_name:Default Project Group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
+            'space_name:Default',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
-        tags=['project_group_id:ProjectGroups-2', 'project_group_name:test-group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-2',
+            'project_group_name:test-group',
+            'space_name:Default',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
         1,
-        tags=['project_group_id:ProjectGroups-3', 'project_group_name:hello', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-3',
+            'project_group_name:hello',
+            'space_name:Default',
+        ],
     )
 
 
@@ -686,18 +764,33 @@ def test_discovery_space_project_groups(get_current_datetime, dd_run_check, aggr
 
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
-        tags=['project_group_id:ProjectGroups-1', 'project_group_name:Default Project Group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
+            'space_name:Default',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
-        tags=['project_group_id:ProjectGroups-2', 'project_group_name:test-group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-2',
+            'project_group_name:test-group',
+            'space_name:Default',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
         1,
-        tags=['project_group_id:ProjectGroups-3', 'project_group_name:hello', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-3',
+            'project_group_name:hello',
+            'space_name:Default',
+        ],
     )
 
 
@@ -719,6 +812,7 @@ def test_discovery_default_projects(get_current_datetime, dd_run_check, aggregat
         'octopus_deploy.project.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'project_id:Projects-1',
             'project_name:test-api',
             'project_group_name:Default Project Group',
@@ -728,6 +822,7 @@ def test_discovery_default_projects(get_current_datetime, dd_run_check, aggregat
     aggregator.assert_metric(
         'octopus_deploy.project.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'project_id:Projects-2',
             'project_name:my-project',
             'project_group_name:Default Project Group',
@@ -738,6 +833,7 @@ def test_discovery_default_projects(get_current_datetime, dd_run_check, aggregat
     aggregator.assert_metric(
         'octopus_deploy.project.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'project_name:test',
             'project_name:test',
             'project_group_name:Default Project Group',
@@ -747,7 +843,13 @@ def test_discovery_default_projects(get_current_datetime, dd_run_check, aggregat
     )
     aggregator.assert_metric(
         'octopus_deploy.project.count',
-        tags=['project_id:Projects-4', 'project_name:hi', 'project_group_name:test-group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_id:Projects-4',
+            'project_name:hi',
+            'project_group_name:test-group',
+            'space_name:Default',
+        ],
         count=0,
     )
 
@@ -784,18 +886,33 @@ def test_discovery_space_project_group_projects(get_current_datetime, dd_run_che
 
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
-        tags=['project_group_id:ProjectGroups-1', 'project_group_name:Default Project Group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
+            'space_name:Default',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
-        tags=['project_group_id:ProjectGroups-2', 'project_group_name:test-group', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-2',
+            'project_group_name:test-group',
+            'space_name:Default',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project_group.count',
         1,
-        tags=['project_group_id:ProjectGroups-3', 'project_group_name:hello', 'space_name:Default'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'project_group_id:ProjectGroups-3',
+            'project_group_name:hello',
+            'space_name:Default',
+        ],
     )
 
 
@@ -939,6 +1056,7 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
         1,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -948,6 +1066,7 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
         5,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -957,6 +1076,7 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
         0,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -992,6 +1112,7 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
         1,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -1001,6 +1122,7 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
         5,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -1010,6 +1132,7 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
         5,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -1081,12 +1204,19 @@ def test_environment_metrics(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1097,12 +1227,19 @@ def test_environment_metrics(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1113,12 +1250,19 @@ def test_environment_metrics(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=1,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1138,12 +1282,19 @@ def test_environments_discovery_one_include(get_current_datetime, dd_run_check, 
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1155,12 +1306,19 @@ def test_environments_discovery_one_include(get_current_datetime, dd_run_check, 
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1172,12 +1330,19 @@ def test_environments_discovery_one_include(get_current_datetime, dd_run_check, 
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=1,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1202,12 +1367,19 @@ def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, 
         'octopus_deploy.environment.count',
         value=1,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1219,12 +1391,19 @@ def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, 
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1236,12 +1415,19 @@ def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, 
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=1,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1266,13 +1452,20 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
         'octopus_deploy.environment.count',
         value=1,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1284,13 +1477,20 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1302,13 +1502,20 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=1,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1350,13 +1557,20 @@ def test_environments_metrics_http_failure(get_current_datetime, dd_run_check, a
         'octopus_deploy.environment.count',
         value=1,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.count',
         value=1,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1368,13 +1582,20 @@ def test_environments_metrics_http_failure(get_current_datetime, dd_run_check, a
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.use_guided_failure',
         value=0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1386,13 +1607,20 @@ def test_environments_metrics_http_failure(get_current_datetime, dd_run_check, a
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=1,
         count=0,
-        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+        tags=[
+            'octopus_server:http://localhost:80',
+            'space_name:Default',
+            'environment_name:dev',
+            'environment_slug:dev',
+            'environment_id:Environments-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.environment.allow_dynamic_infrastructure',
         value=0,
         count=0,
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'environment_name:staging',
             'environment_slug:staging',
@@ -1429,6 +1657,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'project_name:test',
             'space_name:Default',
             'server_node:None',
@@ -1442,6 +1671,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'project_name:my-project',
             'server_node:OctopusServerNodes-50c3dfbarc82',
@@ -1462,6 +1692,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1475,6 +1706,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.queued_time',
         110,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1488,6 +1720,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.executing_time',
         50,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1501,6 +1734,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.completed_time',
         5,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1514,6 +1748,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1527,6 +1762,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.queued_time',
         90,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1540,6 +1776,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.executing_time',
         54,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1553,6 +1790,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.completed_time',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1565,6 +1803,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1578,6 +1817,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.queued_time',
         18,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1591,6 +1831,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.executing_time',
         41,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1604,6 +1845,7 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.completed_time',
         14,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1645,6 +1887,7 @@ def test_deployment_metrics_deployments_http_failure(
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'project_name:test',
             'space_name:Default',
             'server_node:None',
@@ -1658,6 +1901,7 @@ def test_deployment_metrics_deployments_http_failure(
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'space_name:Default',
             'project_name:my-project',
             'server_node:OctopusServerNodes-50c3dfbarc82',
@@ -1678,6 +1922,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1691,6 +1936,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.queued_time',
         110,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1704,6 +1950,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.executing_time',
         50,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1717,6 +1964,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.completed_time',
         5,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1730,6 +1978,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.count',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1744,6 +1993,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.queued_time',
         90,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1758,6 +2008,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.executing_time',
         54,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1772,6 +2023,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.completed_time',
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1785,6 +2037,7 @@ def test_deployment_metrics_deployments_http_failure(
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1798,6 +2051,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.queued_time',
         18,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1811,6 +2065,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.executing_time',
         41,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1824,6 +2079,7 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.completed_time',
         14,
         tags=[
+            'octopus_server:http://localhost:80',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1934,6 +2190,7 @@ def test_paginated_limit_octopusservernodes(
         1,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -1943,6 +2200,7 @@ def test_paginated_limit_octopusservernodes(
         5,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -1952,6 +2210,7 @@ def test_paginated_limit_octopusservernodes(
         0,
         count=1,
         tags=[
+            'octopus_server:http://localhost:80',
             'server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n',
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
@@ -2276,6 +2535,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2288,6 +2548,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.is_healthy",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2300,6 +2561,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-2",
             "machine_name:test-machine1",
             "machine_slug:test-machine1",
@@ -2313,6 +2575,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.is_healthy",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-2",
             "machine_name:test-machine1",
             "machine_slug:test-machine1",
@@ -2327,6 +2590,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2339,6 +2603,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.is_healthy",
         0,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2401,6 +2666,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2413,6 +2679,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.is_healthy",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2425,6 +2692,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-2",
             "machine_name:test-machine1",
             "machine_slug:test-machine1",
@@ -2438,6 +2706,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.is_healthy",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-2",
             "machine_name:test-machine1",
             "machine_slug:test-machine1",
@@ -2452,6 +2721,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            'octopus_server:http://localhost:80',
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2464,6 +2734,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.is_healthy",
         0,
         tags=[
+            "octopus_server:http://localhost:80",
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
