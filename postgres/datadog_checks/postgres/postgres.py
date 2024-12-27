@@ -8,7 +8,6 @@ import os
 from time import time
 
 import psycopg
-from psycopg.rows import dict_row
 
 from cachetools import TTLCache
 
@@ -868,7 +867,7 @@ class PostgreSql(AgentCheck):
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(row_factory=dict_row) as cursor:
+            with db.cursor() as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,

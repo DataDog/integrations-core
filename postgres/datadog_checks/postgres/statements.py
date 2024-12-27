@@ -188,12 +188,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _execute_query(self, cursor, query, params=()):
         try:
-            self._log.debug("Running query [%s] %s", query, params)
+            self._log.warning("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
             # but the next time the query is run, it will retrieve the correct columns.
+            self._log.warning("Failed to run query [%s] %s", query, params)
             self._stat_column_cache = []
             raise e
 
@@ -205,6 +206,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         be upgraded without upgrading extensions, even when the extension is included by default.
         """
         if self._stat_column_cache:
+            self._log.warning("Returning cached columns %s", self._stat_column_cache)
             return self._stat_column_cache
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
@@ -218,6 +220,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._execute_query(cursor, query)
                 col_names = [desc[0] for desc in cursor.description] if cursor.description else []
                 self._stat_column_cache = col_names
+                self._log.warning("Fetched columns %s", col_names)
                 return col_names
 
     def _check_called_queries(self):

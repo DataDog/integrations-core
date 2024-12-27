@@ -135,3 +135,28 @@ def run_one_check(check, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+
+
+# WaitGroup is used like go's sync.WaitGroup
+class WaitGroup(object):
+    def __init__(self):
+        self.count = 0
+        self.cv = threading.Condition()
+
+    def add(self, n):
+        self.cv.acquire()
+        self.count += n
+        self.cv.release()
+
+    def done(self):
+        self.cv.acquire()
+        self.count -= 1
+        if self.count == 0:
+            self.cv.notify_all()
+        self.cv.release()
+
+    def wait(self):
+        self.cv.acquire()
+        while self.count > 0:
+            self.cv.wait()
+        self.cv.release()
