@@ -1,7 +1,7 @@
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'go.gc.duration.seconds',
     'go_goroutines': 'go.goroutines',
-    'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
+    'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'},
     'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash.sys_bytes',
     'go_memstats_frees': 'go.memstats.frees',
     'go_memstats_gc_cpu_fraction': 'go.memstats.gc.cpu_fraction',
