@@ -152,6 +152,7 @@ def test_statement_metrics(
         expected_tags.add("replication_role:" + aurora_replication_role)
     assert set(event['tags']) == expected_tags
     query_signature = compute_sql_signature(query)
+    print("query_signature: ", query_signature)
     matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
     assert len(matching_rows) == 1
     row = matching_rows[0]
@@ -607,6 +608,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         ),
     ],
 )
+@pytest.mark.unit
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload, root_conn
 ):
