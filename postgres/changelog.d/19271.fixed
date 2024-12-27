@@ -1,1 +1,0 @@
-Fix check for Postgres collect query activity to avoid bugs with in-flight duration and missing blocking pids
