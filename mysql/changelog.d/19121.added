@@ -1,1 +1,0 @@
-Add `mysql.performance.performance_schema_digest_lost`, the number of digest instances that could not be instrumented in the `events_statements_summary_by_digest` table.
