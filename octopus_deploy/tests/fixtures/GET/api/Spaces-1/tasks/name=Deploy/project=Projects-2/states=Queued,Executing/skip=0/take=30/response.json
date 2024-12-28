@@ -1,0 +1,79 @@
+{
+    "ItemType": "Task",
+    "TotalResults": 1,
+    "ItemsPerPage": 30,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "TotalCounts": {
+      "Canceled": 0,
+      "Cancelling": 0,
+      "Executing": 1,
+      "Failed": 2,
+      "Queued": 0,
+      "Success": 1,
+      "TimedOut": 0,
+      "Interrupted": 0
+    },
+    "TotalCountsInOtherSpaces": {
+      "Canceled": 0,
+      "Cancelling": 0,
+      "Executing": 0,
+      "Failed": 0,
+      "Queued": 0,
+      "Success": 0,
+      "TimedOut": 0,
+      "Interrupted": 0
+    },
+    "Items": [
+      {
+        "Id": "ServerTasks-118048",
+        "SpaceId": "Spaces-1",
+        "EstimatedRemainingQueueDurationSeconds": 0,
+        "Name": "Deploy",
+        "Description": "Deploy hello release 0.0.2 to staging",
+        "Arguments": {
+          "DeploymentId": "Deployments-18"
+        },
+        "State": "Executing",
+        "Completed": "Executing...",
+        "QueueTime": "2024-09-23T14:42:00.123+00:00",
+        "QueueTimeExpiry": null,
+        "StartTime": "2024-09-23T14:42:30.123+00:00",
+        "LastUpdatedTime": "2024-11-05T18:59:25.395+00:00",
+        "CompletedTime": null,
+        "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+        "Duration": "18 seconds",
+        "ErrorMessage": "",
+        "HasBeenPickedUpByProcessor": true,
+        "IsCompleted": false,
+        "FinishedSuccessfully": false,
+        "HasPendingInterruptions": true,
+        "CanRerun": false,
+        "HasWarningsOrErrors": false,
+        "UnmetPreconditions": null,
+        "ProjectId": "Projects-2",
+        "Links": {
+          "Self": "/api/tasks/ServerTasks-118048",
+          "Web": "/app#/Spaces-1/tasks/ServerTasks-118048",
+          "Raw": "/api/tasks/ServerTasks-118048/raw",
+          "Rerun": "/api/tasks/rerun/ServerTasks-118048",
+          "Cancel": "/api/tasks/ServerTasks-118048/cancel",
+          "State": "/api/tasks/ServerTasks-118048/state",
+          "BlockedBy": "/api/tasks/ServerTasks-118048/blockedby",
+          "QueuedBehind": "/api/tasks/ServerTasks-118048/queued-behind{?skip,take}",
+          "Details": "/api/tasks/ServerTasks-118048/details{?verbose,tail,ranges}",
+          "StatusMessages": "/api/tasks/ServerTasks-118048/status/messages",
+          "Prioritize": "/api/tasks/ServerTasks-118048/prioritize",
+          "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-118048",
+          "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-118048"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/tasks?skip=0&take=30",
+      "Template": "/api/tasks{?skip,active,environment,tenant,runbook,project,name,node,running,states,hasPendingInterruptions,hasWarningsOrErrors,take,ids,partialName,spaces,includeSystem,description,fromCompletedDate,toCompletedDate,fromQueueDate,toQueueDate,fromStartDate,toStartDate}",
+      "Page.All": "/api/tasks?skip=0&take=2147483647",
+      "Page.Current": "/api/tasks?skip=0&take=30",
+      "Page.Last": "/api/tasks?skip=0&take=30"
+    }
+  }

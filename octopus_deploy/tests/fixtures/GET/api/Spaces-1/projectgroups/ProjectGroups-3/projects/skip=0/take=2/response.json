@@ -1,0 +1,15 @@
+{
+    "ItemType": "Project",
+    "TotalResults": 0,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "Items": [],
+    "Links": {
+      "Self": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects?skip=0&take=30",
+      "Template": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects{?skip,take}",
+      "Page.All": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects?skip=0&take=2147483647",
+      "Page.Current": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects?skip=0&take=30",
+      "Page.Last": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects?skip=0&take=30"
+    }
+  }
