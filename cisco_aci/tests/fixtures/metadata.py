@@ -331,7 +331,34 @@ TOPOLOGY_LINK_METADATA = [
     },
 ]
 
-EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
+EXPORTER_IP_ADDRESS_METADATA = [
+    {
+        'device_id': 'default:10.0.200.0',
+        'integration': 'cisco-aci',
+        'ip_address': '1.1.0.101',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.1',
+        'integration': 'cisco-aci',
+        'ip_address': '1.1.0.102',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.4',
+        'integration': 'cisco-aci',
+        'ip_address': '1.1.0.1',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.5',
+        'integration': 'cisco-aci',
+        'ip_address': '1.1.0.201',
+        'prefixlen': '24',
+    },
+]
+
+DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
 # "2012-01-14 03:21:34" in seconds
 MOCK_TIME_EPOCH = 1326511294
@@ -344,6 +371,7 @@ EXPECTED_METADATA_EVENTS = [
         devices=DEVICE_METADATA,
         interfaces=INTERFACE_METADATA,
         links=TOPOLOGY_LINK_METADATA,
+        exporter_ip_addresses=EXPORTER_IP_ADDRESS_METADATA,
         collect_timestamp=MOCK_TIME_EPOCH,
     )
 ]

@@ -135,6 +135,11 @@ instances:
     #
     # send_ndm_metadata: false
 
+    ## @param enable_netflow - boolean - optional - default: false
+    ## Set to `true` to enable allowing Netflow data from Cisco ACI devices to be identified in Datadog.
+    #
+    # enable_netflow: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

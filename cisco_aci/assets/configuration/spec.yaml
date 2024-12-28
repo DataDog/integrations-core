@@ -106,6 +106,13 @@ files:
         type: boolean
         example: False
         display_default: False
+    - name: enable_netflow
+      description: |
+        Set to `true` to enable allowing Netflow data from Cisco ACI devices to be identified in Datadog.
+      value:
+        type: boolean
+        example: False
+        display_default: False
     - template: instances/http
       overrides:
         username.display_priority: 9

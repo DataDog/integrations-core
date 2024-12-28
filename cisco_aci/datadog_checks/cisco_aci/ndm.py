@@ -4,6 +4,7 @@
 
 from datadog_checks.cisco_aci.models import (
     DeviceMetadata,
+    ExporterIPAddressMetadata,
     InterfaceMetadata,
     LldpAdjEp,
     NetworkDevicesMetadata,
@@ -14,6 +15,7 @@ from datadog_checks.cisco_aci.models import (
     TopologyLinkInterface,
     TopologyLinkMetadata,
     TopologyLinkSide,
+    TopSystemList,
 )
 
 from . import helpers
@@ -130,6 +132,19 @@ def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespa
         )
 
 
+def create_exporter_ip_address_metadata(namespace, top_systems):
+    """
+    Create an ExporterIPAddressMetadata object from a out-of-band mgmt IP that is available for every device
+    """
+    top_systems_list = TopSystemList(top_systems=top_systems)
+    for top_system in top_systems_list.top_systems:
+        yield ExporterIPAddressMetadata(
+            device_id=namespace + ":" + top_system.attributes.address,
+            ip_address=top_system.attributes.oob_mgmt_addr,
+            prefixlen=top_system.attributes.oob_mgmt_addr_mask,
+        )
+
+
 def get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip) -> str | None:
     """
     Get the Cisco DN for a remote device, if the device is in the device map then
@@ -182,7 +197,7 @@ def get_device_info(device):
     return device.id, node_id
 
 
-def batch_payloads(namespace, devices, interfaces, links, collect_ts):
+def batch_payloads(namespace, devices, interfaces, links, exporter_ip_addresses, collect_ts):
     """
     Batch payloads into NetworkDevicesMetadata objects
     """
@@ -201,6 +216,14 @@ def batch_payloads(namespace, devices, interfaces, links, collect_ts):
 
     for link in links:
         current_payload, new_payload = append_to_payload(link, network_devices_metadata, namespace, collect_ts)
+        if new_payload:
+            yield current_payload
+            network_devices_metadata = new_payload
+
+    for exporter_ip_address in exporter_ip_addresses:
+        current_payload, new_payload = append_to_payload(
+            exporter_ip_address, network_devices_metadata, namespace, collect_ts
+        )
         if new_payload:
             yield current_payload
             network_devices_metadata = new_payload
