@@ -1,0 +1,43 @@
+otel,dd,description,filter,transform
+kafka.consumer.bytes-consumed-rate,kafka.consumer.bytes_consumed,The average number of bytes consumed per second,,Rename attribute key `client-id` to `client`
+kafka.consumer.fetch-size-avg,kafka.consumer.fetch_size_avg,The average number of bytes fetched per request,,Rename attribute key `client-id` to `client`
+kafka.consumer.records-consumed-rate,kafka.consumer.records_consumed,The average number of records consumed per second,,Rename attribute key `client-id` to `client`
+kafka.consumer.total.bytes-consumed-rate,kafka.consumer.bytes_in,The average number of bytes consumed for all topics per second.,,
+kafka.consumer.total.records-consumed-rate,kafka.consumer.messages_in,The average number of records consumed for all topics per second.,,
+kafka.consumer_group.lag,kafka.consumer_lag,Current approximate lag of consumer group at partition of topic,,Rename attribute key `group` to `consumer_group`
+kafka.consumer_group.offset,kafka.consumer_offset,Current offset of the consumer group at partition of topic,,Rename attribute key `group` to `consumer_group`
+kafka.controller.active.count,kafka.replication.active_controller_count,Controller is active on broker,,
+kafka.isr.operation.count,kafka.replication.isr_expands.rate,The number of in-sync replica shrink and expand operations,`operation`: `expand`,
+kafka.isr.operation.count,kafka.replication.isr_shrinks.rate,The number of in-sync replica shrink and expand operations,`operation`: `shrink`,
+kafka.leader.election.rate,kafka.replication.leader_elections.rate,Leader election rate - increasing indicates broker failures,,
+kafka.logs.flush.time.count,kafka.log.flush_rate.rate,Log flush count,,
+kafka.max.lag,kafka.replication.max_lag,Max lag in messages between follower and leader replicas,,
+kafka.message.count,kafka.messages_in.rate,The number of messages received by the broker,,
+kafka.network.io,kafka.net.bytes_in.rate,The bytes received or sent by the broker,`state`: `in`,
+kafka.network.io,kafka.net.bytes_out.rate,The bytes received or sent by the broker,`state`: `out`,
+kafka.partition.count,kafka.replication.partition_count,The number of partitions on the broker,,
+kafka.partition.current_offset,kafka.broker_offset,Current offset of partition of topic.,,Rename attribute key `group` to `consumer_group`
+kafka.partition.offline,kafka.replication.offline_partitions_count,The number of partitions offline,,
+kafka.partition.under_replicated,kafka.replication.under_replicated_partitions,The number of under replicated partitions,,
+kafka.producer.byte-rate,kafka.producer.bytes_out,The average number of bytes sent per second for a topic.,,Rename attribute key `client-id` to `client`
+kafka.producer.compression-rate,kafka.producer.compression_rate,The average compression rate of record batches for a topic.,,Rename attribute key `client-id` to `client`
+kafka.producer.io-wait-time-ns-avg,kafka.producer.io_wait,The average length of time the I/O thread spent waiting for a socket ready for reads or writes.,,
+kafka.producer.outgoing-byte-rate,kafka.producer.bytes_out,The average number of outgoing bytes sent per second to all servers.,,
+kafka.producer.record-error-rate,kafka.producer.record_error_rate,The average per-second number of record sends that resulted in errors for a topic.,,Rename attribute key `client-id` to `client`
+kafka.producer.record-retry-rate,kafka.producer.record_retry_rate,The average per-second number of retried record sends for a topic.,,Rename attribute key `client-id` to `client`
+kafka.producer.record-send-rate,kafka.producer.record_send_rate,The average number of records sent per second for a topic.,,Rename attribute key `client-id` to `client`
+kafka.producer.request-latency-avg,kafka.producer.request_latency_avg,The average request latency.,,
+kafka.producer.request-rate,kafka.producer.request_rate,The average number of requests sent per second.,,
+kafka.producer.response-rate,kafka.producer.response_rate,Responses received per second.,,
+kafka.purgatory.size,kafka.request.fetch_request_purgatory.size,The number of requests waiting in purgatory,`type`: `fetch`,
+kafka.purgatory.size,kafka.request.producer_request_purgatory.size,The number of requests waiting in purgatory,`type`: `produce`,
+kafka.request.failed,kafka.request.fetch.failed.rate,The number of requests to the broker resulting in a failure,`type`: `fetch`,
+kafka.request.failed,kafka.request.produce.failed.rate,The number of requests to the broker resulting in a failure,`type`: `produce`,
+kafka.request.queue,kafka.request.channel.queue.size,Size of the request queue,,
+kafka.request.time.99p,kafka.request.fetch_consumer.time.99percentile,The 99th percentile time the broker has taken to service requests,`type`: `fetchconsumer`,
+kafka.request.time.99p,kafka.request.fetch_follower.time.99percentile,The 99th percentile time the broker has taken to service requests,`type`: `fetchfollower`,
+kafka.request.time.99p,kafka.request.produce.time.99percentile,The 99th percentile time the broker has taken to service requests,`type`: `produce`,
+kafka.request.time.avg,kafka.request.fetch_consumer.time.avg,The average time the broker has taken to service requests,`type`: `fetchconsumer`,
+kafka.request.time.avg,kafka.request.fetch_follower.time.avg,The average time the broker has taken to service requests,`type`: `fetchfollower`,
+kafka.request.time.avg,kafka.request.produce.time.avg,The average time the broker has taken to service requests,`type`: `produce`,
+kafka.unclean.election.rate,kafka.replication.unclean_leader_elections.rate,Unclean leader election rate - increasing indicates broker failures,,
