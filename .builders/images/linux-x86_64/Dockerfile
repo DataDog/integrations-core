@@ -48,6 +48,19 @@ RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-lo
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
+# Rust toolchain (needed for cryptography)
+ENV RUST_VERSION="1.76"
+ENV RUSTC_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
+ARG RUSTUP_VERSION="1.26.0"
+ARG RUSTUP_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
+ && echo "${RUSTUP_SHA256} rustup-init" | sha256sum --check \
+ && chmod +x ./rustup-init \
+ && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
+ && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
+ && rm ./rustup-init
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 # MQ Client library required by pymqi
 ENV IBM_MQ_VERSION="9.2.4.0"
 ENV IBM_MQ_SHA256="d0d583eba72daf20b3762976f8831c2e23150ace90509520e12f8cda5b5bdb49"
@@ -165,6 +178,10 @@ RUN \
     --without-libssh2 \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
+
+# Environment variables to help openssl crate find OpenSSL
+ENV OPENSSL_LIB_DIR="/usr/local/lib64"
+ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt

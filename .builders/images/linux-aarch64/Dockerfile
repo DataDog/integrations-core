@@ -53,6 +53,19 @@ RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-lo
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
+# Rust toolchain (needed for cryptography)
+ENV RUST_VERSION="1.76"
+ENV RUSTC_SHA256="673e336c81c65e6b16dcdede33f4cc9ed0f08bde1dbe7a935f113605292dc800"
+ARG RUSTUP_VERSION="1.26.0"
+ARG RUSTUP_SHA256="673e336c81c65e6b16dcdede33f4cc9ed0f08bde1dbe7a935f113605292dc800"
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/aarch64-unknown-linux-gnu/rustup-init" \
+ && echo "${RUSTUP_SHA256} rustup-init" | sha256sum --check \
+ && chmod +x ./rustup-init \
+ && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
+ && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
+ && rm ./rustup-init
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 # krb5 for dependencies that require kerberos support
 RUN \
  DOWNLOAD_URL="https://kerberos.org/dist/krb5/1.20/krb5-{{version}}.tar.gz" \
@@ -161,6 +174,10 @@ RUN \
     --without-libssh2 \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
+
+# Environment variables to help openssl crate find OpenSSL
+ENV OPENSSL_LIB_DIR="/usr/local/lib"
+ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt
