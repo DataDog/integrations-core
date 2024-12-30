@@ -8,7 +8,7 @@ from operator import attrgetter
 from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
-from cachetools import TTLCache, Cache
+from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
@@ -85,6 +85,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self.log = get_check_logger()
         self._state = StatementMetrics()
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        # last_seen: the last query execution time seen by the check
+        # This is used to limit the queries to fetch from the performance schema to only the new ones
         self._last_seen = '1970-01-01'
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -217,9 +219,14 @@ class MySQLStatementMetrics(DBMAsyncJob):
         values to get the counts for the elapsed period. This is similar to monotonic_count, but
         several fields must be further processed from the delta values.
         """
-        condition = "`last_seen` >= %s" if self._config.statement_metrics_config.get('only_query_recent_statements', False) else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
+        only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
+        condition = (
+            "WHERE `last_seen` >= %s"
+            if only_query_recent_statements
+            else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
             ORDER BY `count_star` DESC
             LIMIT 10000"""
+        )
 
         sql_statement_summary = """\
             SELECT `schema_name`,
@@ -239,23 +246,20 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
             {}
-            """.format(condition)
+            """.format(
+            condition
+        )
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            cursor.execute(sql_statement_summary, [self._last_seen])
+            args = [self._last_seen] if only_query_recent_statements else None
+            cursor.execute(sql_statement_summary, args)
 
             rows = cursor.fetchall() or []  # type: ignore
 
-        # self.log.warning("Rows: %s", len(rows))
         if rows:
             self._last_seen = max(row['last_seen'] for row in rows)
-            # self.log.warning("Last seen: %s", self._last_seen)
-            # for row in rows:
-            #     if row['digest'] == '6b5a1b14bbeef4253f3d88bd6d2f41cf' or  row['digest'] == '98c344ecca8effb370ff4296412a2d73': 
-            #         self.log.warning("Row: %s", row)
 
         return rows
-
 
     def _filter_query_rows(self, rows):
         # type: (List[PyMysqlRow]) -> List[PyMysqlRow]
@@ -288,7 +292,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             normalized_rows.append(normalized_row)
 
         return normalized_rows
-    
+
     def _add_associated_rows(self, rows):
         """
         If two or more statements with different digests have the same query_signature, they are considered the same
