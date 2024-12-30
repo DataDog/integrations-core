@@ -74,46 +74,46 @@ class PgBouncer(AgentCheck):
             metric_scope.append(SERVERS_METRICS)
 
         try:
-            with db.cursor(row_factory=dict_row) as cursor:
-                for scope in metric_scope:
-                    descriptors = scope['descriptors']
-                    metrics = scope['metrics']
-                    query = scope['query']
+            for scope in metric_scope:
+                descriptors = scope['descriptors']
+                metrics = scope['metrics']
+                query = scope['query']
 
-                    try:
-                        self.log.warning("Running query: %s", query)
-                        cursor.execute(query)
-                        rows = self.iter_rows(cursor)
+                try:
+                    cursor = db.cursor(row_factory=dict_row)
+                    self.log.debug("Running query: %s", query)
+                    cursor.execute(query)
+                    rows = self.iter_rows(cursor)
 
-                    except Exception as e:
-                        self.log.exception("Not all metrics may be available: %s", str(e))
+                except Exception as e:
+                    self.log.exception("Not all metrics may be available: %s", str(e))
 
-                    else:
-                        for row in rows:
-                            if 'key' in row:  # We are processing "config metrics"
-                                # Make a copy of the row to allow mutation
-                                row = row.copy()
-                                # We flip/rotate the row: row value becomes the column name
-                                row[row['key']] = row['value']
-                            # Skip the "pgbouncer" database
-                            elif row.get('database') == self.DB_NAME:
-                                continue
+                else:
+                    for row in rows:
+                        if 'key' in row:  # We are processing "config metrics"
+                            # Make a copy of the row to allow mutation
+                            row = row.copy()
+                            # We flip/rotate the row: row value becomes the column name
+                            row[row['key']] = row['value']
+                        # Skip the "pgbouncer" database
+                        elif row.get('database') == self.DB_NAME:
+                            continue
 
-                            tags = list(self.tags)
-                            tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
-                            for column, (name, reporter) in metrics:
-                                if column in row:
-                                    value = row[column]
-                                    if column in ['connect_time', 'request_time']:
-                                        self.log.debug("Parsing timestamp; original value: %s", value)
-                                        # First get rid of any UTC suffix.
-                                        value = re.findall(r'^[^ ]+ [^ ]+', value)[0]
-                                        value = time.strptime(value, '%Y-%m-%d %H:%M:%S')
-                                        value = time.mktime(value)
-                                    reporter(self, name, value, tags)
+                        tags = list(self.tags)
+                        tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
+                        for column, (name, reporter) in metrics:
+                            if column in row:
+                                value = row[column]
+                                if column in ['connect_time', 'request_time']:
+                                    self.log.debug("Parsing timestamp; original value: %s", value)
+                                    # First get rid of any UTC suffix.
+                                    value = re.findall(r'^[^ ]+ [^ ]+', value)[0]
+                                    value = time.strptime(value, '%Y-%m-%d %H:%M:%S')
+                                    value = time.mktime(value)
+                                reporter(self, name, value, tags)
 
-                        if not rows:
-                            self.log.warning("No results were found for query: %s", query)
+                    if not rows:
+                        self.log.warning("No results were found for query: %s", query)
 
         except pg.Error:
             self.log.exception("Connection error")
@@ -142,11 +142,11 @@ class PgBouncer(AgentCheck):
         from yaml settings file
         """
         if self.database_url:
-            return {'dsn': self.database_url}
+            return {'conninfo': self.database_url, 'client_encoding': 'utf-8'}
 
         if self.host in ('localhost', '127.0.0.1') and self.password == '':
             # Use ident method
-            return {'dsn': "user={} dbname={}".format(self.user, self.DB_NAME)}
+            return {'conninfo': "user={} dbname={} client_encoding=utf-8".format(self.user, self.DB_NAME)}
 
         args = {
             'host': self.host,
@@ -154,6 +154,7 @@ class PgBouncer(AgentCheck):
             'password': self.password,
             'dbname': self.DB_NAME,
             'cursor_factory': ClientCursor,
+            'client_encoding': 'utf-8',
         }
         if self.port:
             args['port'] = self.port
@@ -167,7 +168,7 @@ class PgBouncer(AgentCheck):
             return self.connection
         try:
             connect_kwargs = self._get_connect_kwargs()
-            connection = pg.connect(**connect_kwargs)
+            connection = pg.connect(**connect_kwargs, autocommit=True)
         except Exception:
             redacted_url = self._get_redacted_dsn()
             message = u'Cannot establish connection to {}'.format(redacted_url)
@@ -179,6 +180,10 @@ class PgBouncer(AgentCheck):
 
         self.connection = connection
         return connection
+
+    def _close_connection(self):
+        self.connection.close()
+        self.connection = None
 
     def _get_redacted_dsn(self):
         if not self.database_url:
@@ -200,6 +205,8 @@ class PgBouncer(AgentCheck):
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags())
         self._set_metadata()
+        # Avoid holding an open connection
+        self._close_connection()
 
     def _set_metadata(self):
         if self.is_metadata_collection_enabled():
@@ -209,14 +216,5 @@ class PgBouncer(AgentCheck):
 
     def get_version(self):
         db = self._get_connection()
-        regex = r'\d+\.\d+\.\d+'
-        with db.cursor(row_factory=dict_row) as cursor:
-            cursor.execute('SHOW VERSION;')
-            if db.notices:
-                data = db.notices[0]
-            else:
-                data = cursor.fetchone()[0]
-            res = re.findall(regex, data)
-            if res:
-                return res[0]
-            self.log.debug("Couldn't detect version from %s", data)
+        version = pg.pq.version_pretty(db.connection.info.server_version)
+        return version
