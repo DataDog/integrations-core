@@ -141,6 +141,8 @@ class PgBouncer(AgentCheck):
         Get the params to pass to psycopg.connect() based on passed-in vals
         from yaml settings file
         """
+        # It's important to set the client_encoding to utf-8
+        # PGBouncer defaults to an encoding of 'UNICODE`, which will cause psycopg to error out
         if self.database_url:
             return {'conninfo': self.database_url, 'client_encoding': 'utf-8'}
 
@@ -168,6 +170,8 @@ class PgBouncer(AgentCheck):
             return self.connection
         try:
             connect_kwargs = self._get_connect_kwargs()
+            # Somewhat counterintuitively, we need to set autocommit to True to avoid a BEGIN/COMMIT block
+            # https://www.psycopg.org/psycopg3/docs/basic/transactions.html#autocommit-transactions
             connection = pg.connect(**connect_kwargs, autocommit=True)
         except Exception:
             redacted_url = self._get_redacted_dsn()
