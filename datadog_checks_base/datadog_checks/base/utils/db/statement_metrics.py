@@ -70,7 +70,6 @@ class StatementMetrics:
             #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
             #    avoids having to send a lot of unnecessary metrics.
 
-
             diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
 
             # Check for negative values, but only in the columns used for metrics
