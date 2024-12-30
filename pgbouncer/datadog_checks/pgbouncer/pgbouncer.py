@@ -6,6 +6,7 @@ import time
 from urllib.parse import urlparse
 
 import psycopg as pg
+from psycopg import ClientCursor
 from psycopg.rows import dict_row
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -73,14 +74,14 @@ class PgBouncer(AgentCheck):
             metric_scope.append(SERVERS_METRICS)
 
         try:
-            with db.cursor(row_factor=dict_row) as cursor:
+            with db.cursor(row_factory=dict_row) as cursor:
                 for scope in metric_scope:
                     descriptors = scope['descriptors']
                     metrics = scope['metrics']
                     query = scope['query']
 
                     try:
-                        self.log.debug("Running query: %s", query)
+                        self.log.warning("Running query: %s", query)
                         cursor.execute(query)
                         rows = self.iter_rows(cursor)
 
@@ -151,7 +152,8 @@ class PgBouncer(AgentCheck):
             'host': self.host,
             'user': self.user,
             'password': self.password,
-            'database': self.DB_NAME,
+            'dbname': self.DB_NAME,
+            'cursor_factory': ClientCursor,
         }
         if self.port:
             args['port'] = self.port
@@ -166,7 +168,6 @@ class PgBouncer(AgentCheck):
         try:
             connect_kwargs = self._get_connect_kwargs()
             connection = pg.connect(**connect_kwargs)
-            connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         except Exception:
             redacted_url = self._get_redacted_dsn()
             message = u'Cannot establish connection to {}'.format(redacted_url)
@@ -209,7 +210,7 @@ class PgBouncer(AgentCheck):
     def get_version(self):
         db = self._get_connection()
         regex = r'\d+\.\d+\.\d+'
-        with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+        with db.cursor(row_factory=dict_row) as cursor:
             cursor.execute('SHOW VERSION;')
             if db.notices:
                 data = db.notices[0]
