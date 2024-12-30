@@ -6,7 +6,6 @@ from typing import Dict, List
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.postgres.cursor import CommenterCursor
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""

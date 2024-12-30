@@ -3,17 +3,16 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
 import re
-import time
-import select
 import threading
+import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg
-from psycopg import ClientCursor
 import pytest
 from dateutil import parser
+from psycopg import ClientCursor
 from semver import VersionInfo
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -24,20 +23,19 @@ from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
 )
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
 from .common import (
     DB_NAME,
     HOST,
-    PORT,
     PORT_REPLICA2,
     POSTGRES_VERSION,
     _get_expected_replication_tags,
     _get_expected_tags,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13, run_one_check, WaitGroup
+from .utils import WaitGroup, _get_conn, _get_superconn, requires_over_10, requires_over_13, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -117,7 +115,9 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         password = "bob"
         dbname = "datadog_test"
         if dbname not in connections:
-            connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor)
+            connections[dbname] = psycopg.connect(
+                host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor
+            )
 
         args = ('two',)
         if idx == 1:
@@ -233,7 +233,9 @@ def test_statement_metrics(
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
             if dbname not in connections:
-                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor)
+                connections[dbname] = psycopg.connect(
+                    host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
+                )
             connections[dbname].cursor().execute(query, (arg,))
 
     check = integration_check(dbm_instance)
@@ -263,7 +265,7 @@ def test_statement_metrics(
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 2
-    event = events[1] # first item is from the initial dummy check to load pg_settings
+    event = events[1]  # first item is from the initial dummy check to load pg_settings
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
@@ -793,7 +795,9 @@ def test_statement_samples_collect(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor)
+    conn = psycopg.connect(
+        host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
+    )
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
@@ -810,9 +814,7 @@ def test_statement_samples_collect(
 
         # Find matching events by checking if the expected query is continaed the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements and leading comments
-        matching = [
-            e for e in dbm_samples if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8")
-        ]
+        matching = [e for e in dbm_samples if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8")]
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
             # pg_monitor role exists only in version 10+
@@ -1206,7 +1208,6 @@ def test_activity_snapshot_collection(
         conn.close()
 
 
-
 @pytest.mark.parametrize(
     "reported_hostname,expected_hostname",
     [
@@ -1451,7 +1452,9 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
 
     connections = []
     for user, password, dbname, query, arg in SAMPLE_QUERIES:
-        conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor, autocommit=True)
+        conn = psycopg.connect(
+            host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor, autocommit=True
+        )
         conn.cursor().execute(query, (arg,))
         connections.append(conn)
 

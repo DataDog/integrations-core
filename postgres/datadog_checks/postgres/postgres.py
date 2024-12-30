@@ -8,7 +8,6 @@ import os
 from time import time
 
 import psycopg
-
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck

@@ -39,7 +39,7 @@ requires_over_16 = pytest.mark.skipif(
 )
 
 
-def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test',autocommit=True):
+def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test', autocommit=True):
     conn = psycopg.connect(
         host=db_instance['host'],
         port=db_instance['port'],
@@ -54,7 +54,9 @@ def _get_conn(db_instance, dbname=None, user=None, password=None, application_na
 
 # Get a connection with superuser
 def _get_superconn(db_instance, application_name='test', autocommit=True):
-    return _get_conn(db_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name=application_name, autocommit=autocommit)
+    return _get_conn(
+        db_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name=application_name, autocommit=autocommit
+    )
 
 
 def lock_table(pg_instance, table, lock_mode):

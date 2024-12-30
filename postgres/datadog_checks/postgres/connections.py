@@ -152,7 +152,9 @@ class MultiDatabaseConnectionPool(object):
         """
         try:
             with self._mu:
-                db = self._get_connection_raw(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, startup_fn=startup_fn, persistent=persistent)
+                db = self._get_connection_raw(
+                    dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, startup_fn=startup_fn, persistent=persistent
+                )
             yield db
         finally:
             with self._mu:

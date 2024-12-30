@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from psycopg.rows import dict_row
-
 from .utils import _get_superconn
 
 

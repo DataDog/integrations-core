@@ -9,9 +9,8 @@ from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg
-from psycopg.rows import dict_row
 from cachetools import TTLCache
-
+from psycopg.rows import dict_row
 
 try:
     import datadog_agent

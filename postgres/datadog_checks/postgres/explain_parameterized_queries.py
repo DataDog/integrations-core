@@ -6,7 +6,6 @@ import logging
 import re
 
 import psycopg
-from psycopg.rows import dict_row
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
