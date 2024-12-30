@@ -92,6 +92,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
         )  # type: TTLCache
 
+        # statement_rows: cache of all rows for each digest, keyed by (schema_name, query_signature)
+        # This is used to cache the metrics for queries that have the same query_signature but different digests
         self._statement_rows = {}  # type: Dict[(str, str), Dict[str, PyMysqlRow]]
 
     def _get_db_connection(self):
@@ -117,8 +119,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
         start = time.time()
         self.collect_per_statement_metrics()
         self._check.gauge(
-            "dd.mysql.statement_metrics.elapsed_ms",
-            time.time() - start,
+            "dd.mysql.statement_metrics.collect_metrics.elapsed_ms",
+            (time.time() - start) * 1000,
             tags=self._check.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
@@ -150,12 +152,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         rows = self._collect_per_statement_metrics(tags)
         if not rows:
+            # No rows to process, can skip the rest of the payload generation and avoid an empty payload
             return
-        self.log.info("_rows_to_fqt_events start")
         for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-        self.log.info("_rows_to_fqt_events end")
-        self.log.info("payload start")
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -176,18 +176,15 @@ class MySQLStatementMetrics(DBMAsyncJob):
             tags=tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        self.log.info("payload end")
 
     def _collect_per_statement_metrics(self, tags):
-        # type: () -> List[PyMysqlRow]
+        # type: (List[str]) -> List[PyMysqlRow]
 
         self._get_statement_count(tags)
 
-        self.log.info("_query_summary_per_statement start")
         monotonic_rows = self._query_summary_per_statement()
-        self.log.info("_query_summary_per_statement end")
         self._check.gauge(
-            "dd.mysql.statement_metrics.rows",
+            "dd.mysql.statement_metrics.query_rows",
             len(monotonic_rows),
             tags=tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
@@ -195,13 +192,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
-        self._log.warning("normalized_rows: %s", [(m['schema_name'],m['digest'],m['sum_rows_examined']) for m in monotonic_rows if m['query_signature'] == '94caeb4c54f97849'])
         monotonic_rows = self._add_associated_rows(monotonic_rows)
-        self._log.warning("monotonic_rows: %s", [(m['schema_name'],m['digest'],m['sum_rows_examined']) for m in monotonic_rows if m['query_signature'] == '94caeb4c54f97849'])
-
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
-        self._log.warning("derivative_rows: %s", [(m['schema_name'],m['digest'],m['sum_rows_examined']) for m in rows if m['query_signature'] == '94caeb4c54f97849'])
-        self.log.info("compute_derivative_rows end")
         return rows
 
     def _get_statement_count(self, tags):
@@ -211,7 +203,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             rows = cursor.fetchall() or []  # type: ignore
             if rows:
                 self._check.gauge(
-                    "dd.mysql.statement_metrics.total_rows",
+                    "dd.mysql.statement_metrics.events_statements_summary_by_digest.total_rows",
                     rows[0]['count'],
                     tags=tags + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
@@ -225,6 +217,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
         values to get the counts for the elapsed period. This is similar to monotonic_count, but
         several fields must be further processed from the delta values.
         """
+        condition = "`last_seen` >= %s" if self._config.statement_metrics_config.get('only_query_recent_statements', False) else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
+            ORDER BY `count_star` DESC
+            LIMIT 10000"""
+
         sql_statement_summary = """\
             SELECT `schema_name`,
                    `digest`,
@@ -242,8 +238,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_no_good_index_used`,
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
-            WHERE `last_seen` >= %s
-            """
+            {}
+            """.format(condition)
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             cursor.execute(sql_statement_summary, [self._last_seen])
