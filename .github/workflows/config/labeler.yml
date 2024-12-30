@@ -177,6 +177,8 @@ integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
 - druid/**/*
+integration/duckdb:
+- duckdb/**/*
 integration/ecs_fargate:
 - ecs_fargate/**/*
 integration/eks_anywhere:
@@ -525,6 +527,8 @@ integration/streamnative:
 - streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
+integration/supabase:
+- supabase/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/suricata:
