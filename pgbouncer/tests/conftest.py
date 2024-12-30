@@ -21,7 +21,7 @@ def container_up(service_name, port):
     Try to connect to postgres/pgbouncer
     """
     psycopg.connect(
-        host=common.HOST, port=port, user=common.USER, password=common.PASS, database=common.DB, connect_timeout=2
+        host=common.HOST, port=port, user=common.USER, password=common.PASS, dbname=common.DB, connect_timeout=2
     )
 
 
