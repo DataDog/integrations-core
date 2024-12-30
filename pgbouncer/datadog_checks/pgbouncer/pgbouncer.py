@@ -5,8 +5,8 @@ import re
 import time
 from urllib.parse import urlparse
 
-import psycopg2 as pg
-from psycopg2 import extras as pgextras
+import psycopg as pg
+from psycopg.rows import dict_row
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.pgbouncer.metrics import (
@@ -73,7 +73,7 @@ class PgBouncer(AgentCheck):
             metric_scope.append(SERVERS_METRICS)
 
         try:
-            with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+            with db.cursor(row_factor=dict_row) as cursor:
                 for scope in metric_scope:
                     descriptors = scope['descriptors']
                     metrics = scope['metrics']
@@ -91,7 +91,6 @@ class PgBouncer(AgentCheck):
                         for row in rows:
                             if 'key' in row:  # We are processing "config metrics"
                                 # Make a copy of the row to allow mutation
-                                # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
                                 row = row.copy()
                                 # We flip/rotate the row: row value becomes the column name
                                 row[row['key']] = row['value']
@@ -138,7 +137,7 @@ class PgBouncer(AgentCheck):
 
     def _get_connect_kwargs(self):
         """
-        Get the params to pass to psycopg2.connect() based on passed-in vals
+        Get the params to pass to psycopg.connect() based on passed-in vals
         from yaml settings file
         """
         if self.database_url:
