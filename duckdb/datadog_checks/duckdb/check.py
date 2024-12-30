@@ -71,12 +71,12 @@ class DuckdbCheck(AgentCheck):
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
             for row in cursor.execute(query).fetchall():
+                # Try to find the field name or version from the query, anything else would fail
                 pattern_version = r"\bversion\b"
                 query_version = re.search(pattern_version, query)
                 if query_version:
                     query_name = 'version'
                 else:
-                    # Try to find the field name from the query
                     pattern = r"(?i)\bname\s*=\s*'([^']+)'"
                     query_name = re.search(pattern, query).group(1)
                 try:
