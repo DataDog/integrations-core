@@ -440,7 +440,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return
         try:
             with self._check._get_main_db() as conn:
-                with conn.cursor(row_factory=dict_row) as cursor:
+                with conn.cursor() as cursor:
                     rows = self._execute_query(
                         cursor,
                         PG_STAT_STATEMENTS_DEALLOC,
