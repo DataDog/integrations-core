@@ -45,7 +45,7 @@ def dd_environment():
         ],
     ):
 
-        yield common.DEFAULT_INSTANCE
+        yield common.DEFAULT_INSTANCE, common.E2E_METADATA
 
 
 @pytest.fixture
