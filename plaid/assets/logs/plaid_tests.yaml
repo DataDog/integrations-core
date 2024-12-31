@@ -1,0 +1,77 @@
+id: "plaid"
+tests:
+ -
+  sample: |-
+    {
+      "amount" : "12.34",
+      "authorization_id" : "128ff9dc-6634-22f3-a8d7-0902fc8dd99a",
+      "created" : "2024-12-20T12:04:24.386329Z",
+      "description" : "posted",
+      "type" : "debit",
+      "cancellable" : false,
+      "standard_return_window" : "2024-12-26",
+      "network" : "ach",
+      "originator_client_id" : "66d5881a2972360019c5e068",
+      "sweep_status" : "unswept",
+      "account_id" : "dLaW3JympPiWRaz9NGPwUB98VNmDPLcJ3AXxr",
+      "ach_class" : "ppd",
+      "iso_currency_code" : "USD",
+      "origination_account_id" : "",
+      "unauthorized_return_window" : "2025-03-21",
+      "id" : "6ed7708c-9e7a-9a79-13fc-a65e2f771a76",
+      "ledger_id" : "4b15ee7e-a39f-4c94-a84e-bfa3982a7737",
+      "user" : {
+        "legal_name" : "Anne Charleston"
+      },
+      "status" : "posted"
+    }
+  result:
+    custom:
+      account_id: "dLaW3JympPiWRaz9NGPwUB98VNmDPLcJ3AXxr"
+      ach_class: "ppd"
+      amount: "12.34"
+      authorization_id: "128ff9dc-6634-22f3-a8d7-0902fc8dd99a"
+      cancellable: false
+      created: "2024-12-20T12:04:24.386329Z"
+      description: "posted"
+      id: "6ed7708c-9e7a-9a79-13fc-a65e2f771a76"
+      iso_currency_code: "USD"
+      ledger_id: "4b15ee7e-a39f-4c94-a84e-bfa3982a7737"
+      network: "ach"
+      origination_account_id: ""
+      originator_client_id: "66d5881a2972360019c5e068"
+      standard_return_window: "2024-12-26"
+      status: "posted"
+      sweep_status: "unswept"
+      timestamp: "2024-12-20T12:04:24.386329Z"
+      type: "debit"
+      unauthorized_return_window: "2025-03-21"
+      user:
+        legal_name: "Anne Charleston"
+    message: |-
+      {
+        "amount" : "12.34",
+        "authorization_id" : "128ff9dc-6634-22f3-a8d7-0902fc8dd99a",
+        "created" : "2024-12-20T12:04:24.386329Z",
+        "description" : "posted",
+        "type" : "debit",
+        "cancellable" : false,
+        "standard_return_window" : "2024-12-26",
+        "network" : "ach",
+        "originator_client_id" : "66d5881a2972360019c5e068",
+        "sweep_status" : "unswept",
+        "account_id" : "dLaW3JympPiWRaz9NGPwUB98VNmDPLcJ3AXxr",
+        "ach_class" : "ppd",
+        "iso_currency_code" : "USD",
+        "origination_account_id" : "",
+        "unauthorized_return_window" : "2025-03-21",
+        "id" : "6ed7708c-9e7a-9a79-13fc-a65e2f771a76",
+        "ledger_id" : "4b15ee7e-a39f-4c94-a84e-bfa3982a7737",
+        "user" : {
+          "legal_name" : "Anne Charleston"
+        },
+        "status" : "posted"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1734696264386
