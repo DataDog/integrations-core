@@ -197,6 +197,8 @@ integration/fluxcd:
 - fluxcd/**/*
 integration/fly_io:
 - fly_io/**/*
+integration/forcepoint_security_service_edge:
+- forcepoint_security_service_edge/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
