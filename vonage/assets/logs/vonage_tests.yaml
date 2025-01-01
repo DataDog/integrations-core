@@ -92,7 +92,8 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
-     - "error_code_description:Delivered"
-     - "product:SMS"
-     - "error_code:0"
-     - "latency:945284"
+    ddtags:
+      - error_code_description
+      - product
+      - error_code
+      - latency
