@@ -1,0 +1,2714 @@
+{
+  "title": "Okta Workflows",
+  "description": "The Okta Workflows dashboard offers a detailed overview of workflow activities, including trends, and event tracking for flows, connectors, folders, and tables. It highlights key insights like workflow success rates, and execution history, providing a centralized view of workflow operations and user actions.",
+  "widgets": [
+    {
+      "id": 7612801639546888,
+      "definition": {
+        "type": "image",
+        "url": "data:image/jpeg;base64,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g8Puxu1ot7d5ZmHjdmCkpe+vk8aVq2AvLUvfrC9Y0FM7BFXFaANezwacwh0fn/02UtMFHfPEywLV2JRjDVWveOFYCg+f6S9VLdy5+k1GDZtulGUl06DrOsMqzg5C3bhOZMXxSvc2fiMzvM9T9VwxflA77S2HPzPzNs0Hu+0vJ9uGfU80UCuhAlP9T5J1NHulXCdFh5vD5cCpcuZgFz3J6p78D2NEZYzNZr3fKCqOgdbn1+3BEANSUeUu61l0eRg4qOTnABLHIk94zODiGpN0dC26lCh5ieaQQEEdE/kt5wqCHRf6TJ43R3rQ9CWY2FVtNi+qcs2Qi0ZRtW1PbjyGmvpf4E55D5fg84g/NHZr8PnC3kDyfMsww28f1UOTKP6+sc49hAeyX+eQ+vrLiKB9SufSETXQFvnPVPeD9JqMnUwp1WyPAhwBbg5c7ivNdaWfX7RUKzfJYADai23aUBrEiqSyGGDkc++Ja1v07T0qXiXsN9X3tLbb8YmJ4nhfpYveVseu19PSK6OoEx2SB03FVVOX8lwK213YfiAAoYF5tDlMLje64eveOzzVn44EEA3tesFG0gnRrZgh0rwaHt68eXu+nT5jPsq90/wili/NDMT8OcHuQwaCgj0XZR15fHDcktHnmDhDO3htm4ocLL4pX2z5T+OIB9ftK0a72yfMpuppUXV60s/aKM/MVK1dkz7PpGB552+3MLNhdI1ywnp9uVp3e3+EabYaj8yhxoj+SBEKkdyLEqemkCYG4mPBnrErDA7I8O7Fe6NO4AQACgOIfRNbp4eEW8AroXgHqJrfTbtwL0Iq3qSxNY1yfe0KvBlNVzhZyncOArS2LW9uG4r4Hkx0aGXoReLOdEMCatyYhrg2NyLxbZE3LL964NSTbSzw7s0DSPCKQdQSy+kDKiDsSv1atPNlh0lfr7RD44Z/lYwbIWMSLncfunTXdDL05IBhagKD/pv/AP/aAAwDAQACAAMAAAAQ8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888885v/wDMeefPO/NPvPPPPPPPPPPP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",
+        "sizing": "contain",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 5159039009035336,
+      "definition": {
+        "title": "Monitors Summary",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5841197223063948,
+            "definition": {
+              "title": "Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:okta-workflows)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 691608206884740,
+      "definition": {
+        "type": "note",
+        "content": "**Overview**\n\nThe Okta Workflows dashboard offers a detailed overview of workflow activities, including trends, and event tracking for flows, connectors, folders, and tables. It highlights key insights like workflow success rates, and execution history, providing a centralized view of workflow operations and user actions.\n\nFor more information, see the [Okta Workflows Integration Documentation](https://docs.datadoghq.com/integrations/okta-workflows/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 1490333542954818,
+      "definition": {
+        "title": "Workflows Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 37978737945836,
+            "definition": {
+              "title": "Success Rate of Workflow Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "label": "%",
+                          "type": "custom_unit_label"
+                        }
+                      },
+                      "formula": "query2 / query1 * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 95
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "black_on_light_green",
+                      "value": 90
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "green_on_white",
+                      "value": 80
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_yellow",
+                      "value": 70
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_red",
+                      "value": 70
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows -@evt.outcome:(FAILURE OR failure) $Workflow_Name $User_Name $User_ID $User_Email"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count",
+                        "metric": "@log.uuid",
+                        "interval": 300000
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows $Workflow_Name $User_Name $User_ID $User_Email"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count",
+                        "metric": "@log.uuid",
+                        "interval": 300000
+                      },
+                      "storage": "hot"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 3352439277636610,
+            "definition": {
+              "title": "Workflow Events over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Workflow Events",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 1874939174648428,
+            "definition": {
+              "title": "Frequent Workflow Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8441169342368060,
+            "definition": {
+              "title": "Infrequent Workflow Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "asc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4834793462373932,
+            "definition": {
+              "title": "Workflow Events by Location",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 250,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 12
+      }
+    },
+    {
+      "id": 5158160747359662,
+      "definition": {
+        "title": "Flows Insights",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8524190436046540,
+            "definition": {
+              "title": "Created Flows by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.create $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@enrichment_details.workflow_id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@enrichment_details.workflow_id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 146472154927972,
+            "definition": {
+              "title": "Deleted Flows by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@enrichment_details.workflow_id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@enrichment_details.workflow_id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8558335725079792,
+            "definition": {
+              "title": "Created and Deleted Flows over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Created Flows",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Deleted Flows",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.create $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@enrichment_details.workflow_id"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@enrichment_details.workflow_id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 5027090578075560,
+            "definition": {
+              "title": "Activated Flows by User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.activate $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@enrichment_details.workflow_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Count",
+                      "formula": "query1",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 0,
+                          "palette": "black_on_light_green"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7077499463331688,
+            "definition": {
+              "title": "Deactivated Flows by User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.deactivate $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@enrichment_details.workflow_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Count",
+                      "formula": "query1",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 0,
+                          "palette": "black_on_light_red"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 281779904992220,
+            "definition": {
+              "title": "Activated and Deactivated Flows Trend",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Activated Flows",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Deactivated Flows",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.activate $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.deactivate $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 6252417277995878,
+            "definition": {
+              "title": "Exported Flows by User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.export $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@enrichment_details.workflow_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6336040166464990,
+            "definition": {
+              "title": "Imported Flows by User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.import $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@enrichment_details.workflow_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 16,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6367758736022530,
+            "definition": {
+              "title": "Canceled Flow Executions by User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.execution.cancel $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@enrichment_details.workflow_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 0,
+                          "palette": "black_on_light_red"
+                        }
+                      ],
+                      "cell_display_mode": "bar",
+                      "alias": "Count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 20,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 24
+      }
+    },
+    {
+      "id": 116212910186676,
+      "definition": {
+        "title": "Execution History and Workflow Runs",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1503019260849880,
+            "definition": {
+              "title": "Activated and Deactivated Execution History Trend",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Activated Execution History",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Deactivated Execution History",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.execution_history.activate $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.execution_history.deactivate $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 8460370647242532,
+            "definition": {
+              "title": "Flow Execution History Deletion by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.flow.execution_history.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7044391512767462,
+            "definition": {
+              "title": "Delegated Workflow Runs by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.delegatedflow.run $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2519489860872178,
+            "definition": {
+              "title": "Top Delegated Workflow Runs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.delegatedflow.run $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@enrichment_details.workflow_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1396310714058086,
+            "definition": {
+              "title": "Delegated Workflow Runs over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.delegatedflow.run $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 8,
+              "width": 8,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 42,
+        "width": 12,
+        "height": 13,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7914967042765606,
+      "definition": {
+        "title": "Workflow Connectors Insights",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7817798015265170,
+            "definition": {
+              "title": "Workflow Connectors Creation by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.connection.create $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 974276237318820,
+            "definition": {
+              "title": "Workflow Connectors Deletion by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.connection.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6147995091131244,
+            "definition": {
+              "title": "Workflow Connectors Activity Trend",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Create",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Delete",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Reauthorize",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Revoke",
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.connection.create $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.connection.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.connection.reauthorize $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.connection.revoke $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 55,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 530845092314274,
+      "definition": {
+        "title": "Folders",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8729663989628246,
+            "definition": {
+              "title": "Folders Created by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.folder.create $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3931706691014624,
+            "definition": {
+              "title": "Folders Deleted by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.folder.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5323841840937246,
+            "definition": {
+              "title": "Folders Exported by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.folder.export $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 304742592564742,
+            "definition": {
+              "title": "Folders Imported by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.folder.import $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 64,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 5969708596634978,
+      "definition": {
+        "title": "Tables",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6908673875560986,
+            "definition": {
+              "title": "Tables Created by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.table.create $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7839173854742012,
+            "definition": {
+              "title": "Tables Deleted by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.table.delete $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8394705923034074,
+            "definition": {
+              "title": "Tables Updated by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.table.update $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 1734222538772660,
+            "definition": {
+              "title": "Tables Exported by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.table.export $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2009795827136474,
+            "definition": {
+              "title": "Tables Imported by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:okta-workflows service:workflows @evt.name:workflows.user.table.import $User_Name $User_ID $User_Email $Workflow_Name"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@log.uuid"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@log.uuid"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 73,
+        "width": 12,
+        "height": 13
+      }
+    },
+    {
+      "id": 4583199094802920,
+      "definition": {
+        "title": "Role Activities over Time",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "alias": "Group Added",
+                "formula": "query1"
+              },
+              {
+                "alias": "Group Removed",
+                "formula": "query2"
+              },
+              {
+                "alias": "User Added",
+                "formula": "query3"
+              },
+              {
+                "alias": "User Removed",
+                "formula": "query4"
+              }
+            ],
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:okta-workflows service:workflows @evt.name:workflows.user.role.group.add $User_Name $User_ID $User_Email $Workflow_Name"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@log.uuid"
+                },
+                "storage": "hot"
+              },
+              {
+                "name": "query2",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:okta-workflows service:workflows @evt.name:workflows.user.role.group.remove $User_Name $User_ID $User_Email $Workflow_Name"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@log.uuid"
+                },
+                "storage": "hot"
+              },
+              {
+                "name": "query3",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:okta-workflows service:workflows @evt.name:workflows.user.role.user.add $User_Name $User_ID $User_Email $Workflow_Name"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@log.uuid"
+                },
+                "storage": "hot"
+              },
+              {
+                "name": "query4",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:okta-workflows service:workflows @evt.name:workflows.user.role.user.remove $User_Name $User_ID $User_Email $Workflow_Name"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@log.uuid"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 5396925856410067,
+      "definition": {
+        "title": "Workflow Event Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "source:okta-workflows service:workflows $User_Name $User_ID $User_Email $Workflow_Name",
+              "indexes": [],
+              "storage": "hot",
+              "sort": {
+                "order": "desc",
+                "column": "timestamp"
+              }
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "service",
+                "width": "auto"
+              },
+              {
+                "field": "@usr.name",
+                "width": "auto"
+              },
+              {
+                "field": "@usr.email",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "auto"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 12,
+        "height": 3
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "User_Name",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "User_ID",
+      "prefix": "@usr.id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "User_Email",
+      "prefix": "@usr.email",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Workflow_Name",
+      "prefix": "@enrichment_details.workflow_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

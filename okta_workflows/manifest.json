@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e5e2a25d-aa66-41bc-9996-50f635dcc7a1",
+  "app_id": "okta-workflows",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Okta Workflows Events.",
+    "title": "Okta Workflows",
+    "media": [
+      {
+        "caption": "Okta Workflows",
+        "image_url": "images/okta_workflows_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Okta Workflows",
+        "image_url": "images/okta_workflows_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",     
+      "Submitted Data Type::Logs",
+      "Offering::Integration",
+      "Category::Automation"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 33274584,
+      "source_type_name": "Okta Workflows",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Okta Workflows": "assets/dashboards/okta_workflows.json"
+    },
+    "monitors": {
+      "High Number of Abandoned Outcome Events Detected": "assets/monitors/high_number_of_abandoned_outcome_events_detected.json",
+      "High Number of Denied Outcome Events Detected": "assets/monitors/high_number_of_denied_outcome_events_detected.json",
+      "High Number of Failure Outcome Events Detected": "assets/monitors/high_number_of_failure_outcome_events_detected.json"
+    },
+    "logs": {
+      "source": "okta-workflows"
+    }
+  },
+  "author": {
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "support_email": "help@datadoghq.com"
+  }
+}

@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-23",
+	"last_updated_at": "2024-12-23",
+	"title": "High Number of Failure Outcome Events Detected",
+	"description": "Failure outcome events in Okta Workflows indicate unsuccessful executions, causing delays and service interruptions. This monitor tracks such failures to ensure reliability and continuity. Immediate action is required to address issues and maintain smooth workflow performance.",
+	"definition": {
+		"id": 159649819,
+		"name": "High Number of Failure Outcome Events Detected",
+		"type": "log alert",
+		"query": "logs(\"source:okta-workflows service:workflows @evt.outcome:FAILURE @evt.name:workflows.*\").index(\"*\").rollup(\"cardinality\", \"@log.uuid\").last(\"1h\") > 50",
+		"message": "{{#is_alert}}\nFailure outcome events for Okta Workflows indicates unsuccessful workflow executions which leads to delays, operational inefficiencies, and potential service interruptions.\n\nHigh number of failure outcome events detected in Okta Workflows. Immediate action is needed to maintain reliability and operational continuity.\n{{/is_alert}}",
+		"tags": [
+			"integration:okta-workflows"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 50
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:okta-workflows"
+	]
+}
