@@ -3,7 +3,7 @@
 ## Overview
 [Okta Workflows][1] is a no-code automation platform provided by Okta, designed to simplify and automate identity-related tasks and processes. It allows organizations to build custom workflows that integrate seamlessly with Okta's identity and access management capabilities and third-party applications, enhancing operational efficiency, security, and user experience.
 
-The Okta Workflows integration collects Okta workflow event logs and sends it into Datadog for comprehensive analysis.
+The Okta Workflows integration collects Okta workflow event logs and sends them to Datadog for comprehensive analysis.
 
 ## Setup
 
@@ -32,7 +32,7 @@ The Okta Workflows integration collects Okta workflow event logs and sends it in
 
 ### Logs
 
-The Okta Workflows integration collects and forwards okta workflow event logs to Datadog.
+The Okta Workflows integration collects and forwards Okta workflow event logs to Datadog.
 
 ### Metrics
 
