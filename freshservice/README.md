@@ -1,43 +1,51 @@
-# Agent Check: freshservice
+# Freshservice
 
 ## Overview
 
-This check monitors [freshservice][1].
+[Freshservice][1] is a cloud-based IT service management (ITSM) solution that streamlines ticketing, asset management, and service desk operations. It offers robust features for problem resolution, change control, and IT asset tracking. With a user-friendly interface and automation capabilities, Freshservice empowers organizations to enhance IT support efficiency, improve service delivery, and ensure seamless IT operations.
+
+This integration ingests the following logs:
+
+- Ticket: Represents case sheet detailing an issue's history, from the time it was reported until it was closed.
+
+The Freshservice integration seamlessly collects ticket logs from Freshservice, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into ticket logs through the out-of-the-box dashboards.
 
 ## Setup
 
-### Installation
+### Generate API credentials in Freshservice
 
-The Freshservice check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to your [Freshservice account][2].
+2. Click your profile picture on the upper-right corner of the portal and select the Profile settings page. Your API key is displayed on the right-side section of the page.
 
-### Configuration
+### Connect your Freshservice Account to Datadog
 
-!!! Add list of steps to set up this integration !!!
+1. Add your Freshservice API key.
 
-### Validation
+    | Parameters | Description                                                                |
+    | ----------------------- | --------------------------------------------------------------|
+    | Domain Name             | The Domain Name from Freshservice portal URL.                 |
+    | API Key                 | The Personal API key of Freshservice.                         |
 
-!!! Add steps to validate integration is functioning as expected !!!
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The integration collects and forwards Freshservice ticket logs to Datadog.
+
 ### Metrics
 
-Freshservice does not include any metrics.
-
-### Service Checks
-
-Freshservice does not include any service checks.
+The Freshservice integration does not include any metrics.
 
 ### Events
 
-Freshservice does not include any events.
+The Freshservice integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+For further assistance, contact [Datadog Support][3].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: https://developers.freshservice.com/
+[2]: https://login.freshworks.com/email-login/
 [3]: https://docs.datadoghq.com/help/
-
