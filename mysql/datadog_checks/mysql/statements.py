@@ -287,8 +287,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_row['dd_comments'] = metadata.get('comments', None)
-            # if row['digest'] == '6b5a1b14bbeef4253f3d88bd6d2f41cf':
-            #     self.log.warning("Normalized Row: %s", normalized_row)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
@@ -297,19 +295,18 @@ class MySQLStatementMetrics(DBMAsyncJob):
         """
         If two or more statements with different digests have the same query_signature, they are considered the same
         Because only one digest statement may be updated, we cache all the rows for each digest,
-        update with any new rows and then return all the rows for all the query_signatures
+        update with any new rows and then return all the rows for all the query_signatures.
+
+        We return all rows to guard against the case where a signature wasn't collected on the immediately previous run
+        but was present on runs before that.
         """
-        keys = set()
         for row in rows:
             key = (row['schema_name'], row['query_signature'])
             if key not in self._statement_rows:
                 self._statement_rows[key] = {}
             self._statement_rows[key][row['digest']] = row
-            keys.add(key)
 
-        # self._log.warning("keys: %s", keys)
-
-        return [self._statement_rows[key][digest] for key in keys for digest in self._statement_rows[key]]
+        return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
 
     def _rows_to_fqt_events(self, rows, tags):
         for row in rows:
