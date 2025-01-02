@@ -616,7 +616,6 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         ),
     ],
 )
-@pytest.mark.unit
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload, root_conn
 ):
