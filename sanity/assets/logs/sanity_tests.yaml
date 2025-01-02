@@ -1,0 +1,261 @@
+id: sanity
+tests:
+  - sample: >-
+      {
+      	"documentType": "comment",
+      	"service": "activity-logs",
+      	"datasetName": "testing-dataset-comments",
+      	"action": "document.create",
+      	"afterValues": {
+      		"threadId": "8bd8fd8a-96d8-45a0-a27f-e79e3a5313cc",
+      		"_createdAt": "2025-01-02T09:34:44Z",
+      		"context": {
+      			"notification": {
+      				"currentThreadLength": 1,
+      				"documentTitle": "new1 (2024)",
+      				"workspaceTitle": "abc",
+      				"url": "https://studio-with-template.sanity.studio/structure/movie"
+      			},
+      			"payload": {
+      				"workspace": "default"
+      			},
+      			"tool": ""
+      		},
+      		"_type": "comment",
+      		"_rev": "PLZU3STmlngeQSXnoPA4gq",
+      		"_id": "9ded3fab-5df8-43eb-8d3c-f94a44bbd91c",
+      		"authorId": "ppZaIKjRJ",
+      		"message": [
+      			{
+      				"children": [
+      					{
+      						"_type": "span",
+      						"text": "commentn1",
+      						"_key": "74830e586545"
+      					}
+      				],
+      				"_type": "block",
+      				"style": "normal",
+      				"_key": "ea0b25ee8e22"
+      			}
+      		],
+      		"_updatedAt": "2025-01-02T09:34:44Z",
+      		"target": {
+      			"path": {
+      				"field": "title"
+      			},
+      			"documentRevisionId": "rYFaT4Hj0JassVhSW9iHEt",
+      			"documentType": "movie",
+      			"document": {
+      				"_weak": true,
+      				"_type": "crossDatasetReference",
+      				"_ref": "7c1c32ce-e6d5-4832-87e0-3c45accc9004",
+      				"_dataset": "testing-dataset",
+      				"_projectId": "6t8g3xid"
+      			}
+      		},
+      		"status": "open"
+      	},
+      	"documentId": "9ded3fab-5df8-43eb-8d3c-f94a44bbd91c",
+      	"projectId": "6t8g3xid",
+      	"timestamp": "2025-01-02T09:34:44Z"
+      }
+    result: null
+  - sample: >-
+      {
+      	"beforeValues": {
+      		"threadId": "8bd8fd8a-96d8-45a0-a27f-e79e3a5313cc",
+      		"_createdAt": "2025-01-02T09:34:44Z",
+      		"_rev": "PLZU3STmlngeQSXnoPA4gq",
+      		"_type": "comment",
+      		"context": {
+      			"notification": {
+      				"currentThreadLength": 1,
+      				"documentTitle": "new1 (2024)",
+      				"workspaceTitle": "abc",
+      				"url": "https://studio-with-template.sanity.studio/structure/movie"
+      			},
+      			"payload": {
+      				"workspace": "default"
+      			},
+      			"tool": ""
+      		},
+      		"_id": "9ded3fab-5df8-43eb-8d3c-f94a44bbd91c",
+      		"message": [
+      			{
+      				"children": [
+      					{
+      						"_type": "span",
+      						"text": "commentn1",
+      						"_key": "74830e586545"
+      					}
+      				],
+      				"_type": "block",
+      				"style": "normal",
+      				"_key": "ea0b25ee8e22"
+      			}
+      		],
+      		"authorId": "ppZaIKjRJ",
+      		"_updatedAt": "2025-01-02T09:34:44Z",
+      		"target": {
+      			"path": {
+      				"field": "title"
+      			},
+      			"documentRevisionId": "rYFaT4Hj0JassVhSW9iHEt",
+      			"documentType": "movie",
+      			"document": {
+      				"_weak": true,
+      				"_ref": "7c1c32ce-e6d5-4832-87e0-3c45accc9004",
+      				"_type": "crossDatasetReference",
+      				"_dataset": "testing-dataset",
+      				"_projectId": "6t8g3xid"
+      			}
+      		},
+      		"status": "open"
+      	},
+      	"documentType": "comment",
+      	"service": "activity-logs",
+      	"datasetName": "testing-dataset-comments",
+      	"action": "document.delete",
+      	"documentId": "9ded3fab-5df8-43eb-8d3c-f94a44bbd91c",
+      	"projectId": "6t8g3xid",
+      	"timestamp": "2025-01-02T10:11:01Z"
+      }
+    result: null
+  - sample: >-
+      {
+      	"beforeValues": {
+      		"createdByUser": "2025-01-01T04:30:32.513Z",
+      		"subscribers": [
+      			"ppZaIKjRJ"
+      		],
+      		"_rev": "72321a62-d605-4df3-ab23-d8c2b7306747",
+      		"_type": "tasks.task",
+      		"description": [
+      			{
+      				"children": [
+      					{
+      						"_type": "span",
+      						"text": "task_2_screening",
+      						"_key": "ea8e16ae3083"
+      					}
+      				],
+      				"_type": "block",
+      				"style": "normal",
+      				"_key": "76570d367036"
+      			}
+      		],
+      		"title": "task_screening_1 (copy)",
+      		"authorId": "ppZaIKjRJ",
+      		"assignedTo": "ppZaIKjRJ",
+      		"target": {
+      			"documentType": "screening",
+      			"document": {
+      				"_weak": true,
+      				"_ref": "c437cb0b-8b77-4ba6-b22b-86dd678bd797",
+      				"_type": "crossDatasetReference",
+      				"_dataset": "testing-dataset-comments",
+      				"_projectId": "6t8g3xid"
+      			}
+      		},
+      		"_createdAt": "2025-01-01T04:29:57Z",
+      		"context": {
+      			"notification": {
+      				"targetContentImageUrl": "https://cdn.sanity.io/images/6t8g3xid/testing-dataset/123-352x100.svg?rect=126,0,100,100&w=96&h=96",
+      				"targetContentTitle": "Test_screening_2",
+      				"workspaceTitle": "abc",
+      				"url": "https://studio-with-template.sanity.studio//structure"
+      			}
+      		},
+      		"_id": "7077cdfc-2d17-44e4-bc49-0bf15c7cfdd9",
+      		"_updatedAt": "2025-01-01T04:32:19Z",
+      		"status": "open"
+      	},
+      	"documentType": "tasks.task",
+      	"service": "activity-logs",
+      	"datasetName": "testing-dataset-comments",
+      	"action": "document.update",
+      	"afterValues": {
+      		"createdByUser": "2025-01-01T04:30:32.513Z",
+      		"subscribers": [
+      			"ppZaIKjRJ"
+      		],
+      		"_type": "tasks.task",
+      		"_rev": "aa1decd8-ff39-498d-9064-e0fa26ffe1c0",
+      		"description": [
+      			{
+      				"children": [
+      					{
+      						"_type": "span",
+      						"text": "task_2_screening",
+      						"_key": "ea8e16ae3083"
+      					}
+      				],
+      				"_type": "block",
+      				"style": "normal",
+      				"_key": "76570d367036"
+      			}
+      		],
+      		"title": "task_screening_1 ()",
+      		"authorId": "ppZaIKjRJ",
+      		"assignedTo": "ppZaIKjRJ",
+      		"target": {
+      			"documentType": "screening",
+      			"document": {
+      				"_weak": true,
+      				"_ref": "c437cb0b-8b77-4ba6-b22b-86dd678bd797",
+      				"_type": "crossDatasetReference",
+      				"_dataset": "testing-dataset-comments",
+      				"_projectId": "6t8g3xid"
+      			}
+      		},
+      		"_createdAt": "2025-01-01T04:29:57Z",
+      		"context": {
+      			"notification": {
+      				"targetContentImageUrl": "https://cdn.sanity.io/images/6t8g3xid/testing-dataset/123-352x100.svg?rect=126,0,100,100&w=96&h=96",
+      				"targetContentTitle": "Test_screening_2",
+      				"workspaceTitle": "abc",
+      				"url": "https://studio-with-template.sanity.studio//structure"
+      			}
+      		},
+      		"_id": "7077cdfc-2d17-44e4-bc49-0bf15c7cfdd9",
+      		"_updatedAt": "2025-01-02T10:12:48Z",
+      		"status": "open"
+      	},
+      	"documentId": "7077cdfc-2d17-44e4-bc49-0bf15c7cfdd9",
+      	"projectId": "6t8g3xid",
+      	"timestamp": "2025-01-02T10:12:48Z"
+      }
+    result: null
+  - sample: >-
+      {
+          "id": "ale-2qkaB8F2TktURrG2QmnARtoNpIk",
+          "version": "v2021-02-01",
+          "actorId": "g1CHkVlfZ",
+          "actorName": "Watif Pax",
+          "actorEmail": "wetif@abc.com",
+          "action": "project.members.role.delete",
+          "timestamp": "2024-12-26T10:28:08.669Z",
+          "description": "\"Watif Pax\" was removed from the role \"test3\" on the project",
+          "correlationId": "c87c267d910f818378a248436ecb6d0x",
+          "metadata": {
+              "roleName": "test",
+              "roleTitle": "test3"
+          },
+          "userId": "g1CHkVlfZ",
+          "userName": "Watif Pax",
+          "userEmail": "wetif@abc.com",
+          "projectId": "6t8g3xid",
+          "projectDisplayName": "ABC",
+          "organizationId": null,
+          "organizationDisplayName": null,
+          "transactionId": null,
+          "documentId": null,
+          "datasetName": "dataset_test3"
+      }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.

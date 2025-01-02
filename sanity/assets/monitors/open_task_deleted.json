@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2025-01-02",
+  "last_updated_at": "2025-01-02",
+  "title": "Open task deleted",
+  "description": "This monitor alerts when an open task is deleted before completion, potentially leading to workflow disruptions, loss of important action items, or gaps in project management that could affect team productivity and task tracking within your Sanity project.",
+  "definition": {
+    "id": 161218492,
+    "name": "Open task deleted",
+    "type": "log alert",
+    "query": "logs(\"source:sanity service:activity-logs @evt.name:document.delete @documentType:tasks.task @beforeValues.status:open\").index(\"*\").rollup(\"count\").by(\"@projectId,@documentId,@beforeValues.assignedTo,@beforeValues.title\").last(\"10m\") >= 1",
+    "message": "{{#is_alert}}\nAn open task **{{[@beforeValues.title].name}}** was deleted in project: **{{@projectId.name}}** which was assigned to **{{[@beforeValues.assignedTo].name}}**.\n{{/is_alert}}\n\n@example@example.com",
+    "tags": [
+      "integration:sanity"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "enable_logs_sample": false,
+      "notify_audit": false,
+      "on_missing_data": "show_no_data",
+      "include_tags": false,
+      "new_group_delay": 60,
+      "silenced": {}
+    },
+    "priority": null,
+    "restriction_policy": {
+      "bindings": []
+    }
+  },
+  "tags": [
+    "integration:sanity"
+  ]
+}
