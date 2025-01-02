@@ -1,0 +1,29 @@
+{
+    "title": "DuckDB Overview",
+    "description": "[[suggested_dashboards]]",
+    "widgets": [
+        {
+            "id": 6432334130190000,
+            "definition": {
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/duckdb_small.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 2,
+                "height": 2
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
