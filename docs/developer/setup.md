@@ -96,7 +96,10 @@ To install certain command line tools, you'll need [pipx](https://github.com/pyp
 
     ```
     python -m pip install --user pipx
+    python -m pipx ensurepath
     ```
+
+    After that, restart your shell or reload the PATH enviroment variable (`source ~/.bashrc` if you're using bash).
 
     Verify successful `PATH` modification:
 
@@ -292,10 +295,9 @@ Upon the first invocation, `ddev` will create its [config file](ddev/configurati
 You will need to set the location of each cloned repository:
 
 ```
-ddev config set <REPO> /path/to/integrations-<REPO>
+ddev config set repos.core /path/to/integrations-core
+ddev config set repos.extras /path/to/integrations-extras
 ```
-
-The `<REPO>` may be either `core` or `extras`.
 
 By default, the repo `core` will be the target of all commands. If you want to switch to `integrations-extras`, run:
 
