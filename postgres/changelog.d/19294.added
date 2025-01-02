@@ -1,0 +1,1 @@
+Added `postgresql.sequence.estimated_remaining` metric for monitoring remaining available values in sequences
