@@ -226,7 +226,8 @@ After downloading the archive corresponding to your platform and architecture, e
     ```
     pipx install ddev
     ```
-
+    After that, restart your shell or reload the PATH enviroment variable (`source ~/.bashrc` if you're using bash).
+    
     !!! warning
         Do not use `sudo` as it may result in a broken installation!
 
