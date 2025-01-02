@@ -1,4 +1,4 @@
-# Agent Check: Nvidia Jetson
+# Agent Check: NVIDIA Jetson
 
 ## Overview
 
