@@ -1,0 +1,25 @@
+id: milvus
+tests:
+  - sample: '[2024/11/27 14:07:51.849 +00:00] [INFO] [datacoord/handler.go:341]
+      ["channel seek position set from channel checkpoint meta"]
+      [channel=by-dev-rootcoord-dml_2_453764875273209568v0]
+      [posTs=454221223538458625] [posTime=2024/11/27 14:07:39.421 +00:00]'
+    result: null
+  - sample: '[2024/11/27 14:07:01.849 +00:00] [INFO] [datacoord/services.go:833]
+      ["datacoord append channelInfo in GetRecoveryInfo"]
+      [traceID=ed216b196edf0589f281c4ad800f6565]
+      [collectionID=453764875273209568] [partitionIDs="[]"]
+      [channel=by-dev-rootcoord-dml_2_453764875273209568v0] ["# of unflushed
+      segments"=0] ["# of flushed segments"=1] ["# of dropped segments"=0] ["#
+      of indexed segments"=0] ["# of l0 segments"=0]'
+    result: null
+  - sample: '[2024/11/27 14:06:51.852 +00:00] [INFO] [datacoord/services.go:818]
+      ["get recovery info request received"]
+      [traceID=54cda8d3229d00982db785351a12ea7a]
+      [collectionID=453764875273212700] [partitionIDs="[]"]'
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
