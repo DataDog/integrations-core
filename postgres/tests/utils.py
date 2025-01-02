@@ -4,7 +4,7 @@
 import threading
 import time
 
-import psycopg2
+import psycopg
 import pytest
 
 from .common import PASSWORD_ADMIN, POSTGRES_VERSION, USER_ADMIN
@@ -39,22 +39,24 @@ requires_over_16 = pytest.mark.skipif(
 )
 
 
-def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test'):
-    conn = psycopg2.connect(
+def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test', autocommit=True):
+    conn = psycopg.connect(
         host=db_instance['host'],
         port=db_instance['port'],
         dbname=dbname or db_instance['dbname'],
         user=user or db_instance['username'],
         password=password or db_instance['password'],
         application_name=application_name,
+        autocommit=autocommit,
     )
-    conn.autocommit = True
     return conn
 
 
 # Get a connection with superuser
-def _get_superconn(db_instance, application_name='test'):
-    return _get_conn(db_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name=application_name)
+def _get_superconn(db_instance, application_name='test', autocommit=True):
+    return _get_conn(
+        db_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name=application_name, autocommit=autocommit
+    )
 
 
 def lock_table(pg_instance, table, lock_mode):
@@ -106,7 +108,7 @@ def run_query_thread(pg_instance, query, application_name='test', init_statement
                     cur.execute(stmt)
             try:
                 cur.execute(query)
-            except psycopg2.errors.QueryCanceled:
+            except psycopg.errors.QueryCanceled:
                 pass
         conn.close()
 
@@ -135,3 +137,28 @@ def run_one_check(check, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+
+
+# WaitGroup is used like go's sync.WaitGroup
+class WaitGroup(object):
+    def __init__(self):
+        self.count = 0
+        self.cv = threading.Condition()
+
+    def add(self, n):
+        self.cv.acquire()
+        self.count += n
+        self.cv.release()
+
+    def done(self):
+        self.cv.acquire()
+        self.count -= 1
+        if self.count == 0:
+            self.cv.notify_all()
+        self.cv.release()
+
+    def wait(self):
+        self.cv.acquire()
+        while self.count > 0:
+            self.cv.wait()
+        self.cv.release()

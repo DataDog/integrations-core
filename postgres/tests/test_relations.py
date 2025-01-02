@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -380,7 +380,7 @@ def check_with_lock(check, instance, lock_table=None):
     lock_statement = 'LOCK persons'
     if lock_table is not None:
         lock_statement = 'LOCK {}'.format(lock_table)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute(lock_statement)
             check.check(instance)
