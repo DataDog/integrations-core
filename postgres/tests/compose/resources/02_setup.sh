@@ -15,6 +15,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "datadog_test" <<-'EOSQL'
     CREATE EXTENSION pg_buffercache SCHEMA public;
     CREATE EXTENSION pg_stat_statements SCHEMA public;
     GRANT SELECT ON pg_stat_statements TO datadog;
+    GRANT SELECT ON pg_statistic TO datadog;
 
     CREATE SCHEMA IF NOT EXISTS datadog;
     GRANT USAGE ON SCHEMA datadog TO datadog;
