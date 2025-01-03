@@ -40,7 +40,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:ringcentral",
+              "query": "tag:(integration:ringcentral)",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
