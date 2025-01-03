@@ -22,6 +22,7 @@ cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
 cryptography,PyPI,PSF,Copyright (c) Individual contributors.
 ddtrace,PyPI,BSD-3-Clause,"Copyright 2016 Datadog, Inc."
 dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
+duckdb,PyPI,MIT,Copyright (c) Hannes Muehleisen
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
