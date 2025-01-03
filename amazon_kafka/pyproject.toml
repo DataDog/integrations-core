@@ -13,6 +13,7 @@ keywords = [
     "datadog agent",
     "datadog check",
     "amazon_msk",
+    "amazon_kafka",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -43,7 +44,7 @@ deps = [
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/amazon_msk/__about__.py"
+path = "datadog_checks/amazon_kafka/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -54,7 +55,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/amazon_msk",
+    "/datadog_checks/amazon_kafka",
 ]
 dev-mode-dirs = [
     ".",

@@ -6,15 +6,15 @@ import copy
 import mock
 import pytest
 
-from datadog_checks.amazon_msk import AmazonMskCheck
-from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
+from datadog_checks.amazon_kafka import AmazonMskCheck
+from datadog_checks.amazon_kafka.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
 from .common import INSTANCE, INSTANCE_LEGACY, assert_jmx_metrics
 
 
 @pytest.mark.usefixtures('mock_data')
 def test_node_check_legacy(aggregator, instance_legacy, mock_client):
-    c = AmazonMskCheck('amazon_msk', {}, [instance_legacy])
+    c = AmazonMskCheck('amazon_kafka', {}, [instance_legacy])
     assert not c.run()
 
     caller, client = mock_client
@@ -75,7 +75,7 @@ def test_disabled_exporter_legacy(
             "node_exporter_port": node_exporter_port,
         }
     )
-    c = AmazonMskCheck('amazon_msk', {}, [inst])
+    c = AmazonMskCheck('amazon_kafka', {}, [inst])
     assert not c.run()
 
     assert_jmx_metrics(aggregator, [], is_enabled=assert_jmx_metrics_enabled)
@@ -84,7 +84,7 @@ def test_disabled_exporter_legacy(
 
 @pytest.mark.usefixtures('mock_data')
 def test_node_check(aggregator, dd_run_check, instance, mock_client):
-    c = AmazonMskCheck('amazon_msk', {}, [instance])
+    c = AmazonMskCheck('amazon_kafka', {}, [instance])
     dd_run_check(c)
 
     caller, client = mock_client
@@ -147,7 +147,7 @@ def test_disabled_exporter_check(
             "node_exporter_port": node_exporter_port,
         }
     )
-    c = AmazonMskCheck('amazon_msk', {}, [inst])
+    c = AmazonMskCheck('amazon_kafka', {}, [inst])
     dd_run_check(c)
 
     assert_jmx_metrics(aggregator, [], is_enabled=assert_jmx_metrics_enabled)
@@ -207,7 +207,7 @@ def assert_node_metrics(aggregator, tags, is_enabled=True):
 @pytest.mark.usefixtures('mock_data')
 def test_custom_metric_path(aggregator, instance_legacy, mock_client):
     instance_legacy['prometheus_metrics_path'] = '/'
-    c = AmazonMskCheck('amazon_msk', {}, [instance_legacy])
+    c = AmazonMskCheck('amazon_kafka', {}, [instance_legacy])
     assert not c.run()
 
     caller, client = mock_client
@@ -249,7 +249,7 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
 def test_proxy_config(instance):
     HTTP_PROXY = {"http": "example.com"}
     init_config = {"proxy": HTTP_PROXY}
-    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    c = AmazonMskCheck('amazon_kafka', init_config, [instance])
     assert c._boto_config.proxies == HTTP_PROXY
 
 
@@ -265,7 +265,7 @@ def test_boto_config(instance):
     HTTP_PROXY = {"http": "example.com"}
     init_config = {"proxy": HTTP_PROXY}
     instance["boto_config"] = {"proxies_config": {"proxy_use_forwarding_for_https": True}, "read_timeout": 60}
-    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    c = AmazonMskCheck('amazon_kafka', init_config, [instance])
     assert c._boto_config.proxies == HTTP_PROXY
     assert c._boto_config.proxies_config.get("proxy_use_forwarding_for_https")
     assert c._boto_config.read_timeout == 60
@@ -284,7 +284,7 @@ def test_invalid_boto_config(aggregator, instance, dd_run_check, caplog):
     HTTP_PROXY = {"http": "example.com"}
     init_config = {"proxy": HTTP_PROXY}
     instance["boto_config"] = {"proxies_config": {}, "read_timeout": True}
-    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    c = AmazonMskCheck('amazon_kafka', init_config, [instance])
     with pytest.raises(Exception, match=r'Timeout cannot be a boolean value. It must be an int, float or None.'):
         dd_run_check(c)
 

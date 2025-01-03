@@ -45,7 +45,7 @@ coverage:
       Amazon_Kafka:
         target: 75
         flags:
-        - amazon_msk
+        - amazon_kafka
       Ambari:
         target: 75
         flags:
@@ -764,11 +764,11 @@ flags:
     paths:
     - airflow/datadog_checks/airflow
     - airflow/tests
-  amazon_msk:
+  amazon_kafka:
     carryforward: true
     paths:
-    - amazon_msk/datadog_checks/amazon_msk
-    - amazon_msk/tests
+    - amazon_kafka/datadog_checks/amazon_kafka
+    - amazon_kafka/tests
   ambari:
     carryforward: true
     paths:

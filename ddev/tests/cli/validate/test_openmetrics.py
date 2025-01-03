@@ -5,7 +5,7 @@ import pytest
     "check_name, classes",
     [
         pytest.param("aerospike", 1, id="Aerospike check.py OpenMetricsV2"),
-        pytest.param("amazon_msk", 2, id="Amazon MSK amazon_msk.py OpenMetricsV1 and V2"),
+        pytest.param("amazon_kafka", 2, id="Amazon MSK amazon_kafka.py OpenMetricsV1 and V2"),
     ],
 )
 def test_openmetrics_pass_single_parameter(ddev, helpers, check_name, classes):

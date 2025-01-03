@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.amazon_msk import AmazonMskCheck
-from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
+from datadog_checks.amazon_kafka import AmazonMskCheck
+from datadog_checks.amazon_kafka.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import assert_jmx_metrics
