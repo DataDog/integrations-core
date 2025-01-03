@@ -9,7 +9,7 @@
 		"name": "High number of dataset deletions",
 		"type": "log alert",
 		"query": "logs(\"source:sanity service:activity-logs @evt.name:project.datasets.delete\").index(\"*\").rollup(\"count\").by(\"@projectId\").last(\"10m\") > 10",
-		"message": "{{#is_warning}}\nDataset deletion count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nDataset deletion count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nDataset deletion count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nDataset Deletion count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
+		"message": "{{#is_warning}}\nDataset deletion count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nDataset deletion count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nDataset deletion count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nDataset deletion count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
 		"tags": [
 			"integration:sanity"
 		],

@@ -338,17 +338,13 @@
           {
             "id": 4634010603041944,
             "definition": {
-              "title": "Documents Changes by Type",
+              "title": "Document Changes by Type",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
+              "type": "toplist",
               "requests": [
                 {
-                  "response_format": "scalar",
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -362,7 +358,7 @@
                       "group_by": [
                         {
                           "facet": "@documentType",
-                          "limit": 10,
+                          "limit": 50,
                           "sort": {
                             "aggregation": "count",
                             "order": "desc",
@@ -377,11 +373,14 @@
                       "storage": "hot"
                     }
                   ],
-                  "style": {
-                    "palette": "datadog16"
-                  },
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
-                    "count": 10,
+                    "count": 50,
                     "order_by": [
                       {
                         "type": "formula",
@@ -392,9 +391,12 @@
                   }
                 }
               ],
-              "type": "sunburst",
-              "legend": {
-                "type": "table"
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
               }
             },
             "layout": {
@@ -603,7 +605,7 @@
         "x": 0,
         "y": 6,
         "width": 12,
-        "height": 1
+        "height": 20
       }
     },
     {
@@ -1482,9 +1484,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 26,
         "width": 12,
-        "height": 1
+        "height": 26
       }
     },
     {
@@ -1796,7 +1798,7 @@
           {
             "id": 3154877210070018,
             "definition": {
-              "title": "Total Project Plan Created",
+              "title": "Total Project Plans Created",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1851,7 +1853,7 @@
           {
             "id": 2058735498440436,
             "definition": {
-              "title": "Total Project Plan Edited",
+              "title": "Total Project Plans Edited",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1905,7 +1907,7 @@
           {
             "id": 7945797244813960,
             "definition": {
-              "title": "Project Request Logs Files Downloaded",
+              "title": "Request Log Files Downloaded",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1959,7 +1961,7 @@
           {
             "id": 4709782345044730,
             "definition": {
-              "title": "Project Request Logs Files Requested",
+              "title": "Request Log Files Requested",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -2083,7 +2085,7 @@
           {
             "id": 7540719645363036,
             "definition": {
-              "title": "Top Actors with Project Request Logs File Events",
+              "title": "Top Actors with Request Log File Events",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -2164,9 +2166,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 8,
+        "y": 52,
         "width": 12,
-        "height": 1
+        "height": 17
       }
     },
     {
@@ -2181,7 +2183,7 @@
           {
             "id": 4649153852588994,
             "definition": {
-              "title": "Invitations Events Distribution",
+              "title": "Invitation Events Distribution",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -2708,9 +2710,10 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 0,
         "width": 12,
-        "height": 1
+        "height": 17,
+        "is_column_break": true
       }
     },
     {
@@ -3417,9 +3420,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 17,
         "width": 12,
-        "height": 1
+        "height": 27
       }
     },
     {
@@ -3993,9 +3996,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 11,
+        "y": 44,
         "width": 12,
-        "height": 1
+        "height": 22
       }
     }
   ],

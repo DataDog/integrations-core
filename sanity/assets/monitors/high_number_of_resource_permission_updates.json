@@ -5,11 +5,11 @@
 	"title": "High number of resource permission updates",
 	"description": "This monitor alerts when there's an unusually high number of resource permission changes within a short time frame, potentially indicating unauthorized access attempts, misconfiguration, or suspicious activity that could compromise data security and access controls.",
 	"definition": {
-		"id": 161217987,
+		"id": 161559074,
 		"name": "High number of resource permission updates",
 		"type": "log alert",
-		"query": "logs(\"source:sanity service:activity-logs @evt.name:project.permissionResource.update\").index(\"*\").rollup(\"count\").by(\"@projectId\").last(\"15m\") > 10",
-		"message": "{{#is_warning}}\nThe Resource permission update count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nResource permission update count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nThe Resource permission update count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nResource permission update count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
+		"query": "logs(\"source:sanity service:activity-logs @evt.name:project.permissionResource.update\").index(\"*\").rollup(\"count\").by(\"@projectId\").last(\"10m\") > 10",
+		"message": "{{#is_warning}}\nThe resource permission update count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nResource permission update count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nThe resource permission update count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nResource permission update count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
 		"tags": [
 			"integration:sanity"
 		],
@@ -22,8 +22,8 @@
 			"notify_audit": false,
 			"on_missing_data": "show_no_data",
 			"include_tags": false,
-			"silenced": {},
-			"new_group_delay": 0
+			"new_group_delay": 0,
+			"silenced": {}
 		},
 		"priority": null,
 		"restriction_policy": {

@@ -18,6 +18,15 @@ Integrate Sanity with Datadog to gain insights into content and project related 
 6. Enter a name and set the permission to **Viewer**.
 7. Click **Save** to copy a newly generated token.
 
+### Connect your Sanity account to Datadog
+
+1. Add your Sanity API Token    
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |API Token|API Token of your Sanity project.|
+
+2. Click the **Save** button to save your settings.
+
 ### Webhook Configuration
 Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [Sanity webhook documentation][4] for more details.
 
@@ -45,16 +54,6 @@ Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [
     **Note**: It is recommended that the **Trigger webhook when drafts are modified** checkbox under the **Drafts** section should not be checked.
 10. Ensure **POST** is selected under **HTTP method** in the **Advanced settings section**.
 11. Click **Save**.
-
-### Connect your Sanity account to Datadog
-
-1. Add your Sanity API Token    
-    |Parameters|Description|
-    |--------------------|--------------------|
-    |API Token|API Token of your Sanity project.|
-
-2. Click the **Save** button to save your settings.
-
 
 ## Data Collected
 
