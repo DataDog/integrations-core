@@ -377,6 +377,9 @@ cluster_checks_configs_info{check_id="http_check:kubernetes:c964669d244288ea",jo
 cluster_checks_configs_info{check_id="http_check:nginx 1:c89937d23c8b01a0",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-jm4mz"} 1
 cluster_checks_configs_info{check_id="http_check:nginx 2:89d07d5d897f5241",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-hxjwg"} 1
 cluster_checks_configs_info{check_id="http_check:nginx 3:8f889113ed52b58e",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-hxjwg"} 1
+# HELP cluster_checks_unscheduled_check Number of check configurations not scheduled.
+# TYPE cluster_checks_unscheduled_check gauge
+cluster_checks_unscheduled_check{config_name="kubernetes_state_core",config_source="file:/etc/datadog-agent/conf.d/kubernetes_state_core.yaml.default",join_leader="true"} 1
 # HELP autodiscovery_errors Number of Autodiscovery errors by provider.
 # TYPE autodiscovery_errors gauge
 autodiscovery_errors{provider="kubernetes-services"} 1
