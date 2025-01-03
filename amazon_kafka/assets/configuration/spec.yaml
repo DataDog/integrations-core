@@ -1,6 +1,6 @@
 name: Amazon Kafka
 files:
-- name: amazon_msk.yaml
+- name: amazon_kafka.yaml
   options:
   - template: init_config
     options:

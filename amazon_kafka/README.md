@@ -23,7 +23,7 @@ This OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) a
 
 ### Configuration
 
-1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. 
+1. Edit the `amazon_kafka.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. 
 
    Include custom [tags][17] that attach to every metric and service check provided by this integration.
 
@@ -33,7 +33,7 @@ This OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) a
      - <KEY_2>:<VALUE_2>
    ```
    
-   See the [sample amazon_msk.d/conf.yaml][9] for all available configuration options for the latest mode. For the legacy mode of this integration, see the [legacy example][10].
+   See the [sample amazon_kafka.d/conf.yaml][9] for all available configuration options for the latest mode. For the legacy mode of this integration, see the [legacy example][10].
 
 2. [Restart the Agent][11].
 
