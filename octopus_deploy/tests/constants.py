@@ -23,25 +23,46 @@ DEFAULT_COLLECTION_INTERVAL = 15
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=DEFAULT_COLLECTION_INTERVAL)
 
-E2E_METRICS = [
-    "octopus_deploy.space.count",
-    "octopus_deploy.project_group.count",
-    "octopus_deploy.project.count",
+
+DEPLOY_METRICS = [
     "octopus_deploy.deployment.count",
     "octopus_deploy.deployment.executing",
     "octopus_deploy.deployment.queued",
     "octopus_deploy.deployment.waiting",
     "octopus_deploy.deployment.queued_time",
     "octopus_deploy.deployment.executing_time",
-    "octopus_deploy.server_node.count",
-    "octopus_deploy.server_node.in_maintenance_mode",
-    "octopus_deploy.server_node.max_concurrent_tasks",
+    "octopus_deploy.deployment.completed_time",
+]
+
+SPACE_METRICS = [
+    "octopus_deploy.space.count",
+]
+
+PROJECT_GROUP_METRICS = [
+    "octopus_deploy.project_group.count",
+]
+
+PROJECT_METRICS = [
+    "octopus_deploy.project.count",
+]
+
+ENV_METRICS = [
     "octopus_deploy.environment.allow_dynamic_infrastructure",
     "octopus_deploy.environment.count",
     "octopus_deploy.environment.use_guided_failure",
 ]
 
-ALL_METRICS = ["octopus_deploy.deployment.completed_time"] + E2E_METRICS
+SERVER_METRICS = [
+    "octopus_deploy.server_node.count",
+    "octopus_deploy.server_node.in_maintenance_mode",
+    "octopus_deploy.server_node.max_concurrent_tasks",
+]
+
+COMPLETED_METRICS = ["octopus_deploy.deployment.completed_time"]
+
+ALL_METRICS = SERVER_METRICS + ENV_METRICS + PROJECT_METRICS + PROJECT_GROUP_METRICS + SPACE_METRICS + DEPLOY_METRICS
+
+E2E_METRICS = list(set(ALL_METRICS) - set(COMPLETED_METRICS))
 
 ALL_DEPLOYMENT_LOGS = [
     {

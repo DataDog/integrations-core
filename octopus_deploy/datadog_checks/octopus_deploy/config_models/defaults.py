@@ -84,5 +84,9 @@ def instance_tls_verify():
     return True
 
 
+def instance_unified_service_tagging():
+    return False
+
+
 def instance_use_legacy_auth_encoding():
     return True

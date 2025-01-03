@@ -142,6 +142,7 @@ class InstanceConfig(BaseModel):
     tls_protocols_allowed: Optional[tuple[str, ...]] = None
     tls_use_host_header: Optional[bool] = None
     tls_verify: Optional[bool] = None
+    unified_service_tagging: Optional[bool] = None
     use_legacy_auth_encoding: Optional[bool] = None
     username: Optional[str] = None
 
