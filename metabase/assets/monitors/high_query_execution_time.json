@@ -1,0 +1,69 @@
+{
+	"version": 2,
+	"created_at": "2024-10-23",
+	"last_updated_at": "2024-10-23",
+	"title": "High query execution time",
+	"description": "This monitor tracks the execution time of queries running within your Metabase account. A high query execution time may indicate database performance issues, inefficient queries or resource constraints.",
+	"definition": {
+		"id": 156182216,
+		"name": "High query execution time",
+		"type": "log alert",
+		"query": "formula(\"(query / query1) * 100\").last(\"15m\") > 10",
+		"message": "{{#is_alert}}\n\nHigh query running time observed. Total {{value}}% of queries are taking longer than 10 seconds.\n\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:metabase",
+			"service:query-logs"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"variables": [
+				{
+					"data_source": "logs",
+					"name": "query",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:metabase service:query-logs @running_time_seconds:>10"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "logs",
+					"name": "query1",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:metabase service:query-logs"
+					},
+					"storage": "hot"
+				}
+			],
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:metabase"
+	]
+}
