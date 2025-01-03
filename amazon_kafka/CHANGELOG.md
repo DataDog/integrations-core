@@ -1,4 +1,4 @@
-# CHANGELOG - Amazon MSK
+# CHANGELOG - Amazon Kafka
 
 <!-- towncrier release notes start -->
 

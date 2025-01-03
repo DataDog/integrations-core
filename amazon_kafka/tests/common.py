@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES
+from datadog_checks.amazon_kafka.metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import read_file
 

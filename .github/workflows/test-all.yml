@@ -318,7 +318,7 @@ jobs:
     uses: ./.github/workflows/test-target.yml
     with:
       job-name: Amazon Kafka
-      target: amazon_msk
+      target: amazon_kafka
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

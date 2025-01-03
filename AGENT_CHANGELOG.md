@@ -26,7 +26,7 @@
 * ActiveMQ [5.0.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md) **BREAKING CHANGE**
 * Aerospike [4.0.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md) **BREAKING CHANGE**
 * Airflow [6.1.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [6.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md) **BREAKING CHANGE**
+* Amazon Kafka [6.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md) **BREAKING CHANGE**
 * Ambari [6.0.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md) **BREAKING CHANGE**
 * Apache [6.0.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md) **BREAKING CHANGE**
 * Appgate SDP [1.0.0](https://github.com/DataDog/integrations-core/blob/master/appgate_sdp/CHANGELOG.md)
@@ -231,7 +231,7 @@
 * ActiveMQ [4.0.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md) **BREAKING CHANGE**
 * Aerospike [3.0.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md) **BREAKING CHANGE**
 * Airflow [6.0.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md) **BREAKING CHANGE**
-* Amazon Kafka [5.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md) **BREAKING CHANGE**
+* Amazon Kafka [5.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md) **BREAKING CHANGE**
 * Ambari [5.0.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md) **BREAKING CHANGE**
 * Apache [5.0.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md) **BREAKING CHANGE**
 * ArangoDB [3.0.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md) **BREAKING CHANGE**
@@ -430,7 +430,7 @@
 
 ## Datadog Agent version [7.57.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7570)
 
-* Amazon Kafka [4.10.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.10.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * ArgoCD [2.4.3](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
 * AWS Neuron [1.0.0](https://github.com/DataDog/integrations-core/blob/master/aws_neuron/CHANGELOG.md)
 * Datadog Checks Base [36.13.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
@@ -471,7 +471,7 @@
 
 ## Datadog Agent version [7.56.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7560)
 
-* Amazon Kafka [4.9.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.9.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Datadog Checks Base [36.9.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * Cisco ACI [2.9.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
 * ClickHouse [3.6.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
@@ -514,7 +514,7 @@
 * ActiveMQ XML [3.2.1](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * Aerospike [2.2.2](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [5.0.1](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [4.8.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.8.1](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [4.2.1](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.5.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ArangoDB [2.2.2](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
@@ -639,7 +639,7 @@
 
 ## Datadog Agent version [7.54.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7540)
 
-* Amazon Kafka [4.7.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.7.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Boundary [2.2.1](https://github.com/DataDog/integrations-core/blob/master/boundary/CHANGELOG.md)
 * Datadog Checks Base [36.6.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * Datadog Checks Downloader [4.6.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
@@ -665,7 +665,7 @@
 
 ## Datadog Agent version [7.53.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7530)
 
-* Amazon Kafka [4.6.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.6.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Argo Rollouts [1.0.0](https://github.com/DataDog/integrations-core/blob/master/argo_rollouts/CHANGELOG.md)
 * Argo Workflows [1.0.0](https://github.com/DataDog/integrations-core/blob/master/argo_workflows/CHANGELOG.md)
 * ArgoCD [2.4.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
@@ -716,7 +716,7 @@
 * ActiveMQ XML [3.2.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * Aerospike [2.2.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [5.0.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md) **BREAKING CHANGE**
-* Amazon Kafka [4.5.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.5.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [4.2.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.5.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ArangoDB [2.2.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
@@ -834,7 +834,7 @@
 * ActiveMQ [3.1.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [2.1.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [4.1.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [4.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [4.1.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.4.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ArangoDB [2.1.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
@@ -1019,7 +1019,7 @@
 
 ## Datadog Agent version [7.50.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7500)
 
-* Amazon Kafka [4.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [4.0.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md) **BREAKING CHANGE**
 * Cacti [2.0.1](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
 * Datadog Checks Base [34.3.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
@@ -1068,7 +1068,7 @@
 
 ## Datadog Agent version [7.49.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7490)
 
-* Amazon Kafka [4.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [4.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * ArgoCD [2.1.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
 * Datadog Checks Base [34.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * Datadog Checks Downloader [4.3.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
@@ -1107,7 +1107,7 @@
 * ActiveMQ [3.0.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md) **BREAKING CHANGE**
 * Aerospike [2.0.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md) **BREAKING CHANGE**
 * Airflow [4.0.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md) **BREAKING CHANGE**
-* Amazon Kafka [4.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md) **BREAKING CHANGE**
+* Amazon Kafka [4.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md) **BREAKING CHANGE**
 * Ambari [3.3.1](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.3.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ArangoDB [2.0.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md) **BREAKING CHANGE**
@@ -1275,7 +1275,7 @@
 * ActiveMQ [2.3.2](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.18.1](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [3.2.1](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [3.5.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.5.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [3.2.1](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.2.2](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ArangoDB [1.4.1](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
@@ -1448,7 +1448,7 @@
 ## Datadog Agent version [7.46.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7460)
 
 * Aerospike [1.18.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
-* Amazon Kafka [3.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * ArangoDB [1.4.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
 * ArgoCD [1.1.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
 * Avi Vantage [3.3.0](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
@@ -1499,7 +1499,7 @@
 
 ## Datadog Agent version [7.45.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7450)
 
-* Amazon Kafka [3.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Apache [4.2.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * Avi Vantage [3.2.1](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
 * Datadog Checks Base [31.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
@@ -1526,7 +1526,7 @@
 
 ## Datadog Agent version [7.44.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7440)
 
-* Amazon Kafka [3.2.4](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.2.4](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Datadog Checks Base [30.2.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * Datadog Checks Downloader [4.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
 * Cloudera [1.1.0](https://github.com/DataDog/integrations-core/blob/master/cloudera/CHANGELOG.md)
@@ -1561,7 +1561,7 @@
 
 ## Datadog Agent version [7.43.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7430)
 
-* Amazon Kafka [3.2.3](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.2.3](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Datadog Checks Base [30.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * Datadog Checks Downloader [4.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
 * ClickHouse [2.8.2](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
@@ -1599,7 +1599,7 @@
 
 ## Datadog Agent version [7.42.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7420)
 
-* Amazon Kafka [3.2.2](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.2.2](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * ArgoCD [1.0.1](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
 * Datadog Checks Base [28.0.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * Datadog Checks Downloader [3.10.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
@@ -1646,7 +1646,7 @@
 ## Datadog Agent version [7.41.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7410)
 
 * Aerospike [1.17.2](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
-* Amazon Kafka [3.2.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.2.1](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Datadog Checks Base [27.4.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * Datadog Checks Downloader [3.10.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
 * Cloud Foundry API [2.2.1](https://github.com/DataDog/integrations-core/blob/master/cloud_foundry_api/CHANGELOG.md)
@@ -1679,7 +1679,7 @@
 * ActiveMQ XML [2.2.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * Aerospike [1.17.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [3.2.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [3.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [3.2.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.2.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ArangoDB [1.3.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
@@ -1773,7 +1773,7 @@
 
 * Active Directory [1.16.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
 * Aerospike [1.16.2](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
-* Amazon Kafka [3.1.3](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.1.3](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * ASP.NET [1.12.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
 * Btrfs [1.14.1](https://github.com/DataDog/integrations-core/blob/master/btrfs/CHANGELOG.md)
 * Cacti [1.11.1](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
@@ -1863,7 +1863,7 @@
 
 * Active Directory [1.15.1](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
 * Aerospike [1.16.1](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
-* Amazon Kafka [3.1.2](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.1.2](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * ArangoDB [1.1.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
 * ASP.NET [1.11.1](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
 * Avi Vantage [3.1.1](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
@@ -1943,7 +1943,7 @@
 * ActiveMQ [2.3.1](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.15.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [3.1.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [3.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [3.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [3.1.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [4.1.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ASP.NET [1.11.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
@@ -2100,7 +2100,7 @@
 * ActiveMQ [2.3.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.14.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [3.0.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md) **BREAKING CHANGE**
-* Amazon Kafka [3.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md) **BREAKING CHANGE**
+* Amazon Kafka [3.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md) **BREAKING CHANGE**
 * Ambari [3.0.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md) **BREAKING CHANGE**
 * Apache [4.0.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md) **BREAKING CHANGE**
 * ASP.NET [1.10.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
@@ -2261,7 +2261,7 @@
 * ActiveMQ [2.2.2](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.13.1](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [2.1.2](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [2.1.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [2.1.1](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [2.2.1](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [3.0.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md) **BREAKING CHANGE**
 * ASP.NET [1.9.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
@@ -2407,7 +2407,7 @@
 * ActiveMQ [2.2.1](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.13.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [2.1.1](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [2.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [2.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [2.2.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * ASP.NET [1.8.1](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
 * Avi Vantage [2.1.0](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
@@ -2490,7 +2490,7 @@
 * ActiveMQ XML [1.12.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * ActiveMQ [2.2.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Airflow [2.1.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [2.0.2](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md) **BREAKING CHANGE**
+* Amazon Kafka [2.0.2](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md) **BREAKING CHANGE**
 * Ambari [2.1.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [2.0.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md) **BREAKING CHANGE**
 * Avi Vantage [2.0.3](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md) **BREAKING CHANGE**
@@ -2706,7 +2706,7 @@
 
 * ActiveMQ [2.1.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.12.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
-* Amazon Kafka [1.8.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.8.1](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Apache [1.17.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * Cacti [1.8.3](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
 * Cassandra [1.12.0](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
@@ -2767,7 +2767,7 @@
 ## Datadog Agent version [7.29.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7290)
 
 * ActiveMQ [2.0.1](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
-* Amazon Kafka [1.7.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.7.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Azure IoT Edge [2.1.0](https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/CHANGELOG.md)
 * Cassandra Nodetool [1.8.0](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/CHANGELOG.md)
 * Cassandra [1.11.1](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
@@ -2851,7 +2851,7 @@
 * ActiveMQ XML [1.11.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * Aerospike [1.11.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [1.8.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [1.6.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.6.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Apache [1.16.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ASP.NET [1.7.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
 * Cassandra [1.11.0](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
@@ -3050,7 +3050,7 @@
 ## Datadog Agent version [7.26.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7260)
 
 * ActiveMQ [1.9.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
-* Amazon Kafka [1.4.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.4.1](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [1.6.1](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Azure IoT Edge [2.0.0](https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/CHANGELOG.md) **BREAKING CHANGE**
 * Cacti [1.8.1](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
@@ -3118,7 +3118,7 @@
 * ActiveMQ [1.8.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.9.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [1.7.1](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [1.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Azure IoT Edge [1.1.1](https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/CHANGELOG.md)
 * Cassandra [1.9.0](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
 * Ceph [2.3.0](https://github.com/DataDog/integrations-core/blob/master/ceph/CHANGELOG.md)
@@ -3182,7 +3182,7 @@
 * ActiveMQ XML [1.10.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * ActiveMQ [1.7.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Airflow [1.7.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [1.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [1.6.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [1.15.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * Azure IoT Edge [1.1.0](https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/CHANGELOG.md)
@@ -3292,7 +3292,7 @@
 * ActiveMQ XML [1.9.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * ActiveMQ [1.6.1](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Airflow [1.6.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [1.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.2.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [1.5.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [1.14.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ASP.NET [1.6.1](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
@@ -3603,7 +3603,7 @@
 * ActiveMQ [1.5.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.8.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
 * Airflow [1.3.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
-* Amazon Kafka [1.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.1.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [1.3.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [1.12.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ASP.NET [1.5.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
@@ -4024,7 +4024,7 @@
 * ActiveMQ XML [1.5.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * ActiveMQ [1.3.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.4.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
-* Amazon Kafka [1.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Amazon Kafka [1.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/CHANGELOG.md)
 * Ambari [1.2.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [1.9.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ASP.NET [1.4.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)

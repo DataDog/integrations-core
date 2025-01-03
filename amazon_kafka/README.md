@@ -23,7 +23,7 @@ This OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) a
 
 ### Configuration
 
-1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. 
+1. Edit the `amazon_kafka.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. 
 
    Include custom [tags][17] that attach to every metric and service check provided by this integration.
 
@@ -33,13 +33,13 @@ This OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) a
      - <KEY_2>:<VALUE_2>
    ```
    
-   See the [sample amazon_msk.d/conf.yaml][9] for all available configuration options for the latest mode. For the legacy mode of this integration, see the [legacy example][10].
+   See the [sample amazon_kafka.d/conf.yaml][9] for all available configuration options for the latest mode. For the legacy mode of this integration, see the [legacy example][10].
 
 2. [Restart the Agent][11].
 
 ### Validation
 
-[Run the Agent's status subcommand][12] and look for `amazon_msk` under the Checks section.
+[Run the Agent's status subcommand][12] and look for `amazon_kafka` under the Checks section.
 
 ## Data Collected
 
@@ -73,12 +73,12 @@ Additional helpful documentation, links, and articles:
 [6]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
 [7]: https://docs.aws.amazon.com/msk/latest/developerguide/open-monitoring.html
 [8]: https://docs.datadoghq.com/agent/
-[9]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/datadog_checks/amazon_msk/data/conf.yaml.example
-[10]: https://github.com/DataDog/integrations-core/blob/7.31.x/amazon_msk/datadog_checks/amazon_msk/data/conf.yaml.example
+[9]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/datadog_checks/amazon_kafka/data/conf.yaml.example
+[10]: https://github.com/DataDog/integrations-core/blob/7.31.x/amazon_msk/datadog_checks/amazon_kafka/data/conf.yaml.example
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[13]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
-[14]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/assets/service_checks.json
+[13]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/metadata.csv
+[14]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/assets/service_checks.json
 [15]: https://docs.datadoghq.com/help/
 [16]: https://www.datadoghq.com/blog/monitor-amazon-msk/
 [17]: https://docs.datadoghq.com/getting_started/tagging/

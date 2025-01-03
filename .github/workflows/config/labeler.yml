@@ -51,8 +51,8 @@ integration/amazon_eks:
 - amazon_eks/**/*
 integration/amazon_eks_blueprints:
 - amazon_eks_blueprints/**/*
-integration/amazon_msk:
-- amazon_msk/**/*
+integration/amazon_kafka:
+- amazon_kafka/**/*
 integration/ambari:
 - ambari/**/*
 integration/anthropic:
