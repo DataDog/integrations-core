@@ -48,3 +48,16 @@
     type: boolean
   description: |
     Verifies that the server's cert hostname matches the one requested.
+- name: tls_ciphers
+  description: |
+    The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    `ALL` ciphers are used. For list of ciphers see: 
+    https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - 'TLS_AES_256_GCM_SHA384'
+      - 'TLS_CHACHA20_POLY1305_SHA256'
+      - 'TLS_AES_128_GCM_SHA256'
