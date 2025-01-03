@@ -20,6 +20,13 @@ INSTANCE_URL = {
     'tags': ['optional:tag1'],
 }
 
+E2E_METADATA = {
+    'start_commands': [
+        'apt update',
+        'apt install -y --no-install-recommends build-essential python3-dev libpq-dev',
+    ],
+}
+
 
 def get_version_from_env():
     return version.parse(os.environ.get('PGBOUNCER_VERSION'))

@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psycopg2-binary==2.9.9",
+    "psycopg[c]==3.2.3",
 ]
 
 [project.urls]

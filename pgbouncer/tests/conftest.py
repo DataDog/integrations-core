@@ -5,7 +5,7 @@
 import os
 from copy import deepcopy
 
-import psycopg2
+import psycopg
 import pytest
 from packaging import version
 
@@ -20,8 +20,8 @@ def container_up(service_name, port):
     """
     Try to connect to postgres/pgbouncer
     """
-    psycopg2.connect(
-        host=common.HOST, port=port, user=common.USER, password=common.PASS, database=common.DB, connect_timeout=2
+    psycopg.connect(
+        host=common.HOST, port=port, user=common.USER, password=common.PASS, dbname=common.DB, connect_timeout=2
     )
 
 
@@ -45,7 +45,7 @@ def dd_environment():
         ],
     ):
 
-        yield common.DEFAULT_INSTANCE
+        yield common.DEFAULT_INSTANCE, common.E2E_METADATA
 
 
 @pytest.fixture
