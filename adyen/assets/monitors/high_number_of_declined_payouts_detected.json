@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "High number of declined payouts detected",
+	"description": "Declined payouts occur when disbursement requests are rejected due to issues such as invalid bank details, insufficient funds, or compliance failures. This monitor tracks declined payouts exceeding the threshold to ensure timely action and prevent operational delays.",
+	"definition": {
+		"id": 154507580,
+		"name": "High number of declined payouts detected",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:payout @evt.name:PAYOUT_DECLINE\").index(\"*\").rollup(\"cardinality\", \"@pspReference\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}\nDeclined payouts occurs when a payout request is rejected due to issues like invalid bank details, insufficient funds, or compliance failures.\n\nThe number of declined payouts have exceeded the threshold, which could impact timely disbursements and may cause delays in fund transfers. This requires immediate attention to ensure smooth operations.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:payout"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}
