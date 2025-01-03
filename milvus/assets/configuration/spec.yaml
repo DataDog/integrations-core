@@ -13,3 +13,8 @@ files:
             openmetrics_endpoint.description: |
               Endpoint exposing Milvus' Prometheus metrics. For more information, refer to 
               https://milvus.io/docs/monitor.md#Monitor-metrics-with-Prometheus.
+    - template: logs
+      example:
+      - type: docker
+        source: milvus
+        service: <SERVICE>
