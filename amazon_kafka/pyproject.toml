@@ -5,7 +5,7 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-amazon-msk"
+name = "datadog-amazon-kafka"
 description = "The Amazon Kafka check"
 readme = "README.md"
 keywords = [
