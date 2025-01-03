@@ -1,15 +1,15 @@
-# Agent Check: Nvidia Jetson
+# Agent Check: NVIDIA Jetson
 
 ## Overview
 
-This check monitors an [Nvidia Jetson][1] board.
+This check monitors an [NVIDIA Jetson][1] board.
 It reports the metrics collected from `tegrastats`.
 
 ## Setup
 
 ### Installation
 
-The Nvidia Jetson check is included in the [Datadog Agent][2] package.
+The NVIDIA Jetson check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -40,11 +40,11 @@ Some metrics are reported only if `use_sudo` is set to true:
 
 ### Service Checks
 
-The Nvidia Jetson integration does not include any service checks.
+The NVIDIA Jetson integration does not include any service checks.
 
 ### Events
 
-The Nvidia Jetson integration does not include any events.
+The NVIDIA Jetson integration does not include any events.
 
 ## Troubleshooting
 
