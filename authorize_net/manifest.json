@@ -4,46 +4,72 @@
   "app_id": "authorize-net",
   "display_on_public_website": false,
   "tile": {
-    "overview": "README.md#Overview",
-    "configuration": "README.md#Setup",
-    "support": "README.md#Support",
-    "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Settled and Unsettled Transactions of Authorize.Net",
-    "title": "Authorize.Net",
-    "media": [],
-    "classifier_tags": [
-      "Category::Log Collection",
-      "Category::Metrics",
-      "Submitted Data Type::Logs",
-      "Submitted Data Type::Metrics",
-      "Offering::Integration"
-    ]
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "Gain insights into settled and unsettled transactions of Authorize.net",
+      "title": "Authorize.Net",
+      "media": [
+        {
+          "media_type": "image",
+          "caption": "Authorize.net Settled Transactions",
+          "image_url": "images/authorize_net_settled_transactions_1.png"
+        },
+        {
+            "media_type": "image",
+            "caption": "Authorize.net Settled Transactions",
+            "image_url": "images/authorize_net_settled_transactions_2.png"
+        },
+        {
+          "media_type": "image",
+          "caption": "Authorize.net Unsettled Transactions",
+          "image_url": "images/authorize_net_unsettled_transactions.png"
+        }
+      ],
+      "classifier_tags": [
+          "Category::Log Collection",
+          "Submitted Data Type::Logs",
+          "Submitted Data Type::Metrics",
+          "Offering::Integration"
+      ]
   },
   "assets": {
-    "integration": {
-      "auto_install": false,
-      "source_type_id": 28965663,
-      "source_type_name": "Authorize.Net",
-      "events": {
-        "creates_events": false
+      "integration": {
+          "auto_install": false,
+          "source_type_id": 28965663,
+          "source_type_name": "Authorize.Net",
+          "events": {
+              "creates_events": false
+          },
+          "metrics": {
+              "prefix": "authorize_net.",
+              "check": ["authorize_net.unsettled_transaction.amount_by_account_type", "authorize_net.unsettled_transaction.total_unsettled_transactions"],
+              "metadata_path": "metadata.csv"
+          },
+          "service_checks": {
+              "metadata_path": "assets/service_checks.json"
+          }
       },
-      "metrics": {
-        "prefix": "authorize_net.",
-        "check": [],
-        "metadata_path": "metadata.csv"
+      "dashboards": {
+          "Authorize.net settled transactions": "assets/dashboards/authorize_net_settled_transactions.json",
+          "Authorize.net unsettled transactions": "assets/dashboards/authorize_net_unsettled_transactions.json"  
       },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
+      "monitors": {
+          "High number of declined transactions detected": "assets/monitors/high_number_of_declined_transactions_detected.json",
+          "High number of errored transactions detected": "assets/monitors/high_number_of_errored_transactions_detected.json",
+          "High number of expired transactions detected": "assets/monitors/high_number_of_expired_transactions_detected.json",
+          "High number of voided transactions detected": "assets/monitors/high_number_of_voided_transactions_detected.json",
+          "High number of suspicious fraud transactions detected": "assets/monitors/high_number_of_suspicious_fraud_transactions_detected.json"  
+      },
+      "logs": {
+          "source": "authorize-net"
       }
-    },
-    "logs": {
-      "source": "authorize_net"
-    }
   },
   "author": {
-    "support_email": "help@datadoghq.com",
-    "name": "Datadog",
-    "homepage": "https://www.datadoghq.com",
-    "sales_email": "info@datadoghq.com"
+      "support_email": "help@datadoghq.com",
+      "name": "Datadog",
+      "homepage": "https://www.datadoghq.com",
+      "sales_email": "info@datadoghq.com"
   }
 }
