@@ -42,6 +42,10 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "saved_views": {
+      "Milvus Logs Overview": "assets/saved_views/logs_overview.json",
+      "Milvus Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
     "logs": {
       "source": "milvus"
     }
