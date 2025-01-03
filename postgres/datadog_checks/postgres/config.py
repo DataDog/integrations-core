@@ -29,6 +29,7 @@ class PostgresConfig:
     MONOTONIC = AgentCheck.monotonic_count
 
     def __init__(self, instance, init_config, check):
+        self.database_identifier = instance.get('database_identifier', {})
         self.host = instance.get('host', '')
         if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
