@@ -149,7 +149,7 @@ class GUnicornCheck(AgentCheck):
         master_procs = []
         for p in psutil.process_iter():
             try:
-                if p.cmdline()[0] == master_name:
+                if len(p.cmdline()) > 0 and p.cmdline()[0] == master_name:
                     master_procs.append(p)
             except (IndexError, psutil.Error) as e:
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
