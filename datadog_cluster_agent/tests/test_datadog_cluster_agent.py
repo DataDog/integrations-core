@@ -70,6 +70,7 @@ METRICS = [
     'kubernetes_apiserver.kube_events',
     'language_detection_dca_handler.processed_requests',
     'language_detection_patcher.patches',
+    'leader_election.is_leader',
     'secret_backend.elapsed',
     'tagger.stored_entities',
     'tagger.updated_entities',
