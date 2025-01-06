@@ -128,9 +128,15 @@ FROM
     FROM pg_class C
     LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
     LEFT JOIN pg_inherits I ON (I.inhrelid = C.oid)
-    LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
     WHERE NOT (nspname = ANY('{{pg_catalog,information_schema}}')) AND
-      (L.relation IS NULL OR L.mode <> 'AccessExclusiveLock' OR NOT L.granted) AND
+        NOT EXISTS (
+            SELECT 1
+            from pg_locks
+            WHERE locktype = 'relation'
+            AND mode = 'AccessExclusiveLock'
+            AND granted = true
+            AND relation = C.oid
+      ) AND
       relkind = 'r' AND
       {relations} {limits}) as s""",
     'columns': [
@@ -191,7 +197,6 @@ SELECT
   C.xmin
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
 LEFT JOIN pg_index idx_toast ON (idx_toast.indrelid = C.reltoastrelid)
 LEFT JOIN LATERAL (
     SELECT sum(pg_stat_get_numscans(indexrelid))::bigint AS idx_scan,
@@ -200,7 +205,14 @@ LEFT JOIN LATERAL (
      WHERE pg_index.indrelid = C.oid) I ON true
 WHERE C.relkind = 'r'
     AND NOT (nspname = ANY('{{pg_catalog,information_schema}}'))
-    AND (L.relation IS NULL OR L.mode <> 'AccessExclusiveLock' OR NOT L.granted)
+    AND NOT EXISTS (
+        SELECT 1
+        from pg_locks
+        WHERE locktype = 'relation'
+        AND mode = 'AccessExclusiveLock'
+        AND granted = true
+        AND relation = C.oid
+    )
     AND {relations} {limits}
 """,
     'columns': [
