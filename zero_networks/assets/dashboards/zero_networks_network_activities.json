@@ -374,7 +374,7 @@
                     {
                         "id": 8700812738359164,
                         "definition": {
-                            "title": "Medium Security Signals",
+                            "title": "Critical Security Signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -401,7 +401,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities status:medium $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities status:critical $User $IP $Traffic-Type $State $Protocol"
                                             }
                                         }
                                     ],
@@ -441,81 +441,7 @@
                         "layout": {
                             "x": 4,
                             "y": 1,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8590036025513724,
-                        "definition": {
-                            "title": "Low Security Signals",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@workflow.rule.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:zero-networks service:network-activities status:low $User $IP $Traffic-Type $State $Protocol"
-                                            }
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#ffb52b"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 1,
-                            "width": 4,
+                            "width": 8,
                             "height": 4
                         }
                     },
@@ -671,6 +597,302 @@
                             "width": 2,
                             "height": 1
                         }
+                    },
+                    {
+                        "id": 3680138366512730,
+                        "definition": {
+                            "title": "High Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities status:high $User $IP $Traffic-Type $State $Protocol"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8590036025513724,
+                        "definition": {
+                            "title": "Medium Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities status:medium $User $IP $Traffic-Type $State $Protocol"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffb52b"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6292364445193512,
+                        "definition": {
+                            "title": "Info Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities status:info $User $IP $Traffic-Type $State $Protocol"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1513911561139188,
+                        "definition": {
+                            "title": "Low Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities status:low $User $IP $Traffic-Type $State $Protocol"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 4
+                        }
                     }
                 ]
             },
@@ -678,7 +900,7 @@
                 "x": 0,
                 "y": 9,
                 "width": 12,
-                "height": 6
+                "height": 1
             }
         },
         {
@@ -711,7 +933,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@protocol",
+                                                    "facet": "@fields_mapping.protocol",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -785,13 +1007,14 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@trafficType",
+                                                    "facet": "@fields_mapping.trafficType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -842,7 +1065,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @trafficType:Internal $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.trafficType:Internal $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -857,6 +1080,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
                                         }
                                     ]
                                 }
@@ -886,7 +1116,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @trafficType:External $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.trafficType:External $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -901,6 +1131,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
                                         }
                                     ]
                                 }
@@ -930,7 +1167,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @trafficType:Both $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.trafficType:Both $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -945,6 +1182,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e4f4f7"
                                         }
                                     ]
                                 }
@@ -962,7 +1207,7 @@
                     {
                         "id": 4018554368221482,
                         "definition": {
-                            "title": "Top IP's",
+                            "title": "Top IPs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1054,13 +1299,14 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@state",
+                                                    "facet": "@fields_mapping.state",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -1111,7 +1357,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @state:Blocked $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.state:Blocked $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1126,6 +1372,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
                                         }
                                     ]
                                 }
@@ -1155,7 +1408,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @state:\"Blocked At Source\" $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.state:\"Blocked At Source\" $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1170,6 +1423,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
                                         }
                                     ]
                                 }
@@ -1199,7 +1459,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @state:Requested $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.state:Requested $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1214,6 +1474,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ebfaff"
                                         }
                                     ]
                                 }
@@ -1243,7 +1511,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @state:\"Blocked By Third Party\" $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.state:\"Blocked By Third Party\" $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1258,6 +1526,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f4cdd9"
                                         }
                                     ]
                                 }
@@ -1287,7 +1563,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @state:\"Blocked At Source By Third Party\" $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.state:\"Blocked At Source By Third Party\" $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1302,6 +1578,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f7c0c0"
                                         }
                                     ]
                                 }
@@ -1331,7 +1615,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @state:Established $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.state:Established $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1346,6 +1630,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -1375,7 +1666,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @protocol:TCP $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.protocol:TCP $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1390,6 +1681,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e3f6f8"
                                         }
                                     ]
                                 }
@@ -1419,7 +1718,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @protocol:UDP $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.protocol:UDP $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1434,6 +1733,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#fbe2fd"
                                         }
                                     ]
                                 }
@@ -1463,7 +1770,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @protocol:ICMP $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.protocol:ICMP $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1478,6 +1785,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f8e3e3"
                                         }
                                     ]
                                 }
@@ -1507,7 +1822,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities @protocol:RDP $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities @fields_mapping.protocol:RDP $User $IP $Traffic-Type $State $Protocol"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1522,6 +1837,14 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#edeefd"
                                         }
                                     ]
                                 }
@@ -1539,7 +1862,7 @@
                     {
                         "id": 8071523453594128,
                         "definition": {
-                            "title": "Top Destination Asset Sources",
+                            "title": "Top Destination Asset Types",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1557,7 +1880,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@dst.assetSrc",
+                                                    "facet": "@fields_mapping.dst.assetType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1600,144 +1923,6 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 24,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5632667227080570,
-                        "definition": {
-                            "title": "Top Destination Network Protection States",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@dst.networkProtectionState",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 24,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5586724905348182,
-                        "definition": {
-                            "title": "Top Destination FQDN",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@dst.fqdn",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
                             "y": 24,
                             "width": 4,
                             "height": 4
@@ -1805,57 +1990,78 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 28,
+                            "x": 4,
+                            "y": 24,
                             "width": 4,
                             "height": 4
                         }
                     },
                     {
-                        "id": 1840424163789940,
+                        "id": 5586724905348182,
                         "definition": {
-                            "title": "Destination Process Details",
+                            "title": "Top Destination FQDN",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol",
-                                        "indexes": [],
-                                        "storage": "hot",
-                                        "sort": {
-                                            "order": "desc",
-                                            "column": "timestamp"
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@record.dst.fqdn",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
                                         }
-                                    },
-                                    "columns": [
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
                                         {
-                                            "field": "dst.assetId",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dst.processId",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dst.processName",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dst.processPath",
-                                            "width": "auto"
+                                            "formula": "query1"
                                         }
-                                    ]
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
-                            "type": "list_stream"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 28,
-                            "width": 8,
+                            "x": 8,
+                            "y": 24,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -1880,7 +2086,161 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@dst.processName",
+                                                    "facet": "@record.dst.processName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 28,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6589084141519102,
+                        "definition": {
+                            "title": "Destination User Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@record.dst.assetId",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@record.dst.userId",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@record.dst.userName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 28,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6297826389227418,
+                        "definition": {
+                            "title": "Top Destination Asset Sources",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@fields_mapping.src.assetSrc",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1929,82 +2289,45 @@
                         }
                     },
                     {
-                        "id": 6589084141519102,
+                        "id": 1840424163789940,
                         "definition": {
-                            "title": "Destination User Details",
+                            "title": "Destination Process Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "query_table",
                             "requests": [
                                 {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@dst.assetId",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@dst.userId",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@dst.userName",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
                                         }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 1000,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
                                     },
-                                    "formulas": [
+                                    "columns": [
                                         {
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
+                                            "field": "record.dst.assetId",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "record.dst.processId",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "record.dst.processName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "record.dst.processPath",
+                                            "width": "auto"
                                         }
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "type": "list_stream"
                         },
                         "layout": {
                             "x": 4,
@@ -2034,7 +2357,7 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "dst.assetId",
+                                            "field": "record.dst.assetId",
                                             "width": "auto"
                                         },
                                         {
@@ -2046,23 +2369,23 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.ipThreatScore",
+                                            "field": "record.dst.ipThreatScore",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.eventRecorId",
+                                            "field": "record.dst.eventRecorId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.processId",
+                                            "field": "record.dst.processId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.processName",
+                                            "field": "record.dst.processName",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.processPath",
+                                            "field": "record.dst.processPath",
                                             "width": "auto"
                                         }
                                     ]
@@ -2080,7 +2403,7 @@
                     {
                         "id": 8588088349138280,
                         "definition": {
-                            "title": "Top Asset Sources",
+                            "title": "Top Source Asset Types",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2098,7 +2421,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@src.assetSrc",
+                                                    "facet": "@fields_mapping.src.assetType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2147,9 +2470,9 @@
                         }
                     },
                     {
-                        "id": 3951358046142266,
+                        "id": 6921995545111866,
                         "definition": {
-                            "title": "Top Source Network Protection State",
+                            "title": "Top Source IP Addresses",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2167,14 +2490,13 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@src.networkProtectionState",
+                                                    "facet": "@network.client.ip",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
+                                                    }
                                                 }
                                             ],
                                             "compute": {
@@ -2236,7 +2558,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@src.fqdn",
+                                                    "facet": "@record.src.fqdn",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2305,7 +2627,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@src.processName",
+                                                    "facet": "@record.src.processName",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2349,14 +2671,62 @@
                         "layout": {
                             "x": 0,
                             "y": 44,
-                            "width": 6,
+                            "width": 4,
                             "height": 4
                         }
                     },
                     {
-                        "id": 6921995545111866,
+                        "id": 8960629590747932,
                         "definition": {
-                            "title": "Top Source IP Addresses",
+                            "title": "Source Process Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "record.src.assetId",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "record.src.processId",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "record.src.processName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "record.src.processPath",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 44,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8107362937220770,
+                        "definition": {
+                            "title": "Top Asset Sources",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2374,13 +2744,14 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@network.client.ip",
+                                                    "facet": "@fields_mapping.src.assetSrc",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -2415,57 +2786,9 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 44,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8960629590747932,
-                        "definition": {
-                            "title": "Source Process Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol",
-                                        "indexes": [],
-                                        "storage": "hot",
-                                        "sort": {
-                                            "order": "desc",
-                                            "column": "timestamp"
-                                        }
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "src.assetId",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "src.processId",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "src.processName",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "src.processPath",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
                             "x": 0,
                             "y": 48,
-                            "width": 12,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -2490,7 +2813,7 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "src.assetId",
+                                            "field": "record.src.assetId",
                                             "width": "auto"
                                         },
                                         {
@@ -2502,23 +2825,23 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.ipThreatScore",
+                                            "field": "record.src.ipThreatScore",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processId",
+                                            "field": "record.src.processId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processName",
+                                            "field": "record.src.processName",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processPath",
+                                            "field": "record.src.processPath",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.eventRecordId",
+                                            "field": "record.src.eventRecordId",
                                             "width": "auto"
                                         }
                                     ]
@@ -2527,9 +2850,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 52,
-                            "width": 12,
+                            "x": 4,
+                            "y": 48,
+                            "width": 8,
                             "height": 4
                         }
                     },
@@ -2555,6 +2878,76 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 250,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 52,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2675206461490272,
+                        "definition": {
+                            "title": "Network Activities by Destination Country",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.iso_code",
                                                     "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2632,11 +3025,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "protocol",
+                                            "field": "fields_mapping.protocol",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "trafficType",
+                                            "field": "fields_mapping.trafficType",
                                             "width": "auto"
                                         },
                                         {
@@ -2644,19 +3037,15 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "state",
+                                            "field": "fields_mapping.state",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.assetSrc",
+                                            "field": "record.dst.assetSrc",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.networkProtectionState",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dst.fqdn",
+                                            "field": "record.dst.fqdn",
                                             "width": "auto"
                                         },
                                         {
@@ -2664,27 +3053,27 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.assetId",
+                                            "field": "record.dst.assetId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.processId",
+                                            "field": "record.dst.processId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.processName",
+                                            "field": "record.dst.processName",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.processPath",
+                                            "field": "record.dst.processPath",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.userId",
+                                            "field": "record.dst.userId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.userName",
+                                            "field": "record.dst.userName",
                                             "width": "auto"
                                         },
                                         {
@@ -2692,27 +3081,23 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.ipThreatScore",
+                                            "field": "record.dst.ipThreatScore",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.eventRecordId",
+                                            "field": "record.dst.eventRecordId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dst.ipThreatScore",
+                                            "field": "record.dst.ipThreatScore",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.assetSrc",
+                                            "field": "record.src.assetSrc",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.networkProtectionState",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "src.fqdn",
+                                            "field": "record.src.fqdn",
                                             "width": "auto"
                                         },
                                         {
@@ -2720,19 +3105,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.assetId",
+                                            "field": "record.src.assetId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processId",
+                                            "field": "record.src.processId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processName",
+                                            "field": "record.src.processName",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processPath",
+                                            "field": "record.src.processPath",
                                             "width": "auto"
                                         },
                                         {
@@ -2740,19 +3125,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.ipThreatScore",
+                                            "field": "record.src.ipThreatScore",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.eventRecordId",
+                                            "field": "record.src.eventRecordId",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processPath",
+                                            "field": "record.src.processPath",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src.processPath",
+                                            "field": "record.src.processPath",
                                             "width": "auto"
                                         }
                                     ]
@@ -2771,7 +3156,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 10,
                 "width": 12,
                 "height": 65
             }

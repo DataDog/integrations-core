@@ -1043,6 +1043,144 @@
                         }
                     },
                     {
+                        "id": 5999525942412330,
+                        "definition": {
+                            "title": "Top User Roles associated with System",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zero-networks service:audit @enforcement_source:System $User $User-Role $Enforcement-Source"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@user_role",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4669974496291300,
+                        "definition": {
+                            "title": "API Usage Analysis over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zero-networks service:audit @user_role:(API-FullAccess OR API-ReadOnly) @enforcement_source:API $User $User-Role $Enforcement-Source"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@user_role",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
                         "id": 7270801875129594,
                         "definition": {
                             "title": "Total Admin Users",
@@ -1088,7 +1226,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 4,
+                            "y": 8,
                             "width": 3,
                             "height": 4
                         }
@@ -1124,7 +1262,7 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "black_on_light_yellow"
                                         }
                                     ],
                                     "formulas": [
@@ -1139,7 +1277,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 4,
+                            "y": 8,
                             "width": 3,
                             "height": 4
                         }
@@ -1175,7 +1313,7 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "black_on_light_red"
                                         }
                                     ],
                                     "formulas": [
@@ -1190,7 +1328,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 4,
+                            "y": 8,
                             "width": 3,
                             "height": 4
                         }
@@ -1226,7 +1364,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d8e6f3"
                                         }
                                     ],
                                     "formulas": [
@@ -1241,7 +1380,7 @@
                         },
                         "layout": {
                             "x": 9,
-                            "y": 4,
+                            "y": 8,
                             "width": 3,
                             "height": 4
                         }
@@ -1277,7 +1416,7 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "black_on_light_yellow"
                                         }
                                     ],
                                     "formulas": [
@@ -1292,7 +1431,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 8,
+                            "y": 12,
                             "width": 3,
                             "height": 4
                         }
@@ -1328,7 +1467,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#fde2f2"
                                         }
                                     ],
                                     "formulas": [
@@ -1343,7 +1483,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 8,
+                            "y": 12,
                             "width": 3,
                             "height": 4
                         }
@@ -1394,7 +1534,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 8,
+                            "y": 12,
                             "width": 3,
                             "height": 4
                         }
@@ -1430,7 +1570,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#fbeabc"
                                         }
                                     ],
                                     "formulas": [
@@ -1445,7 +1586,7 @@
                         },
                         "layout": {
                             "x": 9,
-                            "y": 8,
+                            "y": 12,
                             "width": 3,
                             "height": 4
                         }
@@ -1496,7 +1637,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
+                            "y": 16,
                             "width": 4,
                             "height": 4
                         }
@@ -1532,7 +1673,7 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "black_on_light_red"
                                         }
                                     ],
                                     "formulas": [
@@ -1547,7 +1688,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 12,
+                            "y": 16,
                             "width": 4,
                             "height": 4
                         }
@@ -1583,7 +1724,8 @@
                                         {
                                             "comparator": ">",
                                             "value": 0,
-                                            "palette": "black_on_light_green"
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#efeefb"
                                         }
                                     ],
                                     "formulas": [
@@ -1598,7 +1740,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 12,
+                            "y": 16,
                             "width": 4,
                             "height": 4
                         }
@@ -1668,7 +1810,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 16,
+                            "y": 20,
                             "width": 4,
                             "height": 4
                         }
@@ -1687,7 +1829,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:\"Asset is being segmented (network)\" $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:\"Asset segmented (network)\" $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1738,7 +1880,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 16,
+                            "y": 20,
                             "width": 4,
                             "height": 4
                         }
@@ -1808,7 +1950,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 16,
+                            "y": 20,
                             "width": 4,
                             "height": 4
                         }
@@ -1877,7 +2019,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 20,
+                            "y": 24,
                             "width": 4,
                             "height": 4
                         }
@@ -1896,7 +2038,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:\"Asset manager added\" @user_role:\"Asset Manager\" $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:\"Asset manager added\" @user_role:\"Asset Manager\" $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1947,7 +2089,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 20,
+                            "y": 24,
                             "width": 4,
                             "height": 4
                         }
@@ -1966,7 +2108,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:\"Asset manager removed\" @user_role:\"Asset Manager\" $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:\"Asset manager removed\" @user_role:\"Asset Manager\" $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2017,146 +2159,8 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 20,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5999525942412330,
-                        "definition": {
-                            "title": "Top User Roles associated with System",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zero-networks service:audit @enforcement_source:System $User $User-Role $Enforcement-Source"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@user_role",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
                             "y": 24,
                             "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4669974496291300,
-                        "definition": {
-                            "title": "API Usage Analysis over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zero-networks service:audit @user_role:(API-FullAccess OR API-ReadOnly) @enforcement_source:API $User $User-Role $Enforcement-Source"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@user_role",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "datadog16",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 24,
-                            "width": 8,
                             "height": 4
                         }
                     },
@@ -2201,7 +2205,7 @@
                                                     "should_exclude_missing": true
                                                 },
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2260,7 +2264,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:\"API Token created\" $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:\"API Token created\" $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2317,6 +2321,7 @@
                                     "formulas": [
                                         {
                                             "cell_display_mode": "bar",
+                                            "alias": "count",
                                             "formula": "query1"
                                         }
                                     ]
@@ -2349,14 +2354,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"User access configuration created\" OR \"User access configuration edited\" OR \"User access configuration deleted\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"User access configuration created\" OR \"User access configuration edited\" OR \"User access configuration deleted\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2418,14 +2423,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"API Token created\" OR \"API Token deleted\" OR \"API Token regenerated\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"API Token created\" OR \"API Token deleted\" OR \"API Token regenerated\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2487,14 +2492,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Asset added to RPC monitoring\" OR \"Asset removed from RPC monitoring\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Asset added to RPC monitoring\" OR \"Asset removed from RPC monitoring\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2556,14 +2561,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @user_role:CloudConnectorProvisioning @auditType:(\"Asset is monitored by Cloud connector\" OR \"Asset is no longer monitored by Cloud connector\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @user_role:CloudConnectorProvisioning @fields_mapping.auditType:(\"Asset is monitored by Cloud connector\" OR \"Asset is no longer monitored by Cloud connector\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2625,14 +2630,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @enforcement_source:\"Admin Portal\" @auditType:(\"Admin portal role changed to admin\" OR \"Admin portal role changed to viewer\" OR \"Admin portal role revoked\" OR \"Admin portal logon\" OR \"Admin portal role changed to operator\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @enforcement_source:\"Admin Portal\" @fields_mapping.auditType:(\"Admin portal role changed to admin\" OR \"Admin portal role changed to viewer\" OR \"Admin portal role revoked\" OR \"Admin portal logon\" OR \"Admin portal role changed to operator\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2694,14 +2699,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Segmentation policy created\" OR \"Segmentation policy deleted\" OR \"Segmentation policy edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Segmentation policy created\" OR \"Segmentation policy deleted\" OR \"Segmentation policy edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2763,14 +2768,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Outbound JIT access rejected\" OR \"Inbound JIT access rejected\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Outbound JIT access rejected\" OR \"Inbound JIT access rejected\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2815,9 +2820,9 @@
                         }
                     },
                     {
-                        "id": 5641989942381028,
+                        "id": 3534431085357244,
                         "definition": {
-                            "title": "Distribution by Outbound JIT Rule Status",
+                            "title": "Distribution by Inbound JIT Rule Status",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -2832,14 +2837,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Outbound JIT rule created\" OR \"Outbound JIT rule deleted\" OR \"Outbound JIT rule expired\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Inbound JIT rule created\" OR \"Inbound JIT rule deleted\" OR \"Inbound JIT rule expired\" OR \"Inbound JIT rule revived\" OR \"Inbound JIT rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2884,9 +2889,9 @@
                         }
                     },
                     {
-                        "id": 3534431085357244,
+                        "id": 5641989942381028,
                         "definition": {
-                            "title": "Distribution by Inbound JIT Rule Status",
+                            "title": "Distribution by Outbound JIT Rule Status",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -2901,14 +2906,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Inbound JIT rule created\" OR \"Inbound JIT rule deleted\" OR \"Inbound JIT rule expired\" OR \"Inbound JIT rule revived\" OR \"Inbound JIT rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Outbound JIT rule created\" OR \"Outbound JIT rule deleted\" OR \"Outbound JIT rule expired\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2970,14 +2975,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit enforcement_source:MFA @auditType:(\"Inbound MFA policy created\" OR \"Inbound MFA policy edited\" OR \"Inbound MFA policy deleted\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @enforcement_source:MFA @fields_mapping.auditType:(\"Inbound MFA policy created\" OR \"Inbound MFA policy edited\" OR \"Inbound MFA policy deleted\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3039,14 +3044,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit enforcement_source:MFA @auditType:(\"Outbound MFA policy created\" OR \"Outbound MFA policy edited\" OR \"Outbound MFA policy deleted\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @enforcement_source:MFA @fields_mapping.auditType:(\"Outbound MFA policy created\" OR \"Outbound MFA policy edited\" OR \"Outbound MFA policy deleted\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3108,20 +3113,21 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Inbound allow rule created\" OR \"Inbound allow rule deleted\" OR \"Inbound allow rule expired\" OR \"Inbound allow rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Inbound allow rule created\" OR \"Inbound allow rule deleted\" OR \"Inbound allow rule expired\" OR \"Inbound allow rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -3176,14 +3182,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Outbound allow rule created\" OR \"Outbound allow rule deleted\" OR \"Outbound allow rule expired\" OR \"Outbound allow rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Outbound allow rule created\" OR \"Outbound allow rule deleted\" OR \"Outbound allow rule expired\" OR \"Outbound allow rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3245,14 +3251,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Inbound block rule created\" OR \"Inbound block rule deleted\" OR \"Inbound block rule expired\" OR \"Inbound block rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Inbound block rule created\" OR \"Inbound block rule deleted\" OR \"Inbound block rule expired\" OR \"Inbound block rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3314,14 +3320,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Outbound block rule created\" OR \"Outbound block rule deleted\" OR \"Outbound block rule expired\" OR \"Outbound block rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Outbound block rule created\" OR \"Outbound block rule deleted\" OR \"Outbound block rule expired\" OR \"Outbound block rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3383,14 +3389,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Connect session created\" OR \"Connect session expired\" OR \"Connect session revoked\" OR \"Connect session logged out\" OR \"Connect session extended\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Connect session created\" OR \"Connect session expired\" OR \"Connect session revoked\" OR \"Connect session logged out\" OR \"Connect session extended\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3452,14 +3458,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Connect region created\" OR \"Connect region edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Connect region created\" OR \"Connect region edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3521,14 +3527,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Connect server deployed\" OR \"Connect server edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Connect server deployed\" OR \"Connect server edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3590,14 +3596,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Rules RPC rule created\" OR \"Rules RPC rule deleted\" OR \"Rules RPC rule expired\" OR \"Rules RPC rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Rules RPC rule created\" OR \"Rules RPC rule deleted\" OR \"Rules RPC rule expired\" OR \"Rules RPC rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3659,14 +3665,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"AI inbound allow rule rejected\" OR \"AI inbound allow rule approved\" OR \"AI inbound allow rule approved with changes\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"AI inbound allow rule rejected\" OR \"AI inbound allow rule approved\" OR \"AI inbound allow rule approved with changes\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3728,14 +3734,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"AI outbound allow rule rejected\" OR \"AI outbound allow rule approved\" OR \"AI outbound allow rule approved with changes\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"AI outbound allow rule rejected\" OR \"AI outbound allow rule approved\" OR \"AI outbound allow rule approved with changes\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3797,14 +3803,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"AI inbound block rule rejected\" OR \"AI inbound block rule approved\" OR \"AI inbound block rule approved with changes\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"AI inbound block rule rejected\" OR \"AI inbound block rule approved\" OR \"AI inbound block rule approved with changes\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3866,14 +3872,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"AI outbound block rule rejected\" OR \"AI outbound block rule approved\" OR \"AI outbound block rule approved with changes\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"AI outbound block rule rejected\" OR \"AI outbound block rule approved\" OR \"AI outbound block rule approved with changes\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3935,14 +3941,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:audit @auditType:(\"Identity rule created\" OR \"Identity rule deleted\" OR \"Identity rule expired\" OR \"Identity rule edited\") $User $User-Role $Enforcement-Source"
+                                                "query": "source:zero-networks service:audit @fields_mapping.auditType:(\"Identity rule created\" OR \"Identity rule deleted\" OR \"Identity rule expired\" OR \"Identity rule edited\") $User $User-Role $Enforcement-Source"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@auditType",
+                                                    "facet": "@fields_mapping.auditType",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -4023,7 +4029,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "auditType",
+                                            "field": "fields_mapping.auditType",
                                             "width": "auto"
                                         }
                                     ]

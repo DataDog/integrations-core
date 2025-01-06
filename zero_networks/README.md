@@ -16,8 +16,11 @@ This integration seamlessly collects all the above listed logs, channeling them 
 ### Generate API credentials in Zero Networks
 
 1. Log in to the Zero Networks platform.
-2. Navigate to **Settings**, click **API** under **Integrations** and click **Add new token**.
-3. Enter a **Token Name** and Set the **Expiry** to **36 months** and click **Add**.
+2. Navigate to **Settings**, click **API** under **Integrations**, click **Add new token** and specify the settings of the new API key.
+    - Token name: A meaningful name that can help you identify the API key.
+    - Access type: The access permission assigned to the API key. Select **Read only**.
+    - Expiry: The expiration duration of the API key. Select **36 months**.
+3. Click Add.
 
 ### Connect your Zero Networks Account to Datadog
 
