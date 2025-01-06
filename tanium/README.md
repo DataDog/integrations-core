@@ -1,6 +1,6 @@
 ## Overview
 
-[Tanium][1] is an enterprise platform that’s primarily used as an endpoint management tool. It empowers security and IT operations teams with quick visibility and control to secure and manage every endpoint on the network.
+[Tanium][1] is an enterprise platform that's primarily used as an endpoint management tool. It empowers security and IT operations teams with quick visibility and control to secure and manage every endpoint on the network.
 
 This integration ingests the following logs:
 
