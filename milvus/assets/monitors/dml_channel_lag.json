@@ -3,7 +3,7 @@
 	"created_at": "2025-01-03",
 	"last_updated_at": "2025-01-03",
 	"title": "DML channel lag",
-	"description": "This monitor measures the lag in the DML channels.High lag indicates synchronization issues, which can affect real-time data consistency and query freshness.",
+	"description": "This monitor measures the lag in the DML channels. High lag indicates synchronization issues, which can affect real-time data consistency and query freshness.",
 	"definition": {
 		"name": "Significant lag in DML channel",
 		"type": "query alert",
