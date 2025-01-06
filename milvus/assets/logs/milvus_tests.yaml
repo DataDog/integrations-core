@@ -63,3 +63,17 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1732716411852
+ -
+  sample: "[2024/11/18 15:15:45.120 +00:00] [INFO] [roles/roles.go:282] [setupPrometheusHTTPServer]"
+  result:
+    custom:
+      date: 1731942945120
+      file: "roles.go"
+      level: "INFO"
+      lineno: "282"
+      service: "roles"
+    message: "setupPrometheusHTTPServer"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1731942945120

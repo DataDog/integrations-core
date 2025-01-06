@@ -29,10 +29,10 @@ pipeline:
           ["get recovery info request received"]
           [traceID=54cda8d3229d00982db785351a12ea7a]
           [collectionID=453764875273212700] [partitionIDs="[]"]'
+        - '[2024/11/18 15:15:45.120 +00:00] [INFO] [roles/roles.go:282] [setupPrometheusHTTPServer]'
       grok:
         supportRules: message_rule
-          \[?(")%{data:message.body}?(")]\s+%{data:message.details:array("[]","]
-          [")}
+          \["?%{data:message.body}"?](\s+%{data:message.details:array("[]","] [")})?
         matchRules: rule1 \[%{date("yyyy/MM/dd HH:mm:ss.SSS
           ZZ"):date}]\s+\[%{word:level}\]\s+\[%{word:service}/%{notSpace:file}:%{word:lineno}\]\s+%{message_rule}
     - type: status-remapper
