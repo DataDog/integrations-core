@@ -33,9 +33,8 @@ pipeline:
       grok:
         supportRules: message_rule
           \["?%{data:message.body}"?](\s+%{data:message.details:array("[]","] [")})?
-        matchRules: rule1 \[%{date("yyyy/MM/dd HH:mm:ss.SSS
-          ZZ"):date}]\s+\[%{word:level}\]\s+\[%{word:service}/%{notSpace:file}:%{word:lineno}\]\s+%{message_rule}
-          rule 2 %{regex("[IWE]"):level}%{date("yyyyMMdd HH:mm:ss.SSSSSS"):date}\s+%{number:pid}\s+%{notSpace:file}:%{word:lineno}]\s+%{data:message.details:array("[]","][")}\s+%{data:message.body}
+        matchRules: rule1 \[%{date("yyyy/MM/dd HH:mm:ss.SSS ZZ"):date}]\s+\[%{word:level}\]\s+\[%{word:service}/%{notSpace:file}:%{word:lineno}\]\s+%{message_rule}
+        rule 2 %{regex("[IWE]"):level}%{date("yyyyMMdd HH:mm:ss.SSSSSS"):date}\s+%{number:pid}\s+%{notSpace:file}:%{word:lineno}]\s+%{data:message.details:array("[]","][")}\s+%{data:message.body}
     - type: status-remapper
       name: Define `level` as the official status of the log
       enabled: true
