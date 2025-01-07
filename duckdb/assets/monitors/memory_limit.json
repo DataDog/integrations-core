@@ -2,13 +2,13 @@
     "version": 2,
     "created_at": "2025-01-07",
     "last_updated_at": "2025-01-07",
-    "title": "Memory limit is high",
+    "title": "DuckDB Memory limit is high",
     "description": "",
     "tags": [
       "integration:duckdb"
     ],
     "definition": {
-      "name": "Memory limit is high",
+      "name": "DuckDB Memory limit is high",
       "type": "query alert",
       "query": "avg(last_5m):avg:duckdb.memory_limit{*} by {host} > 1000000000",
       "message": "{{#is_alert}}\nThe memory limit for DuckDB database on host {{host.name}} is above the default limit of 1GB.\n{{/is_alert}}",
