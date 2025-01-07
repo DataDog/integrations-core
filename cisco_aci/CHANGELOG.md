@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.2.0 / 2024-12-26
+
+***Added***:
+
+* [NDM] [Cisco ACI] Support submitting topology metadata (utilizing LLDP neighbor information) ([#18675](https://github.com/DataDog/integrations-core/pull/18675))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Fix APIC device status ([#19204](https://github.com/DataDog/integrations-core/pull/19204))
+
 ## 4.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:

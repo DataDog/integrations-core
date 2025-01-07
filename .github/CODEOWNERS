@@ -243,6 +243,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 
 # SaaS Integrations
+/adyen/                                                              @DataDog/saas-integrations
+/adyen/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
+/adyen/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
+/adyen/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /authorize_net/                                                      @DataDog/saas-integrations
 /authorize_net/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /authorize_net/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
@@ -276,6 +281,12 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /freshservice/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /freshservice/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /freshservice/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
+/genesys/                                                           @DataDog/saas-integrations
+/genesys/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
+/genesys/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
+/genesys/metadata.csv                                               @DataDog/saas-integrations @DataDog/documentation
+/genesys/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /genesys/                                                           @DataDog/saas-integrations
 /genesys/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
