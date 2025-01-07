@@ -22,14 +22,14 @@ This integration collects logs from the sources listed above and sends them to D
     - **Expiration**: Enter the expiration interval in days.
     - **Trusted IP addresses**: Enter the external IP addresses as `::/0,0.0.0.0/0` to enable any system to use the token.
 4. Click **Save** and copy the **token** for later use.
-5. The Tanium API host example value is **\<customerURL\>.cloud.tanium.com**. Replace **\<customerURL\>** with your specific customer URL to complete the Tanium API host.
+5. The Tanium host format is **\<customerURL\>.cloud.tanium.com**. Replace **\<customerURL\>** with your organization's specific subdomain.
 
 ### Connect your Tanium Account to Datadog
 
-1. Add your API Host and API Token.
+1. Add your Host and API Token.
    | Parameters | Description |
    | ------------------- |------------------------------------------------------------- |
-   | API Host | The API Host of your Tanium platform. |
+   | Host | The Host of your Tanium platform. |
    | API Token | The API Token of your Tanium platform. |
 
 2. Click the Save button to save your settings.

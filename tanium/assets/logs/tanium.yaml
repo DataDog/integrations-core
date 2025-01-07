@@ -92,15 +92,15 @@ pipeline:
             supportRules: ""
             matchRules: >-
               new_system_user_session_created_rule UserID: %{word:usr.id};
-              Session ID: %{integer:session_id}; IP Address: %{ip:ip_address}
+              Session ID: %{integer:session_id}; IP Address: %{ip:network.client.ip}
 
-              new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{word:authentication_type}; (Originated from %{data:originated_from}|IP Address: %{ip:ip_address})
+              new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{word:authentication_type}; (Originated from %{data:originated_from}|IP Address: %{ip:network.client.ip})
 
-              user_logged_out User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; %{ip:ip_address}
+              user_logged_out User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; %{ip:network.client.ip}
 
               authentication_failed_rule1 Failed Authentication (Deleted|Expired) session supplied.%{regex(" *")}User: %{regex("[^;]*"):usr.name}; Last Used: %{date("yyyy-MM-dd HH:mm:ss Z"):last_used}; Now: %{date("yyyy-MM-dd HH:mm:ss Z"):now}
 
-              authentication_failed_rule2 Failed Authentication JWT authentication failed: IP Address: %{ip:ip_address}. (JWTInvalidToken: Invalid JSON Web Token. Token has expired. now=%{date("yyyy-MM-dd HH:mm:ss Z"):now} exp=%{date("yyyy-MM-dd HH:mm:ss Z"):exp}|User access token has been invalidated)
+              authentication_failed_rule2 Failed Authentication JWT authentication failed: IP Address: %{ip:network.client.ip}. (JWTInvalidToken: Invalid JSON Web Token. Token has expired. now=%{date("yyyy-MM-dd HH:mm:ss Z"):now} exp=%{date("yyyy-MM-dd HH:mm:ss Z"):exp}|User access token has been invalidated)
     - type: pipeline
       name: Platform Audit Logs for System Settings
       enabled: true

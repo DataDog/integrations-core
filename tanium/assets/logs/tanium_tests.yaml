@@ -376,10 +376,12 @@ tests:
       audit_name: "New System User Session Created"
       audit_row_id: 323047
       creation_time: "2025-01-06T09:46:20Z"
-      ip_address: "10.10.10.10"
       last_modified_by: ""
       modification_time: "2025-01-06T09:46:20Z"
       modifier_user_id: 0
+      network:
+        client:
+          ip: "10.10.10.10"
       object_id: 2
       object_name: ""
       object_type_name: "authentication"
@@ -456,10 +458,12 @@ tests:
       audit_row_id: 254586
       authentication_type: "JsonWebToken"
       creation_time: "2025-01-02T16:28:31Z"
-      ip_address: "10.10.10.10"
       last_modified_by: ""
       modification_time: "2025-01-02T16:28:31Z"
       modifier_user_id: 0
+      network:
+        client:
+          ip: "10.10.10.10"
       object_id: 3
       object_name: ""
       object_type_name: "authentication"
@@ -501,13 +505,15 @@ tests:
       audit_name: "User Logged Out"
       audit_row_id: 122364
       creation_time: "2024-12-26T12:12:38Z"
-      ip_address: "10.10.10.10"
       last_modified_by: "test@example.com"
       mod_user:
         display_name: ""
         domain: ""
       modification_time: "2024-12-26T12:12:38Z"
       modifier_user_id: 47
+      network:
+        client:
+          ip: "10.10.10.10"
       object_id: 47
       object_name: ""
       object_type_name: "authentication"
@@ -622,10 +628,12 @@ tests:
       audit_name: "Authentication Failed"
       audit_row_id: 264927
       creation_time: "2025-01-03T05:56:12Z"
-      ip_address: "10.10.10.10"
       last_modified_by: ""
       modification_time: "2025-01-03T05:56:12Z"
       modifier_user_id: 0
+      network:
+        client:
+          ip: "10.10.10.10"
       object_id: 0
       object_name: ""
       object_type_name: "authentication"
@@ -659,10 +667,12 @@ tests:
       audit_row_id: 214232
       creation_time: "2024-12-31T11:53:03Z"
       exp: 1735643413000
-      ip_address: "10.10.10.10"
       last_modified_by: ""
       modification_time: "2024-12-31T11:53:03Z"
       modifier_user_id: 0
+      network:
+        client:
+          ip: "10.10.10.10"
       now: 1735645983000
       object_id: 0
       object_name: ""
