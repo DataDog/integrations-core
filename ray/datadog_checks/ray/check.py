@@ -179,6 +179,7 @@ class RayCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         for config in self.scraper_configs:
             self.log.debug("Config loop is: %s", config)
             config["metrics"] = [METRIC_MAP]
+            config["extra_metrics"] = ["ray_vllm:.+"]
             self.scrapers[config["openmetrics_endpoint"]] = CustomOpenMetricsScraper(
                 self, config
             )

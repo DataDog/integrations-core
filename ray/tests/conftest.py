@@ -24,6 +24,7 @@ from .common import (
     HERE,
     MOCKED_HEAD_INSTANCE,
     MOCKED_WORKER_INSTANCE,
+    MOCKED_VLLM_INSTANCE,
     RAY_VERSION,
     SERVE_PORT,
     SERVE_URL,
@@ -36,6 +37,10 @@ from .common import (
     WORKER3_INSTANCE,
     WORKER3_METRICS_PORT,
     WORKER3_OPENMETRICS_ENDPOINT,
+    VLLM_PORT,
+    VLLM_OPENMETRICS_ENDPOINT,
+    VLLM_INSTANCE,
+    
 )
 
 
@@ -55,12 +60,14 @@ def dd_environment():
             "WORKER2_METRICS_PORT": WORKER2_METRICS_PORT,
             "WORKER3_METRICS_PORT": WORKER3_METRICS_PORT,
             "SERVE_PORT": SERVE_PORT,
+            "VLLM_PORT": VLLM_PORT,
         },
         conditions=[
             CheckEndpoints(HEAD_OPENMETRICS_ENDPOINT),
             CheckEndpoints(WORKER1_OPENMETRICS_ENDPOINT),
             CheckEndpoints(WORKER2_OPENMETRICS_ENDPOINT),
             CheckEndpoints(WORKER3_OPENMETRICS_ENDPOINT),
+            CheckEndpoints(VLLM_OPENMETRICS_ENDPOINT),
             CheckEndpoints(urljoin(SERVE_URL, "hello")),
             WaitFor(run_add),
             WaitFor(prepare_service),
@@ -74,6 +81,7 @@ def dd_environment():
                 WORKER1_INSTANCE,
                 WORKER2_INSTANCE,
                 WORKER3_INSTANCE,
+                VLLM_INSTANCE
             ],
         }, E2E_METADATA
 
@@ -101,6 +109,10 @@ def mocked_head_instance():
 @pytest.fixture
 def mocked_worker_instance():
     return copy.deepcopy(MOCKED_WORKER_INSTANCE)
+
+@pytest.fixture
+def mocked_vllm_instance():
+    return copy.deepcopy(MOCKED_VLLM_INSTANCE)
 
 
 def run_add():

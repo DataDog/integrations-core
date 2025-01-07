@@ -122,3 +122,11 @@ services:
         condition: service_healthy
     volumes:
       - ./call_apis.py:/home/ray/call_apis.py
+  vllm-api:
+    image: caddy:2.7
+    container_name: vllm-api
+    ports:
+      - 8080
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/ray_vllm.txt:/usr/share/caddy

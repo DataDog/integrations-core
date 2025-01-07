@@ -16,6 +16,7 @@ HEAD_METRICS_PORT = "8080"
 WORKER1_METRICS_PORT = "8081"
 WORKER2_METRICS_PORT = "8082"
 WORKER3_METRICS_PORT = "8083"
+VLLM_PORT = "8080"
 HEAD_DASHBOARD_PORT = "8265"
 HOSTNAME = get_docker_hostname()
 
@@ -23,6 +24,7 @@ HEAD_OPENMETRICS_ENDPOINT = f"http://{HOSTNAME}:{HEAD_METRICS_PORT}"
 WORKER1_OPENMETRICS_ENDPOINT = f"http://{HOSTNAME}:{WORKER1_METRICS_PORT}"
 WORKER2_OPENMETRICS_ENDPOINT = f"http://{HOSTNAME}:{WORKER2_METRICS_PORT}"
 WORKER3_OPENMETRICS_ENDPOINT = f"http://{HOSTNAME}:{WORKER3_METRICS_PORT}"
+VLLM_OPENMETRICS_ENDPOINT = f"http://{HOSTNAME}:{VLLM_PORT}"
 SERVE_URL = f"http://{HOSTNAME}:{SERVE_PORT}"
 
 HEAD_INSTANCE = {
@@ -41,12 +43,20 @@ WORKER3_INSTANCE = {
     "openmetrics_endpoint": WORKER3_OPENMETRICS_ENDPOINT,
 }
 
+VLLM_INSTANCE = {
+    "openmetrics_endpoint": VLLM_OPENMETRICS_ENDPOINT,
+}
+
 MOCKED_HEAD_INSTANCE = {
     "openmetrics_endpoint": "http://ray-head:8080",
 }
 
 MOCKED_WORKER_INSTANCE = {
     "openmetrics_endpoint": "http://ray-worker:8081",
+}
+
+MOCKED_VLLM_INSTANCE = {
+    "openmetrics_endpoint": "http://vllm-api:8080",
 }
 
 E2E_METADATA = {
@@ -320,11 +330,36 @@ OPTIONAL_METRICS = [
 ]
 OPTIONAL_METRICS = ['ray.' + m for m in OPTIONAL_METRICS]
 
+VLLM_METRICS = [
+    'prompt_tokens_total',
+    'avg_generation_throughput_toks_per_s',
+    'time_per_output_token_seconds',
+    'avg_prompt_throughput_toks_per_s',
+    'cpu_cache_usage_perc',
+    'gpu_cache_usage_perc',
+    'num_requests_waiting',
+    'num_requests_swapped',
+    'num_requests_running',
+    'generation_tokens_total',
+    'gpu_prefix_cache_hit_rate',
+    'cpu_prefix_cache_hit_rate',
+    'time_to_first_token_seconds',
+    'request_success_total',
+    'request_params_n',
+    'e2e_request_latency_seconds',
+    'request_prompt_tokens',
+    'request_params_best_of',
+    'request_generation_tokens',
+]
+VLLM_METRICS = ['ray.' + m for m in VLLM_METRICS]
+
+
 
 def mock_http_responses(url, **_params):
     mapping = {
         'http://ray-head:8080': 'ray_head.txt',
         'http://ray-worker:8081': 'ray_worker.txt',
+        'http://vllm-api:8080': 'ray_vllm.txt'
     }
 
     metrics_file = mapping.get(url)
