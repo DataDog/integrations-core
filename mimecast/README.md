@@ -28,7 +28,7 @@ The Mimecast integration seamlessly collects all the above listed logs, channeli
    - Click the **Generate keys** button of Mimecast API 2.0 tile.
    - Check the **I accept** checkbox, click on **Next**.
    - In **Application Details** step, fill out the following details according to the instructions:
-     - Application Name: Enter a meaningful name of application
+     - Application Name: Enter a meaningful name for the application
      - Category: Select **SIEM Integration**
      - Products: Click **Select all** option
      - Application Role: Select **Basic Administrator**
