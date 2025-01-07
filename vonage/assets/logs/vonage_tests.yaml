@@ -31,6 +31,12 @@ tests:
       "to" : "919481686682",
       "status" : "delivered"
     }
+  ddtags:
+    - error_code_description
+    - product
+    - error_code
+    - latency
+
   result:
     custom:
       account_id: "bf8d8cc9"
