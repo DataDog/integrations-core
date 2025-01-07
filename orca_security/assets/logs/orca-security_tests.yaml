@@ -191,6 +191,7 @@ tests:
       type_key: "ad59fd836bc225b159dcfbf413191c77"
       type_string: "KMS CMK schedule deletion"
     message: "KMS CMK schedule deletion"
+    service: "Orca Alerts"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
