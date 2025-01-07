@@ -1,8 +1,6 @@
 id: orca-security
 metric_id: orca-security
 backend_only: false
-installation_sources: 
-  - orca_security
 facets: null
 pipeline:
   type: pipeline
@@ -16,6 +14,11 @@ pipeline:
       enabled: true
       sources:
         - state.last_updated
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
     - name: Lookup on `state.risk_level` to `status`
       enabled: true
       source: state.risk_level
