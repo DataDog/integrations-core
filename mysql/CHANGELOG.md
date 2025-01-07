@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.4.0 / 2024-12-26
+
+***Added***:
+
+* Add `mysql.performance.performance_schema_digest_lost`, the number of digest instances that could not be instrumented in the `events_statements_summary_by_digest` table. ([#19121](https://github.com/DataDog/integrations-core/pull/19121))
+
 ## 14.3.0 / 2024-11-28
 
 ***Added***:
@@ -9,7 +15,7 @@
 * Added the `dbms_flavor` tag to MySQL integration metrics and events to identify the database type. This tag indicates whether the database is MySQL or MariaDB. ([#18950](https://github.com/DataDog/integrations-core/pull/18950))
 * Submit database_hostname with database instance and metrics for MySQL, Postgres, and SQLServer ([#18969](https://github.com/DataDog/integrations-core/pull/18969))
 
-## 14.2.0 / 2024-11-06
+## 14.2.0 / 2024-11-06 / Agent 7.60.0
 
 ***Added***:
 
@@ -71,7 +77,7 @@
 
 * Adding databases (schemas) data collection to MySQL
   These data include information about the tables, their columns, indexes, foreign keys, and partitions. ([#17916](https://github.com/DataDog/integrations-core/pull/17916))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ***Fixed***:
 

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2024-12-26
+
+***Added***:
+
+* Use `start_date` instead of `execution_date` for ongoing duration metrics ([#19278](https://github.com/DataDog/integrations-core/pull/19278))
+
 ## 6.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:
