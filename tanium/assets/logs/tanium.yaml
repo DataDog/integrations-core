@@ -27,7 +27,7 @@ pipeline:
     - type: date-remapper
       name: Define `alertedAt`, `createdAt`, `creation_time` as the official date of
         the log
-      enabled: false
+      enabled: true
       sources:
         - alertedAt
         - createdAt
