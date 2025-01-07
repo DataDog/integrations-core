@@ -837,7 +837,7 @@ class AuthTokenOAuthReader(object):
         self._expiration = None
 
     def read(self, **request):
-        if self._token is None or get_timestamp() >= self._expiration or 'error' in request:
+        if self._token is None or self._expiration is None or get_timestamp() >= self._expiration or 'error' in request:
             global oauth2
             if oauth2 is None:
                 from oauthlib import oauth2
