@@ -44,7 +44,6 @@
       ]
     },
     "dashboards": {
-      "Duckdb Overview": "assets/dashboards/duckdb_overview.json",
       "DuckDB Overview": "assets/dashboards/overview.json"
     }
   },
