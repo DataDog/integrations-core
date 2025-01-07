@@ -27,7 +27,7 @@ pipeline:
     - type: date-remapper
       name: Define `alertedAt`, `createdAt`, `creation_time` as the official date of
         the log
-      enabled: true
+      enabled: false
       sources:
         - alertedAt
         - createdAt
@@ -94,9 +94,9 @@ pipeline:
               new_system_user_session_created_rule UserID: %{word:usr.id};
               Session ID: %{integer:session_id}; IP Address: %{ip:network.client.ip}
 
-              new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{word:authentication_type}; (Originated from %{data:originated_from}|IP Address: %{ip:network.client.ip})
+              new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{regex("[^;]*"):authentication_type}(; Originated from %{data:originated_from})?(; IP Address: %{ip:network.client.ip})?
 
-              user_logged_out User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; %{ip:network.client.ip}
+              user_logged_out User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; (IP Address: )?%{ip:network.client.ip}
 
               authentication_failed_rule1 Failed Authentication (Deleted|Expired) session supplied.%{regex(" *")}User: %{regex("[^;]*"):usr.name}; Last Used: %{date("yyyy-MM-dd HH:mm:ss Z"):last_used}; Now: %{date("yyyy-MM-dd HH:mm:ss Z"):now}
 
