@@ -333,11 +333,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
-/sanity/                                                            @DataDog/saas-integrations
-/sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-/sanity/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/sanity/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
-
 /snowflake/                                                          @DataDog/saas-integrations
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
