@@ -1,4 +1,3 @@
-version: '3'
 services:
   jboss_wildfly:
     image: jboss/wildfly:16.0.0.Final

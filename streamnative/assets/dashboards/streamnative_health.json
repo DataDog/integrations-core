@@ -1,0 +1,604 @@
+{
+    "title": "StreamNative - Health",
+    "description": "",
+    "widgets": [
+        {
+            "id": 5694301138076536,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.prod.website-files.com/638a1dc72083d166ed6e3d76/63926c17a52727a15e13decd_Logo-streamnative-150px.svg",
+                "url_dark_theme": "https://cdn.prod.website-files.com/638a1dc72083d166ed6e3d76/66503b265696d89c26062701_Group%2021.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 3
+            }
+        },
+        {
+            "id": 4734527193949666,
+            "definition": {
+                "title": "Monitor Summary",
+                "type": "manage_status",
+                "display_format": "countsAndList",
+                "color_preference": "background",
+                "hide_zero_counts": true,
+                "show_status": true,
+                "last_triggered_format": "relative",
+                "query": "tag:streamnative",
+                "sort": "status,asc",
+                "count": 50,
+                "start": 0,
+                "summary_type": "monitors",
+                "show_priority": false,
+                "show_last_triggered": false
+            },
+            "layout": {
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 5
+            }
+        },
+        {
+            "id": 6669352432630000,
+            "definition": {
+                "type": "note",
+                "content": "**[StreamNative](https://www.streamnative.com/)** provides an enterprise-grade messaging platform built on Apache Pulsar, offering scalable real-time data streaming with multi-tenancy, geo-replication, and cloud integration.\n\nThis Health dashboard tracks messaging latency (end-to-end, publish, cross-cluster) and service availability. \n\nFor more information, see the [StreamNative Integration Documentation](https://docs.datadoghq.com/integrations/streamnative/).",
+                "background_color": "orange",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5437379294232914,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured based on health statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 3,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 1229081970979708,
+            "definition": {
+                "title": "End to End Latency over time (Median)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "End To End Latency",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:streamnative.health.pulsar_detector_e2e_latency_ms{$Organization,$Instance,$Namespace,$Cluster,quantile:0.5} by {cloud_streamnative_io_cluster}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 4014832880981910,
+            "definition": {
+                "title": "Publish Latency over time (Median)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Publish Latency",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:streamnative.health.pulsar_detector_publish_latency_ms{$Organization,$Cluster,$Instance,$Namespace,quantile:0.5} by {cloud_streamnative_io_cluster}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 762054180789370,
+            "definition": {
+                "title": "Average End To End Latency by Quantile",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "End To End latency",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:streamnative.health.pulsar_detector_e2e_latency_ms{$Organization,$Instance,$Namespace,$Cluster} by {quantile}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 8630166971873926,
+            "definition": {
+                "title": "Average Publish Latency by Quantile",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Publish Latency",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:streamnative.health.pulsar_detector_publish_latency_ms{$Organization,$Instance,$Namespace,$Cluster} by {quantile}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 1445816428377812,
+            "definition": {
+                "title": "Service Status",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:streamnative.health.pulsar_detector_pulsar_sla_webservice_up{$Organization,$Instance,$Namespace,$Cluster} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance,cloud_streamnative_io_cluster}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "avg:streamnative.health.pulsar_detector_pulsar_sla_messaging_up{$Organization,$Instance,$Namespace,$Cluster} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance,cloud_streamnative_io_cluster}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "conditional_formats": [
+                                    {
+                                        "comparator": "=",
+                                        "value": 1,
+                                        "palette": "white_on_green"
+                                    },
+                                    {
+                                        "comparator": "<",
+                                        "value": 1,
+                                        "palette": "black_on_light_red"
+                                    }
+                                ],
+                                "cell_display_mode": "number",
+                                "alias": "Webservice Status",
+                                "formula": "query1"
+                            },
+                            {
+                                "conditional_formats": [
+                                    {
+                                        "comparator": "=",
+                                        "value": 1,
+                                        "palette": "white_on_green"
+                                    },
+                                    {
+                                        "comparator": "<",
+                                        "value": 1,
+                                        "palette": "black_on_light_red"
+                                    }
+                                ],
+                                "cell_display_mode": "number",
+                                "alias": "Messaging Service Status",
+                                "formula": "query2"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 5425815181046796,
+            "definition": {
+                "title": "Service Status over time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Webservice",
+                                "style": {
+                                    "palette": "dd20",
+                                    "palette_index": 2
+                                },
+                                "formula": "count_nonzero(query1)"
+                            },
+                            {
+                                "alias": "Messaging Service",
+                                "style": {
+                                    "palette": "classic",
+                                    "palette_index": 1
+                                },
+                                "formula": "count_nonzero(query2)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:streamnative.health.pulsar_detector_pulsar_sla_webservice_up{$Organization,$Instance,$Namespace,$Cluster}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "avg:streamnative.health.pulsar_detector_pulsar_sla_messaging_up{$Organization,$Instance,$Namespace,$Cluster}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 1936496724376416,
+            "definition": {
+                "title": "Overall Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:streamnative.health.pulsar_detector_e2e_latency_ms{$Organization,$Cluster,$Instance,$Namespace,quantile:0.5} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "avg:streamnative.health.pulsar_detector_publish_latency_ms{$Organization,$Cluster,$Instance,$Namespace,quantile:0.5} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query3",
+                                "query": "avg:streamnative.health.pulsar_detector_pulsar_sla_webservice_up{$Organization,$Cluster,$Instance,$Namespace} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query4",
+                                "query": "avg:streamnative.health.pulsar_detector_pulsar_sla_messaging_up{$Organization,$Cluster,$Instance,$Namespace} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "End to End Latency (Median)",
+                                "formula": "query1"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Publish Latency (Median)",
+                                "formula": "query2"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Webservice Status",
+                                "formula": "query3",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": "=",
+                                        "value": 1,
+                                        "palette": "black_on_light_green"
+                                    },
+                                    {
+                                        "comparator": "<",
+                                        "value": 1,
+                                        "palette": "black_on_light_red"
+                                    }
+                                ]
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Messaging Status",
+                                "formula": "query4",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": "=",
+                                        "value": 1,
+                                        "palette": "black_on_light_green"
+                                    },
+                                    {
+                                        "comparator": "<",
+                                        "value": 1,
+                                        "palette": "black_on_light_red"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Organization",
+            "prefix": "cloud_streamnative_io_organization_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Instance",
+            "prefix": "cloud_streamnative_io_pulsar_instance",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Cluster",
+            "prefix": "cloud_streamnative_io_pulsar_cluster",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Namespace",
+            "prefix": "kubernetes_namespace",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

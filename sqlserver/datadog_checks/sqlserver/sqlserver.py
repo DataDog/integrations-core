@@ -116,6 +116,7 @@ class SQLServer(AgentCheck):
 
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
@@ -202,6 +203,8 @@ class SQLServer(AgentCheck):
         self.set_metadata("resolved_hostname", self.resolved_hostname)
 
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self._config.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -283,6 +286,14 @@ class SQLServer(AgentCheck):
     @property
     def resolved_hostname(self):
         return self._resolved_hostname
+
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            host, _ = split_sqlserver_host_port(self.instance.get("host"))
+            self._database_hostname = resolve_db_host(host)
+        return self._database_hostname
 
     def load_static_information(self):
         engine_edition_reloaded = False
@@ -746,7 +757,6 @@ class SQLServer(AgentCheck):
     def _new_database_metric_executor(self, database_metric_class, db_names=None):
         return database_metric_class(
             config=self._config,
-            instance_config=self.instance,
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
@@ -959,6 +969,7 @@ class SQLServer(AgentCheck):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
                 "host": self.resolved_hostname,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
                 "kind": "database_instance",
