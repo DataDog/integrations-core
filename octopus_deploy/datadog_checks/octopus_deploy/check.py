@@ -197,6 +197,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
+            self._collect_machine_metrics(space_id)
             if self.collect_events:
                 self._collect_new_events(space_id, space_name)
 
@@ -449,6 +450,42 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
             self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
             self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
+
+    def _collect_machine_metrics(self, space_id):
+        self.log.debug("Collecting server node metrics.")
+        url = f"api/{space_id}/machines"
+        response_json = self._process_paginated_endpoint(url)
+        machines = response_json.get('Items', [])
+
+        for machine in machines:
+            machine_id = machine.get("Id")
+            machine_name = machine.get("Name")
+            machine_slug = machine.get("Slug")
+            roles = machine.get("Roles", [])
+            os = machine.get("OperatingSystem")
+            health_status = machine.get("HealthStatus")
+            is_healthy = health_status.startswith("Healthy")
+            machine_tags = [
+                f"machine_id:{machine_id}",
+                f"machine_name:{machine_name}",
+                f"machine_slug:{machine_slug}",
+                f"health_status:{health_status}",
+                f"operating_system:{os}",
+            ]
+            machine_tags += roles
+            environment_ids = machine.get("EnvironmentIds")
+            env_tags = []
+            for env_id in environment_ids:
+                env_name = self._environments_cache.get(env_id)
+                env_tag_name = (
+                    "env"
+                    if not self.config.disable_generic_tags and self.config.unified_service_tagging
+                    else "environment_name"
+                )
+                env_tags.append(f"{env_tag_name}:{env_name}")
+            machine_tags += env_tags
+            self.gauge("machine.count", 1, tags=self._base_tags + machine_tags)
+            self.gauge("machine.is_healthy", is_healthy, tags=self._base_tags + machine_tags)
 
     def _collect_deployment_logs(self, space_id, task_id, tags):
         url = f"api/{space_id}/tasks/{task_id}/details"

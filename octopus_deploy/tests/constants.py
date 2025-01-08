@@ -34,6 +34,11 @@ DEPLOY_METRICS = [
     "octopus_deploy.deployment.completed_time",
 ]
 
+MACHINE_METRICS = [
+    "octopus_deploy.machine.count",
+    "octopus_deploy.machine.is_healthy",
+]
+
 SPACE_METRICS = [
     "octopus_deploy.space.count",
 ]
@@ -60,7 +65,15 @@ SERVER_METRICS = [
 
 COMPLETED_METRICS = ["octopus_deploy.deployment.completed_time"]
 
-ALL_METRICS = SERVER_METRICS + ENV_METRICS + PROJECT_METRICS + PROJECT_GROUP_METRICS + SPACE_METRICS + DEPLOY_METRICS
+ALL_METRICS = (
+    SERVER_METRICS
+    + ENV_METRICS
+    + PROJECT_METRICS
+    + PROJECT_GROUP_METRICS
+    + MACHINE_METRICS
+    + SPACE_METRICS
+    + DEPLOY_METRICS
+)
 
 E2E_METRICS = list(set(ALL_METRICS) - set(COMPLETED_METRICS))
 

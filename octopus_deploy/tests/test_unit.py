@@ -2270,6 +2270,229 @@ def test_paginated_limit_environments(
     assert skip_take_args == expected_skip_take_args
 
 
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_machines_metrics(
+    get_current_datetime,
+    dd_run_check,
+    aggregator,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-1",
+            "machine_name:test-machine",
+            "machine_slug:test-machine",
+            "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test-tag",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        1,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-1",
+            "machine_name:test-machine",
+            "machine_slug:test-machine",
+            "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test-tag",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "tag",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+            "tag",
+        ],
+    )
+
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        0,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('paginated_limit, expected_skip_take_args'),
+    [
+        pytest.param(
+            30,
+            [
+                (['http://localhost:80/api/Spaces-1/machines'], 0, 30),
+            ],
+            id='high limit',
+        ),
+        pytest.param(
+            2,
+            [
+                (['http://localhost:80/api/Spaces-1/machines'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/machines'], 2, 2),
+            ],
+            id='low limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_machines_pagination(
+    get_current_datetime,
+    dd_run_check,
+    aggregator,
+    expected_skip_take_args,
+    mock_http_get,
+    paginated_limit,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['paginated_limit'] = paginated_limit
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    skip_take_args = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        take = kwargs.get('params', {}).get('take')
+        skip = kwargs.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/machines' == args[0]:
+            skip_take_args += [(list(args), skip, take)]
+
+    assert skip_take_args == expected_skip_take_args
+
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-1",
+            "machine_name:test-machine",
+            "machine_slug:test-machine",
+            "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test-tag",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        1,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-1",
+            "machine_name:test-machine",
+            "machine_slug:test-machine",
+            "health_status:Healthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test-tag",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "tag",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        1,
+        tags=[
+            "machine_id:Machines-2",
+            "machine_name:test-machine1",
+            "machine_slug:test-machine1",
+            "health_status:Healthy with warnings",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+            "tag",
+        ],
+    )
+
+    aggregator.assert_metric(
+        "octopus_deploy.machine.count",
+        1,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+        ],
+    )
+    aggregator.assert_metric(
+        "octopus_deploy.machine.is_healthy",
+        0,
+        tags=[
+            "environment_name:dev",
+            "machine_id:Machines-3",
+            "machine_name:test-machine3",
+            "machine_slug:test-machine3",
+            "health_status:Unhealthy",
+            "operating_system:Ubuntu 24.04.1 LTS",
+            "test",
+        ],
+    )
+
+
 @pytest.mark.parametrize(
     ('disable_generic_tags, unified_service_tagging, expect_service_tags'),
     [
