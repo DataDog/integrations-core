@@ -55,6 +55,8 @@ integration/amazon_msk:
 - amazon_msk/**/*
 integration/ambari:
 - ambari/**/*
+integration/anthropic:
+- anthropic/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
@@ -175,6 +177,8 @@ integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
 - druid/**/*
+integration/duckdb:
+- duckdb/**/*
 integration/ecs_fargate:
 - ecs_fargate/**/*
 integration/eks_anywhere:
@@ -285,6 +289,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/keda:
+- keda/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:
@@ -325,8 +331,6 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
-integration/anthropic:
-- anthropic/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
@@ -353,6 +357,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/milvus:
+- milvus/**/*
 integration/mimecast:
 - mimecast/**/*
 integration/mongo:
@@ -523,6 +529,8 @@ integration/streamnative:
 - streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
+integration/supabase:
+- supabase/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/suricata:

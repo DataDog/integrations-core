@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 37.3.0 / 2024-12-26
+
+***Security***:
+
+* Add FIPS switch ([#19179](https://github.com/DataDog/integrations-core/pull/19179))
+
+***Added***:
+
+* Show diff to closest metric match when metric test fails ([#18975](https://github.com/DataDog/integrations-core/pull/18975))
+* Use `time_elapsed` metric type for process start time and last GC time metrics ([#19309](https://github.com/DataDog/integrations-core/pull/19309))
+
+***Fixed***:
+
+* Fix "no snapshot data found" error when `agent check <check> --profile-memory` ([#19197](https://github.com/DataDog/integrations-core/pull/19197))
+
 ## 37.2.0 / 2024-12-05 / Agent 7.60.0
 
 ***Added***:
