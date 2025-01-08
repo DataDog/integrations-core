@@ -562,6 +562,10 @@ coverage:
         target: 75
         flags:
         - sonarqube
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       Spark:
         target: 75
         flags:
