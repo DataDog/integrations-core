@@ -16,7 +16,8 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
 
     def scrape(self):
         """
-        Overrides the scrape method to add custom logic for filtering and processing metrics. Recreates metric samples to be submitted with new metric name.
+        Overrides the scrape method to add custom logic for filtering and processing metrics.
+        Recreates metric samples to be submitted with new metric name.
         """
         runtime_data = {
             "flush_first_value": self.flush_first_value,
@@ -24,12 +25,13 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
         }
 
         metrics = self.consume_metrics(runtime_data)
+        metric_prefix = "ray_vllm:"
 
         for metric in metrics:
             self.log.debug("Processing metric custom: %s", metric.name)
 
-            if metric.name.startswith("ray_vllm:"):
-                new_name = metric.name.replace("ray_vllm:", "")
+            if metric.name.startswith(metric_prefix):
+                new_name = metric.name.replace(metric_prefix, "")
 
                 updated_samples = [
                     Sample(
