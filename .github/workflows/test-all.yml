@@ -2714,10 +2714,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb705691:
+  j9874319:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: nvidia_nim
+      job-name: Nvidia NIM
       target: nvidia_nim
       platform: linux
       runner: '["ubuntu-22.04"]'

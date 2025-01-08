@@ -1,4 +1,4 @@
-name: nvidia_nim
+name: Nvidia NIM
 files:
 - name: nvidia_nim.yaml
   options:

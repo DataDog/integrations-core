@@ -450,6 +450,10 @@ coverage:
         target: 75
         flags:
         - network
+      Nvidia_NIM:
+        target: 75
+        flags:
+        - nvidia_nim
       Nvidia_Triton:
         target: 75
         flags:
@@ -730,10 +734,6 @@ coverage:
         target: 75
         flags:
         - kyverno
-      nvidia_nim:
-        target: 75
-        flags:
-        - nvidia_nim
       tibco_ems:
         target: 75
         flags:

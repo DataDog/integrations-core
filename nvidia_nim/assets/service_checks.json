@@ -1,7 +1,7 @@
 [    
     {
     "agent_version": "7.61.0",
-    "integration": "nvidia_nim",
+    "integration": "Nvidia NIM",
     "check": "nvidia_nim.openmetrics.health",
     "statuses": [
         "ok",
