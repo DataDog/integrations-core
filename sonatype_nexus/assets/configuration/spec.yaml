@@ -21,7 +21,7 @@ files:
             description: "The Server URL of your Sonatype Nexus account."
             value:
               type: string
-              example: http://0.0.0.0:8081
+              example: https://0.0.0.0:8081
           - template: instances/default
             overrides:
               min_collection_interval.required: true

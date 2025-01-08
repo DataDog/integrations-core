@@ -15,7 +15,16 @@ instances:
     ## @param sonatype_nexus_server_url - string - required
     ## The Server URL for your Sonatype Nexus account.
     #
-    sonatype_nexus_server_url: http://0.0.0.0:8081
+    sonatype_nexus_server_url: https://0.0.0.0:8081
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
     ## @param min_collection_interval - number - required
     ## This changes the collection interval of the check. For more information, see:
