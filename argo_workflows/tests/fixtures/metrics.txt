@@ -1,10 +1,10 @@
-# HELP argo_workflows_count Number of Workflows currently accessible by the controller by status (refreshed every 15s)
-# TYPE argo_workflows_count gauge
-argo_workflows_count{status="Error"} 0
-argo_workflows_count{status="Failed"} 0
-argo_workflows_count{status="Pending"} 0
-argo_workflows_count{status="Running"} 0
-argo_workflows_count{status="Succeeded"} 0
+# HELP argo_workflows_gauge Number of Workflows currently accessible by the controller by status (refreshed every 15s)
+# TYPE argo_workflows_gauge gauge
+argo_workflows_gauge{status="Error"} 0
+argo_workflows_gauge{status="Failed"} 0
+argo_workflows_gauge{status="Pending"} 0
+argo_workflows_gauge{status="Running"} 0
+argo_workflows_gauge{status="Succeeded"} 0
 # HELP argo_workflows_error_count Number of errors encountered by the controller by cause
 # TYPE argo_workflows_error_count counter
 argo_workflows_error_count{cause="CronWorkflowSpecError"} 0
@@ -48,22 +48,22 @@ argo_workflows_operation_duration_seconds_bucket{le="30"} 0
 argo_workflows_operation_duration_seconds_bucket{le="+Inf"} 0
 argo_workflows_operation_duration_seconds_sum 0
 argo_workflows_operation_duration_seconds_count 0
-# HELP argo_workflows_pods_count Number of Pods from Workflows currently accessible by the controller by status (refreshed every 15s)
-# TYPE argo_workflows_pods_count gauge
-argo_workflows_pods_count{status="Pending"} 0
-argo_workflows_pods_count{status="Running"} 0
+# HELP argo_workflows_pods_gauge Number of Pods from Workflows currently accessible by the controller by status (refreshed every 15s)
+# TYPE argo_workflows_pods_gauge gauge
+argo_workflows_pods_gauge{status="Pending"} 0
+argo_workflows_pods_gauge{status="Running"} 0
 # HELP argo_workflows_queue_adds_count Adds to the queue
 # TYPE argo_workflows_queue_adds_count counter
 argo_workflows_queue_adds_count{queue_name="cron_wf_queue"} 0
 argo_workflows_queue_adds_count{queue_name="pod_cleanup_queue"} 0
 argo_workflows_queue_adds_count{queue_name="workflow_queue"} 0
 argo_workflows_queue_adds_count{queue_name="workflow_ttl_queue"} 0
-# HELP argo_workflows_queue_depth_count Depth of the queue
-# TYPE argo_workflows_queue_depth_count gauge
-argo_workflows_queue_depth_count{queue_name="cron_wf_queue"} 0
-argo_workflows_queue_depth_count{queue_name="pod_cleanup_queue"} 0
-argo_workflows_queue_depth_count{queue_name="workflow_queue"} 0
-argo_workflows_queue_depth_count{queue_name="workflow_ttl_queue"} 0
+# HELP argo_workflows_queue_depth_gauge Depth of the queue
+# TYPE argo_workflows_queue_depth_gauge gauge
+argo_workflows_queue_depth_gauge{queue_name="cron_wf_queue"} 0
+argo_workflows_queue_depth_gauge{queue_name="pod_cleanup_queue"} 0
+argo_workflows_queue_depth_gauge{queue_name="workflow_queue"} 0
+argo_workflows_queue_depth_gauge{queue_name="workflow_ttl_queue"} 0
 # HELP argo_workflows_queue_latency Time objects spend waiting in the queue
 # TYPE argo_workflows_queue_latency histogram
 argo_workflows_queue_latency_bucket{queue_name="cron_wf_queue",le="1"} 0
@@ -198,8 +198,8 @@ go_memstats_sys_bytes 2.0026632e+07
 # HELP go_threads Number of OS threads created.
 # TYPE go_threads gauge
 go_threads 10
-# HELP log_messages Total number of log messages.
-# TYPE log_messages counter
-log_messages{level="error"} 0
-log_messages{level="info"} 136
-log_messages{level="warning"} 0
+# HELP argo_workflows_log_messages Total number of log messages.
+# TYPE argo_workflows_log_messages counter
+argo_workflows_log_messages{level="error"} 0
+argo_workflows_log_messages{level="info"} 136
+argo_workflows_log_messages{level="warning"} 0
