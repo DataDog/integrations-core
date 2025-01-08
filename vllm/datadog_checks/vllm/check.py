@@ -8,20 +8,18 @@ from .custom_scraper import CustomOpenMetricsScraper
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
-
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = 'vllm'
+    __NAMESPACE__ = "vllm"
 
     def get_default_config(self):
         return {
-            'metrics': [METRIC_MAP],
+            "metrics": [METRIC_MAP],
             "rename_labels": RENAME_LABELS_MAP,
         }
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-
         endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/version")
         response = self.http.get(endpoint)
         response.raise_for_status()
@@ -34,21 +32,22 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
             minor = version_split[1]
             patch = version_split[2]
 
-            version_raw = f'{major}.{minor}.{patch}'
+            version_raw = f"{major}.{minor}.{patch}"
 
             version_parts = {
-                'major': major,
-                'minor': minor,
-                'patch': patch,
+                "major": major,
+                "minor": minor,
+                "patch": patch,
             }
-            self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+            self.set_metadata(
+                "version", version_raw, scheme="semver", part_map=version_parts
+            )
         else:
             self.log.debug("Invalid vLLM version format: %s", version)
 
     def check(self, instance):
         super().check(instance)
         self._submit_version_metadata()
-
 
     def configure_scrapers(self):
         """
