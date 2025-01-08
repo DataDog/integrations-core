@@ -11,7 +11,7 @@
 		"query": "min(last_30m):avg:sonatype_nexus.status.available_cpus_health{*} by {sonatype_host} == 0",
 		"message": "{{#is_alert}}\nAvailable CPUs impacts longer running operations and also the thread allocation algorithms of the web container.\n\nAn unhealthy status for available CPUs has been detected. Take necessary action to mitigate potential risks.\n{{/is_alert}}",
 		"tags": [
-			"integration:sonatype_nexus",
+			"integration:sonatype-nexus",
 			"type:health_status"
 		],
 		"options": {
@@ -29,6 +29,6 @@
 		}
 	},
 	"tags": [
-		"integration:sonatype_nexus"
+		"integration:sonatype-nexus"
 	]
 }

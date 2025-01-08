@@ -11,7 +11,7 @@
 		"query": "min(last_30m):avg:sonatype_nexus.status.blob_store.ready_health{*} by {sonatype_host} == 0",
 		"message": "{{#is_alert}}\nNexus Repository uses a binary large object (blob) storage, or blob store, to store files found in a repository. This includes metadata, hashes, and repository-generated indexes.\n\nAn unhealthy status for blob stores has been detected. Take necessary action to mitigate the issue.\n{{/is_alert}}",
 		"tags": [
-			"integration:sonatype_nexus",
+			"integration:sonatype-nexus",
 			"type:health_status"
 		],
 		"options": {
@@ -29,6 +29,6 @@
 		}
 	},
 	"tags": [
-		"integration:sonatype_nexus"
+		"integration:sonatype-nexus"
 	]
 }

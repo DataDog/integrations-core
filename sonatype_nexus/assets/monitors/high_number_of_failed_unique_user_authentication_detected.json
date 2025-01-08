@@ -11,7 +11,7 @@
 		"query": "max(last_1d):avg:sonatype_nexus.analytics.failed_unique_user_authentication_count{*} by {sonatype_host} > 10",
 		"message": "{{#is_alert}}\nRepeated failed authentication attempts can indicate potential security issues, such as unauthorized access attempts or misconfigured user credentials.\n\nA high number of failed unique user authentications have been detected. Take necessary action to mitigate potential risks.\n{{/is_alert}}",
 		"tags": [
-			"integration:sonatype_nexus",
+			"integration:sonatype-nexus",
 			"type:metrics"
 		],
 		"options": {
@@ -29,6 +29,6 @@
 		}
 	},
 	"tags": [
-		"integration:sonatype_nexus"
+		"integration:sonatype-nexus"
 	]
 }

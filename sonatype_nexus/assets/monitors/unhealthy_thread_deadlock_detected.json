@@ -11,7 +11,7 @@
 		"query": "min(last_30m):avg:sonatype_nexus.status.thread_deadlock_detector{*} by {sonatype_host} == 0",
 		"message": "{{#is_alert}}\nThread deadlock is a condition where two or more threads are blocked and unable to progress because they are waiting for each other.\n\nAn unhealthy status for thread deadlock has been detected. Take necessary action to mitigate the issue.\n{{/is_alert}}",
 		"tags": [
-			"integration:sonatype_nexus",
+			"integration:sonatype-nexus",
 			"type:health_status"
 		],
 		"options": {
@@ -29,6 +29,6 @@
 		}
 	},
 	"tags": [
-		"integration:sonatype_nexus"
+		"integration:sonatype-nexus"
 	]
 }
