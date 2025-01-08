@@ -113,7 +113,12 @@ class DockerAgent(AgentInterface):
 
         if agent_build.startswith("datadog/"):
             # Add a potentially missing `py` suffix for default non-RC builds
-            if 'rc' not in agent_build and 'py' not in agent_build and not re.match(AGENT_VERSION_REGEX, agent_build):
+            if (
+                'rc' not in agent_build
+                and 'py' not in agent_build
+                and 'fips' not in agent_build
+                and not re.match(AGENT_VERSION_REGEX, agent_build)
+            ):
                 agent_build = f'{agent_build}-py{self.python_version[0]}'
 
             if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
