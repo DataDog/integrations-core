@@ -466,6 +466,7 @@ class RequestsWrapper(object):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
+                context.set_ciphers('ALL')
 
                 with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
