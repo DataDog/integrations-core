@@ -1,0 +1,24 @@
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param username - string - required
+    ## The username for your Sonatype Nexus account.
+    #
+  - username: test_username
+
+    ## @param password - string - required
+    ## The password for your Sonatype Nexus account.
+    #
+    password: test_password
+
+    ## @param sonatype_nexus_server_url - string - required
+    ## The Server URL for your Sonatype Nexus account.
+    #
+    sonatype_nexus_server_url: http://0.0.0.0:8081
+
+    ## @param min_collection_interval - number - required
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    min_collection_interval: 600
