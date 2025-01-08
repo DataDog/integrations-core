@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -259,6 +259,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f'project_id:{project_id}',
                 f'project_name:{project_name}',
             ]
+            if not self.config.disable_generic_tags and self.config.unified_service_tagging:
+                tags.append(f'service:{project_name}')
             self.gauge("project.count", 1, tags=tags)
             self._process_queued_and_running_tasks(space_id, space_name, project_id, project_name)
             self._process_completed_tasks(space_id, space_name, project_id, project_name)
@@ -289,6 +291,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f"environment_id:{environment_id}",
                 f"environment_slug:{environment_slug}",
             ]
+            if not self.config.disable_generic_tags and self.config.unified_service_tagging:
+                tags.append(f'env:{environment_name}')
             self.gauge("environment.count", 1, tags=tags)
             self.gauge("environment.use_guided_failure", use_guided_failure, tags=tags)
             self.gauge("environment.allow_dynamic_infrastructure", allow_dynamic_infrastructure, tags=tags)
@@ -371,6 +375,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                         f'server_node:{server_node}',
                     ]
                 )
+                if not self.config.disable_generic_tags and self.config.unified_service_tagging:
+                    tags.append(f'service:{project_name}')
                 self.log.debug("Processing task id %s for project %s", task_id, project_name)
                 queued_time, executing_time, completed_time = self._calculate_task_times(task)
                 self.gauge("deployment.count", 1, tags=tags)
@@ -423,6 +429,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             f'release_version:{release_version}',
             f'environment_name:{environment_name}',
         ]
+        if not self.config.disable_generic_tags and self.config.unified_service_tagging:
+            tags.append(f'env:{environment_name}')
+            tags.append(f'version:{release_version}')
+
         return environment_name, tags
 
     def _collect_server_nodes_metrics(self):
@@ -463,6 +473,17 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f"operating_system:{os}",
             ]
             machine_tags += roles
+            environment_ids = machine.get("EnvironmentIds")
+            env_tags = []
+            for env_id in environment_ids:
+                env_name = self._environments_cache.get(env_id)
+                env_tag_name = (
+                    "env"
+                    if not self.config.disable_generic_tags and self.config.unified_service_tagging
+                    else "environment_name"
+                )
+                env_tags.append(f"{env_tag_name}:{env_name}")
+            machine_tags += env_tags
             self.gauge("machine.count", 1, tags=self._base_tags + machine_tags)
             self.gauge("machine.is_healthy", is_healthy, tags=self._base_tags + machine_tags)
 

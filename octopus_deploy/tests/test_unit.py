@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -12,7 +12,18 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_DEPLOYMENT_LOGS, ALL_EVENTS, ALL_METRICS, MOCKED_TIME1, MOCKED_TIME2, ONLY_TEST_LOGS
+from .constants import (
+    ALL_DEPLOYMENT_LOGS,
+    ALL_EVENTS,
+    ALL_METRICS,
+    COMPLETED_METRICS,
+    DEPLOY_METRICS,
+    ENV_METRICS,
+    MOCKED_TIME1,
+    MOCKED_TIME2,
+    ONLY_TEST_LOGS,
+    PROJECT_METRICS,
+)
 
 
 @pytest.mark.parametrize(
@@ -2276,6 +2287,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2288,6 +2300,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.is_healthy",
         1,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2327,6 +2340,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2339,6 +2353,7 @@ def test_machines_metrics(
         "octopus_deploy.machine.is_healthy",
         0,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2401,6 +2416,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2413,6 +2429,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.is_healthy",
         1,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-1",
             "machine_name:test-machine",
             "machine_slug:test-machine",
@@ -2452,6 +2469,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.count",
         1,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2464,6 +2482,7 @@ def test_machines_pagination(
         "octopus_deploy.machine.is_healthy",
         0,
         tags=[
+            "environment_name:dev",
             "machine_id:Machines-3",
             "machine_name:test-machine3",
             "machine_slug:test-machine3",
@@ -2472,3 +2491,64 @@ def test_machines_pagination(
             "test",
         ],
     )
+
+
+@pytest.mark.parametrize(
+    ('disable_generic_tags, unified_service_tagging, expect_service_tags'),
+    [
+        pytest.param(
+            True,
+            True,
+            False,
+        ),
+        pytest.param(
+            True,
+            False,
+            False,
+        ),
+        pytest.param(
+            False,
+            True,
+            True,
+        ),
+        pytest.param(
+            False,
+            False,
+            False,
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_unified_service_tagging(
+    get_current_datetime,
+    dd_run_check,
+    aggregator,
+    disable_generic_tags,
+    unified_service_tagging,
+    expect_service_tags,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['disable_generic_tags'] = disable_generic_tags
+    instance['unified_service_tagging'] = unified_service_tagging
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    if expect_service_tags:
+        for metric in set(DEPLOY_METRICS) - set(COMPLETED_METRICS):
+            aggregator.assert_metric_has_tag(metric, 'service:my-project', count=1)
+            aggregator.assert_metric_has_tag(metric, 'env:staging', count=1)
+
+        for metric in PROJECT_METRICS:
+            aggregator.assert_metric_has_tag(metric, 'service:my-project', count=1)
+            aggregator.assert_metric_has_tag(metric, 'env:staging', count=0)
+
+        for metric in ENV_METRICS:
+            aggregator.assert_metric_has_tag(metric, 'service:my-project', count=0)
+            aggregator.assert_metric_has_tag(metric, 'env:staging', count=1)
+
+    else:
+        for metric in ALL_METRICS:
+            aggregator.assert_metric_has_tag(metric, 'service:my-project', count=0)
+            aggregator.assert_metric_has_tag(metric, 'env:staging', count=0)
