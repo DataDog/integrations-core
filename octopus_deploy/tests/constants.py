@@ -79,7 +79,7 @@ E2E_METRICS = list(set(ALL_METRICS) - set(COMPLETED_METRICS))
 
 ALL_DEPLOYMENT_LOGS = [
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment failed because one or more steps failed. Please see the deployment log for details.',
@@ -88,7 +88,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Deploy test release 0.0.2 to Development',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
@@ -97,7 +97,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': "The step failed: Activity Run a Script on the Octopus Server failed with error "
@@ -107,7 +107,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Step 2: Run a Script',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'ParserError: At /home/octopus/.octopus/OctopusServer/Server/Work/'
@@ -117,7 +117,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
@@ -126,7 +126,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
@@ -135,7 +135,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The string is missing the terminator: ".',
@@ -144,7 +144,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Script.ps1:1 char:6',
@@ -153,7 +153,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
@@ -162,7 +162,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
@@ -171,7 +171,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
@@ -180,7 +180,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/'
@@ -190,7 +190,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/'
@@ -200,7 +200,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
@@ -209,7 +209,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
@@ -218,7 +218,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The remote script failed with exit code 1',
@@ -227,7 +227,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The action Run a Script on the Octopus Server failed',
@@ -236,7 +236,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
@@ -245,7 +245,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Deploy test release 0.0.1 to Staging',
     },
     {
-        'ddtags': 'deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
@@ -254,7 +254,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
@@ -263,7 +263,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Deploy test release 0.0.1 to Development',
     },
     {
-        'ddtags': 'deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
@@ -272,7 +272,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-16,release_version:0.1.5,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-16,release_version:0.1.5,environment_name:dev,'
         'space_name:Default,project_name:test-api,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
@@ -281,7 +281,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Deploy test-api release 0.1.5 to Development',
     },
     {
-        'ddtags': 'deployment_id:Deployments-16,release_version:0.1.5,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-16,release_version:0.1.5,environment_name:dev,'
         'space_name:Default,project_name:test-api,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'Testing',
@@ -290,7 +290,7 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-16,release_version:0.1.5,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-16,release_version:0.1.5,environment_name:dev,'
         'space_name:Default,project_name:test-api,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'test',
@@ -302,7 +302,7 @@ ALL_DEPLOYMENT_LOGS = [
 
 ONLY_TEST_LOGS = [
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment failed because one or more steps failed. Please see the deployment log for details.',
@@ -311,7 +311,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Deploy test release 0.0.2 to Development',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
@@ -320,7 +320,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': "The step failed: Activity Run a Script on the Octopus Server failed with error"
@@ -330,7 +330,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Step 2: Run a Script',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'ParserError: At /home/octopus/.octopus/OctopusServer/Server/Work/'
@@ -340,7 +340,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
@@ -349,7 +349,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
@@ -358,7 +358,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The string is missing the terminator: ".',
@@ -367,7 +367,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'At /home/octopus/.octopus/OctopusServer/Server/Work/' '09234928998123-1847-68/Script.ps1:1 char:6',
@@ -376,7 +376,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
@@ -385,7 +385,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
@@ -394,7 +394,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
@@ -403,7 +403,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/'
@@ -413,7 +413,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/'
@@ -423,7 +423,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
@@ -432,7 +432,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
@@ -441,7 +441,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The remote script failed with exit code 1',
@@ -450,7 +450,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Failed,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The action Run a Script on the Octopus Server failed',
@@ -459,7 +459,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
@@ -468,7 +468,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Deploy test release 0.0.1 to Staging',
     },
     {
-        'ddtags': 'deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-18,release_version:0.0.1,environment_name:staging,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
@@ -477,7 +477,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
@@ -486,7 +486,7 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Deploy test release 0.0.1 to Development',
     },
     {
-        'ddtags': 'deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
+        'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-17,release_version:0.0.1,environment_name:dev,'
         'space_name:Default,project_name:test,task_state:Success,'
         'server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
@@ -499,14 +499,14 @@ ONLY_TEST_LOGS = [
 ALL_EVENTS = [
     {
         'message': 'Machine test is unhealthy',
-        'tags': ['space_name:Default'],
+        'tags': ['octopus_server:http://localhost:80', 'space_name:Default'],
     },
     {
         'message': 'Deploy to dev failed for new-project-from-group release 0.0.2 to dev',
-        'tags': ['space_name:Default'],
+        'tags': ['octopus_server:http://localhost:80', 'space_name:Default'],
     },
     {
         'message': 'Deploy to dev failed for project-new-2 release 0.0.2 to dev',
-        'tags': ['space_name:Default'],
+        'tags': ['octopus_server:http://localhost:80', 'space_name:Default'],
     },
 ]
