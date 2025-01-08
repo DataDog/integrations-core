@@ -3295,7 +3295,7 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
   j3835902:
-    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
+    uses: ./.github/workflows/test-target.yml
     with:
       job-name: sonatype_nexus
       target: sonatype_nexus
