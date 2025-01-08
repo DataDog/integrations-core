@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -82,6 +82,10 @@ def instance_tls_use_host_header():
 
 def instance_tls_verify():
     return True
+
+
+def instance_unified_service_tagging():
+    return False
 
 
 def instance_use_legacy_auth_encoding():

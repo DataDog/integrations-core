@@ -59,9 +59,7 @@
         },
         {
             "Id": "Machines-2",
-            "EnvironmentIds": [
-                "Environments-1"
-            ],
+            "EnvironmentIds": [],
             "Roles": [
                 "test",
                 "tag"
