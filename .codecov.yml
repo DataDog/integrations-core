@@ -186,6 +186,10 @@ coverage:
         target: 75
         flags:
         - druid
+      DuckDB:
+        target: 75
+        flags:
+        - duckdb
       EKS_Fargate:
         target: 75
         flags:
@@ -310,6 +314,10 @@ coverage:
         target: 75
         flags:
         - karpenter
+      Keda:
+        target: 75
+        flags:
+        - keda
       Kong:
         target: 75
         flags:
@@ -410,6 +418,10 @@ coverage:
         target: 75
         flags:
         - mesos_master
+      Milvus:
+        target: 75
+        flags:
+        - milvus
       MongoDB:
         target: 75
         flags:
@@ -498,6 +510,10 @@ coverage:
         target: 75
         flags:
         - pulsar
+      Quarkus:
+        target: 75
+        flags:
+        - quarkus
       RabbitMQ:
         target: 75
         flags:
@@ -578,6 +594,10 @@ coverage:
         target: 75
         flags:
         - strimzi
+      Supabase:
+        target: 75
+        flags:
+        - supabase
       Supervisord:
         target: 75
         flags:
@@ -958,6 +978,11 @@ flags:
     paths:
     - druid/datadog_checks/druid
     - druid/tests
+  duckdb:
+    carryforward: true
+    paths:
+    - duckdb/datadog_checks/duckdb
+    - duckdb/tests
   ecs_fargate:
     carryforward: true
     paths:
@@ -1128,6 +1153,11 @@ flags:
     paths:
     - karpenter/datadog_checks/karpenter
     - karpenter/tests
+  keda:
+    carryforward: true
+    paths:
+    - keda/datadog_checks/keda
+    - keda/tests
   kong:
     carryforward: true
     paths:
@@ -1258,6 +1288,11 @@ flags:
     paths:
     - mesos_slave/datadog_checks/mesos_slave
     - mesos_slave/tests
+  milvus:
+    carryforward: true
+    paths:
+    - milvus/datadog_checks/milvus
+    - milvus/tests
   mongo:
     carryforward: true
     paths:
@@ -1373,6 +1408,11 @@ flags:
     paths:
     - pulsar/datadog_checks/pulsar
     - pulsar/tests
+  quarkus:
+    carryforward: true
+    paths:
+    - quarkus/datadog_checks/quarkus
+    - quarkus/tests
   rabbitmq:
     carryforward: true
     paths:
@@ -1473,6 +1513,11 @@ flags:
     paths:
     - strimzi/datadog_checks/strimzi
     - strimzi/tests
+  supabase:
+    carryforward: true
+    paths:
+    - supabase/datadog_checks/supabase
+    - supabase/tests
   supervisord:
     carryforward: true
     paths:
