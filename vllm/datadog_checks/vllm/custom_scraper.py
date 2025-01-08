@@ -18,9 +18,6 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
         """
         Overrides the scrape method to add custom logic for filtering and processing metrics. Recreates metric samples to be submitted with new metric name.
         """
-        self.log.debug("Starting custom scrape for endpoint: %s", self.endpoint)
-        self.log.debug("Scraping with current list: %s", self.config.get("metrics"))
-
         runtime_data = {
             "flush_first_value": self.flush_first_value,
             "static_tags": self.static_tags,
@@ -32,7 +29,6 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
             self.log.debug("Processing metric custom: %s", metric.name)
 
             if metric.name.startswith("ray_vllm:"):
-                self.log.debug("Custom processing for ray_vllm metric: %s", metric.name)
                 new_name = metric.name.replace("ray_vllm:", "")
 
                 updated_samples = [
@@ -54,18 +50,11 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
                 )
                 metric.samples = updated_samples
                 self.modified_metric_names.add(new_name)
-                self.log.debug("Modified metric: %s", metric)
-                self.log.debug(
-                    "Modified metric name list is: %s of type %s",
-                    self.modified_metric_names,
-                    type(self.modified_metric_names),
-                )
                 self.write_persistent_cache(
                     "modified_metrics", str(self.modified_metric_names)
                 )
 
             transformer = self.get(metric)
-            self.log.debug("Transformer obj is %s", transformer)
             if transformer is not None:
                 transformer(metric, self.generate_sample_data(metric), runtime_data)
 
@@ -79,9 +68,6 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
         self.metric_transformer.metric_patterns = []
         for raw_metric_name, config in metrics_config.items():
             escaped_metric_name = re.escape(raw_metric_name)
-            self.log.debug(
-                "Raw metric name is: %s, config is %s", raw_metric_name, config
-            )
 
             if raw_metric_name != escaped_metric_name:
                 config.pop("name", None)
@@ -90,12 +76,7 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
                 )
             else:
                 try:
-                    self.log.debug(
-                        "Compiling transformer for metric: %s", raw_metric_name
-                    )
-                    self.log.debug("Transformer config: %s", config)
                     transformer = self.metric_transformer.compile_transformer(config)
-                    self.log.debug("Compiled transformer: %s", transformer)
                     self.metric_transformer.transformer_data[
                         raw_metric_name
                     ] = transformer
@@ -117,9 +98,7 @@ class CustomOpenMetricsScraper(OpenMetricsScraper):
         DEFAULT_METRIC_TYPE = "native"
 
         transformer_data = self.metric_transformer.transformer_data.get(metric_name)
-        self.log.debug(
-            " self Transformer data is: %s", self.metric_transformer.transformer_data
-        )
+
         if transformer_data is not None:
             metric_type, transformer = transformer_data
             if (
