@@ -275,6 +275,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/intercom:
+- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
 integration/istio:
