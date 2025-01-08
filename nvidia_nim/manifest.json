@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 30338252,
-      "source_type_name": "nvidia_nim",
+      "source_type_name": "Nvidia NIM",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
