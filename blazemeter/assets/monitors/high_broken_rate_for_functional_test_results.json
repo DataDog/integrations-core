@@ -27,7 +27,6 @@
         "priority": null
     },
 	"tags": [
-			"integration:blazemeter",
-			"service:functional"
+			"integration:blazemeter"
 	]
 }

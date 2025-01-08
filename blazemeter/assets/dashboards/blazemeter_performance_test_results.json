@@ -2673,6 +2673,7 @@
                             "title": "Total Samples",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2703,7 +2704,10 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "bars"
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
                             }
                         },
                         "layout": {
