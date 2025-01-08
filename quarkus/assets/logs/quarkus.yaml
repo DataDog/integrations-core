@@ -20,7 +20,7 @@ pipeline:
         - "2024-12-13 11:05:38,618 INFO  [org.acm.GreetingResource] (executor-thread-1) Custom log message"
       grok:
         matchRules: |
-          quarkus %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}\s+%{word:level}\s+\[%{notSpace:logger}\]\s+\(%{data:thread}\)\s+%{data:message}
+          quarkus %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}\s+%{word:level}\s+\[%{notSpace:logger}\]\s+\(%{regex("[^)]*"):thread}\)\s+%{data:message}
         supportRules: ''
     - type: message-remapper
       name: Define `message` as the official message of the log
