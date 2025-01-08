@@ -1,5 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-,,,,,,,,,,
 blazemeter.functional.gridSummary_brokenTestCasesCount,gauge,,,,The number of test cases that are in a broken state,-1,blazemeter,,,
 blazemeter.functional.gridSummary_failedTestCasesCount,gauge,,,,The number of the test cases that are in a failed state,-1,blazemeter,,,
 blazemeter.functional.gridSummary_passedPercent,gauge,,percent,,The percentage of test cases that passed,1,blazemeter,,,
@@ -41,4 +40,4 @@ blazemeter.performance.summary_max,gauge,,millisecond,,Maximum Response Time.,-1
 blazemeter.performance.summary_maxUsers,gauge,,,,The maximum concurrency the test reached.,1,blazemeter,,,
 blazemeter.performance.summary_min,gauge,,millisecond,,Minimum Response Time.,1,blazemeter,,,
 blazemeter.performance.summary_stDev,gauge,,millisecond,,Standard deviation of the response times,0,blazemeter,,,
-blazemeter.performance.summary_tp90,blazemetergauge,,millisecond,,Max response time for 90% of samples,-1,blazemeter,,,
+blazemeter.performance.summary_tp90,gauge,,millisecond,,Max response time for 90% of samples,-1,blazemeter,,,
