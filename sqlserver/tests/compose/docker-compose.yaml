@@ -11,6 +11,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123
+      - TZ=${TZ}
     ports:
       - "1433:1433"
     volumes:

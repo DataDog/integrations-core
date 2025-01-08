@@ -2,17 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-# TODO: remove `try` when we drop Python 2
-try:
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-    class LegacyCheck(OpenMetricsBaseCheckV2):
-        def create_scraper(self, config):
-            return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
-
-except Exception:
-    pass
+class LegacyCheck(OpenMetricsBaseCheckV2):
+    def create_scraper(self, config):
+        return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
 
 def get_legacy_check(instance=None, init_config=None):

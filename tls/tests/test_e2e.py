@@ -13,7 +13,7 @@ from datadog_checks.tls.const import (
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance_e2e):
+def test_e2e(dd_environment, dd_agent_check, instance_e2e):
     aggregator = dd_agent_check(instance_e2e)
 
     aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=TLSCheck.OK, count=1)

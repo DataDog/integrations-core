@@ -130,6 +130,7 @@ def instance_integration(instance_custom_queries):
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
+    instance["service"] = "my_service"
     return instance
 
 
@@ -139,6 +140,7 @@ def instance_integration_autodiscovery(instance_integration):
     instance["database_autodiscovery"] = {
         "enabled": True,
     }
+    instance.pop("collections", None)
     return instance
 
 
