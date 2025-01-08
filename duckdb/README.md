@@ -2,9 +2,23 @@
 
 ## Overview
 
+DuckDB is a high-performance analytical database system. It is available as a standalone CLI application and has clients for Python, R, Java, Wasm, etc., with deep integrations with packages such as pandas and dplyr.
+
+For more information on using DuckDB, please refer to the [DuckDB documentation][9].
+
 This check monitors [DuckDB][1] through the Datadog Agent. 
 
 ## Setup
+
+DuckDB has two configurable options for concurrency:
+
+- One process can both read and write to the database.
+- Multiple processes can read from the database, but no processes can write (access_mode = 'READ_ONLY').
+
+<div class="alert alert-warning">
+The datadog agent is using the read_only mode to get metrics, with a default 60 seconds frequency (min_collection_interval). 
+Feel free to increase this value to reduce concurrency issues.
+</div>
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -50,3 +64,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/duckdb/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://duckdb.org/docs/
