@@ -3295,7 +3295,7 @@ jobs:
       setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3835902:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: sonatype_nexus
       target: sonatype_nexus
@@ -3312,7 +3312,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}    
+      setup-env-vars: "${{ inputs.setup-env-vars }}"  
     secrets: inherit
   j529bc3b:
     uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
