@@ -4,6 +4,7 @@
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
 
 from .metrics import METRIC_MAP, RENAME_LABELS_MAP
+from .custom_scraper import CustomOpenMetricsScraper
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
@@ -47,3 +48,79 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
     def check(self, instance):
         super().check(instance)
         self._submit_version_metadata()
+
+
+    def configure_scrapers(self):
+        """
+        Configure custom scrapers.
+        """
+        self.scrapers = {}
+
+        for config in self.scraper_configs:
+            self.log.debug("Config loop is: %s", config)
+            config["metrics"] = [METRIC_MAP]
+            config["extra_metrics"] = ["ray_vllm:.+"]
+            self.scrapers[config["openmetrics_endpoint"]] = CustomOpenMetricsScraper(
+                self, config
+            )
+
+    def refresh_scrapers(self):
+        """
+        Refresh scrapers to include dynamically added metrics before scraping.
+        """
+        self.log.debug(
+            "Starting refresh_scrapers. Current scrapers: %s",
+            list(self.scrapers.keys()),
+        )
+
+        for endpoint, scraper in self.scrapers.items():
+            self.log.debug("Processing scraper for endpoint: %s", endpoint)
+
+            if isinstance(scraper, CustomOpenMetricsScraper):
+                self.log.debug("Custom scraper detected for endpoint: %s", endpoint)
+
+                dynamic_metrics = [
+                    item.strip("'{} ")
+                    for item in self.read_persistent_cache("modified_metrics").split(
+                        ","
+                    )
+                ]
+
+                self.log.debug(
+                    "Dynamic metrics for endpoint %s: %s", endpoint, dynamic_metrics
+                )
+
+                current_metrics = scraper.config.get("metrics", [])
+                self.log.debug(
+                    "Current metrics for endpoint %s: %s", endpoint, current_metrics
+                )
+
+                existing_names = {
+                    metric.get("name")
+                    for metric in current_metrics
+                    if isinstance(metric, dict) and "name" in metric
+                }
+                self.log.debug(
+                    "Existing metric names for endpoint %s: %s",
+                    endpoint,
+                    existing_names,
+                )
+
+                for metric_name in dynamic_metrics:
+                    if metric_name not in existing_names:
+                        current_metrics[0][metric_name] = metric_name
+                        self.log.debug(
+                            "Added dynamic metric '%s' to config for endpoint %s",
+                            metric_name,
+                            endpoint,
+                        )
+
+                scraper.config["metrics"] = current_metrics
+                self.log.debug(
+                    "Updated metrics config for endpoint %s: %s",
+                    endpoint,
+                    scraper.config["metrics"],
+                )
+
+            else:
+                self.log.debug("Skipping non-custom scraper for endpoint: %s", endpoint)
