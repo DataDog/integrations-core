@@ -3,17 +3,17 @@
 instances:
 
     ## @param username - string - required
-    ## The username for your Sonatype Nexus account.
+    ## The username of your Sonatype Nexus account.
     #
   - username: test_username
 
     ## @param password - string - required
-    ## The password for your Sonatype Nexus account.
+    ## The password of your Sonatype Nexus account.
     #
     password: test_password
 
     ## @param sonatype_nexus_server_url - string - required
-    ## The Server URL for your Sonatype Nexus account.
+    ## The Server URL of your Sonatype Nexus account.
     #
     sonatype_nexus_server_url: https://0.0.0.0:8081
 
