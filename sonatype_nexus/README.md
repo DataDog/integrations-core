@@ -128,7 +128,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 For integrations running on the Agent:
 
 1. Fully remove the integration by following the datadog-agent integration remove command. More information can be found [here][7].
-2. Click ‘Uninstall’ to remove the included assets, such as dashboards, from your organization.
+2. Click 'Uninstall' to remove the included assets, such as dashboards, from your organization.
 
 ## Support
 
