@@ -29,7 +29,7 @@ $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
 # Get deps
 Set-Location "$librdkafka_dir"
 # Patch the the vcpkg manifest to to override the OpenSSL version
-python C:\update_librdkafka_manifest.py vcpkg.json --set-version openssl:${Env:OPENSSL_VERSION}
+python C:\update_librdkafka_manifest.py vcpkg.json --set-version openssl:${Env:OPENSSL_VERSION} --set-version curl:${Env:CURL_VERSION}
 
 C:\vcpkg\vcpkg integrate install
 C:\vcpkg\vcpkg --feature-flags=versions install --triplet $triplet
