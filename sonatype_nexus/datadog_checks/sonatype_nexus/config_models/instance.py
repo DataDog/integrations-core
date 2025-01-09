@@ -7,17 +7,25 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
@@ -26,10 +34,15 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    min_collection_interval: Optional[float] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: float = Field(..., ge=600.0, le=64800.0)
+    password: str
     service: Optional[str] = None
+    sonatype_nexus_server_url: str
     tags: Optional[tuple[str, ...]] = None
+    username: str
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

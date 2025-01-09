@@ -8,9 +8,9 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
-def instance_empty_default_hostname():
+def instance_disable_generic_tags():
     return False
 
 
-def instance_min_collection_interval():
-    return 15
+def instance_empty_default_hostname():
+    return False
