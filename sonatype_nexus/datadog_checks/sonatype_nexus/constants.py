@@ -93,7 +93,11 @@ METRIC_CONFIGS = {
         "value_key": "",
         "tag_key": [],
     },
-    "analytics.component_total_count": {"metric_key": "nexus.analytics.component_total_count", "value_key": "", "tag_key": []},
+    "analytics.component_total_count": {
+        "metric_key": "nexus.analytics.component_total_count",
+        "value_key": "",
+        "tag_key": [],
+    },
     "analytics.log4j_visualizer_non_vulnerable_daily_download_count": {
         "metric_key": "nexus.analytics.log4j_visualizer_non_vulnerable_daily_download_count",
         "value_key": "",
@@ -104,7 +108,11 @@ METRIC_CONFIGS = {
         "value_key": "",
         "tag_key": [],
     },
-    "analytics.cleanup_dry_run_count": {"metric_key": "nexus.analytics.cleanup_dry_run_count", "value_key": "", "tag_key": []},
+    "analytics.cleanup_dry_run_count": {
+        "metric_key": "nexus.analytics.cleanup_dry_run_count",
+        "value_key": "",
+        "tag_key": [],
+    },
     "analytics.cleanup_dry_run_avg_execution_time": {
         "metric_key": "nexus.analytics.cleanup_dry_run_avg_execution_time",
         "value_key": "",
@@ -146,7 +154,11 @@ METRIC_CONFIGS = {
         "value_key": "successful_last_24h",
         "tag_key": [],
     },
-    "analytics.total_memory": {"metric_key": "nexus.analytics.system_information", "value_key": "totalMemory", "tag_key": []},
+    "analytics.total_memory": {
+        "metric_key": "nexus.analytics.system_information",
+        "value_key": "totalMemory",
+        "tag_key": [],
+    },
     "analytics.available_cpus": {
         "metric_key": "nexus.analytics.system_information",
         "value_key": "availableCPUs",

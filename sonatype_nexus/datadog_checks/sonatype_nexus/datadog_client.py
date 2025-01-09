@@ -56,5 +56,7 @@ class DatadogClient:
             log_and_raise_exception(self, forbidden_msg, InvalidAPIKeyError)
         except Exception as err:
             err_message = "Error occurred while validating datadog API key."
-            self.log.exception(f"{constants.INTEGRATION_PREFIX} | HOST={self.host} | MESSAGE={err_message} | ERROR={err}")
+            self.log.exception(
+                f"{constants.INTEGRATION_PREFIX} | HOST={self.host} | MESSAGE={err_message} | ERROR={err}"
+            )
             raise

@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import Mock, patch
 from datadog_checks.sonatype_nexus.datadog_client import DatadogClient
 
+
 def setup_datadog_client():
     client = DatadogClient('site', {'api_key': 'key', 'app_key': 'app_key'}, Mock())
     client.ingest_service_check_and_event = Mock()
@@ -19,6 +20,7 @@ def test_successful_api_key_validation(mock_auth_api):
     client.validate_datadog_configurations()
     client.log.info.assert_called_once()
     assert "Connection with datadog is successful" in client.log.info.call_args[0][0]
+
 
 @patch('datadog_checks.sonatype_nexus.datadog_client.AuthenticationApi')
 def test_generic_exception(mock_auth_api):
