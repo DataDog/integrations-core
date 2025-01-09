@@ -3,13 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
 from base64 import b64encode
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import requests
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.sonatype_nexus.api_client import SonatypeNexusClient
-
 
 REQUEST_URL = 'requests.Session.get'
 URL = 'https://example.com'

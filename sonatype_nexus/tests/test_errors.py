@@ -3,13 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
 from unittest.mock import Mock
+
 from requests import Response
+
 from datadog_checks.sonatype_nexus.errors import (
     APIError,
     EmptyResponseError,
-    handle_errors,
     InsufficientAPIPermissionError,
     InvalidAPICredentialsError,
+    handle_errors,
 )
 
 
