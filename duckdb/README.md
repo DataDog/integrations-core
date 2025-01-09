@@ -16,7 +16,7 @@ DuckDB has two configurable options for concurrency:
 - Multiple processes can read from the database, but no processes can write (access_mode = 'READ_ONLY').
 
 <div class="alert alert-warning">
-The datadog agent is using the read_only mode to get metrics, with a default 60 seconds frequency (min_collection_interval). 
+The Datadog Agent uses the <code>read_only</code> mode to get metrics, with a default frequency of 60 seconds (<code>min_collection_interval</code>). 
 You can increase this value to reduce concurrency issues.
 </div>
 
