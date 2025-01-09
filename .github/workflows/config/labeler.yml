@@ -39,6 +39,8 @@ integration/activemq:
 - activemq/**/*
 integration/activemq_xml:
 - activemq_xml/**/*
+integration/adyen:
+- adyen/**/*
 integration/aerospike:
 - aerospike/**/*
 integration/agent_metrics:
@@ -275,6 +277,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/intercom:
+- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
 integration/istio:

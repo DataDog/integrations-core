@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "High number of failed refunds detected",
+	"description": "Failed refunds occur when refund attempts cannot be processed, potentially impacting customer satisfaction and trust. This monitor tracks the occurrence of failed refunds to ensure timely resolution and maintain operational efficiency.",
+	"definition": {
+		"id": 154602429,
+		"name": "High number of failed refunds detected",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false\").index(\"*\").rollup(\"cardinality\", \"@pspReference\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}\nFailed Refund refers that a transaction could not be reversed, possibly due to issues with the payment method, insufficient funds, or card network problems.\n\nA refund attempt was unsuccessful, meaning the funds were not returned to the customer. This issue needs immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:transaction"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}
