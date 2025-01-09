@@ -170,7 +170,7 @@ def test_list_value():
     check = SonatypeNexusCheck('sonatype_nexus', {}, [{}])
     check.gauge = MagicMock()
     check.extract_ip_from_url = MagicMock(return_value="127.0.0.1")
-    
+
     metric_data = {"value": [{"tag_key": "tag_value", "value_key": 10}]}
     config = {"tag_key": ["tag_key"], "value_key": "value_key"}
     constants.METRIC_CONFIGS = {"metric_name": config}
@@ -183,7 +183,7 @@ def test_int_value():
     check = SonatypeNexusCheck('sonatype_nexus', {}, [{}])
     check.gauge = MagicMock()
     check.extract_ip_from_url = MagicMock(return_value="127.0.0.1")
-    
+
     metric_data = {"value": 10}
     config = {"tag_key": [], "value_key": ""}
     constants.METRIC_CONFIGS = {"metric_name": config}
@@ -221,10 +221,7 @@ def test_missing_value_key():
 def test_metric_data_as_list():
     check = MagicMock()
     check.extract_ip_from_url.return_value = '127.0.0.1'
-    metric_data = [
-        {'format_type1': {'value_key': 10}},
-        {'format_type2': {'value_key': 20}}
-    ]
+    metric_data = [{'format_type1': {'value_key': 10}}, {'format_type2': {'value_key': 20}}]
     metric_name = 'metric_name'
     metric_info = {'value_key': 'value_key'}
 
@@ -350,11 +347,7 @@ def test_service_check_and_event_with_none_values_for_tags_and_message():
     check.event = MagicMock()
     check.extract_ip_from_url = MagicMock(return_value="127.0.0.1")
     check.ingest_service_check_and_event(
-        status=0,
-        tags=None,
-        message=None,
-        title="Test title",
-        source_type="Test source type"
+        status=0, tags=None, message=None, title="Test title", source_type="Test source type"
     )
     check.service_check.assert_called_once()
     check.event.assert_called_once()
