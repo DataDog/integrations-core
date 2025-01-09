@@ -79,5 +79,39 @@ tests:
     timestamp: 1731942945120
  -
   sample: "I20241118 15:15:45.622637    26 thread_pool.h:178] [KNOWHERE][InitGlobalBuildThreadPool][milvus] Init global build thread pool with size 7"
+  result:
+    custom:
+      date: 1731942945622
+      file: "thread_pool.h"
+      level: "I"
+      lineno: "178"
+      message:
+        details:
+         - "KNOWHERE"
+         - "InitGlobalBuildThreadPool"
+         - "milvus"
+      pid: 26.0
+    message: "Init global build thread pool with size 7"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1731942945622
  -
   sample: "I20241118 15:15:45.626205    33 MmapChunkManager.cpp:302] [SERVER][MmapChunkManager][milvus] Init MappChunkManager with: Path /var/lib/milvus/data/mmap/mmap_chunk_manager, MaxDiskSize 121418772 MB, FixedFileSize 1 MB."
+  result:
+    custom:
+      date: 1731942945626
+      file: "MmapChunkManager.cpp"
+      level: "I"
+      lineno: "302"
+      message:
+        details:
+         - "SERVER"
+         - "MmapChunkManager"
+         - "milvus"
+      pid: 33.0
+    message: "Init MappChunkManager with: Path /var/lib/milvus/data/mmap/mmap_chunk_manager, MaxDiskSize 121418772 MB, FixedFileSize 1 MB."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1731942945626
