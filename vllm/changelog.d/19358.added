@@ -1,1 +1,3 @@
-Add coverage for vLLM metrics prefixed with `ray_vllm`
+AI-4795 Coverage for ray_vllm* metrics
+Added coverage for vLLM metrics prefixed with `ray_vllm`
+vllm/changelog.d/19358.changed
