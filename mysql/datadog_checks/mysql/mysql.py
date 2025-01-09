@@ -580,7 +580,7 @@ class MySql(AgentCheck):
                 results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
-        # TODO ALLEN: implement configuration option
+        # TODO ALLEN: implement configuration option, and adjust collection interval
         if is_affirmative(self._config.options.get('index_usage_metrics', True)):
             with tracked_query(self, operation="index_size_metrics"):
                 results['index_size'] = self._query_index_size_per_index(db)
@@ -1233,7 +1233,6 @@ class MySql(AgentCheck):
                         "'table_io_waits_summary_by_index_usage' table."
                     )
                     return None
-                # index_usage_read = {}
                 index_usage = {}
                 for row in cursor.fetchall():
                     db_name = str(row[0])
@@ -1253,8 +1252,8 @@ class MySql(AgentCheck):
                     index_usage["db:{},table:{},index:{},operation:delete".format(db_name, table_name, index_name)] = (
                         count_delete
                     )
+                    self.warning("Allen! Found index usage: %s", index_usage)
 
-                    # index_usage_read["db:{},table:{},index:{}".format(db_name, table_name, index_name)] = count_read
                 return index_usage
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Index usage metrics unavailable at this time: %s", e)
