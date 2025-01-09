@@ -1,2 +1,3 @@
 AI-4795 Coverage for ray_vllm* metrics
 Added coverage for ray_vllm* metrics
+vllm/changelog.d/19358.changed
