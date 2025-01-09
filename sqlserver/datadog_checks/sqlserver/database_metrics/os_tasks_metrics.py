@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.config import is_affirmative
-
 from .base import SqlserverDatabaseMetricsBase
 
 OS_TASKS_METRICS_QUERY = {
@@ -30,7 +28,7 @@ class SqlserverOsTasksMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-tasks-transact-sql
     @property
     def include_task_scheduler_metrics(self):
-        return is_affirmative(self.instance_config.get('include_task_scheduler_metrics', False))
+        return self.config.database_metrics_config["task_scheduler_metrics"]["enabled"]
 
     @property
     def enabled(self):

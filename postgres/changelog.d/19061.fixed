@@ -1,1 +1,0 @@
-Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL.

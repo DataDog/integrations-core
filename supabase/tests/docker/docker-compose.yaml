@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/privileged_metrics.txt:/usr/share/caddy/privileged_metrics
+      - ../fixtures/storage_api_metrics.txt:/usr/share/caddy/storage_api_metrics

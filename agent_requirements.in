@@ -2,7 +2,7 @@ aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin'
 aws-requests-auth==0.4.3
 azure-identity==1.17.1
 beautifulsoup4==4.12.3
-binary==1.0.0
+binary==1.0.1
 boto3==1.35.10
 botocore==1.35.10
 cachetools==5.5.0
@@ -13,6 +13,7 @@ confluent-kafka==2.6.1
 cryptography==43.0.1
 ddtrace==2.10.6
 dnspython==2.6.1
+duckdb==1.1.1
 foundationdb==6.3.24
 hazelcast-python-client==5.4.0
 importlib-metadata==2.1.3; python_version < '3.8'

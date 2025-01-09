@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2024-11-28
+
+***Added***:
+
+* Add new Application Set metrics ([#18961](https://github.com/DataDog/integrations-core/pull/18961))
+
 ## 3.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:

@@ -126,7 +126,6 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            tags:
              dag_id: "$1"
              task_id: "$2"
-         - match: "airflow.pool.open_slots.*"
          - match: "airflow.dagrun.*.first_task_scheduling_delay"
            name: "airflow.dagrun.first_task_scheduling_delay"
            tags:
@@ -429,7 +428,7 @@ Need help? Contact [Datadog support][11].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/developers/dogstatsd/?tab=kubernetes#setup
-[13]: /integrations/airflow/?tab=host#connect-airflow-to-dogstatsd
+[13]: https://docs.datadoghq.com/integrations/airflow/?tab=host#connect-airflow-to-dogstatsd
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [15]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [16]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/_modules/airflow/providers/datadog/hooks/datadog.html

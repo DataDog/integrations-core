@@ -1,0 +1,79 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "4fc358f8-ab2d-43ae-86e5-129ef4e4e6a1",
+  "app_id": "temporal-cloud",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into system health, workflow efficiency, task execution and performance bottlenecks for your instance.",
+    "title": "Temporal Cloud",
+    "media": [
+      {
+        "caption": "Temporal Cloud - Overview 1",
+        "image_url": "images/temporal_cloud_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Temporal Cloud - Overview 2",
+        "image_url": "images/temporal_cloud_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Temporal Cloud - Overview 3",
+        "image_url": "images/temporal_cloud_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Temporal Cloud - Overview 4",
+        "image_url": "images/temporal_cloud_overview_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Temporal Cloud - Overview 5",
+        "image_url": "images/temporal_cloud_overview_5.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Cloud",
+      "Category::Developer Tools",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 32597071,
+      "source_type_name": "Temporal Cloud",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "temporal_cloud.",
+        "check": "temporal_cloud.cloud_metrics.v0_frontend_service_request_increase1m",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Temporal Cloud - Overview": "assets/dashboards/temporal_cloud_overview.json"
+    },
+    "monitors": {
+      "High gRPC error percentage": "assets/monitors/high_grpc_error_percentage.json",
+      "High service latency": "assets/monitors/high_service_latency.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

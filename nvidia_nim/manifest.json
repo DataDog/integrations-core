@@ -1,0 +1,63 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c7307eb9-7bbf-4dae-b74f-6396bf5bf514",
+  "app_id": "nvidia-nim",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "NVIDIA NIM integration with Datadog enables real-time GPU observability by collecting Prometheus metrics for monitoring.",
+    "title": "Nvidia NIM",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 30338252,
+      "source_type_name": "nvidia_nim",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "nvidia_nim.",
+        "check": "nvidia_nim.num_requests.running",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "vllm_nvext.entrypoints.openai.api_server"
+      ]
+    },
+    "dashboards": {
+      "NVIDIA NIM Overview": "assets/dashboards/nvidia_nim_overview.json"
+    },
+    "monitors": {
+      "Average Request Latency is High": "assets/monitors/latency.json"
+    },
+    "saved_views": {
+      "NVIDIA NIM Errors": "assets/saved_views/nim_errors.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
