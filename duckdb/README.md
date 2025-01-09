@@ -4,7 +4,7 @@
 
 DuckDB is a high-performance analytical database system. It is available as a standalone CLI application and has clients for Python, R, Java, Wasm, etc., with deep integrations with packages such as pandas and dplyr.
 
-For more information on using DuckDB, please refer to the [DuckDB documentation][9].
+For more information on using DuckDB, refer to the [DuckDB documentation][9].
 
 This check monitors [DuckDB][1] through the Datadog Agent. 
 
