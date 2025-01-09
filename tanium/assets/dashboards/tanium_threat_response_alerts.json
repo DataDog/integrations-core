@@ -138,7 +138,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "status",
+                                                    "facet": "@severity",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -176,7 +176,7 @@
                     {
                         "id": 437698652416320,
                         "definition": {
-                            "title": "Alerts by Severity over time",
+                            "title": "Alerts by Severity",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1027,7 +1027,6 @@
                             "title": "Threat Response Alerts Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1611,7 +1610,7 @@
                 "x": 0,
                 "y": 35,
                 "width": 12,
-                "height": 1
+                "height": 10
             }
         }
     ],

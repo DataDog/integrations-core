@@ -94,7 +94,7 @@ pipeline:
               new_system_user_session_created_rule UserID: %{word:usr.id};
               Session ID: %{integer:session_id}; IP Address: %{ip:network.client.ip}
 
-              new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{regex("[^;]*"):authentication_type}(; Originated from %{data:originated_from})?(; IP Address: %{ip:network.client.ip})?
+              new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{regex("[^;]*"):authentication_type}(; Originated from %{notSpace:originated_from})?(; IP Address: %{ip:network.client.ip})?
 
               user_logged_out User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; (IP Address: )?%{ip:network.client.ip}
 

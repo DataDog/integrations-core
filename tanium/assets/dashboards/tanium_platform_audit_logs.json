@@ -359,7 +359,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:tanium service:platform-audit-logs @object_type_name:api_token @type_name:UpdateObject $Last-Modified $Type-Name"
+                                                "query": "source:tanium service:platform-audit-logs @object_type_name:api_token @type_name:UpdateObject -@last_modified_by:\"\" $Last-Modified $Type-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -846,7 +846,6 @@
                             "title": "Distribution of Events by Authenticated Types",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -1052,7 +1051,7 @@
                     {
                         "id": 5782056781854484,
                         "definition": {
-                            "title": "API Token Details",
+                            "title": "Authentication Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1544,7 +1543,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:tanium service:platform-audit-logs @object_type_name:persona @type_name:UpdateObject $Last-Modified $Type-Name"
+                                                "query": "source:tanium service:platform-audit-logs @object_type_name:persona @type_name:UpdateObject -@last_modified_by:\"\" $Last-Modified $Type-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1921,7 +1920,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:tanium service:platform-audit-logs @object_type_name:system_setting @type_name:UpdateObject $Last-Modified $Type-Name"
+                                                "query": "source:tanium service:platform-audit-logs @object_type_name:system_setting @type_name:UpdateObject -@last_modified_by:\"\" $Last-Modified $Type-Name"
                                             },
                                             "indexes": [
                                                 "*"
