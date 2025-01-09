@@ -36,6 +36,9 @@ dynamic = [
     "version",
 ]
 
+[envs.default]
+e2e-env = false
+
 [project.optional-dependencies]
 deps = []
 
