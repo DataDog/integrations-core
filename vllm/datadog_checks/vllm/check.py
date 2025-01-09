@@ -14,7 +14,10 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
 
     def get_default_config(self):
         return {
-            'metrics': [METRIC_MAP, RAY_METRIC_MAP],
+            'metrics': [
+                METRIC_MAP,
+                RAY_METRIC_MAP,
+            ],  # RAY_METRIC_MAP included to account for metrics exposed with ray_vllm. prefix when vllm run as a library
             "rename_labels": RENAME_LABELS_MAP,
         }
 
