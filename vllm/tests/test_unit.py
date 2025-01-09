@@ -73,7 +73,6 @@ def _get_version_metadata(raw_version):
     }
 
 
-
 def test_emits_critical_openemtrics_service_check_when_service_is_down(
     dd_run_check, aggregator, instance, mock_http_response
 ):

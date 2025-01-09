@@ -34,4 +34,3 @@ def instance():
 @pytest.fixture
 def ray_instance():
     return copy.deepcopy(MOCKED_INSTANCE_RAY)
-
