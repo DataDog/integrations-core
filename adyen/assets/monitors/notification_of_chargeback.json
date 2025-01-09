@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "Notification of Chargeback",
+	"description": "Chargeback notifications indicate disputes filed by issuing banks, requiring immediate action to review the case and compile evidence for resolution. This monitor tracks chargeback notifications to ensure timely awareness and response.",
+	"definition": {
+		"id": 154206380,
+		"name": "Notification of Chargeback",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}\nA Notification of Chargeback is the notification Adyen sends as soon as it is known that a dispute has been filed by the issuing bank\n\nA notification of chargeback has been detected for pspReference {{log.attributes.pspReference}}. Immediate attention is required to begin reviewing the case and compiling evidence for a defense in preparation of the upcoming Chargeback.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:dispute"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}
