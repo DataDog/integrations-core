@@ -17,7 +17,7 @@ DuckDB has two configurable options for concurrency:
 
 <div class="alert alert-warning">
 The datadog agent is using the read_only mode to get metrics, with a default 60 seconds frequency (min_collection_interval). 
-Feel free to increase this value to reduce concurrency issues.
+You can increase this value to reduce concurrency issues.
 </div>
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
