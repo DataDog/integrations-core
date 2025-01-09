@@ -34,6 +34,7 @@ METRIC_MAP = {
     'vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
 }
 
+# RAY_METRIC_MAP for metrics exposed with ray_vllm. prefix when vllm run as a library
 RAY_METRIC_MAP = {
     'ray_vllm:cache_config_info': 'cache_config_info',
     'ray_vllm:num_requests_running': 'num_requests.running',
