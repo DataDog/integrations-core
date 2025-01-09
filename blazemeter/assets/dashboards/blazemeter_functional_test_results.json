@@ -834,7 +834,7 @@
                     {
                         "id": 8803519680369122,
                         "definition": {
-                            "title": "Top Failing Test Cases",
+                            "title": "Top Failing Tests",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
