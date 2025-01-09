@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
 import requests
 from base64 import b64encode

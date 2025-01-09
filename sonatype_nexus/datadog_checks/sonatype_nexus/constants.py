@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 STATUS_ENDPOINT = "/service/rest/v1/status/check"
 ANALYTICS_ENDPOINT = "/service/metrics/data"
 

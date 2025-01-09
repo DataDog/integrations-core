@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
 from unittest.mock import Mock, patch
 from datadog_checks.sonatype_nexus.datadog_client import DatadogClient
