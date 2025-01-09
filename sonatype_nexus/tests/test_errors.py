@@ -14,7 +14,6 @@ from datadog_checks.sonatype_nexus.errors import (
 
 
 class TestHandleErrors(unittest.TestCase):
-
     def test_empty_response(self):
         method = Mock(return_value=None)
         wrapped_method = handle_errors(method)

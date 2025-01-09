@@ -29,9 +29,7 @@ def setup_check():
     return check
 
 
-@patch(
-    "datadog_checks.sonatype_nexus.check.SonatypeNexusCheck.validate_minimum_collection_interval"
-)
+@patch("datadog_checks.sonatype_nexus.check.SonatypeNexusCheck.validate_minimum_collection_interval")
 def test_validate_minimum_collection_interval_called(
     mock_validate_minimum_collection_interval,
 ):
@@ -66,8 +64,7 @@ def test_success(mock_client_class, mock_extract_ip):
     check.generate_and_yield_status_metrics()
 
     expected_calls = [
-        call(metric_name, 1, [SONATYPE_HOST], hostname=None)
-        for metric_name in STATUS_METRICS_MAP.values()
+        call(metric_name, 1, [SONATYPE_HOST], hostname=None) for metric_name in STATUS_METRICS_MAP.values()
     ]
     check.gauge.assert_has_calls(expected_calls, any_order=True)
     assert check.gauge.call_count == len(STATUS_METRICS_MAP)
@@ -78,8 +75,8 @@ def test_json_decode_error(mock_client_class):
     check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
     mock_client = MagicMock()
     mock_client_class.return_value = mock_client
-    mock_client.call_sonatype_nexus_api.return_value.json.side_effect = (
-        requests.exceptions.JSONDecodeError("Test error", "", 0)
+    mock_client.call_sonatype_nexus_api.return_value.json.side_effect = requests.exceptions.JSONDecodeError(
+        "Test error", "", 0
     )
     check.sonatype_nexus_client = mock_client
     result = check.generate_and_yield_status_metrics()
@@ -108,9 +105,7 @@ def test_generate_and_yield_analytics_metrics_success(mock_client):
         "metric_name1": {"metric_key": "metric_key1"},
         "metric_name2": {"metric_key": "metric_key2"},
     }
-    constants.METRIC_CONFIGS_BY_FORMAT_TYPE = {
-        "metric_name3": {"metric_key": "metric_key3", "value_key": "value"}
-    }
+    constants.METRIC_CONFIGS_BY_FORMAT_TYPE = {"metric_name3": {"metric_key": "metric_key3", "value_key": "value"}}
     check.generate_and_yield_analytics_metrics()
     assert check.create_metric_for_configs.call_count == 0
 
@@ -188,9 +183,7 @@ def test_list_value():
     constants.METRIC_CONFIGS = {"metric_name": config}
 
     check.create_metric_for_configs(metric_data, "metric_name")
-    check.gauge.assert_called_once_with(
-        "metric_name", 10, [SONATYPE_HOST, "tag_key:tag_value"], hostname=None
-    )
+    check.gauge.assert_called_once_with("metric_name", 10, [SONATYPE_HOST, "tag_key:tag_value"], hostname=None)
 
 
 def test_int_value():
@@ -203,9 +196,7 @@ def test_int_value():
     constants.METRIC_CONFIGS = {"metric_name": config}
 
     check.create_metric_for_configs(metric_data, "metric_name")
-    check.gauge.assert_called_once_with(
-        "metric_name", 10, [SONATYPE_HOST], hostname=None
-    )
+    check.gauge.assert_called_once_with("metric_name", 10, [SONATYPE_HOST], hostname=None)
 
 
 def test_dict_value():
@@ -218,9 +209,7 @@ def test_dict_value():
     constants.METRIC_CONFIGS = {"metric_name": config}
 
     check.create_metric_for_configs(metric_data, "metric_name")
-    check.gauge.assert_called_once_with(
-        "metric_name", 10, [SONATYPE_HOST], hostname=None
-    )
+    check.gauge.assert_called_once_with("metric_name", 10, [SONATYPE_HOST], hostname=None)
 
 
 def test_missing_value_key():
@@ -246,16 +235,10 @@ def test_metric_data_as_list():
     metric_name = "metric_name"
     metric_info = {"value_key": "value_key"}
 
-    create_metric_for_configs_by_format_type(
-        check, metric_data, metric_name, metric_info
-    )
+    create_metric_for_configs_by_format_type(check, metric_data, metric_name, metric_info)
 
-    check.ingest_metric.assert_any_call(
-        [SONATYPE_HOST], "format_type1", metric_info, metric_name, 10
-    )
-    check.ingest_metric.assert_any_call(
-        [SONATYPE_HOST], "format_type2", metric_info, metric_name, 20
-    )
+    check.ingest_metric.assert_any_call([SONATYPE_HOST], "format_type1", metric_info, metric_name, 10)
+    check.ingest_metric.assert_any_call([SONATYPE_HOST], "format_type2", metric_info, metric_name, 20)
     assert check.ingest_metric.call_count == 2
 
 
@@ -266,16 +249,10 @@ def test_metric_data_as_dict():
     metric_name = "metric_name"
     metric_info = {"value_key": "value_key"}
 
-    create_metric_for_configs_by_format_type(
-        check, metric_data, metric_name, metric_info
-    )
+    create_metric_for_configs_by_format_type(check, metric_data, metric_name, metric_info)
 
-    check.ingest_metric.assert_any_call(
-        [SONATYPE_HOST], "format_type1", metric_info, metric_name, 10
-    )
-    check.ingest_metric.assert_any_call(
-        [SONATYPE_HOST], "format_type2", metric_info, metric_name, 20
-    )
+    check.ingest_metric.assert_any_call([SONATYPE_HOST], "format_type1", metric_info, metric_name, 10)
+    check.ingest_metric.assert_any_call([SONATYPE_HOST], "format_type2", metric_info, metric_name, 20)
     assert check.ingest_metric.call_count == 2
 
 
@@ -285,9 +262,7 @@ def test_metric_data_as_empty_list():
     metric_name = "metric_name"
     metric_info = {"value_key": "value_key"}
 
-    create_metric_for_configs_by_format_type(
-        check, metric_data, metric_name, metric_info
-    )
+    create_metric_for_configs_by_format_type(check, metric_data, metric_name, metric_info)
 
     check.ingest_metric.assert_not_called()
 
@@ -298,9 +273,7 @@ def test_metric_data_as_empty_dict():
     metric_name = "metric_name"
     metric_info = {"value_key": "value_key"}
 
-    create_metric_for_configs_by_format_type(
-        check, metric_data, metric_name, metric_info
-    )
+    create_metric_for_configs_by_format_type(check, metric_data, metric_name, metric_info)
 
     check.ingest_metric.assert_not_called()
 
@@ -311,16 +284,12 @@ def test_metric_data_as_none():
     metric_name = "metric_name"
     metric_info = {"value_key": "value_key"}
 
-    create_metric_for_configs_by_format_type(
-        check, metric_data, metric_name, metric_info
-    )
+    create_metric_for_configs_by_format_type(check, metric_data, metric_name, metric_info)
 
     check.ingest_metric.assert_not_called()
 
 
-def create_metric_for_configs_by_format_type(
-    self, metric_data, metric_name, metric_info
-):
+def create_metric_for_configs_by_format_type(self, metric_data, metric_name, metric_info):
     base_tag = [f"sonatype_host:{self.extract_ip_from_url()}"]
 
     if isinstance(metric_data, list):
@@ -335,9 +304,7 @@ def create_metric_for_configs_by_format_type(
                 )
     elif isinstance(metric_data, dict):
         for format_type, metric_value in metric_data.items():
-            self.ingest_metric(
-                base_tag, format_type, metric_info, metric_name, metric_value
-            )
+            self.ingest_metric(base_tag, format_type, metric_info, metric_name, metric_value)
 
 
 class TestIngestMetric(unittest.TestCase):
@@ -366,9 +333,7 @@ class TestIngestMetric(unittest.TestCase):
         metric_name = "metric_name"
         value = "non-integer"
         with self.assertRaises(ValueError):
-            self.check.ingest_metric(
-                base_tag, format_type, metric_info, metric_name, value
-            )
+            self.check.ingest_metric(base_tag, format_type, metric_info, metric_name, value)
 
     def test_missing_tag_key(self):
         base_tag = [SONATYPE_HOST]
@@ -377,9 +342,7 @@ class TestIngestMetric(unittest.TestCase):
         metric_name = "metric_name"
         value = 10
         with self.assertRaises(KeyError):
-            self.check.ingest_metric(
-                base_tag, format_type, metric_info, metric_name, value
-            )
+            self.check.ingest_metric(base_tag, format_type, metric_info, metric_name, value)
 
 
 def test_service_check_and_event_with_all_required_arguments():
@@ -388,9 +351,7 @@ def test_service_check_and_event_with_all_required_arguments():
     check.event = MagicMock()
     check.extract_ip_from_url = MagicMock(return_value="127.0.0.1")
 
-    with patch(
-        "datadog_checks.sonatype_nexus.constants.STATUS_NUMBER_TO_VALUE"
-    ) as mock_status_number_to_value:
+    with patch("datadog_checks.sonatype_nexus.constants.STATUS_NUMBER_TO_VALUE") as mock_status_number_to_value:
         mock_status_number_to_value.get.return_value = "OK"
         check.ingest_service_check_and_event(
             status=0,
