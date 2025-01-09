@@ -53,7 +53,8 @@ def handle_errors(method):
 
             elif res.status_code not in constants.SUCCESSFUL_STATUSCODE:
                 raise APIError(
-                    f"Request to API server failed. URL: {res.url}. Status code: {res.status_code}. Response: {res.text}",
+                    f"Request to API server failed. URL: {res.url}."
+                    f"Status code: {res.status_code}. Response: {res.text}",
                     res,
                 )
 
@@ -77,5 +78,5 @@ def handle_errors(method):
 
 
 def log_and_raise_exception(self, error_message: str, exception_type: type[Exception]):
-    self.log.error(f"{constants.INTEGRATION_PREFIX} | HOST={self.hostname} | MESSAGE={error_message}")
+    self.log.error("%s | HOST=%s | MESSAGE=%s", constants.INTEGRATION_PREFIX, self.hostname, error_message)
     raise exception_type(error_message)

@@ -31,7 +31,9 @@ class SonatypeNexusClient:
             return response
 
         except ConfigurationError:
-            err_message = "Error occurred while authenticating the Sonatype Nexus credentials. Please check logs for more details."
+            err_message = (
+                "Error occurred while authenticating the Sonatype Nexus credentials. Please check logs for more details."
+            )
             self.instance_check.ingest_service_check_and_event(
                 status=2,
                 tags=constants.AUTH_TAG,

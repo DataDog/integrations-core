@@ -11,7 +11,7 @@
 		"query": "avg(last_1h):(avg:sonatype_nexus.analytics.jvm.heap_memory_used{*} by {sonatype_host} / avg:sonatype_nexus.analytics.jvm.heap_memory_max{*} by {sonatype_host}) * 100 > 80",
 		"message": "{{#is_alert}}\nJMV heap memory stores all the objects created by the Java application. The JVM manages this space, and a special process called garbage collection automatically cleans up unused objects to free up memory.\n\nHigh percentage of JVM heap memory usage detected. Take necessary action to mitigate the issue.\n{{/is_alert}}",
 		"tags": [
-			"integration:sonatype-nexus",
+			"integration:sonatype_nexus",
 			"type:metrics"
 		],
 		"options": {
@@ -30,6 +30,6 @@
 		}
 	},
 	"tags": [
-		"integration:sonatype-nexus"
+		"integration:sonatype_nexus"
 	]
 }

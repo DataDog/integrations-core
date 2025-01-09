@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
+from unittest.mock import patch, MagicMock, Mock, call
+
 import pytest
 import requests
-from unittest.mock import patch, MagicMock, Mock, call
+
 from datadog_checks.sonatype_nexus import constants
-from datadog_checks.sonatype_nexus.constants import REQUIRED_FIELDS, STATUS_METRICS_MAP
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
+from datadog_checks.sonatype_nexus.constants import REQUIRED_FIELDS, STATUS_METRICS_MAP
 
 
 SONATYPE_HOST = 'sonatype_host:127.0.0.1'

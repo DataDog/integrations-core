@@ -4,11 +4,6 @@
 
 import re
 
-try:
-    import datadog_agent  # type: ignore
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent  # type: ignore
-
 import requests
 
 from datadog_checks.base import AgentCheck
@@ -19,7 +14,6 @@ from datadog_checks.base.errors import (
 
 from . import constants
 from .api_client import SonatypeNexusClient
-from .datadog_client import DatadogClient
 from .errors import log_and_raise_exception
 
 
@@ -29,26 +23,17 @@ class SonatypeNexusCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-        self._dd_api_key = datadog_agent.get_config("api_key")
-        self._dd_app_key = datadog_agent.get_config("app_key")
-        self._dd_site = datadog_agent.get_config("site") or constants.DEFAULT_SITE
-
         self._username = self.instance.get("username")
         self._password = self.instance.get("password")
         self._sonatype_nexus_server_url = self.instance.get("sonatype_nexus_server_url")
         self.min_collection_interval = self.instance.get("min_collection_interval")
-        self.dd_client = DatadogClient(
-            self._dd_site, {"apiKeyAuth": self._dd_api_key, "appKeyAuth": self._dd_app_key}, self
-        )
         self.sonatype_nexus_client = SonatypeNexusClient(self)
 
     def check(self, _):
         try:
-            self.dd_client.validate_datadog_configurations()
-
             self.validate_integration_configurations()
             success_msg = "All the provided configurations in conf.yaml are valid."
-            self.log.info(f"{constants.INTEGRATION_PREFIX} | HOST={self.hostname} | MESSAGE={success_msg}")
+            self.log.info("%s | HOST=%s | MESSAGE=%s", constants.INTEGRATION_PREFIX, self.hostname, success_msg)
             self.ingest_service_check_and_event(
                 status=0,
                 tags=constants.CONF_VAL_TAG,
@@ -88,7 +73,9 @@ class SonatypeNexusCheck(AgentCheck):
                 err_message = f"Empty value is not allowed in '{field_name}' field."
                 log_and_raise_exception(self, err_message, ValueError)
             if not (isinstance(value, str)):
-                err_message = f"Invalid value provided for {field_name} field. The value type should be string but found {type(value)}."
+                err_message = (
+                    f"Invalid value provided for {field_name} field. The value type should be string but found {type(value)}."
+                )
                 log_and_raise_exception(self, err_message, ValueError)
 
         self.validate_minimum_collection_interval()

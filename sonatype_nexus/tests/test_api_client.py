@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
-import requests
 from base64 import b64encode
 from unittest.mock import patch, MagicMock, Mock
-from datadog_checks.sonatype_nexus.api_client import SonatypeNexusClient
+
+import requests
+
 from datadog_checks.base import ConfigurationError
+from datadog_checks.sonatype_nexus.api_client import SonatypeNexusClient
 
 
 REQUEST_URL = 'requests.Session.get'
@@ -97,5 +99,5 @@ def test_handles_none_username_or_password():
     assert session.headers["Authorization"].startswith("Basic ")
 
     # Check the actual encoded value
-    expected_token = b64encode(f"test_username:None".encode()).decode("ascii")
+    expected_token = b64encode("test_username:None".encode()).decode("ascii")
     assert session.headers["Authorization"] == f"Basic {expected_token}"

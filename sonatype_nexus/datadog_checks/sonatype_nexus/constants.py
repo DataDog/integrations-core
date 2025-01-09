@@ -13,32 +13,16 @@ STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
 # field validation
 REQUIRED_FIELDS = ["username", "password", "sonatype_nexus_server_url"]
 
-# Datadog site mapping
-DEFAULT_SITE = "datadoghq.com"
-API_SITE = "https://api.{}"
-
-API_VAL_TAG = ["tag:datadog_keys_validation"]
-API_VAL_TITLE = "Datadog api/app key validation"
-API_VAL_SOURCE_TYPE = INTEGRATION_PREFIX + ".datadog_keys_validation"
-
-AUTH_TAG = ["tag:sonatype_nexus_authentication"]
-AUTH_TITLE = "Sonatype Nexus Authentication"
-AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".sonatype_nexus_authentication"
-
 # ServiceCheck and Events constants
 SONATYPE_NEXUS_CHECK_NAME = "status"
 
-API_VAL_TAG = ["tag:datadog_keys_validation"]
-API_VAL_TITLE = "Datadog api/app key validation"
-API_VAL_SOURCE_TYPE = INTEGRATION_PREFIX + ".datadog_keys_validation"
-
 CONF_VAL_TAG = ["tag:sonatype_nexus_conf_validation"]
 CONF_VAL_TITLE = "Sonatype Nexus conf.yaml validations"
-CONF_VAL_SOURCE_TYPE = INTEGRATION_PREFIX + ".sonatype_nexus_conf_validation"
+CONF_VAL_SOURCE_TYPE = INTEGRATION_PREFIX + ".conf_validation"
 
-AUTH_TAG = ["tag:sonatype_nexus_authentication"]
-AUTH_TITLE = "Sonatype Nexus Authentication"
-AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".sonatype_nexus_authentication"
+AUTH_TAG = ["tag:sonatype_nexus_authentication_validation"]
+AUTH_TITLE = "Sonatype Nexus Authentication validations"
+AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".authentication_validation"
 
 # API Client Constants
 REQUEST_TIMEOUT = 30
