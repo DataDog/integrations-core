@@ -35,6 +35,17 @@ SELECT table_schema, table_name,
 FROM information_schema.tables
 WHERE table_schema in ('mysql', 'performance_schema', 'information_schema')"""
 
+SQL_QUERY_INDEX_SIZE = """\
+SELECT database_name, table_name, index_name,
+ ROUND(stat_value * @@innodb_page_size/1024/1024, 2) AS index_size_mb
+FROM mysql.innodb_index_stats
+WHERE stat_name = 'size' AND index_name != 'PRIMARY'"""
+
+SQL_QUERY_INDEX_USAGE = """\
+SELECT object_schema, object_name, index_name, count_read, count_update, count_delete
+FROM performance_schema.table_io_waits_summary_by_index_usage
+WHERE index_name IS NOT NULL AND index_name != 'PRIMARY' AND object_schema NOT IN ('mysql', 'performance_schema')"""
+
 SQL_AVG_QUERY_RUN_TIME = """\
 SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
 FROM performance_schema.events_statements_summary_by_digest

@@ -74,6 +74,7 @@ def dd_environment(config_e2e):
             yield config_e2e, e2e_metadata
 
 
+# TODO ALLEN: adjust configs for index metric collection once the config is implemented
 @pytest.fixture(scope='session')
 def instance_basic():
     return {
@@ -405,6 +406,7 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
+    cur.execute("GRANT SELECT ON mysql.innodb_index_stats TO 'dog'@'%'")
 
     # refactor try older mysql.user table first. if this fails, go to newer ALTER USER
     try:

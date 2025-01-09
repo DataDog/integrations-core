@@ -39,6 +39,7 @@ from .const import (
     GAUGE,
     GROUP_REPLICATION_VARS,
     GROUP_REPLICATION_VARS_8_0_2,
+    INDEX_VARS,
     INNODB_VARS,
     MONOTONIC,
     OPTIONAL_STATUS_VARS,
@@ -68,6 +69,8 @@ from .queries import (
     SQL_GROUP_REPLICATION_PLUGIN_STATUS,
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
+    SQL_QUERY_INDEX_SIZE,
+    SQL_QUERY_INDEX_USAGE,
     SQL_QUERY_SCHEMA_SIZE,
     SQL_QUERY_SYSTEM_TABLE_SIZE,
     SQL_QUERY_TABLE_ROWS_STATS,
@@ -576,6 +579,14 @@ class MySql(AgentCheck):
             else:
                 results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
+
+        # TODO ALLEN: implement configuration option
+        if is_affirmative(self._config.options.get('index_usage_metrics', True)):
+            with tracked_query(self, operation="index_size_metrics"):
+                results['index_size'] = self._query_index_size_per_index(db)
+            with tracked_query(self, operation="index_usage_metrics"):
+                results['index_usage'] = self._query_index_usage(db)
+            metrics.update(INDEX_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
             if self.performance_schema_enabled and self._is_group_replication_active(db):
@@ -1186,6 +1197,69 @@ class MySql(AgentCheck):
             self.warning("Size of schemas metrics unavailable at this time: %s", e)
 
         return {}
+
+    def _query_index_size_per_index(self, db):
+        try:
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute(SQL_QUERY_INDEX_SIZE)
+                if cursor.rowcount < 1:
+                    # TODO ALLEN: link to documentation
+                    self.warning("Failed to fetch records from the mysql 'innodb_index_stats' table.")
+                    return None
+                index_sizes = {}
+                for row in cursor.fetchall():
+                    db_name = str(row[0])
+                    table_name = str(row[1])
+                    index_name = str(row[2])
+                    index_size = float(row[3])
+
+                    # set the tag as the dictionary key
+                    index_sizes["db:{},table:{},index:{}".format(db_name, table_name, index_name)] = index_size
+                return index_sizes
+        except (pymysql.err.InternalError, pymysql.err.OperationalError):
+            self.warning(
+                "Failed to fetch records from the performance schema " "'table_io_waits_summary_by_index_usage' table."
+            )
+
+            return None
+
+    def _query_index_usage(self, db):
+        try:
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute(SQL_QUERY_INDEX_USAGE)
+                if cursor.rowcount < 1:
+                    self.warning(
+                        "Failed to fetch records from the performance schema "
+                        "'table_io_waits_summary_by_index_usage' table."
+                    )
+                    return None
+                # index_usage_read = {}
+                index_usage = {}
+                for row in cursor.fetchall():
+                    db_name = str(row[0])
+                    table_name = str(row[1])
+                    index_name = str(row[2])
+                    count_read = int(row[3])
+                    count_update = int(row[4])
+                    count_delete = int(row[5])
+
+                    # set the tag as the dictionary key
+                    index_usage["db:{},table:{},index:{},operation:read".format(db_name, table_name, index_name)] = (
+                        count_read
+                    )
+                    index_usage["db:{},table:{},index:{},operation:update".format(db_name, table_name, index_name)] = (
+                        count_update
+                    )
+                    index_usage["db:{},table:{},index:{},operation:delete".format(db_name, table_name, index_name)] = (
+                        count_delete
+                    )
+
+                    # index_usage_read["db:{},table:{},index:{}".format(db_name, table_name, index_name)] = count_read
+                return index_usage
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            self.warning("Index usage metrics unavailable at this time: %s", e)
+
+            return None
 
     def _query_size_per_table(self, db, system_tables=False):
         try:
