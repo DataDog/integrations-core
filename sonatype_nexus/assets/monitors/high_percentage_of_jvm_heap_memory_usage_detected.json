@@ -30,6 +30,6 @@
 		}
 	},
 	"tags": [
-		"integration:sonatype_nexus"
+		"integration:sonatype-nexus"
 	]
 }
