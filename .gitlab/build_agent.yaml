@@ -31,11 +31,11 @@ build-agent-auto:
 
 build-agent-manual:
   extends: .build-agent-tpl
-  when: manual
   rules:
     # By default we test with Agent's main branch.
     # From a release branch we want to use the same release branch in the agent repo.
     - if: $CI_COMMIT_BRANCH =~ "/^7.\d+.x$/"
+      when: manual
       variables:
         _AGENT_BRANCH: ${CI_COMMIT_BRANCH}
-    - when: always
+    - when: manual
