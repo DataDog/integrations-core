@@ -21,15 +21,26 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 # Based on this job from upstream:
 # https://github.com/confluentinc/librdkafka/blob/cb8c19c43011b66c4b08b25e5150455a247e1ff3/.semaphore/semaphore.yml#L265
 # Install vcpkg
-Set-Location "C:\"
 $triplet = "x64-windows"
+$vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
+$desired_tag = "2024.12.16"
 
-& "${librdkafka_dir}\win32\setup-vcpkg.ps1"
+# Clone and configure vcpkg
+if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
+    git clone https://github.com/Microsoft/vcpkg.git $vcpkg_dir
+}
+
+Set-Location $vcpkg_dir
+git checkout $desired_tag
+
+Write-Host "Bootstrapping vcpkg..."
+.\bootstrap-vcpkg.bat
+
 # Get deps
 Set-Location "$librdkafka_dir"
-# Patch the the vcpkg manifest to to override the OpenSSL version
-python C:\update_librdkafka_manifest.py vcpkg.json --set-version openssl:${Env:OPENSSL_VERSION}
+# Patch the the vcpkg manifest to to override the OpenSSL version and CURL version
+python C:\update_librdkafka_manifest.py vcpkg.json --set-version openssl:${Env:OPENSSL_VERSION} --set-version curl:${Env:CURL_VERSION}
 
 C:\vcpkg\vcpkg integrate install
 C:\vcpkg\vcpkg --feature-flags=versions install --triplet $triplet
