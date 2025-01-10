@@ -280,9 +280,13 @@ GROUP_REPLICATION_VARS_8_0_2 = [
     'mysql.replication.group.transactions_rollback',
 ]
 
-INDEX_VARS = [
+INDEX_SIZE_VARS = [
     'mysql.index.size',
-    'mysql.index.usage',
+]
+INDEX_USAGE_VARS = [
+    'mysql.index.reads',
+    'mysql.index.updates',
+    'mysql.index.deletes',
 ]
 
 SIMPLE_OPERATION_TIME_METRICS = [
@@ -307,6 +311,8 @@ PERFORMANCE_OPERATION_TIME_METRICS = ['exec_time_95th_metrics', 'exec_time_per_s
 COMMON_PERFORMANCE_OPERATION_TIME_METRICS = ['performance_schema.threads']
 
 OPERATION_TIME_METRIC_NAME = 'dd.mysql.operation.time'
+
+TEMP_EXCLUDED_METRIC = 'dd.mysql.statement_metrics.events_statements_summary_by_digest.total_rows'
 
 E2E_OPERATION_TIME_METRIC_NAME = [
     'dd.mysql.operation.time.{}'.format(suffix) for suffix in ('avg', 'max', '95percentile', 'count', 'median')

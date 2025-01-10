@@ -74,7 +74,6 @@ def dd_environment(config_e2e):
             yield config_e2e, e2e_metadata
 
 
-# TODO ALLEN: adjust configs for index metric collection once the config is implemented
 @pytest.fixture(scope='session')
 def instance_basic():
     return {
@@ -103,6 +102,7 @@ def instance_complex():
             'table_size_metrics': True,
             'system_table_size_metrics': True,
             'table_row_stats_metrics': True,
+            'index_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [

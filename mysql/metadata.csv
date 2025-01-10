@@ -18,7 +18,9 @@ mysql.galera.wsrep_received,gauge,,,,Total number of write-sets received from ot
 mysql.galera.wsrep_received_bytes,gauge,,,,Total size (in bytes) of writesets received from other nodes.,0,mysql,mysql galera wsrep_received_bytes,
 mysql.galera.wsrep_replicated_bytes,gauge,,,,Total size (in bytes) of writesets sent to other nodes.,0,mysql,mysql galera wsrep_replicated_bytes,
 mysql.index.size,gauge,,mebibyte,,Size of indexes in MiB,0,mysql,mysql index size,
-mysql.index.usage,gauge,,operation,,The number of operations using an index.,0,mysql,mysql index usage,
+mysql.index.reads,gauge,,operation,,The number of read operation using an index.,0,mysql,mysql index read usage,
+mysql.index.deletes,gauge,,operation,,The number of delete operation using an index.,0,mysql,mysql index delete usage,
+mysql.index.updates,gauge,,operation,,The number of update operation using an index.,0,mysql,mysql index update usage,
 mysql.info.schema.size,gauge,,mebibyte,,Size of schemas in MiB,0,mysql,mysql schema size,
 mysql.info.table.data_size,gauge,,mebibyte,,Size of tables data in MiB,0,mysql,mysql data table size,memory
 mysql.info.table.index_size,gauge,,mebibyte,,Size of tables index in MiB,0,mysql,mysql index table size,

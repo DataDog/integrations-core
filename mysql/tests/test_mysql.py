@@ -48,7 +48,8 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
         + variables.COMMON_PERFORMANCE_VARS
-        + variables.INDEX_VARS
+        + variables.INDEX_SIZE_VARS
+        + variables.INDEX_USAGE_VARS
     )
 
     operation_time_metrics = (
@@ -161,7 +162,8 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
-        + variables.INDEX_VARS
+        + variables.INDEX_SIZE_VARS
+        + variables.INDEX_USAGE_VARS
     )
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
@@ -234,7 +236,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
-    _test_index_metrics(aggregator, variables.INDEX_VARS, metric_tags)
+    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
     # test optional metrics
     optional_metrics = (
         variables.OPTIONAL_REPLICATION_METRICS
@@ -306,6 +308,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
+        + variables.INDEX_SIZE_VARS
     )
 
     operation_time_metrics = (
@@ -315,7 +318,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
-        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
+        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS + variables.INDEX_USAGE_VARS)
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
         )
@@ -366,7 +369,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
-    _test_index_metrics(aggregator, variables.INDEX_VARS, tags.METRIC_TAGS_WITH_RESOURCE)
     # test optional metrics
     optional_metrics = (
         variables.OPTIONAL_REPLICATION_METRICS
@@ -462,33 +464,31 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
 
 def _test_index_metrics(aggregator, index_metrics, metric_tags):
-    operations = ["read", "delete", "update"]
+    # operations = ["read", "delete", "update"]
     for mname in index_metrics:
-        if mname == 'mysql.index.usage':
-            for operation in operations:
-                aggregator.assert_metric(
-                    mname,
-                    tags=metric_tags + ['db:testdb', 'table:users', 'index:id', f'operation:{operation}'],
-                    count=1,
-                )
-                aggregator.assert_metric(
-                    mname,
-                    tags=metric_tags
-                    + [
-                        'db:datadog_test_schemas',
-                        'table:cities',
-                        'index:single_column_index',
-                        f'operation:{operation}',
-                    ],
-                    count=1,
-                )
-                aggregator.assert_metric(
-                    mname,
-                    tags=metric_tags
-                    + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index', f'operation:{operation}'],
-                    count=1,
-                )
-        elif mname == 'mysql.index.size':
+        if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:testdb', 'table:users', 'index:id'],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + [
+                    'db:datadog_test_schemas',
+                    'table:cities',
+                    'index:single_column_index',
+                ],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
+                count=1,
+            )
+        if mname == 'mysql.index.size':
             aggregator.assert_metric(mname, tags=metric_tags + ['db:testdb', 'table:users', 'index:id'], count=1)
             aggregator.assert_metric(
                 mname,

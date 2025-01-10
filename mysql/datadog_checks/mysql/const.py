@@ -307,9 +307,4 @@ SYNTHETIC_VARS = {
     'Qcache_instant_utilization': ('mysql.performance.qcache.utilization.instant', GAUGE),
 }
 
-INDEX_VARS = {
-    'index_usage': ('mysql.index.usage', GAUGE),
-    'index_size': ('mysql.index.size', GAUGE),
-}
-
 BUILDS = ('log', 'standard', 'debug', 'valgrind', 'embedded')
