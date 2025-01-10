@@ -1,0 +1,33 @@
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param username - string - required
+    ## The username of your Sonatype Nexus account.
+    #
+  - username: test_username
+
+    ## @param password - string - required
+    ## The password of your Sonatype Nexus account.
+    #
+    password: test_password
+
+    ## @param sonatype_nexus_server_url - string - required
+    ## The Server URL of your Sonatype Nexus account.
+    #
+    sonatype_nexus_server_url: https://0.0.0.0:8081
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param min_collection_interval - number - required
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    min_collection_interval: 600
