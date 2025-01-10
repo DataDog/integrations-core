@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import unittest
 import base64
-from unittest.mock import patch, MagicMock
-
+import unittest
+from unittest.mock import MagicMock, patch
 
 from datadog_checks.sonatype_nexus.api_client import SonatypeNexusClient
-
 
 REQUEST_URL = 'requests.Session.get'
 URL = 'https://example.com'
@@ -48,13 +46,15 @@ def test_session_headers():
         mock_session.return_value.headers.get.side_effect = lambda key: {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'.encode()).decode('ascii')}",
+            "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'\
+                .encode()).decode('ascii')}",
         }.get(key)
         session = client.prepare_session()
         expected_headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'.encode()).decode('ascii')}",
+            "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'\
+                .encode()).decode('ascii')}",
         }
         for key, value in expected_headers.items():
             assert session.headers.get(key) == value

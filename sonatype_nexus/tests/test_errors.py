@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
-import requests
 from unittest.mock import Mock
+
+import requests
 from requests import Response
+
 from datadog_checks.sonatype_nexus.errors import APIError, handle_errors
 
 
