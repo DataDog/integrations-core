@@ -14,30 +14,7 @@ The Sonatype Nexus check is included in the [Datadog Agent package][1]. No addit
 
 1. The `Username` and `Password` of either the **Administrator** account or a user with the **nx-metrics-all** privilege
 
-2. The `Server URL` of the Repository instance. For Ex: https://123.123.123.123:8081 
-
-### Connect your Datadog account to agent
-1. Update the `datadog.yaml` file by adding the following configuration. For more information, see [Agent Configuration Files][2] and [API and Application Keys][3].
-
-   ```yaml
-      ## @param api_key - string - required
-      ## Datadog API Key
-      #
-      api_key: <API_KEY>
-
-      ## @param app_key - string - required
-      ## Datadog App Key
-      #
-      app_key: <APP_KEY>
-
-      ## @param site - string - optional - default: datadoghq.com
-      ## The site of the Datadog intake to send Agent data to.
-      ## Set to 'datadoghq.eu' to send data to the EU site.
-      ## Set to 'us3.datadoghq.com' to send data to the US3 site.
-      ## Set to 'us5.datadoghq.com' to send data to the US5 site.
-      #
-      site: <URL>
-   ```
+2. The `Server URL` of the Repository instance. For Ex: https://123.123.123.123:8081
 
 ### Connect your Sonatype Nexus account to agent
 
@@ -87,22 +64,11 @@ The Sonatype Nexus check is included in the [Datadog Agent package][1]. No addit
         sonatype_nexus_server_url: <SONATYPE_NEXUS_SERVER_URL>
     ```
 
-3. Install the third-party dependent Python package:
-
-- Linux:
-  ```sh
-  sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install datadog-api-client>=2.16.0
-  ```
-
-- Windows:
-  ```sh
-  "%programfiles%\Datadog\Datadog Agent\embedded3\python.exe" -m pip install datadog-api-client>=2.16.0
-  ```
-4. [Restart the Agent][4].
+3. [Restart the Agent][2].
 
 ### Validation
 
-- [Run the Agent's status subcommand][5] and look for `sonatype_nexus` under the Checks section.
+- [Run the Agent's status subcommand][3] and look for `sonatype_nexus` under the Checks section.
 
 ## Data Collected
 
@@ -117,29 +83,21 @@ The Sonatype Nexus integration collects and forwards analytics, and instance hea
 
 ### Events
 
-The sonatype_nexus integration does not include any events.
+The Sonatype Nexus integration forwards below events to Datadog.
+1. sonatype_nexus.conf_validation
+2. sonatype_nexus.authentication_validation
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
-## Uninstallation
-
-For integrations running on the Agent:
-
-1. Fully remove the integration by following the datadog-agent integration remove command. More information can be found [here][7].
-2. Click 'Uninstall' to remove the included assets, such as dashboards, from your organization.
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Support
 
-For further assistance, contact [Datadog support][6].
+For further assistance, contact [Datadog support][4].
 
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7
-[3]: https://docs.datadoghq.com/account_management/api-app-keys
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#remove
-[8]: https://github.com/DataDog/integrations-core/blob/master/sonatype_nexus/assets/service_checks.json
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/sonatype_nexus/assets/service_checks.json
