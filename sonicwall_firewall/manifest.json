@@ -1,0 +1,94 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "f29dd27d-2c3b-46f0-a872-7e0d861aff54",
+  "app_id": "sonicwall-firewall",
+  "display_on_public_website": true,
+  "tile": {
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "Gain Insights into Sonicwall Firewall logs.",
+      "title": "Sonicwall Firewall",
+      "media": [
+        {
+          "caption": "Sonicwall Firewall - Overview",
+          "image_url": "images/sonicwall_firewall_overview.png",
+          "media_type": "image"
+        },
+        {
+          "caption": "Sonicwall Firewall - Network",
+          "image_url": "images/sonicwall_firewall_network.png",
+          "media_type": "image"
+        },
+        {
+          "caption": "Sonicwall Firewall - Security Services",
+          "image_url": "images/sonicwall_firewall_security_services.png",
+          "media_type": "image"
+        },
+        {
+          "caption": "Sonicwall Firewall - User",
+          "image_url": "images/sonicwall_firewall_user.png",
+          "media_type": "image"
+        },
+        {
+          "caption": "Sonicwall Firewall - VPN",
+          "image_url": "images/sonicwall_firewall_vpn.png",
+          "media_type": "image"
+        },
+        {
+          "caption": "Sonicwall Firewall - Anti-Spam",
+          "image_url": "images/sonicwall_firewall_anti_spam.png",
+          "media_type": "image"
+        },
+        {
+          "caption": "Sonicwall Firewall - Firewall & Firewall Settings",
+          "image_url": "images/sonicwall_firewall_and_firewall_settings.png",
+          "media_type": "image"
+        }
+      ],
+      "classifier_tags": [
+        "Supported OS::Linux",
+        "Supported OS::Windows",
+        "Supported OS::macOS",
+        "Category::Log Collection",
+        "Category::Security",
+        "Offering::Integration",
+        "Submitted Data Type::Logs"
+      ]
+    },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 27315184,
+      "source_type_name": "Sonicwall Firewall",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Sonicwall Firewall - Overview": "assets/dashboards/sonicwall_firewall_overview.json",
+      "Sonicwall Firewall - Network": "assets/dashboards/sonicwall_firewall_network.json",
+      "Sonicwall Firewall - Security Services": "assets/dashboards/sonicwall_firewall_security_services.json",
+      "Sonicwall Firewall - Anti Spam": "assets/dashboards/sonicwall_firewall_anti_spam.json",
+      "Sonicwall Firewall - User": "assets/dashboards/sonicwall_firewall_user.json",
+      "Sonicwall Firewall - VPN": "assets/dashboards/sonicwall_firewall_vpn.json",
+      "Sonicwall Firewall and Firewall Settings": "assets/dashboards/sonicwall_firewall_and_firewall_settings.json"
+    },
+    "logs": {
+      "source":"sonicwall-firewall"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

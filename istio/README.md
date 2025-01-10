@@ -5,7 +5,7 @@
 Datadog monitors every aspect of your Istio environment, so you can:
 - Assess the health of Envoy and the Istio control plane with [logs](#log-collection).
 - Break down the performance of your service mesh with [request, bandwidth, and resource consumption metrics](#metrics).
-- Map network communication between containers, pods, and services over the mesh with [Network Performance Monitoring][1].
+- Map network communication between containers, pods, and services over the mesh with [Cloud Network Monitoring][1].
 - Drill into distributed traces for applications transacting over the mesh with [APM][2].
 
 To learn more about monitoring your Istio environment with Datadog, [see the Monitor blog post][3].
@@ -65,6 +65,9 @@ Customize this file with any additional configurations. See the [sample istio.d/
 ##### Control plane configuration
 To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Annotations v1" xxx -->
+
 ```yaml
 ad.datadoghq.com/discovery.checks: |
   {
@@ -79,7 +82,27 @@ ad.datadoghq.com/discovery.checks: |
   }
 ```
 
-This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
+<!-- xxz tab xxx -->
+<!-- xxx tab "Annotations v2" xxx -->
+
+**Note**: Annotations v2 is supported for Agent v7.36+.
+
+```yaml
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
+  {
+    "Istio": {
+      "istiod_endpoint": "http://%%host%%:15014/metrics",
+      "use_openmetrics": "true"
+    }
+  }
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+
+
+This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
@@ -147,7 +170,7 @@ ad.datadoghq.com/discovery.logs: |
   ]
 ```
 
-This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
+This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.logs` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
 Replace `<SERVICE_NAME>` with your desired Istio service name.
 
@@ -168,7 +191,7 @@ ad.datadoghq.com/istio-proxy.logs: |
   ]
 ```
 
-This annotation specifies the container `istio-proxy` to match the default container name of the injected Istio sidecar container. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs` with the name (`.spec.containers[i].name`) of your Istio sidecar container if yours differs.
+This annotation specifies the container `istio-proxy` to match the default container name of the injected Istio sidecar container. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.logs` with the name (`.spec.containers[i].name`) of your Istio sidecar container if yours differs.
 
 Replace `<SERVICE_NAME>` with your desired Istio proxy service name.
 

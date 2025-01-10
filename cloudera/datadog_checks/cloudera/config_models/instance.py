@@ -66,6 +66,7 @@ class InstanceConfig(BaseModel):
     max_parallel_requests: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    pools_size: Optional[int] = None
     service: Optional[str] = None
     ssl_ca_cert: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

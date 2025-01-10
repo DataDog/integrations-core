@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import threading
+
 import psycopg2
 import pytest
 
@@ -117,6 +119,59 @@ def test_relations_metrics_access_exclusive_lock(aggregator, integration_check, 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_relations_metrics_share_lock(aggregator, integration_check, pg_instance):
+    '''
+    This test is to verify the PG_CLASS query does not reporte duplicate metrics
+    when a relation has multiple locks present in PG_LOCKS.
+    '''
+    pg_instance['relations'] = ['persons']
+    check = integration_check(pg_instance)
+
+    def access_share_lock():
+        conn = _get_superconn(pg_instance)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('BEGIN')
+            cursor.execute("LOCK persons IN SHARE MODE;")  # Acquires SHARE LOCK
+        finally:
+            cursor.execute('COMMIT')
+            cursor.close()
+            conn.close()
+
+    def row_share_lock():
+        conn = _get_superconn(pg_instance)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('BEGIN')
+            cursor.execute("SELECT * FROM persons FOR SHARE;")  # Acquires ROW SHARE LOCK
+        finally:
+            cursor.execute('COMMIT')
+            cursor.close()
+            conn.close()
+            print("ROW SHARE LOCK released.")
+
+    t1 = threading.Thread(target=access_share_lock)
+    t2 = threading.Thread(target=row_share_lock)
+
+    # Start threads
+    t1.start()
+    t2.start()
+
+    check.check(pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
+
+    for name in ('postgresql.rows_inserted', 'postgresql.rows_updated', 'postgresql.rows_deleted'):
+        # Expect no relation metrics to be collected for persons table
+        # because locked relations are skipped in the query
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+    # Wait for threads to complete
+    t1.join()
+    t2.join()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @requires_over_11
 def test_partition_relation(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = [
@@ -195,6 +250,35 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
         )
     for relation in relations:
         _check_metrics_for_relation_wo_index(aggregator, expected_tags[relation])
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_relations_xmin(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['persons']
+
+    conn = _get_superconn(pg_instance)
+    cursor = conn.cursor()
+    cursor.execute("SELECT xmin FROM pg_class WHERE relname='persons'")
+    start_xmin = float(cursor.fetchone()[0])
+
+    # Check that initial xmin metric match
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
+    aggregator.assert_metric('postgresql.relation.xmin', count=1, value=start_xmin, tags=expected_tags)
+    aggregator.reset()
+
+    # Run multiple DDL modifying the persons relation which will increase persons' xmin in pg_class
+    cursor.execute("ALTER TABLE persons REPLICA IDENTITY FULL;")
+    cursor.execute("ALTER TABLE persons REPLICA IDENTITY DEFAULT;")
+    cursor.close()
+    conn.close()
+
+    check.check(pg_instance)
+
+    # xmin metric should be greater than initial xmin
+    assert_metric_at_least(aggregator, 'postgresql.relation.xmin', lower_bound=start_xmin + 1, tags=expected_tags)
 
 
 @pytest.mark.integration

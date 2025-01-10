@@ -20,7 +20,7 @@ from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -103,10 +103,19 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 )
 @pytest.mark.parametrize("default_schema", [None, "testdb"])
 @pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
+@pytest.mark.parametrize("only_query_recent_statements", [False, True])
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics(
-    aggregator, dd_run_check, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    query,
+    default_schema,
+    datadog_agent,
+    aurora_replication_role,
+    only_query_recent_statements,
 ):
+    dbm_instance['query_metrics']['only_query_recent_statements'] = only_query_recent_statements
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -853,16 +862,23 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    return dbm_instance.get('tags', []) + [
+        'database_hostname:{}'.format('stubbed.hostname'),
+        'server:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    ]
 
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
 def _expected_dbm_job_err_tags(dbm_instance):
     return dbm_instance['tags'] + [
+        'database_hostname:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
+        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
     ]
 
 
