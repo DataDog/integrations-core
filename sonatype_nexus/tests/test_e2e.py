@@ -13,9 +13,9 @@ from .constants import E2E_METRICS
 def test_e2e(dd_agent_check, instance):
     aggregator = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     aggregator.gauge(
-        metric_name="sonatype_nexus.analytics.available_cpus_health",
-        value=1,
-        tags=[{"sonatype_host": "localhost", "host": "http://localhost:8081"}],
+        "sonatype_nexus.analytics.available_cpus_health",
+        1,
+        [{"sonatype_host": "localhost", "host": "http://localhost:8081"}],
     )
     for metric in E2E_METRICS:
         aggregator.gauge(metric)
