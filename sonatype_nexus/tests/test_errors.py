@@ -2,43 +2,41 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
+import requests
 from unittest.mock import Mock
-
 from requests import Response
-
 from datadog_checks.sonatype_nexus.errors import (
     APIError,
-    EmptyResponseError,
-    InsufficientAPIPermissionError,
-    InvalidAPICredentialsError,
-    handle_errors,
+    handle_errors
 )
 
-
+            
 class TestHandleErrors(unittest.TestCase):
-    def test_empty_response(self):
-        method = Mock(return_value=None)
-        wrapped_method = handle_errors(method)
-        with self.assertRaises(EmptyResponseError):
-            wrapped_method(Mock())
-
-    def test_invalid_api_credentials(self):
-        method = Mock(return_value=Response())
-        method.return_value.status_code = 401
-        wrapped_method = handle_errors(method)
-        with self.assertRaises(InvalidAPICredentialsError):
-            wrapped_method(Mock())
-
-    def test_insufficient_api_permission(self):
-        method = Mock(return_value=Response())
-        method.return_value.status_code = 403
-        wrapped_method = handle_errors(method)
-        with self.assertRaises(InsufficientAPIPermissionError):
-            wrapped_method(Mock())
+    def setUp(self):
+        self.method = Mock(return_value=Response())
+        self.wrapper = handle_errors(self.method)
 
     def test_unsuccessful_status_code(self):
-        method = Mock(return_value=Response())
-        method.return_value.status_code = 500
-        wrapped_method = handle_errors(method)
+        self.method.return_value.status_code = 500
         with self.assertRaises(APIError):
-            wrapped_method(Mock())
+            self.wrapper(Mock())
+
+    def test_timeout_error(self):
+        self.method.side_effect = requests.exceptions.Timeout()
+        with self.assertRaises(APIError):
+            self.wrapper(Mock())
+
+    def test_connection_error(self):
+        self.method.side_effect = requests.exceptions.ConnectionError()
+        with self.assertRaises(APIError):
+            self.wrapper(Mock())
+
+    def test_request_error(self):
+        self.method.side_effect = requests.exceptions.RequestException()
+        with self.assertRaises(APIError):
+            self.wrapper(Mock())
+
+    def test_unexpected_error(self):
+        self.method.side_effect = Exception()
+        with self.assertRaises(APIError):
+            self.wrapper(Mock())

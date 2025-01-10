@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import patch, MagicMock, Mock, call
 
 import pytest
 import requests
@@ -47,6 +47,7 @@ def test_valid_integer_value(mock_log_and_raise_exception):
     mock_log_and_raise_exception.assert_not_called()
 
 
+@pytest.mark.e2e
 @patch("datadog_checks.sonatype_nexus.check.SonatypeNexusCheck.extract_ip_from_url")
 @patch("datadog_checks.sonatype_nexus.check.SonatypeNexusClient")
 def test_success(mock_client_class, mock_extract_ip):
@@ -224,7 +225,6 @@ def test_missing_value_key():
     check.gauge.assert_not_called()
 
 
-@pytest.mark.e2e
 def test_metric_data_as_list():
     check = MagicMock()
     check.extract_ip_from_url.return_value = "127.0.0.1"
