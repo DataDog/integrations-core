@@ -159,6 +159,7 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
+    --without-libpsl \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
 
