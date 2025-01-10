@@ -31,6 +31,7 @@ build-agent-auto:
 
 build-agent-manual:
   extends: .build-agent-tpl
+  allow_failure: true
   rules:
     # By default we test with Agent's main branch.
     # From a release branch we want to use the same release branch in the agent repo.
