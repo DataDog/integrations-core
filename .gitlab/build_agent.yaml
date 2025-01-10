@@ -41,13 +41,3 @@ build-agent-manual:
       variables:
         _AGENT_BRANCH: ${CI_COMMIT_BRANCH}
     - when: manual
-
-validate-manual-build:
-  # We use this job to show the status of the pipeline in GitHub if we trigger the manual build.
-  # The build job itself is allowed to fail. If it succeeds, we're fine.
-  # If it fails, we trigger this job which can only fail and thus fail the whole pipeline because it's required.
-  stage: validate
-  needs:
-    - build-agent-manual
-  when: on_failure
-  script: "exit 1"
