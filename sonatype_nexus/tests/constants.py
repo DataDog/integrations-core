@@ -43,5 +43,5 @@ E2E_METRICS = [
     "sonatype_nexus.analytics.failed_unique_user_authentication_count",
     "sonatype_nexus.analytics.successful_unique_user_authentication_count",
     "sonatype_nexus.analytics.total_memory",
-    "sonatype_nexus.analytics.available_cpus"  
+    "sonatype_nexus.analytics.available_cpus",
 ]

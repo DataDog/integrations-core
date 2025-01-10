@@ -12,9 +12,9 @@ def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
 
     aggregator.assert_metric(
-        'sonatype_nexus.status.available_cpus_health', 
-        1, 
-        tags=[{"sonatype_host": "localhost", "host":"http://localhost:8081"}]
+        "sonatype_nexus.status.available_cpus_health",
+        1,
+        tags=[{"sonatype_host": "localhost", "host": "http://localhost:8081"}],
     )
     for metric in E2E_METRICS:
         aggregator.assert_metric(metric)
