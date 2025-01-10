@@ -59,6 +59,9 @@ class MetricTransformer:
         transformer_data = self.transformer_data.get(metric_name)
         if transformer_data is not None:
             metric_type, transformer = transformer_data
+            self.logger.debug(
+                "Get metric transformer data , met type: %s  transform_data: %s", metric_type, transformer
+            )
             if metric_type == DEFAULT_METRIC_TYPE and self.skip_native_metric(metric):
                 return
 

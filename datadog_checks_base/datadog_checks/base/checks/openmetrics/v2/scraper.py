@@ -199,7 +199,7 @@ class OpenMetricsScraper:
             self.static_tags.append(f'endpoint:{self.endpoint}')
 
         # These will be applied only to service checks
-        self.static_tags = tuple(self.static_tags)
+        self.static_tags = list(self.static_tags)
         # These will be applied to everything except service checks
         self.tags = self.static_tags
 
@@ -239,6 +239,7 @@ class OpenMetricsScraper:
         runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
 
         for metric in self.consume_metrics(runtime_data):
+            # self.log.debug("Scrape metric name is: %s", metric)
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
@@ -246,6 +247,13 @@ class OpenMetricsScraper:
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
         self.flush_first_value = True
+
+    def process_target_info(self, metric_sample):
+        """
+        Process target information from the given metric sample by extracting
+        and appending labels as tags.
+        """
+        self.tags.extend(f"{key}:{value}" for sample in metric_sample.samples for key, value in sample.labels.items())
 
     def consume_metrics(self, runtime_data):
         """
@@ -265,6 +273,10 @@ class OpenMetricsScraper:
                 self.submit_telemetry_number_of_ignored_metric_samples(metric)
                 continue
 
+            if metric.name == 'target_info':
+                self.process_target_info(metric)
+                continue
+
             yield metric
 
     def parse_metrics(self):
@@ -280,6 +292,7 @@ class OpenMetricsScraper:
         # side effect inside the `line_streamer` generator, we need to consume the first line in order to
         # trigger that side effect.
         try:
+            # self.log.debug("Line streamer gen item is : %s", line_streamer)
             line_streamer = chain([next(line_streamer)], line_streamer)
         except StopIteration:
             # If line_streamer is an empty iterator, next(line_streamer) fails.
@@ -287,7 +300,6 @@ class OpenMetricsScraper:
 
         for metric in self.parse_metric_families(line_streamer):
             self.submit_telemetry_number_of_total_metric_samples(metric)
-
             # It is critical that the prefix is removed immediately so that
             # all other configuration may reference the trimmed metric name
             if self.raw_metric_prefix and metric.name.startswith(self.raw_metric_prefix):
