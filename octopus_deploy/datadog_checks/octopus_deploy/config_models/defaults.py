@@ -24,6 +24,10 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_collect_events():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
