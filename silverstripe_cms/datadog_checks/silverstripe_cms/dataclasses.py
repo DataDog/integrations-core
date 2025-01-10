@@ -12,7 +12,9 @@ class TableConfig:
         # Validating dataclass members
         conditional_operators = ["AND", "OR"]
         if self.conditional_operator and self.conditional_operator not in conditional_operators:
-            raise ValueError(f"Conditional operator must be one of {conditional_operators}, got {self.conditional_operator}.")
+            raise ValueError(
+                f"Conditional operator must be one of {conditional_operators}, got {self.conditional_operator}."
+            )
 
         comparison_operators = ["=", "<", ">", "<=", ">=", "<>", "!="]
         for condition in self.conditions:
@@ -29,4 +31,6 @@ class TableConfig:
                 )
 
             if not isinstance(value, (str | int | float)):
-                raise ValueError(f"Condition value must be of type str, int, or float, got {type(value)} for {condition}.")
+                raise ValueError(
+                    f"Condition value must be of type str, int, or float, got {type(value)} for {condition}."
+                )

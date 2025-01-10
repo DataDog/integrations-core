@@ -7,12 +7,20 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from datadog_checks.base.errors import ConfigurationError
 
-from .constants import DB_CONNECTION_TIMEOUT_IN_SECONDS, LOG_TEMPLATE, MYSQL, MYSQL_DB_URL_PREFIX, POSTGRES_DB_URL_PREFIX
+from .constants import (
+    DB_CONNECTION_TIMEOUT_IN_SECONDS,
+    LOG_TEMPLATE,
+    MYSQL,
+    MYSQL_DB_URL_PREFIX,
+    POSTGRES_DB_URL_PREFIX,
+)
 from .dataclasses import TableConfig
 
 
 class DatabaseClient:
-    def __init__(self, db_type: str, db_name: str, db_host: str, db_port: int, db_username: str, db_password: str, logger):
+    def __init__(
+        self, db_type: str, db_name: str, db_host: str, db_port: int, db_username: str, db_password: str, logger
+    ):
         self.log = logger
         self.db_type = db_type
         self.db_host = db_host
@@ -40,9 +48,7 @@ class DatabaseClient:
             self.log.info(LOG_TEMPLATE.format(host=self.db_host, message=message))
 
         except SQLAlchemyError as db_err:
-            err_message = (
-                f"Authentication failed for provided credentials. Please check the provided credentials. | Error={db_err}."
-            )
+            err_message = f"Authentication failed for provided credentials. Please check the provided credentials. | Error={db_err}."
             self.log.error(LOG_TEMPLATE.format(host=self.db_host, message=err_message))
             raise ConfigurationError(err_message)
 
@@ -67,7 +73,9 @@ class DatabaseClient:
         )
         group_by_clause = f" GROUP BY {query_columns}"
 
-        query = f"SELECT {query_columns}, COUNT(*) as `RowCount` FROM `{table_config.name}`{where_clause}{group_by_clause}"
+        query = (
+            f"SELECT {query_columns}, COUNT(*) as `RowCount` FROM `{table_config.name}`{where_clause}{group_by_clause}"
+        )
         return self.convert_query_for_db(query)
 
     def convert_query_for_db(self, query: str) -> str:

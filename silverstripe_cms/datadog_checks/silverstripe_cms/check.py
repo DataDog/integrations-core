@@ -78,9 +78,7 @@ class SilverstripeCMSCheck(AgentCheck):
                 source_type=constants.AUTH_SOURCE_TYPE,
             )
         except Exception:
-            err_message = (
-                "Error occurred while authenticating the Silverstripe CMS credentials. Please check logs for more details."
-            )
+            err_message = "Error occurred while authenticating the Silverstripe CMS credentials. Please check logs for more details."
             self.ingest_service_check_and_event(
                 status=2,
                 tags=constants.AUTH_TAG,
@@ -197,7 +195,9 @@ class SilverstripeCMSCheck(AgentCheck):
     def ingest_query_result(self, query_result: CursorResult[Any], metric_name: str) -> None:
         """Extracts the query result to make it ready for ingestion as metrics."""
         try:
-            common_tags = [f"silverstripe_host:{self.database_server_ip}"] + (self.custom_tags if self.custom_tags else [])
+            common_tags = [f"silverstripe_host:{self.database_server_ip}"] + (
+                self.custom_tags if self.custom_tags else []
+            )
             column_names = query_result.keys()
             for row in query_result:
                 row_data = dict(zip(column_names, row, strict=False))
