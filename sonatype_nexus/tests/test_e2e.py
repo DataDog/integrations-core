@@ -12,13 +12,12 @@ from .constants import E2E_METRICS
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
-
-    aggregator.ingest_metric(
-        metric_name="sonatype_nexus.status.available_cpus_health",
+    aggregator.gauge(
+        metric_name="sonatype_nexus.analytics.available_cpus_health",
         value=1,
-        base_tag=[{"sonatype_host": "localhost", "host": "http://localhost:8081"}],
+        tags=[{"sonatype_host": "localhost", "host": "http://localhost:8081"}],
     )
     for metric in E2E_METRICS:
-        aggregator.ingest_metric(metric)
+        aggregator.gauge(metric)
     aggregator.assert_no_duplicate_all()
     aggregator.assert_all_metrics_covered()
