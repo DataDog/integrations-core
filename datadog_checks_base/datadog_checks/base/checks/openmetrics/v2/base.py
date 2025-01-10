@@ -110,13 +110,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         return {}
 
     def refresh_scrapers(self):
-        self.log.debug("Scrapersss is : %s", self.scrapers)
         for scraper, config in self.scrapers.items():
-            self.log.debug("Scraper is : %s, config is %s, tags are: %s", scraper, config.config, config.tags)
-            # config.tags = []
-            # del config.tags
+            config.tags = []
 
-        # pass
+
 
     @contextmanager
     def adopt_namespace(self, namespace):

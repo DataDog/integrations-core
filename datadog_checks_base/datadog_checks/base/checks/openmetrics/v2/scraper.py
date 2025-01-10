@@ -239,7 +239,6 @@ class OpenMetricsScraper:
         runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
 
         for metric in self.consume_metrics(runtime_data):
-            # self.log.debug("Scrape metric name is: %s", metric)
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
@@ -292,7 +291,6 @@ class OpenMetricsScraper:
         # side effect inside the `line_streamer` generator, we need to consume the first line in order to
         # trigger that side effect.
         try:
-            # self.log.debug("Line streamer gen item is : %s", line_streamer)
             line_streamer = chain([next(line_streamer)], line_streamer)
         except StopIteration:
             # If line_streamer is an empty iterator, next(line_streamer) fails.
