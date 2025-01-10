@@ -60,8 +60,7 @@ class MySqlIndexMetrics():
         return is_affirmative(self._config.options.get('index_metrics', True))
     @property
     def collection_interval(self) -> int:
-        # TODO ALLEN: change this to 300
-        return 60
+        return 300
     
     @property
     def queries(self):
