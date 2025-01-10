@@ -856,7 +856,13 @@ class AuthTokenOAuthReader(object):
 
             # https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
             self._token = response['access_token']
-            self._expiration = get_timestamp() + response['expires_in']
+            self._expiration = get_timestamp()
+            try:
+                # According to https://www.rfc-editor.org/rfc/rfc6749#section-5.1, the `expires_in` field is optional
+                token_expiration = response.get('expires_in', 0)
+                self._expiration += token_expiration
+            except TypeError:
+                self.logger.warning('OAuth2 included an `expires_in` value of unexpected type %s.', type(token_expiration))
 
             return self._token
 
