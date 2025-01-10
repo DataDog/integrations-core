@@ -6,7 +6,6 @@
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
-    "uninstallation": "README.md#Uninstallation",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into sonatype nexus analytics and instance health data.",

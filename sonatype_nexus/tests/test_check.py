@@ -224,6 +224,7 @@ def test_missing_value_key():
     check.gauge.assert_not_called()
 
 
+@pytest.mark.e2e
 def test_metric_data_as_list():
     check = MagicMock()
     check.extract_ip_from_url.return_value = "127.0.0.1"
