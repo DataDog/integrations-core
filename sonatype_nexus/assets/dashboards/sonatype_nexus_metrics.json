@@ -68,7 +68,7 @@
       "id": 6563141666851772,
       "definition": {
         "type": "note",
-        "content": "**Overview**\n\nThis dashboard provides insights into Sonatype Nexus repository performance, resource utilization, and activity trends. It tracks instance uptime, memory usage, repository statistics, blobstore metrics, and data transfers. and security metrics, including vulnerabilities and cleanup operations.\n\nFor more information, see the [Sonatype Nexus Integration Documentation](https://docs.datadoghq.com/integrations/sonatype_nexus/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n- Apply the Sonatype Nexus Host filter to focus on specific instance data.",
+        "content": "**Overview**\n\nThis dashboard provides insights into Sonatype Nexus repository performance, resource utilization, and activity trends. It tracks instance uptime, memory usage, repository statistics, blobstore metrics, data transfers, and security metrics, including vulnerabilities and cleanup operations.\n\nFor more information, see the [Sonatype Nexus Integration Documentation](https://docs.datadoghq.com/integrations/sonatype_nexus/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n- Apply the Sonatype Nexus Host filter to focus on specific instance data.",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
