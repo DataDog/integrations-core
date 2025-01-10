@@ -188,7 +188,7 @@
           "id": 2923359492917778,
           "definition": {
               "type": "note",
-              "content": "**Dashboard Overview**\n\nThe RingCentral Voice Dashboard offers an extensive view of RingCentral voice call metrics, providing crucial insights into call performance, usage, and associated costs. It serves as a vital tool for analyzing user behavior, detecting call patterns, and enhancing communication efficiency within the organization.\n\n[RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+              "content": "**Dashboard Overview**\n\nThe RingCentral Voice Dashboard offers an extensive view of RingCentral voice call metrics, providing crucial insights into call performance, usage, and associated costs. It serves as a vital tool for analyzing user behavior, detecting call patterns, and enhancing communication efficiency within the organization.\n\nFor more information, see the [RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -945,7 +945,7 @@
                   {
                       "id": 1144839007896174,
                       "definition": {
-                          "title": "Voice Call Volume Over Time",
+                          "title": "Voice Call Volume over Time",
                           "title_size": "16",
                           "title_align": "left",
                           "show_legend": false,
