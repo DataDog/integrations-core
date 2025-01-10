@@ -110,8 +110,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         return {}
 
     def refresh_scrapers(self):
-        for scraper, config in self.scrapers.items():
-            config.tags = []
+        pass
+
+
 
 
 
