@@ -468,15 +468,15 @@ class TestAuthTokenOAuth:
         ):
             with pytest.raises(Exception, match='OAuth2 client credentials grant error: unauthorized_client'):
                 http.get('https://www.google.com')
-    
+
     @pytest.mark.parametrize(
         'token_response',
         [
             pytest.param({'access_token': 'foo', 'expires_in': 9000}, id='With expires_in'),
             pytest.param({'access_token': 'foo'}, id='Without expires_in'),
             pytest.param({'access_token': 'foo', 'expires_in': 'two minutes'}, id='With string expires_in'),
-        ]
-        )
+        ],
+    )
     def test_success(self, token_response):
         instance = {
             'auth_token': {
