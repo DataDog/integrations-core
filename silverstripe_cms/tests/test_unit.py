@@ -1,6 +1,7 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -44,7 +45,10 @@ def test_validate_configurations_with_wrong_database_type(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
     # with wrong SS_DATABASE_TYPE field
-    err_message = f"'SS_DATABASE_TYPE' must be one of {constants.SUPPORTED_DATABASE_TYPES}. Please provide a valid SS_DATABASE_TYPE."
+    err_message = (
+        f"'SS_DATABASE_TYPE' must be one of {constants.SUPPORTED_DATABASE_TYPES}. "
+        "Please provide a valid SS_DATABASE_TYPE."
+    )
     with pytest.raises(ConfigurationError) as err:
         check.database_type = "Postgres"
         check.validate_configurations()

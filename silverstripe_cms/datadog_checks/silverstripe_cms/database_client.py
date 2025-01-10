@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from typing import Any
 from urllib.parse import quote_plus
 
@@ -48,7 +52,10 @@ class DatabaseClient:
             self.log.info(LOG_TEMPLATE.format(host=self.db_host, message=message))
 
         except SQLAlchemyError as db_err:
-            err_message = f"Authentication failed for provided credentials. Please check the provided credentials. | Error={db_err}."
+            err_message = (
+                f"Authentication failed for provided credentials. Please check the provided credentials."
+                f" | Error={db_err}."
+            )
             self.log.error(LOG_TEMPLATE.format(host=self.db_host, message=err_message))
             raise ConfigurationError(err_message)
 

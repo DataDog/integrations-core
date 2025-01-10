@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -78,7 +78,10 @@ class SilverstripeCMSCheck(AgentCheck):
                 source_type=constants.AUTH_SOURCE_TYPE,
             )
         except Exception:
-            err_message = "Error occurred while authenticating the Silverstripe CMS credentials. Please check logs for more details."
+            err_message = (
+                "Error occurred while authenticating the Silverstripe CMS credentials."
+                "Please check logs for more details."
+            )
             self.ingest_service_check_and_event(
                 status=2,
                 tags=constants.AUTH_TAG,

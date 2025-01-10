@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from dataclasses import dataclass, field
 
 
@@ -20,7 +24,8 @@ class TableConfig:
         for condition in self.conditions:
             if not isinstance(condition, tuple) or len(condition) != 3:
                 raise ValueError(
-                    f"Each condition must be a tuple of 3 elements: (field, comparison_operator, value), got {condition}"
+                    f"Each condition must be a tuple of 3 elements: (field, comparison_operator, value),"
+                    f" got {condition}"
                 )
 
             _, comparison_operator, value = condition
