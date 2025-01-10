@@ -73,7 +73,8 @@ class SonatypeNexusCheck(AgentCheck):
                 err_message = f"Empty value is not allowed in '{field_name}' field."
                 log_and_raise_exception(self, err_message, ValueError)
             if not (isinstance(value, str)):
-                err_message = f"Invalid value provided for {field_name} field. The value type should be string but found {type(value)}."
+                err_message = f"Invalid value provided for {field_name} field. "
+                f"The value type should be string but found {type(value)}."
                 log_and_raise_exception(self, err_message, ValueError)
 
         self.validate_minimum_collection_interval()

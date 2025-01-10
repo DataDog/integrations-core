@@ -70,7 +70,7 @@ class SonatypeNexusClient:
             except Exception as ex:
                 self.log.error("Error occurred while calling the Sonatype Nexus API: %s", ex)
                 wait_time = retry_wait * (2**attempt)  # Exponential backoff
-                self.log.warning(f"Retrying in {wait_time} seconds (attempt {attempt + 1}/{max_retries})")
+                self.log.warning("Retrying in %s seconds (attempt %s/%s)", wait_time, attempt + 1, max_retries)
                 time.sleep(wait_time)
 
         raise RuntimeError("Max retries exceeded")
