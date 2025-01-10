@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides an overview of your DuckDB metrics describing the systems behavior.\n\n**Useful Links**\n\n[DuckDB documentation](https://duckdb.org/docs/)\n\n[DuckDB Github](https://github.com/duckdb/duckdb)\n\n",
+    "description": "This dashboard provides an overview of your DuckDB metrics describing the systems behavior.\n\n**Useful Links**\n[DuckDB Datadog Docs](https://docs.datadoghq.com/integrations/duckdb/)\n\n[DuckDB documentation](https://duckdb.org/docs/)\n\n[DuckDB Github](https://github.com/duckdb/duckdb)\n\n",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -8,12 +8,6 @@
             "default": "*",
             "name": "db_name",
             "prefix": "db_name"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "host",
-            "prefix": "host"
         }
     ],
     "title": "DuckDB Overview",
@@ -34,7 +28,8 @@
                             "margin": "md",
                             "sizing": "contain",
                             "type": "image",
-                            "url": "https://static.datadoghq.com/static/images/logos/duckdb_small.svg",
+                            "url": "https://static.datadoghq.com/static/images/logos/duckdb_large.svg",
+                            "url_dark_theme": "https://static.datadoghq.com/static/images/logos/duckdb_large.svg",
                             "vertical_align": "center"
                         },
                         "id": 6432334130190000,
@@ -69,7 +64,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "# Useful Links\n\n[DuckDB documentation](https://duckdb.org/docs/)\n\n[DuckDB Github](https://github.com/duckdb/duckdb)\n\n",
+                            "content": "# Useful Links\n\n[DuckDB Datadog Docs](https://docs.datadoghq.com/integrations/duckdb/)\n\n[DuckDB documentation](https://duckdb.org/docs/)\n\n[DuckDB Github](https://github.com/duckdb/duckdb)\n\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,

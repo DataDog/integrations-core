@@ -48,7 +48,7 @@
     },
     "monitors": {
       "DuckDB number of CPU cores used is high": "assets/monitors/worker_thread.json",
-      "DuckDB Memory limit is high" : "assets/monitors/memory_limit.json"
+      "DuckDB Memory limit is high": "assets/monitors/memory_limit.json"
     }
   },
   "author": {
