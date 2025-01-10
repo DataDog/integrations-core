@@ -5,11 +5,12 @@
 import pytest
 
 from .constants import E2E_METRICS
+from datadog_checks.sonatype_nexus import SonatypeNexusCheck
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance)
+    aggregator = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
 
     aggregator.assert_metric(
         "sonatype_nexus.status.available_cpus_health",
