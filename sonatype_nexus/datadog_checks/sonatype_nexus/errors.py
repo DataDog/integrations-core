@@ -1,82 +1,78 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable
+from typing import Any
+
 import requests
 
 from . import constants
 
 
 class APIError(Exception):
-    message = "Unknown API error occurred."
+    default_message = "An unknown API error occurred."
 
-    def __init__(self, message=message, response=None):
+    def __init__(self, message: str = None, response: requests.Response = None):
         self.response = response
-        super().__init__(message)
+        super().__init__(message or self.default_message)
 
 
 class EmptyResponseError(APIError):
-    message = "Not received response object from API."
-
-    def __init__(self, message=message):
-        super().__init__(message)
+    default_message = "No response object received from the API."
 
 
 class InvalidAPICredentialsError(APIError):
-    message = "API Credentials are invalid."
-
-    def __init__(self, message=message):
-        super().__init__(message)
+    default_message = "Invalid API credentials provided."
 
 
 class InsufficientAPIPermissionError(APIError):
-    message = "API does not have sufficient permissions."
-
-    def __init__(self, message=message):
-        super().__init__(message)
+    default_message = "Insufficient permissions for the API request."
 
 
-def handle_errors(method):
-    def wrapper(self, *args, **kwargs):
-        err = None
-        err_msg = None
+def handle_errors(method: Callable) -> Callable:
+    def wrapper(self, *args: Any, **kwargs: Any) -> Any:
         try:
-            res = method(self, *args, **kwargs)
+            response = method(self, *args, **kwargs)
 
-            if res is None:
-                raise EmptyResponseError
+            if response is None:
+                raise EmptyResponseError()
 
-            elif res.status_code == 401:
-                raise InvalidAPICredentialsError
+            if response.status_code == 401:
+                raise InvalidAPICredentialsError()
 
-            elif res.status_code == 403:
-                raise InsufficientAPIPermissionError
+            if response.status_code == 403:
+                raise InsufficientAPIPermissionError()
 
-            elif res.status_code not in constants.SUCCESSFUL_STATUSCODE:
+            if response.status_code not in constants.SUCCESSFUL_STATUS_CODES:
                 raise APIError(
-                    f"Request to API server failed. URL: {res.url}."
-                    f"Status code: {res.status_code}. Response: {res.text}",
-                    res,
+                    message=(
+                        f"API request failed. URL: {response.url}. "
+                        f"Status code: {response.status_code}. Response: {response.text}"
+                    ),
+                    response=response,
                 )
 
-            return res
+            return response
 
         except requests.exceptions.Timeout as ex:
-            err_msg = "TimeoutError: Timeout while requesting data from Platform."
-            err = ex
+            self.log.error("TimeoutError: Timeout while requesting data from the API.")
+            raise APIError("Timeout while requesting data from the API.") from ex
 
         except requests.exceptions.ConnectionError as ex:
-            err_msg = "ConnectionError: Error while connecting."
-            err = ex
+            self.log.error("ConnectionError: Error while connecting to the API.")
+            raise APIError("Error while connecting to the API.") from ex
 
         except requests.exceptions.RequestException as ex:
-            err_msg = "RequestError: Error while fetching data."
-            err = ex
+            self.log.error("RequestError: General request error occurred.")
+            raise APIError("General request error occurred.") from ex
 
-        raise APIError(err_msg + f" Error: {err}")
+        except Exception as ex:
+            self.log.error("Unexpected error: %s", ex)
+            raise APIError("Unexpected error occurred.") from ex
 
     return wrapper
 
 
-def log_and_raise_exception(self, error_message: str, exception_type: type[Exception]):
+def log_and_raise_exception(self, error_message: str, exception_type: type[Exception]) -> None:
     self.log.error("%s | HOST=%s | MESSAGE=%s", constants.INTEGRATION_PREFIX, self.hostname, error_message)
     raise exception_type(error_message)

@@ -74,8 +74,7 @@ class SonatypeNexusCheck(AgentCheck):
                 log_and_raise_exception(self, err_message, ValueError)
             if not (isinstance(value, str)):
                 err_message = (
-                    f"Invalid value provided for {field_name} field."
-                    f"The value type should be string but found {type(value)}."
+                    f"Invalid value provided for {field_name} field. The value type should be string but found {type(value)}."
                 )
                 log_and_raise_exception(self, err_message, ValueError)
 

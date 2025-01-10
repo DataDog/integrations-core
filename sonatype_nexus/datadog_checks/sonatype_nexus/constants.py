@@ -26,10 +26,6 @@ AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".authentication_validation"
 
 # API Client Constants
 REQUEST_TIMEOUT = 30
-RETRY = 3
-BACKOFF_FACTOR = 3
-STATUS_FORCELIST = [429] + list(range(501, 600))
-ALLOWED_METHODS = ["GET"]
 
 METRIC_CONFIGS_BY_FORMAT_TYPE = {
     "analytics.uploaded_bytes_by_format": {
@@ -138,6 +134,11 @@ METRIC_CONFIGS = {
         "value_key": "successful_last_24h",
         "tag_key": [],
     },
+    "analytics.unique_user_count": {
+        "metric_key": "nexus.analytics.unique_user_count",
+        "value_key": "last_24h",
+        "tag_key": [],
+    },
     "analytics.total_memory": {
         "metric_key": "nexus.analytics.system_information",
         "value_key": "totalMemory",
@@ -169,4 +170,4 @@ STATUS_METRICS_MAP = {
     "Thread Deadlock Detector": "status.thread_deadlock_detector",
 }
 
-SUCCESSFUL_STATUSCODE = list(range(200, 299))
+SUCCESSFUL_STATUS_CODES = list(range(200, 299))
