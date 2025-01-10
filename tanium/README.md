@@ -21,8 +21,9 @@ This integration collects logs from the sources listed above and sends them to D
 3. Click **New API Token** and configure the token settings:
     - **Expiration**: Enter the expiration interval in days.
     - **Trusted IP addresses**: Enter the external IP addresses as `::/0,0.0.0.0/0` to enable any system to use the token.
-4. Click **Save** and copy the **token** for later use.
-5. The Tanium host format is **\<customer\>.cloud.tanium.com**. Replace **\<customer\>** with your organization's specific subdomain.
+4. Click on **Create**.
+5. Click on **Yes** and copy the **token** for later use.
+6. The Tanium host format is **\<customer\>.cloud.tanium.com**. Replace **\<customer\>** with your organization's specific subdomain.
 
 ### Connect your Tanium Account to Datadog
 
