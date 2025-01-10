@@ -4,8 +4,9 @@
 
 import pytest
 
-from .constants import E2E_METRICS
 from datadog_checks.sonatype_nexus import SonatypeNexusCheck
+
+from .constants import E2E_METRICS
 
 
 @pytest.mark.e2e
