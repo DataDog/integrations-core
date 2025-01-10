@@ -38,10 +38,17 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "duckdb"
+      ]
     },
     "dashboards": {
-        "Duckdb Overview": "assets/dashboards/duckdb_overview.json"
+      "DuckDB Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "DuckDB number of CPU cores used is high": "assets/monitors/worker_thread.json",
+      "DuckDB Memory limit is high": "assets/monitors/memory_limit.json"
     }
   },
   "author": {
