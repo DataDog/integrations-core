@@ -862,7 +862,7 @@ class AuthTokenOAuthReader(object):
                 token_expiration = response.get('expires_in', 0)
                 self._expiration += token_expiration
             except TypeError:
-                self.logger.warning('OAuth2 included an `expires_in` value of unexpected type %s.', type(token_expiration))
+                LOGGER.warning('OAuth2 included an `expires_in` value of unexpected type %s.', type(token_expiration))
 
             return self._token
 

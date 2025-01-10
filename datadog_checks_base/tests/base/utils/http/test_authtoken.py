@@ -468,8 +468,16 @@ class TestAuthTokenOAuth:
         ):
             with pytest.raises(Exception, match='OAuth2 client credentials grant error: unauthorized_client'):
                 http.get('https://www.google.com')
-
-    def test_success(self):
+    
+    @pytest.mark.parametrize(
+        'token_response',
+        [
+            pytest.param({'access_token': 'foo', 'expires_in': 9000}, id='With expires_in'),
+            pytest.param({'access_token': 'foo'}, id='Without expires_in'),
+            pytest.param({'access_token': 'foo', 'expires_in': 'two minutes'}, id='With string expires_in'),
+        ]
+        )
+    def test_success(self, token_response):
         instance = {
             'auth_token': {
                 'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
@@ -487,7 +495,7 @@ class TestAuthTokenOAuth:
                 pass
 
             def fetch_token(self, *args, **kwargs):
-                return {'access_token': 'foo', 'expires_in': 9000}
+                return token_response
 
         with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
             'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
