@@ -5,12 +5,9 @@ import unittest
 import requests
 from unittest.mock import Mock
 from requests import Response
-from datadog_checks.sonatype_nexus.errors import (
-    APIError,
-    handle_errors
-)
+from datadog_checks.sonatype_nexus.errors import APIError, handle_errors
 
-            
+
 class TestHandleErrors(unittest.TestCase):
     def setUp(self):
         self.method = Mock(return_value=Response())
