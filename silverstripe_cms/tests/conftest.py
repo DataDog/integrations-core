@@ -4,7 +4,6 @@
 
 import pytest
 
-
 INSTANCE = {
     "SS_DATABASE_TYPE": "PostgreSQL",
     "SS_DATABASE_NAME": "test_db",

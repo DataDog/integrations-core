@@ -4,7 +4,6 @@
 
 from .dataclasses import TableConfig
 
-
 # Field validation constants
 REQUIRED_STRING_FIELDS = [
     "SS_DATABASE_TYPE",
