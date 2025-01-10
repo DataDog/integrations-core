@@ -1,0 +1,55 @@
+name: Silverstripe CMS
+files:
+- name: silverstripe_cms.yaml
+  options:
+  - template: instances
+    options:
+    - name: SS_DATABASE_TYPE
+      required: true
+      description: "Silverstripe Database Type (MySQL or PostgreSQL)."
+      value:
+        type: string
+        example: "<DATABASE_TYPE>"
+    - name: SS_DATABASE_NAME
+      required: true
+      description: "Silverstripe Database Name."
+      value:
+        type: string
+        example: "<DATABASE_NAME>"
+    - name: SS_DATABASE_SERVER_IP
+      required: true
+      description: "Silverstripe Database Server IP."
+      value:
+        type: string
+        example: "<IP_ADDRESS>"
+    - name: SS_DATABASE_PORT
+      required: true
+      description: "Silverstripe Database Port."
+      value:
+        type: integer
+        minimum: 0
+        maximum: 65535
+        example: 5432
+    - name: SS_DATABASE_USERNAME
+      required: true
+      description: "Silverstripe Database Username."
+      value:
+        type: string
+        example: "<USERNAME>"
+    - name: SS_DATABASE_PASSWORD
+      required: true
+      description: "Silverstripe Database Password."
+      value:
+        type: string
+        example: "<PASSWORD>"
+    - template: instances/default
+      overrides:
+        min_collection_interval.required: true
+        min_collection_interval.value.example: 300
+        min_collection_interval.value.minimum: 1
+        min_collection_interval.value.maximum: 64800
+        service.hidden: true
+        empty_default_hostname.hidden: true
+        metric_patterns.hidden: true
+    
+

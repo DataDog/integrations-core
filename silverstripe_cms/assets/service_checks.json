@@ -1,0 +1,14 @@
+[
+    {
+        "agent_version": "7.60.1",
+        "integration": "silverstripe_cms",
+        "groups": [],
+        "check": "silverstripe_cms.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Silverstripe CMS Status",
+        "description": "Returns `CRITICAL` if the user configurations are invalid or Silverstripe CMS Database server authentication fails. Returns `OK` otherwise."
+    }
+]
