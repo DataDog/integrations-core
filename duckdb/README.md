@@ -2,14 +2,23 @@
 
 ## Overview
 
+DuckDB is a high-performance analytical database system. It is available as a standalone CLI application and has clients for Python, R, Java, Wasm, etc., with deep integrations with packages such as pandas and dplyr.
+
+For more information on using DuckDB, refer to the [DuckDB documentation][9].
+
 This check monitors [DuckDB][1] through the Datadog Agent. 
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
-
 ## Setup
+
+DuckDB has two configurable options for concurrency:
+
+- One process can both read and write to the database.
+- Multiple processes can read from the database, but no processes can write (access_mode = 'READ_ONLY').
+
+<div class="alert alert-warning">
+The Datadog Agent uses the <code>read_only</code> mode to get metrics, with a default frequency of 60 seconds (<code>min_collection_interval</code>). 
+You can increase this value to reduce concurrency issues.
+</div>
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -42,19 +51,17 @@ The DuckDB integration does not include any events.
 
 The DuckDB integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://docs.datadoghq.com/integrations/duckdb/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/duckdb/datadog_checks/duckdb/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/duckdb/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/duckdb/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/
+[9]: https://duckdb.org/docs/
