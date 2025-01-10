@@ -230,6 +230,7 @@
                             "title": "Top 10 Requested Domains",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -245,14 +246,13 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@requesteddomain",
+                                                    "facet": "@dns.question.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
+                                                    }
                                                 }
                                             ],
                                             "compute": {
@@ -300,6 +300,7 @@
                             "title": "Top 10 Applications",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -308,7 +309,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action -@application:\"\""
                                             },
                                             "indexes": [
                                                 "*"
@@ -519,6 +520,7 @@
                             "title": "User Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -544,7 +546,7 @@
                                                     "should_exclude_missing": true
                                                 },
                                                 {
-                                                    "facet": "@firstname",
+                                                    "facet": "@usr.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -902,6 +904,7 @@
                             "title": "Log details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -929,7 +932,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "requesteddomain",
+                                            "field": "dns.question.name",
                                             "width": "auto"
                                         },
                                         {
@@ -965,7 +968,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "firstname",
+                                            "field": "usr.name",
                                             "width": "auto"
                                         },
                                         {

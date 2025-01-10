@@ -28,15 +28,15 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      },
-      "dashboards": {
-        "Forcepoint Secure Web Gateway - Overview": "assets/dashboards/forcepoint_secure_web_gateway_overview.json",
-        "Forcepoint Secure Web Gateway - Web Logs": "assets/dashboards/forcepoint_secure_web_gateway_web_logs.json",
-        "Forcepoint Secure Web Gateway - Web DLP Logs": "assets/dashboards/forcepoint_secure_web_gateway_web_dlp_logs.json"
-      },
-      "logs":{
-        "source": "forcepoint-secure-web-gateway"
       }
+    },
+    "dashboards": {
+      "Forcepoint Secure Web Gateway - Overview": "assets/dashboards/forcepoint_secure_web_gateway_overview.json",
+      "Forcepoint Secure Web Gateway - Web Logs": "assets/dashboards/forcepoint_secure_web_gateway_web_logs.json",
+      "Forcepoint Secure Web Gateway - Web DLP Logs": "assets/dashboards/forcepoint_secure_web_gateway_web_dlp_logs.json"
+    },
+    "logs": {
+      "source": "forcepoint-secure-web-gateway"
     }
   },
   "author": {
