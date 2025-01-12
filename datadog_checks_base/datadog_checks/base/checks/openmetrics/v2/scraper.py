@@ -363,30 +363,23 @@ class OpenMetricsScraper:
         Extract target and related information from the payload using regex search
         on the entire payload and parse labels into "key:value" format inside a tuple.
         """
-        info_patterns = [
-            r"# HELP target.*",  # Matches HELP lines
-            r"# TYPE target.*",  # Matches TYPE lines
-            r"target_info.*",  # Matches target_info metric
-        ]
-
-        # Combine patterns into one for a single search
-        combined_pattern = re.compile("|".join(info_patterns))  # Logical OR of all patterns
-        matches = combined_pattern.findall(payload)
+        combined_pattern = re.compile(
+            r"# (?:HELP|TYPE) target.*|target_info\{(.*?)\}"
+        )  # Match HELP, TYPE, or target_info with labels
+        
+        matches = combined_pattern.finditer(payload)
         extracted_labels = []
-
+    
         for match in matches:
-            self.log.debug("Matching line: %s", match)
-            if "target_info{" in match:
-                label_pattern = r'{(.*?)}'
-                label_match = re.search(label_pattern, match)
-                if label_match:
-                    labels_content = label_match.group(1)
-                    key_value_pattern = r'(\w+)="([^"]*)"'
-                    labels = re.findall(key_value_pattern, labels_content)
-                    extracted_labels.extend(f"{key}:{value}" for key, value in labels)
-
-        labels_as_tuples = tuple(extracted_labels)
-        return labels_as_tuples
+            self.log.debug("Matching line: %s", match.group(0))
+            labels_content = match.group(1)
+            if labels_content:
+                # Extract key-value pairs from labels_content
+                key_value_pattern = re.compile(r'(\w+)="([^"]*)"')
+                labels = key_value_pattern.findall(labels_content)
+                extracted_labels.extend(f"{key}:{value}" for key, value in labels)
+    
+        return tuple(extracted_labels)
 
     def stream_connection_lines(self):
         """
