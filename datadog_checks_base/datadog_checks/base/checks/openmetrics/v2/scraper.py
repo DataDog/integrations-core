@@ -272,8 +272,9 @@ class OpenMetricsScraper:
         """
         Get the line streamer and yield processed metrics.
         """
-
-        line_streamer = self.stream_connection_lines()
+        raw_metric_payload = self.get_connection()
+        self.info_labels = self.extract_target_info(raw_metric_payload)
+        line_streamer = self.stream_connection_lines(raw_metric_payload)
         if self.raw_line_filter is not None:
             line_streamer = self.filter_connection_lines(line_streamer)
 
@@ -344,10 +345,7 @@ class OpenMetricsScraper:
                 continue
 
             tags.extend(self.tags)
-            self.log.debug("Self info labels is: %s", self.info_labels)
-            self.log.debug("Tags are: %s", tags)
-            for tag in self.info_labels:
-                tags.append(tag)
+            tags.extend(self.info_labels)
 
             hostname = ""
             if self.hostname_label and self.hostname_label in labels:
@@ -360,36 +358,28 @@ class OpenMetricsScraper:
 
     def extract_target_info(self, payload):
         """
-        Extract target and related information from the payload using regex search
-        on the entire payload and parse labels into "key:value" format inside a tuple.
+        Extract target_info information from the payload using regex search
+        on raw bytes and parse labels
         """
         combined_pattern = re.compile(
-            r"# (?:HELP|TYPE) target.*|target_info\{(.*?)\}"
-        )  # Match HELP, TYPE, or target_info with labels
-        
-        matches = combined_pattern.finditer(payload)
-        extracted_labels = []
-    
-        for match in matches:
-            self.log.debug("Matching line: %s", match.group(0))
-            labels_content = match.group(1)
-            if labels_content:
-                # Extract key-value pairs from labels_content
-                key_value_pattern = re.compile(r'(\w+)="([^"]*)"')
-                labels = key_value_pattern.findall(labels_content)
-                extracted_labels.extend(f"{key}:{value}" for key, value in labels)
-    
-        return tuple(extracted_labels)
+            rb"# (?:HELP|TYPE) target.*|target_info\{(.*?)\}"
+        )  # Match HELP, TYPE, or target_info with labels in bytes
 
-    def stream_connection_lines(self):
+        key_value_pattern = re.compile(rb'(\w+)="([^"]*)"')  # Match key-value pairs
+        extracted_labels = tuple(
+            f"{key.decode('utf-8')}:{value.decode('utf-8')}"
+            for match in combined_pattern.finditer(payload.content)
+            for key, value in key_value_pattern.findall(match.group(1) or b"")
+        )
+        return extracted_labels
+
+    def stream_connection_lines(self, payload):
         """
         Yield the connection lines.
         """
         try:
-            with self.get_connection() as connection:
-                info_labels = self.extract_target_info(connection.text)
-                self.log.debug("Info labels are: %s", info_labels)
-                self.info_labels = info_labels
+            # with self.get_connection() as connection:
+            with payload as connection:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
