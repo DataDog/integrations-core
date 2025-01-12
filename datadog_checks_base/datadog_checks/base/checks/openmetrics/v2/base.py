@@ -29,7 +29,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     """
 
-    DEFAULT_METRIC_LIMIT = 2000
+    DEFAULT_METRIC_LIMIT = 20000
 
     # Allow tracing for openmetrics integrations
     def __init_subclass__(cls, **kwargs):
@@ -111,10 +111,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     def refresh_scrapers(self):
         pass
-
-
-
-
 
     @contextmanager
     def adopt_namespace(self, namespace):

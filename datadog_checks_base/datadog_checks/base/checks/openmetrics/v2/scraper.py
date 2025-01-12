@@ -199,7 +199,7 @@ class OpenMetricsScraper:
             self.static_tags.append(f'endpoint:{self.endpoint}')
 
         # These will be applied only to service checks
-        self.static_tags = list(self.static_tags)
+        self.static_tags = tuple(self.static_tags)
         # These will be applied to everything except service checks
         self.tags = self.static_tags
 
@@ -246,13 +246,7 @@ class OpenMetricsScraper:
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
         self.flush_first_value = True
-
-    def process_target_info(self, metric_sample):
-        """
-        Process target information from the given metric sample by extracting
-        and appending labels as tags.
-        """
-        self.tags.extend(f"{key}:{value}" for sample in metric_sample.samples for key, value in sample.labels.items())
+        self.info_labels = []
 
     def consume_metrics(self, runtime_data):
         """
@@ -270,10 +264,6 @@ class OpenMetricsScraper:
                 self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
             ):
                 self.submit_telemetry_number_of_ignored_metric_samples(metric)
-                continue
-
-            if metric.name == 'target_info':
-                self.process_target_info(metric)
                 continue
 
             yield metric
@@ -354,6 +344,10 @@ class OpenMetricsScraper:
                 continue
 
             tags.extend(self.tags)
+            self.log.debug("Self info labels is: %s", self.info_labels)
+            self.log.debug("Tags are: %s", tags)
+            for tag in self.info_labels:
+                tags.append(tag)
 
             hostname = ""
             if self.hostname_label and self.hostname_label in labels:
@@ -364,14 +358,45 @@ class OpenMetricsScraper:
             self.submit_telemetry_number_of_processed_metric_samples()
             yield sample, tags, hostname
 
+    def extract_target_info(self, payload):
+        """
+        Extract target and related information from the payload using regex search
+        on the entire payload and parse labels into "key:value" format inside a tuple.
+        """
+        info_patterns = [
+            r"# HELP target.*",  # Matches HELP lines
+            r"# TYPE target.*",  # Matches TYPE lines
+            r"target_info.*",  # Matches target_info metric
+        ]
+
+        # Combine patterns into one for a single search
+        combined_pattern = re.compile("|".join(info_patterns))  # Logical OR of all patterns
+        matches = combined_pattern.findall(payload)
+        extracted_labels = []
+
+        for match in matches:
+            self.log.debug("Matching line: %s", match)
+            if "target_info{" in match:
+                label_pattern = r'{(.*?)}'
+                label_match = re.search(label_pattern, match)
+                if label_match:
+                    labels_content = label_match.group(1)
+                    key_value_pattern = r'(\w+)="([^"]*)"'
+                    labels = re.findall(key_value_pattern, labels_content)
+                    extracted_labels.extend(f"{key}:{value}" for key, value in labels)
+
+        labels_as_tuples = tuple(extracted_labels)
+        return labels_as_tuples
+
     def stream_connection_lines(self):
         """
-        Yield the connection line.
+        Yield the connection lines.
         """
-
         try:
             with self.get_connection() as connection:
-                # Media type will be used to select parser dynamically
+                info_labels = self.extract_target_info(connection.text)
+                self.log.debug("Info labels are: %s", info_labels)
+                self.info_labels = info_labels
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
