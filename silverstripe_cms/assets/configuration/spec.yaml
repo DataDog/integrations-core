@@ -1,4 +1,4 @@
-name: Silverstripe CMS
+name: silverstripe_cms
 files:
 - name: silverstripe_cms.yaml
   options:
