@@ -60,11 +60,11 @@ class MySqlIndexMetrics:
 
     @property
     def include_index_metrics(self) -> bool:
-        return is_affirmative(self._config.options.get('index_metrics', True))
+        return is_affirmative(self._config.index_config.get('enabled', True))
 
     @property
     def collection_interval(self) -> int:
-        return DEFAULT_INDEX_METRIC_COLLECTION_INTERVAL
+        return int(self._config.index_config.get('collection_interval', DEFAULT_INDEX_METRIC_COLLECTION_INTERVAL))
 
     @property
     def queries(self):

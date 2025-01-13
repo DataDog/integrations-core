@@ -339,7 +339,7 @@ files:
 
               - name: index_metrics
                 description: |
-                  Set to `true` to collect index metrics.
+                  Configure collection of index metrics.
                   Metrics provided by the options:
                     - mysql.index.size (per index)
                     - mysql.index.reads (per index)
@@ -348,11 +348,20 @@ files:
                   Note that some of these metrics require the `user` defined for this instance
                   to have SELECT privileges. Take a look at the
                   MySQL integration tile in the Datadog Web UI for further instructions.
-
-                value:
-                  type: boolean
-                  example: true
-
+                options:
+                  - name: enabled
+                    description: |
+                      Enable collection of index metrics.
+                    value:
+                      type: boolean
+                      example: true
+                  - name: collection_interval
+                    hidden: true
+                    description: |
+                      Set the index metrics collection interval (in seconds). Defaults to 5 minutes.
+                    value:
+                      type: number
+                      example: 300
               - name: extra_performance_metrics
                 description: |
                   These metrics are reported if `performance_schema` is enabled in the MySQL instance
