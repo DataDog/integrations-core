@@ -106,7 +106,6 @@ def test_initialize_db_client(instance):
     assert isinstance(check.db_client, DatabaseClient)
 
 
-# remaining
 @pytest.mark.integration
 @patch.object(DatabaseClient, "build_query")
 @patch.object(DatabaseClient, "execute_query")
@@ -123,6 +122,26 @@ def test_metrics_collection_and_ingestion(mock_ingest_query_result, mock_execute
     assert mock_build_query.call_count == table_config_mappings
     assert mock_execute_query.call_count == table_config_mappings + query_mappings
     assert mock_ingest_query_result.call_count == table_config_mappings + query_mappings
+
+
+@pytest.mark.e2e
+@patch.object(DatabaseClient, "create_connection")
+@patch.object(SilverstripeCMSCheck, "metrics_collection_and_ingestion")
+@patch.object(DatabaseClient, "close_connection")
+def test_check(
+    mock_close_connection,
+    mock_metrics_collection_and_ingestion,
+    mock_create_connection,
+    instance,
+):
+    check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
+    check.db_client.gauge = MagicMock()
+    check.check("")
+
+    assert mock_create_connection.assert_called()
+    assert mock_metrics_collection_and_ingestion.assert_called()
+    assert check.db_client.gauge.assert_called()
+    assert mock_close_connection.assert_called()
 
 
 @pytest.mark.integration
