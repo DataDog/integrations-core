@@ -562,6 +562,10 @@ coverage:
         target: 75
         flags:
         - silk
+      Silverstripe_CMS:
+        target: 75
+        flags:
+        - silverstripe_cms
       SingleStore:
         target: 75
         flags:
@@ -734,10 +738,6 @@ coverage:
         target: 75
         flags:
         - nvidia_nim
-      silverstripe_cms:
-        target: 75
-        flags:
-        - silverstripe_cms
       tibco_ems:
         target: 75
         flags:

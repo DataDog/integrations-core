@@ -1,4 +1,4 @@
-name: silverstripe_cms
+name: Silverstripe CMS
 files:
 - name: silverstripe_cms.yaml
   options:
@@ -51,5 +51,3 @@ files:
         service.hidden: true
         empty_default_hostname.hidden: true
         metric_patterns.hidden: true
-    
-
