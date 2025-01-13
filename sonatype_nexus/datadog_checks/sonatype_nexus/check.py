@@ -23,8 +23,8 @@ class SonatypeNexusCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-        self._username = self.instance.get("username")
-        self._password = self.instance.get("password")
+        self._username = self.instance.get("username", "").strip()
+        self._password = self.instance.get("password", "").strip()
         self._sonatype_nexus_server_url = self.instance.get("sonatype_nexus_server_url")
         self.min_collection_interval = self.instance.get("min_collection_interval")
         self.sonatype_nexus_client = SonatypeNexusClient(self)
@@ -73,9 +73,6 @@ class SonatypeNexusCheck(AgentCheck):
             if not (isinstance(value, str)):
                 err_message = f"Invalid value provided for {field_name} field. "
                 f"The value type should be string but found {type(value)}."
-                log_and_raise_exception(self, err_message, ValueError)
-            if value.strip() == "":
-                err_message = f"Empty value is not allowed in '{field_name}' field."
                 log_and_raise_exception(self, err_message, ValueError)
 
         self.validate_minimum_collection_interval()

@@ -3294,10 +3294,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j3835902:
+  j48ccb3f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: sonatype_nexus
+      job-name: Sonatype Nexus
       target: sonatype_nexus
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3312,7 +3312,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j529bc3b:
     uses: ./.github/workflows/test-target.yml
