@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "7.60.1",
-        "integration": "silverstripe_cms",
+        "integration": "Silverstripe CMS",
         "groups": [],
         "check": "silverstripe_cms.status",
         "statuses": [
