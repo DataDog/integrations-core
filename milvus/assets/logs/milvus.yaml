@@ -32,7 +32,7 @@ pipeline:
         - '[2024/11/18 15:15:45.120 +00:00] [INFO] [roles/roles.go:282] [setupPrometheusHTTPServer]'
       grok:
         supportRules: message_rule
-          \["?%{data:message.body}"?](\s+%{data:message.details:array("[]","] [")})?
+          \["?%{regex("[^]^\"]+"):message.body}"?](\s+%{data:message.details:array("[]","] [")})?
         matchRules: |
           rule1 \[%{date("yyyy/MM/dd HH:mm:ss.SSS ZZ"):date}]\s+\[%{word:level}\]\s+\[%{word:service}/%{notSpace:file}:%{word:lineno}\]\s+%{message_rule}
           rule2 %{regex("[IWE]"):level}%{date("yyyyMMdd HH:mm:ss.SSSSSS"):date}\s+%{number:pid}\s+%{notSpace:file}:%{word:lineno}]\s+%{data:message.details:array("[]","][")}\s+%{data:message.body}
