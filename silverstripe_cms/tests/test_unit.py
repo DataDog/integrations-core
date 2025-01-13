@@ -127,21 +127,22 @@ def test_metrics_collection_and_ingestion(mock_ingest_query_result, mock_execute
 @pytest.mark.e2e
 @patch.object(DatabaseClient, "create_connection")
 @patch.object(SilverstripeCMSCheck, "metrics_collection_and_ingestion")
+@patch.object(SilverstripeCMSCheck, "ingest_service_check_and_event")
 @patch.object(DatabaseClient, "close_connection")
-def test_check(
+def test_success(
     mock_close_connection,
+    mock_ingest_service_check_and_event,
     mock_metrics_collection_and_ingestion,
     mock_create_connection,
     instance,
 ):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
-    check.db_client.gauge = MagicMock()
     check.check("")
 
-    assert mock_create_connection.assert_called()
-    assert mock_metrics_collection_and_ingestion.assert_called()
-    assert check.db_client.gauge.assert_called()
-    assert mock_close_connection.assert_called()
+    assert mock_create_connection.call_count == 1
+    assert mock_metrics_collection_and_ingestion.call_count == 1
+    assert mock_ingest_service_check_and_event.call_count == 2
+    assert mock_close_connection.call_count == 1
 
 
 @pytest.mark.integration
