@@ -71,9 +71,6 @@ aerospike = ['Apache-2.0']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
 # https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
-# TODO: Remove once confluent-kafka license metadata is fixed:
-# https://github.com/confluentinc/confluent-kafka-python/issues/1857
-confluent-kafka = ['Apache-2.0']
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
