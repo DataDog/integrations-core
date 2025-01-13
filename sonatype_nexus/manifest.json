@@ -39,7 +39,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 34928997,
-      "source_type_name": "Sonatype Nexus",
+      "source_type_name": "sonatype_nexus",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

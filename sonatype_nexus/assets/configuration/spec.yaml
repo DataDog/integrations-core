@@ -1,4 +1,4 @@
-name: Sonatype Nexus
+name: sonatype_nexus
 files:
   - name: sonatype_nexus.yaml
     options:
