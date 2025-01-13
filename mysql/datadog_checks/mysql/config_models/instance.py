@@ -106,6 +106,7 @@ class Options(BaseModel):
     extra_performance_metrics: Optional[bool] = None
     extra_status_metrics: Optional[bool] = None
     galera_cluster: Optional[bool] = None
+    index_metrics: Optional[bool] = None
     replication: Optional[bool] = None
     replication_channel: Optional[str] = None
     replication_non_blocking_status: Optional[bool] = None
