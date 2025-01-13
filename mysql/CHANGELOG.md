@@ -8,7 +8,7 @@
 
 * Add `mysql.performance.performance_schema_digest_lost`, the number of digest instances that could not be instrumented in the `events_statements_summary_by_digest` table. ([#19121](https://github.com/DataDog/integrations-core/pull/19121))
 
-## 14.3.0 / 2024-11-28
+## 14.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 

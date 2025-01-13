@@ -8,7 +8,7 @@
 
 * Skip unauthorized `local` database collections `system.replset`, `replset.election`, and `replset.minvalid` in collection and index stats gathering to avoid permission errors. ([#19244](https://github.com/DataDog/integrations-core/pull/19244))
 
-## 8.3.0 / 2024-11-28
+## 8.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 
