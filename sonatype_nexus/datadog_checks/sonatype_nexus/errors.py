@@ -22,12 +22,33 @@ class EmptyResponseError(APIError):
 
 
 class InvalidAPICredentialsError(APIError):
-    default_message = "Invalid API credentials provided."
+    default_message = (
+        "Error occurred with provided Sonatype Nexus credentials."
+    )
 
 
 class InsufficientAPIPermissionError(APIError):
-    default_message = "Insufficient permissions for the API request."
+    default_message = (
+        "Insufficient permissions to call the Sonatype Nexus API."
+    )
 
+
+class BadRequestError(APIError):
+    default_message = (
+        "Bad request error occurred when calling the Sonatype Nexus API."
+    )
+
+
+class NotFoundError(APIError):
+    default_message = (
+        "Resource not found while calling the Sonatype Nexus API."
+    )
+
+
+class ServerError(APIError):
+    default_message = (
+        "Server Error occurred while calling the Sonatype Nexus API."
+    )
 
 def handle_errors(method: Callable) -> Callable:
     def wrapper(self, *args: Any, **kwargs: Any) -> Any:
@@ -37,11 +58,20 @@ def handle_errors(method: Callable) -> Callable:
             if response is None:
                 raise EmptyResponseError()
 
+            if response.status_code == 400:
+                raise BadRequestError()
+
             if response.status_code == 401:
                 raise InvalidAPICredentialsError()
 
             if response.status_code == 403:
                 raise InsufficientAPIPermissionError()
+
+            if response.status_code == 404:
+                raise NotFoundError()
+
+            if response.status_code in [500, 502, 503, 504]:
+                raise ServerError()
 
             if response.status_code not in constants.SUCCESSFUL_STATUS_CODES:
                 raise APIError(
@@ -65,6 +95,26 @@ def handle_errors(method: Callable) -> Callable:
         except requests.exceptions.RequestException as ex:
             self.log.error("RequestError: General request error occurred.")
             raise APIError("General request error occurred.") from ex
+
+        except InvalidAPICredentialsError as ex:
+            self.log.error("InvalidAPICredentialsError: %s", ex)
+            raise InvalidAPICredentialsError() from ex
+
+        except InsufficientAPIPermissionError as ex:
+            self.log.error("InsufficientAPIPermissionError: %s", ex)
+            raise InsufficientAPIPermissionError() from ex
+
+        except BadRequestError as ex:
+            self.log.error("BadRequestError: %s", ex)
+            raise BadRequestError() from ex
+
+        except NotFoundError as ex:
+            self.log.error("NotFoundError: %s", ex)
+            raise NotFoundError() from ex
+
+        except ServerError as ex:
+            self.log.error("ServerError: %s", ex)
+            raise ServerError() from ex
 
         except Exception as ex:
             self.log.error("Unexpected error: %s", ex)

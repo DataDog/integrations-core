@@ -9,7 +9,7 @@ from datadog_checks.sonatype_nexus.api_client import SonatypeNexusClient
 
 REQUEST_URL = 'requests.Session.get'
 URL = 'https://example.com'
-
+ACCEPT_HEADER = 'application/json'
 
 def test_call_sonatype_nexus_api_success():
     instance_check = MagicMock()
@@ -44,15 +44,15 @@ def test_session_headers():
     client = SonatypeNexusClient(instance_check)
     with patch('requests.Session') as mock_session:
         mock_session.return_value.headers.get.side_effect = lambda key: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
+            "Accept": ACCEPT_HEADER,
+            "Content-Type": ACCEPT_HEADER,
             "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'\
                 .encode()).decode('ascii')}",
         }.get(key)
         session = client.prepare_session()
         expected_headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
+            "Accept": ACCEPT_HEADER,
+            "Content-Type": ACCEPT_HEADER,
             "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'\
                 .encode()).decode('ascii')}",
         }

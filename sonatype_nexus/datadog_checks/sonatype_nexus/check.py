@@ -46,6 +46,7 @@ class SonatypeNexusCheck(AgentCheck):
                 "Error occurred while validating the provided configurations in conf.yaml file."
                 " Please check logs for more details."
             )
+            self.log.error("%s | HOST=%s | MESSAGE=%s", constants.INTEGRATION_PREFIX, self.hostname, err_message)
             self.ingest_service_check_and_event(
                 status=2,
                 tags=constants.CONF_VAL_TAG,
@@ -69,12 +70,12 @@ class SonatypeNexusCheck(AgentCheck):
             if value is None:
                 err_message = f"'{field_name}' field is required"
                 log_and_raise_exception(self, err_message, ConfigurationError)
-            if isinstance(value, str) and value.strip() == "":
-                err_message = f"Empty value is not allowed in '{field_name}' field."
-                log_and_raise_exception(self, err_message, ValueError)
             if not (isinstance(value, str)):
                 err_message = f"Invalid value provided for {field_name} field. "
                 f"The value type should be string but found {type(value)}."
+                log_and_raise_exception(self, err_message, ValueError)
+            if value.strip() == "":
+                err_message = f"Empty value is not allowed in '{field_name}' field."
                 log_and_raise_exception(self, err_message, ValueError)
 
         self.validate_minimum_collection_interval()
@@ -83,12 +84,13 @@ class SonatypeNexusCheck(AgentCheck):
         if self.min_collection_interval is None:
             err_message = "'min_collection_interval' field is required"
             log_and_raise_exception(self, err_message, ConfigValueError)
-        if self.min_collection_interval <= 60 or self.min_collection_interval > 64800:
+        if self.min_collection_interval < 300 or self.min_collection_interval > 64800:
             err_message = (
-                "'min_collection_interval' must be a positive integer value greater than 60 upto 64800,"
+                "'min_collection_interval' must be a positive integer value greater than or equal to 300 upto 64800,"
                 f" but found {self.min_collection_interval}."
             )
             log_and_raise_exception(self, err_message, ValueError)
+
         if not (isinstance(self.min_collection_interval, int)):
             err_message = (
                 "Invalid value provided for 'min_collection_interval' field. "
@@ -101,27 +103,35 @@ class SonatypeNexusCheck(AgentCheck):
         try:
             response_json = self.sonatype_nexus_client.call_sonatype_nexus_api(url).json()
         except requests.exceptions.JSONDecodeError as ex:
-            return {"message": "can't decode response to json", "error": str(ex)}
+            self.log.error("Can't decode API response to json, Error: %s", str(ex))
+            return {"message": "Can't decode API response to json", "error": str(ex)}
         for key, metric_name in constants.STATUS_METRICS_MAP.items():
-            self.gauge(
-                metric_name,
-                int(response_json[key]["healthy"]),
-                [f"sonatype_host:{self.extract_ip_from_url()}"],
-                hostname=None,
-            )
+            try:
+                self.gauge(
+                    metric_name,
+                    int(response_json[key]["healthy"]),
+                    [f"sonatype_host:{self.extract_ip_from_url()}"],
+                    hostname=None,
+                )
+            except KeyError as key:
+                raise KeyError(f"Expected key, '{key}' is not present in API response.") from None
 
     def generate_and_yield_analytics_metrics(self):
         url = f"{self._sonatype_nexus_server_url}{constants.ANALYTICS_ENDPOINT}"
         try:
             response_json = self.sonatype_nexus_client.call_sonatype_nexus_api(url).json()
         except requests.exceptions.JSONDecodeError as ex:
-            return {"message": "can't decode response to json", "error": str(ex)}
-        for metric_name, metric_info in constants.METRIC_CONFIGS.items():
-            metric_data = self.process_metrics(metric_info["metric_key"], response_json["gauges"])
-            self.create_metric_for_configs(metric_data, metric_name)
-        for metric_name, metric_info in constants.METRIC_CONFIGS_BY_FORMAT_TYPE.items():
-            metric_data = self.process_metrics(metric_info["metric_key"], response_json["gauges"])
-            self.create_metric_for_configs_by_format_type(metric_data["value"], metric_name, metric_info)
+            self.log.error("Can't decode API response to json, Error: %s", str(ex))
+            return {"message": "Can't decode API response to json", "error": str(ex)}
+        try:
+            for metric_name, metric_info in constants.METRIC_CONFIGS.items():
+                metric_data = self.process_metrics(metric_info["metric_key"], response_json["gauges"])
+                self.create_metric_for_configs(metric_data, metric_name)
+            for metric_name, metric_info in constants.METRIC_CONFIGS_BY_FORMAT_TYPE.items():
+                metric_data = self.process_metrics(metric_info["metric_key"], response_json["gauges"])
+                self.create_metric_for_configs_by_format_type(metric_data["value"], metric_name, metric_info)
+        except KeyError as key:
+                raise KeyError(f"Expected key, '{key}' is not present in API response.") from None
 
     def process_metrics(self, metric_key, response_json) -> dict:
         if metric_key in response_json:

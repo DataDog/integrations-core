@@ -41,9 +41,9 @@ def test_validate_minimum_collection_interval_called(
 @patch("datadog_checks.sonatype_nexus.check.log_and_raise_exception")
 def test_valid_integer_value(mock_log_and_raise_exception):
     check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
-    check.min_collection_interval = 120
+    check.min_collection_interval = 300
     check.validate_minimum_collection_interval()
-    assert check.min_collection_interval == 120
+    assert check.min_collection_interval == 300
     mock_log_and_raise_exception.assert_not_called()
 
 
@@ -81,7 +81,7 @@ def test_json_decode_error(mock_client_class):
     check.sonatype_nexus_client = mock_client
     result = check.generate_and_yield_status_metrics()
     assert result == {
-        "message": "can't decode response to json",
+        "message": "Can't decode API response to json",
         "error": "Test error: line 1 column 1 (char 0)",
     }
 

@@ -26,6 +26,9 @@ AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".authentication_validation"
 
 # API Client Constants
 REQUEST_TIMEOUT = 30
+MAX_RETRIES = 3
+BACKOFF_FACTOR = 2
+STATUS_FORCELIST = [429, 500, 502, 503, 504]
 
 METRIC_CONFIGS_BY_FORMAT_TYPE = {
     "analytics.uploaded_bytes_by_format": {
