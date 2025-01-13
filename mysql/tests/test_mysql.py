@@ -466,7 +466,6 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
 
 def _test_index_metrics(aggregator, index_metrics, metric_tags):
-    # operations = ["read", "delete", "update"]
     for mname in index_metrics:
         if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
             aggregator.assert_metric(

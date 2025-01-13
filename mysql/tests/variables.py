@@ -312,8 +312,6 @@ COMMON_PERFORMANCE_OPERATION_TIME_METRICS = ['performance_schema.threads']
 
 OPERATION_TIME_METRIC_NAME = 'dd.mysql.operation.time'
 
-TEMP_EXCLUDED_METRIC = 'dd.mysql.statement_metrics.events_statements_summary_by_digest.total_rows'
-
 E2E_OPERATION_TIME_METRIC_NAME = [
     'dd.mysql.operation.time.{}'.format(suffix) for suffix in ('avg', 'max', '95percentile', 'count', 'median')
 ]
