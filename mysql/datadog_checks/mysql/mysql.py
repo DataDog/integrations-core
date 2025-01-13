@@ -1190,68 +1190,6 @@ class MySql(AgentCheck):
 
         return {}
 
-    # def _query_index_size_per_index(self, db):
-    #     try:
-    #         with closing(db.cursor(CommenterCursor)) as cursor:
-    #             cursor.execute(SQL_QUERY_INDEX_SIZE)
-    #             if cursor.rowcount < 1:
-    #                 # TODO ALLEN: link to documentation
-    #                 self.warning("Failed to fetch records from the mysql 'innodb_index_stats' table.")
-    #                 return None
-    #             index_sizes = {}
-    #             for row in cursor.fetchall():
-    #                 db_name = str(row[0])
-    #                 table_name = str(row[1])
-    #                 index_name = str(row[2])
-    #                 index_size = float(row[3])
-
-    #                 # set the tag as the dictionary key
-    #                 index_sizes["db:{},table:{},index:{}".format(db_name, table_name, index_name)] = index_size
-    #             return index_sizes
-    #     except (pymysql.err.InternalError, pymysql.err.OperationalError):
-    #         self.warning(
-    #             "Failed to fetch records from the performance schema " "'table_io_waits_summary_by_index_usage' table."
-    #         )
-
-    #         return None
-
-    # def _query_index_usage(self, db):
-    #     try:
-    #         with closing(db.cursor(CommenterCursor)) as cursor:
-    #             cursor.execute(SQL_QUERY_INDEX_USAGE)
-    #             if cursor.rowcount < 1:
-    #                 self.warning(
-    #                     "Failed to fetch records from the performance schema "
-    #                     "'table_io_waits_summary_by_index_usage' table."
-    #                 )
-    #                 return None
-    #             index_usage = {}
-    #             for row in cursor.fetchall():
-    #                 db_name = str(row[0])
-    #                 table_name = str(row[1])
-    #                 index_name = str(row[2])
-    #                 count_read = int(row[3])
-    #                 count_update = int(row[4])
-    #                 count_delete = int(row[5])
-
-    #                 # set the tag as the dictionary key
-    #                 index_usage["db:{},table:{},index:{},operation:read".format(db_name, table_name, index_name)] = (
-    #                     count_read
-    #                 )
-    #                 index_usage["db:{},table:{},index:{},operation:update".format(db_name, table_name, index_name)] = (
-    #                     count_update
-    #                 )
-    #                 index_usage["db:{},table:{},index:{},operation:delete".format(db_name, table_name, index_name)] = (
-    #                     count_delete
-    #                 )
-    #                 self.warning("Allen! Found index usage: %s", index_usage)
-
-    #             return index_usage
-    #     except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-    #         self.warning("Index usage metrics unavailable at this time: %s", e)
-
-    #         return None
-
     def _query_size_per_table(self, db, system_tables=False):
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:

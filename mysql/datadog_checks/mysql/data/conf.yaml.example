@@ -340,6 +340,19 @@ instances:
         #
         # table_rows_stats_metrics: false
 
+        ## @param index_metrics - boolean - optional - default: true
+        ## Set to `true` to collect index metrics.
+        ## Metrics provided by the options:
+        ##   - mysql.index.size (per index)
+        ##   - mysql.index.reads (per index)
+        ##   - mysql.index.updates (per index)
+        ##   - mysql.index.deletes (per index)
+        ## Note that some of these metrics require the `user` defined for this instance
+        ## to have SELECT privileges. Take a look at the
+        ## MySQL integration tile in the Datadog Web UI for further instructions.
+        #
+        # index_metrics: true
+
         ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance
         ## and if the version for that instance is >= 5.6.0.

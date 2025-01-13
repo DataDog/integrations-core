@@ -318,7 +318,9 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
-        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS + variables.INDEX_USAGE_VARS)
+        testable_metrics.extend(
+            variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS + variables.INDEX_USAGE_VARS
+        )
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
         )
@@ -484,8 +486,7 @@ def _test_index_metrics(aggregator, index_metrics, metric_tags):
             )
             aggregator.assert_metric(
                 mname,
-                tags=metric_tags
-                + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
                 count=1,
             )
         if mname == 'mysql.index.size':

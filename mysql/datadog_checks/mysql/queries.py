@@ -212,6 +212,7 @@ QUERY_USER_CONNECTIONS = {
     ],
 }
 
+
 def show_replica_status_query(version, is_mariadb, channel=''):
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
         base_query = "SHOW REPLICA STATUS"

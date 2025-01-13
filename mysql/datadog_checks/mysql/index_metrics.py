@@ -7,7 +7,7 @@ from datadog_checks.base import is_affirmative
 QUERY_INDEX_SIZE = {
     'name': 'mysql.innodb_index_stats',
     'query': """
-        SELECT 
+        SELECT
             database_name,
             table_name,
             index_name,
@@ -24,7 +24,7 @@ QUERY_INDEX_SIZE = {
         {'name': 'index', 'type': 'tag'},
         {'name': 'mysql.index.size', 'type': 'gauge'},
     ],
-} 
+}
 QUERY_INDEX_USAGE = {
     'name': 'performance_schema.table_io_waits_summary_by_index_usage',
     'query': """
@@ -51,17 +51,19 @@ QUERY_INDEX_USAGE = {
     ],
 }
 
-class MySqlIndexMetrics():
+
+class MySqlIndexMetrics:
     def __init__(self, config):
         self._config = config
 
     @property
     def include_index_metrics(self) -> bool:
         return is_affirmative(self._config.options.get('index_metrics', True))
+
     @property
     def collection_interval(self) -> int:
         return 300
-    
+
     @property
     def queries(self):
         # make a copy of the query to avoid modifying the original
