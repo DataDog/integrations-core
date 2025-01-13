@@ -51,6 +51,7 @@ QUERY_INDEX_USAGE = {
     ],
 }
 
+DEFAULT_INDEX_METRIC_COLLECTION_INTERVAL = 300 # 5 minutes
 
 class MySqlIndexMetrics:
     def __init__(self, config):
@@ -62,7 +63,7 @@ class MySqlIndexMetrics:
 
     @property
     def collection_interval(self) -> int:
-        return 300
+        return DEFAULT_INDEX_METRIC_COLLECTION_INTERVAL
 
     @property
     def queries(self):
