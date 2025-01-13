@@ -67,6 +67,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class IndexMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -106,7 +115,6 @@ class Options(BaseModel):
     extra_performance_metrics: Optional[bool] = None
     extra_status_metrics: Optional[bool] = None
     galera_cluster: Optional[bool] = None
-    index_metrics: Optional[bool] = None
     replication: Optional[bool] = None
     replication_channel: Optional[str] = None
     replication_non_blocking_status: Optional[bool] = None
@@ -197,6 +205,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None
+    index_metrics: Optional[IndexMetrics] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     max_custom_queries: Optional[int] = None
