@@ -1,0 +1,5 @@
+id: forcepoint-security-service-edge
+tests:
+  - sample: '{"syslogheader":"<110>1 2024-12-27T07:19:17.887066Z api.hostserver.com NILVALUE NILVALUE cloudsummary","filename":"file_123.pdf","time":"27 Dec 2024 07:19:17","size":"233926","owner":"abc@xyz.io","application":"Cloud Apps","status":"Internal, Shared, DLP","folder":"/My Drive","fileid":"1fdf5e4f8e4f8er4e8re7e","patterns":"Encypted File (IsLocked: True), Document and PDF Files (FileMatchClassification: pdf)","filelink":"https://file_123.com","sharedwith":"","attachments":"","dlpmatchlocations":"","organization":"","originalfolder":"","originalpatterns":"","policyid":"","classifylabels":"","enterprisename":"","createdtime":"27 Dec 2024 06:18:35","modifiedtime":"26 Dec 2024 11:09:12"}'
+    service: "forcepoint-sse-cloudsummary"
+    result: null
