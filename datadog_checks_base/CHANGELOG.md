@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 37.3.0 / 2024-12-26
+## 37.3.0 / 2024-12-26 / Agent 7.61.0
 
 ***Security***:
 
@@ -35,7 +35,7 @@
 
 * Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
 
-## 37.0.0 / 2024-09-19 / Agent 7.58.0
+## 37.0.0 / 2024-09-19
 
 ***Removed***:
 
