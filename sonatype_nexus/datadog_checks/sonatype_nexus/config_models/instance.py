@@ -37,7 +37,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
-    min_collection_interval: float = Field(..., ge=600.0, le=64800.0)
+    min_collection_interval: float = Field(..., ge=300.0, le=64800.0)
     password: str
     service: Optional[str] = None
     sonatype_nexus_server_url: str
