@@ -7,11 +7,14 @@ import datetime
 import re
 import time
 
-from datadog_checks_base.datadog_checks.base.utils.db.utils import RateLimitingTTLCache
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
