@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-try:
-    from os import scandir
-except ImportError:
-    from scandir import scandir
+from os import scandir
 
 
 def walk(top, onerror=None, followlinks=False):
