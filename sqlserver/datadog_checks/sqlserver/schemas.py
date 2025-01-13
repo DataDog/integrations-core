@@ -74,7 +74,7 @@ class SubmitData:
                     db_name = db_name_lower
                 else:
                     self._log.debug(
-                        "Skipping db {} as it is not in the databases list {} and collation is case sensitive".format(
+                        "Skipping db {} as it is not in the databases list {} or collation is case sensitive".format(
                             db_name, dbs
                         )
                     )
