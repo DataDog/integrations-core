@@ -3312,7 +3312,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
-      setup-env-vars: "${{ inputs.setup-env-vars }}"
+      pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
   j529bc3b:
     uses: ./.github/workflows/test-target.yml
