@@ -3254,10 +3254,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdeebd5c:
+  j3fc8b4e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Silverstripe CMS
+      job-name: silverstripe_cms
       target: silverstripe_cms
       platform: linux
       runner: '["ubuntu-22.04"]'
