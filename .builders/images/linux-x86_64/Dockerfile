@@ -145,8 +145,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.9.1" \
- SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
+ VERSION="8.11.1" \
+ SHA256="a889ac9dbba3644271bd9d1302b5c22a088893719b72be3487bc3d401e5c4e80" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \
@@ -163,6 +163,7 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
+    --without-libpsl \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
 
