@@ -58,7 +58,8 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "java tomcat"
+        "java tomcat",
+        "java org.apache.catalina.startup.Bootstrap"
       ],
       "source_type_id": 43,
       "auto_install": true

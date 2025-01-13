@@ -131,6 +131,7 @@ class QueryMetrics(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    only_query_recent_statements: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):

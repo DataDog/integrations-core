@@ -13,6 +13,7 @@ confluent-kafka==2.6.1
 cryptography==43.0.1
 ddtrace==2.10.6
 dnspython==2.6.1
+duckdb==1.1.1
 foundationdb==6.3.24
 hazelcast-python-client==5.4.0
 importlib-metadata==2.1.3; python_version < '3.8'
@@ -46,7 +47,7 @@ pysmi==1.2.1
 pysnmp-mibs==0.1.6
 pysnmp==5.1.0
 pysocks==1.7.1
-python-binary-memcached==0.31.2; sys_platform != 'win32'
+python-binary-memcached==0.31.4; sys_platform != 'win32'
 python-dateutil==2.9.0.post0
 python3-gearman==0.1.0; sys_platform != 'win32'
 pyvmomi==8.0.3.0.1
