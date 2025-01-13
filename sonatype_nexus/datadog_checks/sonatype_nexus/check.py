@@ -131,7 +131,7 @@ class SonatypeNexusCheck(AgentCheck):
                 metric_data = self.process_metrics(metric_info["metric_key"], response_json["gauges"])
                 self.create_metric_for_configs_by_format_type(metric_data["value"], metric_name, metric_info)
         except KeyError as key:
-                raise KeyError(f"Expected key, '{key}' is not present in API response.") from None
+            raise KeyError(f"Expected key, '{key}' is not present in API response.") from None
 
     def process_metrics(self, metric_key, response_json) -> dict:
         if metric_key in response_json:

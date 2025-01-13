@@ -38,8 +38,7 @@ class SonatypeNexusClient:
                 )
             if response.status_code == 401:
                 err_message = (
-                    "Error occurred with provided Sonatype Nexus credentials. "
-                    "Please check logs for more details."
+                    "Error occurred with provided Sonatype Nexus credentials. Please check logs for more details."
                 )
                 self.instance_check.ingest_service_check_and_event(
                     status=2,
@@ -50,8 +49,7 @@ class SonatypeNexusClient:
                 )
             elif response.status_code == 403:
                 err_message = (
-                    "Insufficient permissions to call the Sonatype Nexus API. "
-                    "Please check logs for more details."
+                    "Insufficient permissions to call the Sonatype Nexus API. Please check logs for more details."
                 )
                 self.instance_check.ingest_service_check_and_event(
                     status=2,
@@ -64,7 +62,6 @@ class SonatypeNexusClient:
 
         except Exception as ex:
             self.log.error("Error occurred while calling the Sonatype Nexus API: %s", ex)
-
 
     def prepare_session(self) -> requests.Session:
         """Creates and returns a session object with retry mechanism."""

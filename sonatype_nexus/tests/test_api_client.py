@@ -11,6 +11,7 @@ REQUEST_URL = 'requests.Session.get'
 URL = 'https://example.com'
 ACCEPT_HEADER = 'application/json'
 
+
 def test_call_sonatype_nexus_api_success():
     instance_check = MagicMock()
     sonatype_nexus_client = SonatypeNexusClient(instance_check)

@@ -22,33 +22,24 @@ class EmptyResponseError(APIError):
 
 
 class InvalidAPICredentialsError(APIError):
-    default_message = (
-        "Error occurred with provided Sonatype Nexus credentials."
-    )
+    default_message = "Error occurred with provided Sonatype Nexus credentials."
 
 
 class InsufficientAPIPermissionError(APIError):
-    default_message = (
-        "Insufficient permissions to call the Sonatype Nexus API."
-    )
+    default_message = "Insufficient permissions to call the Sonatype Nexus API."
 
 
 class BadRequestError(APIError):
-    default_message = (
-        "Bad request error occurred when calling the Sonatype Nexus API."
-    )
+    default_message = "Bad request error occurred when calling the Sonatype Nexus API."
 
 
 class NotFoundError(APIError):
-    default_message = (
-        "Resource not found while calling the Sonatype Nexus API."
-    )
+    default_message = "Resource not found while calling the Sonatype Nexus API."
 
 
 class ServerError(APIError):
-    default_message = (
-        "Server Error occurred while calling the Sonatype Nexus API."
-    )
+    default_message = "Server Error occurred while calling the Sonatype Nexus API."
+
 
 def handle_errors(method: Callable) -> Callable:
     def wrapper(self, *args: Any, **kwargs: Any) -> Any:
