@@ -378,8 +378,8 @@ class OpenMetricsScraper:
         Yield the connection lines.
         """
         try:
-            # with self.get_connection() as connection:
             with payload as connection:
+                # Media type will be used to select parser dynamically
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line

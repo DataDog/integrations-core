@@ -6,10 +6,9 @@ from .utils import get_check
 
 
 def test_target_info_tags_propagation(aggregator, dd_run_check, mock_http_response):
-    # Initialize the check
+
     check = get_check({'metrics': ['.+']})
 
-    # Mock the HTTP response with target_info and another metric
     mock_http_response(
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -21,10 +20,8 @@ def test_target_info_tags_propagation(aggregator, dd_run_check, mock_http_respon
         """
     )
 
-    # Run the check
     dd_run_check(check)
 
-    # Assert that the tags from target_info are applied to the other metric
     aggregator.assert_metric(
         'test.go_memstats_alloc_bytes',
         value=6396288,
@@ -32,5 +29,4 @@ def test_target_info_tags_propagation(aggregator, dd_run_check, mock_http_respon
         metric_type=aggregator.GAUGE,
     )
 
-    # Assert all metrics are covered
     aggregator.assert_all_metrics_covered()
