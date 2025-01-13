@@ -107,6 +107,12 @@ class SQLServerConfig:
                 }
             )
         )
+        collect_raw_statement_config: dict = instance.get('collect_raw_statement', {}) or {}
+        self.collect_raw_statement = {
+            "enabled": is_affirmative(collect_raw_statement_config.get('enabled', False)),
+            "cache_max_size": int(collect_raw_statement_config.get('cache_max_size', 10000)),
+            "samples_per_hour_per_query": int(collect_raw_statement_config.get('samples_per_hour_per_query', 1)),
+        }
         self.log_unobfuscated_queries: bool = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans: bool = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)

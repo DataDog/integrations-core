@@ -842,6 +842,19 @@ files:
             type: boolean
             example: false
             display_default: false
+    - name: collect_raw_statement
+      hidden: true
+      description: |
+        Configure the collection of raw query statements in query activity and execution plans.
+        Note: This option only applies when `dbm` is enabled.
+      options:
+        - name: enabled
+          description: |
+            Set to `true` to collect the raw query statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: log_unobfuscated_queries
       hidden: true
       description: |
