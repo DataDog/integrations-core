@@ -7,12 +7,13 @@
 	"definition": {
 		"name": "High index build latency",
 		"type": "query alert",
-		"query": "sum(last_5m):sum:milvus.build_latency.sum{*}.as_count() > 0.3",
+		"query": "sum(last_5m):avg:milvus.build_latency.sum{*}.as_count() > 2",
 		"message": "{{#is_alert}}Index build latency has exceeded {{threshold}}.{{/is_alert}}\n{{#is_recovery}}Index build latency has returned to normal levels.{{/is_recovery}}",
 		"tags": ["integration:milvus"],
 		"options": {
 			"thresholds": {
-				"critical": 0.3
+				"critical": 2,
+				"warning": 1
 			},
 			"notify_audit": false,
 			"on_missing_data": "default",

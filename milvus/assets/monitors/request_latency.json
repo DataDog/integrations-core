@@ -7,7 +7,7 @@
 	"definition": {
 		"name": "Request latency is high",
 		"type": "query alert",
-		"query": "sum(last_5m):sum:milvus.proxy.req.latency.sum{*}.as_count() / sum:milvus.proxy.req.latency.count{*}.as_count() > 500",
+		"query": "sum(last_5m):avg:milvus.proxy.req.latency.sum{*}.as_count() > 500",
 		"message": "{{#is_alert}}Request latency exceeds {{threshold}} milliseconds.{{/is_alert}}\n{{#is_recovery}}Request latency has returned to acceptable levels.{{/is_recovery}}",
 		"tags": ["integration:milvus"],
 		"options": {
