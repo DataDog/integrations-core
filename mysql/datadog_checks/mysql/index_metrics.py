@@ -11,12 +11,11 @@ QUERY_INDEX_SIZE = {
             database_name,
             table_name,
             index_name,
-            ROUND(stat_value * @@innodb_page_size/1024/1024, 2) AS index_size_mb
+            stat_value * @@innodb_page_size AS index_size_bytes
         FROM
             mysql.innodb_index_stats
         WHERE
-            stat_name = 'size' AND
-            index_name != 'PRIMARY'
+            stat_name = 'size'
     """.strip(),
     'columns': [
         {'name': 'db', 'type': 'tag'},
@@ -37,9 +36,8 @@ QUERY_INDEX_USAGE = {
             count_delete
         FROM
             performance_schema.table_io_waits_summary_by_index_usage
-        WHERE index_name IS NOT NULL AND
-        index_name != 'PRIMARY' AND
-        object_schema NOT IN ('mysql', 'performance_schema')
+        WHERE index_name IS NOT NULL
+        AND object_schema NOT IN ('mysql', 'performance_schema')
     """.strip(),
     'columns': [
         {'name': 'db', 'type': 'tag'},
