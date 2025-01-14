@@ -98,29 +98,27 @@ class LabelAggregator:
                 metric_config = self.metric_config.copy()
                 target_info_metric = self.info_metric.copy()
                 cached_metrics = []
-        
+
                 for metric in metrics:
                     if metric_config and metric.name in metric_config:
                         self.collect(metric, metric_config.pop(metric.name))
-        
+
                     if target_info_metric and metric.name in target_info_metric:
                         self.collect(metric, target_info_metric.pop(metric.name))
-        
+
                     cached_metrics.append(metric)
-        
+
                     if not (metric_config or target_info_metric):
                         break
-        
+
                 yield from cached_metrics
                 yield from metrics
             finally:
                 self.label_sets.clear()
                 self.unconditional_labels.clear()
 
-
     def collect(self, metric, config):
         allowed_values = config.get('values')
-        self.logger.debug("Collect config is: %s", config)
 
         if 'match' in config:
             matching_labels = config['match']
@@ -138,7 +136,6 @@ class LabelAggregator:
                             shared_labels[label] = value
 
                     self.label_sets.append((label_set, shared_labels))
-                    self.logger.debug("Labelset is %s, shared labels is %s", label_set, shared_labels)
             else:
                 for sample in self.allowed_samples(metric, allowed_values):
                     label_set = set()
@@ -151,7 +148,6 @@ class LabelAggregator:
                         shared_labels[label] = value
 
                     self.label_sets.append((label_set, shared_labels))
-                    self.logger.debug("Labelset - else is %s, shared labels is %s", label_set, shared_labels)
         else:
             if 'labels' in config:
                 labels = config['labels']
@@ -169,9 +165,6 @@ class LabelAggregator:
         labels.update(self.unconditional_labels)
 
         for matching_label_set, shared_labels in self.label_sets:
-            self.logger.debug(
-                "self.label sets, matching label is %s, shared label is %s", matching_label_set, shared_labels
-            )
             # Check for subset without incurring the cost of a `.issubset` lookup and call
             if matching_label_set <= label_set:
                 labels.update(shared_labels)
