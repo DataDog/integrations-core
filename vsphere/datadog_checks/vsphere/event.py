@@ -145,7 +145,8 @@ class VSphereEvent(object):
                 md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
-        host_name = None
+        # workaround to send empty hostname
+        host_name = "AGENT_INT_EMPTY_HOSTNAME"
         entity_name = self.raw_event.entity.name
 
         # for backwards compatibility, vm host type is capitalized
@@ -178,8 +179,7 @@ class VSphereEvent(object):
             "vCenter monitor status changed on this alarm, "
             "it was {before} and it's now {after}.".format(before=trans_before, after=trans_after)
         )
-        if host_name is not None:
-            self.payload['host'] = host_name
+        self.payload['host'] = host_name
 
         # VMs and hosts submit these as host tags
         if self.host_type.lower() not in DEFAULT_EVENT_RESOURCES:
