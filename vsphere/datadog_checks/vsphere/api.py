@@ -470,9 +470,9 @@ class VSphereAPI(object):
             for host in cluster_reference.host:
                 for vm in host.vm:
                     cpuCount += vm.summary.config.numCpu
-            # TODO: get cost multiplier since cost = cpuCount * multiplier
             resource_metadata['class'] = 'standard'
-            resource_metadata['cost'] = cpuCount
+            # the price of VMware vSphere Standard is $1394 per CPU per year.
+            resource_metadata['cost'] = 1394 * cpuCount
             resource_metadata['num_hosts'] = len(cluster_reference.host)
             performance_metrics.append(discovered_metrics)
             to_resource_metadata.append(resource_metadata)
