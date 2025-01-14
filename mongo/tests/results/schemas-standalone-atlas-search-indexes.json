@@ -314,7 +314,24 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": "1"
+                            }
+                        ]
                     },
                     {
                         "name": "bar",
@@ -583,7 +600,24 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": "1"
+                            }
+                        ]
                     }
                 ]
             }
@@ -904,7 +938,24 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": "1"
+                            }
+                        ]
                     },
                     {
                         "name": "bar",
@@ -1173,7 +1224,24 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": "1"
+                            }
+                        ]
                     }
                 ]
             }
