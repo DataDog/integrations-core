@@ -85,13 +85,11 @@ class LabelAggregator:
             else:
                 metric_config = self.metric_config.copy()
                 target_info_metric = self.info_metric.copy()
-                self.logger.debug("Target info metric is: %s", target_info_metric)
 
                 for metric in metrics:
                     if metric_config and metric.name in metric_config:
                         self.collect(metric, metric_config.pop(metric.name))
                     if target_info_metric and metric.name in target_info_metric:
-                        # self.logger.debug("Metric is : %s, popped is %s", metric, metric.pop(metric.name) )
                         self.collect(metric, target_info_metric.pop(metric.name))
 
                     yield metric
@@ -108,18 +106,15 @@ class LabelAggregator:
                         self.collect(metric, metric_config.pop(metric.name))
 
                     if target_info_metric and metric.name in target_info_metric:
-                        #self.logger.debug("Metric is : %s, popped is %s", metric, target_info_metric.pop(metric.name))
                         self.collect(metric, target_info_metric.pop(metric.name))
 
                     cached_metrics.append(metric)
 
-                    #if not (metric_config or target_info_metric):
-                    #    break
+                    if not (metric_config or target_info_metric):
+                        break
 
                 yield from cached_metrics
                 yield from metrics
-            except Exception as exc:
-                self.logger.error("Call error %s", exc)
             finally:
                 self.label_sets.clear()
                 self.unconditional_labels.clear()
@@ -163,20 +158,15 @@ class LabelAggregator:
                         if label in labels:
                             self.unconditional_labels[label] = value
             else:
-                self.logger.debug("Else block")
                 for sample in self.allowed_samples(metric, allowed_values):
-                    self.logger.debug("Sample in allowed sample: %s", sample)
                     for label, value in sample.labels.items():
                         self.unconditional_labels[label] = value
 
     def populate(self, labels):
         label_set = frozenset(labels.items())
         labels.update(self.unconditional_labels)
-        self.logger.debug("Populate label set is: %s", label_set)
-        self.logger.debug("Populate uncon labels are: %s", self.unconditional_labels)
 
         for matching_label_set, shared_labels in self.label_sets:
-            self.logger.debug("matching label set: %s, shared label set: %s", matching_label_set, shared_labels)
             # Check for subset without incurring the cost of a `.issubset` lookup and call
             if matching_label_set <= label_set:
                 labels.update(shared_labels)

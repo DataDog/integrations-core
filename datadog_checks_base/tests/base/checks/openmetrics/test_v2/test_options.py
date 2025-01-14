@@ -754,9 +754,19 @@ class TestShareLabels:
         aggregator.assert_metric(
             'test.go_memstats_alloc_bytes',
             value=6396288,
+            tags=['endpoint:test', 'foo:bar'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes',
+            value=6396288,
             tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
             metric_type=aggregator.GAUGE,
         )
+
 
         aggregator.assert_all_metrics_covered()
 
