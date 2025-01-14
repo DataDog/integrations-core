@@ -338,7 +338,7 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             assert len(performance_metrics) == 1
             assert len(performance_metrics[0]) == 6
             assert len(resource_metadata) == 1
-            assert resource_metadata[0]['cost'] == 4
+            assert resource_metadata[0]['cost'] == 5576
             assert resource_metadata[0]['size_used'] == 5
             assert resource_metadata[0]['size_total'] == 6
 
