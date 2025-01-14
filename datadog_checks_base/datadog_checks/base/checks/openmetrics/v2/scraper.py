@@ -243,6 +243,7 @@ class OpenMetricsScraper:
             if transformer is None:
                 continue
 
+            self.log.debug("met in scrape is: %s", metric)
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
         self.flush_first_value = True
@@ -257,6 +258,7 @@ class OpenMetricsScraper:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
+            self.log.debug("scraper met parser: %s", metric_parser)
 
         for metric in metric_parser:
             if metric.name in self.exclude_metrics or (
@@ -324,6 +326,7 @@ class OpenMetricsScraper:
             tags = []
             skip_sample = False
             labels = sample.labels
+            self.log.debug("gen sample data met is %s", labels)
             self.label_aggregator.populate(labels)
             label_normalizer(labels)
 

@@ -103,6 +103,9 @@ class MetricTransformer:
 
     def skip_native_metric(self, metric):
         if metric.type == 'unknown':
+            # if metric.name == 'target_info':
+            #    metric.type = 'info'
+            #    return False
             self.logger.debug('Metric `%s` has no type, so you must define one in the `metrics` setting', metric.name)
             return True
         # We don't support all of the metric types:
@@ -183,6 +186,7 @@ NATIVE_TRANSFORMERS = {
     'gauge': transformers.get_gauge,
     'histogram': transformers.get_histogram,
     'summary': transformers.get_summary,
+    'info': transformers.get_info,
 }
 
 TRANSFORMERS = {

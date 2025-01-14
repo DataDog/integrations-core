@@ -681,6 +681,85 @@ class TestShareLabels:
 
         aggregator.assert_all_metrics_covered()
 
+    def test_target_info_tags_propagation(self, aggregator, dd_run_check, mock_http_response):
+
+        check = get_check({'metrics': ['.+'], 'target_info': True})
+
+        mock_http_response(
+            """  
+            # HELP target_info Target metadata   
+            # TYPE target_info info   
+            target_info{env="prod", region="europe"} 1.0  
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
+            # TYPE go_memstats_alloc_bytes gauge   
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06   
+ 
+            """
+        )
+
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes',
+            value=6396288,
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+    def test_target_info_tags_propagation_unordered(self, aggregator, dd_run_check, mock_http_response):
+
+        check = get_check({'metrics': ['.+'], 'target_info': True, 'cache_shared_labels': False })
+
+        mock_http_response(
+            """  
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
+            # TYPE go_memstats_alloc_bytes gauge   
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            # HELP target_info Target metadata   
+            # TYPE target_info info   
+            target_info{env="prod", region="europe"} 1.0   
+            """
+        )
+
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes',
+            value=6396288,
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+    def test_target_info_tags_propagation_unordered_w_cache(self, aggregator, dd_run_check, mock_http_response):
+
+        check = get_check({'metrics': ['.+'], 'target_info': True })
+
+        mock_http_response(
+            """  
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
+            # TYPE go_memstats_alloc_bytes gauge   
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            # HELP target_info Target metadata   
+            # TYPE target_info info   
+            target_info{env="prod", region="europe"} 1.0   
+            """
+        )
+
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes',
+            value=6396288,
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        aggregator.assert_all_metrics_covered()
+
 
 class TestIgnoreTags:
     def test_simple_match(self, aggregator, dd_run_check, mock_http_response):
@@ -742,3 +821,5 @@ class TestIgnoreTags:
         )
 
         aggregator.assert_all_metrics_covered()
+
+

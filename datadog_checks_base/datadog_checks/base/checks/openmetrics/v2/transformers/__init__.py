@@ -5,6 +5,7 @@ from .counter import get_counter
 from .counter_gauge import get_counter_gauge
 from .gauge import get_gauge
 from .histogram import get_histogram
+from .info import get_info
 from .metadata import get_metadata
 from .rate import get_rate
 from .service_check import get_service_check
