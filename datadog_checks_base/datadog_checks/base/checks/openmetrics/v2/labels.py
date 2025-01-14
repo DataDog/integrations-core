@@ -23,7 +23,6 @@ class LabelAggregator:
         self.info_metric = {'target_info': {}}
         self.metric_config = {}
         for metric, config in share_labels.items():
-            check.log.debug("Share label items, metrics is: %s, config is %s", metric, config)
             data = self.metric_config[metric] = {}
 
             if config is True:
