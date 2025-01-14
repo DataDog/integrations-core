@@ -43,6 +43,9 @@
       "process_signatures": [
         "milvus run standalone"
       ]
+    },
+    "dashboards": {
+      "Milvus Overview": "assets/dashboards/milvus_overview.json"
     }
   },
   "author": {
