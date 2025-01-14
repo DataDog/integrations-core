@@ -7,17 +7,23 @@ from ....utils.functions import no_op
 class LabelAggregator:
     def __init__(self, check, config):
         share_labels = config.get('share_labels', {})
+        self.target_info = config.get('target_info', False)
+
         if not isinstance(share_labels, dict):
             raise TypeError('Setting `share_labels` must be a mapping')
-        elif not share_labels:
+
+        if not isinstance(self.target_info, bool):
+            raise TypeError('Setting `target_info` must be a boolean')
+
+        if not share_labels and not self.target_info:
             self.populate = no_op
-            return
 
         self.cache_shared_labels = config.get('cache_shared_labels', True)
         self.shared_labels_cached = False
-
+        self.info_metric = {'target_info': {}}
         self.metric_config = {}
         for metric, config in share_labels.items():
+            check.log.debug("Share label items, metrics is: %s, config is %s", metric, config)
             data = self.metric_config[metric] = {}
 
             if config is True:
@@ -31,6 +37,7 @@ class LabelAggregator:
                     raise TypeError(f'Option `values` for metric `{metric}` of setting `share_labels` must be an array')
 
                 allowed_values = set()
+
                 for i, value in enumerate(values, 1):
                     value = str(value)
 
@@ -73,43 +80,41 @@ class LabelAggregator:
         self.unconditional_labels = {}
 
     def __call__(self, metrics):
-        if self.cache_shared_labels:
-            if self.shared_labels_cached:
-                yield from metrics
-            else:
-                metric_config = self.metric_config.copy()
+        if self.cache_shared_labels or self.target_info:
 
-                for metric in metrics:
-                    if metric_config and metric.name in metric_config:
-                        self.collect(metric, metric_config.pop(metric.name))
-
-                    yield metric
-
-                self.shared_labels_cached = True
-        else:
             try:
-                metric_config = self.metric_config.copy()
-
-                # Cache every encountered metric until the desired labels have been collected
+                shared_metric_config = self.metric_config.copy() if self.cache_shared_labels else None
+                target_metric_config = self.info_metric.copy() if self.target_info else None
                 cached_metrics = []
 
                 for metric in metrics:
-                    if metric.name in metric_config:
-                        self.collect(metric, metric_config.pop(metric.name))
+
+                    if shared_metric_config and metric.name in shared_metric_config:
+                        self.collect(metric, shared_metric_config.pop(metric.name))
+
+                    if target_metric_config and metric.name in target_metric_config:
+                        self.collect(metric, target_metric_config.pop(metric.name))
 
                     cached_metrics.append(metric)
 
-                    if not metric_config:
+                    if not (shared_metric_config or target_metric_config):
                         break
 
                 yield from cached_metrics
                 yield from metrics
+
+                if self.cache_shared_labels:
+                    self.shared_labels_cached = True
+
             finally:
                 self.label_sets.clear()
                 self.unconditional_labels.clear()
+        else:
+            yield from metrics
 
     def collect(self, metric, config):
         allowed_values = config.get('values')
+        self.logger.debug("Collect config is: %s", config)
 
         if 'match' in config:
             matching_labels = config['match']
@@ -127,6 +132,7 @@ class LabelAggregator:
                             shared_labels[label] = value
 
                     self.label_sets.append((label_set, shared_labels))
+                    self.logger.debug("Labelset is %s, shared labels is %s", label_set, shared_labels)
             else:
                 for sample in self.allowed_samples(metric, allowed_values):
                     label_set = set()
@@ -139,6 +145,7 @@ class LabelAggregator:
                         shared_labels[label] = value
 
                     self.label_sets.append((label_set, shared_labels))
+                    self.logger.debug("Labelset - else is %s, shared labels is %s", label_set, shared_labels)
         else:
             if 'labels' in config:
                 labels = config['labels']
@@ -156,6 +163,9 @@ class LabelAggregator:
         labels.update(self.unconditional_labels)
 
         for matching_label_set, shared_labels in self.label_sets:
+            self.logger.debug(
+                "self.label sets, matching label is %s, shared label is %s", matching_label_set, shared_labels
+            )
             # Check for subset without incurring the cost of a `.issubset` lookup and call
             if matching_label_set <= label_set:
                 labels.update(shared_labels)
