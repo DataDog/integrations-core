@@ -94,7 +94,7 @@ class DockerAgent(AgentInterface):
         from ddev.e2e.agent.constants import AgentEnvVars
 
         if not agent_build:
-            agent_build = 'datadog/agent-dev:6-53-1-rc-5-py2py3-jmx''
+            agent_build = 'datadog/agent-dev:6-53-1-rc-5-py2py3-jmx'
 
         if agent_build.startswith("datadog/"):
             # Add a potentially missing `py` suffix for default non-RC builds
