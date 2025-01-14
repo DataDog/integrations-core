@@ -23,8 +23,9 @@ from .constants import (
 
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
+    EMPTY_HOSTNAME = "AGENT_INT_EMPTY_HOSTNAME"
 
-    def __init__(self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS):
+    def __init__(self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS, hostname=None):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]
@@ -44,6 +45,7 @@ class VSphereEvent(object):
             self.event_config = event_config
         self.exclude_filters = exclude_filters
         self.event_resource_filters = event_resource_filters
+        self.hostname = hostname
 
     def _is_filtered(self):
         # Filter the unwanted types
@@ -146,7 +148,10 @@ class VSphereEvent(object):
             )
 
         # workaround to send empty hostname
-        host_name = "AGENT_INT_EMPTY_HOSTNAME"
+        if self.hostname is None:
+            host_name = VSphereEvent.EMPTY_HOSTNAME
+        else:
+            host_name = self.hostname
         entity_name = self.raw_event.entity.name
 
         # for backwards compatibility, vm host type is capitalized

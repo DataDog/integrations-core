@@ -586,12 +586,20 @@ def test_vsan_event_include_events_filter_set(aggregator, realtime_instance, dd_
     dd_run_check(check)
     assert len(aggregator.events) == 1
 
-
+@pytest.mark.parametrize(
+    'empty_default_hostname, event_hostname',
+    [
+        (True, "AGENT_INT_EMPTY_HOSTNAME"),
+        (False, "stubbed.hostname"),
+    ],
+)
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_empty_hostname_for_events(
-    aggregator, realtime_instance, dd_run_check, mock_api
+    aggregator, realtime_instance, dd_run_check, mock_api, empty_default_hostname, event_hostname
 ):
     realtime_instance['event_resource_filters'] = ['datacenter', 'cluster', 'datastore']
+    realtime_instance['empty_default_hostname'] = empty_default_hostname
+
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     time1 = dt.datetime.now()
     event4 = vim.event.AlarmStatusChangedEvent()
@@ -613,4 +621,4 @@ def test_empty_hostname_for_events(
         tags=['vsphere_type:cluster', 'vsphere_resource:c1', 'vcenter_server:FAKE'], count=1,
     )
     assert len(aggregator.events) == 1
-    assert aggregator.events[0]['host'] == "AGENT_INT_EMPTY_HOSTNAME"
+    assert aggregator.events[0]['host'] == event_hostname
