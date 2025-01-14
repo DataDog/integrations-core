@@ -43,7 +43,7 @@ DEFAULT_CONFIG = {
         'integrations-internal-core': os.path.join('~', 'dd', 'integrations-internal-core'),
     },
     'agents': {
-        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+        'master': {'docker': 'datadog/agent-dev:6-53-1-rc-5-py2py3-jmx', 'local': 'latest'},
         '7': {'docker': 'datadog/agent:7', 'local': '7'},
         '6': {'docker': 'datadog/agent:6', 'local': '6'},
     },
