@@ -49,7 +49,7 @@ instances:
     ## Octopus API endpoint.
     ## See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
     #
-  - octopus_endpoint: http://localhost:80/api
+  - octopus_endpoint: http://localhost:80
 
     ## @param environments - mapping - optional
     ## Optional configuration to indicate the environments that we want to be processed. If not configured,

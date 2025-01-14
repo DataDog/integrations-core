@@ -14,7 +14,7 @@ files:
         Octopus API endpoint.
         See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
       value:
-        example: http://localhost:80/api
+        example: http://localhost:80
         type: string
       required: true
     - name: spaces

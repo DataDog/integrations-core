@@ -15,9 +15,18 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `octopus_deploy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `octopus_deploy` performance data. See the [sample `octopus_deploy.d/conf.yaml`][4] for all available configuration options.
+1. Create an [API key][10] on your Octopus Server.
 
-2. [Restart the Agent][5].
+2. Edit the `octopus_deploy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `octopus_deploy` performance data. See the [sample `octopus_deploy.d/conf.yaml`][4] for all available configuration options. Limit the amount of projects you collect data for by using the `projects` configuration options:
+
+    ```
+    projects:
+        limit: 10
+        include:
+        - 'project.*'
+    ```
+
+3. [Restart the Agent][5].
 
 ### Validation
 
@@ -51,3 +60,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/octopus_deploy/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/octopus_deploy/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://octopus.com/docs/octopus-rest-api/how-to-create-an-api-key
