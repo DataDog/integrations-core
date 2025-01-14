@@ -25,7 +25,9 @@ class VSphereEvent(object):
     UNKNOWN = 'unknown'
     EMPTY_HOSTNAME = "AGENT_INT_EMPTY_HOSTNAME"
 
-    def __init__(self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS, hostname=None):
+    def __init__(
+        self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS, hostname=None
+    ):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]

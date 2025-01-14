@@ -586,6 +586,7 @@ def test_vsan_event_include_events_filter_set(aggregator, realtime_instance, dd_
     dd_run_check(check)
     assert len(aggregator.events) == 1
 
+
 @pytest.mark.parametrize(
     'empty_default_hostname, event_hostname',
     [
@@ -618,7 +619,8 @@ def test_empty_hostname_for_events(
     dd_run_check(check)
     aggregator.assert_event(
         "vCenter monitor status changed on this alarm, it was red and it's now green.",
-        tags=['vsphere_type:cluster', 'vsphere_resource:c1', 'vcenter_server:FAKE'], count=1,
+        tags=['vsphere_type:cluster', 'vsphere_resource:c1', 'vcenter_server:FAKE'],
+        count=1,
     )
     assert len(aggregator.events) == 1
     assert aggregator.events[0]['host'] == event_hostname
