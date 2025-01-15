@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-from .const import SERVICE_CHECK_HTTP
-
 from datadog_checks.base import AgentCheck  # noqa: F401
+
+from .const import SERVICE_CHECK_HTTP
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout

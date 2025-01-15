@@ -39,6 +39,7 @@ def instance_fips():
         'http_endpoint': 'https://localhost:8443',
     }
 
+
 @pytest.fixture(scope='session')
 def instance_non_fips():
     return {
