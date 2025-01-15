@@ -264,7 +264,6 @@ class OpenMetricsScraper:
             ):
                 self.submit_telemetry_number_of_ignored_metric_samples(metric)
                 continue
-            self.log.debug("Metric Sample is: %s", metric)
             yield metric
 
     def parse_metrics(self):
