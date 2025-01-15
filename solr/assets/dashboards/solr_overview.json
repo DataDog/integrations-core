@@ -1,0 +1,550 @@
+{
+  "title": "Solr Overview",
+  "description": null,
+  "widgets": [
+    {
+      "id": 5839594427169188,
+      "definition": {
+        "title": "About",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7813738969422456,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/solr_large.svg",
+              "url_dark_theme": "/static/images/logos/solr_reversed_large.svg",
+              "sizing": "contain",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 8275709391307166,
+            "definition": {
+              "type": "note",
+              "content": "# Solr\n\nThis dashboard provides observability for your Solr clusters, showing key metrics about their usage and performance. \n\nIt includes insights into query execution, cache efficiency, and system performance.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8026233038883102,
+            "definition": {
+              "type": "note",
+              "content": "# Useful Links\n\n[Solr Integration](https://docs.datadoghq.com/integrations/solr/?tab=host)\n\n[Solr Documentation](https://solr.apache.org/resources.html#documentation)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      }
+    },
+    {
+      "id": 2065208102873204,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5686001390167022,
+            "definition": {
+              "type": "note",
+              "content": "This overview gives a summary of the most important metrics.",
+              "background_color": "orange",
+              "font_size": "18",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
+          },
+          {
+            "id": 5241490851849614,
+            "definition": {
+              "title": "Number of documents",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.searcher.numdocs{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 1,
+              "height": 1
+            }
+          },
+          {
+            "id": 8347592912294778,
+            "definition": {
+              "title": "Solr errors and timeouts rate (per sec)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:solr.search_handler.errors{*}"
+                    }
+                  ]
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:solr.search_handler.timeouts{*}"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 1,
+              "y": 1,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7283983404028754,
+            "definition": {
+              "title": "Solr average requests rate (per sec)",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.search_handler.request_times.mean_rate{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 1,
+              "height": 1
+            }
+          },
+          {
+            "id": 2946360776437250,
+            "definition": {
+              "title": "Solr average time per request (in sec)",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.search_handler.request_times.mean{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 1,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      }
+    },
+    {
+      "id": 1514240745675868,
+      "definition": {
+        "title": "Documents",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2219191241660992,
+            "definition": {
+              "type": "note",
+              "content": "Monitor the evolution of the number of documents and the efficiency of the cache.",
+              "background_color": "orange",
+              "font_size": "18",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
+          },
+          {
+            "id": 4904849068199634,
+            "definition": {
+              "title": "Number of documents",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.searcher.numdocs{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 7206949656453200,
+            "definition": {
+              "title": "Solr document cache stats (per sec)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:solr.document_cache.lookups{*}"
+                    }
+                  ]
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:solr.document_cache.hits{*}"
+                    }
+                  ]
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:solr.document_cache.inserts{*}"
+                    }
+                  ]
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:solr.document_cache.evictions{*}"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      }
+    },
+    {
+      "id": 2517263656498788,
+      "definition": {
+        "title": "Requests",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4880172693694784,
+            "definition": {
+              "type": "note",
+              "content": "Gain insight into your cluster's performance by tracking request rates and processing time.",
+              "background_color": "orange",
+              "font_size": "18",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 1
+            }
+          },
+          {
+            "id": 6414903660368862,
+            "definition": {
+              "title": "Solr average requests rate (per sec)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.search_handler.request_times.mean_rate{*}"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7709694466677694,
+            "definition": {
+              "title": "Solr requests processing time percentiles",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.search_handler.request_times.50percentile{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:solr.search_handler.request_times.75percentile{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:solr.search_handler.request_times.90percentile{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:solr.search_handler.request_times.95percentile{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "avg:solr.search_handler.request_times.99percentile{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "avg:solr.search_handler.request_times.999percentile{*}"
+                    }
+                  ],
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 5283178048223442,
+            "definition": {
+              "title": "Solr average time per request (in sec)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:solr.search_handler.request_times.mean{*}"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 7
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
