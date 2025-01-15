@@ -412,7 +412,6 @@ def test_load_broker_timestamps_empty(
     check = check(kafka_instance)
     check.client = mock_client
     check.read_persistent_cache = mock.Mock(return_value=persistent_cache_contents)
-    breakpoint()
     dd_run_check(check)
 
     caplog.set_level(logging.WARN)
