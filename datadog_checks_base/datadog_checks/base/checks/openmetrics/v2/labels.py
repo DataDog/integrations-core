@@ -83,41 +83,39 @@ class LabelAggregator:
             if self.shared_labels_cached:
                 yield from metrics
             else:
-                metric_config = self.metric_config.copy()
-                target_info_metric = self.info_metric.copy()
-
-                for metric in metrics:
-                    if metric_config and metric.name in metric_config:
-                        self.collect(metric, metric_config.pop(metric.name))
-                    if target_info_metric and metric.name in target_info_metric:
-                        self.collect(metric, target_info_metric.pop(metric.name))
-
-                    yield metric
-
-                self.shared_labels_cached = True
+                metric_config, target_info_metric = self.copy_configs()
+                #cached_metrics = list(self.process_metrics(metrics, metric_config, target_info_metric))
+                #yield from cached_metrics
+                #yield from metrics
+    
+                yield from self.process_metrics(metrics, metric_config, target_info_metric)
+            self.shared_labels_cached = True
         else:
             try:
-                metric_config = self.metric_config.copy()
-                target_info_metric = self.info_metric.copy()
-                cached_metrics = []
-
-                for metric in metrics:
-                    if metric_config and metric.name in metric_config:
-                        self.collect(metric, metric_config.pop(metric.name))
-
-                    if target_info_metric and metric.name in target_info_metric:
-                        self.collect(metric, target_info_metric.pop(metric.name))
-
-                    cached_metrics.append(metric)
-
-                    if not (metric_config or target_info_metric):
-                        break
-
+                metric_config, target_info_metric = self.copy_configs()
+    
+                cached_metrics = list(self.process_metrics(metrics, metric_config, target_info_metric))
+                self.logger.debug("Cached metrics are: %s", cached_metrics)
                 yield from cached_metrics
                 yield from metrics
             finally:
                 self.label_sets.clear()
                 self.unconditional_labels.clear()
+
+    def copy_configs(self):
+        return self.metric_config.copy(), self.info_metric.copy()
+        
+    def process_metrics(self, metrics, metric_config, target_info_metric):
+        for metric in metrics:
+            if metric_config and metric.name in metric_config:
+                self.collect(metric, metric_config.pop(metric.name))
+            if target_info_metric and metric.name in target_info_metric:
+                self.collect(metric, target_info_metric.pop(metric.name))
+            yield metric
+    
+            if not (metric_config or target_info_metric):
+                break
+
 
     def collect(self, metric, config):
         allowed_values = config.get('values')
