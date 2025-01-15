@@ -123,7 +123,23 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
                     keys = list(table.keys())
                     assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name", "owner"])
                     assert len(table['indexes']) == 1
-                    assert_fields(list(table['indexes'][0].keys()), ['name', 'definition'])
+                    assert_fields(
+                        list(table['indexes'][0].keys()),
+                        [
+                            'name',
+                            'definition',
+                            'is_unique',
+                            'is_exclusion',
+                            'is_immediate',
+                            'is_clustered',
+                            'is_valid',
+                            'is_checkxmin',
+                            'is_ready',
+                            'is_live',
+                            'is_replident',
+                            'is_partial',
+                        ],
+                    )
                 if float(POSTGRES_VERSION) >= 11:
                     if table['name'] in ('test_part', 'test_part_no_activity'):
                         keys = list(table.keys())
