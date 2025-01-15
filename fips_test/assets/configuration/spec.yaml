@@ -7,4 +7,28 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/default
+      - name: http_endpoint
+        required: true
+        description: The HTTP endpoint to test.
+        value:
+          example: localhost:443
+          type: string
+
+      - name: ssh_endpoint
+        description: The SSH endpoint to test.
+        value:
+          example: localhost:22
+          type: string
+
+      - name: rmi_endpoint
+        description: The RMI endpoint to test.
+        value:
+          example: localhost:1099
+          type: string
+
+      - name: socket_endpoint
+        description: Socket endpoint to test.
+        value:
+          example: localhost:8080
+          type: string
+      - template: instances/default

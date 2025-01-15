@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
+from const import SERVICE_CHECK_HTTP
+
 from datadog_checks.base import AgentCheck  # noqa: F401
 
 # from datadog_checks.base.utils.db import QueryManager
@@ -18,8 +20,10 @@ class FipsTestCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(FipsTestCheck, self).__init__(name, init_config, instances)
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+        self.http_endpoint = self.instance.get('http_endpoint', 'https://localhost:443')
+        self.rmi_endpoint = self.instance.get('rmi_endpoint', 'service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi')
+        self.socket_endpoint = self.instance.get('socket_endpoint', 'localhost:8080')
+        self.ssh_endpoint = self.instance.get('ssh_endpoint', 'localhost:22')
 
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
@@ -40,40 +44,11 @@ class FipsTestCheck(AgentCheck):
 
         # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
-
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
+        try:
+            self.http.get(self.http_endpoint)
+            self.service_check(SERVICE_CHECK_HTTP, AgentCheck.OK)
+        except Exception as e:
+            self.service_check(SERVICE_CHECK_HTTP, AgentCheck.CRITICAL, message=str(e))
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).
@@ -82,17 +57,3 @@ class FipsTestCheck(AgentCheck):
 
         # Perform database queries using the Query Manager
         # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)

@@ -8,9 +8,25 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_disable_generic_tags():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
 
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_rmi_endpoint():
+    return 'localhost:1099'
+
+
+def instance_socket_endpoint():
+    return 'localhost:8080'
+
+
+def instance_ssh_endpoint():
+    return 'localhost:22'

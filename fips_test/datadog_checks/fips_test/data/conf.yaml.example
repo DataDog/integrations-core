@@ -13,7 +13,26 @@ init_config:
 #
 instances:
 
-  -
+    ## @param http_endpoint - string - required
+    ## The HTTP endpoint to test.
+    #
+  - http_endpoint: localhost:443
+
+    ## @param ssh_endpoint - string - optional - default: localhost:22
+    ## The SSH endpoint to test.
+    #
+    # ssh_endpoint: localhost:22
+
+    ## @param rmi_endpoint - string - optional - default: localhost:1099
+    ## The RMI endpoint to test.
+    #
+    # rmi_endpoint: localhost:1099
+
+    ## @param socket_endpoint - string - optional - default: localhost:8080
+    ## Socket endpoint to test.
+    #
+    # socket_endpoint: localhost:8080
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -42,3 +61,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
