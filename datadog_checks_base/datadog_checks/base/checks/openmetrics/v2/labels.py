@@ -9,7 +9,7 @@ class LabelAggregator:
         share_labels = config.get('share_labels', {})
         self.target_info = config.get('target_info', False)
 
-        self._validate_type(share_labels, dict, "Setting `share_labels` must be a dictionary")
+        self._validate_type(share_labels, dict, "Setting `share_labels` must be a mapping")
         self._validate_type(self.target_info, bool, "Setting `target_info` must be a boolean")
 
         if not share_labels and not self.target_info:

@@ -686,13 +686,13 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
-            """  
-            # HELP target Target metadata   
-            # TYPE target info   
-            target_info{env="prod", region="europe"} 1.0  
-            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
-            # TYPE go_memstats_alloc_bytes gauge   
-            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06   
+            """
+            # HELP target Target metadata
+            # TYPE target info
+            target_info{env="prod", region="europe"} 1.0
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
  
             """
         )
@@ -713,13 +713,13 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'target_info': True, 'cache_shared_labels': False})
 
         mock_http_response(
-            """  
+            """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
-            # TYPE go_memstats_alloc_bytes gauge   
+            # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            # HELP target Target metadata   
-            # TYPE target info   
-            target_info{env="prod", region="europe"} 1.0   
+            # HELP target Target metadata
+            # TYPE target info
+            target_info{env="prod", region="europe"} 1.0
             """
         )
 
@@ -739,13 +739,13 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
-            """  
+            """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
-            # TYPE go_memstats_alloc_bytes gauge   
+            # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
-            # HELP target Target metadata   
-            # TYPE target info   
-            target_info{env="prod", region="europe"} 1.0   
+            # HELP target Target metadata
+            # TYPE target info
+            target_info{env="prod", region="europe"} 1.0
             """
         )
 
