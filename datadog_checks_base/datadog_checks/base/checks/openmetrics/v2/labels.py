@@ -14,6 +14,7 @@ class LabelAggregator:
 
         if not share_labels and not self.target_info:
             self.populate = no_op
+            return
 
         self.cache_shared_labels = config.get('cache_shared_labels', True)
         self.shared_labels_cached = False

@@ -693,7 +693,6 @@ class TestShareLabels:
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
- 
             """
         )
 
@@ -714,7 +713,7 @@ class TestShareLabels:
 
         mock_http_response(
             """
-            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
             # HELP target Target metadata
@@ -740,7 +739,7 @@ class TestShareLabels:
 
         mock_http_response(
             """
-            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.   
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
             # HELP target Target metadata
