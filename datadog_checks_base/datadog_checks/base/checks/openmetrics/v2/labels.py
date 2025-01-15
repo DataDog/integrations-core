@@ -9,11 +9,8 @@ class LabelAggregator:
         share_labels = config.get('share_labels', {})
         self.target_info = config.get('target_info', False)
 
-        if not isinstance(share_labels, dict):
-            raise TypeError('Setting `share_labels` must be a mapping')
-
-        if not isinstance(self.target_info, bool):
-            raise TypeError('Setting `target_info` must be a boolean')
+        self._validate_type(share_labels, dict, "Setting `share_labels` must be a dictionary")
+        self._validate_type(self.target_info, bool, "Setting `target_info` must be a boolean")
 
         if not share_labels and not self.target_info:
             self.populate = no_op
@@ -77,6 +74,10 @@ class LabelAggregator:
         self.label_sets = []
 
         self.unconditional_labels = {}
+
+    def _validate_type(self, value, expected_type, error_message):
+        if not isinstance(value, expected_type):
+            raise TypeError(error_message)
 
     def __call__(self, metrics):
         if self.cache_shared_labels:

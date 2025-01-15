@@ -13,7 +13,6 @@ def get_info(check, metric_name, modifiers, global_options):
     def info(metric, sample_data, runtime_data):
         pass
 
-
     del check
     del modifiers
     del global_options
