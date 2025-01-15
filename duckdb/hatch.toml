@@ -2,7 +2,7 @@
 
 [envs.default]
 dependencies = [
-  "duckdb==1.1.1; python_version > '3.12'",
+  "duckdb==1.1.1",
 ]
 
 [[envs.default.matrix]]
