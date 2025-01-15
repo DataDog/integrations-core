@@ -8,7 +8,10 @@ import time
 from contextlib import closing, contextmanager
 from copy import deepcopy
 
-import duckdb
+try:
+    import duckdb
+except ImportError:
+    duckdb = None
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
