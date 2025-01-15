@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-from const import SERVICE_CHECK_HTTP
+from .const import SERVICE_CHECK_HTTP
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
@@ -12,13 +12,13 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 # from json import JSONDecodeError
 
 
-class FipsTestCheck(AgentCheck):
+class FIPSTestCheck(AgentCheck):
 
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'fips_test'
 
     def __init__(self, name, init_config, instances):
-        super(FipsTestCheck, self).__init__(name, init_config, instances)
+        super(FIPSTestCheck, self).__init__(name, init_config, instances)
 
         self.http_endpoint = self.instance.get('http_endpoint', 'https://localhost:443')
         self.rmi_endpoint = self.instance.get('rmi_endpoint', 'service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi')

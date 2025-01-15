@@ -16,11 +16,12 @@ from datadog_checks.fips_test.const import (
 
 @pytest.mark.e2e
 @pytest.mark.fips_on
-def test_connection_fips(clean_fips_environment, dd_environment, dd_agent_check, instance_e2e_fips):
+@pytest.mark.parametrize('dd_environment', ['fips'], indirect=True)
+def test_connection_fips(clean_fips_environment, dd_environment, dd_agent_check, instance_fips):
     """
     Connection to the FIPS servers after enabling FIPS mode should succeed.
     """
-    aggregator = dd_agent_check(instance_e2e_fips)
+    aggregator = dd_agent_check(instance_fips)
     aggregator.assert_service_check(SERVICE_CHECK_HTTP, status=FIPSTestCheck.OK, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_RMI, status=FIPSTestCheck.OK, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_SOCKET, status=FIPSTestCheck.OK, count=1)
@@ -29,11 +30,12 @@ def test_connection_fips(clean_fips_environment, dd_environment, dd_agent_check,
 
 @pytest.mark.e2e
 @pytest.mark.fips_on
-def test_connection_non_fips(clean_fips_environment, dd_environment, dd_agent_check, instance_e2e_non_fips):
+@pytest.mark.parametrize('dd_environment', ['non-fips'], indirect=True)
+def test_connection_non_fips(clean_fips_environment, dd_environment, dd_agent_check, instance_non_fips):
     """
     Connection to the non-FIPS servers after enabling FIPS mode should fail.
     """
-    aggregator = dd_agent_check(instance_e2e_non_fips)
+    aggregator = dd_agent_check(instance_non_fips)
     aggregator.assert_service_check(SERVICE_CHECK_HTTP, status=FIPSTestCheck.CRITICAL, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_RMI, status=FIPSTestCheck.CRITICAL, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_SOCKET, status=FIPSTestCheck.CRITICAL, count=1)
