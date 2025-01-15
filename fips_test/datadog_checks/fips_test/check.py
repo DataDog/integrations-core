@@ -46,9 +46,9 @@ class FIPSTestCheck(AgentCheck):
         # More info at https://datadoghq.dev/integrations-core/base/http/
         try:
             self.http.get(self.http_endpoint)
-            self.service_check(SERVICE_CHECK_HTTP, AgentCheck.OK)
+            self.service_check("can_connect_http", AgentCheck.OK)
         except Exception as e:
-            self.service_check(SERVICE_CHECK_HTTP, AgentCheck.CRITICAL, message=str(e))
+            self.service_check("can_connect_http", AgentCheck.CRITICAL, message=str(e))
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).
