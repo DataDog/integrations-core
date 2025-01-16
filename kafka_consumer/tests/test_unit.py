@@ -184,6 +184,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     mock_client = seed_mock_client()
     # We need the consumer offset to be higher than the highwater offset.
     mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 81)])]
+    kafka_instance["collect_consumer_group_state"] = True
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 

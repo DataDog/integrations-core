@@ -293,13 +293,14 @@ class KafkaCheck(AgentCheck):
 
     def get_consumer_group_state(self, consumer_group):
         consumer_group_state = ""
-        # Get the consumer group state if present
-        group_id, consumer_group_state = self.client.describe_consumer_groups(consumer_group)
-        self.log.debug(
-            "Consumer group: %s in state %s",
-            group_id,
-            consumer_group_state,
-        )
+        if self.config._collect_consumer_group_state:
+            # Get the consumer group state if present
+            group_id, consumer_group_state = self.client.describe_consumer_groups(consumer_group)
+            self.log.debug(
+                "Consumer group: %s in state %s",
+                group_id,
+                consumer_group_state,
+            )
         return consumer_group_state
 
     def get_highwater_offsets(self, consumer_offsets):
