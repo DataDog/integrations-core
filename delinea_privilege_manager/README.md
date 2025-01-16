@@ -20,7 +20,7 @@ View detailed insights into these logs using the out-of-the-box dashboards. The 
 
 To install the Delinea Privilege Manager integration, run the following Agent installation command followed by the steps below. For more information, see the [Integration Management][4] documentation.
 
-**Note**: This step is not required for Agent version >= 7.60.0.
+**Note**: This step is not required for Agent version >= 7.63.0.
 
 Linux command
   ```shell
