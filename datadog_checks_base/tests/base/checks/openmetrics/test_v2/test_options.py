@@ -794,7 +794,6 @@ class TestShareLabels:
             metric_type=aggregator.GAUGE,
         )
 
-
         mock_http_response(
             """
             # HELP target Target metadata
@@ -819,7 +818,9 @@ class TestShareLabels:
 
     def test_target_info_w_shared_labels_cache(self, aggregator, dd_run_check, mock_http_response):
 
-        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_free_bytes': True}, 'target_info': True }) # , 'cache_shared_labels': False
+        check = get_check(
+            {'metrics': ['.+'], 'share_labels': {'go_memstats_free_bytes': True}, 'target_info': True}
+        )  # , 'cache_shared_labels': False
         check_var = check
 
         mock_http_response(
@@ -844,7 +845,6 @@ class TestShareLabels:
             tags=['endpoint:test', 'foo:bar', 'bar:foo', 'env:prod', 'region:europe'],
             metric_type=aggregator.GAUGE,
         )
-
 
         mock_http_response(
             """
