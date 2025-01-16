@@ -186,7 +186,6 @@ NATIVE_TRANSFORMERS = {
     'gauge': transformers.get_gauge,
     'histogram': transformers.get_histogram,
     'summary': transformers.get_summary,
-    'info': transformers.get_info,
 }
 
 TRANSFORMERS = {

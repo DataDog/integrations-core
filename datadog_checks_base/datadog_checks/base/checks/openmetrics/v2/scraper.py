@@ -264,6 +264,8 @@ class OpenMetricsScraper:
             ):
                 self.submit_telemetry_number_of_ignored_metric_samples(metric)
                 continue
+            if metric.name == 'target_info':
+                self.label_aggregator.process_target_info(metric)
             yield metric
 
     def parse_metrics(self):
@@ -311,7 +313,6 @@ class OpenMetricsScraper:
         """
         Yield a sample of processed data.
         """
-
         label_normalizer = get_label_normalizer(metric.type)
 
         for sample in metric.samples:
