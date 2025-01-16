@@ -127,7 +127,7 @@ class TestUpdates:
         assert (
             result.output
             == '''1 dependencies are out of sync:
-dep-a can be updated to version 1.2.3 on py2 and py3
+dep-a can be updated to version 1.2.3 on py3
 '''
         )
         assert result.exit_code != 0

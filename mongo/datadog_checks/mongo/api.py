@@ -50,6 +50,7 @@ class MongoApi(object):
             'directConnection': True,
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,
+            'compressors': 'zlib',  # Enable zlib compression
         }
         if replicaset:
             options['replicaSet'] = replicaset

@@ -1,0 +1,1 @@
+Fix KeyError in SQL Server schema collection caused by case-insensitive database name mismatches.
