@@ -26,7 +26,7 @@ Forcepoint Secure Web Gateway integration gathers these logs and forwards them t
 
     b. **Permissions**: Select **Access your Forcepoint logs (logs api)** option.
 
-    c. **Permitted User Group**: Select as per your requirement. Default is **All**.
+    c. **Permitted User Groups**: Select as per your requirement. Default is **All**.
 
     d. Click **Ok** to save the changes.
     - You will now see your application added to the list, but still listed as **Pending** under status.
