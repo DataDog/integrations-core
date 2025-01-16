@@ -406,11 +406,6 @@ vonage/assets/logs/                                                @DataDog/saas
 /asana/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
 /asana/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/tanium/                                                            @DataDog/saas-integrations
-/tanium/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-/tanium/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/tanium/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 hubspot_content_hub/                                                @DataDog/saas-integrations
 hubspot_content_hub/*.md                                            @DataDog/saas-integrations @DataDog/documentation
 hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
