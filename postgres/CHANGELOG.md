@@ -12,7 +12,7 @@
 
 * Fix check for Postgres collect query activity to avoid bugs with in-flight duration and missing blocking pids ([#19271](https://github.com/DataDog/integrations-core/pull/19271))
 
-## 22.3.0 / 2024-11-28
+## 22.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 

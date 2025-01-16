@@ -35,13 +35,13 @@
 
 * Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
 
-## 37.0.0 / 2024-09-19
+## 37.0.0 / 2024-09-19 / Agent 7.58.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
 
-## 36.16.0 / 2024-09-30 / Agent 7.58.0
+## 36.16.0 / 2024-09-30
 
 ***Security***:
 

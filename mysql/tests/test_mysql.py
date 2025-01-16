@@ -48,6 +48,8 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
         + variables.COMMON_PERFORMANCE_VARS
+        + variables.INDEX_SIZE_VARS
+        + variables.INDEX_USAGE_VARS
     )
 
     operation_time_metrics = (
@@ -73,7 +75,6 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
             continue
         else:
             aggregator.assert_metric(mname, at_least=1)
-        aggregator.assert_metric(mname, at_least=1)
 
     optional_metrics = (
         variables.COMPLEX_STATUS_VARS
@@ -161,6 +162,8 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
+        + variables.INDEX_SIZE_VARS
+        + variables.INDEX_USAGE_VARS
     )
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
@@ -233,6 +236,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
+    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
     # test optional metrics
     optional_metrics = (
         variables.OPTIONAL_REPLICATION_METRICS
@@ -304,6 +308,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
+        + variables.INDEX_SIZE_VARS
     )
 
     operation_time_metrics = (
@@ -313,7 +318,9 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
-        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
+        testable_metrics.extend(
+            variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS + variables.INDEX_USAGE_VARS
+        )
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
         )
@@ -456,6 +463,43 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     for mname in optional_metrics:
         aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
+
+
+def _test_index_metrics(aggregator, index_metrics, metric_tags):
+    for mname in index_metrics:
+        if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:testdb', 'table:users', 'index:id'],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + [
+                    'db:datadog_test_schemas',
+                    'table:cities',
+                    'index:single_column_index',
+                ],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
+                count=1,
+            )
+        if mname == 'mysql.index.size':
+            aggregator.assert_metric(mname, tags=metric_tags + ['db:testdb', 'table:users', 'index:id'], count=1)
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:single_column_index'],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
+                count=1,
+            )
 
 
 def _test_optional_metrics(aggregator, optional_metrics):

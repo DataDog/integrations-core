@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
 
-from .metrics import METRIC_MAP, RENAME_LABELS_MAP
+from .metrics import METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
@@ -14,7 +14,10 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
 
     def get_default_config(self):
         return {
-            'metrics': [METRIC_MAP],
+            'metrics': [
+                METRIC_MAP,
+                RAY_METRIC_MAP,
+            ],
             "rename_labels": RENAME_LABELS_MAP,
         }
 

@@ -12,7 +12,7 @@ Write-Host "Will build librdkafka $kafka_version"
 Get-RemoteFile `
   -Uri "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${kafka_version}.tar.gz" `
   -Path "librdkafka-${kafka_version}.tar.gz" `
-  -Hash '0ddf205ad8d36af0bc72a2fec20639ea02e1d583e353163bf7f4683d949e901b'
+  -Hash '5bd1c46f63265f31c6bfcedcde78703f77d28238eadf23821c2b43fc30be3e25'
 7z x "librdkafka-${kafka_version}.tar.gz" -o"C:\"
 7z x "C:\librdkafka-${kafka_version}.tar" -o"C:\librdkafka"
 Remove-Item "librdkafka-${kafka_version}.tar.gz"
@@ -24,6 +24,8 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
+# We set the desired tag to the latest release tag to ensure that we are building with the latest stable version.
+# The desired tag should be updated periodically or when critical fixes or features are released.
 $desired_tag = "2024.12.16"
 
 # Clone and configure vcpkg
