@@ -48,7 +48,7 @@ Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#integrations/meraki
 [2]: https://app.datadoghq.com/account/settings#integrations/snmp
-[3]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
+[3]: https://docs.datadoghq.com/network_monitoring/devices/setup
 [4]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [5]: https://docs.datadoghq.com/help/
 [6]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/

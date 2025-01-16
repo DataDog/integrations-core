@@ -1,0 +1,80 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "fbf81df6-a556-4ee7-9c50-764bf129b0ec",
+  "app_id": "adyen",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Adyen Transactions, Disputes, and Payouts data",
+    "title": "Adyen",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Adyen Transactions",
+        "image_url": "images/adyen_transaction_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Adyen Transactions",
+        "image_url": "images/adyen_transaction_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Adyen Payouts",
+        "image_url": "images/adyen_payouts.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Adyen Disputes",
+        "image_url": "images/adyen_disputes.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 27052339,
+      "source_type_name": "Adyen",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+        "Adyen Transactions": "assets/dashboards/adyen_transactions.json",
+        "Adyen Payouts": "assets/dashboards/adyen_payouts.json",
+        "Adyen Disputes": "assets/dashboards/adyen_disputes.json"
+    },
+    "monitors": {
+      "Failed refund detected due to a rejection by the card scheme": "assets/monitors/failed_refund_detected_due_to_a_rejection_by_the_card_scheme.json",
+      "High number of failed refunds detected": "assets/monitors/high_number_of_failed_refunds_detected.json",
+      "High number of failed captures detected": "assets/monitors/high_number_of_failed_captures_detected.json",
+      "Failed capture detected due to a rejection by the card scheme": "assets/monitors/failed_capture_detected_due_to_a_rejection_by_the_card_scheme.json",
+      "High number of failed payout requests detected": "assets/monitors/high_number_of_failed_payout_requests_detected.json",
+      "Expired payout detected": "assets/monitors/expired_payout_detected.json",
+      "High number of declined payouts detected": "assets/monitors/high_number_of_declined_payouts_detected.json",
+      "Notification of Chargeback": "assets/monitors/notification_of_chargeback.json",
+      "Notification of Fraud": "assets/monitors/notification_of_fraud.json",
+      "Second Chargeback detected": "assets/monitors/second_chargeback_detected.json"
+    },
+    "logs": {
+      "source": "adyen"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

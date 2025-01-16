@@ -1,0 +1,60 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a905fbe6-135f-4189-b027-4bdc58e51e29",
+  "app_id": "duckdb",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Integration for DuckDB",
+    "title": "DuckDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 28902456,
+      "source_type_name": "DuckDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "duckdb.",
+        "check": "duckdb.memory_limit",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "duckdb"
+      ]
+    },
+    "dashboards": {
+      "DuckDB Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "DuckDB number of CPU cores used is high": "assets/monitors/worker_thread.json",
+      "DuckDB Memory limit is high": "assets/monitors/memory_limit.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
