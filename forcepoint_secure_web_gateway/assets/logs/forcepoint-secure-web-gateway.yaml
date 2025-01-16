@@ -258,7 +258,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: "Map `firstname` to `usr.name`"
+      name: Map `firstname` to `usr.name`
       enabled: true
       sources:
         - firstname
@@ -316,3 +316,103 @@ pipeline:
       target: http.useragent_details
       encoded: false
       combineVersionDetails: false
+    - type: grok-parser
+      name: Extract custom_location list
+      enabled: true
+      source: custom_location
+      samples:
+        - '["Guest","Guest2"]'
+      grok:
+        supportRules: ""
+        matchRules: custom_location_rule %{data:custom_location:array(",")}
+    - type: grok-parser
+      name: Extract usergroup list
+      enabled: true
+      source: usergroup
+      samples:
+        - "['355160', 'All Users']"
+      grok:
+        supportRules: ""
+        matchRules: usergroup_rule %{data:usergroup:array(",")}
+    - type: grok-parser
+      name: Extract webcategories list
+      enabled: true
+      source: webcategories
+      samples:
+        - '["WR:Streaming Media", "WR:test"]'
+      grok:
+        supportRules: ""
+        matchRules: webcategories_rule %{data:webcategories:array(",")}
+    - type: grok-parser
+      name: Extract activity list
+      enabled: true
+      source: activity
+      samples:
+        - '["Uploaded","Cloudstorage","Denied"]'
+      grok:
+        supportRules: ""
+        matchRules: activity_rule %{data:activity:array(",")}
+    - type: grok-parser
+      name: Extract bgcategories list
+      enabled: true
+      source: bgcategories
+      samples:
+        - '["BG:Business Applications","BG:Cloud Data Services","BG:File
+          Sharing","BG:Internet Services","BG:Software"]'
+      grok:
+        supportRules: ""
+        matchRules: bgcategories_rule %{data:bgcategories:array(",")}
+    - type: grok-parser
+      name: Extract customcategories list
+      enabled: true
+      source: customcategories
+      samples:
+        - '["custom_category1","custom_category2"]'
+      grok:
+        supportRules: ""
+        matchRules: customcategories_rule %{data:customcategories:array(",")}
+    - type: grok-parser
+      name: Extract dlppattern list
+      enabled: true
+      source: dlppattern
+      samples:
+        - '["Source Code"]'
+      grok:
+        supportRules: ""
+        matchRules: dlppattern_rule %{data:dlppattern:array(",")}
+    - type: grok-parser
+      name: Extract filename list
+      enabled: true
+      source: filename
+      samples:
+        - '["file1","file2"]'
+      grok:
+        supportRules: ""
+        matchRules: filename_rule %{data:filename:array(",")}
+    - type: grok-parser
+      name: Extract keyword list
+      enabled: true
+      source: keyword
+      samples:
+        - '["keyword1","keyword2"]'
+      grok:
+        supportRules: ""
+        matchRules: keyword_rule %{data:keyword:array(",")}
+    - type: grok-parser
+      name: Extract threatindicator list
+      enabled: true
+      source: threatindicator
+      samples:
+        - '["threatindicator1","threatindicator2"]'
+      grok:
+        supportRules: ""
+        matchRules: threatindicator_rule %{data:threatindicator:array(",")}
+    - type: grok-parser
+      name: Extract webcategoryclass list
+      enabled: true
+      source: webcategoryclass
+      samples:
+        - '["Business/Government/Services"]'
+      grok:
+        supportRules: ""
+        matchRules: webcategoryclass_rule %{data:webcategoryclass:array(",")}
