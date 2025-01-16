@@ -221,6 +221,7 @@ class MongoConfig(object):
             'sample_size': int(self._schemas_config.get('sample_size', 10)),
             'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
+            'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
         }
 
     def _get_database_autodiscovery_config(self, instance):

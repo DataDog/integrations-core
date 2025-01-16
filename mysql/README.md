@@ -95,7 +95,7 @@ To collect index metrics, grant the `datadog` user an additional privilege:
 
 ```shell
 
-mysql> "GRANT SELECT ON mysql.innodb_index_stats TO 'datadog'@'%'";
+mysql> GRANT SELECT ON mysql.innodb_index_stats TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
