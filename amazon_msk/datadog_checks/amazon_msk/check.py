@@ -37,6 +37,12 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
+        # This prevents botocore INFO logs from being printed in the Agent log
+        # https://github.com/boto/botocore/blob/develop/botocore/credentials.py#L1075
+        import logging
+
+        logging.getLogger('botocore').setLevel(logging.CRITICAL)
+
         self._region_name = None
         self._exporter_data = None
         self._endpoint_prefix = None

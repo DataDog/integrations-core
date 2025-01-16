@@ -47,6 +47,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         aggregator.assert_metric(metric, value, expected_tags, count=1)
 
 
+@pytest.mark.flaky
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)

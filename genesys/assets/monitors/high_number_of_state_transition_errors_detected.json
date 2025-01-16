@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2024-11-18",
+	"last_updated_at": "2024-11-18",
+	"title": "High Number of State Transition Errors Detected",
+	"description": "State transition errors refer to the number of errors caused by edge clock skew. This monitor tracks and alerts when there is an increased count of state transition errors, indicating potential issues with process transitions or workflow continuity.",
+	"definition": {
+		"id": 157630544,
+		"name": "High Number of State Transition Errors Detected",
+		"type": "query alert",
+		"query": "sum(last_1d):sum:genesys.conversations.state_transition_errors_count{*}.as_count() > 100",
+		"message": "{{#is_alert}}\nThe state transition errors refer to the number of errors caused by edge clock skew.\n\nA high number of state transition errors has been detected. Please review and take necessary action.\n{{/is_alert}}",
+		"tags": [
+			"source:genesys"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 100
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:genesys"
+	]
+}
