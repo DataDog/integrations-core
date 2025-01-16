@@ -8,7 +8,7 @@ from contextlib import closing, contextmanager
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
-from datadog_checks.sqlserver.utils import construct_use_statement
+from datadog_checks.sqlserver.utils import construct_use_statement, is_collation_case_insensitive
 
 try:
     import adodbapi
@@ -361,7 +361,7 @@ class Connection(object):
                 cursor.execute(DATABASE_EXISTS_QUERY)
                 for row in cursor.fetchall():
                     # collation_name can be NULL if db offline, in that case assume its case_insensitive
-                    case_insensitive = not row.collation_name or 'CI' in row.collation_name
+                    case_insensitive = is_collation_case_insensitive(row.collation_name)
                     self.existing_databases[row.name.lower()] = (
                         case_insensitive,
                         row.name,

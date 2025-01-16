@@ -215,3 +215,12 @@ def convert_to_bool(value):
         return bool(value)
     else:
         return value
+
+
+def is_collation_case_insensitive(collation):
+    """
+    Checks if the collation is case insensitive
+    :param collation: The collation string
+    :return: bool
+    """
+    return not collation or 'CI' in collation.upper()
