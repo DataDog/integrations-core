@@ -10,7 +10,6 @@ METRIC_MAP = {
     'argo_workflows_pods_count': 'pods',
     'argo_workflows_queue_adds_count': 'queue_adds',
     'argo_workflows_queue_depth_count': 'queue_depth',
-    'argo_workflows_queue_depth_gauge': 'queue_depth',
     'argo_workflows_queue_latency': 'queue_latency',
     'argo_workflows_workers_busy_count': 'workers_busy',
     'argo_workflows_workflow_condition': 'workflow_condition',
@@ -43,7 +42,7 @@ METRIC_MAP = {
     'go_threads': 'go.threads',
 }
 
-# Metrics available in Argo WOrkflow v3.6+
+# Metrics available in Argo Workflow v3.6+
 V3_6_PLUS_METRICS = {
     'argo_workflows_gauge': 'current_workflows',
     'argo_workflows_pods_gauge': 'pods',
