@@ -52,7 +52,7 @@ pipeline:
   name: Symantec VIP
   enabled: true
   filter:
-    query: source:symantec-vip service:event-logs
+    query: source:symantec-vip
   processors:
     - type: date-remapper
       name: Define `ts` as the official date of the log
