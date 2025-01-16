@@ -349,10 +349,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /trend_micro_vision_one_endpoint_security/manifest.json             @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_vision_one_endpoint_security/assets/logs/              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/avast/                                                             @DataDog/saas-integrations
-/avast/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
-/avast/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
-/avast/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 
 vonage/                                                @DataDog/saas-integrations
