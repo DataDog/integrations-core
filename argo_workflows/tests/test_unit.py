@@ -63,34 +63,16 @@ COUNTS = {
 EXPECTED_METRICS = sorted(GAUGES | COUNTS)
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path='tests/fixtures/metrics.txt')
-    check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
-    dd_run_check(check)
+@pytest.mark.parametrize(
+    "fixture_file, description",
+    [
+        ('tests/fixtures/metrics.txt', 'Test with old metric names'),
+        ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
+    ],
+)
+def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
 
-    for m_name, m_type in EXPECTED_METRICS:
-        aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
-
-    histograms = (
-        'operation_duration_seconds',
-        'queue_latency',
-    )
-    for m_name in histograms:
-        aggregator.assert_metric(f'argo_workflows.{m_name}.sum', metric_type=agg.MONOTONIC_COUNT)
-        aggregator.assert_metric(f'argo_workflows.{m_name}.count', metric_type=agg.MONOTONIC_COUNT)
-        aggregator.assert_metric(f'argo_workflows.{m_name}.bucket', metric_type=agg.MONOTONIC_COUNT)
-
-    for suff in ('count', 'quantile', 'sum'):
-        aggregator.assert_metric(f'argo_workflows.go.gc.duration.seconds.{suff}')
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.OK)
-    assert_service_checks(aggregator)
-
-def test_check_v6_plus(dd_run_check, aggregator, instance, mock_http_response):
-    #Tests for new metric names begining in Argo v3.6
-    mock_http_response(file_path='tests/fixtures/metricsv3-6+.txt')
+    mock_http_response(file_path=fixture_file)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 
