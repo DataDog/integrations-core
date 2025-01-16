@@ -199,7 +199,6 @@ SELECT
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 LEFT JOIN pg_inherits Inh ON (Inh.inhrelid = C.oid)
-LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
 LEFT JOIN pg_index idx_toast ON (idx_toast.indrelid = C.reltoastrelid)
 LEFT JOIN LATERAL (
     SELECT sum(pg_stat_get_numscans(indexrelid))::bigint AS idx_scan,
