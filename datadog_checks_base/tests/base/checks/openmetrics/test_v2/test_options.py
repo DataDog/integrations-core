@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 from mock import Mock
-import time
 
 from datadog_checks.base.constants import ServiceCheck
 
