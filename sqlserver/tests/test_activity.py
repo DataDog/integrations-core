@@ -62,7 +62,7 @@ def dbm_instance(instance_docker):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc,expected_comments,collect_raw_statement,expected_raw_statement",
+    "database,query,match_pattern,is_proc,expected_comments,collect_raw_query_statement,expected_raw_statement",
     [
         [
             "datadog_test-1",
@@ -113,12 +113,15 @@ def test_collect_load_activity(
     match_pattern,
     is_proc,
     expected_comments,
-    collect_raw_statement,
+    collect_raw_query_statement,
     expected_raw_statement,
 ):
     instance = copy(dbm_instance)
-    if collect_raw_statement:
-        instance["collect_raw_statement"] = {"enabled": True}
+    instance_tags = set(instance.get('tags', []))
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    if collect_raw_query_statement:
+        instance["collect_raw_query_statement"] = {"enabled": True}
+        expected_instance_tags.add("raw_query_statement:enabled")
     check = SQLServer(CHECK_NAME, {}, [instance])
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=use_autocommit)
@@ -165,9 +168,6 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    instance_tags = set(instance.get('tags', []))
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
     event = dbm_activity[0]
@@ -208,7 +208,7 @@ def test_collect_load_activity(
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
-    if collect_raw_statement:
+    if collect_raw_query_statement:
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         rqt_events = [s for s in dbm_samples if s['dbm_type'] == "rqt"]
         assert rqt_events is not None

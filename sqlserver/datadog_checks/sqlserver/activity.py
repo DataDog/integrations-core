@@ -196,10 +196,10 @@ class SqlserverActivity(DBMAsyncJob):
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
 
-        self._collect_raw_statement = self._config.collect_raw_statement.get("enabled", False)
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
         self._raw_statement_text_cache = RateLimitingTTLCache(
-            maxsize=self._config.collect_raw_statement["cache_max_size"],
-            ttl=60 * 60 / self._config.collect_raw_statement["samples_per_hour_per_query"],
+            maxsize=self._config.collect_raw_query_statement["cache_max_size"],
+            ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
 
     def _close_db_conn(self):
@@ -339,7 +339,7 @@ class SqlserverActivity(DBMAsyncJob):
         input_buffer_columns = ""
         input_buffer_join = ""
 
-        if self._collect_raw_statement:
+        if self._collect_raw_query_statement:
             input_buffer_columns = ", ".join(INPUT_BUFFER_COLUMNS) + ","
             input_buffer_join = INPUT_BUFFER_JOIN
 
@@ -465,7 +465,7 @@ class SqlserverActivity(DBMAsyncJob):
                 input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join()
                 rows = self._get_activity(cursor, request_cols, input_buffer_columns, input_buffer_join)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
-                if self._collect_raw_statement:
+                if self._collect_raw_query_statement:
                     for raw_statement_event in self._rows_to_raw_statement_events(normalized_rows):
                         self._check.database_monitoring_query_sample(
                             json.dumps(raw_statement_event, default=default_json_event_encoding)

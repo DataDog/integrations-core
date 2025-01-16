@@ -351,7 +351,7 @@ class InstanceConfig(BaseModel):
     autodiscovery_include: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
-    collect_raw_statement: Optional[CollectRawStatement] = None
+    collect_raw_query_statement: Optional[CollectRawStatement] = None
     collect_settings: Optional[CollectSettings] = None
     command_timeout: Optional[int] = None
     connection_string: Optional[str] = None
