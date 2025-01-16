@@ -1,0 +1,44 @@
+id: symantec-vip
+tests:
+  - sample: |-
+      {
+        "jurHash": "1459689",
+        "credId": "VSME1673472",
+        "result.credType": "STANDARD_OTP",
+        "txnId": "vipus7E94583921D0EA",
+        "ts": "2017-04-04 16:39:23.090 +0000",
+        "result.statusMessage": "Success",
+        "newBindStatus": "ENABLED",
+        "durationMillis": "60",
+        "requestId": "abcd456",
+        "extUserId": "7cc34F6DC",
+        "_nestedCalls": [
+          {
+            "jurHash": "1459689",
+            "credId": "VSME16734672",
+            "result.credType": "STANDARD_OTP",
+            "result.statusMessage": "Success",
+            "newBindStatus": "ENABLED",
+            "extUserId": "7cc34F6DC",
+            "result.status": "0000",
+            "operation": "addCredential"
+          },
+          {
+            "result.status": "0000",
+            "result.detail": "0000",
+            "operation": "activateToken",
+            "result.detailMessage": "Success",
+            "result.statusMessage": "Success"
+          }
+        ],
+        "result.status": "0000",
+        "wsdlVersion": "1_1",
+        "operation": "addCredential",
+        "_id": "coloss4be-d2-tc.149132321663.2235348"
+      }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
