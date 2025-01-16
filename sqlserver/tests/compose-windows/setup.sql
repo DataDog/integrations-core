@@ -152,8 +152,16 @@ BEGIN
     SELECT id FROM ϑings WHERE name = @P2;
 END;
 GO
+
+CREATE PROCEDURE fredProcParams @Name nvarchar(8) = NULL AS
+BEGIN
+    SELECT * FROM ϑings WHERE name like @Name;
+END;
+GO
+
 GRANT EXECUTE on bobProcParams to bob;
 GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on fredProcParams to fred;
 GRANT EXECUTE on bobProc to fred;
 GO
 

@@ -290,7 +290,7 @@ class SqlserverActivity(DBMAsyncJob):
             if not query_signature:
                 continue
 
-            raw_statement = row.get("raw_statement")
+            raw_statement = row.pop("raw_statement", None)
             if not raw_statement:
                 self.log.debug("No raw statement found for query_signature=%s", query_signature)
                 continue
@@ -299,7 +299,7 @@ class SqlserverActivity(DBMAsyncJob):
             row["raw_query_signature"] = raw_query_signature
             raw_statement_key = (query_signature, raw_query_signature)
 
-            if not self._raw_statement_text_cache.accquire(raw_statement_key):
+            if not self._raw_statement_text_cache.acquire(raw_statement_key):
                 continue
 
             yield {
