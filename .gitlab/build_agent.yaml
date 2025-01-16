@@ -1,0 +1,44 @@
+---
+.build-agent-tpl:
+  variables:
+    _AGENT_BRANCH: main # Used only by this job
+    # Pass these to triggered agent build job.
+    RELEASE_VERSION_6: "nightly"
+    RELEASE_VERSION_7: "nightly-a7"
+    BUCKET_BRANCH: "dev"
+    DEPLOY_AGENT: "false"
+    INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
+    # disable kitchen and e2e tests
+    RUN_KITCHEN_TESTS: "false"
+    RUN_E2E_TESTS: "off"
+  stage: build
+  trigger:
+    project: DataDog/datadog-agent
+    branch: ${_AGENT_BRANCH}
+    # It's more convenient to directly show if downstream pipeline succeeded.
+    strategy: depend
+
+build-agent-auto:
+  extends: .build-agent-tpl
+  rules:
+    - if: $CI_COMMIT_BRANCH !~ "/gh-readonly-queue/"
+      changes:
+        # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/369916#note_1972773223
+        compare_to: "master"
+        paths:
+          - .deps/*
+          - .gitlab/build_agent.yaml
+
+build-agent-manual:
+  extends: .build-agent-tpl
+  # We don't want to require the manual build job for regular pipelines.
+  allow_failure: true
+  rules:
+    # By default we test with Agent's main branch.
+    # From a release branch we want to use the same release branch in the agent repo.
+    - if: $CI_COMMIT_BRANCH =~ "/^7.\d+.x$/"
+      when: manual
+      variables:
+        _AGENT_BRANCH: ${CI_COMMIT_BRANCH}
+    - when: manual
