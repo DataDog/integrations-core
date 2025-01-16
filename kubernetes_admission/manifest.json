@@ -1,0 +1,43 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6d009536-3383-4071-b45e-7771e0970cf4",
+  "app_id": "kubernetes-admission",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Provides visibility into Kubernetes Admission events, including deployments modifications from human users.",
+    "title": "Kubernetes Admission",
+    "media": [],
+    "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Offering::Integration",
+      "Submitted Data Type::Events",
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Kubernetes Admission",
+      "events": {
+        "creates_events": true
+      },
+      "source_type_id": 31009687,
+      "auto_install": true,
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

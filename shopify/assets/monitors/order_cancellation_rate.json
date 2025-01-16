@@ -1,0 +1,74 @@
+{
+	"version": 2,
+	"created_at": "2024-10-01",
+	"last_updated_at": "2024-10-01",
+	"title": "Order Cancellation Rate is High",
+	"description": "The order cancellation rate is the percentage of orders that are canceled, compared to the total number of orders placed within a time interval. This monitor tracks the order cancellations to help identify issues, improve the shopping experience, and reduce lost sales.",
+	"definition": {
+		"id": 155142683,
+		"name": "Order Cancellation Rate is High",
+		"type": "log alert",
+		"query": "formula(\"query * 100 / query1\").last(\"4h\") >= 5",
+		"message": "{{#is_warning}}\nThe order cancellation rate has exceeded the defined threshold.   \nCurrent Cancellation Rate: {{value}}%   \nThreshold: {{warn_threshold}}%    \n{{/is_warning}}\n\n{{#is_alert}}\nThe order cancellation rate has exceeded the defined threshold.   \nCurrent Cancellation Rate: {{value}}%   \nThreshold: {{threshold}}%   \n{{/is_alert}}\n\n@abc@example.com",
+		"tags": [
+			"shopify"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5,
+				"warning": 2
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "resolve",
+			"include_tags": false,
+			"variables": [
+				{
+					"data_source": "logs",
+					"name": "query",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "cardinality",
+						"metric": "@id"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:shopify service:order @cancelled_at:*"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "logs",
+					"name": "query1",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "cardinality",
+						"metric": "@id"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:shopify service:order"
+					},
+					"storage": "hot"
+				}
+			],
+			"renotify_interval": 0,
+			"escalation_message": "",
+			"notification_preset_name": "hide_query",
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:shopify"
+	]
+}

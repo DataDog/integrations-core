@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+from ipaddress import IPv6Address
+
 import bmemcached
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -175,6 +177,13 @@ class Memcache(AgentCheck):
         except BadResponseError:
             raise
 
+    def _is_ipv6(self, address):
+        try:
+            IPv6Address(address)
+            return True
+        except ValueError:
+            return False
+
     def _get_optional_metrics(self, client, tags, options=None):
         for arg, metrics_args in self.OPTIONAL_STATS.items():
             if not options or options.get(arg, False):
@@ -256,6 +265,12 @@ class Memcache(AgentCheck):
 
         if not server and not socket:
             raise InvalidConfigError('Either "url" or "socket" must be configured')
+
+        if self._is_ipv6(server):
+            # When it is already enclosed, this code path is not executed.
+            # bmemcached requires IPv6 addresses to be enclosed in brackets,
+            # because we set port with IP address at the client initialization.
+            server = "[{}]".format(server)
 
         if socket:
             server = 'unix'

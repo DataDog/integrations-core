@@ -7,6 +7,10 @@ This check monitors [Kubeflow][1] through the Datadog Agent.
 
 ## Setup
 
+<div class="alert alert-warning">
+This integration is currently released in Preview mode. Its availability is subject to change in the future. 
+</div>
+
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
@@ -117,8 +121,6 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 The Kubeflow integration does not include any events.
 
 ### Service Checks
-
-The Kubeflow integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 

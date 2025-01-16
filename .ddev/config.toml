@@ -70,6 +70,7 @@ exclude = true
 aerospike = ['Apache-2.0']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
+# https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt

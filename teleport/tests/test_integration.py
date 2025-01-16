@@ -6,9 +6,13 @@ import pytest
 
 from datadog_checks.teleport import TeleportCheck
 
-from .common import COMMON_METRICS
+from .common import COMMON_METRICS, USE_TELEPORT_CADDY
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.usefixtures("dd_environment"),
+    pytest.mark.skipif(not USE_TELEPORT_CADDY, reason="Only run integration tests on non-caddy environment"),
+]
 
 
 def test_connect_ok(aggregator, instance, dd_run_check):

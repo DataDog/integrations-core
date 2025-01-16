@@ -2,11 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.1.0 / 2024-10-04 / Agent 7.59.0
+## 6.2.0 / 2024-12-26
 
 ***Added***:
 
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Use `start_date` instead of `execution_date` for ongoing duration metrics ([#19278](https://github.com/DataDog/integrations-core/pull/19278))
+
+## 6.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:
 
@@ -17,6 +19,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 5.0.1 / 2024-05-31 / Agent 7.55.0
 

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.1.0 / 2024-10-31
+## 5.2.0 / 2024-12-26
+
+***Added***:
+
+* add telemetry for local load store in dca ([#19229](https://github.com/DataDog/integrations-core/pull/19229))
+
+## 5.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:
 
@@ -14,10 +20,6 @@
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
 
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
-
 ***Fixed***:
 
 * Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
@@ -27,6 +29,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 3.2.0 / 2024-08-09 / Agent 7.57.0
 
