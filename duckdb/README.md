@@ -27,6 +27,21 @@ Follow the instructions below to install and configure this check for an Agent r
 The DuckDB check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+#### Dependencies
+
+The [duckdb][10] client library is required. To install it, ensure you have a working compiler and run:
+
+##### Unix
+
+```text
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install duckdb==1.1.1
+```
+##### Windows
+
+```text
+"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install duckdb==1.1.1
+```
+
 ### Configuration
 
 1. Edit the `duckdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your duckdb performance data. See the [sample duckdb.d/conf.yaml][4] for all available configuration options.
@@ -65,3 +80,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/duckdb/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://duckdb.org/docs/
+[10]: https://pypi.org/project/duckdb/
