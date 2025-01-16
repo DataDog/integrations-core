@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.2.0 / 2024-12-26
+
+***Added***:
+
+* add telemetry for local load store in dca ([#19229](https://github.com/DataDog/integrations-core/pull/19229))
+
 ## 5.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:

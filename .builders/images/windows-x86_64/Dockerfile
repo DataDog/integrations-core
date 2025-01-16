@@ -116,6 +116,8 @@ RUN Get-RemoteFile `
 
 ENV OPENSSL_VERSION="3.3.2"
 
+ENV CURL_VERSION="8.11.1"
+
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
 RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.txt

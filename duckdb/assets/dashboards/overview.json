@@ -1,0 +1,500 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides an overview of your DuckDB metrics describing the systems behavior.\n\n**Useful Links**\n[DuckDB Datadog Docs](https://docs.datadoghq.com/integrations/duckdb/)\n\n[DuckDB documentation](https://duckdb.org/docs/)\n\n[DuckDB Github](https://github.com/duckdb/duckdb)\n\n",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "db_name",
+            "prefix": "db_name"
+        }
+    ],
+    "title": "DuckDB Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "DuckDB",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": false,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "margin": "md",
+                            "sizing": "contain",
+                            "type": "image",
+                            "url": "https://static.datadoghq.com/static/images/logos/duckdb_large.svg",
+                            "url_dark_theme": "https://static.datadoghq.com/static/images/logos/duckdb_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 6432334130190000,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "# DuckDB\n\nThis dashboard provides an overview of your DuckDB metrics describing the systems behavior.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3714321984694836,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "# Useful Links\n\n[DuckDB Datadog Docs](https://docs.datadoghq.com/integrations/duckdb/)\n\n[DuckDB documentation](https://duckdb.org/docs/)\n\n[DuckDB Github](https://github.com/duckdb/duckdb)\n\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 1536734468270818,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 3,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 887604651372246,
+            "layout": {
+                "height": 6,
+                "width": 5,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "The monitor summary shows you any active alerts for the most crucial Metrics.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3101692221244542,
+                        "layout": {
+                            "height": 1,
+                            "width": 7,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:integration:duckdb",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "show_status": true,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "DuckDB Monitors",
+                            "type": "manage_status"
+                        },
+                        "id": 8571980687166244,
+                        "layout": {
+                            "height": 4,
+                            "width": 7,
+                            "x": 0,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 6362435338630310,
+            "layout": {
+                "height": 6,
+                "width": 7,
+                "x": 5,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "DuckDB Ressources",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "orange",
+                            "content": "The maximum memory along with the number of total threads used by the system.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2087294854638528,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:duckdb.memory_limit{*} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "orange"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Limit",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3652938115508786,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:duckdb.worker_threads{*} by {db_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Worker Threads ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 1155658411475320,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 2494151462759112,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Rows",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "The WAL size threshold at which to automatically trigger a checkpoint.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2970835968640364,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:duckdb.wal_autocheckpoint{*} by {db_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "WAL Autocheckpoint",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6308021610440176,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "When writing using PARTITION_BY, the maximum amount of files the system can keep open before flushing to disk as well as the  threshold in number of rows after which DuckDB flush a thread state.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6282401181522508,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:duckdb.partitioned_write_flush_threshold{*} by {db_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "The threshold in number of rows to flush a thread state",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2826656743476160,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:duckdb.partitioned_write_max_open_files{*} by {db_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "The maximum amount of files the system can keep open before flushing to disk",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 368005232053480,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 5512810485872432,
+            "layout": {
+                "height": 9,
+                "width": 12,
+                "x": 0,
+                "y": 11
+            }
+        }
+    ]
+}

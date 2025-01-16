@@ -1,0 +1,197 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 7431.0
+python_gc_objects_collected_total{generation="1"} 4936.0
+python_gc_objects_collected_total{generation="2"} 1661.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 1151.0
+python_gc_collections_total{generation="1"} 104.0
+python_gc_collections_total{generation="2"} 6.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="10",patchlevel="12",version="3.10.12"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 6.634254336e+09
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 5.106151424e+09
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.7181405583e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 10.950000000000001
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 49.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP ray_vllm:prompt_tokens_total Number of prefill tokens processed.
+# TYPE ray_vllm:prompt_tokens_total counter
+ray_vllm:prompt_tokens_total{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 58.0
+# HELP ray_vllm:avg_generation_throughput_toks_per_s Average generation throughput in tokens/s.
+# TYPE ray_vllm:avg_generation_throughput_toks_per_s gauge
+ray_vllm:avg_generation_throughput_toks_per_s{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 17.757425910245555
+# HELP ray_vllm:time_per_output_token_seconds Histogram of time per output token in seconds.
+# TYPE ray_vllm:time_per_output_token_seconds histogram
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.01",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.025",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.05",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 4.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.075",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 295.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.1",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.15",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.2",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.3",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.4",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.5",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.75",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.5",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 299.0
+ray_vllm:time_per_output_token_seconds_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 16.178537607192993
+# HELP ray_vllm:avg_prompt_throughput_toks_per_s Average prefill throughput in tokens/s.
+# TYPE ray_vllm:avg_prompt_throughput_toks_per_s gauge
+ray_vllm:avg_prompt_throughput_toks_per_s{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+# HELP ray_vllm:cpu_cache_usage_perc CPU KV-cache usage. 1 means 100 percent usage.
+# TYPE ray_vllm:cpu_cache_usage_perc gauge
+ray_vllm:cpu_cache_usage_perc{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.00015260186174270718
+# HELP ray_vllm:gpu_cache_usage_perc GPU KV-cache usage. 1 means 100 percent usage.
+# TYPE ray_vllm:gpu_cache_usage_perc gauge
+ray_vllm:gpu_cache_usage_perc{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 5.882698982295764e-05
+# HELP ray_vllm:num_requests_waiting Number of requests waiting to be processed.
+# TYPE ray_vllm:num_requests_waiting gauge
+ray_vllm:num_requests_waiting{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+# HELP ray_vllm:num_requests_swapped Number of requests swapped to CPU.
+# TYPE ray_vllm:num_requests_swapped gauge
+ray_vllm:num_requests_swapped{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+# HELP ray_vllm:num_requests_running Number of requests currently running on GPU.
+# TYPE ray_vllm:num_requests_running gauge
+ray_vllm:num_requests_running{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+# HELP ray_vllm:generation_tokens_total Number of generation tokens processed.
+# TYPE ray_vllm:generation_tokens_total counter
+ray_vllm:generation_tokens_total{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 300.0
+# HELP ray_vllm:gpu_prefix_cache_hit_rate GPU prefix cache block hit rate.
+# TYPE ray_vllm:gpu_prefix_cache_hit_rate gauge
+ray_vllm:gpu_prefix_cache_hit_rate{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} -1.0
+# HELP ray_vllm:cpu_prefix_cache_hit_rate CPU prefix cache block hit rate.
+# TYPE ray_vllm:cpu_prefix_cache_hit_rate gauge
+ray_vllm:cpu_prefix_cache_hit_rate{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} -1.0
+# HELP ray_vllm:time_to_first_token_seconds Histogram of time to first token in seconds.
+# TYPE ray_vllm:time_to_first_token_seconds histogram
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.001",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.005",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.01",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.02",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.04",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.06",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.08",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.1",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.25",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.5",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="0.75",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.5",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="7.5",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:time_to_first_token_seconds_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.271012544631958
+# HELP ray_vllm:request_success_total Count of successfully processed requests.
+# TYPE ray_vllm:request_success_total counter
+ray_vllm:request_success_total{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",finished_reason="length",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+# HELP ray_vllm:request_params_n Histogram of the n request parameter.
+# TYPE ray_vllm:request_params_n histogram
+ray_vllm:request_params_n_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_params_n_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_n_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_n_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_n_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_n_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_n_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_n_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+# HELP ray_vllm:e2e_request_latency_seconds Histogram of end to end request latency in seconds.
+# TYPE ray_vllm:e2e_request_latency_seconds histogram
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.5",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="15.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="30.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="40.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="50.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="60.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:e2e_request_latency_seconds_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 16.44955015182495
+# HELP ray_vllm:request_prompt_tokens Number of prefill tokens processed.
+# TYPE ray_vllm:request_prompt_tokens histogram
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="50.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="100.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="200.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="500.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="50000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="100000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_prompt_tokens_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 58.0
+# HELP ray_vllm:request_params_best_of Histogram of the best_of request parameter.
+# TYPE ray_vllm:request_params_best_of histogram
+ray_vllm:request_params_best_of_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_params_best_of_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_best_of_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_best_of_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_best_of_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_best_of_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_best_of_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_params_best_of_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+# HELP ray_vllm:request_generation_tokens Number of generation tokens processed.
+# TYPE ray_vllm:request_generation_tokens histogram
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="50.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="100.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="200.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 0.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="500.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="1000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="2000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="5000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="10000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="20000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="50000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="100000.0",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_bucket{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",le="+Inf",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_count{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 1.0
+ray_vllm:request_generation_tokens_sum{Component="core_worker",NodeAddress="10.112.217.4",SessionName="session_2024-12-11_21-36-21_063134_1",Version="2.32.0",WorkerId="6ad5887a3c1c6cefcfa31b4f9a55bdca247686ca9bcd217726128dc8",model_name="neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"} 300.0
+# HELP ray_vllm:avg_generation_throughput_toks_per_s Average generation throughput in tokens/s.
+# TYPE ray_vllm:avg_generation_throughput_toks_per_s gauge
+ray_vllm:avg_generation_throughput_toks_per_s{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:cache_config_info information of cache_config
+# TYPE ray_vllm:cache_config_info gauge
+ray_vllm:cache_config_info{block_size="16",cache_dtype="auto",cpu_kvcache_space_bytes="4294967296",enable_prefix_caching="False",gpu_memory_utilization="0.9",num_cpu_blocks="0",num_gpu_blocks="7281",num_gpu_blocks_override="None",sliding_window="None",swap_space_bytes="4294967296"} 1.0
+# HELP ray_vllm:num_preemptions_total Cumulative number of preemption from the engine.
+# TYPE ray_vllm:num_preemptions_total counter
+ray_vllm:num_preemptions_total{model_name="facebook/opt-125m"} 0.0
