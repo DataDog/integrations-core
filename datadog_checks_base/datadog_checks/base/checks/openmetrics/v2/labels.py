@@ -163,7 +163,6 @@ class LabelAggregator:
                         if label in labels:
                             self.unconditional_labels[label] = value
             else:
-                self.logger.debug("Metric name is %s", metric)
                 for sample in self.allowed_samples(metric, allowed_values):
                     for label, value in sample.labels.items():
                         if metric.name == 'target_info':
