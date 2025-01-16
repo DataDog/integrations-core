@@ -163,12 +163,22 @@ class LabelAggregator:
                         if label in labels:
                             self.unconditional_labels[label] = value
             else:
-                for sample in self.allowed_samples(metric, allowed_values):
-                    for label, value in sample.labels.items():
-                        if metric.name == 'target_info':
-                            self.target_info_labels[label] = value
-                        else:
-                            self.unconditional_labels[label] = value
+                if metric.name == 'target_info':
+                    self.target_info_labels.update(
+                        {
+                            label: value
+                            for sample in self.allowed_samples(metric, allowed_values)
+                            for label, value in sample.labels.items()
+                        }
+                    )
+                else:
+                    self.unconditional_labels.update(
+                        {
+                            label: value
+                            for sample in self.allowed_samples(metric, allowed_values)
+                            for label, value in sample.labels.items()
+                        }
+                    )
 
     def populate(self, labels):
         label_set = frozenset(labels.items())
