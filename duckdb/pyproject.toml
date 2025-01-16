@@ -36,9 +36,7 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-deps = [
-    "duckdb==1.1.1",
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
