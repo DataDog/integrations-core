@@ -63,7 +63,6 @@ tests:
         operation: "activateToken"
       credId: "VSME1673472"
       durationMillis: "60"
-      extUserId: "7cc34F6DC"
       jurHash: "1459689"
       newBindStatus: "ENABLED"
       operation: "addCredential"
@@ -74,6 +73,8 @@ tests:
         statusMessage: "Success"
       ts: "2017-04-04 16:39:23.090 +0000"
       txnId: "vipus7E94583921D0EA"
+      usr:
+        name: "7cc34F6DC"
       wsdlVersion: "1_1"
     message: |-
       {
@@ -116,3 +117,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
