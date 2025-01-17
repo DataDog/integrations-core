@@ -90,10 +90,17 @@ def mock_responses():
             param_string = ""
             for key, val in params.items():
                 if type(val) is list:
-                    val_string = ','.join(f'{str(val_item)}' for val_item in val)
+                    if len(val) < 5:
+                        val_string = ','.join(f'{str(val_item)}' for val_item in val)
+                    else:
+                        # don't use full list as the path is too long
+                        val_string = '[]'
                 else:
                     val_string = str(val)
                 param_string += ("/" if param_string else "") + f'{key}={val_string}'
+                param_string = param_string.replace(':', '_')
+                param_string = param_string.replace('+00_00', '')
+                param_string = param_string.replace('2024-09-23 ', '')
             request_path = '{}/{}'.format(url, param_string)
         print(request_path)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
