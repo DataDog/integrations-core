@@ -46,9 +46,7 @@ class SonatypeNexusCheck(AgentCheck):
                 self.gauge(
                     metric_name,
                     int(response_json[key]["healthy"]),
-                    [f"sonatype_host:{self.extract_ip_from_url()}"] + (
-                        self.custom_tags if self.custom_tags else []
-                    ),
+                    [f"sonatype_host:{self.extract_ip_from_url()}"] + (self.custom_tags if self.custom_tags else []),
                     hostname=None,
                 )
             except KeyError as key:
@@ -76,9 +74,7 @@ class SonatypeNexusCheck(AgentCheck):
             return response_json[metric_key]
 
     def create_metric_for_configs(self, metric_data: dict, metric_name: str):
-        base_tags = [f"sonatype_host:{self.extract_ip_from_url()}"] + (
-            self.custom_tags if self.custom_tags else []
-        )
+        base_tags = [f"sonatype_host:{self.extract_ip_from_url()}"] + (self.custom_tags if self.custom_tags else [])
         config = constants.METRIC_CONFIGS[metric_name]
         value = metric_data.get("value")
 
@@ -94,9 +90,7 @@ class SonatypeNexusCheck(AgentCheck):
             self.gauge(metric_name, int(value[config["value_key"]]), base_tags, hostname=None)
 
     def create_metric_for_configs_by_format_type(self, metric_data, metric_name, metric_info):
-        base_tags = [f"sonatype_host:{self.extract_ip_from_url()}"] + (
-            self.custom_tags if self.custom_tags else []
-        )
+        base_tags = [f"sonatype_host:{self.extract_ip_from_url()}"] + (self.custom_tags if self.custom_tags else [])
 
         if isinstance(metric_data, list):
             for item in metric_data:

@@ -44,6 +44,7 @@ class NotFoundError(APIError):
 class ServerError(APIError):
     default_message = "Server Error occurred while calling the Sonatype Nexus API."
 
+
 ERROR_TYPES = {
     400: BadRequestError,
     401: InvalidAPICredentialsError,
@@ -51,6 +52,7 @@ ERROR_TYPES = {
     403: InsufficientAPIPermissionError,
     404: NotFoundError,
 }
+
 
 def handle_errors(method: Callable) -> Callable:
     def wrapper(self, *args: Any, **kwargs: Any) -> Any:

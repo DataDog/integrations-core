@@ -48,9 +48,7 @@ class SonatypeNexusClient:
                     source_type=constants.AUTH_SOURCE_TYPE,
                 )
             if response.status_code == 402:
-                err_message = (
-                    "Invalid Sonatype Nexus license, access to the requested resource requires payment."
-                )
+                err_message = "Invalid Sonatype Nexus license, access to the requested resource requires payment."
                 self.instance_check.ingest_service_check_and_event(
                     status=2,
                     tags=constants.AUTH_TAG,
