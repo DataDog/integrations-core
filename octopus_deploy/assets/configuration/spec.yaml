@@ -1,0 +1,278 @@
+name: Octopus Deploy
+files:
+- name: octopus_deploy.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
+  - template: instances
+    options:
+    - name: octopus_endpoint
+      display_priority: 8
+      description: |
+        Octopus API endpoint.
+        See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
+      value:
+        example: http://localhost:80
+        type: string
+      required: true
+    - name: spaces
+      display_priority: 5
+      description: |
+        Optional configuration to indicate the spaces that we want to be processed. If not configured,
+        all spaces and their corresponding project groups and projects are be processed.
+
+        The 'include' key indicates the regular expressions of the spaces for reporting metrics 
+        and the configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
+        that enables or disables metric collection for the project groups matching that condition. For further details
+        see the next section, 'project-groups'. If no configuration associated with the key is indicated with the regular
+        expression, they are be processed with the default configuration.
+
+        The spaces are processed in the order indicated in the 'include'.
+        If a space is matched on an 'include' key, it is only processed there and not in a later 'include'
+        that it might match on.
+
+        The 'exclude' key indicates the regular expressions of those spaces for not reporting metrics.
+        The excludes have priority over the includes, that is, if a space matches an exclude, it is not
+        processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
+
+        The 'limit' key allows limiting the number of spaces processed to avoid a combinatorial explosion of tags
+        associated with a metric.
+
+        The 'interval' key indicates the validity time of the last list of spaces obtained through the endpoint.
+        If 'interval' is not indicated, the list of spaces is obtained each time the check is executed
+        and is not cached.
+
+        In the following example, only the space named "default" is collected. Additionally, only the project groups
+        starting with "test" in that space are collected. All other project groups and spaces are ignored.
+        Furthermore, the cache is valid for 1 minute.
+
+          spaces:
+            limit: 3
+            include:
+              - 'default':
+                  project_groups:
+                      - limit: 5
+                        include:
+                            - 'test.*'
+                        interval: 60
+            interval: 60
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of spaces to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    - name: project_groups
+      display_priority: 5
+      description: |
+        Optional configuration to indicate the project groups that we want to be processed. If not configured,
+        all project groups are processed.
+
+        The 'include' key indicates the regular expressions of the project groups for reporting metrics
+        and the configuration to be applied to each of them. Each group can have a 'projects'-like
+        configuration, that enables or disables metric collection for the projects matching that condition. For
+        further details see previous section 'projects'. If no configuration associated with the key is indicated with
+        the regular expression, they are be processed with the default configuration.
+
+        The project groups are processed in the order indicated in the 'include'.
+        If a project group is matched on an 'include' key, it is only processed there and not in a later 'include'
+        that it might match on.
+
+        The 'exclude' key indicates the regular expressions of those project groups for not reporting metrics.
+        The excludes has priority over the includes, that is, if a project group matches an exclude, it is not
+        processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
+
+        The 'limit' key allows limiting the number of project groups processed to avoid a combinatorial explosion of
+        tags associated with a metric.
+
+        The 'interval' key indicates the validity time of the last list of project groups obtained through the
+        endpoint. If 'interval' is not indicated, the list of project groups are obtained each time the check is
+        executed and is not cached.
+
+        In the following example, all project groups are processed except those whose name begins with 'tmp_'
+        up to a maximum of 10 project groups.
+        Furthermore, the cache is valid for 1 minute.
+
+          project_groups:
+            limit: 10
+            include:
+              - '.*'
+            exclude:
+              - 'tmp_.*'
+            interval: 60
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of project groups to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    - name: projects
+      display_priority: 5
+      description: |
+        Optional configuration to indicate the projects that we want to be processed. If not configured,
+        all projects are processed.
+
+        The 'include' key indicates the regular expressions of the projects for reporting metrics.
+
+        The projects are processed in the order indicated in the 'include'.
+        If a projects is matched on an 'include' key, it is only processed there and not in a later 'include'
+        that it might match on.
+
+        The 'exclude' key indicates the regular expressions of those projects for not reporting metrics.
+        The excludes has priority over the includes, that is, if a projects matches an exclude, it is not
+        processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
+
+        The 'limit' key allows limiting the number of projects processed to avoid a combinatorial explosion of tags
+        associated with a metric.
+
+        The 'interval' key indicates the validity time of the last list of projects obtained through the endpoint.
+        If 'interval' is not indicated, the list of projects is obtained each time the check is executed
+        and is not cached.
+
+        In the following example, only the project named 'my-project' is collected.
+
+          projects:
+            include:
+              - 'my-project'
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of projects to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    - name: environments
+      display_priority: 6
+      description: |
+          Optional configuration to indicate the environments that we want to be processed. If not configured,
+          all environments are processed.
+
+          The 'include' key indicates the regular expressions of the environments for reporting metrics.
+
+          The environments are processed in the order indicated in the 'include'.
+          If an environment is matched on an 'include' key, it is only processed there and not in a later 'include'
+          that it might match on.
+
+          The 'exclude' key indicates the regular expressions of those environments for not reporting metrics.
+          The excludes has priority over the includes, that is, if an environment matches an exclude, it is not
+          processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
+
+          The 'limit' key allows limiting the number of environments processed to avoid a combinatorial explosion of
+          tags associated with a metric.
+
+          The 'interval' key indicates the validity time of the last list of environments obtained through the
+          endpoint. If 'interval' is not indicated, the list of environments is obtained each time the check
+          is executed and is not cached.
+
+          In the following example, only the environment named 'prod' is collected.
+
+            environments:
+              include:
+                - 'prod'
+
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of environments to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    - name: paginated_limit
+      description: |
+          Sets the number of items API calls should return at a time. Default is 30.
+      value:
+        example: 30
+        type: integer
+      required: false
+    - name: collect_events
+      description: |
+          Whether or not to collect audit events about machines, deployments, and failed logins.
+      value:
+        default: false
+        example: true
+        type: boolean
+      required: false
+    - name: unified_service_tagging
+      description: |
+          Tags metrics, logs, and events with the project name as the `service`, and octopus environment as `env`,
+          and release version as `version`.
+          For more information, see https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging
+      value:
+        default: false
+        example: true
+        type: boolean
+      required: false
+    - template: instances/default
+    - template: instances/http
+      overrides:
+        headers.display_priority: 6
+        headers.enabled: true
+        headers.description: |
+          Headers to use for every request. An Authorization header including the Octopus Deploy API key token is required
+          for authentication for the REST API.
+          You can alternatively use the `auth_token` option.
+
+        headers.value.example:
+          X-Octopus-ApiKey: "<OCTOPUS_API_KEY>"
+        auth_token.display_priority: 4
+  - template: logs
+    example:
+    - type: integration
+      source: octopus-deploy
+      service: <SERVICE_NAME>
