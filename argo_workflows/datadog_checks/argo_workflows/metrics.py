@@ -41,3 +41,11 @@ METRIC_MAP = {
     'go_memstats_sys_bytes': 'go.memstats.sys_bytes',
     'go_threads': 'go.threads',
 }
+
+# Metrics available in Argo Workflow v3.6+
+V3_6_PLUS_METRICS = {
+    'argo_workflows_gauge': 'current_workflows',
+    'argo_workflows_pods_gauge': 'pods',
+    'argo_workflows_queue_depth_gauge': 'queue_depth',
+    'argo_workflows_log_messages': 'log_messages',
+}
