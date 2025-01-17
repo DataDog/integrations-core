@@ -47,6 +47,17 @@ class SonatypeNexusClient:
                     title=constants.AUTH_TITLE,
                     source_type=constants.AUTH_SOURCE_TYPE,
                 )
+            if response.status_code == 402:
+                err_message = (
+                    "Invalid Sonatype Nexus license, access to the requested resource requires payment."
+                )
+                self.instance_check.ingest_service_check_and_event(
+                    status=2,
+                    tags=constants.AUTH_TAG,
+                    message=err_message,
+                    title=constants.AUTH_TITLE,
+                    source_type=constants.AUTH_SOURCE_TYPE,
+                )
             elif response.status_code == 403:
                 err_message = (
                     "Insufficient permissions to call the Sonatype Nexus API. Please check logs for more details."

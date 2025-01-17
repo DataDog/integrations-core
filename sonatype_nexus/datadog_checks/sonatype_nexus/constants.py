@@ -10,15 +10,8 @@ INTEGRATION_PREFIX = "sonatype_nexus"
 
 STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
 
-# field validation
-REQUIRED_FIELDS = ["username", "password", "sonatype_nexus_server_url"]
-
 # ServiceCheck and Events constants
 SONATYPE_NEXUS_CHECK_NAME = "status"
-
-CONF_VAL_TAG = ["tag:sonatype_nexus_conf_validation"]
-CONF_VAL_TITLE = "Sonatype Nexus conf.yaml validations"
-CONF_VAL_SOURCE_TYPE = INTEGRATION_PREFIX + ".conf_validation"
 
 AUTH_TAG = ["tag:sonatype_nexus_authentication_validation"]
 AUTH_TITLE = "Sonatype Nexus Authentication validations"

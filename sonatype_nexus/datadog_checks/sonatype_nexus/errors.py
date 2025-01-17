@@ -29,6 +29,10 @@ class InsufficientAPIPermissionError(APIError):
     default_message = "Insufficient permissions to call the Sonatype Nexus API."
 
 
+class LicenseExpiredError(APIError):
+    default_message = "Invalid Sonatype Nexus license, access to the requested resource requires payment."
+
+
 class BadRequestError(APIError):
     default_message = "Bad request error occurred when calling the Sonatype Nexus API."
 
@@ -40,6 +44,13 @@ class NotFoundError(APIError):
 class ServerError(APIError):
     default_message = "Server Error occurred while calling the Sonatype Nexus API."
 
+ERROR_TYPES = {
+    400: BadRequestError,
+    401: InvalidAPICredentialsError,
+    402: LicenseExpiredError,
+    403: InsufficientAPIPermissionError,
+    404: NotFoundError,
+}
 
 def handle_errors(method: Callable) -> Callable:
     def wrapper(self, *args: Any, **kwargs: Any) -> Any:
@@ -49,17 +60,8 @@ def handle_errors(method: Callable) -> Callable:
             if response is None:
                 raise EmptyResponseError()
 
-            if response.status_code == 400:
-                raise BadRequestError()
-
-            if response.status_code == 401:
-                raise InvalidAPICredentialsError()
-
-            if response.status_code == 403:
-                raise InsufficientAPIPermissionError()
-
-            if response.status_code == 404:
-                raise NotFoundError()
+            if response.status_code in [400, 401, 402, 403, 404]:
+                raise ERROR_TYPES[response.status_code]()
 
             if response.status_code in [500, 502, 503, 504]:
                 raise ServerError()
@@ -94,6 +96,10 @@ def handle_errors(method: Callable) -> Callable:
         except InsufficientAPIPermissionError as ex:
             self.log.error("InsufficientAPIPermissionError: %s", ex)
             raise InsufficientAPIPermissionError() from ex
+
+        except LicenseExpiredError as ex:
+            self.log.error("LicenseExpiredError: %s", ex)
+            raise LicenseExpiredError() from ex
 
         except BadRequestError as ex:
             self.log.error("BadRequestError: %s", ex)

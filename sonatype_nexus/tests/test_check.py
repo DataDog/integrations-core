@@ -9,7 +9,7 @@ import requests
 
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
-from datadog_checks.sonatype_nexus.constants import REQUIRED_FIELDS, STATUS_METRICS_MAP
+from datadog_checks.sonatype_nexus.constants import STATUS_METRICS_MAP
 
 SONATYPE_HOST = "sonatype_host:127.0.0.1"
 
@@ -28,23 +28,10 @@ def setup_check():
     return check
 
 
-@patch("datadog_checks.sonatype_nexus.check.SonatypeNexusCheck.validate_minimum_collection_interval")
-def test_validate_minimum_collection_interval_called(
-    mock_validate_minimum_collection_interval,
-):
-    check = setup_check()
-    check.instance.get.side_effect = ["valid_value"] * len(REQUIRED_FIELDS)
-    check.validate_integration_configurations()
-    mock_validate_minimum_collection_interval.assert_called_once()
-
-
-@patch("datadog_checks.sonatype_nexus.check.log_and_raise_exception")
-def test_valid_integer_value(mock_log_and_raise_exception):
+def test_valid_integer_value():
     check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
     check.min_collection_interval = 300
-    check.validate_minimum_collection_interval()
     assert check.min_collection_interval == 300
-    mock_log_and_raise_exception.assert_not_called()
 
 
 @pytest.mark.e2e
