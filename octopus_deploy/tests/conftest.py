@@ -100,6 +100,7 @@ def mock_responses():
                 param_string += ("/" if param_string else "") + f'{key}={val_string}'
                 param_string = param_string.replace(':', '_')
                 param_string = param_string.replace('+00_00', '')
+                param_string = param_string.replace('2024-09-23 ', '')
             request_path = '{}/{}'.format(url, param_string)
         print(request_path)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
