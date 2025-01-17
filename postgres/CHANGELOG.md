@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 22.3.0 / 2024-11-28
+## 22.4.0 / 2024-12-26
+
+***Added***:
+
+* Add postgresql.relation.xmin metric ([#19218](https://github.com/DataDog/integrations-core/pull/19218))
+
+***Fixed***:
+
+* Fix check for Postgres collect query activity to avoid bugs with in-flight duration and missing blocking pids ([#19271](https://github.com/DataDog/integrations-core/pull/19271))
+
+## 22.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 
@@ -13,7 +23,7 @@
 
 * Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL. ([#19061](https://github.com/DataDog/integrations-core/pull/19061))
 
-## 22.2.0 / 2024-11-06
+## 22.2.0 / 2024-11-06 / Agent 7.60.0
 
 ***Added***:
 

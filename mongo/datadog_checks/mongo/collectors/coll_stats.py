@@ -45,6 +45,10 @@ class CollStatsCollector(MongoCollector):
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
+            if self.should_skip_system_collection(coll_name):
+                self.log.debug("Skipping collStats for system collection %s.%s", self.db_name, coll_name)
+                continue
+
             # Grab the stats from the collection
             try:
                 collection_stats = self._get_collection_stats(api, coll_name)

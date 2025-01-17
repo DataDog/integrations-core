@@ -587,9 +587,9 @@
                   "cell_display_mode": ["bar"],
                   "conditional_formats": [
                     {
-                      "comparator": ">",
-                      "palette": "white_on_yellow",
-                      "value": 2
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 1
                     },
                     {
                       "comparator": "<=",
@@ -598,8 +598,8 @@
                     },
                     {
                       "comparator": "<=",
-                      "palette": "white_on_green",
-                      "value": 1
+                      "palette": "white_on_yellow",
+                      "value": 3
                     }
                   ],
                   "q": "avg:snmp.ifAdminStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",

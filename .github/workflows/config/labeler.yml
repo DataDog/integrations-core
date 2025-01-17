@@ -39,6 +39,8 @@ integration/activemq:
 - activemq/**/*
 integration/activemq_xml:
 - activemq_xml/**/*
+integration/adyen:
+- adyen/**/*
 integration/aerospike:
 - aerospike/**/*
 integration/agent_metrics:
@@ -55,6 +57,8 @@ integration/amazon_msk:
 - amazon_msk/**/*
 integration/ambari:
 - ambari/**/*
+integration/anthropic:
+- anthropic/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
@@ -69,8 +73,12 @@ integration/argo_workflows:
 - argo_workflows/**/*
 integration/argocd:
 - argocd/**/*
+integration/asana:
+- asana/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
+integration/authorize_net:
+- authorize_net/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
 integration/aws_neuron:
@@ -81,6 +89,8 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/boundary:
 - boundary/**/*
+integration/brevo:
+- brevo/**/*
 integration/btrfs:
 - btrfs/**/*
 integration/cacti:
@@ -169,6 +179,8 @@ integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
 - druid/**/*
+integration/duckdb:
+- duckdb/**/*
 integration/ecs_fargate:
 - ecs_fargate/**/*
 integration/eks_anywhere:
@@ -263,6 +275,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/intercom:
+- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
 integration/istio:
@@ -281,6 +295,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/keda:
+- keda/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:
@@ -321,8 +337,6 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
-integration/anthropic:
-- anthropic/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
@@ -349,6 +363,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/milvus:
+- milvus/**/*
 integration/mimecast:
 - mimecast/**/*
 integration/mongo:
@@ -437,6 +453,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/quarkus:
+- quarkus/**/*
 integration/rabbitmq:
 - rabbitmq/**/*
 integration/ray:
@@ -511,8 +529,12 @@ integration/ssh_check:
 - ssh_check/**/*
 integration/statsd:
 - statsd/**/*
+integration/streamnative:
+- streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
+integration/supabase:
+- supabase/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/suricata:

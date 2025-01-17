@@ -1,0 +1,1156 @@
+{
+    "title": "Shopify - Customer Overview",
+    "description": "",
+    "widgets": [
+        {
+            "id": 6457589008412640,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-primary-logo-456baa801ee66a0a435671082365958316831c9960c480451dd0330bcdae304f.svg",
+                "url_dark_theme": "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-inverted-primary-logo-bdc6ddd67862d9bb1f8c559e1bb50dd233112ac57b29cac2edcf17ed2e1fe6fa.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 7447057642776924,
+            "definition": {
+                "type": "note",
+                "content": "\n**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform designed to help individuals start, manage, and grow their businesses. It provides tools to build an online store, manage sales, market to customers, and accept payments in both digital and physical locations.\n\nThe **Shopify Customer Overview** Dashboard provides an overview of customers within your store. It provides insights into customer's marketing and order details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 8587137220738596,
+            "definition": {
+                "title": "Total Customers",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 2522113371979004,
+            "definition": {
+                "title": "First Time Customers",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 3033015122548506,
+            "definition": {
+                "title": "Returning Customers",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:>1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4601366202227524,
+            "definition": {
+                "title": "Customer Returning Rate",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:>1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "(query1 / query2) * 100"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "yellow_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 6324267437916298,
+            "definition": {
+                "title": "Sales by Customer",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 100,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 100,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [],
+                        "sort": {
+                            "count": 10000,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "number",
+                                "alias": "Order Value",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 4,
+                "y": 6,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 4312648521138476,
+            "definition": {
+                "title": "Amount Spent by First Time Customers (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 8540082775305124,
+            "definition": {
+                "title": "Amount Spent by Returning Customers (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:>1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 10,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 6208927249201918,
+            "definition": {
+                "title": "Amount Spent by Currency (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 10,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 2471531239284296,
+            "definition": {
+                "title": "Customers by City",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@defaultAddress.city",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@usr.id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer -@defaultAddress.city:\"\" $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 3660022425769518,
+            "definition": {
+                "title": "Customers by Default Location",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@defaultAddress.countryCodeV2",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@usr.id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 250,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "palette": "Plasma",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 14,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 8504166996883148,
+            "definition": {
+                "title": "Customers by Email Marketing State",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@emailMarketingConsent.marketingState",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@usr.id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8504970604682638,
+            "definition": {
+                "title": "Customers by SMS Marketing State",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@smsMarketingConsent.marketingState",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@usr.id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 18,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3112514483697428,
+            "definition": {
+                "title": "Customers by Last Order Value",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@lastOrder.totalPriceSet.shopMoney.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@lastOrder.totalPriceSet.shopMoney.amount"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@lastOrder.totalPriceSet.shopMoney.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@lastOrder.totalPriceSet.shopMoney.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 625,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 4536649778544610,
+            "definition": {
+                "title": "Top Customers by Order Count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "hide_incomplete_cost_data": true
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "max",
+                                    "metric": "@numberOfOrders"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "max",
+                                            "metric": "@numberOfOrders"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@usr.id",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "max",
+                                            "metric": "@numberOfOrders"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 625,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 22,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 2373335191656186,
+            "definition": {
+                "title": "Customers by Subscription Status",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@usr.id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@productSubscriberStatus",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@usr.id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 22,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 1987008830400332,
+            "definition": {
+                "title": "Customers Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:shopify service:customer $customer_name $customer_id $currency",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "usr.id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "numberOfOrders",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "lifetimeDuration",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "taxExempt",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "emailMarketingConsent.marketingState",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "smsMarketingConsent.marketingState",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "customer_id",
+            "prefix": "@usr.id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "customer_name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "currency",
+            "prefix": "@amountSpent.currencyCode",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

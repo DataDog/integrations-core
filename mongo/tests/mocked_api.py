@@ -98,7 +98,10 @@ class MockedDB(object):
             return json.load(f, object_hook=json_util.object_hook)
 
     def list_collection_names(self, session=None, filter=None, comment=None, **kwargs):
-        with open(os.path.join(HERE, "fixtures", "list_collection_names"), 'r') as f:
+        filename = f"list_collection_names-{self._db_name}"
+        if not os.path.exists(os.path.join(HERE, "fixtures", filename)):
+            filename = "list_collection_names"
+        with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f)
 
     def aggregate(self, pipeline, session=None, **kwargs):
