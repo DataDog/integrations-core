@@ -104,6 +104,7 @@ def mock_responses():
                 param_string = param_string.replace('2024-09-23 ', '')
                 param_string = param_string.replace('fromCompletedDate', 'from')
                 param_string = param_string.replace('toCompletedDate', 'to')
+                param_string = param_string.replace('.123000', '')
 
             request_path = '{}/{}'.format(url, param_string)
         print(request_path)
