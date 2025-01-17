@@ -174,7 +174,7 @@ datadog-sqlserver==21.0.0
 datadog-squid==4.1.0
 datadog-ssh-check==4.0.0
 datadog-statsd==3.0.0
-datadog-strimzi==3.1.0
+datadog-strimzi==3.2.0
 datadog-supabase==1.0.0
 datadog-supervisord==4.0.0
 datadog-suricata==2.0.0
