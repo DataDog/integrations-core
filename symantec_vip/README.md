@@ -22,7 +22,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
   - Please follow steps mentioned in the official documentation to activate API: [Activate VIP Report Streaming Service][3]
 
 - Jurisdiction hash
-  - User’s account jurisdiction hash is available on the **Account Information** tab of the **Account** page in VIP Manager.
+  - The jurisdiction hash of the user account is available on the **Account Information** tab of the **Account** page in VIP Manager.
 
 ### Connect your Symantec VIP Account to Datadog
 
