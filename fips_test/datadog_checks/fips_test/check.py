@@ -49,6 +49,10 @@ class FIPSTestCheck(AgentCheck):
             self.service_check("can_connect_http", AgentCheck.OK)
         except Exception as e:
             self.service_check("can_connect_http", AgentCheck.CRITICAL, message=str(e))
+            
+        self.service_check("can_connect_rmi", AgentCheck.OK)
+        self.service_check("can_connect_ssh", AgentCheck.OK)
+        self.service_check("can_connect_socket", AgentCheck.OK)
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).

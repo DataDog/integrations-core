@@ -37,6 +37,8 @@ def dd_environment(request, instance_fips, instance_non_fips):
 def instance_fips():
     return {
         'http_endpoint': 'https://localhost:8443',
+        'tls_verify': False,
+        'tls_validate_hostname': False,
     }
 
 
@@ -44,4 +46,6 @@ def instance_fips():
 def instance_non_fips():
     return {
         'http_endpoint': 'https://localhost:9443',
+        'tls_verify': False,
+        'tls_validate_hostname': False,
     }

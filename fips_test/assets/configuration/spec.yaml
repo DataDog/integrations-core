@@ -32,3 +32,4 @@ files:
           example: localhost:8080
           type: string
       - template: instances/default
+      - template: instances/tls

@@ -30,3 +30,11 @@ def instance_socket_endpoint():
 
 def instance_ssh_endpoint():
     return 'localhost:22'
+
+
+def instance_tls_validate_hostname():
+    return True
+
+
+def instance_tls_verify():
+    return True

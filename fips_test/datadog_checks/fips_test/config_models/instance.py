@@ -44,6 +44,12 @@ class InstanceConfig(BaseModel):
     socket_endpoint: Optional[str] = None
     ssh_endpoint: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_private_key: Optional[str] = None
+    tls_private_key_password: Optional[str] = None
+    tls_validate_hostname: Optional[bool] = None
+    tls_verify: Optional[bool] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
