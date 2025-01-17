@@ -311,6 +311,7 @@ class SqlserverActivity(DBMAsyncJob):
                 "ddtags": self.tags,
                 'service': self._config.service,
                 "db": {
+                    "instance": row.get('database_name', None),
                     "query_signature": query_signature,
                     "raw_query_signature": raw_query_signature,
                     "statement": raw_statement,
