@@ -90,7 +90,11 @@ def mock_responses():
             param_string = ""
             for key, val in params.items():
                 if type(val) is list:
-                    val_string = ','.join(f'{str(val_item)}' for val_item in val)
+                    if len(val) < 5:
+                        val_string = ','.join(f'{str(val_item)}' for val_item in val)
+                    else:
+                        # don't use full list as the path is too long
+                        val_string = '[]'
                 else:
                     val_string = str(val)
                 param_string += ("/" if param_string else "") + f'{key}={val_string}'
