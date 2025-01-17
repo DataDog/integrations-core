@@ -632,7 +632,7 @@
             "id": 4011932530089664,
             "definition": {
               "type": "note",
-              "content": "Monitor the efficiency and responsiveness of search and query operations in Milvus. This helps identify bottlenecks and ensures SLAs are met for query performance.\n\n",
+              "content": "Monitor the efficiency and responsiveness of search and query operations in Milvus. This helps identify bottlenecks and ensures SLAs for query performance are met.\n\n",
               "background_color": "blue",
               "font_size": "16",
               "text_align": "center",
@@ -906,7 +906,7 @@
             "id": 2328741487941490,
             "definition": {
               "type": "note",
-              "content": "Monitoring system resource usage helps to ensure adequate resource allocation and plan capacity for scaling.",
+              "content": "Monitoring system resource usage helps you to ensure adequate resource allocation and to plan capacity for scaling.",
               "background_color": "blue",
               "font_size": "16",
               "text_align": "center",
@@ -1522,7 +1522,7 @@
             "id": 3782628226931712,
             "definition": {
               "type": "note",
-              "content": "Track synchronization across distributed components and ensure proper time travel handling. Metrics like TT lag and time synchronization latencies ensure data consistency and real-time query accuracy.",
+              "content": "Track synchronization across distributed components and ensure proper time travel handling. Metrics like time travel lag and time synchronization latencies ensure data consistency and real-time query accuracy.",
               "background_color": "blue",
               "font_size": "16",
               "text_align": "center",
