@@ -186,4 +186,3 @@ files:
         tls_cert.hidden: true
         tls_ca_cert.hidden: true
         tls_private_key.hidden: true
-        tls_ciphers.hidden: true

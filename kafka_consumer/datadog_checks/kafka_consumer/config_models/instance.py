@@ -71,7 +71,6 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
-    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_crlfile: Optional[str] = None
     tls_private_key: Optional[str] = None
     tls_private_key_password: Optional[str] = None
