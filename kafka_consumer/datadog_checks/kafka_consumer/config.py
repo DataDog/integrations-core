@@ -19,7 +19,7 @@ class KafkaConfig:
         self.log = log
         self._custom_tags = instance.get('tags', [])
         self._monitor_unlisted_consumer_groups = is_affirmative(instance.get('monitor_unlisted_consumer_groups', False))
-        self._collect_consumer_group_state = is_affirmative(instance.get('collect_consumer_group_state', False))
+        self._collect_consumer_group_state = instance.get('collect_consumer_group_state', False)
         self._monitor_all_broker_highwatermarks = is_affirmative(
             instance.get('monitor_all_broker_highwatermarks', False)
         )

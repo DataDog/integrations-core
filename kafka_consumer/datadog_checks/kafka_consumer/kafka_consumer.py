@@ -209,7 +209,6 @@ class KafkaCheck(AgentCheck):
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
-            consumer_group_state = self.get_consumer_group_state(consumer_group)
             if reported_contexts >= contexts_limit:
                 self.log.debug(
                     "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
@@ -223,8 +222,10 @@ class KafkaCheck(AgentCheck):
                 'partition:%s' % partition,
                 'consumer_group:%s' % consumer_group,
                 'kafka_cluster_id:%s' % cluster_id,
-                'consumer_group_state:%s' % consumer_group_state,
             ]
+            if self.config._collect_consumer_group_state:
+                consumer_group_state = self.get_consumer_group_state(consumer_group)
+                consumer_group_tags.extend(['consumer_group_state:%s' % consumer_group_state])
             consumer_group_tags.extend(self.config._custom_tags)
 
             partitions = self.client.get_partitions_for_topic(topic)
@@ -292,8 +293,7 @@ class KafkaCheck(AgentCheck):
         self.log.debug('%s consumer offsets reported', reported_contexts)
 
     def get_consumer_group_state(self, consumer_group):
-        consumer_group_state = ""
-        if self.config._collect_consumer_group_state:
+            consumer_group_state = ""
             # Get the consumer group state if present
             group_id, consumer_group_state = self.client.describe_consumer_groups(consumer_group)
             self.log.debug(
@@ -301,7 +301,7 @@ class KafkaCheck(AgentCheck):
                 group_id,
                 consumer_group_state,
             )
-        return consumer_group_state
+            return consumer_group_state
 
     def get_highwater_offsets(self, consumer_offsets):
         self.log.debug('Getting highwater offsets')
