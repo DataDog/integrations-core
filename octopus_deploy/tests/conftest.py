@@ -98,9 +98,13 @@ def mock_responses():
                 else:
                     val_string = str(val)
                 param_string += ("/" if param_string else "") + f'{key}={val_string}'
+                # TODO: fix hacks to decrease path length
                 param_string = param_string.replace(':', '_')
                 param_string = param_string.replace('+00_00', '')
                 param_string = param_string.replace('2024-09-23 ', '')
+                param_string = param_string.replace('fromCompletedDate', 'from')
+                param_string = param_string.replace('toCompletedDate', 'to')
+
             request_path = '{}/{}'.format(url, param_string)
         print(request_path)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
