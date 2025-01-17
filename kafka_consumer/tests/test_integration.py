@@ -41,11 +41,11 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
+
 def test_collect_consumer_group_state(aggregator, check, kafka_instance, dd_run_check):
     kafka_instance['collect_consumer_group_state'] = True
     dd_run_check(check(kafka_instance))
     assert_check_kafka_has_consumer_group_state_tag(aggregator, kafka_instance['consumer_groups'])
-
 
 
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):

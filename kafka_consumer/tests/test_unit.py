@@ -233,12 +233,13 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
         ],
     )
 
+
 def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()
-    kafka_instance["collect_consumer_group_state"] = True 
+    kafka_instance["collect_consumer_group_state"] = True
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
-    
+
     dd_run_check(kafka_consumer_check)
 
     aggregator.assert_metric(
@@ -265,7 +266,7 @@ def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_
             'consumer_group_state:STABLE',
         ],
     )
- 
+
 
 def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_check, aggregator, caplog):
     # Given
