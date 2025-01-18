@@ -14,7 +14,7 @@ from .check import AerospikeCheckV2
 
 class AerospikeCheck(AgentCheck):
     """
-    We will support only openmetrics based implementation only,
+    We will support only openmetrics based implementation,
     as aerospike-prometheus-exporter is capable of taking to different server versions and make server calls seamlessly.
     and expose metrics in openmetrics format.
     """
