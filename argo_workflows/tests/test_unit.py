@@ -63,8 +63,16 @@ COUNTS = {
 EXPECTED_METRICS = sorted(GAUGES | COUNTS)
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path='tests/fixtures/metrics.txt')
+@pytest.mark.parametrize(
+    "fixture_file, description",
+    [
+        ('tests/fixtures/metrics.txt', 'Test with old metric names'),
+        ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
+    ],
+)
+def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
+
+    mock_http_response(file_path=fixture_file)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 

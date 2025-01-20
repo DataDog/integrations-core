@@ -54,6 +54,10 @@ jira_statuses = [
   "Done",
 ]
 github_team = "container-integrations"
+exclude_members = [
+  "clamoriniere",
+  "hkaj",
+]
 github_labels = ["team/container-integrations"]
 
 [teams."Database Monitoring"]
