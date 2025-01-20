@@ -1,0 +1,45 @@
+name: Test FIPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent-image:
+        description: "Agent image to use"
+        required: false
+        type: string
+      target:
+        description: "Target to test"
+        required: false
+        type: string
+  pull_request:
+    path:
+    - datadog_checks_base/datadog_checks/**
+  schedule:
+    - cron: '0 0,8,16 * * *'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    name: "Test FIPS"
+
+    env:
+      FORCE_COLOR: "1"
+      PYTHON_VERSION: "3.12"
+      AGENT_IMAGE: "${{ inputs.agent-image }}"
+
+    steps:
+
+    - name: Set up containers
+      run: |
+        docker compose up -d ./compose/docker-compose.yml
+
+    - name: Run tests
+      run: |
+        pytest -v ./tests
+
