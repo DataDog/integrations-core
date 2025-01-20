@@ -1,0 +1,5 @@
+init_config:
+
+instances:
+  - http_endpoint: http://localhost:8080
+
