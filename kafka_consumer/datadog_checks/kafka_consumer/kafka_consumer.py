@@ -225,7 +225,7 @@ class KafkaCheck(AgentCheck):
             ]
             if self.config._collect_consumer_group_state:
                 consumer_group_state = self.get_consumer_group_state(consumer_group)
-                consumer_group_tags.extend(['consumer_group_state:%s' % consumer_group_state])
+                consumer_group_tags.append(f'consumer_group_state:{consumer_group_state}')
             consumer_group_tags.extend(self.config._custom_tags)
 
             partitions = self.client.get_partitions_for_topic(topic)
