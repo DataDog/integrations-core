@@ -15,21 +15,17 @@ jobs:
   run:
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        platform: [linux, windows]
         agent-image: ["datadog/agent-dev:master-py3", "datadog/agent-dev:master-fips", "datadog/agent-dev:master-py3-win-servercore"]
-        server-image: ["alpine:3.14", "mcr.microsoft.com/windows/nanoserver:ltsc2022"]
+        cipher: ["ECDHE-RSA-AES128-SHA256", "ECDHE-RSA-CHACHA20-POLY1305"]
         exclude:
-          - os: windows-2022
+          - platform: windows
             agent-image: "datadog/agent-dev:master-fips"
-          - os: windows-2022
-            server-image: "alpine:3.14"
-          - os: windows-2022
+          - platform: windows
             agent-image: "datadog/agent-dev:master-py3"
-          - os: ubuntu-22.04
+          - platform: linux
             agent-image: "datadog/agent-dev:master-py3-win-servercore"
-          - os: ubuntu-22.04
-            server-image: "mcr.microsoft.com/windows/nanoserver:ltsc2022"
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.platform == 'linux' && 'ubuntu-22.04' || 'windows-2022' }}
     name: "Test FIPS"
 
     env:
@@ -53,7 +49,9 @@ jobs:
     - name: Set up containers
       env:
         AGENT_IMAGE: "${{ matrix.agent-image }}"
-        SERVER_IMAGE: "${{ matrix.server-image }}"
+        CIPHER: "${{ matrix.cipher }}"
+        SSL_PATH: ${{ matrix.platform == 'linux' && '/etc/ssl' || 'C:\ProgramData\ssl\' }}
+        PLATFORM: ${{ matrix.platform }}
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d

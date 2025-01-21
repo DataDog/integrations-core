@@ -1,8 +1,4 @@
-ARG BASE_IMAGE
-
-FROM ${BASE_IMAGE}
-
-SHELL ["sh", "-c"]
+FROM alpine:3.14
 
 COPY start-server.sh /usr/local/bin/start-server.sh
 COPY ca.* /tmp/
