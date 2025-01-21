@@ -139,6 +139,7 @@ RUN Get-RemoteFile `
     nmake install_sw'
 # libpq and pg_config as needed by psycopg
 ENV PG_VERSION="16.0"
+COPY pg_config.pl C:\pg_config.pl
 RUN Get-RemoteFile `
       -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
       -Path postgresql-$Env:PG_VERSION.tar.bz2 `
@@ -146,6 +147,7 @@ RUN Get-RemoteFile `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src && `
     cd C:\postgresql_src\postgresql-$Env:PG_VERSION\src\tools\msvc && `
+    Copy-Item C:\pg_config.pl -Destination .\config.pl && `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe build.pl' && `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
     Add-ToPath -Append "C:\postgresql\bin"
