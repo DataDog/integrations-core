@@ -205,7 +205,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_metric(
@@ -217,7 +216,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_event(
@@ -225,6 +223,39 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
         "topic: topic1, partition: partition1 has negative consumer lag. "
         "This should never happen and will result in the consumer skipping new messages "
         "until the lag turns positive.",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+
+
+def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
+    mock_client = seed_mock_client()
+    kafka_instance["collect_consumer_group_state"] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+            'consumer_group_state:STABLE',
+        ],
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_lag",
         count=1,
         tags=[
             'consumer_group:consumer_group1',

@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 11.1.0 / 2025-01-21
+
+***Security***:
+
+* Add FIPS switch ([#19179](https://github.com/DataDog/integrations-core/pull/19179))
+
+***Added***:
+
+* First version of helper for creating logs saved views. ([#17353](https://github.com/DataDog/integrations-core/pull/17353))
+* Add script to convert monitor export json into the JSON we can use ([#17936](https://github.com/DataDog/integrations-core/pull/17936))
+* Add decimal/binary specific byte units ([#19252](https://github.com/DataDog/integrations-core/pull/19252))
+
+***Fixed***:
+
+* Stop generating Python 2 markers for dependency updates. ([#19386](https://github.com/DataDog/integrations-core/pull/19386))
+
 ## 11.0.0 / 2024-12-09
 
 ***Removed***:

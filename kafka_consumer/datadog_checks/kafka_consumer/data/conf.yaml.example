@@ -93,6 +93,14 @@ instances:
     #     <TOPIC_NAME_2>: []
     #   test_consumer.+: {}
 
+    ## @param collect_consumer_group_state - boolean - optional - default: false
+    ## Setting the collect_consumer_group_state to true collects the 
+    ## consumer group state as a tag. 
+    ##
+    ## WARNING: Enabling this feature might cause some increase in Agent resource consumption.
+    #
+    # collect_consumer_group_state: false
+
     ## @param monitor_unlisted_consumer_groups - boolean - optional - default: false
     ## Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups
     ## and fetch all their known offsets. If this is not set to true, you must specify `consumer_groups`.

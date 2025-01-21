@@ -1,0 +1,1 @@
+Add index state attributes (is_unique, is_exclusion, is_immediate, is_clustered, is_valid, is_checkxmin, is_ready, is_live, is_replident, is_partial) from pg_index to PostgreSQL schema collection for enhanced index property visibility.
