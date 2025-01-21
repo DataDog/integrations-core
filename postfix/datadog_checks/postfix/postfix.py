@@ -5,10 +5,10 @@
 
 # stdlib
 import os
+import subprocess
 
 # project
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class PostfixCheck(AgentCheck):
@@ -116,15 +116,19 @@ class PostfixCheck(AgentCheck):
 
         return instance_config
 
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def _get_postqueue_stats(self, postfix_config_dir, tags):
-        pc_output, _, _ = get_subprocess_output(['postconf', 'authorized_mailq_users'], self.log, False)
+        pc_output, _, _ = self._get_subprocess_output(['postconf', 'authorized_mailq_users'])
 
         if pc_output:
             authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
 
             self.log.debug('authorized_mailq_users : %s', authorized_mailq_users)
 
-        output, _, _ = get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'], self.log, False)
+        output, _, _ = self._get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'])
         active_count = 0
         hold_count = 0
         deferred_count = 0
@@ -180,12 +184,12 @@ class PostfixCheck(AgentCheck):
             else:
                 # can dd-agent user run sudo?
                 test_sudo = ['sudo', '-l']
-                _, _, exit_code = get_subprocess_output(test_sudo, self.log, False)
+                _, _, exit_code = self._get_subprocess_output(test_sudo)
                 if exit_code == 0:
                     # default to `root` for backward compatibility
                     postfix_user = self.init_config.get('postfix_user', 'root')
                     cmd = ['sudo', '-u', postfix_user, 'find', queue_path, '-type', 'f']
-                    output, _, _ = get_subprocess_output(cmd, self.log, False)
+                    output, _, _ = self._get_subprocess_output(cmd)
                     count = len(output.splitlines())
                 else:
                     raise Exception('The dd-agent user does not have sudo access')
@@ -202,7 +206,7 @@ class PostfixCheck(AgentCheck):
 
     def _collect_metadata(self):
         try:
-            pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+            pc_output, _, _ = self._get_subprocess_output(['postconf', 'mail_version'])
         except Exception as e:
             self.log.warning('unable to call `postconf mail_version`: %s', e)
             return
