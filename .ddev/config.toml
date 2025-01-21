@@ -175,6 +175,7 @@ exclude = [
     # 2.4.10 is broken on py2 and they did not yank the version
     'rethinkdb',
     'psutil',
+    'pymongo[srv]', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
