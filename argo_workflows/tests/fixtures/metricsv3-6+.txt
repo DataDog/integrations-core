@@ -203,3 +203,69 @@ go_threads 10
 argo_workflows_log_messages{level="error"} 0
 argo_workflows_log_messages{level="info"} 136
 argo_workflows_log_messages{level="warning"} 0
+# HELP argo_workflows_cronworkflows_concurrencypolicy_triggered Number of cron workflows triggered with concurrency policy.
+# TYPE argo_workflows_cronworkflows_concurrencypolicy_triggered counter
+argo_workflows_cronworkflows_concurrencypolicy_triggered{namespace="default",workflow="example-cron"} 42
+# HELP argo_workflows_cronworkflows_triggered_total Total number of cron workflows triggered.
+# TYPE argo_workflows_cronworkflows_triggered_total counter
+argo_workflows_cronworkflows_triggered_total{namespace="default",workflow="example-cron"} 100
+# HELP argo_workflows_log_messages Count of log messages by level.
+# TYPE argo_workflows_log_messages counter
+argo_workflows_log_messages{level="info"} 5000
+argo_workflows_log_messages{level="error"} 200
+# HELP argo_workflows_queue_retries Total number of retries in queues.
+# TYPE argo_workflows_queue_retries counter
+argo_workflows_queue_retries{queue="workflow_queue"} 25
+# HELP argo_workflows_total_count Total count of workflows processed.
+# TYPE argo_workflows_total_count counter
+argo_workflows_total{namespace="default"} 1500
+# HELP argo_workflows_workflowtemplate_triggered_total Total number of workflow templates triggered.
+# TYPE argo_workflows_workflowtemplate_triggered_total counter
+argo_workflows_workflowtemplate_triggered_total{template="example-template"} 75
+# HELP argo_workflows_deprecated_feature Count of deprecated features used.
+# TYPE argo_workflows_deprecated_feature gauge
+argo_workflows_deprecated_feature{feature="legacy-feature"} 1
+# HELP argo_workflows_current_workflows Current number of workflows running.
+# TYPE argo_workflows_current_workflows gauge
+argo_workflows_current_workflows{namespace="default"} 10
+# HELP argo_workflows_is_leader Indicates if this controller is the leader.
+# TYPE argo_workflows_is_leader gauge
+argo_workflows_is_leader 1
+# HELP argo_workflows_pod_pending_count Number of pending pods.
+# TYPE argo_workflows_pod_pending_count counter
+argo_workflows_pod_pending_count{namespace="default",reason="unschedulable"} 3
+# HELP argo_workflows_pods Current number of pods.
+# TYPE argo_workflows_pods gauge
+argo_workflows_pods{namespace="default"} 50
+# HELP argo_workflows_pods_total Total number of pods processed.
+# TYPE argo_workflows_pods_total gauge
+argo_workflows_pods_total{namespace="default"} 2000
+# HELP argo_workflows_queue_depth Current depth of workflow queues.
+# TYPE argo_workflows_queue_depth gauge
+argo_workflows_queue_depth{queue="workflow_queue"} 15
+# HELP argo_workflows_queue_longest_running Longest-running task in the queue.
+# TYPE argo_workflows_queue_longest_running gauge
+argo_workflows_queue_longest_running{queue="workflow_queue"} 120
+# HELP argo_workflows_queue_unfinished_work Amount of unfinished work in the queue.
+# TYPE argo_workflows_queue_unfinished_work gauge
+argo_workflows_queue_unfinished_work{queue="workflow_queue"} 500
+# HELP argo_workflows_version Controller version information.
+# TYPE argo_workflows_version gauge
+argo_workflows_version{version="3.6.0",platform="linux/amd64"} 1
+# HELP argo_workflows_workflowtemplate_runtime Runtime of workflow templates.
+# TYPE argo_workflows_workflowtemplate_runtime gauge
+argo_workflows_workflowtemplate_runtime{template="example-template"} 45.2
+# HELP argo_workflows_k8s_request_duration Duration of Kubernetes API requests.
+# TYPE argo_workflows_k8s_request_duration histogram
+argo_workflows_k8s_request_duration_bucket{kind="pod",verb="GET",le="1.0"} 100
+argo_workflows_k8s_request_duration_bucket{kind="pod",verb="GET",le="2.0"} 200
+argo_workflows_k8s_request_duration_bucket{kind="pod",verb="GET",le="5.0"} 300
+argo_workflows_k8s_request_duration_sum{kind="pod",verb="GET"} 1500.0
+argo_workflows_k8s_request_duration_count{kind="pod",verb="GET"} 300
+# HELP argo_workflows_queue_duration Time spent processing items in queues.
+# TYPE argo_workflows_queue_duration histogram
+argo_workflows_queue_duration_bucket{queue="workflow_queue",le="1.0"} 50
+argo_workflows_queue_duration_bucket{queue="workflow_queue",le="2.0"} 150
+argo_workflows_queue_duration_bucket{queue="workflow_queue",le="5.0"} 250
+argo_workflows_queue_duration_sum{queue="workflow_queue"} 1200.0
+argo_workflows_queue_duration_count{queue="workflow_queue"} 250
