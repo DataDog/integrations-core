@@ -159,7 +159,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area"
                             },
@@ -211,7 +210,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {},
                             "title": "Octopus Deploy Logs",
                             "title_align": "left",
                             "title_size": "16",
@@ -238,7 +236,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {},
                             "title": "Octopus Deploy Events",
                             "title_align": "left",
                             "title_size": "16",
@@ -299,7 +296,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -313,7 +315,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 5
+                            },
                             "timeseries_background": {
                                 "type": "area"
                             },
@@ -338,7 +344,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -352,6 +363,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 5
+                            },
                             "timeseries_background": {
                                 "type": "bars"
                             },
@@ -376,7 +392,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -390,7 +411,11 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 5
+                            },
                             "timeseries_background": {
                                 "type": "bars"
                             },
@@ -448,10 +473,17 @@
                     },
                     {
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
                             "requests": [
                                 {
+                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -459,23 +491,26 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:octopus_deploy.deployment.executing_time{$octopus_server,$project_name,$environment_name,$space_name}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
                                 }
                             ],
+                            "show_legend": true,
                             "time": {},
-                            "timeseries_background": {
-                                "type": "area"
-                            },
                             "title": "Average Execution Time ",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "query_value"
+                            "type": "timeseries"
                         },
                         "id": 3351396977294358,
                         "layout": {
@@ -487,10 +522,17 @@
                     },
                     {
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
                             "requests": [
                                 {
+                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -498,23 +540,26 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:octopus_deploy.deployment.queued_time{$octopus_server,$project_name,$environment_name,$space_name}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
                                 }
                             ],
+                            "show_legend": true,
                             "time": {},
-                            "timeseries_background": {
-                                "type": "area"
-                            },
                             "title": "Average Queue Time",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "query_value"
+                            "type": "timeseries"
                         },
                         "id": 2858807073744776,
                         "layout": {
@@ -576,10 +621,17 @@
                     },
                     {
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
                             "requests": [
                                 {
+                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -587,23 +639,26 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:octopus_deploy.deployment.completed_time{$octopus_server,$project_name,$environment_name,$space_name}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
                                 }
                             ],
+                            "show_legend": true,
                             "time": {},
-                            "timeseries_background": {
-                                "type": "area"
-                            },
                             "title": "Average Deployment Time",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "query_value"
+                            "type": "timeseries"
                         },
                         "id": 6937190152710460,
                         "layout": {
@@ -615,10 +670,9 @@
                     },
                     {
                         "definition": {
-                            "autoscale": true,
-                            "precision": 2,
                             "requests": [
                                 {
+                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "formula": "query2 / (query1 + query2)"
@@ -626,29 +680,30 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "query": "avg:octopus_deploy.deployment.count{task_state:failed,$octopus_server,$project_name,$environment_name,$space_name}"
                                         },
                                         {
-                                            "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "avg:octopus_deploy.deployment.count{task_state:success,$octopus_server,$project_name,$environment_name,$space_name}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
                                 }
                             ],
                             "time": {},
-                            "timeseries_background": {
-                                "type": "area"
-                            },
                             "title": "Failure Rate",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "query_value"
+                            "type": "timeseries"
                         },
                         "id": 5887418327961348,
                         "layout": {
@@ -695,7 +750,6 @@
                                 },
                                 "palette": "dog_classic"
                             },
-                            "time": {},
                             "title": "Projects with Highest Average Deployment Time",
                             "title_align": "left",
                             "title_size": "16",
@@ -790,7 +844,6 @@
                                     }
                                 }
                             ],
-                            "time": {},
                             "title": "Releases with the Top Deployment Times",
                             "title_align": "left",
                             "title_size": "16",
