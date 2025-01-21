@@ -27,7 +27,9 @@ class ReplicationOpLogCollector(MongoCollector):
 
     def _get_oplog_size(self, api, oplog_collection_name):
         try:
-            oplog_storage_stats = api.get_collection_stats("local", oplog_collection_name, stats=["storageStats"])[0]
+            oplog_storage_stats = list(
+                api.get_collection_stats("local", oplog_collection_name, stats=["storageStats"])
+            )[0]
         except pymongo.errors.OperationFailure as e:
             self.log.warning(
                 "Could not collect oplog used size for collection %s: %s", oplog_collection_name, e.details
