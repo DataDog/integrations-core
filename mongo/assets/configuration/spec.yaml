@@ -250,7 +250,7 @@ files:
             from collections and inferring schemas.
           value:
             type: number
-            example: 600
+            example: 3600
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
