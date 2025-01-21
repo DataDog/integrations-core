@@ -218,7 +218,7 @@ argo_workflows_log_messages{level="error"} 200
 argo_workflows_queue_retries{queue="workflow_queue"} 25
 # HELP argo_workflows_total_count Total count of workflows processed.
 # TYPE argo_workflows_total_count counter
-argo_workflows_total{namespace="default"} 1500
+argo_workflows_total_count{namespace="default"} 1500
 # HELP argo_workflows_workflowtemplate_triggered_total Total number of workflow templates triggered.
 # TYPE argo_workflows_workflowtemplate_triggered_total counter
 argo_workflows_workflowtemplate_triggered_total{template="example-template"} 75
@@ -237,9 +237,9 @@ argo_workflows_pod_pending_count{namespace="default",reason="unschedulable"} 3
 # HELP argo_workflows_pods Current number of pods.
 # TYPE argo_workflows_pods gauge
 argo_workflows_pods{namespace="default"} 50
-# HELP argo_workflows_pods_total Total number of pods processed.
-# TYPE argo_workflows_pods_total gauge
-argo_workflows_pods_total{namespace="default"} 2000
+# HELP argo_workflows_pods_total_count Total number of pods processed.
+# TYPE argo_workflows_pods_total_count counter
+argo_workflows_pods_total_count{namespace="default"} 2000
 # HELP argo_workflows_queue_depth Current depth of workflow queues.
 # TYPE argo_workflows_queue_depth gauge
 argo_workflows_queue_depth{queue="workflow_queue"} 15
