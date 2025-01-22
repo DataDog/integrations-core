@@ -8,6 +8,7 @@ import inspect
 import logging
 import os
 import re
+import sys
 import traceback
 import unicodedata
 from collections import deque
@@ -92,6 +93,8 @@ if TYPE_CHECKING:
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
+
+FIPS_REGISTRY_KEY = "FipsAlgorithmPolicy"
 
 
 @traced_class
@@ -308,8 +311,23 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__fips_mode = 0
 
+        # On Windows, FIPS mode is activated through a registry
+        # https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp4825.pdf
+        if sys.platform == "win32":
+            try:
+                import winreg
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "HKLM\System\CurrentControlSet\Control\Lsa\FIPSAlgorithmPolicy\STE") as key:
+                    fips_registry, _ = winreg.QueryValueEx(key, FIPS_REGISTRY_KEY)
+                if isinstance(fips_registry, int):
+                    self.__fips_mode = fips_registry
+            except:  # noqa: E722, B001
+                self.logger.debug("Windows error encountered when fetching registry key %s", FIPS_REGISTRY_KEY)
         if os.environ.get("GOFIPS", "0") == "1":
+            self.__fips_mode = 1
+
+        if self.__fips_mode == 1:
             enable_fips()
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
