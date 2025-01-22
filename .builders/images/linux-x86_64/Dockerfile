@@ -41,12 +41,12 @@ RUN yum install -y libffi-devel && \
  VERSION="${PYTHON3_VERSION}" \
  SHA256="85a4c1be906d20e5c5a69f2466b00da769c221d6a684acfd3a514dbf5bf10a66" \
  RELATIVE_PATH="Python-{{version}}" \
- bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
-ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
+ bash install-from-source.sh --prefix=/opt/python/${PYTHON3_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
+ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
 # Set up virtual environment for Python 3
-RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
+RUN /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+ && /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON3_VERSION}/bin/python3 -m virtualenv /py3
 
 # MQ Client library required by pymqi
 ENV IBM_MQ_VERSION="9.2.4.0"
