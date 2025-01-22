@@ -1,0 +1,87 @@
+id: "keda"
+tests:
+-
+  sample: 'I1216 14:53:06.261024       1 main.go:112] "msg"="Connecting Metrics Service gRPC client to the server" "address"="keda-operator.keda.svc.cluster.local:9666" "logger"="keda_metrics_adapter"'
+  result:
+    custom:
+      timestamp: 1737557586261
+      level: "I"
+      process:
+        id: 1
+      component:
+        name:
+          address: "keda-operator.keda.svc.cluster.local:9666"
+          logger: "keda_metrics_adapter"
+      logger:
+        file: "main.go"
+        line: 112
+      "msg": "Connecting Metrics Service gRPC client to the server"
+    message: "Connecting Metrics Service gRPC client to the server"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1737557586261
+-
+  sample: 'I1216 14:53:06.680302       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"'
+  result:
+    custom:
+      level: "I"
+      timestamp: 1737557586680
+      process:
+        id: 1
+      logger:
+        file: "tlsconfig.go"
+        line: 243
+      msg: "Starting DynamicServingCertificateController"
+    message: "Starting DynamicServingCertificateController"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1737557586680
+-
+  sample: '2024-12-23T14:21:51Z	ERROR	scale_handler	error resolving auth params	{"type": "ScaledJob", "namespace": "default", "name": "csv-processor", "triggerIndex": 0, "error": "connection to redis failed: dial tcp 10.244.0.6:6379: connect: no route to host"}'
+  result:
+    custom:
+      msg: "error resolving auth params"
+      level: "ERROR"
+      logger:
+        name: "scale_handler"
+      triggerIndex: 0
+      namespace: "default"
+      name: "csv-processor"
+      type: "ScaledJob"
+      "error": "connection to redis failed: dial tcp 10.244.0.6:6379: connect: no route to host"
+      timestamp: 1737555711000
+    message: "Finish processing RPC: REQUEST_PING"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1737555711000
+-
+  sample: '2024-12-23T14:21:38Z	INFO	KubeAPIWarningLogger	unknown field "status.authenticationsTypes"'
+  result:
+    custom:
+      msg: "unknown field \"status.authenticationsTypes\""
+      level: "INFO"
+      logger:
+        name: "KubeAPIWarningLogger"
+      timestamp: 1737555698000
+    message: unknown field \"status.authenticationsTypes\"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1737555698000
+-
+  sample: '2024-12-16T14:53:12Z	INFO	controller-runtime.builder	Registering a validating webhook	{"GVK": "keda.sh/v1alpha1, Kind=ScaledObject", "path": "/validate-keda-sh-v1alpha1-scaledobject"}'
+  result:
+    custom:
+      msg: "Registering a validating webhook"
+      level: "INFO"
+      logger:
+        name: "controller-runtime.builder"
+      GVK: "keda.sh/v1alpha1, Kind=ScaledObject"
+    message: Registering a validating webhook"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1737555698000
