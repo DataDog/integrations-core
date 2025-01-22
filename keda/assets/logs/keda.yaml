@@ -1,10 +1,10 @@
 id: keda
+metric_id: keda
+backend_only: false
 installation_sources:
   - keda
   - keda-admission-webhooks
   - keda-metrics-apiserver
-metric_id: keda
-backend_only: false
 facets:
 pipeline:
   type: pipeline
@@ -32,7 +32,7 @@ pipeline:
           keda_operator1 %{_date_operator}\s+%{_level_operator}\s+%{_logger_op}\s+%{_msg}
         supportRules: |
           _date_adapter %{date("MMDD HH:mm:ss.SSSSSS"):timestamp}
-          _date_operator %{date("YYYY-MM-DD'T'HH:mm:ssZ"):timestamp}
+          _date_operator %{date("yyyy-MM-DD'T'HH:mm:ssZ"):timestamp}
           _level_adapter %{regex("[A-Z]*"):level}
           _level_operator %{word:level}
           _logger_adapter %{data:logger.file}:%{number:logger.line}
