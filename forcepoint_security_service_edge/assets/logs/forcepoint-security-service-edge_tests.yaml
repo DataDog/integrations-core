@@ -430,7 +430,6 @@ tests:
         device: ""
         deviceguid: ""
         http:
-          email: "user123@xyz.com"
           method: "GET"
           status_category: "Client Error"
           status_code: 400
@@ -465,6 +464,7 @@ tests:
         transactionid: "77fefe54-1111-1cd22-b51a-fs548ee4r2e [26 Dec 2024 06:37:12]"
         usergroup: "Admins, System Administrator"
         usr:
+          email: "user123@xyz.com"
           name: "User123"
       message: |-
         {
@@ -517,7 +517,6 @@ tests:
         device: "Windows 10"
         deviceguid: "11E22EE-1111-11AA-A112-C0BB2211C"
         http:
-          email: "user123@abc.com"
           method: "GET"
           status_category: "Server Error"
           status_code: 581
@@ -552,6 +551,7 @@ tests:
         transactionid: "Zfe54r8e4r_fse584r8e41fs5de [07 Jan 2025 07:13:57]"
         usergroup: "Admins, System Administrator"
         usr:
+          email: "user123@abc.com"
           name: "User123"
       message: |-
         {
@@ -603,7 +603,6 @@ tests:
         fileid: "ferjer84e87re1sdfse"
         filename: "file123.exe"
         http:
-          email: "jkc.bca@xyz.com"
           status_category: "Client Error"
           status_code: 400
           url: "https://runnerapp.org/"
@@ -621,6 +620,7 @@ tests:
         transactionid: "11aabbcc22-121c-48f5-b6e2-111df5s5er5e455 [05 Jan 2025 09:34:03]"
         usergroup: "Admins, System Administrator"
         usr:
+          email: "jkc.bca@xyz.com"
           name: "jkc.bca"
       message: |-
         {
