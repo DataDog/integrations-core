@@ -37,7 +37,7 @@ DEFAULT_METRICS_LEN = len(
     }
 )
 
-DD_OPERATION_COMMENT = MongoApi.operation_comment()
+DD_OPERATION_COMMENT = "service='datadog-agent'"
 
 
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))

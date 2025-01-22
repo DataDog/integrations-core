@@ -74,11 +74,7 @@ class MongoApi(object):
 
         # Check if the server supports the $collStats aggregation pipeline stage.
         self.coll_stats_pipeline_supported = True
-        self.__comment = self.operation_comment()
-
-    @staticmethod
-    def operation_comment():
-        return ",".join([f"{k}='{v}'" for k, v in DD_OPERATION_ATTRIBUTES.items()])
+        self.__comment = ",".join([f"{k}='{v}'" for k, v in DD_OPERATION_ATTRIBUTES.items()])
 
     def __getitem__(self, item):
         return self._cli[item]
