@@ -19,6 +19,7 @@ services:
       timeout: 2s
       retries: 3
   http-server:
+    platform: linux/amd64
     build:
       context: server
       dockerfile: Dockerfile
