@@ -5,11 +5,10 @@
 import logging
 import re
 
-import psycopg2
+import psycopg
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.cursor import CommenterDictCursor
 
 from .util import DBExplainError
 from .version_utils import V12
@@ -77,7 +76,7 @@ class ExplainParameterizedQueries:
         if self._check.version < V12:
             # if pg version < 12, skip explaining parameterized queries because
             # plan_cache_mode is not supported
-            e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+            e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
             logger.debug(
                 "Unable to explain parameterized query. Postgres version %s does not support plan_cache_mode",
                 self._check.version,
@@ -180,16 +179,14 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_query(self, dbname, query):
-        # Psycopg2 connections do not get closed when context ends;
-        # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor() as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query, ignore_query_metric=True)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute(query, ignore_query_metric=True)
                 return cursor.fetchall()
 
