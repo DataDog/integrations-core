@@ -86,7 +86,7 @@ ENV PYTHON_VERSION="3.12.8"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '5914748e6580e70bedeb7c537a0832b3071de9e09a2e4e7e3d28060616045e0a'; `
+      -Hash '8d3f33be9eb810f23c102f08475af2854e50484b8e4e06275e937be61ce3d2fb'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
