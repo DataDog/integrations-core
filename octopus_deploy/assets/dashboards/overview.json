@@ -841,7 +841,8 @@
                                     }
                                 }
                             ],
-                            "title": "Releases with the Top Deployment Times",
+                            "time": {},
+                            "title": "Releases with the Highest Deployment Times",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
