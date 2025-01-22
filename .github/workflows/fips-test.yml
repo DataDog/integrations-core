@@ -46,14 +46,23 @@ jobs:
       run: |
         pip install pytest
 
+    - name: Hello World
+      run: |
+        docker run hello-world
+
+    - name: Run Alpine
+      run: |
+        docker run alpine:3.14 /bin/sh -c ls
+
     - name: Set up containers
       env:
         AGENT_IMAGE: "${{ matrix.agent-image }}"
         CIPHER: "${{ matrix.cipher }}"
+        SSL_PATH: ${{ matrix.platform == 'linux' && '/etc/ssl' || 'C:\ProgramData\ssl\' }}
+        PLATFORM: ${{ matrix.platform }}
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
-        DOCKER_DEFAULT_PLATFORM: linux/amd64
       run: |
-        docker compose --verbose -f .github/workflows/fips/compose/docker-compose.yml up -d
+        docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d
 
     - name: Run tests
       run: |
