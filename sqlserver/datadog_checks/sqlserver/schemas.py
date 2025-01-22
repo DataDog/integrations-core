@@ -31,7 +31,13 @@ from datadog_checks.sqlserver.queries import (
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
 )
-from datadog_checks.sqlserver.utils import convert_to_bool, execute_query, get_list_chunks, is_azure_sql_database
+from datadog_checks.sqlserver.utils import (
+    convert_to_bool,
+    execute_query,
+    get_list_chunks,
+    is_azure_sql_database,
+    is_collation_case_insensitive,
+)
 
 
 class SubmitData:
@@ -57,9 +63,23 @@ class SubmitData:
         self.db_to_schemas.clear()
         self.db_info.clear()
 
-    def store_db_infos(self, db_infos):
+    def store_db_infos(self, db_infos, databases):
+        dbs = set(databases)
         for db_info in db_infos:
-            self.db_info[db_info['name']] = db_info
+            case_insensitive = is_collation_case_insensitive(db_info.get('collation'))
+            db_name = db_info['name']
+            db_name_lower = db_name.lower()
+            if db_name not in dbs:
+                if db_name.lower() in dbs and case_insensitive:
+                    db_name = db_name_lower
+                else:
+                    self._log.debug(
+                        "Skipping db {} as it is not in the databases list {} or collation is case sensitive".format(
+                            db_name, dbs
+                        )
+                    )
+                    continue
+            self.db_info[db_name] = db_info
 
     def store(self, db_name, schema, tables, columns_count):
         self._columns_count += columns_count
@@ -277,7 +297,7 @@ class Schemas(DBMAsyncJob):
 
         databases = self._check.get_databases()
         db_infos = self._query_db_information(databases)
-        self._data_submitter.store_db_infos(db_infos)
+        self._data_submitter.store_db_infos(db_infos, databases)
         self._fetch_for_databases()
         self._data_submitter.submit()
         self._log.debug("Finished collect_schemas_data")

@@ -1,0 +1,1 @@
+Reduced the volume of logging from the `botocore` library
