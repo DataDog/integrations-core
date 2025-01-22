@@ -34,7 +34,7 @@ db = [
     "mmh3==4.1.0",
 ]
 deps = [
-    "binary==1.0.0",
+    "binary==1.0.1",
     "cachetools==5.5.0",
     "cryptography==43.0.1",
     "ddtrace==2.10.6",
@@ -50,7 +50,6 @@ deps = [
     "requests-unixsocket2==0.4.2",
     "requests==2.32.3",
     "simplejson==3.19.3",
-    "six==1.16.0",
     "uptime==3.0.1",
     "wrapt==1.16.0",
 ]

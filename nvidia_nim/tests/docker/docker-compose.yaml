@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/nim_metrics.txt:/usr/share/caddy/metrics
+      - ../fixtures/nim_version.json:/usr/share/caddy/version

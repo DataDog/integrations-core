@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import time
-from collections import OrderedDict
 from copy import deepcopy
 from urllib.parse import urlparse
 
@@ -46,8 +45,7 @@ def filter_items(items, key, default_limit, default_include, default_exclude, co
     include_patterns = config_key.get('include', default_include)
     exclude_patterns = config_key.get('exclude', default_exclude)
     filtered_items = filter_list(items, include_patterns, exclude_patterns)
-    # TODO: Use plain dict when we drop Python 2 support.
-    ordered_items = OrderedDict(list(filtered_items.items())[:limit])
+    ordered_items = dict(list(filtered_items.items())[:limit])
     reached_limit = len(ordered_items) < len(filtered_items)
     return ordered_items, reached_limit
 

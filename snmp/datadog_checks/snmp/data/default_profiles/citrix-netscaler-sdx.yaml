@@ -302,7 +302,8 @@ metric_tags:
       25: l2vpn
   - OID: 1.3.6.1.4.1.5951.6.2.5.0
     symbol: systemSvmIPAddress
-    format: ip_address
+    # TODO update this to the modern syntax that supports format
+    # format: ip_address
     tag: netscaler_sdx_system_svm_ip_address
   - OID: 1.3.6.1.4.1.5951.6.2.6.0
     symbol: systemXenIPAddressType
@@ -317,7 +318,7 @@ metric_tags:
       25: l2vpn
   - OID: 1.3.6.1.4.1.5951.6.2.7.0
     symbol: systemXenIPAddress
-    format: ip_address
+    # format: ip_address
     tag: netscaler_sdx_system_xen_ip_address
   - OID: 1.3.6.1.4.1.5951.6.2.8.0
     symbol: systemNetmaskType
@@ -332,7 +333,7 @@ metric_tags:
       25: l2vpn
   - OID: 1.3.6.1.4.1.5951.6.2.9.0
     symbol: systemNetmask
-    format: ip_address
+    # format: ip_address
     tag: netscaler_sdx_system_netmask
   - OID: 1.3.6.1.4.1.5951.6.2.10.0
     symbol: systemGatewayType
@@ -347,7 +348,7 @@ metric_tags:
       25: l2vpn
   - OID: 1.3.6.1.4.1.5951.6.2.11.0
     symbol: systemGateway
-    format: ip_address
+    # format: ip_address
     tag: netscaler_sdx_system_gateway
   - OID: 1.3.6.1.4.1.5951.6.2.12.0
     symbol: systemNetworkInterface

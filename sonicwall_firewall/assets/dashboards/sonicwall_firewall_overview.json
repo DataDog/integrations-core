@@ -1,0 +1,2773 @@
+{
+  "title": "SonicWall Firewall - Overview",
+  "description": "This dashboard provides information about the Firewall Event logs generated in SonicWall Firewall.",
+  "widgets": [
+    {
+      "id": 8458527877532824,
+      "definition": {
+        "type": "image",
+        "url": "https://securityaffairs.com/wp-content/uploads/2020/10/SonicWall.png",
+        "url_dark_theme": "https://securityaffairs.com/wp-content/uploads/2020/10/SonicWall.png",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": false,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 5284002653708730,
+      "definition": {
+        "title": "Events Logs Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 18076238485316,
+            "definition": {
+              "title": "Events Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "classic",
+                        "palette_index": 1
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5377043751621836,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#dbdef5"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 8
+      }
+    },
+    {
+      "id": 1107075380441772,
+      "definition": {
+        "type": "note",
+        "content": "Gain comprehensive visibility into your organization's security and access activities by monitoring SonicWall Firewall Syslog Event logs with this dashboard. \n\nSonicWall Firewall Event logs consolidate all relevant details, actions, and outcomes into a single view, offering a detailed overview of security and access activities. They include information about each event, related systems and users, IP addresses, user activities, and authentication details. This helps security teams manage and track events from initiation to completion.\n\nFor more information, see the [SonicWall Firewall Integration Documentation](https://docs.datadoghq.com/integrations/https://docs.datadoghq.com/integrations/sonicwall_firewall)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 6567520681434358,
+      "definition": {
+        "title": "Total Network Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:6 $Status_Code $group_category $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 4325707377153974,
+      "definition": {
+        "title": "Total Firewall Settings Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:5 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 3628155683438958,
+      "definition": {
+        "title": "Total Firewall Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:10 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 8860502955301880,
+      "definition": {
+        "title": "Total VPN Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:7 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 8426220812978594,
+      "definition": {
+        "title": "Total System Events",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:1 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 10,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 337389018476806,
+      "definition": {
+        "title": "Total SSL VPN Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:13 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2688935062647582,
+      "definition": {
+        "title": "Total Anti-Spam Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:14 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 4953720279946734,
+      "definition": {
+        "title": "Total Security Services Events",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:3 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7758889585753310,
+      "definition": {
+        "title": "Total User Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:4 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 2,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 1099190138910904,
+      "definition": {
+        "title": "Total Log Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:2 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 5915465834761882,
+      "definition": {
+        "title": "Total High Availability Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:8 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 2,
+        "y": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 8831062421707048,
+      "definition": {
+        "title": "Total 3G/4G, Modem, and Module Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:9 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 5,
+        "y": 4,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 3602404895436472,
+      "definition": {
+        "title": "Total  Multi-Tenancy Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:17 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5543510326961556,
+      "definition": {
+        "title": "Total Wireless Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:11 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 2931728886881966,
+      "definition": {
+        "title": "Total VoIP Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:12 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 6,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 3052533428606714,
+      "definition": {
+        "title": "Total SD-WAN Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:16 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7548131585296892,
+      "definition": {
+        "title": "Total WAN Acceleration Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall $Status_Code $group_category @gcat:15 $Protocol $Policy"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#dbdef5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 6,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6014196362750106,
+      "definition": {
+        "title": "Event Details",
+        "background_color": "vivid_yellow",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5859274040535360,
+            "definition": {
+              "title": "Events by Group Category",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@group_category",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 3541796060443396,
+            "definition": {
+              "title": "Total Events by Priority Over time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@priority",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall $group_category $Protocol $Policy $Status_Code"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 2124555786730858,
+            "definition": {
+              "title": "Top Reasons for Emergency Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "message",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall @priority_level:0 $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#64040a"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 6
+            }
+          },
+          {
+            "id": 7452966560472968,
+            "definition": {
+              "title": "Top Reasons for Critical Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "message",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall @priority_level:2 $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#ca080a"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 6
+            }
+          },
+          {
+            "id": 1559914883608310,
+            "definition": {
+              "title": "Top Reasons for Error Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "message",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall @priority_level:3 $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#e3554c"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 21,
+              "width": 12,
+              "height": 6
+            }
+          },
+          {
+            "id": 1485464074974592,
+            "definition": {
+              "title": "Events by Client GeoIP Location",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 27,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 8079259708855500,
+            "definition": {
+              "title": "Events by Destination GeoIP Location",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@network.destination.geoip.country.iso_code",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 32,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 8821394315910158,
+            "definition": {
+              "title": "Network Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall @gcat:6 $Protocol $Policy $Status_Code $group_category",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 37,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 2583978706078884,
+            "definition": {
+              "title": "Firewall and Firewall Settings Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall @gcat:(10 OR 5) $Protocol $Policy $Status_Code $group_category",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@firewall.action",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 42,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 4622633524253352,
+            "definition": {
+              "title": "Security Services Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall @gcat:3 $Protocol $Policy $Status_Code $group_category",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@source.mac",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@destination.mac",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 47,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 62591403664038,
+            "definition": {
+              "title": "User Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall @gcat:4 $Protocol $Policy $Status_Code $group_category",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 52,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 5783820728004990,
+            "definition": {
+              "title": "VPN Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall @gcat:7 $Protocol $Policy $Status_Code $group_category",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 57,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 7879620531460770,
+            "definition": {
+              "title": "Anti-Spam Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall @gcat:14 $Protocol $Policy $Status_Code $group_category",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 62,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 5854774752792234,
+            "definition": {
+              "title": "Other Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sonicwall-firewall -@gcat:(6 OR 7 OR 4 OR 3 OR 10 OR 14 OR 5 OR 10) $Protocol $Policy $Status_Code $group_category ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "column": "host",
+                      "order": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@group_category",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@message_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@priority",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.destination.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 67,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 73
+      }
+    },
+    {
+      "id": 709709392822540,
+      "definition": {
+        "title": "Datadog Cloud SIEM",
+        "title_align": "center",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2830819343474136,
+            "definition": {
+              "type": "note",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates SonicWall Firewall Event logs to detect threats to your environment in real time. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Asonicwall-firewall). ",
+              "background_color": "vivid_blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5058159142468256,
+            "definition": {
+              "title": "CRITICALs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "status:critical source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5137012693538520,
+            "definition": {
+              "title": "MEDIUMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "status:medium source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 2608076811338498,
+            "definition": {
+              "title": "Critical Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "status:critical source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 1596600360112748,
+            "definition": {
+              "title": "HIGHs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "status:high source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 2042937019218648,
+            "definition": {
+              "title": "LOWs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#ffb52b",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "status:low source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8748609943471182,
+            "definition": {
+              "title": "INFOs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#84c1e0",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "status:info source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 7820565410491022,
+            "definition": {
+              "title": "High Severity Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "status:high source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3620809096696840,
+            "definition": {
+              "title": "Medium Severity Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "status:medium source:sonicwall-firewall $Status_Code $group_category $Protocol $Policy"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 89,
+        "width": 12,
+        "height": 10
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Status_Code",
+      "prefix": "@http.status_code",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Protocol",
+      "prefix": "@protocol",
+      "available_values": [
+        "tcp",
+        "udp",
+        "igmp",
+        "icmp"
+      ],
+      "default": "*"
+    },
+    {
+      "name": "group_category",
+      "prefix": "@group_category",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Policy",
+      "prefix": "@app.policy.type",
+      "available_values": [
+        "CFS",
+        "IPS Content",
+        "POP3",
+        "PolicyType2"
+      ],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

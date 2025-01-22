@@ -697,7 +697,6 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
-            # TODO: use nonlocal when we drop Python 2 support
             counter = {'errors': 0}
 
             def raise_error_once(*args, **kwargs):

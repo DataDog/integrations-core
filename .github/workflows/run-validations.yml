@@ -155,10 +155,6 @@ jobs:
       if: inputs.ci
       run: ddev validate ci
 
-    - name: Validate the CODEOWNERS file
-      if: inputs.codeowners
-      run: ddev validate codeowners
-
     - name: Validate default configuration files
       if: inputs.config
       run: ddev validate config $TARGET
@@ -246,6 +242,10 @@ jobs:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
+      
+    - name: Validate the CODEOWNERS file
+      if: inputs.codeowners
+      run: ddev validate codeowners
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}

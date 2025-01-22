@@ -1,4 +1,3 @@
-<div class="alert alert-info">The Cisco SD-WAN NDM integration is in Preview.</div>
 
 # Agent Check: Cisco SD-WAN
 

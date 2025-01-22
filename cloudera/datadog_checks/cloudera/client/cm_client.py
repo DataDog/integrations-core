@@ -29,7 +29,9 @@ class CmClient(Client):
         cm_client.configuration.ssl_ca_cert = kwargs.get('ssl_ca_cert')
         cm_client.configuration.cert_file = kwargs.get('cert_file')
         cm_client.configuration.key_file = kwargs.get('key_file')
-        self._client.rest_client = RESTClientObject(maxsize=kwargs.get('max_parallel_requests'))
+        self._client.rest_client = RESTClientObject(
+            pools_size=kwargs.get('pools_size'), maxsize=kwargs.get('max_parallel_requests')
+        )
 
     def get_version(self) -> Version:
         self._log.debug('getting version from cloudera')

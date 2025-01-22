@@ -57,6 +57,7 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
@@ -724,6 +725,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
+@pytest.mark.integration
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.1
@@ -758,6 +760,7 @@ def _expected_dbm_instance_tags(check):
     return check._config.tags
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("activity_enabled", [True, False])
 def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}

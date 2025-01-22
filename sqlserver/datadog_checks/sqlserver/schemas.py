@@ -16,6 +16,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
 )
@@ -23,7 +24,9 @@ from datadog_checks.sqlserver.queries import (
     COLUMN_QUERY,
     DB_QUERY,
     FOREIGN_KEY_QUERY,
+    FOREIGN_KEY_QUERY_PRE_2017,
     INDEX_QUERY,
+    INDEX_QUERY_PRE_2017,
     PARTITIONS_QUERY,
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
@@ -395,7 +398,10 @@ class Schemas(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, table_id_to_table_data, cursor):
-        rows = execute_query(INDEX_QUERY.format(table_ids), cursor)
+        index_query = INDEX_QUERY
+        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 2016:
+            index_query = INDEX_QUERY_PRE_2017
+        rows = execute_query(index_query.format(table_ids), cursor)
         for row in rows:
             table_id = row.pop("id", None)
             table_id_str = str(table_id)
@@ -412,7 +418,10 @@ class Schemas(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_ids, table_id_to_table_data, cursor):
-        rows = execute_query(FOREIGN_KEY_QUERY.format(table_ids), cursor)
+        foreign_key_query = FOREIGN_KEY_QUERY
+        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 2016:
+            foreign_key_query = FOREIGN_KEY_QUERY_PRE_2017
+        rows = execute_query(foreign_key_query.format(table_ids), cursor)
         for row in rows:
             table_id = row.pop("id", None)
             table_id_str = str(table_id)

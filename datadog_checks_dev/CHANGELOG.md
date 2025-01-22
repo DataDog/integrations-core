@@ -2,6 +2,34 @@
 
 <!-- towncrier release notes start -->
 
+## 34.1.0 / 2024-11-13
+
+***Added***:
+
+* Add MIT-0 license ([#18936](https://github.com/DataDog/integrations-core/pull/18936))
+
+***Fixed***:
+
+* fix author name not being normalized ([#18718](https://github.com/DataDog/integrations-core/pull/18718))
+
+## 34.0.0 / 2024-10-25
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* add check_only template for publishing platform integrations ([#18596](https://github.com/DataDog/integrations-core/pull/18596))
+* Add ``capture`` parameter to ``docker_run`` to capture ``docker compose`` output. ([#18878](https://github.com/DataDog/integrations-core/pull/18878))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+* Fix ddev create bug where README file gets overwritten ([#18879](https://github.com/DataDog/integrations-core/pull/18879))
+* Fix jmx based integrations test failing due to a missing jvm metric ([#18914](https://github.com/DataDog/integrations-core/pull/18914))
+
 ## 33.1.0 / 2024-08-15
 
 ***Added***:

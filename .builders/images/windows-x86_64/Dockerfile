@@ -85,24 +85,6 @@ RUN Get-RemoteFile `
     & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
     Add-ToPath -Append 'C:\Program Files\Python312'
 
-# Install Python 2
-ENV PYTHON_VERSION="2.7.18"
-RUN Get-RemoteFile `
-      -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION.amd64.msi `
-      -Path python-$Env:PYTHON_VERSION.amd64.msi `
-      -Hash 'b74a3afa1e0bf2a6fc566a7b70d15c9bfabba3756fb077797d16fffa27800c05'; `
-    Start-Process -Wait -FilePath msiexec -ArgumentList '/i', python-$Env:PYTHON_VERSION.amd64.msi, '/quiet', '/norestart', 'InstallAllUsers=1'; `
-    Remove-Item python-$Env:PYTHON_VERSION.amd64.msi; `
-    & 'C:\Python27\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Python27\python.exe' -m pip install --no-python-version-warning --no-warn-script-location virtualenv; `
-    & 'C:\Python27\python.exe' -m virtualenv 'C:\py2'
-RUN Get-RemoteFile `
-      -Uri https://s3.amazonaws.com/dd-agent-omnibus/VCForPython27.msi `
-      -Path VCForPython27.msi `
-      -Hash '070474db76a2e625513a5835df4595df9324d820f9cc97eab2a596dcbc2f5cbf'; `
-    Start-Process -Wait -FilePath msiexec -ArgumentList '/i', VCForPython27.msi, '/quiet'; `
-    Remove-Item VCForPython27.msi
-
 # Install IBM MQ
 ENV IBM_MQ_VERSION="9.2.4.0"
 RUN Get-RemoteFile `

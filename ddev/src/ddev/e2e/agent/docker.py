@@ -139,14 +139,6 @@ class DockerAgent(AgentInterface):
         env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
         env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
 
-        # TODO: Remove this when Python 2 support is removed
-        #
-        # Don't write .pyc, needed to fix this issue (only Python 2):
-        # More info: https://github.com/DataDog/integrations-core/pull/5454
-        # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
-        # in the first place.
-        env_vars['PYTHONDONTWRITEBYTECODE'] = '1'
-
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
                 env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy

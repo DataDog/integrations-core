@@ -81,6 +81,12 @@ PG_STAT_ACTIVITY_COLS = [
     "backend_type",
 ]
 
+# PG_STAT_ACTIVITY_COLS_MAPPING applies additional data type casting to the columns
+PG_STAT_ACTIVITY_COLS_MAPPING = {
+    # use the bytea type to avoid unicode decode errors on Azure PostgreSQL
+    'backend_type': 'backend_type::bytea as backend_type',
+}
+
 PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
 CURRENT_TIME_FUNC = "clock_timestamp() as now,"
 
@@ -240,7 +246,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return [dict(row) for row in rows]
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_new_pg_stat_activity(self, available_activity_columns):
+    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
         report_activity = self._report_activity_event()
@@ -255,10 +261,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             blocking_func = PG_BLOCKING_PIDS_FUNC
         if report_activity:
             cur_time_func = CURRENT_TIME_FUNC
+        activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
         query = PG_STAT_ACTIVITY_QUERY.format(
             backend_type_predicate=backend_type_predicate,
             current_time_func=cur_time_func,
-            pg_stat_activity_cols=', '.join(available_activity_columns),
+            pg_stat_activity_cols=', '.join(activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
@@ -268,17 +275,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
-                rows = []
-                while True:
-                    try:
-                        row = cursor.fetchone()
-                        if row is None:
-                            break
-                        rows.append(row)
-                    except UnicodeDecodeError:
-                        self._log.debug("Invalid unicode in row from pg_stat_activity")
-                    except:
-                        self._log.warning("Unknown error fetching row from pg_stat_activity")
+                rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
@@ -342,6 +339,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             total_count += 1
+            if row.get('backend_type') is not None:
+                try:
+                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
+                except UnicodeDecodeError:
+                    row['backend_type'] = 'unknown'
             if (not row['datname'] or not row['query']) and row.get(
                 'backend_type', 'client backend'
             ) == 'client backend':
@@ -469,7 +471,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return
-        rows = self._get_new_pg_stat_activity(pg_activity_cols)
+        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
@@ -798,6 +800,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
+                'service': self._config.service,
                 "network": {
                     "client": {
                         "ip": str(row.get('client_addr', None)),
@@ -882,6 +885,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }

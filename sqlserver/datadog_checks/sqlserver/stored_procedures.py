@@ -159,6 +159,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
+            'service': self._config.service,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)

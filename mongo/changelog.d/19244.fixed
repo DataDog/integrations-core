@@ -1,0 +1,1 @@
+Skip unauthorized `local` database collections `system.replset`, `replset.election`, and `replset.minvalid` in collection and index stats gathering to avoid permission errors.

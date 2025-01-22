@@ -348,3 +348,18 @@ BEGIN
 
     SET @object_count = @object_count + 1;
 END;
+
+CREATE EVENT SESSION datadog
+ON SERVER
+ADD EVENT sqlserver.xml_deadlock_report 
+ADD TARGET package0.ring_buffer 
+WITH (
+    MAX_MEMORY = 1024 KB, 
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, 
+    MAX_DISPATCH_LATENCY = 120 SECONDS, 
+    STARTUP_STATE = ON 
+);
+GO
+
+ALTER EVENT SESSION datadog ON SERVER STATE = START;
+GO

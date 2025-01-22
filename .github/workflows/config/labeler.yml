@@ -69,6 +69,8 @@ integration/argo_workflows:
 - argo_workflows/**/*
 integration/argocd:
 - argocd/**/*
+integration/asana:
+- asana/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
@@ -203,6 +205,8 @@ integration/freshservice:
 - freshservice/**/*
 integration/gearmand:
 - gearmand/**/*
+integration/genesys:
+- genesys/**/*
 integration/gitlab:
 - gitlab/**/*
 integration/gitlab_runner:
@@ -239,6 +243,8 @@ integration/hivemq:
 - hivemq/**/*
 integration/http_check:
 - http_check/**/*
+integration/hubspot_content_hub:
+- hubspot_content_hub/**/*
 integration/hudi:
 - hudi/**/*
 integration/hyperv:
@@ -261,6 +267,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/incident_io:
+- incident_io/**/*
 integration/istio:
 - istio/**/*
 integration/jboss_wildfly:
@@ -295,6 +303,8 @@ integration/kubelet:
 - kubelet/**/*
 integration/kubernetes:
 - kubernetes/**/*
+integration/kubernetes_admission:
+- kubernetes_admission/**/*
 integration/kubernetes_cluster_autoscaler:
 - kubernetes_cluster_autoscaler/**/*
 integration/kubernetes_state:
@@ -313,6 +323,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/anthropic:
+- anthropic/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
@@ -343,6 +355,8 @@ integration/mimecast:
 - mimecast/**/*
 integration/mongo:
 - mongo/**/*
+integration/mux:
+- mux/**/*
 integration/mysql:
 - mysql/**/*
 integration/nagios:
@@ -361,6 +375,8 @@ integration/ntp:
 - ntp/**/*
 integration/nvidia_jetson:
 - nvidia_jetson/**/*
+integration/nvidia_nim:
+- nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
 integration/oke:
@@ -403,6 +419,8 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/plaid:
+- plaid/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
@@ -439,12 +457,16 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/shopify:
+- shopify/**/*
 integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
 integration/singlestore:
 - singlestore/**/*
+integration/slurm:
+- slurm/**/*
 integration/snmp:
 - snmp/**/*
 integration/snmp_american_power_conversion:
@@ -477,6 +499,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonicwall_firewall:
+- sonicwall_firewall/**/*
 integration/sophos_central_cloud:
 - sophos_central_cloud/**/*
 integration/spark:
@@ -489,12 +513,16 @@ integration/ssh_check:
 - ssh_check/**/*
 integration/statsd:
 - statsd/**/*
+integration/streamnative:
+- streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/suricata:
 - suricata/**/*
+integration/symantec_endpoint_protection:
+- symantec_endpoint_protection/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -513,6 +541,8 @@ integration/teleport:
 - teleport/**/*
 integration/temporal:
 - temporal/**/*
+integration/temporal_cloud:
+- temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:
@@ -555,8 +585,12 @@ integration/vllm:
 - vllm/**/*
 integration/voltdb:
 - voltdb/**/*
+integration/vonage:
+- vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:

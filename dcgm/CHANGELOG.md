@@ -2,11 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 3.0.0 / 2024-10-01
+## 3.1.0 / 2024-10-04 / Agent 7.59.0
+
+* Align OMv2 labels with Kubernetes agent tags ([#18654](https://github.com/DataDog/integrations-core/pull/18654))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 2.3.2 / 2024-07-05 / Agent 7.55.0
 

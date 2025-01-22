@@ -196,12 +196,15 @@ jobs:
 
   build-macos:
     name: Target macOS
-    runs-on: macos-12
+    runs-on: macos-13
 
     env:
       TARGET_NAME: macos-x86_64
       OUT_DIR: output/macos-x86_64
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
+
+    permissions:
+      packages: write
 
     steps:
     - name: Set up environment

@@ -67,6 +67,10 @@ APPSET_CONTROLLER = {
     'controller_runtime_reconcile_errors': 'reconcile.errors',
     'controller_runtime_reconcile_time_seconds': 'reconcile.time_seconds',
     'controller_runtime_reconcile': 'runtime.reconcile',
+    'argocd_appset_info': 'appset.info',
+    'argocd_appset_reconcile': 'appset.reconcile',
+    'argocd_appset_owned_applications': 'appset.owned.applications',
+    'argocd_appset_labels': 'appset.labels',
 }
 
 API_SERVER = {

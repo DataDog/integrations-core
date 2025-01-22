@@ -10,7 +10,7 @@ from datadog_checks.postgres.cursor import CommenterCursor
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
-DEFAULT_EXCLUDES = ["cloudsqladmin", "rdsadmin"]
+DEFAULT_EXCLUDES = ["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"]
 DEFAULT_MAX_DATABASES = 100
 DEFAULT_REFRESH = 600
 

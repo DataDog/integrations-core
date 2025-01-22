@@ -14,7 +14,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments, extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -23,6 +23,8 @@ except ImportError:
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
+
+TAIL_TEXT_SIZE = 200
 
 CONNECTIONS_QUERY = """\
 SELECT
@@ -59,6 +61,10 @@ SELECT
         ELSE req.statement_end_offset END
             - req.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    CASE
+        WHEN LEN(qt.text) > {proc_char_limit} THEN RIGHT(qt.text, {tail_text_size})
+    ELSE ''
+    END AS tail_text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -213,6 +219,7 @@ class SqlserverActivity(DBMAsyncJob):
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
             proc_char_limit=self._config.stored_procedure_characters_limit,
+            tail_text_size=TAIL_TEXT_SIZE,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -286,6 +293,10 @@ class SqlserverActivity(DBMAsyncJob):
             )
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+            if 'tail_text' in row:
+                appended_comments, _ = extract_sql_comments(row['tail_text'])
+                if appended_comments:
+                    comments = list(set(comments + appended_comments))
             if row['is_proc'] and 'text' in row:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
@@ -356,6 +367,7 @@ class SqlserverActivity(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }

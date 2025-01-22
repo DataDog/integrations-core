@@ -146,6 +146,7 @@ class InstanceConfig(BaseModel):
     collect_per_instance_filters: Optional[CollectPerInstanceFilters] = None
     collect_property_metrics: Optional[bool] = None
     collect_tags: Optional[bool] = None
+    collect_vsan_data: Optional[bool] = None
     collection_level: Optional[int] = None
     collection_type: Optional[str] = None
     connection_reset_timeout: Optional[int] = None

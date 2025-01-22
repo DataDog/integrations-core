@@ -152,6 +152,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             'min_collection_interval': self._metric_collection_interval,
             'tags': tags,
             'cloud_metadata': self._config.cloud_metadata,
+            'service': self._config.service,
             'mysql_rows': rows,
         }
         self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
@@ -240,6 +241,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
+                'service': self._config.service,
                 "db": {
                     "instance": row['schema_name'],
                     "query_signature": row['query_signature'],

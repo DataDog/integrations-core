@@ -16,12 +16,18 @@ import pytest
 from mock import patch
 
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVENT_FILE, XE_RING_BUFFER
 from datadog_checks.sqlserver.deadlocks import (
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
     Deadlocks,
 )
-from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
+from datadog_checks.sqlserver.queries import (
+    DEADLOCK_TIMESTAMP_ALIAS,
+    DEADLOCK_XML_ALIAS,
+    XE_SESSION_DATADOG,
+    XE_SESSION_SYSTEM,
+)
 
 from .common import CHECK_NAME
 
@@ -66,13 +72,13 @@ def _get_deadlocks_payload(dbm_activity):
     return matched
 
 
-def _get_conn_for_user(instance_docker, user):
+def _get_conn_for_user(instance_docker, user, password="Password12!"):
     conn_str = (
         f"DRIVER={instance_docker['driver']};"
         f"Server={instance_docker['host']};"
         "Database=master;"
         f"UID={user};"
-        "PWD=Password12!;"
+        f"PWD={password};"
         "TrustServerCertificate=yes;"
     )
     conn = pyodbc.connect(conn_str, autocommit=False)
@@ -136,9 +142,18 @@ def _create_deadlock(dd_environment, dbm_instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.usefixtures('_create_deadlock')
 @pytest.mark.parametrize("convert_xml_to_str", [False, True])
-def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
+@pytest.mark.parametrize(
+    "xe_session_name, xe_session_target",
+    [
+        [XE_SESSION_DATADOG, XE_RING_BUFFER],
+        [XE_SESSION_SYSTEM, XE_EVENT_FILE],
+    ],
+)
+def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, xe_session_name, xe_session_target):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.deadlocks._force_convert_xml_to_str = convert_xml_to_str
+    check.deadlocks._xe_session_name = xe_session_name
+    check.deadlocks._xe_session_target = xe_session_target
 
     dbm_instance['dbm_enabled'] = True
     deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
@@ -197,6 +212,13 @@ def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
     ) as mocked_function:
         dd_run_check(check)
         mocked_function.assert_not_called()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_xe_session(dd_run_check, dbm_instance):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    assert check.deadlocks._xe_session_name == XE_SESSION_DATADOG
 
 
 DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadlocks")
