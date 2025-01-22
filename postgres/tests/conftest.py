@@ -38,6 +38,13 @@ INSTANCE = {
 }
 
 
+E2E_METADATA = {
+    'start_commands': [
+        'apt update',
+        'apt install -y --no-install-recommends build-essential python3-dev libpq-dev',
+    ],
+}
+
 def connect_to_pg():
     psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
     if float(POSTGRES_VERSION) >= 10.0:
@@ -59,7 +66,7 @@ def dd_environment(e2e_instance):
         conditions=[WaitFor(connect_to_pg)],
         env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE},
     ):
-        yield e2e_instance
+        yield e2e_instance, E2E_METADATA
 
 
 @pytest.fixture
