@@ -1,19 +1,20 @@
 [build-system]
 requires = [
-    "hatchling>=0.11.2",
+    "hatchling>=0.13.0",
 ]
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-pgbouncer"
-description = "The PGBouncer check"
+name = "datadog-duckdb"
+description = "The DuckDB check"
 readme = "README.md"
-requires-python = ">=3.8"
+license = "BSD-3-Clause"
+requires-python = ">=3.12"
 keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "pgbouncer",
+    "duckdb",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -23,9 +24,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload",
     "Programming Language :: Python :: 3.12",
     "Topic :: System :: Monitoring",
-    "Private :: Do Not Upload",
 ]
 dependencies = [
     "datadog-checks-base>=37.0.0",
@@ -33,18 +34,17 @@ dependencies = [
 dynamic = [
     "version",
 ]
-license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psycopg[c]==3.2.3",
+    "duckdb==1.1.1",
 ]
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/pgbouncer/__about__.py"
+path = "datadog_checks/duckdb/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -55,7 +55,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/pgbouncer",
+    "/datadog_checks/duckdb",
 ]
 dev-mode-dirs = [
     ".",
