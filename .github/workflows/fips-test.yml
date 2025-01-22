@@ -50,9 +50,8 @@ jobs:
       env:
         AGENT_IMAGE: "${{ matrix.agent-image }}"
         CIPHER: "${{ matrix.cipher }}"
-        SSL_PATH: ${{ matrix.platform == 'linux' && '/etc/ssl' || 'C:\ProgramData\ssl\' }}
-        PLATFORM: ${{ matrix.platform }}
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
+        DOCKER_DEFAULT_PLATFORM: linux/amd64
       run: |
         docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d
 
