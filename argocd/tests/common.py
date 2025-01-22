@@ -113,12 +113,18 @@ appset_controller_counters = ['reconcile.errors.count', 'runtime.reconcile.count
 appset_controller_gauges = [
     'active.workers',
     'max.concurrent.reconciles',
+    'appset.info',
+    'appset.owned.applications',
+    'appset.labels',
 ]
 
 appset_controller_histograms = [
     'reconcile.time_seconds.bucket',
     'reconcile.time_seconds.count',
     'reconcile.time_seconds.sum',
+    'appset.reconcile.bucket',
+    'appset.reconcile.count',
+    'appset.reconcile.sum',
 ]
 
 api_server_counters = [
@@ -176,6 +182,12 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.reconcile.count',
     'argocd.app_controller.app.reconcile.sum',
     'argocd.app_controller.kubectl.exec.pending',
+    'argocd.appset_controller.appset.reconcile.bucket',
+    'argocd.appset_controller.appset.reconcile.count',
+    'argocd.appset_controller.appset.reconcile.sum',
+    'argocd.appset_controller.appset.info',
+    'argocd.appset_controller.appset.owned.applications',
+    'argocd.appset_controller.appset.labels',
     'argocd.appset_controller.reconcile.time_seconds.bucket',
     'argocd.appset_controller.reconcile.time_seconds.count',
     'argocd.appset_controller.reconcile.time_seconds.sum',

@@ -10,12 +10,15 @@ from urllib.parse import quote_plus
 
 import mock
 import pytest
+from bson import json_util
 from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
+from datadog_checks.mongo.dbm.utils import should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
 
@@ -612,6 +615,7 @@ def test_when_collections_indexes_stats_to_true_then_index_stats_metrics_reporte
 
 def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggregator, check, instance, dd_run_check):
     # Given
+    instance["reported_database_hostname"] = "test-hostname:27017"
     instance["collections_indexes_stats"] = True
     instance["collections"] = ['bar', 'foo']
     check = check(instance)
@@ -625,6 +629,7 @@ def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggreg
 
 def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator, check, instance, dd_run_check):
     # Given
+    instance["reported_database_hostname"] = "test-hostname:27017"
     check = check(instance)
     # When
     mocked_client = mock.MagicMock()
@@ -738,6 +743,7 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     Ideally we should be asserting that we emit an event for a change of role. That's the behavior users care about.
     It requires more mocking work though.
     """
+    instance_shard["reported_database_hostname"] = "test-hostname:27018"
     mongo_check = check(instance_shard)
     mc = seed_mock_client()
     mc.replset_get_status.return_value = load_json_fixture('replSetGetStatus-replica-primary-in-shard')
@@ -775,3 +781,135 @@ def seed_mock_client():
 def load_json_fixture(name):
     with open(os.path.join(common.HERE, "fixtures", name), 'r') as f:
         return json.load(f)
+
+
+@pytest.mark.parametrize(
+    'namespace,op,command,should_explain',
+    [
+        pytest.param(
+            "test.test",
+            "command",
+            {
+                "aggregate": "test",
+                "pipeline": [{"$collStats": {"latencyStats": {}, "storageStats": {}, "queryExecStats": {}}}],
+                "cursor": {},
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no-explain $collStats',
+        ),
+        pytest.param(
+            "test.test",
+            "command",
+            {
+                "aggregate": "test",
+                "pipeline": [{"$sample": {"size": "?"}}],
+                "cursor": {},
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain $sample',
+        ),
+        pytest.param(
+            "test.test",
+            "command",
+            {
+                "aggregate": "test",
+                "pipeline": [{"$indexStats": {}}],
+                "cursor": {},
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain $indexStats',
+        ),
+        pytest.param(
+            "test.test",
+            "command",
+            {"getMore": "?", "collection": "test", "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='no explain getMore',
+        ),
+        pytest.param(
+            "test.test",
+            "update",
+            {
+                "update": "test",
+                "updates": [{"q": {}, "u": {}, "multi": False, "upsert": False}],
+                "ordered": True,
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain update',
+        ),
+        pytest.param(
+            "test.test",
+            "insert",
+            {
+                "insert": "test",
+                "documents": [{"_id": "?", "a": 1}],
+                "ordered": True,
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain insert',
+        ),
+        pytest.param(
+            "test.test",
+            "remove",
+            {
+                "delete": "test",
+                "deletes": [{"q": {}, "limit": 1}],
+                "ordered": True,
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain delete',
+        ),
+        pytest.param(
+            "test.test",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            True,
+            id='explain find',
+        ),
+        pytest.param(
+            None,
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='missing ns',
+        ),
+        pytest.param(
+            "",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='blank ns',
+        ),
+        pytest.param(
+            "db",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            True,
+            id='ns with no collection',
+        ),
+    ],
+)
+def test_should_explain_operation(namespace, op, command, should_explain):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    assert (
+        should_explain_operation(
+            namespace,
+            op,
+            command,
+            explain_plan_rate_limiter=check._operation_samples._explained_operations_ratelimiter,
+            explain_plan_cache_key=(namespace, op, compute_exec_plan_signature(json_util.dumps(command))),
+        )
+        == should_explain
+    )

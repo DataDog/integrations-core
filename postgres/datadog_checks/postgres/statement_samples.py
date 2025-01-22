@@ -41,6 +41,8 @@ MAX_CHARACTER_SIZE_IN_BYTES = 6
 
 TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
+TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE = 4096
+
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 # columns from pg_stat_activity which correspond to attributes common to all databases and are therefore stored in
@@ -80,6 +82,12 @@ PG_STAT_ACTIVITY_COLS = [
     "query",
     "backend_type",
 ]
+
+# PG_STAT_ACTIVITY_COLS_MAPPING applies additional data type casting to the columns
+PG_STAT_ACTIVITY_COLS_MAPPING = {
+    # use the bytea type to avoid unicode decode errors on Azure PostgreSQL
+    'backend_type': 'backend_type::bytea as backend_type',
+}
 
 PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
 CURRENT_TIME_FUNC = "clock_timestamp() as now,"
@@ -240,10 +248,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         return [dict(row) for row in rows]
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_new_pg_stat_activity(self, available_activity_columns):
+    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping, collect_activity):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
-        report_activity = self._report_activity_event()
         cur_time_func = ""
         blocking_func = ""
         backend_type_predicate = ""
@@ -251,14 +258,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             backend_type_predicate = "backend_type != 'client backend' OR"
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
-        if self._check.version >= V9_6 and report_activity:
+        if self._check.version >= V9_6 and collect_activity:
             blocking_func = PG_BLOCKING_PIDS_FUNC
-        if report_activity:
-            cur_time_func = CURRENT_TIME_FUNC
+        cur_time_func = CURRENT_TIME_FUNC
+        activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
         query = PG_STAT_ACTIVITY_QUERY.format(
             backend_type_predicate=backend_type_predicate,
             current_time_func=cur_time_func,
-            pg_stat_activity_cols=', '.join(available_activity_columns),
+            pg_stat_activity_cols=', '.join(activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
@@ -332,6 +339,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             total_count += 1
+            if row.get('backend_type') is not None:
+                try:
+                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
+                except UnicodeDecodeError:
+                    row['backend_type'] = 'unknown'
             if (not row['datname'] or not row['query']) and row.get(
                 'backend_type', 'client backend'
             ) == 'client backend':
@@ -424,6 +436,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
             raw=True,
         )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_ms",
+            (time.time() - start_time) * 1000,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_count",
+            row_len,
+            "histogram",
+        )
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -447,7 +471,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return
-        rows = self._get_new_pg_stat_activity(pg_activity_cols)
+        collect_activity = self._report_activity_event()
+        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING, collect_activity)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
@@ -456,7 +481,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
 
-        if self._report_activity_event():
+        if collect_activity:
             active_connections = self._get_active_connections()
             activity_event = self._create_activity_event(rows, active_connections)
             self._check.database_monitoring_query_activity(
@@ -468,6 +493,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self.tags,
                 raw=True,
             )
+            datadog_agent.emit_agent_telemetry(
+                "postgres",
+                "collect_activity_snapshot_ms",
+                (time.time() - start_time) * 1000,
+                "histogram",
+            )
+
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
@@ -504,9 +536,20 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
             raw=True,
         )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_ms",
+            elapsed_ms,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_count",
+            submitted_count,
+            "gauge",
+        )
 
-    @staticmethod
-    def _to_active_session(row, track_activity_query_size):
+    def _to_active_session(self, row, track_activity_query_size):
         if (row.get('backend_type', 'client backend') != 'client backend') or (
             row['state'] is not None and row['state'] != 'idle'
         ):
@@ -514,8 +557,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
-            active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
-                track_activity_query_size, row['query']
+            active_row['query_truncated'] = self._get_truncation_state(
+                track_activity_query_size, row['query'], row['query_signature']
             ).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
@@ -647,7 +690,10 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         track_activity_query_size = self._get_track_activity_query_size()
 
-        if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
+        if (
+            self._get_truncation_state(track_activity_query_size, statement, query_signature)
+            == StatementTruncationState.truncated
+        ):
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -757,6 +803,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
+                'service': self._config.service,
                 "network": {
                     "client": {
                         "ip": str(row.get('client_addr', None)),
@@ -782,7 +829,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "comments": row['dd_comments'],
                     },
                     "query_truncated": self._get_truncation_state(
-                        self._get_track_activity_query_size(), row['query']
+                        self._get_track_activity_query_size(), row['query'], row['query_signature']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -841,6 +888,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }
@@ -870,8 +918,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
-    @staticmethod
-    def _get_truncation_state(track_activity_query_size, statement):
+    def _get_truncation_state(self, track_activity_query_size, statement, query_signature):
         # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
         # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
         if track_activity_query_size == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE:
@@ -885,4 +932,23 @@ class PostgresStatementSamples(DBMAsyncJob):
         # would falsely report it as a truncated statement
         statement_bytes = bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
-        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+        if truncated:
+            if track_activity_query_size < TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE:
+                self._log.warning(
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting%s "
+                    "for more details on how to increase the track_activity_query_size setting.",
+                    query_signature,
+                    len(statement_bytes),
+                    track_activity_query_size,
+                    "#query-samples-are-truncated",
+                )
+            else:
+                self._log.debug(
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d",
+                    query_signature,
+                    len(statement_bytes),
+                    track_activity_query_size,
+                )
+            return StatementTruncationState.truncated
+        return StatementTruncationState.not_truncated

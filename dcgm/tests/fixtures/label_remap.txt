@@ -1,0 +1,3 @@
+# HELP DCGM_FI_DEV_GPU_UTIL GPU utilization (in %) edited to include namespace, pod and container labels
+# TYPE DCGM_FI_DEV_GPU_UTIL gauge
+DCGM_FI_DEV_GPU_UTIL{gpu="0",UUID="GPU-20c56d28-0da5-6d26-a36a-e7af1ce2586e",device="nvidia0",modelName="Tesla T4",Hostname="424773df46e0",DCGM_FI_DRIVER_VERSION="460.106.00",DCGM_FI_PROCESS_NAME="/usr/bin/dcgm-exporter",namespace="foo",pod="bar",container="baz"} 0

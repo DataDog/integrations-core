@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-08-14",
+	"last_updated_at": "2024-08-14",
+	"title": "[Docusign] Unauthorized IP Address Activity",
+	"description": "Unauthorized ip address activity is monitored.",
+	"definition": {
+		"id": 150031469,
+		"name": "[Docusign] Unauthorized IP Address Activity",
+		"type": "log alert",
+		"query": "logs(\"source:docusign @activity_log.object:Alert @activity_log.action:IpAddressOutsideAllowedRanges\").index(\"*\").rollup(\"cardinality\", \"@activity_log.eventId\").last(\"1d\") >= 10",
+		"message": "{{#is_warning}}\n\nNumber of Activities from Unauthorized IPs have exceeded the threshold value.  \nCurrent Value: {{value}}  \nThreshold: {{warn_threshold}} \n\n{{/is_warning}}\n\n{{#is_alert}}\n\nNumber of Activities from Unauthorized IPs have exceeded the threshold value.  \nCurrent Value: {{value}}  \nThreshold: {{threshold}}\n\n{{/is_alert}}\n\n@email@example.com",
+		"tags": [
+			"docusign"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "show_no_data",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:docusign"
+	]
+}

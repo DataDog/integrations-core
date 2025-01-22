@@ -4,6 +4,7 @@
 import logging
 from copy import copy, deepcopy
 
+import mock
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
@@ -42,7 +43,6 @@ except ImportError:
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    instance_tags = instance_docker.get('tags', [])
 
     with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.initialize_connection()
@@ -55,7 +55,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
             'db:master',
             'connection_host:{}'.format(instance_docker.get('host')),
         ]
-        + instance_tags,
+        + sqlserver_check._config.tags,
         message=str(excinfo.value),
     )
 
@@ -92,7 +92,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
         instance_docker['autodiscovery_include'] = autodiscovery_dbs
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + [
+    expected_tags = sqlserver_check._config.tags + [
         'connection_host:{}'.format(instance_docker.get('host')),
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'db:master',
@@ -100,7 +100,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     assert_metrics(
         instance_docker,
         aggregator,
-        check_tags=instance_docker.get('tags', []),
+        check_tags=sqlserver_check._config.tags,
         service_tags=expected_tags,
         dbm_enabled=dbm_enabled,
         hostname=sqlserver_check.resolved_hostname,
@@ -119,7 +119,7 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
 
-    expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
+    expected_tags = sqlserver_check._config.tags + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
@@ -145,7 +145,7 @@ def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, i
 def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     dd_run_check(sqlserver_check)
-    instance_tags = instance_docker.get('tags', []) + ['optional_tag:tag1']
+    instance_tags = sqlserver_check._config.tags + ['optional_tag:tag1']
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=instance_tags, count=1)
     aggregator.assert_metric('sqlserver.broker_activation.tasks_running', tags=instance_tags, count=1)
@@ -158,7 +158,7 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance_docker])
     dd_run_check(sqlserver_check)
-    instance_tags = instance_docker.get('tags', [])
+    instance_tags = sqlserver_check._config.tags
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=instance_tags, count=1)
     aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=instance_tags, count=1)
@@ -187,7 +187,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     master_tags = [
         'database:master',
@@ -228,7 +228,7 @@ def test_autodiscovery_db_service_checks(
     instance_autodiscovery['autodiscovery_db_service_check'] = service_check_enabled
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     # verify that the old status check returns OK
     aggregator.assert_service_check(
@@ -279,7 +279,7 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     instance_autodiscovery['autodiscovery_include'] = ['master']
     instance_autodiscovery['autodiscovery_exclude'] = ['msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     dd_run_check(check)
 
@@ -323,7 +323,7 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE]
     master_tags = ['database:master'] + instance_tags
@@ -340,7 +340,7 @@ def test_autodiscovery_perf_counters_ao(aggregator, dd_run_check, instance_autod
     instance_autodiscovery['autodiscovery_include'] = ['datadog_test-1']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
     tags = ['database:datadog_test-1'] + instance_tags
@@ -382,9 +382,7 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
     found_log = 0
     for _, _, message in caplog.record_tuples:
         # make sure master and msdb is only queried once
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [master]" in message:
-            found_log += 1
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [msdb]" in message:
+        if "Restoring the original database context master" in message:
             found_log += 1
 
     assert found_log == 2
@@ -428,7 +426,7 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
     for metric_name, kwargs in assert_metrics:
         kwargs = copy(kwargs)
-        kwargs['tags'] = instance['tags'] + kwargs.get('tags', [])
+        kwargs['tags'] = check._config.tags + kwargs.get('tags', [])
         aggregator.assert_metric(metric_name, **kwargs)
 
 
@@ -603,12 +601,12 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             {
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:forced_hostname",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -620,12 +618,47 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             {
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:localhost/datadog_test-1",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+        ),
+        (
+            True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost/datadog_test-1',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'fully_qualified_domain_name': 'my-instance.database.windows.net',
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+        ),
+        (
+            True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'fully_qualified_domain_name': 'my-instance.database.windows.net',
+                    'aggregate_sql_databases': True,
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -658,13 +691,13 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 },
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
                 "dd.internal.resource:aws_rds_instance:foo.aws.com",
-                "dd.internal.resource:azure_sql_server_database:my-instance",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -804,10 +837,99 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(check)
-    expected_tags = instance_docker.get('tags', []) + [
+    expected_tags = check._config.tags + [
         'db:datadog_test-1',
         'table:ϑings',
+        'schema:dbo',
         'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
+    instance_docker['database'] = 'master'
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dd_run_check(sqlserver_check)
+    expected_tags = sqlserver_check._config.tags + [
+        'database_recovery_model_desc:SIMPLE',
+        'database_state_desc:ONLINE',
+        'database:{}'.format(instance_docker['database']),
+        'db:{}'.format(instance_docker['database']),
+    ]
+    aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
+
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+@pytest.mark.integration
+def test_propagate_agent_tags(
+    aggregator,
+    dd_run_check,
+    instance_docker,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    init_config = {}
+    if instance_propagate_agent_tags is not None:
+        instance_docker['propagate_agent_tags'] = instance_propagate_agent_tags
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
+
+    with mock.patch('datadog_checks.sqlserver.config.get_agent_host_tags', return_value=agent_tags):
+        check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+        assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            assert all(tag in check.tags for tag in agent_tags)
+            dd_run_check(check)
+            expected_tags = check._config.tags + [
+                'connection_host:{}'.format(instance_docker.get('host')),
+                'sqlserver_host:{}'.format(check.resolved_hostname),
+                'db:master',
+            ]
+            aggregator.assert_service_check(
+                'sqlserver.can_connect',
+                status=SQLServer.OK,
+                tags=expected_tags,
+            )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_static_information_expire(aggregator, dd_run_check, init_config, instance_docker):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.static_info_cache is not None
+    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
+
+    # manually clear static information cache
+    sqlserver_check.static_info_cache.clear()
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.static_info_cache is not None
+    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
+
+    # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
+    sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.static_info_cache is not None
+    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert sqlserver_check.resolved_hostname == 'stubbed.hostname'

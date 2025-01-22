@@ -153,12 +153,7 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return (
-        row.get('database_name'),
-        row['query_signature'],
-        row['query_hash'],
-        row['query_plan_hash'],
-    )
+    return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
@@ -286,12 +281,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         )
         return self._statement_metrics_query
 
+    def lookback_window(self):
+        return self._config.statement_metrics_config.get('lookback_window', None)
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
         now = time.time()
         query_interval = self.collection_interval * 2
+        if self.lookback_window():
+            query_interval = self.lookback_window()
         if self._last_stats_query_time:
             query_interval = max(query_interval, now - self._last_stats_query_time)
         self._last_stats_query_time = now
@@ -444,6 +444,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
+            'service': self._config.service,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -500,6 +501,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
+                'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
@@ -593,6 +595,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "cloud_metadata": self._config.cloud_metadata,
                     'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                     'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                    'service': self._config.service,
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {

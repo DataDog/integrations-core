@@ -54,6 +54,7 @@ from .const import (
     TABLE_VARS,
     VARIABLES_VARS,
 )
+from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
@@ -109,6 +110,7 @@ class MySql(AgentCheck):
         self.is_mariadb = None
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
@@ -129,6 +131,7 @@ class MySql(AgentCheck):
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+        self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -170,7 +173,16 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            self._database_hostname = self.resolve_db_host()
+        return self._database_hostname
+
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -201,6 +213,12 @@ class MySql(AgentCheck):
                 self.resolved_hostname,
             )
         )
+
+    def set_version_tags(self):
+        if not self.version or not self.version.flavor:
+            return
+
+        self.tags.append('dbms_flavor:{}'.format(self.version.flavor.lower()))
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
@@ -274,7 +292,6 @@ class MySql(AgentCheck):
         if self.instance.get('pass'):
             self._log_deprecation('_config_renamed', 'pass', 'password')
 
-        tags = list(self.tags)
         self._set_qcache_stats()
         try:
             with self._connect() as db:
@@ -283,11 +300,12 @@ class MySql(AgentCheck):
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
-                    self.tags = tags + aurora_tags
+                    self.tags = list(set(self.tags) | set(aurora_tags))
                     self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
 
                 # version collection
                 self.version = get_version(db)
+                self.set_version_tags()
                 self._send_metadata()
                 self._send_database_instance_metadata()
 
@@ -299,6 +317,7 @@ class MySql(AgentCheck):
                     self.check_userstat_enabled(db)
 
                 # Metric collection
+                tags = copy.deepcopy(self.tags)
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
@@ -361,7 +380,8 @@ class MySql(AgentCheck):
 
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-
+        if self._index_metrics.include_index_metrics:
+            queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
         self._runtime_queries_cached.compile_queries()
         self.log.debug("initialized runtime queries")
@@ -676,7 +696,7 @@ class MySql(AgentCheck):
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
                     status=status,
-                    tags=self._service_check_tags() + additional_tags,
+                    tags=self.service_check_tags + additional_tags,
                 )
 
                 metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_8_0_2 if above_802 else SQL_GROUP_REPLICATION_METRICS
@@ -1079,7 +1099,10 @@ class MySql(AgentCheck):
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+            if "You are not using binary logging" in str(e):
+                replica_results.update({'Binlog_enabled': False})
+            else:
+                self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
 
         return replica_results
 
@@ -1292,6 +1315,8 @@ class MySql(AgentCheck):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
                 "host": self.resolved_hostname,
+                "port": self._config.port,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
                 "kind": "database_instance",

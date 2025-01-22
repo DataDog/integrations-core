@@ -55,11 +55,11 @@ class GlusterfsCheck(AgentCheck):
 
     def check(self, _):
         if self.use_sudo:
-            cmd = [f'sudo -ln {self.gstatus_cmd}']
+            cmd = f'sudo -ln {self.gstatus_cmd}'
             stdout, stderr, returncode = self.get_gstatus_output(cmd)
             if returncode != 0 or not stdout:
                 raise Exception('The dd-agent user does not have sudo access: {!r}'.format(stderr or stdout))
-            gluster_cmd = 'sudo {}'.format(self.gstatus_cmd)
+            gluster_cmd = f'sudo {self.gstatus_cmd}'
         else:
             gluster_cmd = self.gstatus_cmd
         # Ensures units are universally the same by specifying the --units flag

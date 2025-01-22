@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-12",
+	"last_updated_at": "2024-09-12",
+	"title": "High number of public incidents",
+	"description": "This monitor alerts when an unusually high number of public incidents are created in the last 5 minutes, indicating a potential system overload or widespread issue.",
+	"definition": {
+		"id": 153152913,
+		"name": "High number of public incidents",
+		"type": "log alert",
+		"query": "logs(\"source:incident-io @evt.name:public_incident.incident_created_v2 @data.mode:standard\").index(\"*\").rollup(\"count\").last(\"5m\") >= 10",
+		"message": "High number of public incidents were created in last 5 mins.\nTotal incidents created: {{value}}.",
+		"tags": [
+			"integration:incident-io"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:incident-io"
+	]
+}

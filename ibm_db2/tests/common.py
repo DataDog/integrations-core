@@ -32,6 +32,6 @@ E2E_METADATA = {
     'start_commands': [
         'apt-get update',
         'apt-get install -y build-essential libxslt-dev',
-        'pip install -r /dev/requirements.txt',
+        'pip install ibm_db==3.2.3',
     ],
 }

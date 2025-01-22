@@ -1028,5 +1028,10 @@ def test_tenant_mocked(aggregator):
         metric_name, value=0.0, tags=['endpoint_group:Test-EPG', 'application:DtDg-test-AP'] + tags, hostname=''
     )
 
+    aggregator.assert_metric(
+        'datadog.cisco_aci.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=['cisco']
+    )
+    aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
+
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()

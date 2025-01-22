@@ -1,5 +1,3 @@
-version: '3'
-
 # https://github.com/ot4i/ace-docker
 services:
   ibm-ace:

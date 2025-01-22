@@ -274,6 +274,9 @@ class Network(AgentCheck):
         if self._collect_count_metrics:
             self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
+    def _submit_netmetric_gauge(self, metric, value, tags=None):
+        self.gauge(metric, value, tags=tags)
+
     def submit_regexed_values(self, output, regex_list, tags):
         lines = output.splitlines()
         for line in lines:

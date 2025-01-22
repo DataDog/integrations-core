@@ -128,6 +128,11 @@ class WindowsNetwork(Network):
             'dwOutRsts': '.out_resets',
             'dwNumConns': '.connections',
         }
+        # similar to the linux check
+        nstat_metrics_gauge_names = [
+            '.connections',
+            '.current_established',
+        ]
 
         proto_dict = {}
         tcp4stats = self._get_tcp_stats(socket.AF_INET)
@@ -149,7 +154,10 @@ class WindowsNetwork(Network):
             for fieldname in tcpstats_dict:
                 fieldvalue = getattr(stats, fieldname)
                 metric_name = "system.net." + str(proto) + tcpstats_dict[fieldname]
-                self.submit_netmetric(metric_name, fieldvalue, tags)
+                if tcpstats_dict[fieldname] in nstat_metrics_gauge_names:
+                    self._submit_netmetric_gauge(metric_name, fieldvalue, tags)
+                else:
+                    self.submit_netmetric(metric_name, fieldvalue, tags)
 
     def _parse_protocol_psutil(self, conn):
         """

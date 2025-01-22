@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6e01b4b9-7604-4628-9203-c1f042f941aa",
   "app_id": "godaddy",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights and monitor GoDaddy SSL Certificates.",
     "title": "GoDaddy",
-    "media": [],
+    "media": [
+      {
+        "caption": "GoDaddy Overview",
+        "image_url": "images/godaddy_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "GoDaddy Overview",
+        "image_url": "images/godaddy_2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Metrics",
       "Submitted Data Type::Metrics",
@@ -27,12 +38,25 @@
       },
       "metrics": {
         "prefix": "godaddy.",
-        "check": [],
+        "check": "godaddy.certificate.total_certificates",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "GoDaddy Overview": "assets/dashboards/godaddy_overview.json"
+    },
+    "monitors": {
+      "SSL Certificate Denied": "assets/monitors/godaddy_certificate_denied.json",
+      "SSL Certificate Expired": "assets/monitors/godaddy_certificate_expired.json",
+      "SSL Certificate in an Error State": "assets/monitors/godaddy_certificate_in_an_error_state.json",
+      "SSL Certificate Revoked": "assets/monitors/godaddy_certificate_revoked.json",
+      "SSL Certificate Expiration Alert": "assets/monitors/godaddy_days_remaining_for_expiration_of_certificate.json",
+      "Domain Dropped from Request": "assets/monitors/godaddy_domain_dropped_from_request.json",
+      "Domain Fraud Detected": "assets/monitors/godaddy_domain_fraud_detected.json",
+      "Domain Verification Failed": "assets/monitors/godaddy_domain_verification_failed.json"
     }
   },
   "author": {

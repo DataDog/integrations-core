@@ -29,6 +29,8 @@ def test_config(instance):
             sync_request_timeout=10,
             compression=False,
             secure=False,
+            ca_certs=None,
+            verify=True,
             settings={},
             client_name='datadog-test-clickhouse',
         )

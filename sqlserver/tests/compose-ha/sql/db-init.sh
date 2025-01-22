@@ -15,7 +15,21 @@ then
     rm /var/opt/mssql/shared/aoag_certificate.cert 2> /dev/null
 fi
 
+# Define both potential sqlcmd paths
+SQLCMD_PATH_18="/opt/mssql-tools18/bin/sqlcmd"
+SQLCMD_PATH="/opt/mssql-tools/bin/sqlcmd"
+
+# Check if sqlcmd exists in the first path
+if [ -x "$SQLCMD_PATH_18" ]; then
+    SQLCMD_EXEC="$SQLCMD_PATH_18"
+elif [ -x "$SQLCMD_PATH" ]; then
+    SQLCMD_EXEC="$SQLCMD_PATH"
+else
+    echo "sqlcmd not found in either path."
+    exit 1
+fi
+
 #use the SA password from the environment variable
-/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i $SQL_SCRIPT
+$SQLCMD_EXEC -C -N -S localhost -U sa -P $SA_PASSWORD -d master -i $SQL_SCRIPT
 
 echo "#######      AOAG script execution completed     #######"

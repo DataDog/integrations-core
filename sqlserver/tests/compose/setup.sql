@@ -104,6 +104,21 @@ CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
 GO
 
+-- Create a simple table for deadlocks
+CREATE TABLE [datadog_test-1].dbo.deadlocks (a int PRIMARY KEY not null ,b int null); 
+
+INSERT INTO [datadog_test-1].dbo.deadlocks VALUES (1,10),(2,20),(3,30) 
+
+-- Grant permissions to bob and fred to update the deadlocks table
+GRANT INSERT ON [datadog_test-1].dbo.deadlocks TO bob;
+GRANT UPDATE ON [datadog_test-1].dbo.deadlocks TO bob;
+GRANT DELETE ON [datadog_test-1].dbo.deadlocks TO bob;
+
+GRANT INSERT ON [datadog_test-1].dbo.deadlocks TO fred;
+GRANT UPDATE ON [datadog_test-1].dbo.deadlocks TO fred;
+GRANT DELETE ON [datadog_test-1].dbo.deadlocks TO fred;
+GO
+
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
@@ -246,4 +261,19 @@ BEGIN
 END
 GO
 GRANT EXECUTE on conditionalPlanTest to bob;
+GO
+
+CREATE EVENT SESSION datadog
+ON SERVER
+ADD EVENT sqlserver.xml_deadlock_report 
+ADD TARGET package0.ring_buffer 
+WITH (
+    MAX_MEMORY = 1024 KB, 
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, 
+    MAX_DISPATCH_LATENCY = 120 SECONDS, 
+    STARTUP_STATE = ON 
+);
+GO
+
+ALTER EVENT SESSION datadog ON SERVER STATE = START;
 GO

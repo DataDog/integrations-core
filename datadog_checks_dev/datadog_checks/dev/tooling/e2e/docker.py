@@ -307,12 +307,6 @@ class DockerInterface(object):
             'DD_CMD_PORT': find_free_port(get_ip()),
             # Disable trace agent
             'DD_APM_ENABLED': 'false',
-            # Don't write .pyc, needed to fix this issue (only Python 2):
-            # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
-            # in the first place.
-            # More info: https://github.com/DataDog/integrations-core/pull/5454
-            # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
-            'PYTHONDONTWRITEBYTECODE': "1",
             "DD_TELEMETRY_ENABLED": "1",
         }
         if self.dd_site:

@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-20",
+	"last_updated_at": "2024-08-20",
+	"title": "SSL Certificate Denied",
+	"description": "The customer's request for an SSL certificate was denied. This monitor tracks the status of the SSL certificate and triggers an alert when the status changes to denied. This process ensures that appropriate actions are taken promptly to address the denial.",
+	"definition": {
+		"id": 149884454,
+		"name": "SSL Certificate Denied",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.certificate_status{status:denied} by {certificateid} >= 1",
+		"message": "The certificate {{certificateid.name}} is denied. Please review and take the necessary actions.",
+		"tags": [
+			"service:certificate",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:godaddy"
+	]
+}

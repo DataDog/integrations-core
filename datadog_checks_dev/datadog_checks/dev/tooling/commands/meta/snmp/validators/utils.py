@@ -1,8 +1,8 @@
 import glob
+from genericpath import isfile
 from os.path import join
 
 import yaml
-from genericpath import isfile
 from yaml.error import YAMLError
 from yaml.loader import SafeLoader
 

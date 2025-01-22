@@ -1,5 +1,3 @@
-version: '3'
-
 # Adapted from https://github.com/big-data-europe/docker-spark/tree/master/template
 services:
   spark-app-hudi:

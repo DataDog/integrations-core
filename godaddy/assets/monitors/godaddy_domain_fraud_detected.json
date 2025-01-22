@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-20",
+	"last_updated_at": "2024-08-20",
+	"title": "Domain Fraud Detected",
+	"description": "Fraudulent activity can occur with a domain. This monitor tracks the status of the domain and triggers an alert when the status changes to verified_possible_fraud. This helps ensure that potential fraudulent activity is promptly investigated and addressed to protect the integrity of the domain.",
+	"definition": {
+		"id": 149884615,
+		"name": "Domain Fraud Detected",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.domain_status{domain_status:verified_possible_fraud} by {domain_name} >= 1",
+		"message": "Fraud has been detected for the domain {{domain_name.name}}. Please review and take the necessary actions.",
+		"tags": [
+			"service:domain",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 0,
+			"notify_no_data": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:godaddy"
+	]
+}

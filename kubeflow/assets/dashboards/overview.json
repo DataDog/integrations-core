@@ -94,7 +94,7 @@
                     {
                         "definition": {
                             "background_color": "pink",
-                            "content": "If many widgets are empty, you are using a version of Kubeflow that does not expose certain metrics. Refer to the metadata.csv file for metrics list. \n\nReach out to support to indicate version incompatibilities.",
+                            "content": "This integration is currently released in Preview mode. Its availability is subject to change in the future. \n\nIf many widgets are empty, you are using a version of Kubeflow that does not expose certain metrics. Refer to the metadata.csv file for metrics list. \n\nReach out to support to indicate version incompatibilities.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,

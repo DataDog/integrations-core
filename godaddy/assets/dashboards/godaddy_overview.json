@@ -1,0 +1,733 @@
+{
+  "title": "GoDaddy Overview",
+  "description": "Godaddy dashboard provides an overview of certificate management, including the total count of certificates, the count of issued certificates, the count of expired certificates, the count of revoked certificates, and the distribution of certificates by status. It also shows the count of domains associated with each certificate and the list of certificates that are soon to expire. Additionally, it displays the status of certificate and domain monitors.",
+  "widgets": [
+    {
+      "id": 1539830225140338,
+      "definition": {
+        "type": "image",
+        "url": "https://s23.q4cdn.com/406380394/files/images/media_resources/2022/GD_LOCKUP_RGB_BW.svg",
+        "url_dark_theme": "https://s23.q4cdn.com/406380394/files/images/media_resources/2022/GD_LOCKUP_RGB_BW_DARK_BG.svg",
+        "sizing": "fill",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 6674344167556010,
+      "definition": {
+        "title": "Certificates Summary",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3210784733654786,
+            "definition": {
+              "title": "Total Certificates",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:godaddy.certificate.total_certificates{$CustomerId}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#3d0de7"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 3886541897398508,
+            "definition": {
+              "title": "Expired Certificates",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:godaddy.certificate.expired_certificates{$CustomerId}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5615391778213782,
+            "definition": {
+              "title": "Issued Certificates",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:godaddy.certificate.issued_certificates{$CustomerId}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 6578909606700220,
+            "definition": {
+              "title": "Revoked Certificates",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:godaddy.certificate.revoked_certificates{$CustomerId}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 1277505914651742,
+      "definition": {
+        "type": "note",
+        "content": "**Overview**\n\nThis dashboard provides an overview of certificate summary, including the total count of certificates, the count of issued certificates, the count of expired certificates, the count of revoked certificates, and the distribution of certificates by status. It also shows the count of domains associated with each certificate and the list of certificates that are soon to expire. Additionally, it displays the status of certificate and domain monitors.\n\nFor more information, see the [GoDaddy Integration Documentation](https://docs.datadoghq.com/integrations/godaddy/).",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 1865135671025406,
+      "definition": {
+        "type": "note",
+        "content": "**NOTE** \n\nThe data displayed in the dashboard widgets is time-bounded. Therefore, adjusting the global time filter will not impact these widgets.",
+        "background_color": "yellow",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "top",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 4377282170082600,
+      "definition": {
+        "title": "Certificate Insights",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4728178297866722,
+            "definition": {
+              "title": "Certificates by Status",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2 + query3 + query4 + query5 + query6 + query7 + query8 + query9"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:godaddy.certificate.issued_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:godaddy.certificate.denied_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:godaddy.certificate.expired_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:godaddy.certificate.canceled_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:godaddy.certificate.revoked_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:godaddy.certificate.pending_issuance_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:godaddy.certificate.pending_rekey_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:godaddy.certificate.pending_revocation_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:godaddy.certificate.unused_certificates{$CustomerId} by {status}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 2848804234196820,
+            "definition": {
+              "title": "Soon to be Expired Certificates",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:godaddy.certificate.certificate_expiration_days{$CustomerId} by {certificateid,commonname}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "value": 30,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 30,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "cell_display_mode": "bar",
+                      "alias": "Remaining Days in Expiry",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 229722093944502,
+            "definition": {
+              "title": "Certificates over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "day",
+                "value": 1
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Canceled Certificates",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Denied Certificates",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Expired Certificates",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Issued Certificates",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "Pending Issuance Certificates",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Pending Revocation Certificates",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "Pending Rekey Certificates",
+                      "formula": "query8"
+                    },
+                    {
+                      "alias": "Revoked Certificates",
+                      "formula": "query9"
+                    },
+                    {
+                      "alias": "Unused Certificates",
+                      "formula": "query10"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:godaddy.certificate.canceled_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:godaddy.certificate.denied_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:godaddy.certificate.expired_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:godaddy.certificate.issued_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:godaddy.certificate.pending_issuance_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:godaddy.certificate.pending_revocation_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:godaddy.certificate.pending_rekey_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:godaddy.certificate.revoked_certificates{$CustomerId}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "query": "sum:godaddy.certificate.unused_certificates{$CustomerId}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 15
+      }
+    },
+    {
+      "id": 6555127930450788,
+      "definition": {
+        "title": "Domain Overview",
+        "background_color": "vivid_yellow",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5177473629095424,
+            "definition": {
+              "title": "Domain Count by Certificate",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 4
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:godaddy.certificate.domains_count{$CustomerId} by {certificateid}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Domains Count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 8886524551670130,
+      "definition": {
+        "title": "Monitors Overview ",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5019585661866338,
+            "definition": {
+              "title": "Certificate Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "background",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(service:certificate AND source:godaddy)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 3522330832237362,
+            "definition": {
+              "title": "Domain Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "background",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(service:domain AND source:godaddy)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 27,
+        "width": 12,
+        "height": 6
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "CustomerId",
+      "prefix": "customer_id",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

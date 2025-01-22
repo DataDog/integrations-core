@@ -46,9 +46,11 @@ class MongoApi(object):
             'socketTimeoutMS': self._config.timeout,
             'connectTimeoutMS': self._config.timeout,
             'serverSelectionTimeoutMS': self._config.timeout,
+            'timeoutMS': self._config.timeout,
             'directConnection': True,
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,
+            'compressors': 'zlib',  # Enable zlib compression
         }
         if replicaset:
             options['replicaSet'] = replicaset
@@ -65,6 +67,9 @@ class MongoApi(object):
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
         self.__hostname = None
+
+        # Check if the server supports the $collStats aggregation pipeline stage.
+        self.coll_stats_pipeline_supported = True
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -94,21 +99,39 @@ class MongoApi(object):
         # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
         return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
 
-    def coll_stats(self, db_name, coll_name, session=None):
+    def get_collection_stats(self, db_name, coll_name, stats=None, session=None):
+        if not self.coll_stats_pipeline_supported:
+            return [self.coll_stats_compatible(db_name, coll_name, session)]
+        try:
+            return self.coll_stats(db_name, coll_name, stats, session)
+        except OperationFailure as e:
+            if e.code == 13:
+                # Unauthorized to run $collStats, do not try use the compatible mode, raise the exception
+                raise e
+            # Failed to get collection stats using $collStats aggregation
+            self._log.debug(
+                "Failed to collect stats for collection %s with $collStats, fallback to collStats command",
+                coll_name,
+                e.details,
+            )
+            self.coll_stats_pipeline_supported = False
+            return [self.coll_stats_compatible(db_name, coll_name, session)]
+
+    def coll_stats(self, db_name, coll_name, stats=None, session=None):
+        if not stats:
+            stats = {"latencyStats", "storageStats", "queryExecStats"}
+        stats = {stat: {} for stat in stats}
+
         return self[db_name][coll_name].aggregate(
             [
                 {
-                    "$collStats": {
-                        "latencyStats": {},
-                        "storageStats": {},
-                        "queryExecStats": {},
-                    }
+                    "$collStats": stats,
                 },
             ],
             session=session,
         )
 
-    def coll_stats_compatable(self, db_name, coll_name, session=None):
+    def coll_stats_compatible(self, db_name, coll_name, session=None):
         # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
         return self[db_name].command({'collStats': coll_name}, session=session)
 

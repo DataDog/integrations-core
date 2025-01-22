@@ -2,6 +2,34 @@
 
 <!-- towncrier release notes start -->
 
+## 7.0.0 / 2024-11-28 / Agent 7.61.0
+
+***Changed***:
+
+* v16 ceremony: bump root layout to v6. ([#19146](https://github.com/DataDog/integrations-core/pull/19146))
+
+## 6.1.0 / 2024-10-31 / Agent 7.60.0
+
+***Added***:
+
+* Update root.json for v14 ceremony. ([#18824](https://github.com/DataDog/integrations-core/pull/18824))
+
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+## 5.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
 ## 4.7.0 / 2024-07-05 / Agent 7.55.0
 
 ***Security***:

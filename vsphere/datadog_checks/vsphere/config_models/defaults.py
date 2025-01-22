@@ -36,6 +36,10 @@ def instance_collect_tags():
     return False
 
 
+def instance_collect_vsan_data():
+    return False
+
+
 def instance_collection_level():
     return 1
 

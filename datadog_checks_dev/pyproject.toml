@@ -32,7 +32,6 @@ dependencies = [
     "coverage>=5.0.3",
     "flaky>=3.8.0",
     "mock",
-    "psutil",
     "pytest==8.1.1",
     "pytest-asyncio>=0.23.4",
     "pytest-benchmark[histogram]>=4.0.0",

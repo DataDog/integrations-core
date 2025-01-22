@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   vault-leader:
     container_name: vault-leader

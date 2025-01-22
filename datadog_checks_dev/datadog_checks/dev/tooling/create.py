@@ -193,6 +193,8 @@ def create_template_files(template_name, new_root, config, repo_choice, read=Fal
         for template_file in template_files:
             if template_file.endswith('1.added') and repo_choice != 'core':
                 continue
+            if template_root == root and template_file == "README.md":
+                continue
             if not template_file.endswith(('.pyc', '.pyo')):
                 if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):
                     # Custom README for the marketplace/partner support_type integrations

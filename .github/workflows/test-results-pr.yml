@@ -12,6 +12,12 @@ jobs:
     name: Publish test results
     runs-on: ubuntu-22.04
 
+    permissions: 
+      checks: write # For EnricoMi/publish-unit-test-result-action@v2
+      pull-requests: write  # For EnricoMi/publish-unit-test-result-action@v2
+      contents: read  # For EnricoMi/publish-unit-test-result-action@v2
+      actions: read  # For "Download and extract artifacts"
+      
     steps:
     - name: Download and extract artifacts
       id: download

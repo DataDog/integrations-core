@@ -5,8 +5,6 @@ import json
 import re
 from collections import defaultdict
 
-from six import iteritems
-
 from datadog_checks.base.utils.serialization import from_json, to_json
 
 
@@ -29,6 +27,7 @@ class DatadogAgentStub(object):
         self._process_start_time = 0
         self._external_tags = []
         self._host_tags = "{}"
+        self._sent_telemetry = defaultdict(list)
 
     def get_default_config(self):
         return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
@@ -66,8 +65,8 @@ class DatadogAgentStub(object):
         for h, tags in self._external_tags:
             if h == hostname:
                 if not match_tags_order:
-                    external_tags = {k: sorted(v) for (k, v) in iteritems(external_tags)}
-                    tags = {k: sorted(v) for (k, v) in iteritems(tags)}
+                    external_tags = {k: sorted(v) for (k, v) in external_tags.items()}
+                    tags = {k: sorted(v) for (k, v) in tags.items()}
 
                 assert (
                     external_tags == tags
@@ -82,6 +81,12 @@ class DatadogAgentStub(object):
         tags_count = len(self._external_tags)
         assert tags_count == count, 'Expected {} external tags items, found {}. Submitted external tags: {}'.format(
             count, tags_count, repr(self._external_tags)
+        )
+
+    def assert_telemetry(self, check_name, metric_name, metric_type, metric_value):
+        values = self._sent_telemetry[(check_name, metric_name, metric_type)]
+        assert metric_value in values, 'Expected value {} for check {}, metric {}, type {}. Found {}.'.format(
+            metric_value, check_name, metric_name, metric_type, values
         )
 
     def get_hostname(self):
@@ -151,6 +156,9 @@ class DatadogAgentStub(object):
     def obfuscate_mongodb_string(self, command):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
+
+    def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type):
+        self._sent_telemetry[(check_name, metric_name, metric_type)].append(metric_value)
 
 
 # Use the stub as a singleton
