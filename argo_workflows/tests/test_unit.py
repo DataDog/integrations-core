@@ -83,8 +83,6 @@ V3_6_METRICS = {
 }
 
 
-
-
 @pytest.mark.parametrize(
     "fixture_file, description",
     [
@@ -114,9 +112,9 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
         )
 
         for m_name in histograms:
-            aggregator.assert_metric(f'argo_workflows.{m_name}.sum', metric_type=agg.    MONOTONIC_COUNT)
-            aggregator.assert_metric(f'argo_workflows.{m_name}.count', metric_type=agg.    MONOTONIC_COUNT)
-            aggregator.assert_metric(f'argo_workflows.{m_name}.bucket', metric_type=agg.    MONOTONIC_COUNT)
+            aggregator.assert_metric(f'argo_workflows.{m_name}.sum', metric_type=agg.MONOTONIC_COUNT)
+            aggregator.assert_metric(f'argo_workflows.{m_name}.count', metric_type=agg.MONOTONIC_COUNT)
+            aggregator.assert_metric(f'argo_workflows.{m_name}.bucket', metric_type=agg.MONOTONIC_COUNT)
 
     histograms = (
         'operation_duration_seconds',
