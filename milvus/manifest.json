@@ -39,7 +39,13 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "milvus"
+      ]
+    },
+    "dashboards": {
+      "Milvus Overview": "assets/dashboards/milvus_overview.json"
     }
   },
   "author": {

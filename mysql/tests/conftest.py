@@ -102,6 +102,7 @@ def instance_complex():
             'table_size_metrics': True,
             'system_table_size_metrics': True,
             'table_row_stats_metrics': True,
+            'index_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [
@@ -405,6 +406,7 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
+    cur.execute("GRANT SELECT ON mysql.innodb_index_stats TO 'dog'@'%'")
 
     # refactor try older mysql.user table first. if this fails, go to newer ALTER USER
     try:

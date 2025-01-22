@@ -115,12 +115,28 @@ WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
 """
 
 PG_INDEXES_QUERY = """
-SELECT indexname AS NAME,
-       indexdef  AS definition,
-       schemaname,
-       tablename
-FROM   pg_indexes
-WHERE  schemaname='{schema_name}' AND ({table_names_like});
+SELECT
+    c.relname AS name,
+    ix.indrelid AS table_id,
+    pg_get_indexdef(c.oid) AS definition,
+    ix.indisunique AS is_unique,
+    ix.indisexclusion AS is_exclusion,
+    ix.indimmediate AS is_immediate,
+    ix.indisclustered AS is_clustered,
+    ix.indisvalid AS is_valid,
+    ix.indcheckxmin AS is_checkxmin,
+    ix.indisready AS is_ready,
+    ix.indislive AS is_live,
+    ix.indisreplident AS is_replident,
+    ix.indpred IS NOT NULL AS is_partial
+FROM
+    pg_index ix
+JOIN
+    pg_class c
+ON
+    c.oid = ix.indexrelid
+WHERE
+    ix.indrelid IN ({table_ids});
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -595,6 +611,16 @@ class PostgresMetadata(DBMAsyncJob):
             "indexes": dict (if has indexes)
                 name: str
                 definition: str
+                is_unique: bool
+                is_exclusion: bool
+                is_immediate: bool
+                is_clustered: bool
+                is_valid: bool
+                is_checkxmin: bool
+                is_ready: bool
+                is_live: bool
+                is_replident: bool
+                is_partial: bool
             "columns": dict
                 name: str
                 data_type: str
@@ -607,14 +633,13 @@ class PostgresMetadata(DBMAsyncJob):
         tables = {t.get("name"): {**t, "num_partitions": 0} for t in table_info}
         table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
-        table_names_like = " OR ".join(["tablename LIKE '{}%'".format(t.get("name")) for t in table_info])
 
         # Get indexes
-        cursor.execute(PG_INDEXES_QUERY.format(schema_name=schema_name, table_names_like=table_names_like))
+        cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
         rows = cursor.fetchall()
         for row in rows:
             # Partition indexes in some versions of Postgres have appended digits for each partition
-            table_name = row.get("tablename")
+            table_name = table_name_lookup.get(str(row.get("table_id")))
             while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
                 table_name = table_name[0:-1]
             if tables.get(table_name) is not None:

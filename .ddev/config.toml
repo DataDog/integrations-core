@@ -71,9 +71,6 @@ aerospike = ['Apache-2.0']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
 # https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
-# TODO: Remove once confluent-kafka license metadata is fixed:
-# https://github.com/confluentinc/confluent-kafka-python/issues/1857
-confluent-kafka = ['Apache-2.0']
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
@@ -177,8 +174,6 @@ exclude = [
     # We're not ready to switch to v3 of the postgres library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
-    # 2.4.10 is broken on py2 and they did not yank the version
-    'rethinkdb',
     'psutil',
 ]
 
