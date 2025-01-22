@@ -15,7 +15,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
-from datadog_checks.mongo.api import CRITICAL_FAILURE, DD_SERVICE, MongoApi
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.dbm.utils import should_explain_operation
@@ -36,6 +36,8 @@ DEFAULT_METRICS_LEN = len(
         for m_name, m_type in d.items()
     }
 )
+
+DD_OPERATION_COMMENT = MongoApi.operation_comment()
 
 
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
@@ -148,9 +150,9 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus', comment=DD_SERVICE),
-            mock.call('getCmdLineOpts', comment=DD_SERVICE),
-            mock.call('isMaster', comment=DD_SERVICE),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -182,10 +184,10 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus', comment=DD_SERVICE),
-            mock.call('getCmdLineOpts', comment=DD_SERVICE),
-            mock.call('isMaster', comment=DD_SERVICE),
-            mock.call('replSetGetStatus', comment=DD_SERVICE),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+            mock.call('replSetGetStatus', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -215,10 +217,10 @@ def test_when_replicaset_state_recovering_then_database_names_not_called(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus', comment=DD_SERVICE),
-            mock.call('getCmdLineOpts', comment=DD_SERVICE),
-            mock.call('isMaster', comment=DD_SERVICE),
-            mock.call('replSetGetStatus', comment=DD_SERVICE),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+            mock.call('replSetGetStatus', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -716,10 +718,10 @@ def test_emits_ok_service_check_for_documentdb_deployment(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus', comment=DD_SERVICE),
-            mock.call('getCmdLineOpts', comment=DD_SERVICE),
-            mock.call('isMaster', comment=DD_SERVICE),
-            mock.call('replSetGetStatus', comment=DD_SERVICE),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+            mock.call('replSetGetStatus', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -748,8 +750,8 @@ def test_emits_ok_service_check_for_mongodb_atlas_deployment(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus', comment=DD_SERVICE),
-            mock.call('getCmdLineOpts', comment=DD_SERVICE),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
