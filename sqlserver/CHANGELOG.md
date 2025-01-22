@@ -14,7 +14,7 @@
 * Send schema name as part of index usage metrics ([#19266](https://github.com/DataDog/integrations-core/pull/19266))
 * Add schema tag to db_fragmentation metrics for sqlserver ([#19277](https://github.com/DataDog/integrations-core/pull/19277))
 
-## 20.2.0 / 2024-11-28
+## 20.2.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 

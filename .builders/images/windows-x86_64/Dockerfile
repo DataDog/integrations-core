@@ -152,6 +152,8 @@ RUN Get-RemoteFile `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
+ENV CURL_VERSION="8.11.1"
+
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
 RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.txt

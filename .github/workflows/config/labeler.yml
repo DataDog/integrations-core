@@ -39,6 +39,8 @@ integration/activemq:
 - activemq/**/*
 integration/activemq_xml:
 - activemq_xml/**/*
+integration/adyen:
+- adyen/**/*
 integration/aerospike:
 - aerospike/**/*
 integration/agent_metrics:
@@ -273,6 +275,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/intercom:
+- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
 integration/istio:
@@ -387,6 +391,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/octopus_deploy:
+- octopus_deploy/**/*
 integration/oke:
 - oke/**/*
 integration/oom_kill:
