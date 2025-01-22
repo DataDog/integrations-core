@@ -13,7 +13,6 @@ confluent-kafka==2.8.0
 cryptography==43.0.1
 ddtrace==2.10.6
 dnspython==2.6.1
-duckdb==1.1.1
 foundationdb==6.3.24
 hazelcast-python-client==5.4.0
 in-toto==2.0.0
