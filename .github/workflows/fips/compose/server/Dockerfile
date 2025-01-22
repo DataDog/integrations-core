@@ -1,4 +1,4 @@
-FROM alpine:3.14
+FROM alpine:3.14 --platform=linux/amd64
 
 COPY start-server.sh /usr/local/bin/start-server.sh
 COPY ca.* /tmp/
