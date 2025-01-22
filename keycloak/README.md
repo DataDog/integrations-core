@@ -17,7 +17,7 @@ Visualize detailed insights into these logs through the out-of-the-box dashboard
 
 To install the Keycloak integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][4] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.59.0.
+**Note**: This step is not necessary for Agent version >= 7.63.0.
 
 Linux command
   ```shell
