@@ -863,7 +863,7 @@ class AuthTokenOAuthReader(object):
                 # According to https://www.rfc-editor.org/rfc/rfc6749#section-5.1, the `expires_in` field is optional
                 self._expiration += _parse_expires_in(response.get('expires_in'))
             except TypeError:
-                LOGGER.warning(
+                LOGGER.debug(
                     'The `expires_in` field of the OAuth2 response is not a number, defaulting to %s',
                     DEFAULT_EXPIRATION,
                 )
@@ -1008,9 +1008,9 @@ def _parse_expires_in(token_expiration):
         try:
             token_expiration = int(token_expiration)
         except ValueError:
-            LOGGER.warning('Could not convert %s to an integer', token_expiration)
+            LOGGER.debug('Could not convert %s to an integer', token_expiration)
     else:
-        LOGGER.warning('Unexpected type for `expires_in`: %s.', type(token_expiration))
+        LOGGER.debug('Unexpected type for `expires_in`: %s.', type(token_expiration))
         token_expiration = None
 
     return token_expiration
