@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+import subprocess
+
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError
 
 from . import Network
 from .const import SOLARIS_TCP_METRICS
@@ -13,12 +15,16 @@ class SolarisNetwork(Network):
         super(SolarisNetwork, self).__init__(name, init_config, instances)
         self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
 
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def check(self, instance):
         # Can't get bytes sent and received via netstat
         # Default to kstat -p link:0:
         custom_tags = instance.get('tags', [])
         try:
-            netstat, _, _ = get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
+            netstat, _, _ = self._get_subprocess_output(["kstat", "-p", "link:0:"])
             metrics_by_interface = self._parse_solaris_netstat(netstat)
             for interface, metrics in metrics_by_interface.items():
                 self.submit_devicemetrics(interface, metrics, custom_tags)
@@ -26,7 +32,7 @@ class SolarisNetwork(Network):
             self.log.exception("Error collecting kstat stats.")
 
         try:
-            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-P" "tcp"], self.log)
+            netstat, _, _ = self._get_subprocess_output(["netstat", "-s", "-P" "tcp"])
             # TCP: tcpRtoAlgorithm=     4 tcpRtoMin           =   200
             # tcpRtoMax           = 60000 tcpMaxConn          =    -1
             # tcpActiveOpens      =    57 tcpPassiveOpens     =    50
