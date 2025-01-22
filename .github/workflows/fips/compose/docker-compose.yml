@@ -22,8 +22,6 @@ services:
     platform: linux/amd64
     build:
       context: server
-      platforms:
-        - "linux/amd64"
       dockerfile: Dockerfile
       args:
         - CIPHER=$CIPHER

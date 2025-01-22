@@ -53,7 +53,7 @@ jobs:
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
         DOCKER_DEFAULT_PLATFORM: linux/amd64
       run: |
-        docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d
+        docker compose --verbose -f .github/workflows/fips/compose/docker-compose.yml up -d
 
     - name: Run tests
       run: |
