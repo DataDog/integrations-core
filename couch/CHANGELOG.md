@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 8.1.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.4.0 / 2025-01-16
+
+***Added***:
+
+* Allow for Ciphers to be customizable in the SSLContext creation ([#19312](https://github.com/DataDog/integrations-core/pull/19312))
+
 ## 37.3.0 / 2024-12-26
 
 ***Security***:

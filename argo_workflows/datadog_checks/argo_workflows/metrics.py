@@ -64,6 +64,3 @@ V3_6_PLUS_METRICS = {
     'argo_workflows_workflowtemplate_runtime': 'workflowtemplate.runtime',
     'argo_workflows_workflowtemplate_triggered': 'workflowtemplate.triggered',
 }
-
-
-

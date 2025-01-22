@@ -1,0 +1,1 @@
+Increased the default collection interval for MongoDB inferred schema and index definitions to 1 hour to reduce resource overhead.

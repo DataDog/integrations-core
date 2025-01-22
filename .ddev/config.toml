@@ -172,8 +172,6 @@ exclude = [
     # We're not ready to switch to v3 of the postgres library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
-    # 2.4.10 is broken on py2 and they did not yank the version
-    'rethinkdb',
     'psutil',
 ]
 
