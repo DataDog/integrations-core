@@ -45,6 +45,7 @@ E2E_METADATA = {
     ],
 }
 
+
 def connect_to_pg():
     psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
     if float(POSTGRES_VERSION) >= 10.0:
