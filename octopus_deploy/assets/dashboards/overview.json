@@ -296,7 +296,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "formula": "default_zero(query1)",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit"
@@ -318,7 +318,7 @@
                             "time": {
                                 "type": "live",
                                 "unit": "minute",
-                                "value": 5
+                                "value": 1
                             },
                             "timeseries_background": {
                                 "type": "area"
@@ -344,7 +344,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "formula": "default_zero(query1)",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit"
@@ -366,7 +366,7 @@
                             "time": {
                                 "type": "live",
                                 "unit": "minute",
-                                "value": 5
+                                "value": 1
                             },
                             "timeseries_background": {
                                 "type": "bars"
@@ -392,7 +392,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "formula": "default_zero(query1)",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit"
@@ -414,7 +414,7 @@
                             "time": {
                                 "type": "live",
                                 "unit": "minute",
-                                "value": 5
+                                "value": 1
                             },
                             "timeseries_background": {
                                 "type": "bars"
@@ -506,7 +506,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average Execution Time ",
                             "title_align": "left",
                             "title_size": "16",
@@ -555,7 +554,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average Queue Time",
                             "title_align": "left",
                             "title_size": "16",
@@ -654,7 +652,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average Deployment Time",
                             "title_align": "left",
                             "title_size": "16",
@@ -699,7 +696,7 @@
                                     }
                                 }
                             ],
-                            "time": {},
+                            "show_legend": false,
                             "title": "Failure Rate",
                             "title_align": "left",
                             "title_size": "16",
@@ -883,7 +880,7 @@
                                     "formulas": [
                                         {
                                             "alias": "GROUP",
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "formula": "query1"
                                         }
                                     ],
@@ -908,6 +905,7 @@
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Project Groups",
                             "title_align": "left",
                             "title_size": "16",
@@ -929,7 +927,7 @@
                                     "formulas": [
                                         {
                                             "alias": "PROJECT",
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "formula": "query1"
                                         }
                                     ],
@@ -951,9 +949,23 @@
                                                 "type": "formula"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": ""
+                                                },
+                                                "palette": "white_on_green"
+                                            }
+                                        ]
+                                    ]
                                 }
                             ],
+                            "time": {},
                             "title": "Projects",
                             "title_align": "left",
                             "title_size": "16",
@@ -993,7 +1005,7 @@
                                     "formulas": [
                                         {
                                             "alias": "server",
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1018,6 +1030,7 @@
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Server Nodes",
                             "title_align": "left",
                             "title_size": "16",
@@ -1039,7 +1052,7 @@
                                     "formulas": [
                                         {
                                             "alias": "ENV",
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1064,6 +1077,7 @@
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Environments",
                             "title_align": "left",
                             "title_size": "16",
@@ -1085,7 +1099,7 @@
                                     "formulas": [
                                         {
                                             "alias": "is healthy?",
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1110,6 +1124,7 @@
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Machines",
                             "title_align": "left",
                             "title_size": "16",
@@ -1131,7 +1146,7 @@
                                     "formulas": [
                                         {
                                             "alias": "SPACE",
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1156,6 +1171,7 @@
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Spaces",
                             "title_align": "left",
                             "title_size": "16",
