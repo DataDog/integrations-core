@@ -151,88 +151,10 @@ pipeline:
       sources:
         - service
     - type: pipeline
-      name: Processing of Access Logs
+      name: Processing of Access Logs and Admin Logs
       enabled: true
       filter:
-        query: service:forcepoint-sse-access
-      processors:
-        - type: attribute-remapper
-          name: Map `user` to `usr.name`
-          enabled: true
-          sources:
-            - user
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `email` to `usr.email`
-          enabled: true
-          sources:
-            - email
-          sourceType: attribute
-          target: usr.email
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `ipaddress` to `network.client.ip`
-          enabled: true
-          sources:
-            - ipaddress
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `useragent` to `http.useragent`
-          enabled: true
-          sources:
-            - useragent
-          sourceType: attribute
-          target: http.useragent
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `url` to `http.url`
-          enabled: true
-          sources:
-            - url
-          sourceType: attribute
-          target: http.url
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: url-parser
-          name: Parse URL
-          enabled: true
-          sources:
-            - http.url
-          target: http.url_details
-          normalizeEndingSlashes: false
-        - type: user-agent-parser
-          name: Extracting user-agent information from the user-agent
-          enabled: true
-          sources:
-            - http.useragent
-          target: http.useragent_details
-          encoded: false
-          combineVersionDetails: false
-        - type: geo-ip-parser
-          name: Define `network.client.ip` as default geoip attribute for source
-          enabled: true
-          sources:
-            - network.client.ip
-          target: network.client.geoip
-          ip_processing_behavior: do-nothing
-    - type: pipeline
-      name: Processing of Admin Logs
-      enabled: true
-      filter:
-        query: service:forcepoint-sse-admin
+        query: service:(forcepoint-sse-access OR forcepoint-sse-admin)
       processors:
         - type: attribute-remapper
           name: Map `user` to `usr.name`
@@ -372,12 +294,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `email` to `http.email`
+          name: Map `email` to `usr.email`
           enabled: true
           sources:
             - email
           sourceType: attribute
-          target: http.email
+          target: usr.email
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false

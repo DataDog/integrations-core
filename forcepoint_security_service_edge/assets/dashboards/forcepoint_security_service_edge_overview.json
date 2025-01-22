@@ -181,11 +181,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -215,6 +210,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -224,9 +227,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -598,6 +598,7 @@
               "title": "Log Details",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -617,7 +618,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "host",
+                      "field": "syslog.hostname",
                       "width": "auto"
                     },
                     {
@@ -1167,7 +1168,7 @@
         "x": 0,
         "y": 35,
         "width": 12,
-        "height": 1
+        "height": 10
       }
     }
   ],

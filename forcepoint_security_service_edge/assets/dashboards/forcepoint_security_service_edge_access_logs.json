@@ -228,6 +228,7 @@
         "title": "Top 10 IPs",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "type": "toplist",
         "requests": [
           {
@@ -236,7 +237,7 @@
                 "name": "query1",
                 "data_source": "logs",
                 "search": {
-                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access $Client_IP $User_Name $URL"
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@network.client.ip:\"\" $Client_IP $User_Name $URL"
                 },
                 "indexes": [
                   "*"
@@ -1084,6 +1085,7 @@
         "title": "Access Log Details",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "requests": [
           {
             "response_format": "event_list",
@@ -1103,7 +1105,7 @@
                 "width": "auto"
               },
               {
-                "field": "host",
+                "field": "syslog.hostname",
                 "width": "auto"
               },
               {

@@ -181,11 +181,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -218,6 +213,11 @@
                   "style": {
                     "palette": "datadog16"
                   },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -378,11 +378,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -412,6 +407,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -421,9 +424,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -447,11 +447,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -481,6 +476,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -490,9 +493,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -864,7 +864,6 @@
               "title": "User Activity Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -1051,6 +1050,7 @@
               "title": "Health Proxy Log Details",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1070,7 +1070,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "host",
+                      "field": "syslog.hostname",
                       "width": "auto"
                     },
                     {
@@ -1225,11 +1225,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -1259,6 +1254,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -1268,9 +1271,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -1294,11 +1294,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -1328,6 +1323,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -1337,9 +1340,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -1637,7 +1637,6 @@
               "title": "User Activity Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -1739,98 +1738,12 @@
             }
           },
           {
-            "id": 3246106243933596,
-            "definition": {
-              "title": "File Details",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {},
-              "type": "query_table",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "logs",
-                      "search": {
-                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-healthapi -@filename:\"\" $Client_IP $User_Name $URL"
-                      },
-                      "indexes": [
-                        "*"
-                      ],
-                      "group_by": [
-                        {
-                          "facet": "@filename",
-                          "limit": 100,
-                          "sort": {
-                            "aggregation": "count",
-                            "order": "desc",
-                            "metric": "count"
-                          },
-                          "should_exclude_missing": true
-                        },
-                        {
-                          "facet": "@usr.name",
-                          "limit": 10,
-                          "sort": {
-                            "aggregation": "count",
-                            "order": "desc",
-                            "metric": "count"
-                          },
-                          "should_exclude_missing": true
-                        },
-                        {
-                          "facet": "@application",
-                          "limit": 10,
-                          "sort": {
-                            "aggregation": "count",
-                            "order": "desc",
-                            "metric": "count"
-                          },
-                          "should_exclude_missing": true
-                        }
-                      ],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "storage": "hot"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "sort": {
-                    "count": 10000,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 0,
-                        "order": "desc"
-                      }
-                    ]
-                  },
-                  "formulas": [
-                    {
-                      "cell_display_mode": "number",
-                      "alias": "LOG COUNT",
-                      "formula": "query1"
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 0,
-              "y": 31,
-              "width": 12,
-              "height": 5
-            }
-          },
-          {
             "id": 3485767781985310,
             "definition": {
               "title": "Health Api Log Details",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1850,7 +1763,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "host",
+                      "field": "syslog.hostname",
                       "width": "auto"
                     },
                     {
@@ -1864,7 +1777,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 36,
+              "y": 31,
               "width": 12,
               "height": 5
             }
@@ -1875,7 +1788,7 @@
         "x": 0,
         "y": 56,
         "width": 12,
-        "height": 42,
+        "height": 37,
         "is_column_break": true
       }
     },
@@ -2006,11 +1919,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -2040,6 +1948,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -2049,9 +1965,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -2075,11 +1988,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
@@ -2109,6 +2017,14 @@
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -2118,9 +2034,6 @@
                         "order": "desc"
                       }
                     ]
-                  },
-                  "style": {
-                    "palette": "datadog16"
                   }
                 }
               ],
@@ -2352,7 +2265,6 @@
               "title": "Top 10 Locations",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -2679,6 +2591,7 @@
               "title": "Health System Log Details",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -2698,7 +2611,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "host",
+                      "field": "syslog.hostname",
                       "width": "auto"
                     },
                     {
@@ -2721,7 +2634,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 98,
+        "y": 93,
         "width": 12,
         "height": 42
       }
