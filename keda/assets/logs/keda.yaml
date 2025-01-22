@@ -11,7 +11,7 @@ pipeline:
   name: Keda
   enabled: true
   filter:
-    query: source:(keda-metrics-apiserver OR keda-admission-webhooks OR keda)
+    query: source:(keda OR keda-admission-webhooks OR keda-metrics-apiserver)
   processors:
     - type: grok-parser
       name:  Keda Parser
