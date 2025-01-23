@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import subprocess
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
@@ -32,8 +32,12 @@ class NfsStatCheck(AgentCheck):
                 )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
 
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def check(self, instance):
-        stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
+        stat_out, err, _ = self._get_subprocess_output(self.nfs_cmd)
         all_devices = []
         this_device = []
         custom_tags = instance.get("tags", [])
