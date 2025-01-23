@@ -2,8 +2,7 @@
 
 ## Overview
 
-ServiceNow is a cloud-based platform that provides enterprise solutions for IT service management (ITSM), IT operations management (ITOM), and IT business management (ITBM). It enables organizations to automate workflows, streamline processes, and improve productivity across departments.
-
+ServiceNow is a comprehensive platform that helps streamline and automate IT service, asset, security, and configuration management processes. It enables organizations to enhance operational efficiency, mitigate risks, and improve service delivery.
 
 ## Setup
 
