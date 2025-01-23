@@ -1,1 +1,1 @@
-Update integrations to use stdlib's subprocess library 
+Update to use stdlib subprocess module
