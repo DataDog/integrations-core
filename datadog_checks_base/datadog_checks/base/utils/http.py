@@ -156,6 +156,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'ciphers',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
