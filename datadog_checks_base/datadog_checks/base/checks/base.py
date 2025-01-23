@@ -94,7 +94,7 @@ if TYPE_CHECKING:
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
-FIPS_REGISTRY_KEY = "FipsAlgorithmPolicy"
+FIPS_REGISTRY_KEY = "FIPSAlgorithmPolicy"
 
 
 @traced_class
@@ -318,8 +318,8 @@ class AgentCheck(object):
         if sys.platform == "win32":
             try:
                 import winreg
-                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "HKLM\System\CurrentControlSet\Control\Lsa\FIPSAlgorithmPolicy\STE") as key:
-                    fips_registry, _ = winreg.QueryValueEx(key, FIPS_REGISTRY_KEY)
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, f"System\CurrentControlSet\Control\Lsa\{FIPS_REGISTRY_KEY}") as key:
+                    fips_registry, _ = winreg.QueryValueEx(key, "Enabled")
                 if isinstance(fips_registry, int):
                     self.__fips_mode = fips_registry
             except:  # noqa: E722, B001
