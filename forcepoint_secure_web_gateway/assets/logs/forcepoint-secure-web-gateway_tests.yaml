@@ -3,10 +3,10 @@ tests:
  -
   sample: |-
     {
-      "ipaddress" : "122.170.105.85",
+      "ipaddress" : "10.10.10.10",
       "country" : "India",
       "requestmethod" : "POST",
-      "firstname" : "Kavan",
+      "firstname" : "John",
       "devicehostname" : "desktop-gno7jr8",
       "regioncode" : "MH",
       "city" : "Mumbai",
@@ -23,7 +23,7 @@ tests:
       "indexedtime" : "2025-01-10 12:02:13",
       "policyid" : "369036",
       "action" : "block",
-      "email" : "kavan.dalwadi@crestdatasys.com",
+      "email" : "john.doe@test.com",
       "lat" : "19.07480000",
       "syslogheader" : "<110>1 2025-01-10T11:55:00.000000Z api.bitglass.com NILVALUE NILVALUE swgweb",
       "webcategories" : "[\"WR:Image and Video Search\",\"WR:Social Networking\"]",
@@ -32,7 +32,7 @@ tests:
       "uri" : "/ajax/bz",
       "url" : "www.instagram.com/ajax/bz?__a=1&__ccg=EXCELLENT&__comet_req=7&__d=www&__hs=20098.HYP%3Ainstagram_web_pkg.2.1.0.0.0&__hsi=7458216500016125819&__req=15&__rev=1019252539&__s=%3Acyql2x%3At9l688&__spin_b=trunk&__spin_r=101925253...",
       "setransactionid" : "190E18BD-ECB8-4FE5-9CFD-D5DAE9783017",
-      "lastname" : "Dalwadi",
+      "lastname" : "Doe",
       "destinationip" : "",
       "referrer" : "https://www.instagram.com/",
       "requestdomain" : "www.instagram.com",
@@ -98,13 +98,13 @@ tests:
             family: "Windows"
             major: "10"
       indexedtime: 1736510533000
-      lastname: "Dalwadi"
+      lastname: "Doe"
       lat: "19.07480000"
       long: "72.88559999"
       network:
         client:
           geoip: {}
-          ip: "122.170.105.85"
+          ip: "10.10.10.10"
           port: "443"
         destination:
           ip: ""
@@ -129,8 +129,8 @@ tests:
        - " 'Bitglass Admins'"
        - " 'crestdatasys'"
       usr:
-        email: "kavan.dalwadi@crestdatasys.com"
-        name: "Kavan"
+        email: "john.doe@test.com"
+        name: "John"
       webcategories:
        - "\"WR:Image and Video Search\""
        - "\"WR:Social Networking\""
@@ -140,10 +140,10 @@ tests:
       webreputation: "81.00"
     message: |-
       {
-        "ipaddress" : "122.170.105.85",
+        "ipaddress" : "10.10.10.10",
         "country" : "India",
         "requestmethod" : "POST",
-        "firstname" : "Kavan",
+        "firstname" : "John",
         "devicehostname" : "desktop-gno7jr8",
         "regioncode" : "MH",
         "city" : "Mumbai",
@@ -160,7 +160,7 @@ tests:
         "indexedtime" : "2025-01-10 12:02:13",
         "policyid" : "369036",
         "action" : "block",
-        "email" : "kavan.dalwadi@crestdatasys.com",
+        "email" : "john.doe@test.com",
         "lat" : "19.07480000",
         "syslogheader" : "<110>1 2025-01-10T11:55:00.000000Z api.bitglass.com NILVALUE NILVALUE swgweb",
         "webcategories" : "[\"WR:Image and Video Search\",\"WR:Social Networking\"]",
@@ -169,7 +169,7 @@ tests:
         "uri" : "/ajax/bz",
         "url" : "www.instagram.com/ajax/bz?__a=1&__ccg=EXCELLENT&__comet_req=7&__d=www&__hs=20098.HYP%3Ainstagram_web_pkg.2.1.0.0.0&__hsi=7458216500016125819&__req=15&__rev=1019252539&__s=%3Acyql2x%3At9l688&__spin_b=trunk&__spin_r=101925253...",
         "setransactionid" : "190E18BD-ECB8-4FE5-9CFD-D5DAE9783017",
-        "lastname" : "Dalwadi",
+        "lastname" : "Doe",
         "destinationip" : "",
         "referrer" : "https://www.instagram.com/",
         "requestdomain" : "www.instagram.com",
@@ -202,15 +202,15 @@ tests:
       "webcategories" : "[\"WR:Computer and Internet Info\"]",
       "docmd5" : "",
       "setransactionid" : "7E6651D9-64FA-42E5-AFC9-B6ACA339FE29",
-      "lastname" : "Dalwadi",
+      "lastname" : "Doe",
       "filename" : "[]",
       "size" : "520",
       "webreputation" : "92.00",
       "usergroup" : "['355160', 'All Users', 'Bitglass Admins', 'crestdatasys']",
       "region" : "Maharashtra",
       "docsha1" : "",
-      "ipaddress" : "122.170.105.85",
-      "firstname" : "Kavan",
+      "ipaddress" : "10.10.10.10",
+      "firstname" : "John",
       "dlppattern" : "[\"Pol-keyword\"]",
       "activity" : "[\"Uploaded\",\"Cloudstorage\",\"Denied\"]",
       "city" : "Mumbai",
@@ -225,7 +225,7 @@ tests:
       "indexedtime" : "2025-01-10 05:44:54",
       "policyid" : "368630",
       "docsha256" : "1a1d1484d3cbc721070469e555f6a0cc89c03d60181e1f13694014e9249d19b6",
-      "email" : "kavan.dalwadi@crestdatasys.com",
+      "email" : "john.doe@test.com",
       "uploadedbytes" : "1967",
       "bgcategories" : "[\"BG:Uncategorized\"]",
       "uri" : "/wp-admin/admin-ajax.php",
@@ -291,13 +291,13 @@ tests:
       indexedtime: 1736487894000
       keyword:
        - "\"politics\""
-      lastname: "Dalwadi"
+      lastname: "Doe"
       lat: "19.07480000"
       long: "72.88559999"
       network:
         client:
           geoip: {}
-          ip: "122.170.105.85"
+          ip: "10.10.10.10"
           port: "443"
         destination:
           ip: ""
@@ -324,8 +324,8 @@ tests:
        - " 'Bitglass Admins'"
        - " 'crestdatasys'"
       usr:
-        email: "kavan.dalwadi@crestdatasys.com"
-        name: "Kavan"
+        email: "john.doe@test.com"
+        name: "John"
       webcategories:
        - "\"WR:Computer and Internet Info\""
       webcategoryclass:
@@ -348,15 +348,15 @@ tests:
         "webcategories" : "[\"WR:Computer and Internet Info\"]",
         "docmd5" : "",
         "setransactionid" : "7E6651D9-64FA-42E5-AFC9-B6ACA339FE29",
-        "lastname" : "Dalwadi",
+        "lastname" : "Doe",
         "filename" : "[]",
         "size" : "520",
         "webreputation" : "92.00",
         "usergroup" : "['355160', 'All Users', 'Bitglass Admins', 'crestdatasys']",
         "region" : "Maharashtra",
         "docsha1" : "",
-        "ipaddress" : "122.170.105.85",
-        "firstname" : "Kavan",
+        "ipaddress" : "10.10.10.10",
+        "firstname" : "John",
         "dlppattern" : "[\"Pol-keyword\"]",
         "activity" : "[\"Uploaded\",\"Cloudstorage\",\"Denied\"]",
         "city" : "Mumbai",
@@ -371,7 +371,7 @@ tests:
         "indexedtime" : "2025-01-10 05:44:54",
         "policyid" : "368630",
         "docsha256" : "1a1d1484d3cbc721070469e555f6a0cc89c03d60181e1f13694014e9249d19b6",
-        "email" : "kavan.dalwadi@crestdatasys.com",
+        "email" : "john.doe@test.com",
         "uploadedbytes" : "1967",
         "bgcategories" : "[\"BG:Uncategorized\"]",
         "uri" : "/wp-admin/admin-ajax.php",
