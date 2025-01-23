@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Quarkus check is included in the [Datadog Agent][2] package starting with Agent 7.63.
+The Quarkus check is included in the [Datadog Agent][2] package starting with Agent 7.62.
 No additional installation is needed on your server.
 
 ### Configuration
