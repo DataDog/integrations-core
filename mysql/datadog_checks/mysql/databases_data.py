@@ -205,14 +205,15 @@ class DatabasesData:
                         - index (dict): A dictionary representing an index.
                             - name (str): The name of the index.
                             - collation (str): The collation of the index.
-                            - cardinality (str): The cardinality of the index.
-                            - index_type (str): The type of the index.
-                            - seq_in_index (str): The sequence in index.
-                            - columns (str): The columns in the index.
-                            - sub_parts (str): The sub-parts of the index.
-                            - packed (str): Whether the index is packed.
-                            - nullables (str): The nullable columns in the index.
-                            - non_uniques (str): Whether the index is non-unique.
+                            - cardinality (int): The cardinality of the index.
+                            - index_type (str): The index method used.
+                            - columns (list): A list of column dictionaries
+                                - column (dict): A dictionary representing a column.
+                                    - sub_part (int): The number of indexed characters if column is partially indexed.
+                                    - packed (str): How the index is packed.
+                                    - nullable (bool): Whether the column is nullable.
+                            - non_unique (bool): Whether the index can contain duplicates.
+                            - expression (str): If index was built with a functional key part, the expression used.
                     - foreign_keys (list): A list of foreign key dictionaries.
                         - foreign_key (dict): A dictionary representing a foreign key.
                             - constraint_schema (str): The schema of the constraint.
@@ -224,21 +225,22 @@ class DatabasesData:
                     - partitions (list): A list of partition dictionaries.
                         - partition (dict): A dictionary representing a partition.
                             - name (str): The name of the partition.
-                            - subpartition_names (str): The names of the subpartitions.
+                            - subpartitions (list): A list of subpartition dictionaries.
+                                - subpartition (dict): A dictionary representing a subpartition.
+                                    - name (str): The name of the subpartition.
+                                    - subpartition_ordinal_position (int): The ordinal position of the subpartition.
+                                    - subpartition_method (str): The subpartition method.
+                                    - subpartition_expression (str): The subpartition expression.
+                                    - table_rows (int): The number of rows in the subpartition.
+                                    - data_length (int): The data length of the subpartition in bytes.
                             - partition_ordinal_position (str): The ordinal position of the partition.
-                            - subpartition_ordinal_positions (str): The ordinal positions of the subpartitions.
                             - partition_method (str): The partition method.
-                            - subpartition_methods (str): The subpartition methods.
                             - partition_expression (str): The partition expression.
-                            - subpartition_expressions (str): The subpartition expressions.
                             - partition_description (str): The description of the partition.
-                            - table_rows (str): The number of rows in the partition.
-                            - data_lengths (str): The data lengths in the partition.
-                            - max_data_lengths (str): The maximum data lengths in the partition.
-                            - index_lengths (str): The index lengths in the partition.
-                            - data_free (str): The free data space in the partition.
-                            - partition_comment (str): The comment on the partition.
-                            - tablespace_name (str): The tablespace name.
+                            - table_rows (int): The number of rows in the partition. If partition has subpartitions, 
+                                                this is the sum of all subpartitions table_rows.
+                            - data_length (int): The data length of the partition in bytes. If partition has subpartitions, 
+                                                 this is the sum of all subpartitions data_length.
         """
         self._data_submitter.reset()
         self._tags = tags
@@ -349,6 +351,7 @@ class DatabasesData:
                     else:
                         nullables_converted += "false,"
                 row["nullables"] = nullables_converted[:-1]
+                # TODO ALLEN: make this booleans rather than strings
             table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
