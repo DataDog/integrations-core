@@ -1,1 +1,1 @@
-Add FIPS case for Windows registry
+Enable FIPS mode in integrations if Windows has FIPS mode enabled in the registry
