@@ -2883,7 +2883,7 @@ def test_template_array():
         'tls_private_key',
         'tls_ca_cert',
         'tls_protocols_allowed',
-        'tls_cipthers',
+        'tls_ciphers',
         'headers',
         'extra_headers',
         'timeout',
