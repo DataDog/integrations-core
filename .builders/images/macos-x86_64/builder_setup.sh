@@ -100,8 +100,6 @@ VERSION="16.6" \
 SHA256="23369cdaccd45270ac5dcc30fa9da205d5be33fa505e1f17a0418d2caeca477b" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
-# Add paths to pg_config and to the library
-echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> $DD_ENV_FILE
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
