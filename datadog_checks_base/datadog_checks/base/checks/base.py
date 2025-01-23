@@ -94,8 +94,6 @@ if TYPE_CHECKING:
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
-FIPS_REGISTRY_KEY = "FIPSAlgorithmPolicy"
-
 
 @traced_class
 class AgentCheck(object):
@@ -320,13 +318,13 @@ class AgentCheck(object):
                 import winreg
 
                 with winreg.OpenKey(
-                    winreg.HKEY_LOCAL_MACHINE, rf"System\CurrentControlSet\Control\Lsa\{FIPS_REGISTRY_KEY}"
+                    winreg.HKEY_LOCAL_MACHINE, r"System\CurrentControlSet\Control\Lsa\FIPSAlgorithmPolicy"
                 ) as key:
                     fips_registry, _ = winreg.QueryValueEx(key, "Enabled")
                 if isinstance(fips_registry, int):
                     self.__fips_mode = fips_registry
             except Exception as e:
-                self.log.debug("Windows error encountered when fetching %s registry key: %s", FIPS_REGISTRY_KEY, e)
+                self.log.debug("Windows error encountered when fetching FIPSAlgorithmPolicy registry key: %s", e)
         if os.environ.get("GOFIPS", "0") == "1":
             self.__fips_mode = 1
 
