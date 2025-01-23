@@ -410,6 +410,9 @@ class RelationsManager(object):
                 relation_filter.append("( relname = '{}'".format(r[RELATION_NAME]))
             elif r.get(RELATION_REGEX) and r.get(RELATION_REGEX) != ".*":
                 relation_filter.append("( relname ~ '{}'".format(r[RELATION_REGEX]))
+            else:
+                # Stub filter to allow for appending
+                relation_filter.append("( 1=1")
 
             if ALL_SCHEMAS not in r[SCHEMAS]:
                 schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
@@ -420,12 +423,10 @@ class RelationsManager(object):
                 relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
-            if relation_filter:
-                relation_filter.append(')')
-                relations_filter.append(' '.join(relation_filter))
+            relation_filter.append(')')
+            relations_filter.append(' '.join(relation_filter))
 
-        if relations_filter:
-            relations_filter = '(' + ' OR '.join(relations_filter) + ')'
+        relations_filter = '(' + ' OR '.join(relations_filter) + ')'
         limits_filter = 'LIMIT {}'.format(self.max_relations)
         self.log.debug(
             "Running query: %s with relations matching: %s, limits %s", str(query), relations_filter, self.max_relations
