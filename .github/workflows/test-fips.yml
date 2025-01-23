@@ -12,7 +12,7 @@ on:
         required: false
         type: string
   pull_request:
-    path:
+    paths:
     - datadog_checks_base/datadog_checks/**
   schedule:
     - cron: '0 0,8,16 * * *'
@@ -106,13 +106,13 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        ddev env test -e GOFIPS=0 --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
+        ddev env test -e GOFIPS=0 --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
     - name: Run E2E tests with FIPS enabled
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
+        ddev env test -e GOFIPS=1 --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
 
     - name: View trace log
       if: always()
