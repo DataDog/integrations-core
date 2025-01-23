@@ -104,6 +104,8 @@ teleport.auth.migrations,gauge,,,,"Tracks for each migration if it is active (1)
 teleport.auth.registered_servers,gauge,,,,"The number of Teleport services that are connected to an Auth Service instance grouped by version.",0,teleport,,
 teleport.auth.registered_servers_by_install_methods,gauge,,,,"The number of Teleport services that are connected to an Auth Service instance grouped by install methods.",0,teleport,,
 teleport.auth.user_login,count,,,,"Number of user logins.",0,teleport,,
+teleport.auth.heartbeat_connections_received,count,,,,"Number of times auth received a heartbeat connection.",0,teleport,,
+teleport.auth.roles,gauge,,,,"Number of roles that exist in the cluster.",0,teleport,,
 teleport.bpf.lost_command_events,count,,,,"Number of lost command events.",0,teleport,,
 teleport.bpf.lost_disk_events,count,,,,"Number of lost disk events.",0,teleport,,
 teleport.bpf.lost_network_events,count,,,,"Number of lost network events.",0,teleport,,
