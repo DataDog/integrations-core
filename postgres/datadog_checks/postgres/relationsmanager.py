@@ -420,10 +420,12 @@ class RelationsManager(object):
                 relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
-            relation_filter.append(')')
-            relations_filter.append(' '.join(relation_filter))
+            if relation_filter:
+                relation_filter.append(')')
+                relations_filter.append(' '.join(relation_filter))
 
-        relations_filter = '(' + ' OR '.join(relations_filter) + ')'
+        if relations_filter:
+            relations_filter = '(' + ' OR '.join(relations_filter) + ')'
         limits_filter = 'LIMIT {}'.format(self.max_relations)
         self.log.debug(
             "Running query: %s with relations matching: %s, limits %s", str(query), relations_filter, self.max_relations
