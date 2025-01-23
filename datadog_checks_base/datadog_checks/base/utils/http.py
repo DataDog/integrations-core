@@ -94,6 +94,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_protocols_allowed': DEFAULT_PROTOCOL_VERSIONS,
     'tls_verify': True,
+    'tls_ciphers': 'ALL',
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
@@ -349,6 +350,8 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
+        self.ciphers = config.get('tls_ciphers')
+
     def get(self, url, **options):
         return self._request('get', url, options)
 
@@ -467,6 +470,7 @@ class RequestsWrapper(object):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
+                context.set_ciphers(self.ciphers)
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
