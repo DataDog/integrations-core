@@ -318,12 +318,15 @@ class AgentCheck(object):
         if sys.platform == "win32":
             try:
                 import winreg
-                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, f"System\CurrentControlSet\Control\Lsa\{FIPS_REGISTRY_KEY}") as key:
+
+                with winreg.OpenKey(
+                    winreg.HKEY_LOCAL_MACHINE, rf"System\CurrentControlSet\Control\Lsa\{FIPS_REGISTRY_KEY}"
+                ) as key:
                     fips_registry, _ = winreg.QueryValueEx(key, "Enabled")
                 if isinstance(fips_registry, int):
                     self.__fips_mode = fips_registry
-            except:  # noqa: E722, B001
-                self.logger.debug("Windows error encountered when fetching registry key %s", FIPS_REGISTRY_KEY)
+            except Exception as e:
+                self.log.debug("Windows error encountered when fetching %s registry key: %s", FIPS_REGISTRY_KEY, e)
         if os.environ.get("GOFIPS", "0") == "1":
             self.__fips_mode = 1
 
