@@ -9,7 +9,6 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network.check_linux import LinuxNetwork
 
@@ -145,7 +144,7 @@ def ss_subprocess_mock_fails(*args, **kwargs):
     if args[0][2].startswith('ss '):
         raise OSError('boom')
     else:
-        return get_subprocess_output(*args, **kwargs)
+        return LinuxNetwork._get_subprocess_output(*args, **kwargs)
 
 
 def netstat_subprocess_mock(*args, **kwargs):
