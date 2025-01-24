@@ -83,7 +83,7 @@
     @get_completed_tasks_project_1 {
         method GET
         path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-1") && {query}.contains("from") && {query}.contains("to")
+        expression {query.project}.contains("Projects-1") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_1 {
         rewrite * /GET/api/Spaces-1/tasks/project_1_completed_high_limit_pg1.json
@@ -92,7 +92,7 @@
     @get_completed_tasks_project_2 {
         method GET
         path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-2") && {query}.contains("from") && {query}.contains("to")
+        expression {query.project}.contains("Projects-2") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_2 {
         rewrite * /GET/api/Spaces-1/tasks/project_2_completed_high_limit_pg1.json
@@ -101,7 +101,7 @@
     @get_completed_tasks_project_3 {
         method GET
         path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-3") && {query}.contains("from") && {query}.contains("to")
+        expression {query.project}.contains("Projects-3") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_3 {
         rewrite * /GET/api/Spaces-1/tasks/project_3_completed_high_limit_pg1.json
@@ -110,7 +110,7 @@
     @get_completed_tasks_project_4 {
         method GET
         path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-4") && {query}.contains("from") && {query}.contains("to")
+        expression {query.project}.contains("Projects-4") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_4 {
         rewrite * /GET/api/Spaces-1/tasks/project_4_completed_high_limit_pg1.json
