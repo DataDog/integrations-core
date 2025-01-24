@@ -37,10 +37,10 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "azure-identity==1.17.1",
+    "azure-identity==1.19.0",
     "lxml==5.1.1",
-    "pyodbc==5.1.0; (sys_platform != 'darwin' or platform_machine != 'arm64')",
-    "pywin32==306; sys_platform == 'win32'",
+    "pyodbc==5.2.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pywin32==308; sys_platform == 'win32'",
 ]
 
 [project.urls]

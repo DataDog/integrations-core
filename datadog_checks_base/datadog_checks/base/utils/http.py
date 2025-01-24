@@ -52,6 +52,8 @@ LOGGER = logging.getLogger(__file__)
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
 
+DEFAULT_EXPIRATION = 300
+
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
@@ -856,8 +858,16 @@ class AuthTokenOAuthReader(object):
 
             # https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
             self._token = response['access_token']
-            self._expiration = get_timestamp() + response['expires_in']
-
+            self._expiration = get_timestamp()
+            try:
+                # According to https://www.rfc-editor.org/rfc/rfc6749#section-5.1, the `expires_in` field is optional
+                self._expiration += _parse_expires_in(response.get('expires_in'))
+            except TypeError:
+                LOGGER.debug(
+                    'The `expires_in` field of the OAuth2 response is not a number, defaulting to %s',
+                    DEFAULT_EXPIRATION,
+                )
+                self._expiration += DEFAULT_EXPIRATION
             return self._token
 
 
@@ -989,6 +999,21 @@ def quote_uds_url(url):
     parsed = parsed._replace(netloc=netloc, path=path)
 
     return urlunparse(parsed)
+
+
+def _parse_expires_in(token_expiration):
+    if isinstance(token_expiration, int) or isinstance(token_expiration, float):
+        return token_expiration
+    if isinstance(token_expiration, str):
+        try:
+            token_expiration = int(token_expiration)
+        except ValueError:
+            LOGGER.debug('Could not convert %s to an integer', token_expiration)
+    else:
+        LOGGER.debug('Unexpected type for `expires_in`: %s.', type(token_expiration))
+        token_expiration = None
+
+    return token_expiration
 
 
 # For documentation generation
