@@ -53,7 +53,7 @@ This integration collects logs and metrics from the sources listed above and sen
             |Vulnerability Response (VR)|`sn_vul.read_all`, `sn_vul.app_read_all`, `sn_vul_container.read_all`, `sn_sec_analytics.read`|
             |Security Incident Response (SIR)|`sn_si.read`|
         * Note: If the above property is not visible, please [Add OAuth Application User Property][9] and refresh the Application Page
-5. In the **Auth Scopes** section, click on `Insert a new row…` below Auth Scope, select **useraccount**, and click the save button.
+5. In the **Auth Scopes** section, click on `Insert a new row...` below Auth Scope, select **useraccount**, and click the save button.
 6. Click Save.
 7. Navigate to the newly created application, from the list of applications.
 8. Get the **Client ID** and **Client Secret** by clicking the lock icon next to **Client Secret**.
