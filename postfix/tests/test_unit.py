@@ -19,7 +19,7 @@ def test__get_postqueue_stats(aggregator):
     with open(filepath, 'r') as f:
         mocked_output = f.read()
 
-    with mock.patch.object(check, '_get_subprocess_output') as s:
+    with mock.patch('datadog_checks.postfix.postfix.PostfixCheck._get_subprocess_output') as s:
         s.side_effect = [(False, None, None), (mocked_output, None, None)]
         check._get_postqueue_stats('/etc/postfix', ['foo:bar'])
 
@@ -32,7 +32,7 @@ def test__get_postqueue_stats_empty(aggregator):
     check = PostfixCheck('postfix', {}, [])
     common_tags = ['instance:/etc/postfix']
 
-    with mock.patch.object(check, '_get_subprocess_output') as s:
+    with mock.patch('datadog_checks.postfix.postfix.PostfixCheck._get_subprocess_output') as s:
         s.side_effect = [(False, None, None), ('Mail queue is empty', None, None)]
         check._get_postqueue_stats('/etc/postfix', [])
 
@@ -41,22 +41,24 @@ def test__get_postqueue_stats_empty(aggregator):
         aggregator.assert_metric('postfix.queue.size', 0, tags=common_tags + ['queue:deferred'])
 
 
+@mock.patch(
+    'datadog_checks.postfix.postfix.PostfixCheck._get_subprocess_output',
+    return_value=('mail_version = {}'.format(MOCK_VERSION), None, None),
+)
 def test_collect_metadata(aggregator, datadog_agent):
     # TODO: Migrate this test as e2e test when it's possible to retrieve the metadata from the Agent
     check = PostfixCheck('postfix', {}, [{}])
     check.check_id = 'test:123'
-    with mock.patch.object(check, '_get_subprocess_output') as s:
-        s.return_value = ('mail_version = {}'.format(MOCK_VERSION), None, None)
 
-        check._collect_metadata()
+    check._collect_metadata()
 
-        major, minor, patch = MOCK_VERSION.split('.')
-        version_metadata = {
-            'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': patch,
-            'version.raw': MOCK_VERSION,
-        }
+    major, minor, patch = MOCK_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': MOCK_VERSION,
+    }
 
-        datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata('test:123', version_metadata)
