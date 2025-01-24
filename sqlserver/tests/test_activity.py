@@ -57,6 +57,7 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test_idle_sessions_sampling(dbm_instance, dd_run_check):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     assert (
