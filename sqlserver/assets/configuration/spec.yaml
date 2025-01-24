@@ -609,14 +609,13 @@ files:
           value:
             type: number
             example: 10
-      - name: sample_recently_active_idle_sessions
+        - name: sample_recently_active_idle_sessions
           description: |
-            This option will enable sampling idle sessions that were active since the last collection.
-            This is useful enhancing APM/DBM correlation.
+            This option enables the sampling of idle sessions that were active since the last collection.
+            Recommended for APM customers to boost the APM/DBM correlation.
           value:
             type: boolean
             example: true
-            hidden: true
 
     - name: stored_procedure_characters_limit
       description: |

@@ -56,6 +56,12 @@ def dbm_instance(instance_docker):
     instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
+def test_idle_sessions_sampling(dbm_instance, dd_run_check):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check.activity._sample_recently_active_idle_sessions, "Sample recently active idle sessions switched off by default"
+    check.activity._sample_recently_active_idle_sessions = True
+    check.activity._time_since_last_activity_event = 10
+    dd_run_check(check)
 
 @pytest.mark.flaky
 @pytest.mark.integration
@@ -908,3 +914,5 @@ def test_sanitize_activity_row(dbm_instance, row):
     row = check.activity._obfuscate_and_sanitize_row(row)
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
+
+    

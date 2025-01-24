@@ -83,8 +83,6 @@ WHERE
 """,
 ).strip()
 
-IDLE_FILTER = "OR NOT (sess.status = 'sleeping' AND sess.last_request_start_time < DATEADD(SECONDS, -?, GETDATE()))"
-
 # Turns out sys.dm_exec_requests does not contain idle sessions.
 # Inner joining dm_exec_sessions with dm_exec_requests will not return any idle sessions.
 # This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle sessions.
@@ -114,12 +112,16 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
-WHERE sess.status = 'sleeping'
-    AND sess.session_id IN ({blocking_session_ids})
-    AND c.session_id IN ({blocking_session_ids})
-    {idle_filter}
+WHERE 
 """,
 ).strip()
+
+IDLE_BLOCKERS_FILTER = """(sess.status = 'sleeping'
+    AND sess.session_id IN ({blocking_session_ids})
+    AND c.session_id IN ({blocking_session_ids}))"""
+
+IDLE_RECENTLY_ACTIVE_FILTER = "(sess.status = 'sleeping' AND sess.last_request_start_time > DATEADD(SECOND, - ?, GETDATE()))"
+
 
 # enumeration of the columns we collect
 # from sys.dm_exec_requests
@@ -185,7 +187,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
-        self._sample_recently_active_idle_sessions=is_affirmative(self._config.activity_config.get('sample_recently_active_idle_sessions', True))
+        self._sample_recently_active_idle_sessions=is_affirmative(self._config.activity_config.get('sample_recently_active_idle_sessions', False))
         self._time_since_last_activity_event = 0
 
     def _close_db_conn(self):
@@ -205,20 +207,29 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("loaded sql server current connections len(rows)=%s", len(rows))
         return rows
 
+    def _is_sample_idle_recently_active_sessions(self) -> bool:
+        return self._sample_recently_active_idle_sessions and self._time_since_last_activity_event
+    
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
-        idle_filter = ""
-        if self._sample_recently_active_idle_sessions and self._time_since_last_activity_event:
-            idle_filter = IDLE_FILTER
-
+    def _get_idle_sessions(self, cursor, blocking_session_ids):
         query = IDLE_SESSIONS_QUERY.format(
-            blocking_session_ids=",".join(map(str, blocking_session_ids)),
             proc_char_limit=self._config.stored_procedure_characters_limit,
-            idle_filter={idle_filter},
         )
+        idle_filter = None
+
+        # a stateful closure that appends filters to the query
+        def _append_filter(filter: str) -> str:
+            if idle_filter:
+                return f"{idle_filter} OR {filter}"
+            return filter
+        if blocking_session_ids:
+            idle_filter = _append_filter(IDLE_BLOCKERS_FILTER.format(blocking_session_ids=",".join(map(str, blocking_session_ids))))
+        if self._is_sample_idle_recently_active_sessions():
+            idle_filter = _append_filter(IDLE_RECENTLY_ACTIVE_FILTER)
+        query += idle_filter
         self.log.debug("Running query [%s]", query)
-        if self._idle_filter:
-            cursor.execute(query, (time.time() - self._time_since_last_activity_event))
+        if self._is_sample_idle_recently_active_sessions():
+            cursor.execute(query, int((time.time() - self._time_since_last_activity_event)))
         else:
             cursor.execute(query)
         columns = [i[0] for i in cursor.description]
@@ -244,9 +255,9 @@ class SqlserverActivity(DBMAsyncJob):
         blocking_session_ids = {r['blocking_session_id'] for r in rows if r['blocking_session_id']}
         # if there are blocking sessions and some of the session(s) are not captured in the activity query
         idle_blocking_session_ids = blocking_session_ids - session_ids
-        if idle_blocking_session_ids:
-            idle_blocking_sessions = self._get_idle_blocking_sessions(cursor, idle_blocking_session_ids)
-            rows.extend(idle_blocking_sessions)
+        if idle_blocking_session_ids or self._is_sample_idle_recently_active_sessions():
+            idle_sessions = self._get_idle_sessions(cursor, idle_blocking_session_ids)
+            rows.extend(idle_sessions)
         return rows
 
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
