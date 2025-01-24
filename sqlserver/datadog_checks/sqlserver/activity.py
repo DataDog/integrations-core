@@ -83,12 +83,14 @@ WHERE
 """,
 ).strip()
 
+IDLE_FILTER = "OR NOT (sess.status = 'sleeping' AND sess.last_request_start_time < DATEADD(SECONDS, -?, GETDATE()))"
+
 # Turns out sys.dm_exec_requests does not contain idle sessions.
-# Inner joining dm_exec_sessions with dm_exec_requests will not return any idle blocking sessions.
-# This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle blocking sessions.
+# Inner joining dm_exec_sessions with dm_exec_requests will not return any idle sessions.
+# This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle sessions.
 # The query below is used for idle sessions and does not join with dm_exec_requests.
 # The last query execution on the connection is fetched from dm_exec_connections.most_recent_sql_handle.
-IDLE_BLOCKING_SESSIONS_QUERY = re.sub(
+IDLE_SESSIONS_QUERY = re.sub(
     r'\s+',
     ' ',
     """\
@@ -115,6 +117,7 @@ FROM sys.dm_exec_sessions sess
 WHERE sess.status = 'sleeping'
     AND sess.session_id IN ({blocking_session_ids})
     AND c.session_id IN ({blocking_session_ids})
+    {idle_filter}
 """,
 ).strip()
 
@@ -182,6 +185,8 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
+        self._sample_recently_active_idle_sessions=is_affirmative(self._config.activity_config.get('sample_recently_active_idle_sessions', True))
+        self._time_since_last_activity_event = 0
 
     def _close_db_conn(self):
         pass
@@ -202,13 +207,20 @@ class SqlserverActivity(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
-        # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
-        query = IDLE_BLOCKING_SESSIONS_QUERY.format(
+        idle_filter = ""
+        if self._sample_recently_active_idle_sessions and self._time_since_last_activity_event:
+            idle_filter = IDLE_FILTER
+
+        query = IDLE_SESSIONS_QUERY.format(
             blocking_session_ids=",".join(map(str, blocking_session_ids)),
             proc_char_limit=self._config.stored_procedure_characters_limit,
+            idle_filter={idle_filter},
         )
         self.log.debug("Running query [%s]", query)
-        cursor.execute(query)
+        if self._idle_filter:
+            cursor.execute(query, (time.time() - self._time_since_last_activity_event))
+        else:
+            cursor.execute(query)
         columns = [i[0] for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return rows
@@ -356,6 +368,7 @@ class SqlserverActivity(DBMAsyncJob):
         return len(str(row))
 
     def _create_activity_event(self, active_sessions, active_connections):
+        self._time_since_last_activity_event = time.time()
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -376,7 +389,7 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_activity(self):
         """
-        Collects all current activity for the SQLServer intance.
+        Collects all current activity for the SQLServer instance.
         :return:
         """
 

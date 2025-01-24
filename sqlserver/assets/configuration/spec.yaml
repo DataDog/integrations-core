@@ -609,6 +609,15 @@ files:
           value:
             type: number
             example: 10
+      - name: sample_recently_active_idle_sessions
+          description: |
+            This option will enable sampling idle sessions that were active since the last collection.
+            This is useful enhancing APM/DBM correlation.
+          value:
+            type: boolean
+            example: true
+            hidden: true
+
     - name: stored_procedure_characters_limit
       description: |
         Limit the number of characters of the text of a stored procedure that is collected.
