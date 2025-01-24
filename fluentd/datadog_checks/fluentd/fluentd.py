@@ -4,10 +4,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import re
+import subprocess
 from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+
 
 
 class Fluentd(AgentCheck):
@@ -108,6 +109,10 @@ class Fluentd(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def _collect_metadata(self):
         raw_version = None
         if not self.is_metadata_collection_enabled():
@@ -131,7 +136,7 @@ class Fluentd(AgentCheck):
         version_command = '{} --version'.format(self._fluentd_command)
 
         try:
-            out, _, _ = get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
+            out, _, _ = self._get_subprocess_output(version_command)
         except OSError as exc:
             self.log.debug("Error collecting fluentd version: %s", exc)
             return None
