@@ -27,7 +27,7 @@ This integration collects logs and metrics from the sources listed above and sen
 
 ### Prerequisite
 
-1. OAuth plugin should be active for ServiceNow instance.
+1. OAuth plugin should be active for ServiceNow the instance.
     * It is active by default on new and upgraded instances.
     * You can verify this by following the instructions in the [OAuth Plugin Activation Guide][4]. 
     * Additionally, ensure that the OAuth activation property is set to True by checking the settings outlined in the [OAuth Property Activation Guide][5].

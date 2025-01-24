@@ -1423,7 +1423,7 @@
                     {
                         "id": 7618119238103990,
                         "definition": {
-                            "title": "Container Image Vulerabilities with Impacted Services",
+                            "title": "Container Image Vulnerabilities with Impacted Services",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1646,7 +1646,7 @@
                     {
                         "id": 3240854240144094,
                         "definition": {
-                            "title": "Container Vulnerablities by Base Image",
+                            "title": "Container Vulnerabilities by Base Image",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
