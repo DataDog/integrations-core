@@ -51,7 +51,7 @@ jobs:
     - name: Set up Windows containers
       if: matrix.platform == 'windows'
       env:
-        AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'mcr.microsoft.com/windows/servercore:ltsc2022' || 'mcr.microsoft.com/windows/servercore:ltsc2012' }}"
+        AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'mcr.microsoft.com/windows/servercore:ltsc2022' || 'mcr.microsoft.com/windows/servercore:ltsc2022' }}"
         SERVER_IMAGE: 'alpine:3.14'
         DOCKER_DEFAULT_PLATFORM: linux/amd64
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
