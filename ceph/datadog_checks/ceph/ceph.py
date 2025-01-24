@@ -96,7 +96,7 @@ class Ceph(AgentCheck):
             tags.append(self.NAMESPACE + '_fsid:%s' % fsid)
 
         return tags
-    
+
     def _get_subprocess_output(self, cmd):
         res = subprocess.run(cmd, capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
