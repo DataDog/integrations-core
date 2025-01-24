@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import psycopg2
+import psycopg
 import pytest
 from packaging import version
 
@@ -15,15 +15,14 @@ from . import common
 @pytest.mark.usefixtures("dd_environment")
 def test_check(instance, aggregator, datadog_agent, dd_run_check):
     # add some stats
-    connection = psycopg2.connect(
+    connection = psycopg.connect(
         host=common.HOST,
         port=common.PORT,
         user=common.USER,
         password=common.PASS,
-        database=common.DB,
+        dbname=common.DB,
         connect_timeout=1,
     )
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = connection.cursor()
     cur.execute('SELECT * FROM persons;')
 
@@ -49,15 +48,14 @@ def test_check(instance, aggregator, datadog_agent, dd_run_check):
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_clients(instance, aggregator, datadog_agent, dd_run_check):
     # add some stats
-    connection = psycopg2.connect(
+    connection = psycopg.connect(
         host=common.HOST,
         port=common.PORT,
         user=common.USER,
         password=common.PASS,
-        database=common.DB,
+        dbname=common.DB,
         connect_timeout=1,
     )
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = connection.cursor()
     cur.execute('SELECT * FROM persons;')
 
@@ -80,15 +78,14 @@ def test_check_with_clients(instance, aggregator, datadog_agent, dd_run_check):
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_servers(instance, aggregator, datadog_agent, dd_run_check):
     # add some stats
-    connection = psycopg2.connect(
+    connection = psycopg.connect(
         host=common.HOST,
         port=common.PORT,
         user=common.USER,
         password=common.PASS,
-        database=common.DB,
+        dbname=common.DB,
         connect_timeout=1,
     )
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = connection.cursor()
     cur.execute('SELECT * FROM persons;')
 

@@ -25,6 +25,7 @@ RUN curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtoo
      --add Microsoft.VisualStudio.Workload.VCTools `
      || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
  && del /q vs_buildtools.exe
+ENV VCVARSALL_BAT="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
 
 # Upgrade PowerShell
 ENV POWERSHELL_VERSION="7.4.0"
@@ -82,11 +83,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.12.6"
+ENV PYTHON_VERSION="3.12.8"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '5914748e6580e70bedeb7c537a0832b3071de9e09a2e4e7e3d28060616045e0a'; `
+      -Hash '71bd44e6b0e91c17558963557e4cdb80b483de9b0a0a9717f06cf896f95ab598'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -114,7 +115,42 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\perl\perl\bin" && `
     Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
 
+# Nasm
+ENV NASM_VERSION="2.16.03"
+RUN Get-RemoteFile `
+      -Uri https://www.nasm.us/pub/nasm/releasebuilds/$Env:NASM_VERSION/win64/nasm-$Env:NASM_VERSION-win64.zip `
+      -Path "nasm-$Env:NASM_VERSION-win64.zip" `
+    -Hash '3ee4782247bcb874378d02f7eab4e294a84d3d15f3f6ee2de2f47a46aa7226e6' && `
+    7z x "nasm-$Env:NASM_VERSION-win64.zip" -o"C:\nasm" && `
+    Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
+    Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
+# openssl
 ENV OPENSSL_VERSION="3.3.2"
+RUN Get-RemoteFile `
+      -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Hash '2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281'; `
+    7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
+    7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
+    cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
+    RunOnVSConsole -Command `
+    'C:\perl\perl\bin\perl.exe Configure && `
+    nmake && `
+    nmake install_sw'
+# libpq and pg_config as needed by psycopg
+ENV PG_VERSION="16.0"
+COPY pg_config.pl C:\pg_config.pl
+RUN Get-RemoteFile `
+      -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
+      -Path postgresql-$Env:PG_VERSION.tar.bz2 `
+      -Hash 'df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99'; `
+    7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
+    7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src && `
+    cd C:\postgresql_src\postgresql-$Env:PG_VERSION\src\tools\msvc && `
+    Copy-Item C:\pg_config.pl -Destination .\config.pl && `
+    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe build.pl' && `
+    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
+    Add-ToPath -Append "C:\postgresql\bin"
 
 ENV CURL_VERSION="8.11.1"
 

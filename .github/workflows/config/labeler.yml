@@ -391,6 +391,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/octopus_deploy:
+- octopus_deploy/**/*
 integration/oke:
 - oke/**/*
 integration/oom_kill:
@@ -439,6 +441,8 @@ integration/postfix:
 - postfix/**/*
 integration/postgres:
 - postgres/**/*
+integration/postmark:
+- postmark/**/*
 integration/powerdns_recursor:
 - powerdns_recursor/**/*
 integration/presto:

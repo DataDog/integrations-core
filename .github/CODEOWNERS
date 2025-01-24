@@ -145,6 +145,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /openstack_controller/                  @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/*.md              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/octopus_deploy/                        @DataDog/platform-integrations @DataDog/agent-integrations
+/octopus_deploy/manifest.json           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/octopus_deploy/*.md                    @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /teleport/                              @DataDog/platform-integrations @DataDog/agent-integrations
 /teleport/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /teleport/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -326,6 +329,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
+/postmark/                                                          @DataDog/saas-integrations
+/postmark/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/postmark/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/postmark/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /snowflake/                                                          @DataDog/saas-integrations
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
