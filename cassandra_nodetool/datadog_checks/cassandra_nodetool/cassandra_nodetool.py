@@ -5,10 +5,10 @@
 from __future__ import division
 
 import re
+import subprocess
 from collections import defaultdict
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_nodetool'
 DEFAULT_HOST = 'localhost'
@@ -67,6 +67,10 @@ class CassandraNodetoolCheck(AgentCheck):
         self.tags = self.instance.get("tags", [])
         self.keyspaces = self.instance.get("keyspaces", [])
 
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def check(self, _):
         # Flag to send service checks only once and not for every keyspace
         send_service_checks = True
@@ -78,7 +82,7 @@ class CassandraNodetoolCheck(AgentCheck):
             cmd = self.nodetool_cmd + ['status', '--', keyspace]
 
             # Execute the command
-            out, err, code = get_subprocess_output(cmd, self.log, False, log_debug=False)
+            out, err, code = self._get_subprocess_output(cmd)
             if err or 'Error:' in out or code != 0:
                 self.log.error('Error executing nodetool status: %s', err or out)
                 continue
