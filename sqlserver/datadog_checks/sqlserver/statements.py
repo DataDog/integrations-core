@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import binascii
+import copy
 import math
 import time
 
@@ -234,6 +235,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._last_stats_query_time = None
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
 
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -453,7 +456,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         Collects statement metrics and plans.
         :return:
         """
-        plans_submitted = 0
+        obfuscated_plans_submitted = 0
+        raw_plans_submitted = 0
         deadline = time.time() + self.collection_interval
 
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
@@ -467,12 +471,26 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-                for event in self._collect_plans(rows, cursor, deadline):
-                    self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                    plans_submitted += 1
+                for obfuscated_plan_event, raw_plan_event in self._collect_plans(rows, cursor, deadline):
+                    self._check.database_monitoring_query_sample(
+                        json.dumps(obfuscated_plan_event, default=default_json_event_encoding)
+                    )
+                    obfuscated_plans_submitted += 1
+                    if self._collect_raw_query_statement and raw_plan_event:
+                        self._check.database_monitoring_query_sample(
+                            json.dumps(raw_plan_event, default=default_json_event_encoding)
+                        )
+                        raw_plans_submitted += 1
 
         self._check.count(
-            "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self._check.debug_stats_kwargs()
+            "dd.sqlserver.statements.plans_submitted.count",
+            obfuscated_plans_submitted,
+            **self._check.debug_stats_kwargs(tags=["type:obfuscated"])
+        )
+        self._check.count(
+            "dd.sqlserver.statements.plans_submitted.count",
+            raw_plans_submitted,
+            **self._check.debug_stats_kwargs(tags=["type:raw"])
         )
         self._check.gauge(
             "dd.sqlserver.statements.seen_plans_cache.len",
@@ -585,7 +603,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
-                yield {
+                obfuscated_plan_event = {
                     "host": self._check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
@@ -623,3 +641,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
+                raw_plan_event = None
+                if self._collect_raw_query_statement:
+                    raw_plan_event = copy.deepcopy(obfuscated_plan_event)
+                    raw_plan_event["dbm_type"] = "rqp"  # raw query plan
+                    raw_plan_event["db"]["plan"]["definition"] = raw_plan
+                yield obfuscated_plan_event, raw_plan_event
