@@ -351,7 +351,13 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
-        self.tls_ciphers_allowed = config.get('tls_ciphers')
+        ciphers = config.get('tls_ciphers')
+        if ciphers:
+            if 'ALL' in ciphers:
+                updated_ciphers = "ALL"
+            else:
+                updated_ciphers = ":".join(ciphers)
+        self.tls_ciphers_allowed = updated_ciphers
 
     def get(self, url, **options):
         return self._request('get', url, options)
