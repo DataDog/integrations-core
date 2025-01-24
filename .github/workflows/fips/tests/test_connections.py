@@ -24,15 +24,16 @@ def _parse_json(payload):
     if not payload.startswith(b'['):
         payload = b'['+payload.split(b'[', maxsplit=1)[1]
     check_json = json.loads(payload)
-    for instance, suffix in zip(check_json, ("", "_fips")):
-        submitted_metrics = instance['aggregator']['metrics']
-        for metric_json in submitted_metrics:
+    # The suffixes depend on the order of the defined instances in the config.
+    for instance, suffix in zip(check_json, ("_fips", "")):
+        for metric_json in instance['aggregator']['metrics']:
             parsed_json[metric_json["metric"]+suffix] = int(metric_json["points"][-1][-1])
-        return parsed_json
+    return parsed_json
 
 
 def test_connections():
     result = subprocess.run(["docker", "exec", "compose-agent-1", "agent", "check", "connections", "--json"], check=True, capture_output=True)
     parsed_json = _parse_json(result.stdout)
+    expected_json = FIPS_AGENT if AGENT_FIPS_MODE else REGULAR_AGENT
 
-    assert parsed_json == FIPS_AGENT if AGENT_FIPS_MODE else REGULAR_AGENT
+    assert parsed_json == expected_json
