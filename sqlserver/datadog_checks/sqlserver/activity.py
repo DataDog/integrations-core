@@ -107,7 +107,8 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
-    sess.is_user_process as is_user_process
+    sess.is_user_process as is_user_process,
+    sess.context_info as context_info
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
