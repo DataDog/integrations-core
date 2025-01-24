@@ -14,7 +14,7 @@
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
-#   - type: tcp/udp
+#   - type: tcp
 #     port: <PORT>
 #     source: ivanti-connect-secure
 #     service: ivanti-connect-secure

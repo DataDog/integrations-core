@@ -4,7 +4,7 @@ files:
   options:
   - template: logs
     example:
-    - type: tcp/udp
+    - type: tcp # or 'udp'
       port: <PORT>
       source: ivanti-connect-secure
       service: ivanti-connect-secure

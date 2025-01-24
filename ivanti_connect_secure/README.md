@@ -17,11 +17,9 @@ Visualize detailed insights into these logs through the out-of-the-box dashboard
 
 ### Installation
 
-To install the Ivanti Connect Secure integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][4] documentation.
+To install the Ivanti Connect Secure integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.59.0.
-
-Linux command
 
 ```shell
 sudo -u dd-agent -- datadog-agent integration install datadog-ivanti_connect_secure==1.0.0
@@ -31,7 +29,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-ivanti_connect_sec
 
 #### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
    ```yaml
    logs_enabled: true
@@ -43,7 +41,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-ivanti_connect_sec
 
    ```yaml
    logs:
-     - type: <tcp/udp>
+     - type: tcp # or 'udp'
        port: <PORT>
        source: ivanti-connect-secure
        service: ivanti-connect-secure
@@ -64,11 +62,11 @@ sudo -u dd-agent -- datadog-agent integration install datadog-ivanti_connect_sec
 4. Under **Select Events to Log**, ensure all event types are selected.
 5. Click **Save Changes** to apply the configuration.
 6. Configure the syslog server details in the **Syslog Servers** section:
-   - **Server name/IP**: Enter the fully qualified domain name or IP address of the syslog server in the format `<IP/domain>:<port>`.
-   - **Type**: Select either **TCP** or **UDP** from the dropdown
-   - **Filter**: Choose **JSON: JSON** from the dropdown
+   - **Server name/IP**: Enter the fully qualified domain name or IP address of the syslog server in the format `<IP/DOMAIN>:<PORT>`.
+   - **Type**: Select either **TCP** or **UDP** from the dropdown.
+   - **Filter**: Choose **JSON: JSON** from the dropdown.
      <br>After entering the required details, click **Add**.
-7. Repeat steps 3 to 6 for the **User Access** and **Admin Access** tabs.
+7. Repeat steps 3 to 6 in the **User Access** and **Admin Access** tabs.
 
 ### Validation
 

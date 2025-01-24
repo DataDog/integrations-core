@@ -106,7 +106,7 @@
                     {
                         "id": 8702748035003160,
                         "definition": {
-                            "title": "Web Requests Logs over time",
+                            "title": "Web Requests Logs over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -287,7 +287,7 @@
                     {
                         "id": 6775190727522570,
                         "definition": {
-                            "title": "Bytes Transferred over time",
+                            "title": "Bytes Transferred over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,

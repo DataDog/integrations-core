@@ -105,7 +105,7 @@
                     {
                         "id": 8702748035003160,
                         "definition": {
-                            "title": "Unauthenticated Web Requests over time",
+                            "title": "Unauthenticated Web Requests over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -422,7 +422,7 @@
                     {
                         "id": 4734511997755772,
                         "definition": {
-                            "title": "Failed Logins over time",
+                            "title": "Failed Logins over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -533,7 +533,7 @@
                     {
                         "id": 8921234832871242,
                         "definition": {
-                            "title": "Rejected Logins over time",
+                            "title": "Rejected Logins over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -644,7 +644,7 @@
                     {
                         "id": 4553625496347152,
                         "definition": {
-                            "title": "Successful Logins over time",
+                            "title": "Successful Logins over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,

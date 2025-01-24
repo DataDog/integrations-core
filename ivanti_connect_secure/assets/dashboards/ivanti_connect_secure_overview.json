@@ -106,7 +106,7 @@
                     {
                         "id": 8702748035003160,
                         "definition": {
-                            "title": "Logs by Severity over time",
+                            "title": "Logs by Severity over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -385,7 +385,7 @@
                     {
                         "id": 2570927267319314,
                         "definition": {
-                            "title": "Logs by Service over time",
+                            "title": "Logs by Service over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -873,7 +873,7 @@
                     {
                         "id": 5107853845773138,
                         "definition": {
-                            "title": "Count of Logs by User-Agents",
+                            "title": "Count of Logs by User-Agent",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

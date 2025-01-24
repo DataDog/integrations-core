@@ -218,7 +218,7 @@
                     {
                         "id": 8979735835512980,
                         "definition": {
-                            "title": "Bytes Transferred over time",
+                            "title": "Bytes Transferred over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -506,7 +506,7 @@
                     {
                         "id": 6327435353768680,
                         "definition": {
-                            "title": "ACL Count over time",
+                            "title": "ACL Count over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -566,7 +566,7 @@
                     {
                         "id": 4054878727260096,
                         "definition": {
-                            "title": "Optimized ACL Count over time",
+                            "title": "Optimized ACL Count over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,

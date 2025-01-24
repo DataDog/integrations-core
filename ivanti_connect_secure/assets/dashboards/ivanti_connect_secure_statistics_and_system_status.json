@@ -54,7 +54,7 @@
                     {
                         "id": 8702748035003160,
                         "definition": {
-                            "title": "Concurrent logged in Users over time",
+                            "title": "Concurrent Logged-in Users over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -114,7 +114,7 @@
                     {
                         "id": 4562843163926840,
                         "definition": {
-                            "title": "NCP Connections over time",
+                            "title": "NCP Connections over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -174,7 +174,7 @@
                     {
                         "id": 8183349058937222,
                         "definition": {
-                            "title": "JCP Connection over time",
+                            "title": "JCP Connection over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -292,7 +292,7 @@
                     {
                         "id": 1997295212378182,
                         "definition": {
-                            "title": "Matched Files over time",
+                            "title": "Matched Files over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -352,7 +352,7 @@
                     {
                         "id": 6592991177188294,
                         "definition": {
-                            "title": "Detected Files over time",
+                            "title": "Detected Files over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -412,7 +412,7 @@
                     {
                         "id": 964190135913232,
                         "definition": {
-                            "title": "Mismatched Files over time",
+                            "title": "Mismatched Files over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,

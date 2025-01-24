@@ -25,7 +25,7 @@
             "id": 495983273354694,
             "definition": {
                 "type": "note",
-                "content": "This dashboard offers a centralized view of administrative activities, ensuring transparency and visibility into critical operations.\n\nIt enables compliance monitoring and detection of unauthorized actions to maintain system integrity. .\n \nFor more information, see the [Ivanti Connect Secure Integration Documentation](https://docs.datadoghq.com/integrations/ivanti_connect_secure).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard offers a centralized view of administrative activities, ensuring transparency and visibility into critical operations.\n\nIt enables compliance monitoring and detection of unauthorized actions to maintain system integrity.\n\nFor more information, see the [Ivanti Connect Secure Integration Documentation](https://docs.datadoghq.com/integrations/ivanti_connect_secure).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -105,7 +105,7 @@
                     {
                         "id": 7700611474623012,
                         "definition": {
-                            "title": "Failed Logins over time",
+                            "title": "Failed Logins over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -215,7 +215,7 @@
                     {
                         "id": 453951888890250,
                         "definition": {
-                            "title": "Successful Logins over time",
+                            "title": "Successful Logins over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
