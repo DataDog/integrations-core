@@ -1,5 +1,5 @@
 init_config:
 
 instances:
-  - http_endpoint: https://localhost:8443
+  - http_endpoint: https://http-server:443
 

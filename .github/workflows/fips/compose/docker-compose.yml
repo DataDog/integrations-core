@@ -14,7 +14,7 @@ services:
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
     healthcheck:
-      test: ["CMD", "agent", "run"]
+      test: ["CMD", "agent", "status"]
       interval: 5s
       timeout: 2s
       retries: 3
@@ -25,11 +25,10 @@ services:
       args:
         - BASE_IMAGE=$SERVER_IMAGE
         - CIPHER=$CIPHER
-    ports:
-      - "8443:443"  # Expose the server on port 8443
     command: ["./start-server.sh", $CIPHER]
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost:443"]
-      interval: 30s
-      timeout: 10s
+      test: "curl -f localhost:443"
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
       retries: 3
