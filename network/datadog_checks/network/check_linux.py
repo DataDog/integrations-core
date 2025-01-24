@@ -23,7 +23,7 @@ class LinuxNetwork(Network):
         super(LinuxNetwork, self).__init__(name, init_config, instances)
         self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
 
-    def _get_subprocess_output(self, cmd, env=None):
+    def _get_subprocess_output(self, cmd=None, env=None):
         res = subprocess.run(cmd, capture_output=True, text=True, env=env)
         return res.stdout, res.stderr, res.returncode
 

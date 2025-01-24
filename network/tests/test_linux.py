@@ -144,7 +144,7 @@ def ss_subprocess_mock_fails(*args, **kwargs):
     if args[0][2].startswith('ss '):
         raise OSError('boom')
     else:
-        return LinuxNetwork._get_subprocess_output(*args, **kwargs)
+        return LinuxNetwork._get_subprocess_output(*args)
 
 
 def netstat_subprocess_mock(*args, **kwargs):
