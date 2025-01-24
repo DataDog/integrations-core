@@ -121,7 +121,9 @@ IDLE_BLOCKERS_FILTER = """(sess.status = 'sleeping'
     AND sess.session_id IN ({blocking_session_ids})
     AND c.session_id IN ({blocking_session_ids}))"""
 
-IDLE_RECENTLY_ACTIVE_FILTER = "(sess.status = 'sleeping' AND sess.last_request_start_time > DATEADD(SECOND, - ?, GETDATE()))"
+IDLE_RECENTLY_ACTIVE_FILTER = (
+    "(sess.status = 'sleeping' AND sess.last_request_start_time > DATEADD(SECOND, - ?, GETDATE()))"
+)
 
 
 # enumeration of the columns we collect
@@ -188,7 +190,9 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
-        self._sample_recently_active_idle_sessions=is_affirmative(self._config.activity_config.get('sample_recently_active_idle_sessions', False))
+        self._sample_recently_active_idle_sessions = is_affirmative(
+            self._config.activity_config.get('sample_recently_active_idle_sessions', False)
+        )
         self._time_since_last_activity_event = 0
 
     def _close_db_conn(self):
@@ -210,7 +214,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _is_sample_idle_recently_active_sessions(self) -> bool:
         return self._sample_recently_active_idle_sessions and self._time_since_last_activity_event
-    
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_idle_sessions(self, cursor, blocking_session_ids):
         query = IDLE_SESSIONS_QUERY.format(
@@ -223,8 +227,11 @@ class SqlserverActivity(DBMAsyncJob):
             if idle_filter:
                 return f"{idle_filter} OR {filter}"
             return filter
+
         if blocking_session_ids:
-            idle_filter = _append_filter(IDLE_BLOCKERS_FILTER.format(blocking_session_ids=",".join(map(str, blocking_session_ids))))
+            idle_filter = _append_filter(
+                IDLE_BLOCKERS_FILTER.format(blocking_session_ids=",".join(map(str, blocking_session_ids)))
+            )
         if self._is_sample_idle_recently_active_sessions():
             idle_filter = _append_filter(IDLE_RECENTLY_ACTIVE_FILTER)
         query += idle_filter
