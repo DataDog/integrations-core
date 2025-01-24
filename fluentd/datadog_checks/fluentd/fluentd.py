@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 
-
 class Fluentd(AgentCheck):
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'fluentd.is_ok'
