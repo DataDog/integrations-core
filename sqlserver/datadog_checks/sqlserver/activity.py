@@ -308,7 +308,7 @@ class SqlserverActivity(DBMAsyncJob):
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
-                "ddtags": self.tags,
+                "ddtags": ",".join(self.tags),
                 'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
