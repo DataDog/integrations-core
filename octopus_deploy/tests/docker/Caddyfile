@@ -50,7 +50,7 @@
         expression {query.project}.contains("Projects-1") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/project_1_in_project_high_limit_pg1.json
+        rewrite * /GET/api/Spaces-1/tasks/project_1_in_progress_high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_2 {
@@ -59,7 +59,7 @@
         expression {query.project}.contains("Projects-2") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/project_2_in_project_high_limit_pg1.json
+        rewrite * /GET/api/Spaces-1/tasks/project_2_in_progress_high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_3 {
@@ -68,7 +68,7 @@
         expression {query.project}.contains("Projects-3") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/project_3_in_project_high_limit_pg1.json
+        rewrite * /GET/api/Spaces-1/tasks/project_3_in_progress_high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_4 {
@@ -77,7 +77,7 @@
         expression {query.project}.contains("Projects-4") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/project_4_in_project_high_limit_pg1.json
+        rewrite * /GET/api/Spaces-1/tasks/project_4_in_progress_high_limit_pg1.json
         file_server
     }
     @get_completed_tasks_project_1 {
