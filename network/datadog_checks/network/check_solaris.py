@@ -4,8 +4,6 @@
 
 import subprocess
 
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError
-
 from . import Network
 from .const import SOLARIS_TCP_METRICS
 
@@ -28,7 +26,7 @@ class SolarisNetwork(Network):
             metrics_by_interface = self._parse_solaris_netstat(netstat)
             for interface, metrics in metrics_by_interface.items():
                 self.submit_devicemetrics(interface, metrics, custom_tags)
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.exception("Error collecting kstat stats.")
 
         try:
