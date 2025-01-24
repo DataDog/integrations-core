@@ -43,7 +43,7 @@ class SolarisNetwork(Network):
             # tcpOutAck           =   185 tcpOutAckDelayed    =     4
             # ...
             self.submit_regexed_values(netstat, SOLARIS_TCP_METRICS, custom_tags)
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.exception("Error collecting TCP stats.")
 
     def _parse_solaris_netstat(self, netstat_output):
