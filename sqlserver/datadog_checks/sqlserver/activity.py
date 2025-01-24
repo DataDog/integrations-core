@@ -237,7 +237,7 @@ class SqlserverActivity(DBMAsyncJob):
         query += idle_filter
         self.log.debug("Running query [%s]", query)
         if self._is_sample_idle_recently_active_sessions():
-            cursor.execute(query, (time.time() - self._time_since_last_activity_event))
+            cursor.execute(query, (int(time.time() - self._time_since_last_activity_event),))
         else:
             cursor.execute(query)
         columns = [i[0] for i in cursor.description]
