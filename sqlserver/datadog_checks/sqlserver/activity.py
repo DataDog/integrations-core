@@ -113,7 +113,7 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
-WHERE 
+WHERE
 """,
 ).strip()
 
