@@ -9,6 +9,7 @@ except ImportError:
 import json
 import time
 from contextlib import closing
+from collections import defaultdict
 
 import pymysql
 
@@ -209,6 +210,7 @@ class DatabasesData:
                             - index_type (str): The index method used.
                             - columns (list): A list of column dictionaries
                                 - column (dict): A dictionary representing a column.
+                                    - name (str): The name of the column.
                                     - sub_part (int): The number of indexed characters if column is partially indexed.
                                     - packed (str): How the index is packed.
                                     - nullable (bool): Whether the column is nullable.
@@ -340,6 +342,8 @@ class DatabasesData:
         self._cursor_run(cursor, query=SQL_INDEXES.format(table_names), params=db_name)
         rows = cursor.fetchall()
         for row in rows:
+            print("ALLEN!!!")
+            print("row:", json.dumps(row, indent=4))
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
             if "nullables" in row:
@@ -351,7 +355,6 @@ class DatabasesData:
                     else:
                         nullables_converted += "false,"
                 row["nullables"] = nullables_converted[:-1]
-                # TODO ALLEN: make this booleans rather than strings
             table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -367,7 +370,46 @@ class DatabasesData:
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
         rows = cursor.fetchall()
+        if not rows:
+            return
+        table_partitions_dict = defaultdict(lambda: defaultdict(lambda: {
+            "name": None,
+            "subpartitions": [],
+            "partition_ordinal_position": None,
+            "partition_method": None,
+            "partition_expression": None,
+            "partition_description": None,
+            "table_rows": 0,
+            "data_length": 0,
+        }))
+
         for row in rows:
-            table_name = str(row.pop("table_name"))
+            table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("partitions", [])
-            table_list[table_name_to_table_index[table_name]]["partitions"].append(row)
+            partition_name = str(row["name"])
+            partition_data = table_partitions_dict[table_name][partition_name]
+
+            # Update partition-level info
+            partition_data["name"] = partition_name
+            partition_data["partition_ordinal_position"] = int(row["partition_ordinal_position"])
+            partition_data["partition_method"] = str(row["partition_method"])
+            partition_data["partition_expression"] = str(row["partition_expression"]).strip().lower()
+            partition_data["partition_description"] = str(row["partition_description"])
+            partition_data["table_rows"] += int(row["table_rows"])
+            partition_data["data_length"] += int(row["data_length"])
+
+            # Add subpartition info, if exists
+            if row["subpartition_name"]:
+                subpartition = {
+                    "name": row["subpartition_name"],
+                    "subpartition_ordinal_position": int(row["subpartition_ordinal_position"]),
+                    "subpartition_method": str(row["subpartition_method"]),
+                    "subpartition_expression": str(row["subpartition_expression"]).strip().lower(),
+                    "table_rows": int(row["table_rows"]),
+                    "data_length": int(row["data_length"]),
+                }
+                partition_data["subpartitions"].append(subpartition)
+        for table_name, partitions_dict in table_partitions_dict.items():
+            table_list[table_name_to_table_index[table_name]]["partitions"] = list(partitions_dict.values())
+        
+        print(json.dumps(partition_data, indent=4))
