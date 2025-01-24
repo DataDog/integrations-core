@@ -1,5 +1,6 @@
 init_config:
 
 instances:
+  - http_endpoint: https://http-server-fips:443
   - http_endpoint: https://http-server:443
 

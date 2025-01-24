@@ -16,21 +16,14 @@ jobs:
     strategy:
       matrix:
         platform: [linux, windows]
-        agent-image: ["datadog/agent-dev:master-py3", "datadog/agent-dev:master-fips", "datadog/agent-dev:master-py3-win-servercore"]
-        cipher: ["ECDHE-RSA-AES128-SHA256", "ECDHE-RSA-CHACHA20-POLY1305"]
-        exclude:
-          - platform: windows
-            agent-image: "datadog/agent-dev:master-fips"
-          - platform: windows
-            agent-image: "datadog/agent-dev:master-py3"
-          - platform: linux
-            agent-image: "datadog/agent-dev:master-py3-win-servercore"
+        agent-type: [fips-agent, standard-agent]
     runs-on: ${{ matrix.platform == 'linux' && 'ubuntu-22.04' || 'windows-2022' }}
     name: "Test FIPS"
 
     env:
       FORCE_COLOR: "1"
       PYTHON_VERSION: "3.12"
+      AGENT_TYPE: "${{ matrix.agent-type }}"
 
     steps:
 
@@ -46,11 +39,21 @@ jobs:
       run: |
         pip install pytest
 
-    - name: Set up containers
+    - name: Set up Linux containers
+      if: matrix.platform == 'linux'
       env:
-        AGENT_IMAGE: "${{ matrix.agent-image }}"
-        SERVER_IMAGE: "${{ matrix.platform == 'linux' && 'alpine:3.14' || 'mcr.microsoft.com/windows/servercore:ltsc2022' }}"
-        CIPHER: "${{ matrix.cipher }}"
+        AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'datadog/agent-dev:master-fips' || 'datadog/agent-dev:master-py3' }}"
+        SERVER_IMAGE: 'alpine:3.14'
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d
+
+    - name: Set up Windows containers
+      if: matrix.platform == 'windows'
+      env:
+        AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'mcr.microsoft.com/windows/servercore:ltsc2022' || 'mcr.microsoft.com/windows/servercore:ltsc2012' }}"
+        SERVER_IMAGE: 'alpine:3.14'
+        DOCKER_DEFAULT_PLATFORM: linux/amd64
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d
