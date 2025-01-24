@@ -61,7 +61,7 @@ class Ceph(AgentCheck):
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
-                output, _, _ = self._get_subprocess_output(args.split(), self.log)
+                output, _, _ = self._get_subprocess_output(args.split())
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)
