@@ -117,11 +117,17 @@ class LabelAggregator:
         return self.metric_config.copy(), self.info_metric.copy()
 
     def process_metric(self, metric, *configs):
+        """
+        Collects labels from shared_labels + target_info metrics
+        """
         for config in configs:
             if config and metric.name in config:
                 self.collect(metric, config.pop(metric.name))
 
     def process_target_info(self, metric):
+        """
+        Updates cached target info metrics
+        """
         if metric.samples[0].labels != self.target_info_labels:
             self.target_info_labels = metric.samples[0].labels
 
@@ -164,6 +170,7 @@ class LabelAggregator:
                         if label in labels:
                             self.unconditional_labels[label] = value
             else:
+                # Store target_info metric labels to be applied to other metrics in payload
                 if metric.name == 'target_info':
                     self.target_info_labels.update(
                         {
@@ -173,6 +180,7 @@ class LabelAggregator:
                         }
                     )
                 else:
+                    # Store shared labels in a seperate attribute
                     self.unconditional_labels.update(
                         {
                             label: value

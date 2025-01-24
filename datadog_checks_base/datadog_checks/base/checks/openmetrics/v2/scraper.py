@@ -256,12 +256,11 @@ class OpenMetricsScraper:
 
     def consume_metrics(self, runtime_data):
         """
-        Yield the processed metrics and filter out excluded metrics.
+        Yield the processed metrics and filter out excluded metrics, without checking for target_info metrics.
         """
 
         metric_parser = self.parse_metrics()
 
-        # Apply additional parsing logic if needed
         if not self.flush_first_value and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
@@ -285,7 +284,6 @@ class OpenMetricsScraper:
 
         metric_parser = self.parse_metrics()
 
-        # Apply additional parsing logic if needed
         if not self.flush_first_value and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
