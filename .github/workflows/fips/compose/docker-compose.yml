@@ -20,17 +20,14 @@ services:
       retries: 3
   http-server:
     build:
-      context: server/$PLATFORM
+      context: server
       dockerfile: Dockerfile
       args:
         - BASE_IMAGE=$SERVER_IMAGE
         - CIPHER=$CIPHER
     ports:
-      - "8443:443"
-    volumes:
-      - ./server/ca.crt:${SSL_PATH}/certs/server.crt
-      - ./server/ca.key:${SSL_PATH}/private/server.key
-    command: ["start-server.sh", $CIPHER]
+      - "8443:443"  # Expose the server on port 8443
+    command: ["./start-server.sh", $CIPHER]
     healthcheck:
       test: ["CMD", "curl", "-f", "https://localhost:443"]
       interval: 30s

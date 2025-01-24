@@ -46,20 +46,11 @@ jobs:
       run: |
         pip install pytest
 
-    - name: Hello World
-      run: |
-        docker run hello-world
-
-    - name: Run Alpine
-      run: |
-        docker run alpine:3.14 /bin/sh -c ls
-
     - name: Set up containers
       env:
         AGENT_IMAGE: "${{ matrix.agent-image }}"
+        SERVER_IMAGE: "${{ matrix.platform == 'linux' && 'alpine:3.14' || 'mcr.microsoft.com/windows/servercore:ltsc2022' }}"
         CIPHER: "${{ matrix.cipher }}"
-        SSL_PATH: ${{ matrix.platform == 'linux' && '/etc/ssl' || 'C:\ProgramData\ssl\' }}
-        PLATFORM: ${{ matrix.platform }}
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         docker compose -f .github/workflows/fips/compose/docker-compose.yml up -d
