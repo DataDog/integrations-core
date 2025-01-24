@@ -4,6 +4,7 @@
 import os
 
 import mock
+
 from datadog_checks.dev import get_here
 from datadog_checks.postfix import PostfixCheck
 
