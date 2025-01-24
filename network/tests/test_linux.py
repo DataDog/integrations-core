@@ -200,7 +200,7 @@ def test_collect_cx_queues_when_ss_fails(check, aggregator):
     instance['collect_connection_queues'] = True
     instance['collect_connection_state'] = True
     check_instance = LinuxNetwork('network', {}, [instance])
-    with mock.patch.object(check, '_get_subprocess_output') as out:
+    with mock.patch.object(check_instance, '_get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock_fails
         check_instance.check({})
 
