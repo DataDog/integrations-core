@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import ssl
 
 import mock
 import pytest
 import requests
 import requests_unixsocket
-import ssl
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
@@ -53,10 +53,12 @@ class TestTLSCiphers:
         http = RequestsWrapper(instance, init_config)
         mock_socket = mock.MagicMock()
 
-        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers, mock.patch('datadog_checks.base.utils.http.create_socket_connection', return_value=mock_socket):
+        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers, mock.patch(
+            'datadog_checks.base.utils.http.create_socket_connection', return_value=mock_socket
+        ):
             http.fetch_intermediate_certs('https://www.google.com')
             mock_set_ciphers.assert_called_once_with(expected_ciphers)
-    
+
 
 class TestRequestSize:
     def test_behavior_correct(self, mock_http_response):
