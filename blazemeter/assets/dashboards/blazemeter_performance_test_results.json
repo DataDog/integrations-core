@@ -1052,6 +1052,7 @@
                             "title": "Minimum Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1066,7 +1067,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -1106,13 +1113,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Average Minimum Response Time",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1146,6 +1160,7 @@
                             "title": "Maximum Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1160,7 +1175,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -1200,13 +1221,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Average Maximum Response Time",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1681,6 +1709,7 @@
                             "title": "Summary Metrics Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1793,12 +1822,24 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Minimum Response Time",
-                                            "formula": "exclude_null(query6)"
+                                            "formula": "exclude_null(query6)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Maximum Response Time",
-                                            "formula": "exclude_null(query7)"
+                                            "formula": "exclude_null(query7)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "alias": "Avg. Bandwidth",
@@ -1847,6 +1888,7 @@
                             "title": "Average Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1861,7 +1903,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -1893,6 +1941,7 @@
                             "title": "Top Labels by Average Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1907,7 +1956,13 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "exclude_null(query1)"
+                                            "formula": "exclude_null(query1)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "sort": {
@@ -1951,13 +2006,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Average Response Time",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -1991,6 +2053,7 @@
                             "title": "Average Latency",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2005,7 +2068,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2037,6 +2106,7 @@
                             "title": "Top Labels by Latency",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2051,7 +2121,13 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "exclude_null(query1)"
+                                            "formula": "exclude_null(query1)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "sort": {
@@ -2095,13 +2171,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Average Latency",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2135,6 +2218,7 @@
                             "title": "Average 90th Percentile Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2149,7 +2233,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2180,6 +2270,7 @@
                             "title": "Average 95th Percentile Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2194,7 +2285,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2225,6 +2322,7 @@
                             "title": "Average 99th Percentile Response Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2239,7 +2337,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2315,6 +2419,7 @@
                             "title": "Average Error Rate",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2329,7 +2434,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2360,6 +2471,7 @@
                             "title": "Top Labels by Error Rate",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2374,7 +2486,13 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "exclude_null(query1)"
+                                            "formula": "exclude_null(query1)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "sort": {
@@ -2418,13 +2536,20 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Average Error Rate",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2673,7 +2798,6 @@
                             "title": "Total Samples",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -3199,6 +3323,7 @@
                             "title": "Request Statistics Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -3255,7 +3380,13 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Avg. Latency",
-                                            "formula": "exclude_null(query1)"
+                                            "formula": "exclude_null(query1)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "cell_display_mode": "number",
@@ -3319,6 +3450,7 @@
                             "title": "Error Details by Label",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -3356,7 +3488,13 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Avg. Error Rate",
-                                            "formula": "exclude_null(query2)"
+                                            "formula": "exclude_null(query2)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ]
                                 }
@@ -3376,6 +3514,7 @@
                             "title": "Response Time Details by Label",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -3438,22 +3577,46 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Avg. Response Time",
-                                            "formula": "exclude_null(query1)"
+                                            "formula": "exclude_null(query1)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Avg. 90line",
-                                            "formula": "exclude_null(query2)"
+                                            "formula": "exclude_null(query2)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Avg. 95line",
-                                            "formula": "exclude_null(query3)"
+                                            "formula": "exclude_null(query3)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Avg. 99line",
-                                            "formula": "exclude_null(query4)"
+                                            "formula": "exclude_null(query4)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
                                         },
                                         {
                                             "cell_display_mode": "number",
@@ -3673,11 +3836,6 @@
                             "requests": [
                                 {
                                     "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "exclude_null(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
@@ -3689,6 +3847,11 @@
                                     "style": {
                                         "palette": "datadog16"
                                     },
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -3966,11 +4129,6 @@
                             "requests": [
                                 {
                                     "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "exclude_null(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
@@ -3982,6 +4140,11 @@
                                     "style": {
                                         "palette": "datadog16"
                                     },
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
