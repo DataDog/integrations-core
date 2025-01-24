@@ -1,0 +1,1 @@
+Fix error `CommandCursor is not subscriptable` in replication oplog size and oplog window collection.

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.3.0 / 2024-11-28
+## 8.3.1 / 2024-12-26
+
+***Fixed***:
+
+* Skip unauthorized `local` database collections `system.replset`, `replset.election`, and `replset.minvalid` in collection and index stats gathering to avoid permission errors. ([#19244](https://github.com/DataDog/integrations-core/pull/19244))
+
+## 8.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 
@@ -16,7 +22,7 @@
 * Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
 * Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
 
-## 8.2.1 / 2024-11-06
+## 8.2.1 / 2024-11-06 / Agent 7.60.0
 
 ***Fixed***:
 

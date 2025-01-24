@@ -8,10 +8,9 @@ import time
 from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import psycopg2
+import psycopg
 from cachetools import TTLCache
-
-from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+from psycopg.rows import dict_row
 
 try:
     import datadog_agent
@@ -40,6 +39,8 @@ from .version_utils import V9_6, V10
 MAX_CHARACTER_SIZE_IN_BYTES = 6
 
 TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
+
+TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE = 4096
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -164,7 +165,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
         )
@@ -236,7 +237,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -246,10 +247,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         return [dict(row) for row in rows]
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping):
+    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping, collect_activity):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
-        report_activity = self._report_activity_event()
         cur_time_func = ""
         blocking_func = ""
         backend_type_predicate = ""
@@ -257,10 +257,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             backend_type_predicate = "backend_type != 'client backend' OR"
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
-        if self._check.version >= V9_6 and report_activity:
+        if self._check.version >= V9_6 and collect_activity:
             blocking_func = PG_BLOCKING_PIDS_FUNC
-        if report_activity:
-            cur_time_func = CURRENT_TIME_FUNC
+        cur_time_func = CURRENT_TIME_FUNC
         activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
         query = PG_STAT_ACTIVITY_QUERY.format(
             backend_type_predicate=backend_type_predicate,
@@ -272,7 +271,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -291,7 +290,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 try:
                     cursor.execute(
                         "select * from {pg_stat_activity_view} LIMIT 0".format(
@@ -306,12 +305,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                             "missing the following expected columns from pg_stat_activity: %s", missing_columns
                         )
                     self._log.debug("found available pg_stat_activity columns: %s", available_columns)
-                except psycopg2.errors.InvalidSchemaName as e:
+                except psycopg.errors.InvalidSchemaName as e:
                     self._log.warning(
                         "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
                     )
                     return None
-                except psycopg2.DatabaseError as e:
+                except psycopg.DatabaseError as e:
                     # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
                     # incorrect definition)
                     self._check.record_warning(
@@ -341,7 +340,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             total_count += 1
             if row.get('backend_type') is not None:
                 try:
-                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
+                    row['backend_type'] = row['backend_type'].decode('utf-8')
                 except UnicodeDecodeError:
                     row['backend_type'] = 'unknown'
             if (not row['datname'] or not row['query']) and row.get(
@@ -471,7 +470,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return
-        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING)
+        collect_activity = self._report_activity_event()
+        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING, collect_activity)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
@@ -480,7 +480,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
 
-        if self._report_activity_event():
+        if collect_activity:
             active_connections = self._get_active_connections()
             activity_event = self._create_activity_event(rows, active_connections)
             self._check.database_monitoring_query_activity(
@@ -548,8 +548,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "gauge",
         )
 
-    @staticmethod
-    def _to_active_session(row, track_activity_query_size):
+    def _to_active_session(self, row, track_activity_query_size):
         if (row.get('backend_type', 'client backend') != 'client backend') or (
             row['state'] is not None and row['state'] != 'idle'
         ):
@@ -557,8 +556,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
-            active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
-                track_activity_query_size, row['query']
+            active_row['query_truncated'] = self._get_truncation_state(
+                track_activity_query_size, row['query'], row['query_signature']
             ).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
@@ -578,12 +577,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
             self.db_pool.get_connection(dbname, self._conn_ttl_ms)
-        except psycopg2.OperationalError as e:
+        except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.connection_error, e
-        except psycopg2.DatabaseError as e:
+        except psycopg.DatabaseError as e:
             self._log.warning(
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
@@ -591,14 +590,14 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
-        except psycopg2.errors.InvalidSchemaName as e:
+        except psycopg.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
-        except psycopg2.errors.DatatypeMismatch as e:
+        except psycopg.errors.DatatypeMismatch as e:
             self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
-        except psycopg2.DatabaseError as e:
+        except psycopg.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._emit_run_explain_error(dbname, DBExplainError.failed_function, e)
@@ -642,7 +641,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
@@ -690,7 +689,10 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         track_activity_query_size = self._get_track_activity_query_size()
 
-        if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
+        if (
+            self._get_truncation_state(track_activity_query_size, statement, query_signature)
+            == StatementTruncationState.truncated
+        ):
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -714,7 +716,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement
                     )
-                e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+                e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
                     " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
@@ -725,18 +727,18 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
                 return error_response
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg2.errors.UndefinedTable as e:
+        except psycopg.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
-        except psycopg2.errors.DatabaseError as e:
+        except psycopg.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
             self._emit_run_explain_error(dbname, DBExplainError.database_error, e)
-            if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
-                e, psycopg2.errors.InsufficientPrivilege
+            if isinstance(e, psycopg.errors.ProgrammingError) and not isinstance(
+                e, psycopg.errors.InsufficientPrivilege
             ):
                 # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
                 # we don't want to cache things like permission errors for a very long time because they can be fixed
@@ -826,7 +828,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "comments": row['dd_comments'],
                     },
                     "query_truncated": self._get_truncation_state(
-                        self._get_track_activity_query_size(), row['query']
+                        self._get_track_activity_query_size(), row['query'], row['query_signature']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -915,8 +917,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
-    @staticmethod
-    def _get_truncation_state(track_activity_query_size, statement):
+    def _get_truncation_state(self, track_activity_query_size, statement, query_signature):
         # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
         # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
         if track_activity_query_size == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE:
@@ -930,4 +931,23 @@ class PostgresStatementSamples(DBMAsyncJob):
         # would falsely report it as a truncated statement
         statement_bytes = bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
-        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+        if truncated:
+            if track_activity_query_size < TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE:
+                self._log.warning(
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting%s "
+                    "for more details on how to increase the track_activity_query_size setting.",
+                    query_signature,
+                    len(statement_bytes),
+                    track_activity_query_size,
+                    "#query-samples-are-truncated",
+                )
+            else:
+                self._log.debug(
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d",
+                    query_signature,
+                    len(statement_bytes),
+                    track_activity_query_size,
+                )
+            return StatementTruncationState.truncated
+        return StatementTruncationState.not_truncated
