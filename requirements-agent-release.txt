@@ -87,7 +87,7 @@ datadog-ibm-i==4.1.0; sys_platform != 'win32'
 datadog-ibm-mq==8.1.0
 datadog-ibm-was==5.1.0
 datadog-ignite==3.1.0
-datadog-iis==5.0.0; sys_platform == 'win32'
+datadog-iis==5.1.0; sys_platform == 'win32'
 datadog-impala==3.2.0
 datadog-istio==8.1.0
 datadog-jboss-wildfly==3.1.0
