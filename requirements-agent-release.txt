@@ -45,7 +45,7 @@ datadog-couch==8.2.0
 datadog-couchbase==5.1.0
 datadog-crio==4.1.0
 datadog-datadog-cluster-agent==5.4.0
-datadog-dcgm==3.2.0
+datadog-dcgm==3.3.0
 datadog-directory==4.0.0
 datadog-disk==7.0.0
 datadog-dns-check==5.0.1
