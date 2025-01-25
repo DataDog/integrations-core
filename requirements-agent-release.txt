@@ -159,7 +159,7 @@ datadog-ray==2.2.0
 datadog-redisdb==7.1.0
 datadog-rethinkdb==5.0.0
 datadog-riak==5.1.0
-datadog-riakcs==4.0.0
+datadog-riakcs==4.1.0
 datadog-sap-hana==5.1.0
 datadog-scylla==4.1.0
 datadog-sidekiq==3.0.0
