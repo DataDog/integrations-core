@@ -202,7 +202,7 @@ datadog-twistlock==5.1.0
 datadog-varnish==4.0.0
 datadog-vault==6.1.0
 datadog-vertica==6.1.0
-datadog-vllm==2.2.0
+datadog-vllm==2.3.0
 datadog-voltdb==5.1.0
 datadog-vsphere==8.2.0
 datadog-wazuh==1.0.0
