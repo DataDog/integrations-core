@@ -29,7 +29,7 @@ datadog-cert-manager==5.2.0
 datadog-checkpoint-quantum-firewall==1.0.0
 datadog-checks-base==37.5.0
 datadog-checks-dependency-provider==3.0.0
-datadog-checks-downloader==7.0.0
+datadog-checks-downloader==7.1.0
 datadog-cilium==5.1.0
 datadog-cisco-aci==4.3.0
 datadog-cisco-secure-firewall==1.0.0
