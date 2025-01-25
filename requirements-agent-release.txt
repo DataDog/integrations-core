@@ -83,7 +83,7 @@ datadog-hudi==4.0.0
 datadog-hyperv==3.0.0; sys_platform == 'win32'
 datadog-ibm-ace==4.1.0
 datadog-ibm-db2==4.0.1
-datadog-ibm-i==4.0.0; sys_platform != 'win32'
+datadog-ibm-i==4.1.0; sys_platform != 'win32'
 datadog-ibm-mq==8.0.0
 datadog-ibm-was==5.1.0
 datadog-ignite==3.1.0
