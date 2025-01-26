@@ -114,6 +114,7 @@ class MySql(AgentCheck):
         self._is_aurora = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
+        self.add_core_tags()
         self.cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
@@ -159,12 +160,22 @@ class MySql(AgentCheck):
 
     @property
     def resolved_hostname(self):
+        # type: () -> str
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        # type: () -> str
+        config_identifier = self._config.database_identifier.get('identifier')
+        if config_identifier:
+            return config_identifier
+        include_port = self._config.get('database_identifier', {}).get('include_port', False)
+        return "{}{}".format(self.resolved_hostname, "." + self._config.port if include_port else "")
 
     @property
     def agent_hostname(self):
@@ -180,9 +191,14 @@ class MySql(AgentCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
-    def set_resource_tags(self):
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
+    def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -210,7 +226,7 @@ class MySql(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 

@@ -119,6 +119,7 @@ class PostgreSql(AgentCheck):
         self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
+        self.add_core_tags()
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
@@ -168,9 +169,14 @@ class PostgreSql(AgentCheck):
         )
         return discovery
 
-    def set_resource_tags(self):
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
+    def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -195,10 +201,11 @@ class PostgreSql(AgentCheck):
                 self.tags.append(
                     "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
                 )
-        # finally, emit a `database_instance` resource for this instance
+        # finally, tag the `database_instance` resource for this instance
+        # metrics intake will use this tag to add all the tags for the instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 
@@ -462,6 +469,15 @@ class PostgreSql(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        # type: () -> str
+        config_identifier = self._config.database_identifier.get('identifier')
+        if config_identifier:
+            return config_identifier
+        include_port = self._config.database_identifier.get('include_port', False)
+        return "{}{}".format(self.resolved_hostname, ":" + self._config.port if include_port else "")
 
     def set_resolved_hostname_metadata(self):
         """
