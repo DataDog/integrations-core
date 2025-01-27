@@ -270,7 +270,7 @@ files:
             `database_autodiscovery` or set `database`.
 
             Set `index_usage_metrics.enabled` to true to enable collection of user table index usage statistics.
-            Defaults to false.
+            Defaults to true.
 
             Use `index_usage_metrics.enabled_tempdb` to enable collection of user table index usage statistics in tempdb
             database from the `sys.dm_db_index_usage_stats` DMV.
@@ -287,7 +287,7 @@ files:
             properties:
             - name: enabled
               type: boolean
-              example: false
+              example: true
             - name: enabled_tempdb
               type: boolean
               example: false
