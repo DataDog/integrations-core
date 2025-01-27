@@ -48,7 +48,7 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
-class CollectRawStatement(BaseModel):
+class CollectRawQueryStatement(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -351,7 +351,7 @@ class InstanceConfig(BaseModel):
     autodiscovery_include: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
-    collect_raw_query_statement: Optional[CollectRawStatement] = None
+    collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_settings: Optional[CollectSettings] = None
     command_timeout: Optional[int] = None
     connection_string: Optional[str] = None
