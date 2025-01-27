@@ -8,8 +8,8 @@ except ImportError:
     from ..stubs import datadog_agent
 import json
 import time
-from contextlib import closing
 from collections import defaultdict
+from contextlib import closing
 
 import pymysql
 
@@ -20,9 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_INDEXES,
     SQL_INDEXES_8_0_13,
+    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_PARTITION,
     SQL_TABLES,
 )
@@ -104,7 +104,9 @@ class SubmitData:
             event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
         json_event = json.dumps(event, default=default_json_event_encoding)
         # self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
-        self._log.debug("ALLEN!!!: Reporting the following untruncated payload for schema collection: {}".format(json_event))
+        self._log.debug(
+            "ALLEN!!!: Reporting the following untruncated payload for schema collection: {}".format(json_event)
+        )
         self._submit_to_agent_queue(json_event)
         self.db_to_tables.clear()
 
@@ -241,10 +243,10 @@ class DatabasesData:
                             - partition_method (str): The partition method.
                             - partition_expression (str): The partition expression.
                             - partition_description (str): The description of the partition.
-                            - table_rows (int): The number of rows in the partition. If partition has subpartitions, 
+                            - table_rows (int): The number of rows in the partition. If partition has subpartitions,
                                                 this is the sum of all subpartitions table_rows.
-                            - data_length (int): The data length of the partition in bytes. If partition has subpartitions, 
-                                                 this is the sum of all subpartitions data_length.
+                            - data_length (int): The data length of the partition in bytes. If partition has
+                                                 subpartitions, this is the sum of all subpartitions data_length.
         """
         self._data_submitter.reset()
         self._tags = tags
@@ -342,19 +344,27 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
-        query = SQL_INDEXES_8_0_13.format(table_names) if cursor.fetchone()["COUNT(*)"] > 0 else SQL_INDEXES.format(table_names)
+        query = (
+            SQL_INDEXES_8_0_13.format(table_names)
+            if cursor.fetchone()["COUNT(*)"] > 0
+            else SQL_INDEXES.format(table_names)
+        )
         self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
         if not rows:
             return
-        table_index_dict = defaultdict(lambda: defaultdict(lambda: {
-            "name": None,
-            "cardinality": 0,
-            "index_type": None,
-            "columns": [],
-            "non_unique": None,
-            "expression": None,
-        }))
+        table_index_dict = defaultdict(
+            lambda: defaultdict(
+                lambda: {
+                    "name": None,
+                    "cardinality": 0,
+                    "index_type": None,
+                    "columns": [],
+                    "non_unique": None,
+                    "expression": None,
+                }
+            )
+        )
         for row in rows:
             table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
@@ -382,7 +392,6 @@ class DatabasesData:
         for table_name, index_dict in table_index_dict.items():
             table_list[table_name_to_table_index[table_name]]["indexes"] = list(index_dict.values())
 
-
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
@@ -398,16 +407,20 @@ class DatabasesData:
         rows = cursor.fetchall()
         if not rows:
             return
-        table_partitions_dict = defaultdict(lambda: defaultdict(lambda: {
-            "name": None,
-            "subpartitions": [],
-            "partition_ordinal_position": None,
-            "partition_method": None,
-            "partition_expression": None,
-            "partition_description": None,
-            "table_rows": 0,
-            "data_length": 0,
-        }))
+        table_partitions_dict = defaultdict(
+            lambda: defaultdict(
+                lambda: {
+                    "name": None,
+                    "subpartitions": [],
+                    "partition_ordinal_position": None,
+                    "partition_method": None,
+                    "partition_expression": None,
+                    "partition_description": None,
+                    "table_rows": 0,
+                    "data_length": 0,
+                }
+            )
+        )
 
         for row in rows:
             table_name = str(row["table_name"])

@@ -5,13 +5,13 @@
 import re
 from os import environ
 
-from packaging.version import parse as parse_version
 import pytest
+from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
-from .common import MYSQL_VERSION_PARSED
 
 from . import common
+from .common import MYSQL_VERSION_PARSED
 from .utils import deep_compare
 
 
@@ -177,7 +177,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 "collation": "A",
                                 "packed": None,
                                 "nullable": True,
-                            }
+                            },
                         ],
                         "non_unique": True,
                         "expression": None,
@@ -237,7 +237,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 "collation": "A",
                                 "packed": None,
                                 "nullable": True,
-                            }
+                            },
                         ],
                         "non_unique": False,
                         "expression": None,
@@ -329,21 +329,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 "collation": ('D' if MYSQL_VERSION_PARSED >= parse_version('8.0.1') else 'A'),
                                 "packed": None,
                                 "nullable": True,
-                            }
+                            },
                         ],
                         "non_unique": True,
                         "expression": None,
                     },
-                    *([
-                        {
-                            "name": "functional_key_part_index",
-                            "index_type": "BTREE",
-                            "cardinality": 3,
-                            "columns": [],
-                            "non_unique": True,
-                            "expression": "(`population` + 1)",
-                        } 
-                    ] if MYSQL_VERSION_PARSED >= parse_version('8.0.13') else [])
+                    *(
+                        [
+                            {
+                                "name": "functional_key_part_index",
+                                "index_type": "BTREE",
+                                "cardinality": 3,
+                                "columns": [],
+                                "non_unique": True,
+                                "expression": "(`population` + 1)",
+                            }
+                        ]
+                        if MYSQL_VERSION_PARSED >= parse_version('8.0.13')
+                        else []
+                    ),
                 ],
             },
             {
