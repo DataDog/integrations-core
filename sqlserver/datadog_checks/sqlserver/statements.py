@@ -470,10 +470,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-                for plan_event in self._collect_plans(rows, cursor, deadline):
-                    self._check.database_monitoring_query_sample(
-                        json.dumps(plan_event, default=default_json_event_encoding)
-                    )
+                for event in self._collect_plans(rows, cursor, deadline):
+                    self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                     plans_submitted += 1
 
         self._check.count(
