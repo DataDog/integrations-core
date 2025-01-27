@@ -456,8 +456,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         Collects statement metrics and plans.
         :return:
         """
-        obfuscated_plans_submitted = 0
-        raw_plans_submitted = 0
+        plans_submitted = 0
         deadline = time.time() + self.collection_interval
 
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
@@ -471,26 +470,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-                for obfuscated_plan_event, raw_plan_event in self._collect_plans(rows, cursor, deadline):
+                for plan_event in self._collect_plans(rows, cursor, deadline):
                     self._check.database_monitoring_query_sample(
-                        json.dumps(obfuscated_plan_event, default=default_json_event_encoding)
+                        json.dumps(plan_event, default=default_json_event_encoding)
                     )
-                    obfuscated_plans_submitted += 1
-                    if self._collect_raw_query_statement and raw_plan_event:
-                        self._check.database_monitoring_query_sample(
-                            json.dumps(raw_plan_event, default=default_json_event_encoding)
-                        )
-                        raw_plans_submitted += 1
+                    plans_submitted += 1
 
         self._check.count(
-            "dd.sqlserver.statements.plans_submitted.count",
-            obfuscated_plans_submitted,
-            **self._check.debug_stats_kwargs(tags=["type:obfuscated"])
-        )
-        self._check.count(
-            "dd.sqlserver.statements.plans_submitted.count",
-            raw_plans_submitted,
-            **self._check.debug_stats_kwargs(tags=["type:raw"])
+            "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self._check.debug_stats_kwargs()
         )
         self._check.gauge(
             "dd.sqlserver.statements.seen_plans_cache.len",
@@ -641,9 +628,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
-                raw_plan_event = None
+                yield obfuscated_plan_event
                 if self._collect_raw_query_statement:
                     raw_plan_event = copy.deepcopy(obfuscated_plan_event)
                     raw_plan_event["dbm_type"] = "rqp"  # raw query plan
                     raw_plan_event["db"]["plan"]["definition"] = raw_plan
-                yield obfuscated_plan_event, raw_plan_event
+                    yield raw_plan_event
