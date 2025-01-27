@@ -610,6 +610,7 @@ files:
             type: number
             example: 10
         - name: sample_recently_active_idle_sessions
+          hidden: true
           description: |
             This option enables the sampling of idle sessions that were active since the last collection.
             Recommended for APM customers to boost the APM/DBM correlation.

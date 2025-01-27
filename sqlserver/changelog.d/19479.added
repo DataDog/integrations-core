@@ -1,1 +1,0 @@
-Add an option to sample idle but recently active sessions. If you're an APM customer, set ``sample_recently_active_idle_sessions`` to ``true`` to improve APM/DBM correlations.
