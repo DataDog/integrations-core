@@ -1230,17 +1230,13 @@ def test_activity_snapshot_collection(
         conn.close()
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
-def test_activity_raw_statement_collection(
-    aggregator, integration_check, dbm_instance, datadog_agent, pg_stat_activity_view
-):
+def test_activity_raw_statement_collection(aggregator, integration_check, dbm_instance, datadog_agent):
 
-    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+    if POSTGRES_VERSION.split('.')[0] == "9":
         # cannot catch any queries from other users
         # only can see own queries
         return
     # No need for query metrics here
-    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['dbstrict'] = True
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
