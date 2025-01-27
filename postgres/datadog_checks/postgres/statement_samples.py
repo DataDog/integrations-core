@@ -179,6 +179,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
         self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._explain_function)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._collect_raw_query_statement = config.collect_raw_query_statement.get("enabled", False)
 
         self._collection_strategy_cache = TTLCache(
             maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
@@ -203,6 +204,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             # total size: 10k * 100 = 1 Mb
             maxsize=int(config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
             ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
+        )
+
+        self._raw_statement_text_cache = RateLimitingTTLCache(
+            maxsize=config.collect_raw_query_statement["cache_max_size"],
+            ttl=60 * 60 / config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
 
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
