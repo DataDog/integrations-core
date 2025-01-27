@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
     - datadog_checks_base/datadog_checks/**
+    - .github/workflows/fips/**
   schedule:
     - cron: '0 0,8,16 * * *'
 
