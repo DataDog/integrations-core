@@ -311,7 +311,6 @@ class QueryActivity(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
-    sample_recently_active_idle_sessions: Optional[bool] = None
 
 
 class QueryMetrics(BaseModel):
