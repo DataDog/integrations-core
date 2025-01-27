@@ -419,11 +419,11 @@ instances:
         #
         # collection_interval: 10
 
-        ## @param sample_recently_active_idle_sessions - boolean - optional - default: true
+        ## @param sample_recently_active_idle_sessions - boolean - optional - default: false
         ## This option enables the sampling of idle sessions that were active since the last collection.
         ## Recommended for APM customers to boost the APM/DBM correlation.
         #
-        # sample_recently_active_idle_sessions: true
+        # sample_recently_active_idle_sessions: false
 
     ## @param stored_procedure_characters_limit - integer - optional - default: 500
     ## Limit the number of characters of the text of a stored procedure that is collected.

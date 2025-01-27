@@ -615,7 +615,7 @@ files:
             Recommended for APM customers to boost the APM/DBM correlation.
           value:
             type: boolean
-            example: true
+            example: false
 
     - name: stored_procedure_characters_limit
       description: |
