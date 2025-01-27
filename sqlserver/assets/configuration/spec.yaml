@@ -846,6 +846,9 @@ files:
       hidden: true
       description: |
         Configure the collection of raw query statements in query activity and execution plans.
+        Raw query statements and execution plans may contain sensitive information in query text.
+        Enabling this option will allow the collection and ingestion of raw query statements and
+        execution plans into Datadog. This option is disabled by default.
         Note: This option only applies when `dbm` is enabled.
       options:
         - name: enabled
