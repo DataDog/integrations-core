@@ -436,7 +436,7 @@
                     {
                         "id": 728443002117262,
                         "definition": {
-                            "title": "Average Calender Time To Resolve Incidents",
+                            "title": "Average Calendar Time To Resolve Incidents",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -688,7 +688,7 @@
                     {
                         "id": 2086178988033952,
                         "definition": {
-                            "title": "Incidents by Imapct",
+                            "title": "Incidents by Impact",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2136,7 +2136,7 @@
                     {
                         "id": 8679078934497815,
                         "definition": {
-                            "title": "Change Requests by Imapct",
+                            "title": "Change Requests by Impact",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3033,7 +3033,7 @@
                     {
                         "id": 7088626365343752,
                         "definition": {
-                            "title": "Tasks by Imapct",
+                            "title": "Tasks by Impact",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
