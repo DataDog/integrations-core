@@ -104,7 +104,9 @@ class SonarqubeCheck(AgentCheck):
         for measure in metric_data['component']['measures']:
             tags = ['{}:{}'.format(tag_name, component)]
             tags.extend(self._tags)
-            value = measure['value'] if 'value' in measure else measure['period']['value'] # fallback to period.value for metrics that start with 'new_'
+            value = (
+                measure['value'] if 'value' in measure else measure['period']['value']
+            )  # fallback to period.value for metrics that start with 'new_'
             self.gauge(available_metrics[measure['metric']], value, tags=tags)
 
     def discover_available_metrics(self):
@@ -308,7 +310,4 @@ class SonarqubeCheck(AgentCheck):
 
     @staticmethod
     def is_valid_metric(metric):
-        return (
-            not metric['hidden']
-            and metric['type'] in NUMERIC_TYPES
-        )
+        return not metric['hidden'] and metric['type'] in NUMERIC_TYPES
