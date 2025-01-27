@@ -137,7 +137,7 @@ class IndexUsageMetrics(BaseModel):
         frozen=True,
     )
     collection_interval: Optional[int] = Field(None, examples=[300])
-    enabled: Optional[bool] = Field(None, examples=[False])
+    enabled: Optional[bool] = Field(None, examples=[True])
     enabled_tempdb: Optional[bool] = Field(None, examples=[False])
 
 
