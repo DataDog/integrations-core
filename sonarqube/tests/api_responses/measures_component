@@ -146,6 +146,12 @@
 			"metric": "vulnerabilities",
 			"value": "0",
 			"bestValue": true
+		}, {
+			"metric": "new_vulnerabilities",
+			"period": {
+				"value": "0",
+				"bestValue": true
+			}
 		}]
 	}
 }
