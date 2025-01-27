@@ -20,7 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
+    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_INDEXES,
+    SQL_INDEXES_8_0_13,
     SQL_PARTITION,
     SQL_TABLES,
 )
@@ -205,14 +207,14 @@ class DatabasesData:
                     - indexes (list): A list of index dictionaries.
                         - index (dict): A dictionary representing an index.
                             - name (str): The name of the index.
-                            - collation (str): The collation of the index.
                             - cardinality (int): The cardinality of the index.
                             - index_type (str): The index method used.
                             - columns (list): A list of column dictionaries
                                 - column (dict): A dictionary representing a column.
                                     - name (str): The name of the column.
                                     - sub_part (int): The number of indexed characters if column is partially indexed.
-                                    - packed (str): How the index is packed.
+                                    - collation (str): The collation of the column.
+                                    - packed (str): How the index is packed. NONE if it is not.
                                     - nullable (bool): Whether the column is nullable.
                             - non_unique (bool): Whether the index can contain duplicates.
                             - expression (str): If index was built with a functional key part, the expression used.
@@ -339,23 +341,47 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES.format(table_names), params=db_name)
+        self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
+        query = SQL_INDEXES_8_0_13.format(table_names) if cursor.fetchone()["COUNT(*)"] > 0 else SQL_INDEXES.format(table_names)
+        self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
+        if not rows:
+            return
+        table_index_dict = defaultdict(lambda: defaultdict(lambda: {
+            "name": None,
+            "cardinality": 0,
+            "index_type": None,
+            "columns": [],
+            "non_unique": None,
+            "expression": None,
+        }))
         for row in rows:
-            print("ALLEN!!!")
-            print("row:", json.dumps(row, indent=4))
-            table_name = str(row.pop("table_name"))
+            table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
-            if "nullables" in row:
-                nullables_arr = row["nullables"].split(',')
-                nullables_converted = ""
-                for s in nullables_arr:
-                    if s.lower() == "yes":
-                        nullables_converted += "true,"
-                    else:
-                        nullables_converted += "false,"
-                row["nullables"] = nullables_converted[:-1]
-            table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
+            index_name = str(row["name"])
+            index_data = table_index_dict[table_name][index_name]
+
+            # Update index-level info
+            index_data["name"] = index_name
+            index_data["cardinality"] = int(row["cardinality"])
+            index_data["index_type"] = str(row["index_type"])
+            index_data["non_unique"] = bool(row["non_unique"])
+            index_data["expression"] = str(row["expression"]).strip().lower() if row["expression"] else None
+
+            # Add column info, if exists
+            if row["column_name"]:
+                column = {
+                    "name": row["column_name"],
+                    "sub_part": int(row["sub_part"]) if row["sub_part"] else None,
+                    "collation": str(row["collation"]) if row["collation"] else None,
+                    "packed": str(row["packed"]) if row["packed"] else None,
+                    "nullable": bool(row["nullable"].lower() == "yes"),
+                }
+                index_data["columns"].append(column)
+
+        for table_name, index_dict in table_index_dict.items():
+            table_list[table_name_to_table_index[table_name]]["indexes"] = list(index_dict.values())
+
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
@@ -411,5 +437,3 @@ class DatabasesData:
                 partition_data["subpartitions"].append(subpartition)
         for table_name, partitions_dict in table_partitions_dict.items():
             table_list[table_name_to_table_index[table_name]]["partitions"] = list(partitions_dict.values())
-        
-        print(json.dumps(partition_data, indent=4))

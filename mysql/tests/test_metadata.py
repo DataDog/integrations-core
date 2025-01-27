@@ -5,9 +5,11 @@
 import re
 from os import environ
 
+from packaging.version import parse as parse_version
 import pytest
 
 from datadog_checks.mysql import MySql
+from .common import MYSQL_VERSION_PARSED
 
 from . import common
 from .utils import deep_compare
@@ -159,18 +161,20 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "FK_RestaurantNameDistrict",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
                                 "name": "RestaurantName",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": True,
                             },
                             {
                                 "name": "District",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": True,
                             }
@@ -217,18 +221,20 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "UC_RestaurantNameDistrict",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
                                 "name": "RestaurantName",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": True,
                             },
                             {
                                 "name": "District",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": True,
                             }
@@ -259,7 +265,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
-                        "column_key": "",
+                        "column_key": "MUL",
                         "extra": "",
                     },
                     {
@@ -275,12 +281,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "PRIMARY",
-                        "collation": "A",
+                        "cardinality": 3,
                         "index_type": "BTREE",
                         "columns": [
                             {
                                 "name": "id",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": False,
                             }
@@ -290,38 +297,53 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "single_column_index",
-                        "collation": "A",
+                        "cardinality": 2,
                         "index_type": "BTREE",
+                        "columns": [
+                            {
+                                "name": "name",
+                                "sub_part": None,
+                                "collation": "A",
+                                "packed": None,
+                                "nullable": True,
+                            }
+                        ],
+                        "non_unique": True,
+                        "expression": None,
+                    },
+                    {
+                        "name": "two_columns_index",
+                        "index_type": "BTREE",
+                        "cardinality": 3,
                         "columns": [
                             {
                                 "name": "population",
                                 "sub_part": None,
-                                "packed": None,
-                                "nullable": False,
-                            }
-                        ],
-                        "non_unique": True,
-                    },
-                    {
-                        "name": "two_columns_index",
-                        "collation": "A",
-                        "index_type": "BTREE",
-                        "columns": [
-                            {
-                                "name": "id",
-                                "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": False,
                             },
                             {
                                 "name": "name",
                                 "sub_part": None,
+                                "collation": ('D' if MYSQL_VERSION_PARSED >= parse_version('8.0.1') else 'A'),
                                 "packed": None,
                                 "nullable": True,
                             }
                         ],
                         "non_unique": True,
+                        "expression": None,
                     },
+                    *([
+                        {
+                            "name": "functional_key_part_index",
+                            "index_type": "BTREE",
+                            "cardinality": 3,
+                            "columns": [],
+                            "non_unique": True,
+                            "expression": "(`population` + 1)",
+                        } 
+                    ] if MYSQL_VERSION_PARSED >= parse_version('8.0.13') else [])
                 ],
             },
             {
@@ -403,12 +425,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "PRIMARY",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
                                 "name": "id",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": False,
                             }
@@ -457,12 +480,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "FK_CityId",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
                                 "name": "city_id",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": True,
                             },
@@ -507,17 +531,18 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "thingsindex",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
                                 "name": "name",
                                 "sub_part": None,
+                                "collation": "A",
                                 "packed": None,
                                 "nullable": True,
                             },
                         ],
-                        "non_unique": "0",
+                        "non_unique": False,
                         "expression": None,
                     }
                 ],
@@ -640,15 +665,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     }
 
     dbm_instance['schemas_collection'] = {"enabled": True}
-    import os
-    # Get the value of an environment variable
-    value = os.environ.get('MYSQL_VERSION')
-
-    # Check if the environment variable exists
-    if value:
-        print(f"ALLEN!!! The value of VARIABLE_NAME is: {value}")
-    else:
-        print("ALLEN!!! VARIABLE_NAME is not set.")
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
 

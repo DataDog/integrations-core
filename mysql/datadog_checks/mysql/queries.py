@@ -115,6 +115,14 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
+SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
+    SELECT COUNT(*) 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = 'information_schema' 
+      AND TABLE_NAME = 'STATISTICS' 
+      AND COLUMN_NAME = 'EXPRESSION';
+"""
+
 SQL_INDEXES = """\
 SELECT
     table_name as `table_name`,
@@ -128,7 +136,25 @@ SELECT
     packed as `packed`,
     nullable as `nullable`,
     non_unique as `non_unique`,
-    IFNULL(expression, NULL) as `expression`
+    NULL as `expression`
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_schema = %s AND table_name IN ({});
+"""
+
+SQL_INDEXES_8_0_13 = """\
+SELECT
+    table_name as `table_name`,
+    index_name as `name`,
+    collation as `collation`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    seq_in_index as `seq_in_index`,
+	column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    expression as `expression`
 FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_schema = %s AND table_name IN ({});
 """
