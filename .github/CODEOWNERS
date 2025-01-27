@@ -155,6 +155,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
 /vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/spinnaker/                             @DataDog/platform-integrations @DataDog/agent-integrations
+/spinnaker/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/spinnaker/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # System checks
 /disk/                                    @DataDog/agent-integrations @DataDog/windows-agent

@@ -523,6 +523,8 @@ integration/sophos_central_cloud:
 - sophos_central_cloud/**/*
 integration/spark:
 - spark/**/*
+integration/spinnaker:
+- spinnaker/**/*
 integration/sqlserver:
 - sqlserver/**/*
 integration/squid:

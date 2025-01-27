@@ -586,6 +586,10 @@ coverage:
         target: 75
         flags:
         - spark
+      Spinnaker:
+        target: 75
+        flags:
+        - spinnaker
       Squid:
         target: 75
         flags:
@@ -1497,6 +1501,11 @@ flags:
     paths:
     - spark/datadog_checks/spark
     - spark/tests
+  spinnaker:
+    carryforward: true
+    paths:
+    - spinnaker/datadog_checks/spinnaker
+    - spinnaker/tests
   sqlserver:
     carryforward: true
     paths:
