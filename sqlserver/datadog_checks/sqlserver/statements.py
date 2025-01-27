@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import binascii
+import copy
 import math
 import time
 
@@ -233,6 +234,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._statement_metrics_query = None
         self._last_stats_query_time = None
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
+
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -585,7 +588,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
-                yield {
+                obfuscated_plan_event = {
                     "host": self._check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
@@ -623,3 +626,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
+                yield obfuscated_plan_event
+                if self._collect_raw_query_statement:
+                    raw_plan_event = copy.deepcopy(obfuscated_plan_event)
+                    raw_plan_event["dbm_type"] = "rqp"  # raw query plan
+                    raw_plan_event["db"]["plan"]["definition"] = raw_plan
+                    yield raw_plan_event
