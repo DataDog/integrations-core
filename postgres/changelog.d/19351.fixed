@@ -1,1 +1,0 @@
-Resolved an issue in `QUERY_PG_CLASS` where multiple locks on the same table in `PG_LOCKS` caused duplicate rows, leading to inaccurate rate metric like `postgresql.rows_inserted`, `postgresql.rows_updated`, or `postgresql.rows_deleted`.
