@@ -1,10 +1,6 @@
 services:
   agent:
-    build:
-      context: agent
-      dockerfile: Dockerfile-linux
-      args:
-        - BASE_IMAGE=$AGENT_IMAGE
+    image: $AGENT_IMAGE
     pid: host
     environment:
       - DD_API_KEY=$DD_API_KEY
@@ -13,6 +9,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+      - ./agent/conf.d/:/etc/datadog-agent/conf.d/
+      - ./agent/checks.d/:/etc/datadog-agent/checks.d/
     healthcheck:
       test: ["CMD", "agent", "status"]
       interval: 5s

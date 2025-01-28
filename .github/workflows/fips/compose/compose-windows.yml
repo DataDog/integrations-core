@@ -1,16 +1,14 @@
 services:
   agent:
-    build:
-      context: agent
-      dockerfile: Dockerfile-windows
-      args:
-        - BASE_IMAGE=$AGENT_IMAGE
+    image: $AGENT_IMAGE
     pid: host
     environment:
       - DD_API_KEY=$DD_API_KEY
       - DD_SITE=datad0g.com
     volumes:
       - \\.\pipe\docker_engine:\\.\pipe\docker_engine
+      - "./agent/conf.d:C:/ProgramData/Datadog/conf.d"
+      - "./agent/checks.d:C:/ProgramData/Datadog/checks.d"
     healthcheck:
       test: ["CMD", "agent", "status"]
       interval: 5s
