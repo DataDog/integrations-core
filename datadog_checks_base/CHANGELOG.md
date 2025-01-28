@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 37.5.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+* Add tls_ciphers option for http ([#19469](https://github.com/DataDog/integrations-core/pull/19469))
+
+***Fixed***:
+
+* Handle unexpected values for `expires_in` in OAuth Access response ([#19371](https://github.com/DataDog/integrations-core/pull/19371))
+* Drop unused importlib-metadata dependency. ([#19382](https://github.com/DataDog/integrations-core/pull/19382))
+
 ## 37.4.0 / 2025-01-16
 
 ***Added***:
