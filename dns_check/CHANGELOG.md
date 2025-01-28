@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 5.0.1 / 2024-12-26
+
+***Fixed***:
+
+* Move timing to be more precise with calculating response times ([#19276](https://github.com/DataDog/integrations-core/pull/19276))
+
 ## 5.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

@@ -126,7 +126,6 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            tags:
              dag_id: "$1"
              task_id: "$2"
-         - match: "airflow.pool.open_slots.*"
          - match: "airflow.dagrun.*.first_task_scheduling_delay"
            name: "airflow.dagrun.first_task_scheduling_delay"
            tags:

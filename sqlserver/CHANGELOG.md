@@ -2,7 +2,30 @@
 
 <!-- towncrier release notes start -->
 
-## 20.2.0 / 2024-11-28
+## 21.1.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+***Fixed***:
+
+* Fix KeyError in SQL Server schema collection caused by case-insensitive database name mismatches. ([#19384](https://github.com/DataDog/integrations-core/pull/19384))
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 21.0.0 / 2024-12-26
+
+***Changed***:
+
+* Fall back to ``system_health/event_file`` when querying deadlocks if `datadog` XE session wasn't created. ([#19189](https://github.com/DataDog/integrations-core/pull/19189))
+
+***Added***:
+
+* Update configuration structure and allow configuration of all database metrics ([#19111](https://github.com/DataDog/integrations-core/pull/19111))
+* Send schema name as part of index usage metrics ([#19266](https://github.com/DataDog/integrations-core/pull/19266))
+* Add schema tag to db_fragmentation metrics for sqlserver ([#19277](https://github.com/DataDog/integrations-core/pull/19277))
+
+## 20.2.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 
@@ -24,7 +47,7 @@
 * Fix duplicate deadlock events ([#19139](https://github.com/DataDog/integrations-core/pull/19139))
 * Fix poor query signature correlation for deadlocks. ([#19142](https://github.com/DataDog/integrations-core/pull/19142))
 
-## 20.1.1 / 2024-11-25
+## 20.1.1 / 2024-11-25 / Agent 7.60.0
 
 ***Fixed***:
 

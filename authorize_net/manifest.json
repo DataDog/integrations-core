@@ -1,0 +1,49 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a86b9a64-3785-471a-9563-a40e6f3fb86e",
+  "app_id": "authorize-net",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Settled and Unsettled Transactions of Authorize.Net",
+    "title": "Authorize.Net",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 28965663,
+      "source_type_name": "Authorize.Net",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "authorize_net.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "logs": {
+      "source": "authorize_net"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

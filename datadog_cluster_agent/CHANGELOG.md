@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 5.1.0 / 2024-10-31
+## 5.4.0 / 2025-01-25
+
+***Added***:
+
+* Add telemetry for checks that are not scheduled. ([#19306](https://github.com/DataDog/integrations-core/pull/19306))
+
+## 5.3.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 5.2.0 / 2024-12-26
+
+***Added***:
+
+* add telemetry for local load store in dca ([#19229](https://github.com/DataDog/integrations-core/pull/19229))
+
+## 5.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:
 
