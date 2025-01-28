@@ -1268,9 +1268,7 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(
-        host=HOST, dbname='datadog_test', user='bob', password='bob', autocommit=True, cursor_factory=ClientCursor
-    )
+    conn = psycopg2.connect(host=HOST, dbname='datadog_test', user='bob', password='bob')
     query = "BEGIN TRANSACTION; SELECT * FROM persons WHERE city like 'hello';"
     try:
         conn.cursor().execute(query)
@@ -1290,7 +1288,7 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
         assert event['ddsource'] == "postgres"
         assert event['dbm_type'] == "rqt"
         assert event['ddagentversion'] == datadog_agent.get_version()
-        assert sorted(event['ddtags']) == sorted(expected_tags)
+        assert sorted(event['ddtags'].split(',')) == sorted(expected_tags)
         assert event['db']['raw_query_signature'], "missing raw query signature"
     finally:
         conn.close()
