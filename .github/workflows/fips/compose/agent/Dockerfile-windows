@@ -4,5 +4,5 @@ FROM ${BASE_IMAGE}
 
 RUN echo "Using base image: ${BASE_IMAGE}"
 
-ADD conf.d/* %%ProgramData%%/Datadog/conf.d/
-ADD checks.d/* %%ProgramData%%/Datadog/checks.d/
+ADD conf.d/* %%ProgramData%%\Datadog\conf.d\
+ADD checks.d/* %%ProgramData%%\Datadog\checks.d\
