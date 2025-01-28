@@ -605,7 +605,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "rqt",
-            "ddtags": self._dbtags(row["datname"]),
+            "ddtags": ",".join(self._dbtags(row["datname"])),
             'service': self._config.service,
             "db": {
                 "instance": row['datname'],
