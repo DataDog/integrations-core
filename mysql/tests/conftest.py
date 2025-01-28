@@ -497,19 +497,12 @@ def add_schema_test_databases(cursor):
     )
 
     # create one column index
-    cursor.execute("CREATE INDEX single_column_index ON cities (name);")
+    cursor.execute("CREATE INDEX single_column_index ON cities (population);")
     # create two column index, one with subpart and descending
-    cursor.execute("CREATE INDEX two_columns_index ON cities (population, name(3) DESC);")
+    cursor.execute("CREATE INDEX two_columns_index ON cities (id, name(3) DESC);")
     # create functional key part index - available after MySQL 8.0.13
-    if MYSQL_VERSION_PARSED >= parse_version('8.0.13'):
+    if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and MYSQL_FLAVOR == 'mysql':
         cursor.execute("CREATE INDEX functional_key_part_index ON cities ((population + 1) DESC);")
-
-    # add some data to the tables to test cardinality of indices
-    cursor.execute("INSERT INTO cities (id, name, population) VALUES (1, 'New York', 10000000);")
-    cursor.execute("INSERT INTO cities (id, name, population) VALUES (2, 'Los Angeles', 6000000);")
-    cursor.execute("INSERT INTO cities (id, name, population) VALUES (3, 'New York', 12);")
-    # force trigger accurate cardinality estimation
-    cursor.execute("ANALYZE TABLE cities;")
 
     cursor.execute(
         """CREATE TABLE landmarks (

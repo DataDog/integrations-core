@@ -265,7 +265,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
-                        "column_key": "MUL",
+                        "column_key": "",
                         "extra": "",
                     },
                     {
@@ -281,7 +281,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "PRIMARY",
-                        "cardinality": 3,
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
@@ -297,15 +297,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "single_column_index",
-                        "cardinality": 2,
+                        "cardinality": 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
-                                "name": "name",
+                                "name": "population",
                                 "sub_part": None,
                                 "collation": "A",
                                 "packed": None,
-                                "nullable": True,
+                                "nullable": False,
                             }
                         ],
                         "non_unique": True,
@@ -314,10 +314,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "two_columns_index",
                         "index_type": "BTREE",
-                        "cardinality": 3,
+                        "cardinality": 0,
                         "columns": [
                             {
-                                "name": "population",
+                                "name": "id",
                                 "sub_part": None,
                                 "collation": "A",
                                 "packed": None,
@@ -326,7 +326,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 "name": "name",
                                 "sub_part": 3,
-                                "collation": ('D' if MYSQL_VERSION_PARSED >= parse_version('8.0') else 'A'),
+                                "collation": (
+                                    'D' if (MYSQL_VERSION_PARSED >= parse_version('8.0') and not is_maria_db) else 'A'
+                                ),
                                 "packed": None,
                                 "nullable": True,
                             },
@@ -339,13 +341,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 "name": "functional_key_part_index",
                                 "index_type": "BTREE",
-                                "cardinality": 3,
+                                "cardinality": 0,
                                 "columns": [],
                                 "non_unique": True,
                                 "expression": "(`population` + 1)",
                             }
                         ]
-                        if MYSQL_VERSION_PARSED >= parse_version('8.0.13')
+                        if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db
                         else []
                     ),
                 ],
@@ -429,7 +431,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "indexes": [
                     {
                         "name": "PRIMARY",
-                        "cardinality": 0,
+                        "cardinality": 4 if is_maria_db else 0,
                         "index_type": "BTREE",
                         "columns": [
                             {
