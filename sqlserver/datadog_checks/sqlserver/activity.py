@@ -9,7 +9,12 @@ import time
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
@@ -70,6 +75,7 @@ SELECT
     sess.host_name as host_name,
     sess.program_name as program_name,
     sess.is_user_process as is_user_process,
+    {input_buffer_columns}
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -77,6 +83,7 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
+    {input_buffer_join}
 WHERE
     sess.session_id != @@spid AND
     sess.status != 'sleeping'
@@ -84,11 +91,11 @@ WHERE
 ).strip()
 
 # Turns out sys.dm_exec_requests does not contain idle sessions.
-# Inner joining dm_exec_sessions with dm_exec_requests will not return any idle sessions.
-# This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle sessions.
+# Inner joining dm_exec_sessions with dm_exec_requests will not return any idle blocking sessions.
+# This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle blocking sessions.
 # The query below is used for idle sessions and does not join with dm_exec_requests.
 # The last query execution on the connection is fetched from dm_exec_connections.most_recent_sql_handle.
-IDLE_SESSIONS_QUERY = re.sub(
+IDLE_BLOCKING_SESSIONS_QUERY = re.sub(
     r'\s+',
     ' ',
     """\
@@ -107,24 +114,16 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
-    sess.is_user_process as is_user_process,
-    sess.context_info as context_info
+    sess.is_user_process as is_user_process
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
-WHERE
+WHERE sess.status = 'sleeping'
+    AND sess.session_id IN ({blocking_session_ids})
+    AND c.session_id IN ({blocking_session_ids})
 """,
 ).strip()
-
-IDLE_BLOCKERS_FILTER = """(sess.status = 'sleeping'
-    AND sess.session_id IN ({blocking_session_ids})
-    AND c.session_id IN ({blocking_session_ids}))"""
-
-IDLE_RECENTLY_ACTIVE_FILTER = (
-    "(sess.status = 'sleeping' AND sess.last_request_start_time > DATEADD(SECOND, - ?, GETDATE()))"
-)
-
 
 # enumeration of the columns we collect
 # from sys.dm_exec_requests
@@ -152,6 +151,12 @@ DM_EXEC_REQUESTS_COLS = [
     "query_plan_hash",
     "context_info",
 ]
+
+INPUT_BUFFER_COLUMNS = [
+    "input_buffer.event_info as raw_statement",
+]
+
+INPUT_BUFFER_JOIN = "OUTER APPLY sys.dm_exec_input_buffer(req.session_id, req.request_id) input_buffer"
 
 
 def _hash_to_hex(hash) -> str:
@@ -190,10 +195,12 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
-        self._sample_recently_active_idle_sessions = is_affirmative(
-            self._config.activity_config.get('sample_recently_active_idle_sessions', False)
+
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+        self._raw_statement_text_cache = RateLimitingTTLCache(
+            maxsize=self._config.collect_raw_query_statement["cache_max_size"],
+            ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
-        self._time_since_last_activity_event = 0
 
     def _close_db_conn(self):
         pass
@@ -212,45 +219,28 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("loaded sql server current connections len(rows)=%s", len(rows))
         return rows
 
-    def _is_sample_idle_recently_active_sessions(self) -> bool:
-        return self._sample_recently_active_idle_sessions and self._time_since_last_activity_event
-
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_idle_sessions(self, cursor, blocking_session_ids):
-        query = IDLE_SESSIONS_QUERY.format(
+    def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
+        # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
+        query = IDLE_BLOCKING_SESSIONS_QUERY.format(
+            blocking_session_ids=",".join(map(str, blocking_session_ids)),
             proc_char_limit=self._config.stored_procedure_characters_limit,
         )
-        idle_filter = None
-
-        # a stateful closure that appends filters to the query
-        def _append_filter(filter: str) -> str:
-            if idle_filter:
-                return f"{idle_filter} OR {filter}"
-            return filter
-
-        if blocking_session_ids:
-            idle_filter = _append_filter(
-                IDLE_BLOCKERS_FILTER.format(blocking_session_ids=",".join(map(str, blocking_session_ids)))
-            )
-        if self._is_sample_idle_recently_active_sessions():
-            idle_filter = _append_filter(IDLE_RECENTLY_ACTIVE_FILTER)
-        query += idle_filter
         self.log.debug("Running query [%s]", query)
-        if self._is_sample_idle_recently_active_sessions():
-            cursor.execute(query, (int(time.time() - self._time_since_last_activity_event),))
-        else:
-            cursor.execute(query)
+        cursor.execute(query)
         columns = [i[0] for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_activity(self, cursor, exec_request_columns):
+    def _get_activity(self, cursor, exec_request_columns, input_buffer_columns, input_buffer_join):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
             proc_char_limit=self._config.stored_procedure_characters_limit,
             tail_text_size=TAIL_TEXT_SIZE,
+            input_buffer_columns=input_buffer_columns,
+            input_buffer_join=input_buffer_join,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -263,9 +253,9 @@ class SqlserverActivity(DBMAsyncJob):
         blocking_session_ids = {r['blocking_session_id'] for r in rows if r['blocking_session_id']}
         # if there are blocking sessions and some of the session(s) are not captured in the activity query
         idle_blocking_session_ids = blocking_session_ids - session_ids
-        if idle_blocking_session_ids or self._is_sample_idle_recently_active_sessions():
-            idle_sessions = self._get_idle_sessions(cursor, idle_blocking_session_ids)
-            rows.extend(idle_sessions)
+        if idle_blocking_session_ids:
+            idle_blocking_sessions = self._get_idle_blocking_sessions(cursor, idle_blocking_session_ids)
+            rows.extend(idle_blocking_sessions)
         return rows
 
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
@@ -293,12 +283,68 @@ class SqlserverActivity(DBMAsyncJob):
             normalized_rows.append(row)
         return normalized_rows
 
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _rows_to_raw_statement_events(self, rows):
+        for row in rows:
+            query_signature = row.get('query_signature')
+            if not query_signature:
+                continue
+
+            raw_statement = row.pop("raw_statement", None)
+            if not raw_statement:
+                self.log.debug("No raw statement found for query_signature=%s", query_signature)
+                continue
+
+            raw_query_signature = compute_sql_signature(raw_statement)
+            row["raw_query_signature"] = raw_query_signature
+            raw_statement_key = (query_signature, raw_query_signature)
+
+            if not self._raw_statement_text_cache.acquire(raw_statement_key):
+                continue
+
+            yield {
+                "timestamp": time.time() * 1000,
+                "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
+                "ddsource": "sqlserver",
+                "dbm_type": "rqt",
+                "ddtags": ",".join(self.tags),
+                'service': self._config.service,
+                "db": {
+                    "instance": row.get('database_name', None),
+                    "query_signature": query_signature,
+                    "raw_query_signature": raw_query_signature,
+                    "statement": raw_statement,
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                        "comments": row.get('dd_comments', None),
+                    },
+                    "procedure_signature": row.get("procedure_signature"),
+                    "procedure_name": row.get("procedure_name"),
+                },
+                "sqlserver": {
+                    "query_hash": row.get("query_hash"),
+                    "query_plan_hash": row.get("query_plan_hash"),
+                },
+            }
+
     def _get_exec_requests_cols_cached(self, cursor, expected_cols):
         if self._exec_requests_cols_cached:
             return self._exec_requests_cols_cached
 
         self._exec_requests_cols_cached = self._get_available_requests_columns(cursor, expected_cols)
         return self._exec_requests_cols_cached
+
+    def _get_input_buffer_columns_and_join(self):
+        input_buffer_columns = ""
+        input_buffer_join = ""
+
+        if self._collect_raw_query_statement:
+            input_buffer_columns = ", ".join(INPUT_BUFFER_COLUMNS) + ","
+            input_buffer_join = INPUT_BUFFER_JOIN
+
+        return input_buffer_columns, input_buffer_join
 
     def _get_available_requests_columns(self, cursor, all_expected_columns):
         cursor.execute("select TOP 0 * from sys.dm_exec_requests")
@@ -387,7 +433,6 @@ class SqlserverActivity(DBMAsyncJob):
         return len(str(row))
 
     def _create_activity_event(self, active_sessions, active_connections):
-        self._time_since_last_activity_event = time.time()
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -408,7 +453,7 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_activity(self):
         """
-        Collects all current activity for the SQLServer instance.
+        Collects all current activity for the SQLServer intance.
         :return:
         """
 
@@ -418,8 +463,14 @@ class SqlserverActivity(DBMAsyncJob):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
-                rows = self._get_activity(cursor, request_cols)
+                input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join()
+                rows = self._get_activity(cursor, request_cols, input_buffer_columns, input_buffer_join)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
+                if self._collect_raw_query_statement:
+                    for raw_statement_event in self._rows_to_raw_statement_events(normalized_rows):
+                        self._check.database_monitoring_query_sample(
+                            json.dumps(raw_statement_event, default=default_json_event_encoding)
+                        )
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)

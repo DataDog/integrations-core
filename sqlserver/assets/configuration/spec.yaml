@@ -270,7 +270,7 @@ files:
             `database_autodiscovery` or set `database`.
 
             Set `index_usage_metrics.enabled` to true to enable collection of user table index usage statistics.
-            Defaults to false.
+            Defaults to true.
 
             Use `index_usage_metrics.enabled_tempdb` to enable collection of user table index usage statistics in tempdb
             database from the `sys.dm_db_index_usage_stats` DMV.
@@ -287,7 +287,7 @@ files:
             properties:
             - name: enabled
               type: boolean
-              example: false
+              example: true
             - name: enabled_tempdb
               type: boolean
               example: false
@@ -609,14 +609,6 @@ files:
           value:
             type: number
             example: 10
-        - name: sample_recently_active_idle_sessions
-          description: |
-            This option enables the sampling of idle sessions that were active since the last collection.
-            Recommended for APM customers to boost the APM/DBM correlation.
-          value:
-            type: boolean
-            example: true
-
     - name: stored_procedure_characters_limit
       description: |
         Limit the number of characters of the text of a stored procedure that is collected.
@@ -846,6 +838,22 @@ files:
         - name: keep_identifier_quotation
           description: |
             Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+    - name: collect_raw_query_statement
+      hidden: true
+      description: |
+        Configure the collection of raw query statements in query activity and execution plans.
+        Raw query statements and execution plans may contain sensitive information in query text.
+        Enabling this option will allow the collection and ingestion of raw query statements and
+        execution plans into Datadog. This option is disabled by default.
+        Note: This option only applies when `dbm` is enabled.
+      options:
+        - name: enabled
+          description: |
+            Set to `true` to collect the raw query statements.
           value:
             type: boolean
             example: false

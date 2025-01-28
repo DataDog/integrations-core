@@ -8,9 +8,10 @@ import time
 from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import psycopg
+import psycopg2
 from cachetools import TTLCache
-from psycopg.rows import dict_row
+
+from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
 try:
     import datadog_agent
@@ -165,7 +166,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=(psycopg.errors.DatabaseError,),
+            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
         )
@@ -243,7 +244,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
         with self._check._get_main_db() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -277,7 +278,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         with self._check._get_main_db() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -296,7 +297,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_main_db() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 try:
                     cursor.execute(
                         "select * from {pg_stat_activity_view} LIMIT 0".format(
@@ -311,12 +312,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                             "missing the following expected columns from pg_stat_activity: %s", missing_columns
                         )
                     self._log.debug("found available pg_stat_activity columns: %s", available_columns)
-                except psycopg.errors.InvalidSchemaName as e:
+                except psycopg2.errors.InvalidSchemaName as e:
                     self._log.warning(
                         "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
                     )
                     return None
-                except psycopg.DatabaseError as e:
+                except psycopg2.DatabaseError as e:
                     # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
                     # incorrect definition)
                     self._check.record_warning(
@@ -346,7 +347,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             total_count += 1
             if row.get('backend_type') is not None:
                 try:
-                    row['backend_type'] = row['backend_type'].decode('utf-8')
+                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
                 except UnicodeDecodeError:
                     row['backend_type'] = 'unknown'
             if (not row['datname'] or not row['query']) and row.get(
@@ -640,12 +641,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
             self.db_pool.get_connection(dbname, self._conn_ttl_ms)
-        except psycopg.OperationalError as e:
+        except psycopg2.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.connection_error, e
-        except psycopg.DatabaseError as e:
+        except psycopg2.DatabaseError as e:
             self._log.warning(
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
@@ -653,14 +654,14 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
-        except psycopg.errors.InvalidSchemaName as e:
+        except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
-        except psycopg.errors.DatatypeMismatch as e:
+        except psycopg2.errors.DatatypeMismatch as e:
             self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
-        except psycopg.DatabaseError as e:
+        except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._emit_run_explain_error(dbname, DBExplainError.failed_function, e)
@@ -704,7 +705,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
@@ -779,7 +780,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement
                     )
-                e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
+                e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
                     " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
@@ -790,18 +791,18 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
                 return error_response
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg.errors.UndefinedTable as e:
+        except psycopg2.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
-        except psycopg.errors.DatabaseError as e:
+        except psycopg2.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
             self._emit_run_explain_error(dbname, DBExplainError.database_error, e)
-            if isinstance(e, psycopg.errors.ProgrammingError) and not isinstance(
-                e, psycopg.errors.InsufficientPrivilege
+            if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
+                e, psycopg2.errors.InsufficientPrivilege
             ):
                 # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
                 # we don't want to cache things like permission errors for a very long time because they can be fixed

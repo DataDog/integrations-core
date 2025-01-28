@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.3.0 / 2025-01-25
+
+***Added***:
+
+* Add coverage for vLLM metrics prefixed with `ray_vllm` ([#19358](https://github.com/DataDog/integrations-core/pull/19358))
+
 ## 2.2.0 / 2025-01-16
 
 ***Added***:
