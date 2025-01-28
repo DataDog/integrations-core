@@ -27,7 +27,7 @@ instances:
 
     # The endpoint exposing Supabase customer metrics
     #
-  - priviledged_metrics_endpoint:  https://<project-ref>.supabase.co/customer/v1/privileged/metrics
+  - privileged_metrics_endpoint:  https://<project-ref>.supabase.co/customer/v1/privileged/metrics
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
