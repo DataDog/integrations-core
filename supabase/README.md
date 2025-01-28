@@ -69,7 +69,7 @@ instances:
     password: <UNIQUEPASSWORD>
     
     ## @param dbname - string - optional - default: postgres
-    ## The name of the PostgresSQL database to monitor.
+    ## The name of the PostgreSQL database to monitor.
     ## Note: If omitted, the default system Postgres database is queried.
     #
     dbname: <DATABASE>
