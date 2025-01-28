@@ -85,6 +85,9 @@ mmh3 = ['CC0-1.0']
 paramiko = ['LGPL-2.1-only']
 # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
 psycopg = ['LGPL-3.0-only']
+# https://github.com/psycopg/psycopg2/blob/master/LICENSE
+# https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
+psycopg2-binary = ['LGPL-3.0-only', 'BSD-3-Clause']
 # https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
 pycryptodomex = ['Unlicense', 'BSD-2-Clause']
 # https://github.com/mongodb/mongo-python-driver/blob/master/LICENSE
@@ -115,6 +118,7 @@ lxml = 'https://github.com/lxml/lxml'
 packaging = 'https://github.com/pypa/packaging'
 paramiko = 'https://github.com/paramiko/paramiko'
 protobuf = 'https://github.com/protocolbuffers/protobuf'
+psycopg2-binary = 'https://github.com/psycopg/psycopg2'
 pycryptodomex = 'https://github.com/Legrandin/pycryptodome'
 redis = 'https://github.com/redis/redis-py'
 requests = 'https://github.com/psf/requests'
@@ -166,6 +170,9 @@ exclude = [
     'aerospike',  # v8+ breaks agent build.
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
+    # We're not ready to switch to v3 of the postgres library, see:
+    # https://github.com/DataDog/integrations-core/pull/15859
+    'psycopg2-binary',
     'psutil',
     'pymongo[srv]', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
 ]
