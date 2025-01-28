@@ -10,9 +10,7 @@ services:
       - DD_API_KEY=$DD_API_KEY
       - DD_SITE=datad0g.com
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /proc/:/host/proc/:ro
-      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+      - \\.\pipe\docker_engine:\\.\pipe\docker_engine
     healthcheck:
       test: ["CMD", "agent", "status"]
       interval: 5s
@@ -22,7 +20,7 @@ services:
     build:
       context: windows
       dockerfile: Dockerfile
-    command: ["./start-server.ps1", "ECDHE-RSA-AES128-SHA256"]
+    command: ["powershell.exe", "-File", "C:/app/start-server.ps1", "ECDHE-RSA-AES128-SHA256"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
@@ -33,7 +31,7 @@ services:
     build:
       context: windows
       dockerfile: Dockerfile
-    command: ["./start-server.ps1", "ECDHE-RSA-CHACHA20-POLY1305"]
+    command: ["powershell.exe", "-File", "C:/app/start-server.ps1", "ECDHE-RSA-CHACHA20-POLY1305"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s

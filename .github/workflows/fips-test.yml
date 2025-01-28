@@ -51,7 +51,7 @@ jobs:
     - name: Set up Windows containers
       if: matrix.platform == 'windows'
       env:
-        AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'mcr.microsoft.com/windows/servercore:ltsc2022' || 'mcr.microsoft.com/windows/servercore:ltsc2022' }}"
+        AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'datadog/agent-dev:master-py3-win-servercore' || 'datadog/agent-dev:master-py3-win-servercore' }}"
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         docker compose -f .github/workflows/fips/compose/compose-windows.yml up -d
