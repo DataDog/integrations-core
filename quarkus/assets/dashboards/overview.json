@@ -20,12 +20,31 @@
     "widgets": [
         {
             "definition": {
-                "banner_img": "/static/images/logos/quarkus_small.svg",
+                "background_color": "vivid_pink",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "",
+                "title": "Overview",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "sizing": "contain",
+                            "type": "image",
+                            "url": "/static/images/logos/quarkus_small.svg",
+                            "url_dark_theme": "/static/images/logos/quarkus_reversed_small.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 6355826195938372,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "background_color": "white",
@@ -44,7 +63,7 @@
                             "height": 3,
                             "width": 3,
                             "x": 0,
-                            "y": 0
+                            "y": 2
                         }
                     },
                     {
@@ -65,7 +84,7 @@
                             "height": 3,
                             "width": 3,
                             "x": 3,
-                            "y": 0
+                            "y": 2
                         }
                     }
                 ]
@@ -523,7 +542,7 @@
                                     }
                                 }
                             ],
-                            "time": {},
+                            "show_legend": false,
                             "title": "Ratio in Use",
                             "title_align": "left",
                             "title_size": "16",
@@ -620,7 +639,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Idle",
                             "title_align": "left",
                             "title_size": "16",
@@ -707,7 +725,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Executor Pending Tasks",
                             "title_align": "left",
                             "title_size": "16",
@@ -756,7 +773,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Allocator Memory Usage",
                             "title_align": "left",
                             "title_size": "16",
