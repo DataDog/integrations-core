@@ -1,0 +1,42 @@
+services:
+  agent:
+    build:
+      context: agent
+      dockerfile: Dockerfile
+      args:
+        - BASE_IMAGE=$AGENT_IMAGE
+    pid: host
+    environment:
+      - DD_API_KEY=$DD_API_KEY
+      - DD_SITE=datad0g.com
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+    healthcheck:
+      test: ["CMD", "agent", "status"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+  http-server-fips:
+    build:
+      context: linux
+      dockerfile: Dockerfile
+    command: ["./start-server.sh", "ECDHE-RSA-AES128-SHA256"]
+    healthcheck:
+      test: "curl -f localhost:443"
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  http-server:
+    build:
+      context: linux
+      dockerfile: Dockerfile
+    command: ["./start-server.sh", "ECDHE-RSA-CHACHA20-POLY1305"]
+    healthcheck:
+      test: "curl -f localhost:443"
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3

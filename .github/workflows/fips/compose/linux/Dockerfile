@@ -1,5 +1,4 @@
-ARG BASE_IMAGE
-FROM ${BASE_IMAGE}
+FROM alpine:3.14
 
 COPY start-server.sh .
 COPY ca.* ./

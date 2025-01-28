@@ -20,11 +20,9 @@ services:
       retries: 3
   http-server-fips:
     build:
-      context: server
+      context: windows
       dockerfile: Dockerfile
-      args:
-        - BASE_IMAGE=$SERVER_IMAGE
-    command: ["./start-server.sh", "ECDHE-RSA-AES128-SHA256"]
+    command: ["./start-server.ps1", "ECDHE-RSA-AES128-SHA256"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
@@ -33,11 +31,9 @@ services:
       retries: 3
   http-server:
     build:
-      context: server
+      context: windows
       dockerfile: Dockerfile
-      args:
-        - BASE_IMAGE=$SERVER_IMAGE
-    command: ["./start-server.sh", "ECDHE-RSA-CHACHA20-POLY1305"]
+    command: ["./start-server.ps1", "ECDHE-RSA-CHACHA20-POLY1305"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
