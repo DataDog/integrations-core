@@ -138,7 +138,6 @@ class MySQLMetadata(DBMAsyncJob):
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
-            self._log.debug("Allen!!!: Collecting databases data")
             self._last_databases_collection_time = time.time()
             try:
                 self._databases_data._collect_databases_data(self._tags)
