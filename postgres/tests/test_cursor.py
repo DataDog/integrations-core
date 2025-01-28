@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+
 from .utils import _get_superconn
 
 
@@ -14,7 +16,8 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
     check = integration_check(pg_instance)
 
     with check.db() as conn:
-        with conn.cursor() as cursor:
+        # verify CommenterCursor and CommenterDictCursor prepend the query with /* service='datadog-agent' */
+        with conn.cursor(cursor_factory=CommenterCursor) as cursor:
             cursor.execute(
                 'SELECT generate_series(1, 10) AS number',
                 ignore_query_metric=ignore,
@@ -23,7 +26,7 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
             assert isinstance(result[0], int)
         __check_prepand_sql_comment(pg_instance, ignore)
 
-        with conn.cursor() as cursor:
+        with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
             cursor.execute(
                 'SELECT generate_series(1, 10) AS number',
                 ignore_query_metric=ignore,
