@@ -40,7 +40,7 @@ instances:
     password: <JWT>
 ```
 
-It also comes with a hosted Postgres database. To integration with the Agent, you need to [prepare Postgres][11] then supply the database configuration to the integration configuration. 
+It also comes with a hosted Postgres database. To integrate with the Agent, you need to [prepare Postgres][10] then supply the database configuration to the integration configuration. 
 ```yaml
 ## All options defined here are available to all instances.
 #
