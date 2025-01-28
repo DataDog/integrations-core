@@ -8,10 +8,6 @@ on:
   schedule:
     - cron: '0 0,8,16 * * *'
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   run:
     strategy:
@@ -29,6 +25,9 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+
+    - uses: Vampire/setup-wsl@v4
+      if: matrix.platform == 'windows'
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v5
@@ -51,6 +50,7 @@ jobs:
 
     - name: Set up Windows containers
       if: matrix.platform == 'windows'
+      shell: wsl-bash {0}
       env:
         AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'mcr.microsoft.com/windows/servercore:ltsc2022' || 'mcr.microsoft.com/windows/servercore:ltsc2022' }}"
         SERVER_IMAGE: 'mcr.microsoft.com/windows/servercore:ltsc2022'
