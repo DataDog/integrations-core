@@ -922,29 +922,39 @@ def test_sqlserver_db_fragmentation_metrics(
     print(instance_docker_metrics)
     mocked_results = [
         [
-            ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_monitor', 0, None, 1, 1.0, 1, 0.0),
-            ('master', 'MSreplication_options', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_dev', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_usg', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_monitor', 'dbo', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'MSreplication_options', 'dbo', 0, None, 1, 1.0, 1, 0.0),
         ],
         [
-            ('msdb', 'syscachedcredentials', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
-            ('msdb', 'syscollector_blobs_internal', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
+            ('msdb', 'syscachedcredentials', 'dbo', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
+            (
+                'msdb',
+                'syscollector_blobs_internal',
+                'dbo',
+                1,
+                'PK_syscollector_blobs_internal_paremeter_name',
+                0,
+                0.0,
+                0,
+                0.0,
+            ),
         ],
-        [('datadog_test-1', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
+        [('datadog_test-1', 'ϑings', 'dbo', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
     mocked_results_tempdb = [
-        [('tempdb', '#TempExample__000000000008', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
+        [('tempdb', '#TempExample__000000000008', 'dbo', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
     ]
 
     if db_fragmentation_object_names:
         instance_docker_metrics['db_fragmentation_object_names'] = db_fragmentation_object_names
         mocked_results = [
             [
-                ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
-                ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
-                ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_dev', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_usg', 'dbo', 0, None, 0, 0.0, 0, 0.0),
             ],
             [],
             [],
@@ -983,12 +993,13 @@ def test_sqlserver_db_fragmentation_metrics(
         tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
-                database_name, object_name, index_id, index_name, *metric_values = row
+                database_name, object_name, schema, index_id, index_name, *metric_values = row
                 metrics = zip(db_fragmentation_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{database_name}',
                     f'database_name:{database_name}',
                     f'object_name:{object_name}',
+                    f'schema:{schema}',
                     f'index_id:{index_id}',
                     f'index_name:{index_name}',
                 ] + tags

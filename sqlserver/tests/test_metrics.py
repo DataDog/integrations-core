@@ -353,7 +353,7 @@ def test_check_db_fragmentation_metrics(
         for metric_name, _, _ in DATABASE_FRAGMENTATION_METRICS:
             for tag in db_tags:
                 aggregator.assert_metric_has_tag(metric_name, tag=tag)
-            for tag_prefix in ('index_id', 'index_name', 'object_name'):
+            for tag_prefix in ('index_id', 'index_name', 'object_name', 'schema'):
                 aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
 
 
