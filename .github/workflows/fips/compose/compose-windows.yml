@@ -2,7 +2,7 @@ services:
   agent:
     build:
       context: agent
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-windows
       args:
         - BASE_IMAGE=$AGENT_IMAGE
     pid: host
