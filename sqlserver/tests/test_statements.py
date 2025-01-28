@@ -477,6 +477,7 @@ def test_statement_metrics_and_plans(
                 assert not event['db']['query_signature'], "procedure plans should not have query_signature field set"
             else:
                 assert event['db']['plan']['definition'], "event plan definition missing"
+                assert event['db']['plan']['raw_signature'], "event plan raw signature missing"
                 parsed_plan = ET.fromstring(event['db']['plan']['definition'])
                 assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
                 assert not event['sqlserver']['is_plan_encrypted']
