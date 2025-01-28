@@ -6,6 +6,7 @@ import logging
 import os
 
 import mock
+from packaging.version import parse as parse_version
 import pymysql
 import pytest
 
@@ -13,7 +14,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
-from .common import MYSQL_REPLICATION
+from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -500,7 +501,7 @@ def add_schema_test_databases(cursor):
     # create two column index, one with subpart and descending
     cursor.execute("CREATE INDEX two_columns_index ON cities (population, name(3) DESC);")
     # create functional key part index - available after MySQL 8.0.13
-    if MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
+    if MYSQL_VERSION_PARSED >= parse_version('8.0.13'):
         cursor.execute("CREATE INDEX functional_key_part_index ON cities ((population + 1) DESC);")
 
     # add some data to the tables to test cardinality of indices

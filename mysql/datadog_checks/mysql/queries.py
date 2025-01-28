@@ -116,7 +116,7 @@ WHERE table_schema = %s AND table_name IN ({});
 """
 
 SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
-    SELECT COUNT(*)
+    SELECT COUNT(*) as column_count
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_SCHEMA = 'information_schema'
       AND TABLE_NAME = 'STATISTICS'
@@ -131,7 +131,7 @@ SELECT
     cardinality as `cardinality`,
     index_type as `index_type`,
     seq_in_index as `seq_in_index`,
-	column_name as `column_name`,
+    column_name as `column_name`,
     sub_part as `sub_part`,
     packed as `packed`,
     nullable as `nullable`,
@@ -149,7 +149,7 @@ SELECT
     cardinality as `cardinality`,
     index_type as `index_type`,
     seq_in_index as `seq_in_index`,
-	column_name as `column_name`,
+    column_name as `column_name`,
     sub_part as `sub_part`,
     packed as `packed`,
     nullable as `nullable`,

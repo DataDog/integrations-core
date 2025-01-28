@@ -343,7 +343,7 @@ class DatabasesData:
         self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
         query = (
             SQL_INDEXES_8_0_13.format(table_names)
-            if cursor.fetchone()["COUNT(*)"] > 0
+            if cursor.fetchone()["column_count"] > 0
             else SQL_INDEXES.format(table_names)
         )
         self._cursor_run(cursor, query=query, params=db_name)
@@ -373,7 +373,7 @@ class DatabasesData:
             index_data["cardinality"] = int(row["cardinality"])
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
-            index_data["expression"] = str(row["expression"]).strip().lower() if row["expression"] else None
+            index_data["expression"] = str(row["expression"]) if row["expression"] else None
 
             # Add column info, if exists
             if row["column_name"]:

@@ -326,7 +326,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 "name": "name",
                                 "sub_part": 3,
-                                "collation": ('D' if MYSQL_VERSION_PARSED >= parse_version('8.0.1') else 'A'),
+                                "collation": ('D' if MYSQL_VERSION_PARSED >= parse_version('8.0') else 'A'),
                                 "packed": None,
                                 "nullable": True,
                             },
