@@ -13,7 +13,7 @@ The Okta Workflows integration collects Okta workflow event logs and sends them 
 
 ### Get Okta Workflows Domain
 1. Sign in to your Okta organization with your administrator account.
-2. Locate the **Domain** by clicking your username in the top-right corner of the Admin Console. The domain appears in the dropdown menu. Your Okta domain looks like
+2. Locate the **Domain** by clicking your username in the top-right corner of the Admin Console. The domain appears in the dropdown menu. Your Okta domain looks like:
      - example.oktapreview.com
      - example.okta.com
      - example.okta-emea.com
