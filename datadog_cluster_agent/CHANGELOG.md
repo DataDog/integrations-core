@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.4.0 / 2025-01-25
+
+***Added***:
+
+* Add telemetry for checks that are not scheduled. ([#19306](https://github.com/DataDog/integrations-core/pull/19306))
+
 ## 5.3.0 / 2025-01-16
 
 ***Added***:

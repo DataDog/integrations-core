@@ -162,7 +162,6 @@ unsorted = [
 [overrides.dep.updates]
 exclude = [
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
@@ -173,6 +172,7 @@ exclude = [
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
     'psutil',
+    'pymongo[srv]', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
