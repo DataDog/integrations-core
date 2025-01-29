@@ -5,10 +5,8 @@ tests:
     {
       "country" : "IN",
       "changed_from" : "",
-      "latency" : "945284",
       "date_finalized" : "2024-11-05T07:18:37+00:00",
       "network" : "40471",
-      "error_code_description" : "Delivered",
       "message_body" : "Hello from Vonage, checking for new data!",
       "dcs" : "0",
       "country_name" : "India",
@@ -27,15 +25,10 @@ tests:
       "account_id" : "bf8d8cc9",
       "udh" : "",
       "forced_from" : "918050290593",
-      "error_code" : "0",
       "to" : "919481686682",
-      "status" : "delivered"
+      "status" : "delivered",
+      "ddtags" : "error_code_description:Delivered,product:my_product,error_code:0,latency:945284"
     }
-  ddtags:
-    - error_code_description
-    - product
-    - error_code
-    - latency
 
   result:
     custom:
@@ -66,14 +59,14 @@ tests:
       total_price: "0.07268000"
       udh: ""
       validity_period: "241106080252000+"
+      vonage_product: "my_product"
+      ddtags: "error_code_description:Delivered,product:my_product,error_code:0,latency:945284"
     message: |-
       {
         "country" : "IN",
         "changed_from" : "",
-        "latency" : "945284",
         "date_finalized" : "2024-11-05T07:18:37+00:00",
         "network" : "40471",
-        "error_code_description" : "Delivered",
         "message_body" : "Hello from Vonage, checking for new data!",
         "dcs" : "0",
         "country_name" : "India",
@@ -92,14 +85,8 @@ tests:
         "account_id" : "bf8d8cc9",
         "udh" : "",
         "forced_from" : "918050290593",
-        "error_code" : "0",
         "to" : "919481686682",
         "status" : "delivered"
       }
     tags:
      - "source:LOGS_SOURCE"
-    ddtags:
-      - error_code_description
-      - product
-      - error_code
-      - latency
