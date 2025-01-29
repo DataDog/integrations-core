@@ -327,7 +327,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 "name": "name",
                                 "sub_part": 3,
                                 "collation": (
-                                    'D' if (MYSQL_VERSION_PARSED >= parse_version('8.0') and not is_maria_db) else 'A'
+                                    'D'
+                                    if (
+                                        (MYSQL_VERSION_PARSED >= parse_version('8.0') and not is_maria_db)
+                                        or (MYSQL_VERSION_PARSED >= parse_version('10.8') and is_maria_db)
+                                    )
+                                    else 'A'
                                 ),
                                 "packed": None,
                                 "nullable": True,
