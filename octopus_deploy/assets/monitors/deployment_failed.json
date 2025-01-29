@@ -3,13 +3,13 @@
 	"created_at": "2025-01-16",
 	"last_updated_at": "2025-01-16",
 	"title": "Deployment failed",
-	"description": "A deployment task failed in Octopus Deploy.",
+	"description": "At least one deployment task has failed in Octopus Deploy.",
 	"definition": {
 		"id": 162880440,
 		"name": "Deployment Failed for {{project_name.name}}",
 		"type": "query alert",
-		"query": "sum(last_10m):avg:octopus_deploy.deployment.count{task_state:failed*} by {project_name} > 5",
-		"message": "{{#is_alert}}\\n At least 1 deployment has failed for {{project_name.name}} \\n{{/is_alert}}",
+		"query": "sum(last_10m):avg:octopus_deploy.deployment.count{task_state:failed*} by {project_name} >= 5",
+		"message": "{{#is_alert}}\\n At least 5 deployments have failed for {{project_name.name}} \\n{{/is_alert}}\n\n{{#is_warning}}One deployment has failed for {{project_name.name}}.{{/is_warning}}\n",
 		"tags": [],
 		"options": {
 			"thresholds": {
