@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.5.1 / 2025-01-29
+
+***Fixed***:
+
+* Revert "Upgrade postgres to psycopg3" due to instability in testing ([#19499](https://github.com/DataDog/integrations-core/pull/19499))
+
 ## 22.5.0 / 2025-01-25
 
 ***Added***:
