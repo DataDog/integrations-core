@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.1 / 2025-01-29
+
+***Fixed***:
+
+* Revert "Upgrade PGBouncer to psycopg3" due to instability in testing ([#19497](https://github.com/DataDog/integrations-core/pull/19497))
+
 ## 8.1.0 / 2025-01-25
 
 ***Security***:
