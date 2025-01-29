@@ -385,6 +385,7 @@ files:
             hidden: true
             description: |
               Configure collection of schemas (databases).
+              Only tables and schemas for which the user has been granted SELECT privileges are collected.
             options:
               - name: enabled
                 description: |
