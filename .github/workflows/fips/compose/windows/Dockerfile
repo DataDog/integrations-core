@@ -1,7 +1,14 @@
-FROM mcr.microsoft.com/windows/servercore:ltsc2022
+FROM golang:1.23
 
-COPY start-server.ps1 C:/app/start-server.ps1
-COPY ca.* C:/app/
+WORKDIR /app
+
+# Copy all files
+COPY . ./
+
+ENV GO111MODULE=off
+
+# Build the server
+RUN go build -o http-server.exe http-server.go
 
 # Expose port 443
 EXPOSE 443

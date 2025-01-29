@@ -20,6 +20,8 @@ services:
     build:
       context: linux
       dockerfile: Dockerfile
+      args:
+        - "BUILD_TARGET=server"
     command: ["./server", "ECDHE-RSA-AES128-SHA256"]
     healthcheck:
       test: "curl -f localhost:443"
@@ -31,6 +33,8 @@ services:
     build:
       context: linux
       dockerfile: Dockerfile
+      args:
+        - "BUILD_TARGET=server"
     command: ["./server", "ECDHE-RSA-CHACHA20-POLY1305"]
     healthcheck:
       test: "curl -f localhost:443"

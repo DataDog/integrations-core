@@ -18,7 +18,9 @@ services:
     build:
       context: windows
       dockerfile: Dockerfile
-    command: ["powershell.exe", "-File", "C:/app/start-server.ps1", "ECDHE-RSA-AES128-SHA256"]
+      args:
+        - "BUILD_TARGET=http-server.exe"
+    command: ["C:/app/http-server.exe", "ECDHE-RSA-AES128-SHA256"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
@@ -29,7 +31,9 @@ services:
     build:
       context: windows
       dockerfile: Dockerfile
-    command: ["powershell.exe", "-File", "C:/app/start-server.ps1", "ECDHE-RSA-CHACHA20-POLY1305"]
+      args:
+        - "BUILD_TARGET=http-server.exe"
+    command: ["C:/app/http-server.exe", "ECDHE-RSA-CHACHA20-POLY1305"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
