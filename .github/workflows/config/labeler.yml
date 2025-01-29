@@ -395,6 +395,8 @@ integration/octopus_deploy:
 - octopus_deploy/**/*
 integration/oke:
 - oke/**/*
+integration/okta_workflows:
+- okta_workflows/**/*
 integration/oom_kill:
 - oom_kill/**/*
 integration/openai:
