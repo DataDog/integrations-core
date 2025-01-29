@@ -19,7 +19,7 @@ The Okta Workflows integration collects Okta workflow event logs and sends them 
      - example.okta-emea.com
 
 ### Connect your Okta Workflows Account to Datadog
-1. Add your API Token and Okta Domain
+1. Add your API Token and Okta Domain:
 
    | Parameters           | Description                       |
    |--------------------- |-----------------------------------|
