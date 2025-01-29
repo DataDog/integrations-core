@@ -20,7 +20,7 @@
 
 * Allow for Ciphers to be customizable in the SSLContext creation ([#19312](https://github.com/DataDog/integrations-core/pull/19312))
 
-## 37.3.0 / 2024-12-26
+## 37.3.0 / 2024-12-26 / Agent 7.62.0
 
 ***Security***:
 
