@@ -1,0 +1,82 @@
+{
+    "ItemType": "Project",
+    "TotalResults": 1,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "Items": [
+      {
+        "Id": "Projects-4",
+        "SpaceId": "Spaces-1",
+        "VariableSetId": "variableset-Projects-4",
+        "DeploymentProcessId": "deploymentprocess-Projects-4",
+        "ClonedFromProjectId": null,
+        "DiscreteChannelRelease": false,
+        "IncludedLibraryVariableSetIds": [],
+        "DefaultToSkipIfAlreadyInstalled": false,
+        "TenantedDeploymentMode": "Untenanted",
+        "DefaultGuidedFailureMode": "EnvironmentDefault",
+        "VersioningStrategy": null,
+        "ReleaseCreationStrategy": {
+          "ChannelId": null,
+          "ReleaseCreationPackage": null,
+          "ReleaseCreationPackageStepId": null
+        },
+        "Templates": [],
+        "AutoDeployReleaseOverrides": [],
+        "ReleaseNotesTemplate": null,
+        "DeploymentChangesTemplate": null,
+        "ForcePackageDownload": false,
+        "Icon": null,
+        "ExtensionSettings": [],
+        "Name": "hi",
+        "Slug": "hi",
+        "Description": "",
+        "IsDisabled": false,
+        "ProjectGroupId": "ProjectGroups-2",
+        "LifecycleId": "Lifecycles-1",
+        "AutoCreateRelease": false,
+        "IsVersionControlled": false,
+        "PersistenceSettings": {
+          "Type": "Database"
+        },
+        "ProjectConnectivityPolicy": {
+          "SkipMachineBehavior": "None",
+          "TargetRoles": [],
+          "AllowDeploymentsToNoTargets": false,
+          "ExcludeUnhealthyTargets": false
+        },
+        "Links": {
+          "Self": "/api/Spaces-1/projects/Projects-4",
+          "Variables": "/api/Spaces-1/projects/Projects-4/variables",
+          "Releases": "/api/Spaces-1/projects/Projects-4/releases{/version}{?skip,take,searchByVersion}",
+          "Channels": "/api/Spaces-1/projects/Projects-4/channels{/id}{?skip,take,partialName}",
+          "Triggers": "/api/Spaces-1/projects/Projects-4/triggers{?skip,take,partialName,triggerActionType,triggerActionCategory,runbooks}",
+          "ScheduledTriggers": "/api/Spaces-1/projects/Projects-4/triggers/scheduled{?skip,take,partialName,ids}",
+          "OrderChannels": "/api/Spaces-1/projects/Projects-4/channels/order",
+          "Progression": "/api/Spaces-1/projects/Projects-4/progression{?releaseHistoryCount}",
+          "RunbookTaskRunDashboardItemsTemplate": "/api/Spaces-1/progression/runbooks/taskRuns{?skip,take,ids,projectIds,runbookIds,environmentIds,tenantIds,taskIds}",
+          "DeploymentProcess": "/api/Spaces-1/projects/Projects-4/deploymentprocesses",
+          "DeploymentSettings": "/api/Spaces-1/projects/Projects-4/deploymentsettings",
+          "Web": "/app#/Spaces-1/projects/Projects-4",
+          "Logo": "/api/Spaces-1/projects/Projects-4/logo?cb=2024.2.9409",
+          "Metadata": "/api/Spaces-1/projects/Projects-4/metadata",
+          "Runbooks": "/api/Spaces-1/projects/Projects-4/runbooks{?skip,take,partialName}",
+          "RunbookSnapshots": "/api/Spaces-1/projects/Projects-4/runbookSnapshots{/name}{?skip,take,searchByName}",
+          "Summary": "/api/Spaces-1/projects/Projects-4/summary",
+          "GitConnectionTest": "/api/Spaces-1/projects/Projects-4/git/connectivity-test",
+          "InsightsMetrics": "/api/Spaces-1/projects/Projects-4/insights/metrics{?channelId,environmentId,tenantId,tenantFilter,timeRange,granularity,timeZone}",
+          "GitCompatibilityReport": "/api/Spaces-1/projects/Projects-4/git/compatibility-report",
+          "ConvertToGit": "/api/Spaces-1/projects/Projects-4/git/convert",
+          "ConvertToVcs": "/api/Spaces-1/projects/Projects-4/git/convert"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/Spaces-1/projectgroups/ProjectGroups-2/projects?skip=0&take=30",
+      "Template": "/api/Spaces-1/projectgroups/ProjectGroups-2/projects{?skip,take}",
+      "Page.All": "/api/Spaces-1/projectgroups/ProjectGroups-2/projects?skip=0&take=2147483647",
+      "Page.Current": "/api/Spaces-1/projectgroups/ProjectGroups-2/projects?skip=0&take=30",
+      "Page.Last": "/api/Spaces-1/projectgroups/ProjectGroups-2/projects?skip=0&take=30"
+    }
+  }

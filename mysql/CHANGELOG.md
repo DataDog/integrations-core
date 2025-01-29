@@ -2,7 +2,31 @@
 
 <!-- towncrier release notes start -->
 
-## 14.2.0 / 2024-11-06
+## 14.5.0 / 2025-01-25
+
+***Added***:
+
+* Added an optional optimization to MySQL statement metrics collection to only query for queries that have run since the last check collection. ([#19321](https://github.com/DataDog/integrations-core/pull/19321))
+* Emit index usage and index metrics from mysql integration ([#19383](https://github.com/DataDog/integrations-core/pull/19383))
+
+***Fixed***:
+
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 14.4.0 / 2024-12-26
+
+***Added***:
+
+* Add `mysql.performance.performance_schema_digest_lost`, the number of digest instances that could not be instrumented in the `events_statements_summary_by_digest` table. ([#19121](https://github.com/DataDog/integrations-core/pull/19121))
+
+## 14.3.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Added the `dbms_flavor` tag to MySQL integration metrics and events to identify the database type. This tag indicates whether the database is MySQL or MariaDB. ([#18950](https://github.com/DataDog/integrations-core/pull/18950))
+* Submit database_hostname with database instance and metrics for MySQL, Postgres, and SQLServer ([#18969](https://github.com/DataDog/integrations-core/pull/18969))
+
+## 14.2.0 / 2024-11-06 / Agent 7.60.0
 
 ***Added***:
 
@@ -28,10 +52,6 @@
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 * Update the `propagate_agent_tags` setting. When set to `true`, the tags from the agent host are now added to the check's tags for all instances. ([#18400](https://github.com/DataDog/integrations-core/pull/18400))
 
 ***Fixed***:
@@ -47,6 +67,10 @@
 ***Security***:
 
 * Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 12.8.0 / 2024-09-05
 
@@ -64,7 +88,7 @@
 
 * Adding databases (schemas) data collection to MySQL
   These data include information about the tables, their columns, indexes, foreign keys, and partitions. ([#17916](https://github.com/DataDog/integrations-core/pull/17916))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ***Fixed***:
 

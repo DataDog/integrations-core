@@ -7,6 +7,7 @@ from datadog_checks.avi_vantage import AviVantageCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 
+@pytest.mark.unit
 def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     check = AviVantageCheck('avi_vantage', {}, [unit_instance])
     dd_run_check(check)
@@ -17,6 +18,7 @@ def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.integration
 def test_integration(
     dd_environment, get_expected_metrics, aggregator, integration_instance, dd_run_check, datadog_agent
 ):

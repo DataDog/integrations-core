@@ -2,11 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2024-10-04 / Agent 7.59.0
+## 3.3.0 / 2025-01-25
 
 ***Added***:
 
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Add the gauge/total version of some monotonic counter metrics ([#19459](https://github.com/DataDog/integrations-core/pull/19459))
+
+## 3.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 3.1.0 / 2024-10-04 / Agent 7.59.0
+
 * Align OMv2 labels with Kubernetes agent tags ([#18654](https://github.com/DataDog/integrations-core/pull/18654))
 
 ***Fixed***:
@@ -18,6 +27,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 2.3.2 / 2024-07-05 / Agent 7.55.0
 

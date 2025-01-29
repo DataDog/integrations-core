@@ -7,6 +7,7 @@ import time
 from typing import List, Optional
 
 from bson import json_util
+from pymongo.errors import NotPrimaryError
 
 from datadog_checks.mongo.dbm.utils import (
     format_key_name,
@@ -107,6 +108,9 @@ class MongoOperationSamples(DBMAsyncJob):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
+        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
+            self._check.log.debug("Skipping operation samples collection on node in recovering state")
+            return False
         return True
 
     def _get_operation_samples(self, now, databases_monitored: List[str]):
@@ -149,10 +153,16 @@ class MongoOperationSamples(DBMAsyncJob):
                 continue
 
     def _get_current_op(self):
-        operations = self._check.api_client.current_op()
-        for operation in operations:
-            self._check.log.debug("Found operation: %s", operation)
-            yield operation
+        try:
+            operations = self._check.api_client.current_op()
+            for operation in operations:
+                self._check.log.debug("Found operation: %s", operation)
+                yield operation
+        except NotPrimaryError as e:
+            # If the node is not primary or secondary, for example node is in recovering state
+            # we could not run the $currentOp command to collect operation samples.
+            self._check.log.warning("Could not collect operation samples, node is not primary or secondary")
+            self._check.log.debug("Error details: %s", e)
 
     def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
@@ -178,10 +188,6 @@ class MongoOperationSamples(DBMAsyncJob):
             # MongoDB drivers and clients use hello to determine the state of
             # the replica set members and to discover additional members of a replica set.
             self._check.log.debug("Skipping hello operation: %s", operation)
-            return False
-        if "explain" in command:
-            # Skip explain operations as explain cannot explain itself
-            self._check.log.debug("Skipping explain operation: %s", operation)
             return False
 
         return True

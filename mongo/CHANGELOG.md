@@ -2,7 +2,41 @@
 
 <!-- towncrier release notes start -->
 
-## 8.2.1 / 2024-11-06
+## 8.4.0 / 2025-01-25
+
+***Added***:
+
+* Add support for `zlib` network compression in the MongoDB integration client with fallback to uncompressed connections. ([#19395](https://github.com/DataDog/integrations-core/pull/19395))
+* Make MongoDB Atlas search indexes collection configurable and disable it by default for improved performance. ([#19396](https://github.com/DataDog/integrations-core/pull/19396))
+* Increased the default collection interval for MongoDB inferred schema and index definitions to 1 hour to reduce resource overhead. ([#19445](https://github.com/DataDog/integrations-core/pull/19445))
+* Include explain operations in MongoDB activity samples. ([#19450](https://github.com/DataDog/integrations-core/pull/19450))
+* Add `service=datadog-agent` comment to MongoDB integration operations for tagging integration operations. ([#19456](https://github.com/DataDog/integrations-core/pull/19456))
+
+***Fixed***:
+
+* Fix error `CommandCursor is not subscriptable` in replication oplog size and oplog window collection. ([#19444](https://github.com/DataDog/integrations-core/pull/19444))
+
+## 8.3.1 / 2024-12-26
+
+***Fixed***:
+
+* Skip unauthorized `local` database collections `system.replset`, `replset.election`, and `replset.minvalid` in collection and index stats gathering to avoid permission errors. ([#19244](https://github.com/DataDog/integrations-core/pull/19244))
+
+## 8.3.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Add `metrics_collection_interval` config option to customize the collection interval for collection stats, index stats, and sharded data distribution metrics.
+  The default collection interval for collection stats and index stats remains unchanged at check min collection interval of 15 seconds.
+  The default collection interval for sharded data distribution metrics is 300 seconds. ([#19098](https://github.com/DataDog/integrations-core/pull/19098))
+
+***Fixed***:
+
+* Fixes timezone parsing bug in slow query log, preventing incorrect timestamp conversions on non-UTC servers. ([#19057](https://github.com/DataDog/integrations-core/pull/19057))
+* Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
+* Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
+
+## 8.2.1 / 2024-11-06 / Agent 7.60.0
 
 ***Fixed***:
 
@@ -30,10 +64,6 @@
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 * Bump datadog-checks-base dependency ([#18583](https://github.com/DataDog/integrations-core/pull/18583))
 * Add `mongodb.system.cpu.percent` metric to track total CPU usage of the MongoDB process on self-hosted instances (only available on self-hosted MongoDB running on the same host as the Agent). ([#18618](https://github.com/DataDog/integrations-core/pull/18618))
 * Always emit `database_instance` metadata regardless of DBM status; previously emitted only when DBM was enabled. ([#18750](https://github.com/DataDog/integrations-core/pull/18750))
@@ -51,6 +81,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
 
 ## 6.11.0 / 2024-09-10

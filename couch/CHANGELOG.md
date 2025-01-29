@@ -2,15 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 8.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 8.1.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Add support for Couch version 3.4.0 ([#19052](https://github.com/DataDog/integrations-core/pull/19052))
+
 ## 8.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
 
@@ -21,6 +29,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 6.2.1 / 2024-05-31 / Agent 7.55.0
 

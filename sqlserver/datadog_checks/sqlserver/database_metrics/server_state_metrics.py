@@ -31,9 +31,16 @@ QUERY_SERVER_STATIC_INFO = {
 
 class SqlserverServerStateMetrics(SqlserverDatabaseMetricsBase):
     @property
+    def include_server_state_metrics(self) -> bool:
+        return self.config.database_metrics_config['server_state_metrics']['enabled']
+
+    @property
     def enabled(self):
         # Server state queries require VIEW SERVER STATE permissions, which some managed database
         # versions do not support.
+
+        if not self.include_server_state_metrics:
+            return False
         if self.engine_edition in [ENGINE_EDITION_SQL_DATABASE]:
             return False
         return True
@@ -46,6 +53,7 @@ class SqlserverServerStateMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
+            f"include_server_state_metrics={self.include_server_state_metrics}, "
             f"major_version={self.major_version}, "
             f"engine_edition={self.engine_edition})"
         )

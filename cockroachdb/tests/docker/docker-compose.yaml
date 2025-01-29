@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   cockroachdb:
     container_name: cockroachdb

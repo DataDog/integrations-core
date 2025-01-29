@@ -2,15 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 9.1.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* [NDMII-3147] update Cisco IP SLA metric tags and description. ([#19079](https://github.com/DataDog/integrations-core/pull/19079))
+
 ## 9.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
 
@@ -21,6 +29,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 7.5.0 / 2024-09-05
 
@@ -37,7 +49,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 7.3.1 / 2024-06-05 / Agent 7.55.0
 

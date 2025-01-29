@@ -52,13 +52,18 @@ STATIC_SERVER_INFO = {
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_file_stats_metrics', [True, False])
 def test_sqlserver_file_stats_metrics(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
+    include_file_stats_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'file_stats_metrics': {'enabled': include_file_stats_metrics},
+    }
 
     mocked_results = [
         ('master', 'ONLINE', 'master', '/xx/master.mdf', 89, 0, 0, 73, 16, 3153920, 933888, 59, 98, 4194304),
@@ -77,7 +82,7 @@ def test_sqlserver_file_stats_metrics(
         return mocked_results
 
     file_stats_metrics = SqlserverFileStatsMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -87,18 +92,21 @@ def test_sqlserver_file_stats_metrics(
 
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
-    for result in mocked_results:
-        db, state, logical_name, file_location, *metric_values = result
-        metrics = zip(file_stats_metrics.metric_names()[0], metric_values)
-        expected_tags = [
-            f'db:{db}',
-            f'state:{state}',
-            f'logical_name:{logical_name}',
-            f'file_location:{file_location}',
-        ] + tags
-        for metric_name, metric_value in metrics:
-            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+    if not include_file_stats_metrics:
+        assert file_stats_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags
+        for result in mocked_results:
+            db, state, logical_name, file_location, *metric_values = result
+            metrics = zip(file_stats_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+                f'state:{state}',
+                f'logical_name:{logical_name}',
+                f'file_location:{file_location}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
 @pytest.mark.integration
@@ -112,7 +120,9 @@ def test_sqlserver_ao_metrics(
     include_ao_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': include_ao_metrics},
+    }
 
     # Mocked results
     mocked_ao_availability_groups = [
@@ -153,7 +163,7 @@ def test_sqlserver_ao_metrics(
     ]
 
     ao_metrics = SqlserverAoMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -252,9 +262,11 @@ def test_sqlserver_availability_groups_metrics(
     mocked_results,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': include_ao_metrics},
+    }
     if availability_group:
-        instance_docker_metrics['availability_group'] = availability_group
+        instance_docker_metrics['database_metrics']['ao_metrics']['availability_group'] = availability_group
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
@@ -262,7 +274,7 @@ def test_sqlserver_availability_groups_metrics(
         return mocked_results
 
     availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -339,11 +351,13 @@ def test_sqlserver_database_replication_stats_metrics(
     mocked_results,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': include_ao_metrics},
+    }
     if availability_group:
-        instance_docker_metrics['availability_group'] = availability_group
+        instance_docker_metrics['database_metrics']['ao_metrics']['availability_group'] = availability_group
     if only_emit_local:
-        instance_docker_metrics['only_emit_local'] = only_emit_local
+        instance_docker_metrics['database_metrics']['ao_metrics']['only_emit_local'] = only_emit_local
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
@@ -351,7 +365,7 @@ def test_sqlserver_database_replication_stats_metrics(
         return mocked_results
 
     database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -471,13 +485,15 @@ def test_sqlserver_availability_replicas_metrics(
     mocked_results,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    instance_docker_metrics['database_metrics'] = {
+        'ao_metrics': {'enabled': include_ao_metrics},
+    }
     if availability_group:
-        instance_docker_metrics['availability_group'] = availability_group
+        instance_docker_metrics['database_metrics']['ao_metrics']['availability_group'] = availability_group
     if only_emit_local:
-        instance_docker_metrics['only_emit_local'] = only_emit_local
+        instance_docker_metrics['database_metrics']['ao_metrics']['only_emit_local'] = only_emit_local
     if ao_database:
-        instance_docker_metrics['ao_database'] = ao_database
+        instance_docker_metrics['database_metrics']['ao_metrics']['ao_database'] = ao_database
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
@@ -485,7 +501,7 @@ def test_sqlserver_availability_replicas_metrics(
         return mocked_results
 
     availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -543,7 +559,9 @@ def test_sqlserver_fci_metrics(
     include_fci_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_fci_metrics'] = include_fci_metrics
+    instance_docker_metrics['database_metrics'] = {
+        'fci_metrics': {'enabled': include_fci_metrics},
+    }
 
     mocked_results = [
         ('node1', 'up', 'cluster1', 0, 1),
@@ -555,7 +573,7 @@ def test_sqlserver_fci_metrics(
         return mocked_results
 
     fci_metrics = SqlserverFciMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -592,8 +610,9 @@ def test_sqlserver_primary_log_shipping_metrics(
     include_primary_log_shipping_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_primary_log_shipping_metrics'] = include_primary_log_shipping_metrics
-
+    instance_docker_metrics['database_metrics'] = {
+        'primary_log_shipping_metrics': {'enabled': include_primary_log_shipping_metrics},
+    }
     mocked_results = [('97E29D89-2FA0-44FF-9EF7-65DA75FE0E3E', 'EC2AMAZ-Q0NCNV5', 'MyDummyDB', 500, 3600)]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -602,7 +621,7 @@ def test_sqlserver_primary_log_shipping_metrics(
         return mocked_results
 
     primary_log_shipping_metrics = SqlserverPrimaryLogShippingMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -639,8 +658,9 @@ def test_sqlserver_secondary_log_shipping_metrics(
     include_secondary_log_shipping_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_secondary_log_shipping_metrics'] = include_secondary_log_shipping_metrics
-
+    instance_docker_metrics['database_metrics'] = {
+        'secondary_log_shipping_metrics': {'enabled': include_secondary_log_shipping_metrics},
+    }
     mocked_results = [
         (
             r'EC2AMAZ-Q0NCNV5\MYSECONDARY',
@@ -661,7 +681,7 @@ def test_sqlserver_secondary_log_shipping_metrics(
         return mocked_results
 
     primary_log_shipping_metrics = SqlserverSecondaryLogShippingMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -691,13 +711,14 @@ def test_sqlserver_secondary_log_shipping_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_server_state_metrics', [True, False])
 def test_sqlserver_server_state_metrics(
-    aggregator,
-    dd_run_check,
-    init_config,
-    instance_docker_metrics,
+    aggregator, dd_run_check, init_config, instance_docker_metrics, include_server_state_metrics
 ):
     instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'server_state_metrics': {'enabled': include_server_state_metrics},
+    }
 
     mocked_results = [(1000, 4, 8589934592, 17179869184, 4294967296, 8589934592)]
 
@@ -707,7 +728,7 @@ def test_sqlserver_server_state_metrics(
         return mocked_results
 
     server_state_metrics = SqlserverServerStateMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -717,11 +738,14 @@ def test_sqlserver_server_state_metrics(
 
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
-    for result in mocked_results:
-        metrics = zip(server_state_metrics.metric_names()[0], result)
-        for metric_name, metric_value in metrics:
-            aggregator.assert_metric(metric_name, value=metric_value, tags=tags)
+    if not include_server_state_metrics:
+        assert server_state_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags
+        for result in mocked_results:
+            metrics = zip(server_state_metrics.metric_names()[0], result)
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=tags)
 
 
 @pytest.mark.integration
@@ -735,8 +759,9 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
     include_tempdb_file_space_usage_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_tempdb_file_space_usage_metrics'] = include_tempdb_file_space_usage_metrics
-
+    instance_docker_metrics['database_metrics'] = {
+        'tempdb_file_space_usage_metrics': {'enabled': include_tempdb_file_space_usage_metrics}
+    }
     mocked_results = [
         [(2, Decimal('5.375000'), Decimal('0.000000'), Decimal('0.000000'), Decimal('1.312500'), Decimal('1.312500'))]
     ]
@@ -747,7 +772,7 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
         return mocked_results
 
     tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -788,26 +813,32 @@ def test_sqlserver_index_usage_metrics(
     index_usage_stats_interval,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_index_usage_metrics'] = include_index_usage_metrics
-    instance_docker_metrics['include_index_usage_metrics_tempdb'] = include_index_usage_metrics_tempdb
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {
+            'enabled': include_index_usage_metrics,
+            'enabled_tempdb': include_index_usage_metrics_tempdb,
+        },
+    }
     if index_usage_stats_interval:
-        instance_docker_metrics['index_usage_stats_interval'] = index_usage_stats_interval
+        instance_docker_metrics['database_metrics']['index_usage_metrics'][
+            'collection_interval'
+        ] = index_usage_stats_interval
 
     mocked_results_non_tempdb = [
         [
-            ('master', 'PK__patch_ac__09EA1DC2BD2BC49C', 'patch_action_execution_state', 36, 0, 0, 0),
-            ('master', 'PK__rds_comp__2E7CCD4A9E2910C9', 'rds_component_version', 0, 5, 0, 0),
+            ('master', 'PK__patch_ac__09EA1DC2BD2BC49C', 'dbo', 'patch_action_execution_state', 36, 0, 0, 0),
+            ('master', 'PK__rds_comp__2E7CCD4A9E2910C9', 'dbo', 'rds_component_version', 0, 5, 0, 0),
         ],
         [
-            ('msdb', 'PK__backupse__21F79AAB9439648C', 'backupset', 0, 1, 0, 0),
+            ('msdb', 'PK__backupse__21F79AAB9439648C', 'dbo', 'backupset', 0, 1, 0, 0),
         ],
         [
-            ('datadog_test-1', 'idx_something', 'some_table', 10, 60, 12, 18),
-            ('datadog_test-1', 'idx_something_else', 'some_table', 20, 30, 40, 50),
+            ('datadog_test-1', 'idx_something', 'dbo', 'some_table', 10, 60, 12, 18),
+            ('datadog_test-1', 'idx_something_else', 'dbo', 'some_table', 20, 30, 40, 50),
         ],
     ]
     mocked_results_tempdb = [
-        ('tempdb', 'PK__dmv_view__B5A34EE25D72CBFE', 'dmv_view_run_history', 1500, 0, 0, 49),
+        ('tempdb', 'PK__dmv_view__B5A34EE25D72CBFE', 'dbo', 'dmv_view_run_history', 1500, 0, 0, 49),
     ]
     mocked_results = mocked_results_non_tempdb
     if include_index_usage_metrics_tempdb:
@@ -819,14 +850,14 @@ def test_sqlserver_index_usage_metrics(
     execute_query_handler_mocked.side_effect = mocked_results
 
     index_usage_metrics = SqlserverIndexUsageMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
         databases=AUTODISCOVERY_DBS + ['tempdb'],
     )
 
-    expected_collection_interval = index_usage_stats_interval or index_usage_metrics._default_collection_interval
+    expected_collection_interval = index_usage_stats_interval or index_usage_metrics.collection_interval
     assert index_usage_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._database_metrics = [index_usage_metrics]
@@ -839,11 +870,12 @@ def test_sqlserver_index_usage_metrics(
         tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
-                db, index_name, table, *metric_values = row
+                db, index_name, schema, table, *metric_values = row
                 metrics = zip(index_usage_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{db}',
                     f'index_name:{index_name}',
+                    f'schema:{schema}',
                     f'table:{table}',
                 ] + tags
                 for metric_name, metric_value in metrics:
@@ -877,36 +909,52 @@ def test_sqlserver_db_fragmentation_metrics(
     db_fragmentation_metrics_interval,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_db_fragmentation_metrics'] = include_db_fragmentation_metrics
-    instance_docker_metrics['include_db_fragmentation_metrics_tempdb'] = include_db_fragmentation_metrics_tempdb
+    instance_docker_metrics['database_metrics'] = {
+        'db_fragmentation_metrics': {
+            'enabled': include_db_fragmentation_metrics,
+            'enabled_tempdb': include_db_fragmentation_metrics_tempdb,
+        },
+    }
     if db_fragmentation_metrics_interval:
-        instance_docker_metrics['db_fragmentation_metrics_interval'] = db_fragmentation_metrics_interval
-
+        instance_docker_metrics['database_metrics']['db_fragmentation_metrics'][
+            'collection_interval'
+        ] = db_fragmentation_metrics_interval
+    print(instance_docker_metrics)
     mocked_results = [
         [
-            ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
-            ('master', 'spt_monitor', 0, None, 1, 1.0, 1, 0.0),
-            ('master', 'MSreplication_options', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_dev', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_usg', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_monitor', 'dbo', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'MSreplication_options', 'dbo', 0, None, 1, 1.0, 1, 0.0),
         ],
         [
-            ('msdb', 'syscachedcredentials', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
-            ('msdb', 'syscollector_blobs_internal', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
+            ('msdb', 'syscachedcredentials', 'dbo', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
+            (
+                'msdb',
+                'syscollector_blobs_internal',
+                'dbo',
+                1,
+                'PK_syscollector_blobs_internal_paremeter_name',
+                0,
+                0.0,
+                0,
+                0.0,
+            ),
         ],
-        [('datadog_test-1', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
+        [('datadog_test-1', 'ϑings', 'dbo', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
     mocked_results_tempdb = [
-        [('tempdb', '#TempExample__000000000008', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
+        [('tempdb', '#TempExample__000000000008', 'dbo', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
     ]
 
     if db_fragmentation_object_names:
         instance_docker_metrics['db_fragmentation_object_names'] = db_fragmentation_object_names
         mocked_results = [
             [
-                ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
-                ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
-                ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_dev', 'dbo', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_usg', 'dbo', 0, None, 0, 0.0, 0, 0.0),
             ],
             [],
             [],
@@ -922,7 +970,7 @@ def test_sqlserver_db_fragmentation_metrics(
     execute_query_handler_mocked.side_effect = mocked_results
 
     db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -932,9 +980,7 @@ def test_sqlserver_db_fragmentation_metrics(
     if db_fragmentation_object_names:
         assert db_fragmentation_metrics.db_fragmentation_object_names == db_fragmentation_object_names
 
-    expected_collection_interval = (
-        db_fragmentation_metrics_interval or db_fragmentation_metrics._default_collection_interval
-    )
+    expected_collection_interval = db_fragmentation_metrics_interval or db_fragmentation_metrics.collection_interval
     assert db_fragmentation_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._database_metrics = [db_fragmentation_metrics]
@@ -947,12 +993,13 @@ def test_sqlserver_db_fragmentation_metrics(
         tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
-                database_name, object_name, index_id, index_name, *metric_values = row
+                database_name, object_name, schema, index_id, index_name, *metric_values = row
                 metrics = zip(db_fragmentation_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{database_name}',
                     f'database_name:{database_name}',
                     f'object_name:{object_name}',
+                    f'schema:{schema}',
                     f'index_id:{index_id}',
                     f'index_name:{index_name}',
                 ] + tags
@@ -983,7 +1030,9 @@ def test_sqlserver_os_schedulers_metrics(
     include_task_scheduler_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_task_scheduler_metrics'] = include_task_scheduler_metrics
+    instance_docker_metrics['database_metrics'] = {
+        'task_scheduler_metrics': {'enabled': include_task_scheduler_metrics},
+    }
 
     mocked_results = [
         (0, 0, 4, 6, 4, 0, 0),
@@ -1011,7 +1060,7 @@ def test_sqlserver_os_schedulers_metrics(
         return mocked_results
 
     os_schedulers_metrics = SqlserverOsSchedulersMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1047,8 +1096,9 @@ def test_sqlserver_os_tasks_metrics(
     include_task_scheduler_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_task_scheduler_metrics'] = include_task_scheduler_metrics
-
+    instance_docker_metrics['database_metrics'] = {
+        'task_scheduler_metrics': {'enabled': include_task_scheduler_metrics},
+    }
     mocked_results = [
         (0, 40, 0, 0, 0),
         (9, 46, 0, 0, 0),
@@ -1075,7 +1125,7 @@ def test_sqlserver_os_tasks_metrics(
         return mocked_results
 
     os_tasks_metrics = SqlserverOsTasksMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1110,8 +1160,9 @@ def test_sqlserver_master_files_metrics(
     include_master_files_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['include_master_files_metrics'] = include_master_files_metrics
-
+    instance_docker_metrics['database_metrics'] = {
+        'master_files_metrics': {'enabled': include_master_files_metrics},
+    }
     mocked_results = [
         ('master', 'master', 1, 'data', '/var/opt/mssql/data/master.mdf', 'ONLINE', 4096, 0),
         ('master', 'master', 2, 'transaction_log', '/var/opt/mssql/data/mastlog.ldf', 'ONLINE', 512, 0),
@@ -1140,7 +1191,7 @@ def test_sqlserver_master_files_metrics(
         return mocked_results
 
     master_files_metrics = SqlserverMasterFilesMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1172,13 +1223,18 @@ def test_sqlserver_master_files_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_database_files_metrics', [True, False])
 def test_sqlserver_database_files_metrics(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
+    include_database_files_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'db_files_metrics': {'enabled': include_database_files_metrics},
+    }
 
     mocked_results = [
         [
@@ -1210,7 +1266,7 @@ def test_sqlserver_database_files_metrics(
     execute_query_handler_mocked.side_effect = mocked_results
 
     database_files_metrics = SqlserverDatabaseFilesMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1221,35 +1277,43 @@ def test_sqlserver_database_files_metrics(
 
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
-    for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
-        for row in result:
-            file_id, file_type, file_location, file_name, database_files_state_desc, size, space_used, state = row
-            size *= 8  # size is in pages, 1 page = 8 KB
-            space_used *= 8  # space_used is in pages, 1 page = 8 KB
-            metrics = zip(database_files_metrics.metric_names()[0], [state, size, space_used])
-            expected_tags = [
-                f'db:{db}',
-                f'database:{db}',
-                f'file_id:{file_id}',
-                f'file_type:{file_type}',
-                f'file_location:{file_location}',
-                f'file_name:{file_name}',
-                f'database_files_state_desc:{database_files_state_desc}',
-            ] + tags
-            for metric_name, metric_value in metrics:
-                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+    if not include_database_files_metrics:
+        assert database_files_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags
+        for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
+            for row in result:
+                file_id, file_type, file_location, file_name, database_files_state_desc, size, space_used, state = row
+                size *= 8  # size is in pages, 1 page = 8 KB
+                space_used *= 8  # space_used is in pages, 1 page = 8 KB
+                metrics = zip(database_files_metrics.metric_names()[0], [state, size, space_used])
+                expected_tags = [
+                    f'db:{db}',
+                    f'database:{db}',
+                    f'file_id:{file_id}',
+                    f'file_type:{file_type}',
+                    f'file_location:{file_location}',
+                    f'file_name:{file_name}',
+                    f'database_files_state_desc:{database_files_state_desc}',
+                ] + tags
+                for metric_name, metric_value in metrics:
+                    aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_database_files_metrics', [True, False])
 def test_sqlserver_database_stats_metrics(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
+    include_database_files_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'db_stats_metrics': {'enabled': include_database_files_metrics},
+    }
 
     mocked_results = [
         ('master', 'master', 'ONLINE', 'SIMPLE', 0, False, False, False),
@@ -1265,7 +1329,7 @@ def test_sqlserver_database_stats_metrics(
         return mocked_results
 
     database_stats_metrics = SqlserverDatabaseStatsMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1275,33 +1339,43 @@ def test_sqlserver_database_stats_metrics(
 
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags
-    for result in mocked_results:
-        db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
-        metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
-        expected_tags = [
-            f'db:{db}',
-            f'database:{database}',
-            f'database_state_desc:{database_state_desc}',
-            f'database_recovery_model_desc:{database_recovery_model_desc}',
-        ] + tags
-        for metric_name, metric_value in metrics:
-            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+    if not include_database_files_metrics:
+        assert database_stats_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags
+        for result in mocked_results:
+            db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
+            metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+                f'database:{database}',
+                f'database_state_desc:{database_state_desc}',
+                f'database_recovery_model_desc:{database_recovery_model_desc}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('database_backup_metrics_interval', [None, 600])
+@pytest.mark.parametrize('include_database_backup_metrics', [True, False])
 def test_sqlserver_database_backup_metrics(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
     database_backup_metrics_interval,
+    include_database_backup_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'db_backup_metrics': {'enabled': include_database_backup_metrics},
+    }
     if database_backup_metrics_interval:
-        instance_docker_metrics['database_backup_metrics_interval'] = database_backup_metrics_interval
+        instance_docker_metrics['database_metrics']['db_backup_metrics'][
+            'collection_interval'
+        ] = database_backup_metrics_interval
 
     mocked_results = [
         ('master', 'master', 0),
@@ -1317,36 +1391,37 @@ def test_sqlserver_database_backup_metrics(
         return mocked_results
 
     database_backup_metrics = SqlserverDatabaseBackupMetrics(
-        instance_config=instance_docker_metrics,
+        config=sqlserver_check._config,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    expected_collection_interval = (
-        database_backup_metrics_interval or database_backup_metrics._default_collection_interval
-    )
+    expected_collection_interval = database_backup_metrics_interval or database_backup_metrics.collection_interval
     assert database_backup_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._database_metrics = [database_backup_metrics]
 
     dd_run_check(sqlserver_check)
-    tags = sqlserver_check._config.tags
-    for result in mocked_results:
-        db, database, *metric_values = result
-        metrics = zip(database_backup_metrics.metric_names()[0], metric_values)
-        expected_tags = [
-            f'db:{db}',
-            f'database:{database}',
-        ] + tags
-        for metric_name, metric_value in metrics:
-            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+    if not include_database_backup_metrics:
+        assert database_backup_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags
+        for result in mocked_results:
+            db, database, *metric_values = result
+            metrics = zip(database_backup_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+                f'database:{database}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
-    # database_backup_metrics should not be collected because the collection interval is not reached
-    aggregator.reset()
-    dd_run_check(sqlserver_check)
-    for metric_name in database_backup_metrics.metric_names()[0]:
-        aggregator.assert_metric(metric_name, count=0)
+        # database_backup_metrics should not be collected because the collection interval is not reached
+        aggregator.reset()
+        dd_run_check(sqlserver_check)
+        for metric_name in database_backup_metrics.metric_names()[0]:
+            aggregator.assert_metric(metric_name, count=0)
 
 
 @pytest.mark.integration
@@ -1373,3 +1448,46 @@ def test_sqlserver_xe_session_metrics(
     expected_tags = sqlserver_check._config.tags
     expected_tags.append('session_name:datadog')
     aggregator.assert_metric("sqlserver.xe.session_status", value=1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_database_metrics_defaults(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    include_defaults = {
+        SqlserverAoMetrics: False,
+        SqlserverAvailabilityGroupsMetrics: False,
+        SqlserverAvailabilityReplicasMetrics: False,
+        SqlserverDatabaseBackupMetrics: True,
+        SqlserverDatabaseFilesMetrics: True,
+        SqlserverDatabaseReplicationStatsMetrics: False,
+        SqlserverDatabaseStatsMetrics: True,
+        SqlserverDBFragmentationMetrics: False,
+        SqlserverFciMetrics: False,
+        SqlserverFileStatsMetrics: True,
+        SqlserverIndexUsageMetrics: True,
+        SqlserverMasterFilesMetrics: False,
+        SqlserverOsSchedulersMetrics: False,
+        SqlserverOsTasksMetrics: False,
+        SqlserverPrimaryLogShippingMetrics: False,
+        SqlserverSecondaryLogShippingMetrics: False,
+        SqlserverServerStateMetrics: True,
+        SqlserverTempDBFileSpaceUsageMetrics: True,
+    }
+    instance_docker_metrics['database_autodiscovery'] = True
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    for metric, enabled in include_defaults.items():
+        database_metrics = metric(
+            config=sqlserver_check._config,
+            new_query_executor=sqlserver_check._new_query_executor,
+            server_static_info=STATIC_SERVER_INFO,
+            execute_query_handler=None,
+            databases=AUTODISCOVERY_DBS,
+        )
+        assert database_metrics.enabled == enabled

@@ -244,8 +244,22 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         aggregator.assert_metric('snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
-        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
+        [
+            'rtt_index:26',
+            'rtt_state:inactive',
+            'rtt_type:tcp_connect',
+            'rtt_source_address:0.0.0.0',
+            'rtt_target_address:190.114.96.169',
+            'rtt_sense:other',
+        ],
+        [
+            'rtt_index:30',
+            'rtt_state:orderly_stop',
+            'rtt_type:script',
+            'rtt_source_address:190.114.96.169',
+            'rtt_target_address:0.0.0.0',
+            'rtt_sense:timeout',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -256,8 +270,22 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
-        ['rtt_index:26', 'rtt_state:inactive', 'rtt_type:tcp_connect'],
-        ['rtt_index:30', 'rtt_state:orderly_stop', 'rtt_type:script'],
+        [
+            'rtt_index:26',
+            'rtt_state:inactive',
+            'rtt_type:tcp_connect',
+            'rtt_source_address:0.0.0.0',
+            'rtt_target_address:190.114.96.169',
+            'rtt_timeout:false',
+        ],
+        [
+            'rtt_index:30',
+            'rtt_state:orderly_stop',
+            'rtt_type:script',
+            'rtt_source_address:190.114.96.169',
+            'rtt_target_address:0.0.0.0',
+            'rtt_timeout:true',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(

@@ -11,6 +11,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVENT_FILE, XE_RING_BUFFER
 from datadog_checks.sqlserver.queries import (
     DEADLOCK_TIMESTAMP_ALIAS,
     DEADLOCK_XML_ALIAS,
@@ -34,6 +35,7 @@ PAYLOAD_QUERY_SIGNATURE = "query_signatures"
 PAYLOAD_XML = "xml"
 
 NO_XE_SESSION_ERROR = f"No XE session `{XE_SESSION_DATADOG}` found"
+OBFUSCATION_ERROR = "ERROR: failed to obfuscate"
 
 
 def agent_check_getter(self):
@@ -52,6 +54,7 @@ class Deadlocks(DBMAsyncJob):
         self.collection_interval = config.deadlocks_config.get("collection_interval", DEFAULT_COLLECTION_INTERVAL)
         self._force_convert_xml_to_str = False
         self._xe_session_name = None
+        self._xe_session_target = None
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -74,7 +77,7 @@ class Deadlocks(DBMAsyncJob):
                 sql_text, self._config.obfuscator_options, replace_null_character=True
             )['query']
         except Exception as e:
-            sql_text = "ERROR: failed to obfuscate"
+            sql_text = OBFUSCATION_ERROR
             error_text = "Failed to obfuscate sql text within a deadlock"
             if self._config.log_unobfuscated_queries:
                 error_text += "=[%s]" % sql_text
@@ -88,24 +91,34 @@ class Deadlocks(DBMAsyncJob):
             raise Exception("process-list element not found. The deadlock XML is in an unexpected format.")
         query_signatures = []
         for process in process_list.findall('process'):
+            spid = process.get('spid')
+            if spid is not None:
+                try:
+                    spid = int(spid)
+                except ValueError:
+                    self._log.error("spid not an integer. Skipping query signature computation.")
+                    continue
+                if spid in query_signatures:
+                    continue
+            else:
+                self._log.error("spid not found in process element. Skipping query signature computation.")
+
+            # Setting `signature` for the first function on the stack
+            signature = None
+            for frame in process.findall('.//frame'):
+                if frame.text is not None and frame.text != "unknown":
+                    frame.text = self.obfuscate_no_except_wrapper(frame.text)
+                    if signature is not None and frame.text != OBFUSCATION_ERROR:
+                        signature = compute_sql_signature(frame.text)
+
             for inputbuf in process.findall('.//inputbuf'):
                 if inputbuf.text is not None:
                     inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
-                    spid = process.get('spid')
-                    if spid is not None:
-                        try:
-                            spid = int(spid)
-                        except ValueError:
-                            self._log.error("spid not an integer. Skipping query signature computation.")
-                            continue
-                        if spid in query_signatures:
-                            continue
-                        query_signatures.append({"spid": spid, "signature": compute_sql_signature(inputbuf.text)})
-                    else:
-                        self._log.error("spid not found in process element. Skipping query signature computation.")
-            for frame in process.findall('.//frame'):
-                if frame.text is not None:
-                    frame.text = self.obfuscate_no_except_wrapper(frame.text)
+                    if signature is None and inputbuf.text != OBFUSCATION_ERROR:
+                        signature = compute_sql_signature(inputbuf.text)
+
+            query_signatures.append({"spid": spid, "signature": signature})
+
         return query_signatures
 
     def _get_lookback_seconds(self):
@@ -123,14 +136,24 @@ class Deadlocks(DBMAsyncJob):
                     if not rows:
                         raise NoXESessionError(NO_XE_SESSION_ERROR)
                     xe_system_found = False
+                    xe_system_xe_file_found = False
                     for row in rows:
-                        if (session := row[0]) in (XE_SESSION_DATADOG):
+                        (session, target) = row
+                        if session in (XE_SESSION_DATADOG):
                             self._xe_session_name = session
+                            self._xe_session_target = target
                             return
                         if session == XE_SESSION_SYSTEM:
                             xe_system_found = True
+                            if target == XE_EVENT_FILE:
+                                xe_system_xe_file_found = True
+
                     if xe_system_found:
                         self._xe_session_name = XE_SESSION_SYSTEM
+                        if xe_system_xe_file_found:
+                            self._xe_session_target = XE_EVENT_FILE
+                        else:
+                            self._xe_session_target = XE_RING_BUFFER
                         return
         raise NoXESessionError(NO_XE_SESSION_ERROR)
 
@@ -141,7 +164,9 @@ class Deadlocks(DBMAsyncJob):
             except NoXESessionError as e:
                 self._log.error(str(e))
                 return
-            self._log.info(f'Using XE session {self._xe_session_name} to collect deadlocks')
+            self._log.info(
+                f'Using XE session [{self._xe_session_name}], target [{self._xe_session_target}] to collect deadlocks'
+            )
 
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
@@ -149,16 +174,19 @@ class Deadlocks(DBMAsyncJob):
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True
                 query = get_deadlocks_query(
-                    convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name
+                    convert_xml_to_str=convert_xml_to_str,
+                    xe_session_name=self._xe_session_name,
+                    xe_target_name=self._xe_session_target,
                 )
+                lookback = self._get_lookback_seconds()
                 self._log.debug(
-                    "Running query [%s] with max deadlocks %s and timestamp %s",
+                    "Running query %s with max deadlocks %s and lookback %s",
                     query,
                     self._max_deadlocks,
-                    self._last_deadlock_timestamp,
+                    lookback,
                 )
                 try:
-                    cursor.execute(query, (self._max_deadlocks, self._get_lookback_seconds()))
+                    cursor.execute(query, (self._max_deadlocks, lookback))
                 except Exception as e:
                     if "Data column of Unknown ADO type" in str(e):
                         raise Exception(f"{str(e)} | cursor.description: {cursor.description} | query: {query}")

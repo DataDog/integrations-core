@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   ibm_was:
     container_name: ibm_was

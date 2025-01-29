@@ -46,7 +46,9 @@ jobs:
 
       # Options
       standard: true
-      test-py2: ${{ !matrix.python-support || contains(matrix.python-support, '2') }}
+      # We never test Python in integrations-core, but some partners may want to keep testing it
+      # in marketplace and integrations-extras.
+      test-py2: ${{ inputs.repo != 'core' && (!matrix.python-support || contains(matrix.python-support, '2')) }}
       test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
 
       # For other repositories

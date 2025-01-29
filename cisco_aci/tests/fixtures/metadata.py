@@ -30,7 +30,6 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.0',
         'model': 'N9K-C93180YC-FX',
-        'fabric_st': 'active',
         'name': 'leaf101',
         'serial_number': 'FDO20440TS1',
         'status': 1,
@@ -62,7 +61,6 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.1',
         'model': 'N9K-C93180YC-FX',
-        'fabric_st': 'active',
         'name': 'leaf102',
         'serial_number': 'FDO20510HCA',
         'status': 1,
@@ -93,10 +91,9 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.4',
         'model': 'APIC-SERVER-M1',
-        'fabric_st': 'unknown',
         'name': 'apic1',
         'serial_number': 'FCH1928V0SL',
-        'status': 2,
+        'status': 1,
         'vendor': 'cisco',
         'version': 'A',
     },
@@ -125,7 +122,6 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.5',
         'model': 'N9K-C9336PQ',
-        'fabric_st': 'active',
         'name': 'spine201',
         'serial_number': 'SAL2014N5U4',
         'status': 1,
@@ -272,6 +268,69 @@ INTERFACE_METADATA = [
     },
 ]
 
+TOPOLOGY_LINK_METADATA = [
+    {
+        'id': 'default:10.0.200.0:cisco-aci-eth1/49.cisco-aci-eth5/1',
+        'local': {
+            'device': {
+                'dd_id': 'default:10.0.200.0',
+            },
+            'interface': {
+                'dd_id': 'default:10.0.200.0:cisco-aci-eth1/49',
+                'id': 'eth1/49',
+                'id_type': 'interface_name',
+            },
+        },
+        'remote': {
+            'device': {
+                'dd_id': 'default:10.0.200.5',
+                'description': 'topology/pod-1/node-201',
+                'id': '6a:00:21:1f:55:2a',
+                'id_type': 'mac',
+                'ip_address': '10.0.200.5',
+                'name': 'SP201',
+            },
+            'interface': {
+                'dd_id': 'default:10.0.200.5:cisco-aci-eth5/1',
+                'description': 'topology/pod-1/paths-201/pathep-[eth5/1]',
+                'id': '6a:00:21:1f:55:2a',
+                'id_type': 'mac_address',
+            },
+        },
+        'source_type': 'lldp',
+    },
+    {
+        'id': 'default:10.0.200.1:cisco-aci-eth1/49.cisco-aci-eth5/2',
+        'local': {
+            'device': {
+                'dd_id': 'default:10.0.200.1',
+            },
+            'interface': {
+                'dd_id': 'default:10.0.200.1:cisco-aci-eth1/49',
+                'id': 'eth1/49',
+                'id_type': 'interface_name',
+            },
+        },
+        'remote': {
+            'device': {
+                'dd_id': 'default:10.0.200.5',
+                'description': 'topology/pod-1/node-201',
+                'id': '6a:00:21:1f:55:2b',
+                'id_type': 'mac',
+                'ip_address': '10.0.200.5',
+                'name': 'SP201',
+            },
+            'interface': {
+                'dd_id': 'default:10.0.200.5:cisco-aci-eth5/2',
+                'description': 'topology/pod-1/paths-201/pathep-[eth5/2]',
+                'id': '6a:00:21:1f:55:2b',
+                'id_type': 'mac_address',
+            },
+        },
+        'source_type': 'lldp',
+    },
+]
+
 EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
 # "2012-01-14 03:21:34" in seconds
@@ -284,6 +343,7 @@ EXPECTED_METADATA_EVENTS = [
         namespace='default',
         devices=DEVICE_METADATA,
         interfaces=INTERFACE_METADATA,
+        links=TOPOLOGY_LINK_METADATA,
         collect_timestamp=MOCK_TIME_EPOCH,
     )
 ]

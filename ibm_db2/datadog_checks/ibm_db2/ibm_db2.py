@@ -6,11 +6,21 @@ from __future__ import division
 from itertools import chain
 from time import time as timestamp
 
-import ibm_db
 from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.platform import Platform
+
+if Platform.is_windows():
+    # After installing ibm_db, dll path of dependent library of clidriver must be set before importing the module
+    # Ref: https://github.com/ibmdb/python-ibmdb/#installation
+    import os
+
+    embedded_lib = os.path.dirname(os.path.abspath(os.__file__))
+    os.add_dll_directory(os.path.join(embedded_lib, 'site-packages', 'clidriver', 'bin'))
+
+import ibm_db
 
 from . import queries
 from .utils import get_version, scrub_connection_string, status_to_service_check

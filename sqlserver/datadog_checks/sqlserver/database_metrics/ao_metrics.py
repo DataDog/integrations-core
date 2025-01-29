@@ -4,7 +4,6 @@
 
 from typing import List
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
@@ -61,7 +60,7 @@ QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
 class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_ao_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_ao_metrics', False))
+        return self.config.database_metrics_config["ao_metrics"]["enabled"]
 
     @property
     def enabled(self) -> bool:

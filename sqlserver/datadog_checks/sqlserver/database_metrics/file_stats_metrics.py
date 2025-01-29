@@ -10,7 +10,13 @@ from .base import SqlserverDatabaseMetricsBase
 
 class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
     @property
+    def include_file_stats_metrics(self) -> bool:
+        return self.config.database_metrics_config["file_stats_metrics"]["enabled"]
+
+    @property
     def enabled(self):
+        if not self.include_file_stats_metrics:
+            return False
         if not self.major_version and not is_azure_database(self.engine_edition):
             return False
         return True

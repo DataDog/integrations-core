@@ -628,6 +628,41 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
         ),
         (
             True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost/datadog_test-1',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'fully_qualified_domain_name': 'my-instance.database.windows.net',
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+        ),
+        (
+            True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'fully_qualified_domain_name': 'my-instance.database.windows.net',
+                    'aggregate_sql_databases': True,
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+        ),
+        (
+            True,
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
@@ -805,6 +840,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     expected_tags = check._config.tags + [
         'db:datadog_test-1',
         'table:ϑings',
+        'schema:dbo',
         'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:

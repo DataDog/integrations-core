@@ -140,6 +140,7 @@ def instance_integration_autodiscovery(instance_integration):
     instance["database_autodiscovery"] = {
         "enabled": True,
     }
+    instance.pop("collections", None)
     return instance
 
 

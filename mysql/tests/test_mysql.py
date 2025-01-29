@@ -48,6 +48,8 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
         + variables.COMMON_PERFORMANCE_VARS
+        + variables.INDEX_SIZE_VARS
+        + variables.INDEX_USAGE_VARS
     )
 
     operation_time_metrics = (
@@ -73,7 +75,6 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
             continue
         else:
             aggregator.assert_metric(mname, at_least=1)
-        aggregator.assert_metric(mname, at_least=1)
 
     optional_metrics = (
         variables.COMPLEX_STATUS_VARS
@@ -101,7 +102,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.SC_TAGS + tags.database_instance_resource_tags('stubbed.hostname'),
         tags.METRIC_TAGS_WITH_RESOURCE,
     )
     aggregator.assert_metrics_using_metadata(
@@ -116,8 +117,8 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
-        tags.METRIC_TAGS + ['dbms_flavor:{}'.format(MYSQL_FLAVOR.lower())],
+        tags.SC_TAGS + tags.database_instance_resource_tags(dd_default_hostname),
+        tags.METRIC_TAGS + [f'database_hostname:{dd_default_hostname}', 'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower())],
         hostname=dd_default_hostname,
         e2e=True,
     )
@@ -161,6 +162,8 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
+        + variables.INDEX_SIZE_VARS
+        + variables.INDEX_USAGE_VARS
     )
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
@@ -233,6 +236,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
+    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
     # test optional metrics
     optional_metrics = (
         variables.OPTIONAL_REPLICATION_METRICS
@@ -304,6 +308,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
+        + variables.INDEX_SIZE_VARS
     )
 
     operation_time_metrics = (
@@ -313,7 +318,9 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
-        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
+        testable_metrics.extend(
+            variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS + variables.INDEX_USAGE_VARS
+        )
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
         )
@@ -390,6 +397,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         assert mysql_check._is_group_replication_active(db) is False
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     'dbm_enabled, reported_hostname, expected_hostname',
     [
@@ -413,12 +421,10 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
         mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
         dd_run_check(mysql_check)
-        if reported_hostname:
-            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
-        else:
-            assert resolve_db_host.called is True
+        assert resolve_db_host.called is True
 
     expected_tags = [
+        'database_hostname:{}'.format(mysql_check.database_hostname),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
@@ -457,6 +463,43 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     for mname in optional_metrics:
         aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
+
+
+def _test_index_metrics(aggregator, index_metrics, metric_tags):
+    for mname in index_metrics:
+        if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:testdb', 'table:users', 'index:id'],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + [
+                    'db:datadog_test_schemas',
+                    'table:cities',
+                    'index:single_column_index',
+                ],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
+                count=1,
+            )
+        if mname == 'mysql.index.size':
+            aggregator.assert_metric(mname, tags=metric_tags + ['db:testdb', 'table:users', 'index:id'], count=1)
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:single_column_index'],
+                count=1,
+            )
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags + ['db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'],
+                count=1,
+            )
 
 
 def _test_optional_metrics(aggregator, optional_metrics):
@@ -709,7 +752,8 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
     for m in metric_names:
         aggregator.assert_metric_has_tag("mysql.net.connections", m)
     aggregator.assert_metric_has_tag(
-        "mysql.net.connections", tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
+        "mysql.net.connections",
+        f'dd.internal.resource:database_instance:{mysql_check.resolved_hostname}',
     )
 
 
@@ -792,6 +836,7 @@ def test_propagate_agent_tags(
     expected_tags = (
         instance_basic.get('tags', [])
         + [
+            'database_hostname:stubbed.hostname',
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
             'dd.internal.resource:database_instance:forced_hostname',

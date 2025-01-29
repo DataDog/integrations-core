@@ -2,6 +2,57 @@
 
 <!-- towncrier release notes start -->
 
+## 21.1.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+***Fixed***:
+
+* Fix KeyError in SQL Server schema collection caused by case-insensitive database name mismatches. ([#19384](https://github.com/DataDog/integrations-core/pull/19384))
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 21.0.0 / 2024-12-26
+
+***Changed***:
+
+* Fall back to ``system_health/event_file`` when querying deadlocks if `datadog` XE session wasn't created. ([#19189](https://github.com/DataDog/integrations-core/pull/19189))
+
+***Added***:
+
+* Update configuration structure and allow configuration of all database metrics ([#19111](https://github.com/DataDog/integrations-core/pull/19111))
+* Send schema name as part of index usage metrics ([#19266](https://github.com/DataDog/integrations-core/pull/19266))
+* Add schema tag to db_fragmentation metrics for sqlserver ([#19277](https://github.com/DataDog/integrations-core/pull/19277))
+
+## 20.2.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Submit database_hostname with database instance and metrics for MySQL, Postgres, and SQLServer ([#18969](https://github.com/DataDog/integrations-core/pull/18969))
+* Add lookback_window config parameter to query_metrics.
+
+  The current lookback window defaults to 2 times the collection interval, and is not able to be overridden.
+  This means that infrequently-run queries are unlikely to have metrics captured for them. One common
+  use case that falls into this bucket is ETL queries which can run hourly or even daily. These have
+  a very small chance of having metrics captured for them. In that case, we will support setting a lookback
+  window that will include such queries. ([#18979](https://github.com/DataDog/integrations-core/pull/18979))
+* Add config option `azure.aggregate_sql_databases` to report multiple azure sql databases as one database host. This is an opted in feature and is disabled by default. ([#19032](https://github.com/DataDog/integrations-core/pull/19032))
+
+***Fixed***:
+
+* Fix missing appended SQL comments. ([#18958](https://github.com/DataDog/integrations-core/pull/18958))
+* Fix `azure_sql_server_database` resource tag to use Azure SQL Database `{fully_qualified_doman_name}/{database_name}`. ([#19014](https://github.com/DataDog/integrations-core/pull/19014))
+* Update SQLServer agent jobs metrics to be DBM only. ([#19033](https://github.com/DataDog/integrations-core/pull/19033))
+* Fix duplicate deadlock events ([#19139](https://github.com/DataDog/integrations-core/pull/19139))
+* Fix poor query signature correlation for deadlocks. ([#19142](https://github.com/DataDog/integrations-core/pull/19142))
+
+## 20.1.1 / 2024-11-25 / Agent 7.60.0
+
+***Fixed***:
+
+* Use alternative schema collection query for sqlserver 2016 and older due to STRING_AGG not being supported until SQLServer 2017 ([#19110](https://github.com/DataDog/integrations-core/pull/19110))
+
 ## 20.1.0 / 2024-10-31
 
 ***Added***:
@@ -70,6 +121,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Bump lxml version for py3.12 E2E tests ([#18637](https://github.com/DataDog/integrations-core/pull/18637))
 
 ***Fixed***:

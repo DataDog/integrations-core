@@ -298,14 +298,44 @@ def test__get_is_aurora():
 @pytest.mark.parametrize(
     'disable_generic_tags, hostname, expected_tags',
     [
-        (True, None, {'port:unix_socket', 'dd.internal.resource:database_instance:stubbed.hostname'}),
+        (
+            True,
+            None,
+            {
+                'port:unix_socket',
+                'database_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            },
+        ),
         (
             False,
             None,
-            {'port:unix_socket', 'server:localhost', 'dd.internal.resource:database_instance:stubbed.hostname'},
+            {
+                'port:unix_socket',
+                'server:localhost',
+                'database_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            },
         ),
-        (True, 'foo', {'port:unix_socket', 'dd.internal.resource:database_instance:stubbed.hostname'}),
-        (False, 'foo', {'port:unix_socket', 'server:foo', 'dd.internal.resource:database_instance:stubbed.hostname'}),
+        (
+            True,
+            'foo',
+            {
+                'port:unix_socket',
+                'database_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            },
+        ),
+        (
+            False,
+            'foo',
+            {
+                'port:unix_socket',
+                'server:foo',
+                'database_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            },
+        ),
     ],
 )
 def test_service_check(disable_generic_tags, expected_tags, hostname):

@@ -96,7 +96,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 1. If log collection is enabled, make a *Logs* group. Insert a timeseries widget showing a bar graph of logs by status over time. Also include a log stream of logs with the "Error" or "Critical" status.
 
 !!! tip
-        Consider turning groups into powerpacks if they appear repeatedly in dashboards irrespective of the integration type, so that you can insert the entire group with the correct formatting with a few clicks rather than adding the same widgets from scratch each time.
+      Consider turning groups into powerpacks if they appear repeatedly in dashboards irrespective of the integration type, so that you can insert the entire group with the correct formatting with a few clicks rather than adding the same widgets from scratch each time.
 
 ### Design Guidelines
 

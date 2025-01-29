@@ -113,6 +113,7 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     assert activity['ddsource'] == 'mysql'
     assert activity['ddagentversion'], "missing agent version"
     assert set(activity['ddtags']) == {
+        'database_hostname:stubbed.hostname',
         'tag1:value1',
         'tag2:value2',
         'port:13306',
@@ -525,6 +526,7 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
 # directly to metrics-intake, so they should also be properly tagged with a resource
 def _expected_dbm_job_err_tags(dbm_instance):
     return dbm_instance['tags'] + [
+        'database_hostname:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',

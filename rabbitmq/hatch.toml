@@ -2,8 +2,7 @@
 
 [envs.default]
 dependencies = [
-  "pika==0.13.0; python_version < '3.0'",
-  "pika==1.3.2; python_version > '3.0'",
+  "pika==1.3.2",
 ]
 
 # Rabbitmq versions 3.8+ introduce the Prometheus plugin. This is the preferred way to collect metrics.

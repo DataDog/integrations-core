@@ -1,5 +1,3 @@
-version: '3'
-
 # Adapted from https://github.com/Lewuathe/docker-presto-cluster
 services:
   coordinator:

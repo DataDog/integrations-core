@@ -1,0 +1,2257 @@
+{
+    "title": "Symantec Endpoint Protection - Risk",
+    "description": "This dashboard provides information about the Risk logs generated on Symantec Endpoint Protection.",
+    "widgets": [
+        {
+            "id": 1304401806386442,
+            "definition": {
+                "title": "",
+                "banner_img": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAPDw8NEBAQFg8PEBUWEA8WFhYVEhYXFxcWFxUWHxUYHSggGBolGxUXITMjJS0rLjEuFx8zODMsQyktLysBCgoKDg0OGxAQGjUlHyAtMjEzMTc3MCs1Nzc1LTUxNTUvLy4tNzIyNTc1NTU3LDUvNy0tLS00Ny0tMjI1NTY3Lf/AABEIAKgBKwMBIgACEQEDEQH/xAAcAAEAAgMBAQEAAAAAAAAAAAAABQYBBAcCAwj/xABEEAABAwIEAwUEBQcMAwAAAAABAAIDBBEFBhIhBxMxFCJBUWEycYGRI0KhseEVJDVydILBMzZTYnOSorKztNHwCBZS/8QAGgEBAAIDAQAAAAAAAAAAAAAAAAQFAgMGAf/EACsRAQABBAAEBQIHAAAAAAAAAAABAgMEEQUSITETFEFRgTLwIjNhcZHB0f/aAAwDAQACEQMRAD8A7iiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAi+U87Yxqe4ADxKhqjMTQbRsJ9TsPkouRmWbH5lWm23ZrufTCeRVoZjk8Y2W95W5SY/G42eCw+fVvzWi3xbFuTqK/56NlWJdpjcwmVET4/CJ46WNwfLIC4aTdga0gOu8bA77A7lVjO2aJB2mjpp4GuMIAqGSd+lkvqMk/hFDpsA7c6nAWWzw/wlrIpSKKOCmlcx0LS1zKl7m6g50rDs3fdtibtKnV7mNUo8a9V0BWViyys3giIgIiICIsIMoiICIiAiIgIiICLCygIsIgyiIgIiICIiAiIgIiIC+NVO2Njnu6NC+yr2aZ/YiHT2j9w/iombkeXsVXPbt+7bYt+JXFKJrqx8z9Tun1W+A/Fb9FgL3gOkOkH6vV34L1lujDnGZw2YbN9/iVUqbiu6mxKbDMWphT2lLYqhpJZpJ+jc4H6pFu8NvMDe1Jw7hsZMeYyOvN6J2Rkzbnw7fTS8Oy5HbZ77+e33WXNeK2N/kqMU7JPzmdt4nN6sAd7RBFrGxC6bmbH4qCinr5CCyKPU0AjvuOzGg/1iQPivy9gGFVWYMTe0v+lqHOlnmNiGNuLuDS4XA1NAaD0srWeFYvNFXJrSJ5u7qY2nMq5YkrcSnZOySlpBoFVFG8kG7WERlwdc6vavuAv01G0AADoAAFQzgkVAG0kLbQsF2C5JsSSd3Ek7kq3YDUGSBt+re6fh0+yy04mfVcya7FUa5e3wzvWIpt03Inu+OPZlosPaHVdTHEHeyHG7ne5gu4/AKGoOJ+CzuDGV8QcenMbJEP70jQFxqkoosZzRVQYjK5rOfO1jNWknlOLY4QT02Hh1sfNdLr+CeESACNs8RBG7ZC6/mCH36+llbojpDHhwDgQQRcEbgjzuvSqOO56w3CZYqCoc+MiNhjaI3FgZ7Le8NrDTb4Kx4piMdLBLVSutFDG573AX7rRc2A6oNtFTYOJmGSUk2INkl7NBIyOR/KcO8/oAOp/EJjfE7CqOKCWScuNRE2SOKNpdJocLtJb9Tr42QXJFT8O4mYVPSS1wqQyOEgSNkBbKCRdoDNy69jbTfofJa+XuKuF19S2kikkbK82j5jNLXnwANzufI2QXdFX80Z0oMMA7XUNa9wu2IAvlI6X0N3A26mwVcw/jNg80giMk0eo2EkkdmfEgmw9Sg6IsKMzBj1PQUrq6ocRAzTdzQX+2Q1tgOu5CgsW4mYVSwQVElRftMYkiiY0ulLXdCWfV6Ed624KC4rF1VcrcQcPxNszqeR+qBhfJE9umQNHVwHRw9x8lxTiBninrsaoKyCSTslNyNRLXNPdlL5Dp6na3yQfpZFAZYzfR4nFLUUsjjFC7TI57SwA21fW8LeKrddxmweKUxCWaSxsZI4yY/gSRqHqEHQllRmAY9S4hC2ppZWyRE2uLgg+LXNO7T6FRGbOIOHYW8RVMx5xF+TG0vkA8CbbNv6kILSipuWOJ2F4jK2mhleyd/sRysLC70B3aT6XurkgyiIgIiICIiAiIgIiICquZf5cfqD7yrUoDNFPcMlH1e673Hp9v3qq4zbmvFq16dUrCqim7G/VsZaI5H77r/YqlxnyYMRonVMTfzykaXRkdXsG74/Xa5HqPVTWX64RvMbjZr+h8j+KtKz4TepuY1MR3p6S8y6Jpuzv1fjuuzZVz4fBhUj709PIXs66rWs1hPi1t3W/W9Au8cDMoiioRXSt/Oa0B2/VkPWNvpf2j7x5KpYhwWqXYuXsEX5MkqBITqs5sZdqdHote/Vottay7q5zY2eDWMHwACsZmIjcoyvZoI5kY8dBv89v4rbysPo3/ANp/AKDxKq50rpPDo0eg6KzYRByoBcG9i5wA333tbz6LmsCrx+I13afpjf8Aizvx4eNTRPdzviPwibiE76+jlbFVPsZI335T3Ae1qaLscdr9QbeG6ohx7MeXJI2VRfJTF1mtlPNgeOtmy+0w2vYXHuVppOOYiqJ4a6hmja2VwZpsJmNv3WvjeR3rdSD8FBcUeKVNitIMPpIJvpJWOdJI1oPdOzWtaSSSf+7rplY3+MnKxXCMPx+nBswlkgNrta86S02/+ZG2/eW1nTNvOyjSP1fS1nKgefG8ZPNPx5X+JWfKeTZP/WvyVUN0zTwyktP1HyOc+O/q06SfUFcEwdlRWSUWBOuGNrnd3xaZCxsnwaI3H4lB0TFcG7HkpgIs+plinftY/SPBZ/gDFJcGMi4dV4b22qgbNNNI9l5LlrGsOkBo8D69VYuOcTWYDJG0WaySBrR5AOAA+QXvgL+g4f7ab/Og5BwjyzTV+LvpqlhfDBFJIGXsHFj2NaHW3I73T0W7xXwmDD8dpW0cTYm6KeXQzZofzXC4Hh7AW3wF/TtV+yz/AOrEvXHf9PUn7NB/rSoOn8SKXAw6nq8XLNUIcIWXdqkBsSOWzd4B+Av6rivEjH8Gq44mYZQuhkik703LZG17C07aWk3N7G532KluMrTHmGKasY91GRTkNHR0LSOawHzvr29fVZ4qZvw6vooKHDIHiOnlEsjmwiOJjQ10YFhv1eN7W+aCyY7O6TI0L3Ek8uBtz5NqGtH2AL4cD8k4fWUMldVQNmlMz4wJN2Na0MIs3pfvHc/YveK/zFi/Vi/3QVg/8ev0M79sl/yxoOdcOKZsGa5aSMWgE1bDo6gxtEtmm/Ud0fJeeIeE00OZqalighZTukpA6FrGtjIc5uq7QLG/itjI/wDPKb9trvumXrjI40uY6aska7lAU0oIHtCN/fA8Ce79oQXLjS2HDMGdT0UEUDa2pbHKImNjBbpc519I3voA9xKpmQMZy3T4dyMQja+qmL+e4wOkLQSQwNfbu2aAdvElW3PNfBmbCKg4dzHy4fNHLoLdLnd14c0Dqe6Xe8tVS4eZ4welohSYjQMdNC52mbkRSF7SSQHF1iHC5G/gAg88CMY7PiFZA1xdTvppJADtcwm7HW8DpLvmvjwmwhmN4vVVVeOaGtdM+NxJa573gNB82gE7egXR+HGY8PxaasZTYYynETLMmETA5zHjS8FzG2Y7+rc3HuXMsqYo/K2MVENXHIYnNMbi0DU5moOjmbewcNvPxPiLIO64bkTDaarbX09LHHO1hY3TswX6uDOgda4uPAlWNc2wPjBSV2IwUFPT1BjmuOe4C4f1b9G250dbuPTba1yrjXZmpqeQxSuc12sMHccQXENNgQN9nt+aCZREQEREBERAREQEREBfOeIPaWOFw4WIX0ReTETGpFMxLDnQu33YfZd/A+RX0osZliAbs5o6A9R8VbHsDgQQCD1B6KLqMAicbt1N924+RXO3eE3rNzxMSrX6fff5WNGXRXTy3oajsxm20W/6233KLrsQkm9s90dGjYfipcZbH9If7o/5W7SYNDGb21OHi7f7OiwqxOJZH4btWqfj+mUXsa31ojc/fuisEwkuIlkFmDdrT4nz9ys1kssq7w8OjFt8lHzPug3r1V2rco7FcCpKsAVNNBLbpzI2vI9xIuFr4ZlXD6V/Mp6Kmjk8HtjaHD961wplFLalB4jcRTg8sMDaN07poi8ODy0NOqwBs03vYqn8IMr1NRiU+YKuDlNe6R0EZaWXklJ1Oa07hoaXC/iXe9dtIRBr4hh8NTGYZ4o5YyQTHI0PZcbg6Ttsq3l7MmG3bSUUEzYzK5reXSTMp9YcQ/6QM0DvA3N/BW1cvyVg1VSSxiWkxUOFVMS9tWzsQbJLIQ404l6aXAkab3uUF8w7AKKnkMtPS00crmkGSONjXkE3IuBexIHyWniNJhtRWtgqKenkrOz81rnxNeRGx+n+UI2s93S/iVSsJybVwx0bo4jFVupsRjqZ9YuHSauy6iHbgEgi17eih8RwGanpa2o7A+ljZgLoZHOkjcX1AkY577Me4nVYnWdzbe21w69imFU1Wzl1MEMrAb6ZGteAfPfoVoDCMOpY20jKOEQ1b+W6NkAdG/Yu7+lpGmzTu7boqMctVb2VT4KKSGlkNEZMPMkYdU8p7nVJBa8tGtpaLuIL9O9lt4Vlyra+meymfDSjGOfFRl7CaeDsz4zcNcWtDpDfQ0m2r3oLzUYbRNpTTyQ04o42ajCWN5LWtOq+i1gARdasFXh9BQGshbFFQ6BNeKOzS14bZ+houSQR4XVCwrI9QyCiaaW0kmGV0NcS5p1SP0mna86jqAN7dQPRTUuBzvywcPjpXR1XYxH2YmMEyCwe64cW94guvfx3sglMu1GEVNVJJTU0bK1g5j3PpnQVFpCQZLyMDnAm4JCnMWwmlrGCOpghlYD3WyNa4A+l+h9ypuYsjP7FVGOWrqa6dlPHzJZGa2xsnZI5jS0Ma0DvHz2UfmnKEolnjp6EyRPpY48MfHIyNlDMHSGSQ6nBzbue1+poJOmyC8YBR4fTuqKeiip43ROaKhkTA0hxbqaHEDc6Tf4rxiOU8NqH8+eipHvPWR0bLn3m2/xVDxTKFXzMT5dNqdUT0crpm8q1RExsfaYbOcO857XP0us0+J3XpuWahsNKZaGaejbPVufhbnQBzOaGiBwZr5YY0tfZuo6eZt02C/trKOiElNE1jOzw811NDHdzWEkAiOMbklp2G5svtieE0laxramnhlba7WyMa4i/lqFwuc4plOoLqt7KAiWpwNsMbmytlMczQ8OjMsjg5xLeW3VvfT12X1xXLNY+plIpXuqZKilfSYlzGBlNFG2ISxkF2pu7JO61pDte6DoGEYDR0dxS00ERd7RjY1rj7yNytyWjiebujjcb3uWgm9gL7jyA+S53RZUqGVUVZ2ciYY9Uyvl1N1dje2XT9b2CSw6B4m9uq6UgyEWAsoCIiAiIgIiICIiAiIgIiICIiAiIgwsoiAiIgIiIFl4kja4FrmgtPVpAIPwK9ogAIiICIiAiIgIiIFkREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//Z",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5073780463706508,
+                        "definition": {
+                            "type": "note",
+                            "content": "Symantec Endpoint Protection is a client-server solution that protects laptops, desktops, and servers in your network against malware, risks, and vulnerabilities. Symantec Endpoint Protection combines virus protection with advanced threat protection to proactively secure your client computers against known and unknown threats, such as viruses, worms, Trojan horses, and adware. Symantec Endpoint Protection provides protection against even the most sophisticated attacks that evade traditional security measures, such as rootkits, zero-day attacks, and spyware that mutates.\n\nThis dashboard provides information about the Risk logs generated on Symantec Endpoint Protection.\n\nFor more information, see the [Symantec Endpoint Protection Integration Documentation](https://docs.datadoghq.com/integrations/symantec_endpoint_protection/).\n\nTips:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 8
+            }
+        },
+        {
+            "id": 4397016275636066,
+            "definition": {
+                "title": "Risk Logs Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5275798311074670,
+                        "definition": {
+                            "title": "Risk Logs over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8815658168302322,
+                        "definition": {
+                            "title": "Total Risk Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1026009056371212,
+                        "definition": {
+                            "title": "Top Risks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@risk_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 8
+            }
+        },
+        {
+            "id": 4969010212931252,
+            "definition": {
+                "title": "Risk Logs Details",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7818864836062226,
+                        "definition": {
+                            "title": "Top Risk Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@risk_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3066507953223256,
+                        "definition": {
+                            "title": "Top Users",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8515585581461480,
+                        "definition": {
+                            "title": "Top Servers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@server_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 799540230905220,
+                        "definition": {
+                            "title": "Top Actual Actions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@actual_action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7732667545019918,
+                        "definition": {
+                            "title": "Action Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@actual_action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@requested_action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@secondary_action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4002514673868263,
+                        "definition": {
+                            "title": "Top File Paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "a",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@file_path",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "a"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3938557461477442,
+                        "definition": {
+                            "title": "Top Downloaded by",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@downloaded_by",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 7,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4502208350526758,
+                        "definition": {
+                            "title": "File Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "first_seen",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "prevalence",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "confidence",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "file_size",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "location",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "download_site",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "downloaded_by",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7117802683653614,
+                        "definition": {
+                            "title": "Top Applications",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@application_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 15,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7563272505008090,
+                        "definition": {
+                            "title": "Application Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "application_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_version",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "allowed_application_reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_hash",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "hash_type",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 15,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2881096364281662,
+                        "definition": {
+                            "title": "Top Source Computer Names",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source_computer_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 19,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5053709589047162,
+                        "definition": {
+                            "title": "Source Computer Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source_computer_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@source_computer_ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 19,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8897604333068586,
+                        "definition": {
+                            "title": "Distribution by Scan Source",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@scan_source",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 19,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3396218916858620,
+                        "definition": {
+                            "title": "Top Domains",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@domain_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 23,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4211654939327166,
+                        "definition": {
+                            "title": "Top Web Domains",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@web_domain",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 23,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4357895160576700,
+                        "definition": {
+                            "title": "Domain Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@domain_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@web_domain",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 23,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1761885876246576,
+                        "definition": {
+                            "title": "Top Category Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 27,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1771423758767622,
+                        "definition": {
+                            "title": "Distribution by Category",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category_set",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 27,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5900205913475106,
+                        "definition": {
+                            "title": "Category Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category_set",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@category_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 31,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6731020336257876,
+                        "definition": {
+                            "title": "Top Dispositions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@disposition",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 31,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6518796311250706,
+                        "definition": {
+                            "title": "Top Companies",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@company_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 35,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2200502928115948,
+                        "definition": {
+                            "title": "Company Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@risk_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@company_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@group_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 35,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3824158959538788,
+                        "definition": {
+                            "title": "Top Group Names",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@group_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 39,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3641820746600130,
+                        "definition": {
+                            "title": "Distribution by URL Tracking Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@url_tracking_status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 39,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1721263337224546,
+                        "definition": {
+                            "title": "Certificate Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@certificate_signer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@certificate_thumbprint",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@certificate_serial_number",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@certificate_issuer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 43,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3327602482401020,
+                        "definition": {
+                            "title": "Risks by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 250,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 47,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6847786685135402,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:symantec-endpoint-protection service:risk $Risk-Name $User $server_name $Action $Domain",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "risk_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "risk_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "server_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "actual_action",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "requested_action",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "secondary_action",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "file_path",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "downloaded_by",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "first_seen",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "prevalence",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "confidence",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "file_size",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "location",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "download_site",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_version",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "allowed_application_reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application_hash",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "hash_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "source_computer_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "source_computer_ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "scan_source",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "domain_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "web_domain",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "category_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "category_set",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "company_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "group_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "disposition",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "url_tarcking_status",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate_issuer",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate_signer",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate_thumbprint",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate_serial_number",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 51,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 56
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Risk-Name",
+            "prefix": "@risk_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "User",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "server_name",
+            "prefix": "@server_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Action",
+            "prefix": "@actual_action",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Domain",
+            "prefix": "@domain_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

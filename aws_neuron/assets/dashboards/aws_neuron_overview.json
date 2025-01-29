@@ -1066,7 +1066,7 @@
                       "name": "a",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:aws-neuron status:ERROR "
+                        "query": "source:aws_neuron status:error"
                       },
                       "indexes": [
                         "*"
@@ -1190,3 +1190,4 @@
   "notify_list": [],
   "reflow_type": "fixed"
 }
+

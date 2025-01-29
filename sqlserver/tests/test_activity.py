@@ -57,11 +57,12 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc,expected_comments",
+    "database,query,match_pattern,is_proc,expected_comments,collect_raw_query_statement,expected_raw_statement",
     [
         [
             "datadog_test-1",
@@ -69,6 +70,8 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings",
             False,
             ["/*test=foo*/"],
+            False,
+            None,
         ],
         [
             "datadog_test-1",
@@ -76,6 +79,26 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings",
             True,
             [],
+            False,
+            None,
+        ],
+        [
+            "datadog_test-1",
+            "SELECT * FROM ϑings WHERE name = 'test'",
+            r"SELECT \* FROM \[ϑings\] WHERE \[name\]=\@1",
+            False,
+            [],
+            True,
+            "SELECT * FROM ϑings WHERE name = 'test'",
+        ],
+        [
+            "datadog_test-1",
+            "EXEC fredProcParams @Name = 'test'",
+            r"SELECT \* FROM ϑings WHERE name like \@Name",
+            True,
+            [],
+            True,
+            "EXEC fredProcParams @Name = 'test'",
         ],
     ],
 )
@@ -90,8 +113,16 @@ def test_collect_load_activity(
     match_pattern,
     is_proc,
     expected_comments,
+    collect_raw_query_statement,
+    expected_raw_statement,
 ):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    instance = copy(dbm_instance)
+    instance_tags = set(instance.get('tags', []))
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    if collect_raw_query_statement:
+        instance["collect_raw_query_statement"] = {"enabled": True}
+        expected_instance_tags.add("raw_query_statement:enabled")
+    check = SQLServer(CHECK_NAME, {}, [instance])
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=use_autocommit)
     bob_conn = _get_conn_for_user(instance_docker, "bob")
@@ -137,9 +168,6 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    instance_tags = set(dbm_instance.get('tags', []))
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
     event = dbm_activity[0]
@@ -180,6 +208,17 @@ def test_collect_load_activity(
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
+    if collect_raw_query_statement:
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        rqt_events = [s for s in dbm_samples if s['dbm_type'] == "rqt"]
+        assert rqt_events is not None
+        matched_rqt_event = [s for s in rqt_events if s['db']['statement'] == expected_raw_statement]
+        assert len(matched_rqt_event) == 1
+        assert matched_rqt_event[0]['db']['query_signature'], "missing query_signature"
+        assert matched_rqt_event[0]['db']['raw_query_signature'], "missing raw_query_signature"
+        assert matched_rqt_event[0]['sqlserver']['query_hash'], "missing query_hash"
+        assert blocked_row['raw_query_signature'] == matched_rqt_event[0]['db']['raw_query_signature']
+        assert 'raw_statement' not in blocked_row
 
     # assert connections collection
     assert len(event['sqlserver_connections']) > 0
@@ -724,6 +763,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
+@pytest.mark.integration
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.1
@@ -758,6 +798,7 @@ def _expected_dbm_instance_tags(check):
     return check._config.tags
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("activity_enabled", [True, False])
 def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}

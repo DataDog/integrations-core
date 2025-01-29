@@ -93,6 +93,7 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect = self._build_metric_list_to_collect()
         self.collectors = []
         self.last_states_by_server = {}
+        self.metrics_last_collection_timestamp = {}
 
         self.deployment_type = None
         self._mongo_version = None

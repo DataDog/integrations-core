@@ -47,7 +47,13 @@ DATABASE_FILES_METRICS_QUERY = {
 class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-database-files-transact-sql
     @property
+    def include_database_files_metrics(self) -> bool:
+        return self.config.database_metrics_config["db_files_metrics"]["enabled"]
+
+    @property
     def enabled(self):
+        if not self.include_database_files_metrics:
+            return False
         return True
 
     @property
@@ -55,7 +61,11 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
         return [DATABASE_FILES_METRICS_QUERY]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(" f"enabled={self.enabled})"
+        return (
+            f"{self.__class__.__name__}("
+            f"enabled={self.enabled}, "
+            f"include_database_files_metrics={self.include_database_files_metrics})"
+        )
 
     def _build_query_executors(self):
         executors = []
