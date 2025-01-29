@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 37.5.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+* Add tls_ciphers option for http ([#19469](https://github.com/DataDog/integrations-core/pull/19469))
+
+***Fixed***:
+
+* Handle unexpected values for `expires_in` in OAuth Access response ([#19371](https://github.com/DataDog/integrations-core/pull/19371))
+* Drop unused importlib-metadata dependency. ([#19382](https://github.com/DataDog/integrations-core/pull/19382))
+
+## 37.4.0 / 2025-01-16
+
+***Added***:
+
+* Allow for Ciphers to be customizable in the SSLContext creation ([#19312](https://github.com/DataDog/integrations-core/pull/19312))
+
 ## 37.3.0 / 2024-12-26
 
 ***Security***:
@@ -35,13 +53,13 @@
 
 * Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
 
-## 37.0.0 / 2024-09-19
+## 37.0.0 / 2024-09-19 / Agent 7.58.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
 
-## 36.16.0 / 2024-09-30 / Agent 7.58.0
+## 36.16.0 / 2024-09-30
 
 ***Security***:
 

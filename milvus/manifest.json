@@ -39,7 +39,18 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "milvus"
+      ]
+    },
+    "dashboards": {
+      "Milvus Overview": "assets/dashboards/milvus_overview.json"
+    },
+    "monitors": {
+      "DML channel lag": "assets/monitors/dml_channel_lag.json",
+      "Request latency": "assets/monitors/request_latency.json",
+      "Index build latency": "assets/monitors/index_build_latency.json"
     }
   },
   "author": {
