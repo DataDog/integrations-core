@@ -23,8 +23,8 @@ The Okta Workflows integration collects Okta workflow event logs and sends them 
 
    | Parameters           | Description                       |
    |--------------------- |-----------------------------------|
-   | API Token            | The API Key of Okta Workflows.    |
-   | Okta Domain          | The Domain of Okta Workflows.     |
+   | API Token            | The API Key of Okta Workflows    |
+   | Okta Domain          | The Domain of Okta Workflows     |
 
 2. Click the **Save** button to save your settings.
 
