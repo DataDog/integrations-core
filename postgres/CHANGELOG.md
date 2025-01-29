@@ -15,7 +15,7 @@
 * Resolved an issue in `QUERY_PG_CLASS` where multiple locks on the same table in `PG_LOCKS` caused duplicate rows, leading to inaccurate rate metric like `postgresql.rows_inserted`, `postgresql.rows_updated`, or `postgresql.rows_deleted`. ([#19351](https://github.com/DataDog/integrations-core/pull/19351))
 * Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
 
-## 22.4.0 / 2024-12-26
+## 22.4.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 

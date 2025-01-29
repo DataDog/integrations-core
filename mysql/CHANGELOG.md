@@ -13,7 +13,7 @@
 
 * Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
 
-## 14.4.0 / 2024-12-26
+## 14.4.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 
