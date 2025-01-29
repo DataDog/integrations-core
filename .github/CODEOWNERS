@@ -297,6 +297,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mux/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /mux/metadata.csv                                                   @DataDog/saas-integrations @DataDog/documentation
 
+/okta_workflows/                                                     @DataDog/saas-integrations
+/okta_workflows/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
+/okta_workflows/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
+/okta_workflows/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 /palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
