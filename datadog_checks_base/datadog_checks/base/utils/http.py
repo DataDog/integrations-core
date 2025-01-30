@@ -52,6 +52,8 @@ LOGGER = logging.getLogger(__file__)
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
 
+DEFAULT_EXPIRATION = 300
+
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
@@ -92,6 +94,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_protocols_allowed': DEFAULT_PROTOCOL_VERSIONS,
     'tls_verify': True,
+    'tls_ciphers': 'ALL',
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
@@ -153,6 +156,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'tls_ciphers_allowed',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -347,6 +351,14 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
+        ciphers = config.get('tls_ciphers')
+        if ciphers:
+            if 'ALL' in ciphers:
+                updated_ciphers = "ALL"
+            else:
+                updated_ciphers = ":".join(ciphers)
+        self.tls_ciphers_allowed = updated_ciphers
+
     def get(self, url, **options):
         return self._request('get', url, options)
 
@@ -465,6 +477,7 @@ class RequestsWrapper(object):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
+                context.set_ciphers(self.tls_ciphers_allowed)
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -856,8 +869,16 @@ class AuthTokenOAuthReader(object):
 
             # https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
             self._token = response['access_token']
-            self._expiration = get_timestamp() + response['expires_in']
-
+            self._expiration = get_timestamp()
+            try:
+                # According to https://www.rfc-editor.org/rfc/rfc6749#section-5.1, the `expires_in` field is optional
+                self._expiration += _parse_expires_in(response.get('expires_in'))
+            except TypeError:
+                LOGGER.debug(
+                    'The `expires_in` field of the OAuth2 response is not a number, defaulting to %s',
+                    DEFAULT_EXPIRATION,
+                )
+                self._expiration += DEFAULT_EXPIRATION
             return self._token
 
 
@@ -989,6 +1010,21 @@ def quote_uds_url(url):
     parsed = parsed._replace(netloc=netloc, path=path)
 
     return urlunparse(parsed)
+
+
+def _parse_expires_in(token_expiration):
+    if isinstance(token_expiration, int) or isinstance(token_expiration, float):
+        return token_expiration
+    if isinstance(token_expiration, str):
+        try:
+            token_expiration = int(token_expiration)
+        except ValueError:
+            LOGGER.debug('Could not convert %s to an integer', token_expiration)
+    else:
+        LOGGER.debug('Unexpected type for `expires_in`: %s.', type(token_expiration))
+        token_expiration = None
+
+    return token_expiration
 
 
 # For documentation generation

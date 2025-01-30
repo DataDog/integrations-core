@@ -1,1 +1,0 @@
-Add support for `zlib` network compression in the MongoDB integration client with fallback to uncompressed connections.

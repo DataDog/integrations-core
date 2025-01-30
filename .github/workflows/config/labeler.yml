@@ -391,8 +391,12 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/octopus_deploy:
+- octopus_deploy/**/*
 integration/oke:
 - oke/**/*
+integration/okta_workflows:
+- okta_workflows/**/*
 integration/oom_kill:
 - oom_kill/**/*
 integration/openai:
@@ -431,6 +435,8 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/plivo:
+- plivo/**/*
 integration/plaid:
 - plaid/**/*
 integration/podman:
@@ -439,6 +445,8 @@ integration/postfix:
 - postfix/**/*
 integration/postgres:
 - postgres/**/*
+integration/postmark:
+- postmark/**/*
 integration/powerdns_recursor:
 - powerdns_recursor/**/*
 integration/presto:
