@@ -29,7 +29,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 4. Go to the **Settings** tab.
 5. Click on the **Cloud** tab from the left menu.
 6. Click on **Go to the Metabase Store**.
-7. Log in to your **Metabase Store** using Metabase credentials.
+7. Log into your **Metabase Store** using Metabase credentials.
 8. Go to the **Instances** tab.
 9. Click on **DNS alias** section to get the DNS alias value.
 
