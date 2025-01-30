@@ -10,7 +10,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ### Generate API credentials in Metabase
 
-1. Log in to your Metabase cloud instance as an administrator.
+1. Log into your Metabase cloud instance as an administrator.
 2. Click on the gear icon in the upper right corner.
 3. Select **Admin settings**.
 4. Go to the **Settings** tab.
