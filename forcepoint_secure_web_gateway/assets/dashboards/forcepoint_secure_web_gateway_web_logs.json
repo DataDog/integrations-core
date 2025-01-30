@@ -67,7 +67,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -125,7 +125,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -169,7 +169,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@http.url:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@http.url:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -239,7 +239,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@dns.question.name:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@dns.question.name:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -309,7 +309,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@application:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@application:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -379,7 +379,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@city:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@city:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -457,7 +457,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@country:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@country:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -527,7 +527,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -(@usr.name:\"\" AND @lastname:\"\" AND @usr.email:\"\") $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -(@usr.name:\"\" AND @lastname:\"\" AND @usr.email:\"\") $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -564,7 +564,7 @@
                                                     "should_exclude_missing": true
                                                 },
                                                 {
-                                                    "facet": "@devicehostname",
+                                                    "facet": "@usergroup",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -624,7 +624,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@http.url:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@http.url:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -730,7 +730,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@http.url:\"\" $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb -@http.url:\"\" $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -827,7 +827,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -897,7 +897,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action"
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -953,6 +953,146 @@
                         }
                     },
                     {
+                        "id": 4395145002123848,
+                        "definition": {
+                            "title": "Top 10 Client IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 41,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8237711845795366,
+                        "definition": {
+                            "title": "Top 10 Actions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 41,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
                         "id": 5739202543799798,
                         "definition": {
                             "title": "Log details",
@@ -963,7 +1103,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Status $Action",
+                                        "query_string": "source:forcepoint-secure-web-gateway service:forcepoint-swg-swgweb $Client_IP $Destination_IP $User_Name $Action",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -978,42 +1118,6 @@
                                         },
                                         {
                                             "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "http.url",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dns.question.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "usr.email",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "webreputation",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "bgcategories",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "webcategories",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "webcategoryclass",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "application",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "country",
                                             "width": "auto"
                                         },
                                         {
@@ -1039,6 +1143,38 @@
                                         {
                                             "field": "network.destination.ip",
                                             "width": "auto"
+                                        },
+                                        {
+                                            "field": "http.url",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns.question.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "webreputation",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "bgcategories",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "webcategories",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "webcategoryclass",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "application",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "country",
+                                            "width": "auto"
                                         }
                                     ]
                                 }
@@ -1047,7 +1183,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 41,
+                            "y": 45,
                             "width": 12,
                             "height": 5
                         }
@@ -1058,7 +1194,7 @@
                 "x": 0,
                 "y": 4,
                 "width": 12,
-                "height": 47,
+                "height": 51,
                 "is_column_break": true
             }
         }
@@ -1079,12 +1215,6 @@
         {
             "name": "User_Name",
             "prefix": "@usr.name",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "Status",
-            "prefix": "@status",
             "available_values": [],
             "default": "*"
         },
