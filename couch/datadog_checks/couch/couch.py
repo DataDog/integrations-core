@@ -258,9 +258,7 @@ class CouchDB2:
                         if '99' in val:
                             self.gauge("{0}.{1}.99".format(prefix, key), val['99'], queue_tags)
                         else:
-                            self.agent_check.log.debug(
-                                "Queue %s does not have any keys. It will be ignored.", queue
-                            )
+                            self.agent_check.log.debug("Queue %s does not have any keys. It will be ignored.", queue)
                     else:
                         self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)
             elif key == "distribution":
