@@ -281,6 +281,8 @@ integration/incident_io:
 - incident_io/**/*
 integration/istio:
 - istio/**/*
+integration/ivanti_nzta:
+- ivanti_nzta/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
