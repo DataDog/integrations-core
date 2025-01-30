@@ -79,6 +79,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/authorize_net:
 - authorize_net/**/*
+integration/avast:
+- avast/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
 integration/aws_neuron:
