@@ -16,6 +16,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::AI/ML",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
@@ -51,6 +52,13 @@
       "DML channel lag": "assets/monitors/dml_channel_lag.json",
       "Request latency": "assets/monitors/request_latency.json",
       "Index build latency": "assets/monitors/index_build_latency.json"
+    },
+    "saved_views": {
+      "Milvus Logs Overview": "assets/saved_views/logs_overview.json",
+      "Milvus Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "logs": {
+      "source": "milvus"
     }
   },
   "author": {
