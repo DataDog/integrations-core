@@ -20,13 +20,3 @@ def parse_json(payload):
             parsed_json[metric_json["metric"]+suffix] = int(metric_json["points"][-1][-1])
     return parsed_json
 
-
-def debug():
-    env_vars = [
-        "GOFIPS",
-        "OPENSSL_CONF",
-        "OPENSSL_MODULES",
-    ]
-    for var in env_vars:
-        print(f"{var}: {os.getenv(var)}")
-
