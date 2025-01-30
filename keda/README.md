@@ -65,7 +65,7 @@ spec:
 # (...)
 ```
 
-To collect metrics from each Keda component, the above pod annotations needs to be applied to each Keda component pod. Example pod annotations for the Operator pod:
+To collect metrics from each Keda component, the above pod annotations need to be applied to each Keda component pod. Example pod annotations for the Operator pod:
 
 ```yaml
 # Pod manifest from a basic Helm chart deployment
