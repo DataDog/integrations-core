@@ -79,6 +79,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/authorize_net:
 - authorize_net/**/*
+integration/avast:
+- avast/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
 integration/aws_neuron:
@@ -437,6 +439,8 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/plivo:
+- plivo/**/*
 integration/plaid:
 - plaid/**/*
 integration/podman:
