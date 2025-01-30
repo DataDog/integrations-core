@@ -17,7 +17,7 @@ services:
   http-server-fips:
     build:
       context: server
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-win
       args:
         BUILD_TARGET: http-server.exe
     command: ["C:/app/http-server.exe", "ECDHE-RSA-AES128-SHA256"]
@@ -30,7 +30,7 @@ services:
   http-server:
     build:
       context: server
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-win
       args:
         BUILD_TARGET: http-server.exe
     command: ["C:/app/http-server.exe", "ECDHE-RSA-CHACHA20-POLY1305"]
