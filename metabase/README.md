@@ -48,7 +48,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ### Logs
 
-The Metabase integration collects and forwards Metabase activity event logs, view logs and query logs to Datadog.
+The Metabase integration collects and forwards Metabase activity event logs, view logs, and query logs to Datadog.
 
 ### Metrics
 
