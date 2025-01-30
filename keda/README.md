@@ -37,7 +37,7 @@ For the Agent to start collecting metrics, the Keda controller pods need to be a
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `keda.scaler.detail_errors.count` metric is exposed only after a scaler encountered an error.
 
-The only parameter required for configuring the keda check is:
+The only parameter required for configuring the Keda check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8080`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
 
 ```yaml
