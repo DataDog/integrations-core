@@ -66,5 +66,5 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -vv .github/workflows/fips/tests
+        pytest -s -vv .github/workflows/fips/tests
 

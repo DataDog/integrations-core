@@ -21,3 +21,12 @@ def parse_json(payload):
     return parsed_json
 
 
+def debug():
+    env_vars = [
+        "GOFIPS",
+        "OPENSSL_CONF",
+        "OPENSSL_MODULES",
+    ]
+    for var in env_vars:
+        print(f"{var}: {os.getenv(var)}")
+
