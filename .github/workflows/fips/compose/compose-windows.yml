@@ -16,10 +16,10 @@ services:
       retries: 3
   http-server-fips:
     build:
-      context: windows
+      context: server
       dockerfile: Dockerfile
       args:
-        - "BUILD_TARGET=http-server.exe"
+        BUILD_TARGET: http-server.exe
     command: ["C:/app/http-server.exe", "ECDHE-RSA-AES128-SHA256"]
     healthcheck:
       test: "curl -f localhost:443"
@@ -29,10 +29,10 @@ services:
       retries: 3
   http-server:
     build:
-      context: windows
+      context: server
       dockerfile: Dockerfile
       args:
-        - "BUILD_TARGET=http-server.exe"
+        BUILD_TARGET: http-server.exe
     command: ["C:/app/http-server.exe", "ECDHE-RSA-CHACHA20-POLY1305"]
     healthcheck:
       test: "curl -f localhost:443"
