@@ -1,4 +1,4 @@
-id: oci.oke
+id: oke
 backend_only: false
 installation_sources:
   - oci.kubernetes
