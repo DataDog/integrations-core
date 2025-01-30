@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [ivanti-nzta][1].
+This check monitors [Ivanti Neurons for Zero Trust Access (nZTA)][1], which is is a SaaS-delivered zero trust network access solution designed to work with VPN or cloud-first organizations.
 
 ## Setup
 
