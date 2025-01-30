@@ -4,16 +4,14 @@
 
 This integration ingests the following logs:
 
-- Policy events and detection
-- Mail tracking
+- Policy events and detection - These logs provide information about policy events and detection, allowing you to monitor and respond to potential security threats effectively.
+- Mail tracking - These logs provide information about email activities, including accepted and blocked traffic, allowing you to track email messages that have passed through the system and monitor their delivery status.
 
 Use out-of-the-box dashboards to visualize detailed insights into email traffic analysis, real-time threat detection, security detection and observation, and compliance monitoring.
 
 ## Setup
 
-### Configuration
-
-#### Get Credentials of Trend Micro Email Security
+### Generate API credentials in Trend Micro Email Security
 
 1. Log on to the Trend Micro Email Security administrator console.
 2. Navigate to **Administration** > **Service Integration** > **API Access**.
@@ -22,11 +20,16 @@ Use out-of-the-box dashboards to visualize detailed insights into email traffic 
 5. To identify the **Host Region** of your Trend Micro Email Security, please refer this [link][3].
 6. **Username** is **Login ID** of your Trend Micro Email Security console.
 
-#### Add your Trend Micro Email Security Credentials
+### Connect your Trend Micro Email Security Account to Datadog
 
-- Host Region
-- Username
-- API key
+1. Add your host region, username, and API key.
+    | Parameters  | Description                                                           |
+    | ----------- | --------------------------------------------------------------------- |
+    | Host Region | The region of the Trend Micro Email Security administrator console.   |
+    | Username    | The username of the Trend Micro Email Security administrator console. |
+    | API Key     | The API key of the Trend Micro Email Security administrator console.  |
+
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 
