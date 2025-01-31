@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 8.1.0 / 2024-11-20
+## 8.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 8.1.0 / 2024-11-20 / Agent 7.61.0
 
 ***Added***:
 
 * Added support for vSAN metric/event collection in the vSphere integration ([#18117](https://github.com/DataDog/integrations-core/pull/18117))
 
-## 8.0.1 / 2024-10-31
+## 8.0.1 / 2024-10-31 / Agent 7.60.0
 
 ***Fixed***:
 

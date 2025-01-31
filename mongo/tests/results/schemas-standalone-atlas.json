@@ -4,7 +4,7 @@
         "agent_version": "0.0.0",
         "dbms": "mongo",
         "kind": "mongodb_databases",
-        "collection_interval": 600,
+        "collection_interval": 3600,
         "dbms_version": "4.1.13",
         "cloud_metadata": {},
         "tags": [
@@ -314,24 +314,7 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": [
-                            {
-                                "mappings": {
-                                    "dynamic": true,
-                                    "fields": [
-                                        {
-                                            "field": "highlight",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                "name": "cast_fullplot_genres_title",
-                                "queryable": true,
-                                "status": "READY",
-                                "type": "search",
-                                "version": "1"
-                            }
-                        ]
+                        "search_indexes": []
                     },
                     {
                         "name": "bar",
@@ -600,24 +583,7 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": [
-                            {
-                                "mappings": {
-                                    "dynamic": true,
-                                    "fields": [
-                                        {
-                                            "field": "highlight",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                "name": "cast_fullplot_genres_title",
-                                "queryable": true,
-                                "status": "READY",
-                                "type": "search",
-                                "version": "1"
-                            }
-                        ]
+                        "search_indexes": []
                     }
                 ]
             }
@@ -628,7 +594,7 @@
         "agent_version": "0.0.0",
         "dbms": "mongo",
         "kind": "mongodb_databases",
-        "collection_interval": 600,
+        "collection_interval": 3600,
         "dbms_version": "4.1.13",
         "cloud_metadata": {},
         "tags": [
@@ -938,24 +904,7 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": [
-                            {
-                                "mappings": {
-                                    "dynamic": true,
-                                    "fields": [
-                                        {
-                                            "field": "highlight",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                "name": "cast_fullplot_genres_title",
-                                "queryable": true,
-                                "status": "READY",
-                                "type": "search",
-                                "version": "1"
-                            }
-                        ]
+                        "search_indexes": []
                     },
                     {
                         "name": "bar",
@@ -1224,24 +1173,7 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": [
-                            {
-                                "mappings": {
-                                    "dynamic": true,
-                                    "fields": [
-                                        {
-                                            "field": "highlight",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                "name": "cast_fullplot_genres_title",
-                                "queryable": true,
-                                "status": "READY",
-                                "type": "search",
-                                "version": "1"
-                            }
-                        ]
+                        "search_indexes": []
                     }
                 ]
             }

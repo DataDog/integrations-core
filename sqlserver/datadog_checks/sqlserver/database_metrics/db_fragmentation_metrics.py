@@ -14,6 +14,7 @@ DB_FRAGMENTATION_QUERY = {
     "query": """SELECT
         DB_NAME(DDIPS.database_id) as database_name,
         OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name,
+        OBJECT_SCHEMA_NAME(DDIPS.object_id, DDIPS.database_id) as "schema",
         DDIPS.index_id as index_id,
         I.name as index_name,
         DDIPS.fragment_count as fragment_count,
@@ -28,6 +29,7 @@ DB_FRAGMENTATION_QUERY = {
     "columns": [
         {"name": "database_name", "type": "tag"},
         {"name": "object_name", "type": "tag"},
+        {"name": "schema", "type": "tag"},
         {"name": "index_id", "type": "tag"},
         {"name": "index_name", "type": "tag"},
         {"name": "database.fragment_count", "type": "gauge"},

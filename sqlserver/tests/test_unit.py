@@ -754,7 +754,9 @@ def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
-    dataSubmitter.store_db_infos([{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}])
+    dataSubmitter.store_db_infos(
+        [{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}], ["test_db1", "test_db2"]
+    )
     schema1 = {"id": "1"}
     schema2 = {"id": "2"}
     schema3 = {"id": "3"}
@@ -785,6 +787,46 @@ def test_submit_data():
     data = json.loads(submitted_data[0])
     data.pop("timestamp")
     assert deep_compare(data, expected_data)
+
+
+@pytest.mark.parametrize(
+    "db_infos, databases, expected_dbs",
+    [
+        pytest.param(
+            [
+                {"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CI_AS"},
+                {"id": 4, "name": "TEST_DB2", "collation": "SQL_Latin1_General_CP1_CI_AS"},
+            ],
+            ["test_db1", "test_db2"],
+            ["test_db1", "test_db2"],
+            id="case_insensitive",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["TEST_DB1"],
+            [],
+            id="case_sensitive",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["test_db1"],
+            ["test_db1"],
+            id="case_sensitive_lowercase",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "TEST_DB1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["TEST_DB1"],
+            ["TEST_DB1"],
+            id="case_sensitive_uppercase",
+        ),
+    ],
+)
+def test_store_db_infos_case_sensitive(db_infos, databases, expected_dbs):
+    dataSubmitter, _ = set_up_submitter_unit_test()
+    dataSubmitter.db_info.clear()
+
+    dataSubmitter.store_db_infos(db_infos, databases)
+    assert list(dataSubmitter.db_info.keys()) == expected_dbs
 
 
 def test_fetch_throws(instance_docker):

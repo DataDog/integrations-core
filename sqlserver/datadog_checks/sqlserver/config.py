@@ -18,10 +18,6 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
-        self.tags: list[str] = self._build_tags(
-            custom_tags=instance.get('tags', []),
-            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
-        )
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
@@ -107,12 +103,24 @@ class SQLServerConfig:
                 }
             )
         )
+        collect_raw_query_statement_config: dict = instance.get('collect_raw_query_statement', {}) or {}
+        self.collect_raw_query_statement = {
+            "enabled": is_affirmative(collect_raw_query_statement_config.get('enabled', False)),
+            "cache_max_size": int(collect_raw_query_statement_config.get('cache_max_size', 10000)),
+            "samples_per_hour_per_query": int(collect_raw_query_statement_config.get('samples_per_hour_per_query', 1)),
+        }
         self.log_unobfuscated_queries: bool = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans: bool = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
+
+        self.tags: list[str] = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
+        )
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []
@@ -135,7 +143,7 @@ class SQLServerConfig:
             # create unmatchable regex - https://stackoverflow.com/a/1845097/2157429
             return re.compile(r'(?!x)x')
 
-    def _build_tags(self, custom_tags, propagate_agent_tags):
+    def _build_tags(self, custom_tags, propagate_agent_tags, additional_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -151,6 +159,9 @@ class SQLServerConfig:
                 raise ConfigurationError(
                     'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
                 )
+
+        if additional_tags:
+            tags.extend(additional_tags)
         return tags
 
     @staticmethod
