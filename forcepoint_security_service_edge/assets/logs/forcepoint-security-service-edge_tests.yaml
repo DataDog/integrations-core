@@ -47,7 +47,10 @@ tests:
         policyid: ""
         sharedwith: ""
         size: "233926"
-        status: "Internal, Shared, DLP"
+        status:
+        - "Internal"
+        - "Shared"
+        - "DLP"
         syslog:
           hostname: "api.hostserver.com"
           msgid: "cloudsummary"
@@ -113,7 +116,8 @@ tests:
     service: "forcepoint-sse-cloudaudit"
     result:
       custom:
-        action: "DLPScan"
+        action:
+        - "DLPScan"
         activity: ""
         application: "Cloud Apps"
         copies: ""
@@ -133,7 +137,10 @@ tests:
         policyid: ""
         sharedwith: ""
         size: ""
-        status: "Internal, Shared, DLP"
+        status:
+        - "Internal"
+        - "Shared"
+        - "DLP"
         syslog:
           hostname: "api.hostserver.com"
           msgid: "cloudaudit"
@@ -206,8 +213,10 @@ tests:
     service: "forcepoint-sse-access"
     result:
       custom:
-        action: "2FA"
-        activity: "Login"
+        action:
+        - "2FA"
+        activity:
+        - "Login"
         application: "MicroApp"
         details: "User challenged with Multi-Factor Authentication."
         device: "Windows 10"
@@ -256,7 +265,9 @@ tests:
         syslogheader: "<110>1 2024-12-26T09:08:34.105000Z api.hostserver.com NILVALUE NILVALUE access"
         time: 1735204114000
         transactionid: "c4878fefefe4reg2r4tr85dfs [26 Dec 2024 09:08:34]"
-        usergroup: "Admins, System Administrator"
+        usergroup:
+        - "Admins"
+        - "System Administrator"
         usr:
           email: "user123@xyz.com"
           name: "User123"
@@ -327,8 +338,12 @@ tests:
     service: "forcepoint-sse-admin"
     result:
       custom:
-        action: "Agent, Directory"
-        activity: "Search, System"
+        action:
+        - "Agent"
+        - "Directory"
+        activity:
+        - "Search"
+        - "System"
         application: "CloudApp"
         details: ""
         device: "Windows 10"
@@ -425,7 +440,9 @@ tests:
     service: "forcepoint-sse-healthsystem"
     result:
       custom:
-        activity: "Cloudsummary, RestAPI"
+        activity:
+        - "Cloudsummary"
+        - "RestAPI"
         application: "CloudApp"
         device: ""
         deviceguid: ""
@@ -462,7 +479,9 @@ tests:
         syslogheader: "<110>1 2024-12-26T06:37:12.620528Z api.hostserver.com NILVALUE NILVALUE access"
         time: 1735195032000
         transactionid: "77fefe54-1111-1cd22-b51a-fs548ee4r2e [26 Dec 2024 06:37:12]"
-        usergroup: "Admins, System Administrator"
+        usergroup:
+        - "Admins"
+        - "System Administrator"
         usr:
           email: "user123@xyz.com"
           name: "User123"
@@ -512,7 +531,8 @@ tests:
     service: "forcepoint-sse-healthproxy"
     result:
       custom:
-        activity: "Server5xx"
+        activity:
+        - "Server5xx"
         application: "Cloud App"
         device: "Windows 10"
         deviceguid: "11E22EE-1111-11AA-A112-C0BB2211C"
@@ -549,7 +569,9 @@ tests:
         syslogheader: "<110>1 2025-01-07T07:13:57.285663Z api.hostserver.com NILVALUE NILVALUE access"
         time: 1736234037000
         transactionid: "Zfe54r8e4r_fse584r8e41fs5de [07 Jan 2025 07:13:57]"
-        usergroup: "Admins, System Administrator"
+        usergroup:
+        - "Admins"
+        - "System Administrator"
         usr:
           email: "user123@abc.com"
           name: "User123"
@@ -597,7 +619,9 @@ tests:
     service: "forcepoint-sse-healthapi"
     result:
       custom:
-        activity: "RunnerAppxx4, RestAPI"
+        activity:
+        - "RunnerAppxx4"
+        - "RestAPI"
         application: "RunnerApp"
         device: ""
         fileid: "ferjer84e87re1sdfse"
@@ -618,7 +642,9 @@ tests:
         syslogheader: "<110>1 2025-01-05T09:34:03.583951Z api.hostserver.com NILVALUE NILVALUE access"
         time: 1736069643000
         transactionid: "11aabbcc22-121c-48f5-b6e2-111df5s5er5e455 [05 Jan 2025 09:34:03]"
-        usergroup: "Admins, System Administrator"
+        usergroup:
+        - "Admins"
+        - "System Administrator"
         usr:
           email: "jkc.bca@xyz.com"
           name: "jkc.bca"
