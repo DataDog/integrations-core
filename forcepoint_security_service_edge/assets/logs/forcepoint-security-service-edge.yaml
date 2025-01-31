@@ -395,3 +395,49 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
+    - type: grok-parser
+      name: Parse `action` field
+      enabled: true
+      source: action
+      samples:
+        - SmartEdge Proxy
+        - Alert, BlockLogin, Notify
+        - 2FA
+        - Alert, Allow, Suspicioususerlocations
+        - Alert, Allow, Suspicioususerlocations
+      grok:
+        supportRules: ""
+        matchRules: parse_action_field %{data:action:array("",", ")}
+    - type: grok-parser
+      name: Parse `usergroup` field
+      enabled: true
+      source: usergroup
+      samples:
+        - Bitglass Admins, System Administrator, crestdatasys
+        - Bitglass Admins, System Administrator
+        - Bitglass Admins
+      grok:
+        supportRules: ""
+        matchRules: parse_usergroup_field %{data:usergroup:array("",", ")}
+    - type: grok-parser
+      name: Parse `activity` field
+      enabled: true
+      source: activity
+      samples:
+        - Endpoint, System
+        - Add, System
+        - Search, System
+      grok:
+        supportRules: ""
+        matchRules: parse_activity_field %{data:activity:array("",", ")}
+    - type: grok-parser
+      name: Parse `status` field
+      enabled: true
+      source: status
+      samples:
+        - Internal, Shared
+        - Internal, Shared, DLP
+        - Private, DLP
+      grok:
+        supportRules: ""
+        matchRules: parse_status_field %{data:status:array("",", ")}
