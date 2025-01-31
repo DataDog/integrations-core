@@ -1,4 +1,4 @@
-id: "oci.oke"
+id: "oke"
 tests:
   -
     sample: |-
