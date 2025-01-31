@@ -189,10 +189,6 @@ class MongoOperationSamples(DBMAsyncJob):
             # the replica set members and to discover additional members of a replica set.
             self._check.log.debug("Skipping hello operation: %s", operation)
             return False
-        if "explain" in command:
-            # Skip explain operations as explain cannot explain itself
-            self._check.log.debug("Skipping explain operation: %s", operation)
-            return False
 
         return True
 
