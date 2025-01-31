@@ -6,6 +6,7 @@ WORKDIR /app
 COPY . ./
 
 ENV GO111MODULE=off
+ENV WORKDIR=C:/app
 
 # Build the server
 ARG BUILD_TARGET

@@ -49,6 +49,12 @@ func main() {
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
 	}
 
-	fmt.Printf("Serving on https://localhost:8443 using cipher %s with TLSv1.2 enforced\n", tlsCipher)
-	log.Fatal(server.ListenAndServeTLS("./ca.crt", "./ca.key"))
+	fmt.Printf("Serving on https://localhost:443 using cipher %s with TLSv1.2 enforced\n", tlsCipher)
+	// Use absolute path for the certificate and key files
+	// Use environment variables to set the path
+	workdir := os.Getenv("WORKDIR")
+	if workdir == "" {
+		workdir = "."
+	}
+	log.Fatal(server.ListenAndServeTLS(workdir+"/ca.crt", workdir+"/ca.key"))
 }
