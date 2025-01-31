@@ -1,6 +1,5 @@
 id: oke
 backend_only: false
-metric_id: oci.oke
 installation_sources:
   - oci.kubernetes
 facets:
