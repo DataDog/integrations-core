@@ -1,3 +1,5 @@
+# Mimecast
+
 ## Overview
 
 [Mimecast][1] is a cloud-based solution designed to protect organizations from a wide range of email-based threats. The product offers a comprehensive set of security features that help to safeguard against advanced threats, such as phishing, malware, spam, and targeted attacks, while also providing data leak prevention and email continuity services.
@@ -15,13 +17,9 @@ The Mimecast integration seamlessly collects all the above listed logs, channeli
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Mimecast
 
-#### Get Credentials of Mimecast
-
-To find your application's details in Mimecast Email Security:
-
-1. Sign into Mimecast Email Security with your credentials.
+1. Log into your **Mimecast account**.
 2. Navigate to the **Administration Console**, select **Services**, and then choose the **API and Platform Integrations** section.
 3. Proceed to Your **API 2.0 Applications**.
 4. Search for your application in the list provided.
@@ -30,27 +28,26 @@ To find your application's details in Mimecast Email Security:
    - Click the **Generate keys** button of Mimecast API 2.0 tile.
    - Check the **I accept** checkbox, click on **Next**.
    - In **Application Details** step, fill out the following details according to the instructions:
-     - Application Name: Enter the application name of your choice
+     - Application Name: Enter a meaningful name for the application
      - Category: Select **SIEM Integration**
      - Products: Click **Select all** option
      - Application Role: Select **Basic Administrator**
      - Description: Enter the description of your choice
    - In **Notifications**, provide the contact details of your technical administrator and click on **Next**
-   - After clicking on **Add and Generate Keys** there will be pop up window showing Client ID and Client Secret. Please copy those keys to a safe place as they won't be displayed again.
+   - Click on **Add and Generate Keys**. A pop up window appears, showing the client ID and client secret.
 6. If the application is present, click on its name.
-7. Click the **Manage API 2.0 credentials** button and click **Generate**. This generates a new Client ID and Client Secret. Please copy those keys to a safe place as they won't be displayed again.
+7. Click the **Manage API 2.0 credentials** button and click **Generate**. This generates a new Client ID and Client Secret.
 
-#### Mimecast DataDog Integration Configuration
+### Connect your Mimecast account to Datadog
 
-Configure the Datadog endpoint to forward Mimecast logs to Datadog.
+1. Add your Mimecast credentials.
 
-1. Navigate to `Mimecast`.
-2. Add your Mimecast credentials.
+    | Parameters | Description                                                           |
+    | ------------------- | ------------------------------------------------------------ |
+    | Client ID           | The client ID of your registered application on Mimecast.     |
+    | Client Secret       | The client secret of your registered application on Mimecast. |
 
-| Mimecast Parameters | Description                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| Client ID           | The Client ID of your registered application on mimecast     |
-| Client Secret       | The Client Secret of your registered application on mimecast |
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
@@ -72,7 +69,7 @@ The Mimecast integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][2].
+Need help? Contact [Datadog Support][2].
 
 [1]: https://www.mimecast.com/
 [2]: https://docs.datadoghq.com/help/

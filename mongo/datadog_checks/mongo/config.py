@@ -216,11 +216,12 @@ class MongoConfig(object):
         max_collections = self._schemas_config.get('max_collections')
         return {
             'enabled': enabled,
-            'collection_interval': self._schemas_config.get('collection_interval', 600),
+            'collection_interval': self._schemas_config.get('collection_interval', 3600),
             'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
             'sample_size': int(self._schemas_config.get('sample_size', 10)),
             'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
+            'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
         }
 
     def _get_database_autodiscovery_config(self, instance):

@@ -17,5 +17,7 @@ def dd_environment():
     with docker_run(
         compose_file=compose_file,
         conditions=[CheckDockerLogs('spark-app-hudi', 'finished: show at script.scala:163')],
+        attempts=5,
+        attempts_wait=5,
     ):
         yield CHECK_CONFIG, {'use_jmx': True}
