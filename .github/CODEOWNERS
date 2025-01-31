@@ -442,6 +442,8 @@ docs/developer/process/integration-release.md                         @DataDog/a
 /.github/workflows/                                                   @DataDog/agent-integrations
 /.github/workflows/build-deps.yml                                     @DataDog/agent-delivery
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
+/.github/CODEOWNERS                                                   @DataDog/agent-integrations @DataDog/saas-integrations
+/.github/workflows/config/labeler.yml                                 @DataDog/agent-integrations @DataDog/saas-integrations
 # Dev container
 /.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations
 /.devcontainer/dbm                                                     @DataDog/database-monitoring-agent
