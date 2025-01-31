@@ -47,6 +47,7 @@ class TestKubeAPIServerMetrics:
         'admission_controller_admission_duration_seconds.count',
         'request_duration_seconds.sum',
         'request_duration_seconds.count',
+        'process_cpu_total',
         'process_resident_memory_bytes',
         'process_virtual_memory_bytes',
         'etcd.db.total_size',
