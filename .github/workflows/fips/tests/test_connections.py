@@ -17,7 +17,4 @@ def test_connections():
     parsed_json = parse_json(result.stdout)
     expected_json = FIPS_AGENT if AGENT_FIPS_MODE else REGULAR_AGENT
 
-    from conftest import debug
-    debug()
-
     assert parsed_json == expected_json

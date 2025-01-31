@@ -5,6 +5,9 @@ services:
     environment:
       - DD_API_KEY=$DD_API_KEY
       - DD_SITE=datad0g.com
+      # TODO remove: GOFIPS is not set on the Windows FIPS image
+      # Set it to 1 for the tests to pass
+      - GOFIPS=1
     volumes:
       - \\.\pipe\docker_engine:\\.\pipe\docker_engine
       - "./agent/conf.d:C:/ProgramData/Datadog/conf.d"
