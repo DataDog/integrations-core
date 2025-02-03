@@ -36,6 +36,7 @@ def select_docker_compose_file(env_version):
     # Version 1.23 and above
     return 'docker-compose-v3.yml'
 
+
 @pytest.fixture(scope="session")
 def dd_environment():
     """
