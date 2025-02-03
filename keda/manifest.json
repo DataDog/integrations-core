@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the health and performance of Keda",
+    "description": "Monitor the health and performance of KEDA",
     "title": "Keda",
     "media": [],
     "classifier_tags": [
