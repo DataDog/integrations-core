@@ -134,7 +134,7 @@
                                 "unit": "minute",
                                 "value": 5
                             },
-                            "title": "Keda Operators",
+                            "title": "KEDA Operators",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
