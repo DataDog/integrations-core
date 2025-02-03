@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Keda\n\nKEDA (Kubernetes Event-Driven Autoscaling) is an open-source project that enables Kubernetes workloads to scale dynamically based on event-driven metrics from sources like message queues, databases, or cloud services.\n\nThis KEDA dashboard provides real-time visual insights into scaling activity, queue depths, and trigger metrics, helping users monitor and optimize their autoscaling behavior effectively.\n\n**Further reading:**\n\n- [Datadog Keda Integration Documentation](https://docs.datadoghq.com/integrations/keda/)\n- [Keda Docs](https://keda.sh/docs/latest/concepts/)\n- [Keda Monitoring Docs](https://keda.sh/docs/latest/integrations/prometheus/)",
+    "description": "## KEDA\n\nKEDA (Kubernetes Event-Driven Autoscaling) is an open-source project that enables Kubernetes workloads to scale dynamically based on event-driven metrics from sources like message queues, databases, or cloud services.\n\nThis KEDA dashboard provides real-time visual insights into scaling activity, queue depths, and trigger metrics, helping users monitor and optimize their autoscaling behavior effectively.\n\n**Further reading:**\n\n- [Datadog KEDA Integration Documentation](https://docs.datadoghq.com/integrations/keda/)\n- [KEDA Docs](https://keda.sh/docs/latest/concepts/)\n- [KEDA Monitoring Docs](https://keda.sh/docs/latest/integrations/prometheus/)",
     "layout_type": "ordered",
     "template_variables": [
         {
