@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-11-05",
+    "last_updated_at": "2024-11-05",
+    "title": "Slurm Partition Down State",
+    "description": "Slurm Partition can be monitored with the sinfo command on a slurmctld. This monitor alerts when a Slurm partition is reported to be in a down state by a slurmctld.",
+    "definition": {
+        "name": "[Slurm] Partition in Down State",
+        "type": "query alert",
+        "query": "min(last_10m):avg:slurm.partition.info{slurm_partition_state:down} by {host,slurm_partition_name}.fill(null) >= 1",
+        "message": "{{#is_alert}}\n\nSlurm Partititon:{{slurm_partition_name.name}} has been reported as down for the last 10 minutes by host:{{host.name}}\n\n{{/is_alert}}\n\n{{#is_recovery}}\n\nSlurm Partititon:{{slurm_partition_name.name}} from host: {{host.name}} is no longer in Down state. \n\n{{/is_recovery}}",
+        "tags": [
+            "integration:slurm"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 1
+            },
+            "notify_audit": false,
+            "on_missing_data": "resolve",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:slurm"
+    ]
+}

@@ -9,12 +9,17 @@ import time
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments, extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -23,6 +28,8 @@ except ImportError:
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
+
+TAIL_TEXT_SIZE = 200
 
 CONNECTIONS_QUERY = """\
 SELECT
@@ -59,11 +66,16 @@ SELECT
         ELSE req.statement_end_offset END
             - req.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    CASE
+        WHEN LEN(qt.text) > {proc_char_limit} THEN RIGHT(qt.text, {tail_text_size})
+    ELSE ''
+    END AS tail_text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
     sess.is_user_process as is_user_process,
+    {input_buffer_columns}
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -71,6 +83,7 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
+    {input_buffer_join}
 WHERE
     sess.session_id != @@spid AND
     sess.status != 'sleeping'
@@ -139,6 +152,12 @@ DM_EXEC_REQUESTS_COLS = [
     "context_info",
 ]
 
+INPUT_BUFFER_COLUMNS = [
+    "input_buffer.event_info as raw_statement",
+]
+
+INPUT_BUFFER_JOIN = "OUTER APPLY sys.dm_exec_input_buffer(req.session_id, req.request_id) input_buffer"
+
 
 def _hash_to_hex(hash) -> str:
     return binascii.hexlify(hash).decode("utf-8")
@@ -177,6 +196,12 @@ class SqlserverActivity(DBMAsyncJob):
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
 
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+        self._raw_statement_text_cache = RateLimitingTTLCache(
+            maxsize=self._config.collect_raw_query_statement["cache_max_size"],
+            ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
+        )
+
     def _close_db_conn(self):
         pass
 
@@ -208,11 +233,14 @@ class SqlserverActivity(DBMAsyncJob):
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_activity(self, cursor, exec_request_columns):
+    def _get_activity(self, cursor, exec_request_columns, input_buffer_columns, input_buffer_join):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
             proc_char_limit=self._config.stored_procedure_characters_limit,
+            tail_text_size=TAIL_TEXT_SIZE,
+            input_buffer_columns=input_buffer_columns,
+            input_buffer_join=input_buffer_join,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -255,12 +283,68 @@ class SqlserverActivity(DBMAsyncJob):
             normalized_rows.append(row)
         return normalized_rows
 
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _rows_to_raw_statement_events(self, rows):
+        for row in rows:
+            query_signature = row.get('query_signature')
+            if not query_signature:
+                continue
+
+            raw_statement = row.pop("raw_statement", None)
+            if not raw_statement:
+                self.log.debug("No raw statement found for query_signature=%s", query_signature)
+                continue
+
+            raw_query_signature = compute_sql_signature(raw_statement)
+            row["raw_query_signature"] = raw_query_signature
+            raw_statement_key = (query_signature, raw_query_signature)
+
+            if not self._raw_statement_text_cache.acquire(raw_statement_key):
+                continue
+
+            yield {
+                "timestamp": time.time() * 1000,
+                "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
+                "ddsource": "sqlserver",
+                "dbm_type": "rqt",
+                "ddtags": ",".join(self.tags),
+                'service': self._config.service,
+                "db": {
+                    "instance": row.get('database_name', None),
+                    "query_signature": query_signature,
+                    "raw_query_signature": raw_query_signature,
+                    "statement": raw_statement,
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                        "comments": row.get('dd_comments', None),
+                    },
+                    "procedure_signature": row.get("procedure_signature"),
+                    "procedure_name": row.get("procedure_name"),
+                },
+                "sqlserver": {
+                    "query_hash": row.get("query_hash"),
+                    "query_plan_hash": row.get("query_plan_hash"),
+                },
+            }
+
     def _get_exec_requests_cols_cached(self, cursor, expected_cols):
         if self._exec_requests_cols_cached:
             return self._exec_requests_cols_cached
 
         self._exec_requests_cols_cached = self._get_available_requests_columns(cursor, expected_cols)
         return self._exec_requests_cols_cached
+
+    def _get_input_buffer_columns_and_join(self):
+        input_buffer_columns = ""
+        input_buffer_join = ""
+
+        if self._collect_raw_query_statement:
+            input_buffer_columns = ", ".join(INPUT_BUFFER_COLUMNS) + ","
+            input_buffer_join = INPUT_BUFFER_JOIN
+
+        return input_buffer_columns, input_buffer_join
 
     def _get_available_requests_columns(self, cursor, all_expected_columns):
         cursor.execute("select TOP 0 * from sys.dm_exec_requests")
@@ -286,6 +370,10 @@ class SqlserverActivity(DBMAsyncJob):
             )
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+            if 'tail_text' in row:
+                appended_comments, _ = extract_sql_comments(row['tail_text'])
+                if appended_comments:
+                    comments = list(set(comments + appended_comments))
             if row['is_proc'] and 'text' in row:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
@@ -356,6 +444,7 @@ class SqlserverActivity(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }
@@ -374,8 +463,14 @@ class SqlserverActivity(DBMAsyncJob):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
-                rows = self._get_activity(cursor, request_cols)
+                input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join()
+                rows = self._get_activity(cursor, request_cols, input_buffer_columns, input_buffer_join)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
+                if self._collect_raw_query_statement:
+                    for raw_statement_event in self._rows_to_raw_statement_events(normalized_rows):
+                        self._check.database_monitoring_query_sample(
+                            json.dumps(raw_statement_event, default=default_json_event_encoding)
+                        )
                 event = self._create_activity_event(normalized_rows, connections)
                 payload = json.dumps(event, default=default_json_event_encoding)
                 self._check.database_monitoring_query_activity(payload)

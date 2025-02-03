@@ -84,7 +84,7 @@ class MongoDb(AgentCheck):
 
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
-        self._config = MongoConfig(self.instance, self.log)
+        self._config = MongoConfig(self.instance, self.log, self.init_config)
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
@@ -93,6 +93,7 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect = self._build_metric_list_to_collect()
         self.collectors = []
         self.last_states_by_server = {}
+        self.metrics_last_collection_timestamp = {}
 
         self.deployment_type = None
         self._mongo_version = None
@@ -246,9 +247,16 @@ class MongoDb(AgentCheck):
         '''
         Return the internal resource tags for the database instance.
         '''
-        if not self._resolved_hostname:
-            return []
-        return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
+        tags = []
+        if self._resolved_hostname:
+            tags.append(f"dd.internal.resource:database_instance:{self._resolved_hostname}")
+        if self._config.cloud_metadata:
+            aws = self._config.cloud_metadata.get('aws')
+            if instance_endpoint := aws.get('instance_endpoint'):
+                tags.append(f"dd.internal.resource:aws_docdb_instance:{instance_endpoint}")
+            if cluster_identifier := aws.get('cluster_identifier'):
+                tags.append(f"dd.internal.resource:aws_docdb_cluster:{cluster_identifier}")
+        return tags
 
     def _get_tags(self, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)

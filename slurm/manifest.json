@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a1e88183-da10-4651-bac8-843bdb640af7",
+  "app_id": "slurm",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Slurm cluster resource usage, job statuses, and system performance.",
+    "title": "Slurm",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Automation",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 25922615,
+      "source_type_name": "Slurm",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "slurm.",
+        "check": [
+          "slurm.partition.info",
+          "slurm.sacct.job.info",
+          "slurm.sdiag.server_thread_count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+          "slurmctld"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "monitors": {
+      "Slurm Partition Down State": "assets/monitors/slurm_partition.json",
+      "Slurm DBD Agent Queue Size": "assets/monitors/slurm_dbd_agent.json"
+    },
+    "dashboards": {
+      "Slurm Overview": "assets/dashboards/slurm_overview.json"
+    },
+    "saved_views": {
+      "Slurm Logs Overview": "assets/saved_views/slurm_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

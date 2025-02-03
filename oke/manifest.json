@@ -8,12 +8,14 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "OKE is an Oracle-managed container orchestration service.",
+    "description": "OKE is an OCI managed container orchestration service.",
     "title": "Oracle Container Engine for Kubernetes",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
       "Category::Containers",
       "Category::Kubernetes",
+      "Category::Metrics",
       "Category::Oracle",
       "Category::Orchestration",
       "Supported OS::Linux",
@@ -46,6 +48,9 @@
       },
       "source_type_id": 10255,
       "auto_install": true
+    },
+    "dashboards": {
+      "OCI OKE Overview": "assets/dashboards/oci_oke_overview.json"
     }
   }
 }

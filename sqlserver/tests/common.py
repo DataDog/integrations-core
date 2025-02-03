@@ -25,7 +25,6 @@ from datadog_checks.sqlserver.const import (
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
-from datadog_checks.sqlserver.queries import get_query_file_stats
 
 from .utils import is_always_on
 
@@ -64,12 +63,18 @@ SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
 SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
 
 
-def get_expected_file_stats_metrics():
-    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION, SQLSERVER_ENGINE_EDITION)
-    return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
-
-
-EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
+EXPECTED_FILE_STATS_METRICS = [
+    'sqlserver.files.io_stall',
+    'sqlserver.files.read_io_stall_queued',
+    'sqlserver.files.write_io_stall_queued',
+    'sqlserver.files.read_io_stall',
+    'sqlserver.files.write_io_stall',
+    'sqlserver.files.read_bytes',
+    'sqlserver.files.written_bytes',
+    'sqlserver.files.reads',
+    'sqlserver.files.writes',
+    'sqlserver.files.size_on_disk',
+]
 
 # SQL Server incremental sql fraction metrics require diffs in order to calculate
 # & report the metric, which means this requires a special unit/integration test coverage
@@ -245,10 +250,7 @@ INIT_CONFIG_ALT_TABLES = {
 
 OPERATION_TIME_METRICS = [
     'simple_metrics',
-    'database_stats_metrics',
     'fraction_metrics',
-    'db_file_space_usage_metrics',
-    'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
 
@@ -318,11 +320,4 @@ def get_operation_time_metrics(instance):
     Return a list of all operation time metrics
     """
     operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
-    if instance.get('include_task_scheduler_metrics', False):
-        operation_time_metrics.append('os_schedulers_metrics')
-        operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_ao_metrics', False):
-        operation_time_metrics.append('availability_groups_metrics')
-    if instance.get('include_master_files_metrics', False):
-        operation_time_metrics.append('master_database_file_stats_metrics')
     return operation_time_metrics

@@ -271,7 +271,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'postgres_rows': rows,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
-                "ddagenthostname": self._check.agent_hostname,
+                'ddagenthostname': self._check.agent_hostname,
+                'service': self._config.service,
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -616,6 +617,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
+                'service': self._config.service,
                 "db": {
                     "instance": row['datname'],
                     "query_signature": row['query_signature'],

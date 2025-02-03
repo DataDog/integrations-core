@@ -14,7 +14,7 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
@@ -263,42 +263,6 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
 
 
 @pytest.mark.parametrize(
-    'col_val_row_1, col_val_row_2, col_val_row_3',
-    [
-        pytest.param(256, 1024, 1720, id='Valid column value 0'),
-        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
-        pytest.param(512, 0, 256, id='Valid column value 2'),
-        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
-    ],
-)
-def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
-    Row = namedtuple('Row', ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc'])
-    mock_rows = [
-        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', col_val_row_1, -1, 0, 'ONLINE'),
-        Row('tempdb', 1, 0, '/var/opt/mssql/data/tempdb.mdf', col_val_row_2, -1, 0, 'ONLINE'),
-        Row('msdb', 1, 0, '/var/opt/mssql/data/MSDBData.mdf', col_val_row_3, -1, 0, 'ONLINE'),
-    ]
-    mock_cols = ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc']
-    mock_metric_obj = SqlMasterDatabaseFileStats(
-        cfg_instance=mock.MagicMock(dict),
-        base_name=None,
-        report_function=mock.MagicMock(),
-        column='size',
-        logger=None,
-    )
-    with mock.patch.object(
-        SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
-    ) as mock_fetch_metric:
-        errors = 0
-        try:
-            mock_fetch_metric(mock_rows, mock_cols)
-        except Exception as e:
-            errors += 1
-            raise AssertionError('{}'.format(e))
-        assert errors < 1
-
-
-@pytest.mark.parametrize(
     'base_name',
     [
         pytest.param('Buffer cache hit ratio base', id='base_name valid'),
@@ -522,19 +486,6 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
 def test_split_sqlserver_host(instance_host, split_host, split_port):
     s_host, s_port = split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
-
-
-def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
-    instance_docker['database'] = 'mAsTeR'
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    dd_run_check(sqlserver_check)
-    expected_tags = sqlserver_check._config.tags + [
-        'database_recovery_model_desc:SIMPLE',
-        'database_state_desc:ONLINE',
-        'database:{}'.format(instance_docker['database']),
-        'db:{}'.format(instance_docker['database']),
-    ]
-    aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 @pytest.mark.parametrize(
@@ -803,7 +754,9 @@ def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
-    dataSubmitter.store_db_infos([{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}])
+    dataSubmitter.store_db_infos(
+        [{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}], ["test_db1", "test_db2"]
+    )
     schema1 = {"id": "1"}
     schema2 = {"id": "2"}
     schema3 = {"id": "3"}
@@ -834,6 +787,46 @@ def test_submit_data():
     data = json.loads(submitted_data[0])
     data.pop("timestamp")
     assert deep_compare(data, expected_data)
+
+
+@pytest.mark.parametrize(
+    "db_infos, databases, expected_dbs",
+    [
+        pytest.param(
+            [
+                {"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CI_AS"},
+                {"id": 4, "name": "TEST_DB2", "collation": "SQL_Latin1_General_CP1_CI_AS"},
+            ],
+            ["test_db1", "test_db2"],
+            ["test_db1", "test_db2"],
+            id="case_insensitive",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["TEST_DB1"],
+            [],
+            id="case_sensitive",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["test_db1"],
+            ["test_db1"],
+            id="case_sensitive_lowercase",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "TEST_DB1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["TEST_DB1"],
+            ["TEST_DB1"],
+            id="case_sensitive_uppercase",
+        ),
+    ],
+)
+def test_store_db_infos_case_sensitive(db_infos, databases, expected_dbs):
+    dataSubmitter, _ = set_up_submitter_unit_test()
+    dataSubmitter.db_info.clear()
+
+    dataSubmitter.store_db_infos(db_infos, databases)
+    assert list(dataSubmitter.db_info.keys()) == expected_dbs
 
 
 def test_fetch_throws(instance_docker):

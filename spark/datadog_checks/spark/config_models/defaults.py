@@ -32,6 +32,14 @@ def instance_disable_legacy_cluster_tag():
     return False
 
 
+def instance_disable_spark_job_stage_tags():
+    return False
+
+
+def instance_disable_spark_stage_metrics():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
 

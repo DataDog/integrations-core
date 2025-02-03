@@ -1102,6 +1102,7 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     # CHANGE
     topology_link1 = {
         'id': device_id + ':1.216',
+        'integration': 'snmp',
         'source_type': 'lldp',
         "local": {
             "device": {'dd_id': device_id},
@@ -1114,6 +1115,7 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     }
     topology_link2 = {
         'id': device_id + ':11.217',
+        'integration': 'snmp',
         'source_type': 'lldp',
         "local": {
             "device": {'dd_id': device_id},
@@ -1286,6 +1288,7 @@ def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
 
     topology_link1 = {
         'id': device_id + ':1.5',
+        'integration': 'snmp',
         'source_type': 'cdp',
         "local": {
             "device": {'dd_id': device_id},
@@ -1303,6 +1306,7 @@ def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
     }
     topology_link2 = {
         'id': device_id + ':2.3',
+        'integration': 'snmp',
         'source_type': 'cdp',
         "local": {
             "device": {'dd_id': device_id},
@@ -1346,6 +1350,7 @@ def test_e2e_core_metadata_cisco_cdp_lldp(dd_agent_check):
 
     topology_link = {
         'id': device_id + ':7.1',
+        'integration': 'snmp',
         'source_type': 'lldp',
         "local": {
             "device": {'dd_id': device_id},

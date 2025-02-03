@@ -5,14 +5,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+import os
 from typing import Any  # noqa: F401
 
 import mock
 import pytest
-from six import PY3
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
+
+from .utils import BaseModelTest
 
 
 def test_instance():
@@ -668,11 +670,7 @@ class TestTags:
 
         assert normalized_tags is not tags
 
-        if PY3:
-            assert normalized_tag == tag.decode('utf-8')
-        else:
-            # Ensure no new allocation occurs
-            assert normalized_tag is tag
+        assert normalized_tag == tag.decode('utf-8')
 
     def test_unicode_string(self):
         check = AgentCheck()
@@ -683,12 +681,7 @@ class TestTags:
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
-
-        if PY3:
-            # Ensure no new allocation occurs
-            assert normalized_tag is tag
-        else:
-            assert normalized_tag == tag.encode('utf-8')
+        assert normalized_tag is tag
 
     def test_unicode_device_name(self):
         check = AgentCheck()
@@ -698,7 +691,7 @@ class TestTags:
         normalized_tags = check._normalize_tags_type(tags, device_name)
         normalized_device_tag = normalized_tags[0]
 
-        assert isinstance(normalized_device_tag, str if PY3 else bytes)
+        assert isinstance(normalized_device_tag, str)
 
     def test_duplicated_device_name(self):
         check = AgentCheck()
@@ -731,11 +724,7 @@ class TestTags:
         external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
         check.set_external_tags(external_host_tags)
 
-        if PY3:
-            datadog_agent.assert_external_tags(u'hostnam\xe9', {'src_name': ['key1:val1']})
-        else:
-            datadog_agent.assert_external_tags('hostnam\xc3\xa9', {'src_name': ['key1:val1']})
-
+        datadog_agent.assert_external_tags(u'hostnam\xe9', {'src_name': ['key1:val1']})
         datadog_agent.assert_external_tags_count(1)
 
     @pytest.mark.parametrize(
@@ -1098,17 +1087,6 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_shared is shared_config
 
 
-if PY3:
-
-    from .utils import BaseModelTest
-
-else:
-
-    class BaseModelTest:
-        def __init__(self, **kwargs):
-            pass
-
-
 @pytest.mark.parametrize(
     "check_instance_config, default_instance_config, log_lines, unknown_options",
     [
@@ -1316,3 +1294,19 @@ def test_detect_typos_configuration_models(
         assert "Detected potential typo in configuration option" not in caplog.text
 
     assert typos == set(unknown_options)
+
+
+def test_env_var_logic_default():
+    with mock.patch.dict('os.environ', {'GOFIPS': '0'}):
+        AgentCheck()
+        assert os.getenv('OPENSSL_CONF', None) is None
+        assert os.getenv('OPENSSL_MODULES', None) is None
+
+
+def test_env_var_logic_preset():
+    preset_conf = 'path/to/openssl.cnf'
+    preset_modules = 'path/to/ossl-modules'
+    with mock.patch.dict('os.environ', {'GOFIPS': '1', 'OPENSSL_CONF': preset_conf, 'OPENSSL_MODULES': preset_modules}):
+        AgentCheck()
+        assert os.getenv('OPENSSL_CONF', None) == preset_conf
+        assert os.getenv('OPENSSL_MODULES', None) == preset_modules

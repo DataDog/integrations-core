@@ -31,7 +31,9 @@ def dd_environment():
         build=True,
         endpoints="{}/stats".format(URL),
         log_patterns=['front-envoy(.*?)all dependencies initialized. starting workers'],
+        sleep=10,
         attempts=5,
+        attempts_wait=10,
     ):
         # Exercising envoy a bit will trigger extra metrics
         requests.get('http://{}:8000/service/1'.format(HOST))

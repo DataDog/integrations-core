@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2024-10-16",
+    "last_updated_at": "2024-10-16",
+    "title": "High replication lag",
+    "tags": [
+      "integration:mongodb"
+    ],
+    "description": "This monitor tracks the replication lag on a MongoDB replica set to alert when it is high.",
+    "definition": {
+      "message": "MongoDB Cluster {{clustername.name}} member {{member.name}} replication lag is high. The replication lag is {{value}} seconds.",
+      "name": "[MongoDB] High replication lag",
+      "options": {
+        "escalation_message": "",
+        "include_tags": true,
+        "locked": false,
+        "new_host_delay": 300,
+        "no_data_timeframe": null,
+        "notify_audit": false,
+        "notify_no_data": false,
+        "renotify_interval": "0",
+        "require_full_window": true,
+        "thresholds": {
+          "critical": 120,
+          "warning": 60
+        },
+        "timeout_h": 0
+      },
+      "query": "avg(last_5m):100 * avg:mongodb.replset.optime_lag{*} by {clustername,member} > 120",
+      "tags": [
+        "integration:mongodb"
+      ],
+      "type": "query alert"
+    }
+  }

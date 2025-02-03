@@ -21,7 +21,7 @@ jobs:
           DD_API_KEY: "${{ secrets.DD_API_KEY }}"
           DD_HOSTNAME: "none"
           DD_INSIDE_CI: "true"
-          DD_LOG_LEVEL: "trace"
+          DD_LOG_LEVEL: "warn"
 
     steps:
     - uses: actions/checkout@v4

@@ -25,6 +25,11 @@
         "media_type": "image",
         "caption": "OpenAI Dashboard Tokens and Cost",
         "image_url": "images/openai_dash_tokens_cost.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Cost Usage",
+        "image_url": "images/openai_cost_dashboard_sample.png"
       }
     ],
     "classifier_tags": [
@@ -37,8 +42,7 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Offering::Integration",
-      "Product::LLM Observability"
+      "Offering::Integration"
     ],
     "resources": [
       {
@@ -74,7 +78,8 @@
     },
     "dashboards": {
       "OpenAI Overview Dashboard": "assets/dashboards/overview_dashboard.json",
-      "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json"
+      "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json",
+      "OpenAI Cost Overview": "assets/dashboards/cost_overview_dashboard.json"
     },
     "monitors": {
       "OpenAI API usage is approaching rate limit": "assets/monitors/request_limits.json",

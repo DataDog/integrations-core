@@ -59,8 +59,8 @@ def test_load():
 
         yaml_config_safe = list(safe_yaml_load_all(stream))
         yaml_config_native = list(yaml.load_all(stream))
-        assert yaml_config_safe is not []
-        assert yaml_config_native is not []
+        assert yaml_config_safe != []
+        assert yaml_config_native != []
         assert len(yaml_config_safe) == len(yaml_config_native)
         for safe, native in zip(yaml_config_safe, yaml_config_native):
             assert safe == native

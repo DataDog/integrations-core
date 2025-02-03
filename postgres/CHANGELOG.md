@@ -2,11 +2,103 @@
 
 <!-- towncrier release notes start -->
 
-## 21.0.0 / 2024-10-01
+## 22.5.1 / 2025-01-29
+
+***Fixed***:
+
+* Revert "Upgrade postgres to psycopg3" due to instability in testing ([#19499](https://github.com/DataDog/integrations-core/pull/19499))
+
+## 22.5.0 / 2025-01-25
+
+***Added***:
+
+* Upgrade psycopg to version 3 for Postgres integration ([#19322](https://github.com/DataDog/integrations-core/pull/19322))
+* Add index state attributes (is_unique, is_exclusion, is_immediate, is_clustered, is_valid, is_checkxmin, is_ready, is_live, is_replident, is_partial) from pg_index to PostgreSQL schema collection for enhanced index property visibility. ([#19406](https://github.com/DataDog/integrations-core/pull/19406))
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+***Fixed***:
+
+* Resolved an issue in `QUERY_PG_CLASS` where multiple locks on the same table in `PG_LOCKS` caused duplicate rows, leading to inaccurate rate metric like `postgresql.rows_inserted`, `postgresql.rows_updated`, or `postgresql.rows_deleted`. ([#19351](https://github.com/DataDog/integrations-core/pull/19351))
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 22.4.0 / 2024-12-26 / Agent 7.62.0
+
+***Added***:
+
+* Add postgresql.relation.xmin metric ([#19218](https://github.com/DataDog/integrations-core/pull/19218))
+
+***Fixed***:
+
+* Fix check for Postgres collect query activity to avoid bugs with in-flight duration and missing blocking pids ([#19271](https://github.com/DataDog/integrations-core/pull/19271))
+
+## 22.3.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Submit database_hostname with database instance and metrics for MySQL, Postgres, and SQLServer ([#18969](https://github.com/DataDog/integrations-core/pull/18969))
+* Track logical replication slot catalog_xmin age ([#19083](https://github.com/DataDog/integrations-core/pull/19083))
+
+***Fixed***:
+
+* Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL. ([#19061](https://github.com/DataDog/integrations-core/pull/19061))
+
+## 22.2.0 / 2024-11-06 / Agent 7.60.0
+
+***Added***:
+
+* Include port as part of database instance metadata for MySQL and Postgres ([#18966](https://github.com/DataDog/integrations-core/pull/18966))
+
+## 22.1.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied to query metrics, query samples and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+
+***Fixed***:
+
+* Use specific databases for template on postgres ignore ([#18807](https://github.com/DataDog/integrations-core/pull/18807))
+* Fix unicode decode error from Azure PostgreSQL Flexible Server ([#18938](https://github.com/DataDog/integrations-core/pull/18938))
+
+## 22.0.3 / 2024-10-23 / Agent 7.59.0
+
+***Fixed***:
+
+* Fix `UnboundLocalError` in postgres schema collection, ensuring proper reset of `_is_schemas_collection_in_progress` to allow consecutive collections. ([#18870](https://github.com/DataDog/integrations-core/pull/18870))
+
+## 22.0.2 / 2024-10-18
+
+***Fixed***:
+
+* Revert "Parse each row of pg_stat_activity separately inside a try/catch (#18762)" ([#18866](https://github.com/DataDog/integrations-core/pull/18866))
+
+## 22.0.1 / 2024-10-14
+
+***Fixed***:
+
+* Wrap schema collection attempt in try/except block to catch collection exceptions ([#18788](https://github.com/DataDog/integrations-core/pull/18788))
+
+## 22.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+* Add `keep_json_path` to `obfuscator_options` to allow users to control whether JSON paths following JSON operators in SQL statements should be obfuscated. By default, these paths are treated as literals and are obfuscated to `?`. ([#18726](https://github.com/DataDog/integrations-core/pull/18726))
+* Add additional debug logging to help with schema collection investigations ([#18754](https://github.com/DataDog/integrations-core/pull/18754))
+* Add Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+***Fixed***:
+
+* Parse each row of `pg_stat_activity` separately inside a `try`/`catch` to avoid crashing on bad UTF8 data. ([#18762](https://github.com/DataDog/integrations-core/pull/18762))
+
+## 21.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 20.0.0 / 2024-09-05
 
@@ -36,7 +128,7 @@
 * Allow filtering of schema collection in Postgres using regexes to include or exclude objects ([#18145](https://github.com/DataDog/integrations-core/pull/18145))
 * Collect blk read/write time from pg_stat_database ([#18169](https://github.com/DataDog/integrations-core/pull/18169))
 * Use QueryManager to collect `custom_queries` and `global_custom_queries`. `custom_queries` now supports configurable `collection_interval`. ([#18183](https://github.com/DataDog/integrations-core/pull/18183))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 * Add new config option `role_arn` to AWS managed authentication to support cross account IAM auth. ([#18228](https://github.com/DataDog/integrations-core/pull/18228))
 
 ***Fixed***:

@@ -27,7 +27,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.0.0",
+    "datadog-checks-base>=37.4.0",
 ]
 dynamic = [
     "version",
@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "confluent-kafka==2.5.0",
+    "confluent-kafka==2.8.0",
 ]
 
 [project.urls]

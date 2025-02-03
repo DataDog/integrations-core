@@ -13,20 +13,5 @@
         ],
         "name": "vLLM OpenMetrics endpoint health",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the vLLM OpenMetrics endpoint, otherwise returns `OK`."
-    },
-    {
-        "agent_version": "7.56.0",
-        "integration": "vLLM",
-        "check": "vllm.health.status",
-        "statuses": [
-            "ok",
-            "warning",
-            "critical"
-        ],
-        "groups": [
-            "host"
-                ],
-        "name": "Health Status of vLLM",
-        "description": "Returns `CRITICAL` if the Server is having a 4xx or 5xx response, `OK` if the response is 200, and `unknown` for everything else."
     }
 ]

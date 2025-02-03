@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2024-12-10",
+  "last_updated_at": "2024-12-10",
+  "title": "High service latency",
+  "description": "This monitor alerts when the 99th percentile service latency exceeds the defined threshold for your Temporal Cloud instance, indicating potential performance degradation that could impact workflow execution times and overall system responsiveness.",
+  "definition": {
+    "id": 160133052,
+    "name": "High service latency",
+    "type": "query alert",
+    "query": "avg(last_5m):avg:temporal_cloud.cloud_metrics.v0_service_latency_p99{*} by {temporal_namespace,operation} > 0.2",
+    "message": "{{#is_warning}}\nThe P99 service latency for Temporal Cloud operation: **{{operation.name}}** in namespace: **{{temporal_namespace.name}}** has exceeded the warning threshold.\nCurrent Service Latency (P99): **{{value}} seconds**\nThreshold: {{warn_threshold}} seconds\n{{/is_warning}}\n\n{{#is_alert}}\nThe P99 service latency for Temporal Cloud operation: **{{operation.name}}** in namespace: **{{temporal_namespace.name}}** has exceeded the alert threshold.\nCurrent Service Latency (P99): **{{value}} seconds**\nThreshold: {{threshold}} seconds\n{{/is_alert}}\n\n@example@example.com",
+    "tags": [
+      "integration:temporal-cloud"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0.2,
+        "warning": 0.1
+      },
+      "notify_audit": false,
+      "on_missing_data": "show_no_data",
+      "include_tags": false,
+      "new_group_delay": 60,
+      "silenced": {}
+    },
+    "priority": 2,
+    "restriction_policy": {
+      "bindings": []
+    }
+  },
+  "tags": [
+    "integration:temporal-cloud"
+  ]
+}

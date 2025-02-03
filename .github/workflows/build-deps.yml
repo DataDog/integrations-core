@@ -196,12 +196,15 @@ jobs:
 
   build-macos:
     name: Target macOS
-    runs-on: macos-12
+    runs-on: macos-13
 
     env:
       TARGET_NAME: macos-x86_64
       OUT_DIR: output/macos-x86_64
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
+
+    permissions:
+      packages: write
 
     steps:
     - name: Set up environment
@@ -214,7 +217,7 @@ jobs:
     - name: Set up Python
       env:
         # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
-        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.6/python-3.12.6-macos11.pkg"
+        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.8/python-3.12.8-macos11.pkg"
       run: |-
         curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
         sudo installer -pkg python3.pkg -target /

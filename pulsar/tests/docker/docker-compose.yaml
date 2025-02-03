@@ -1,5 +1,3 @@
-version: '3'
-
 # https://pulsar.apache.org/docs/en/next/standalone-docker/
 services:
   pulsar:

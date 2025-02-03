@@ -113,7 +113,12 @@ class DockerAgent(AgentInterface):
 
         if agent_build.startswith("datadog/"):
             # Add a potentially missing `py` suffix for default non-RC builds
-            if 'rc' not in agent_build and 'py' not in agent_build and not re.match(AGENT_VERSION_REGEX, agent_build):
+            if (
+                'rc' not in agent_build
+                and 'py' not in agent_build
+                and 'fips' not in agent_build
+                and not re.match(AGENT_VERSION_REGEX, agent_build)
+            ):
                 agent_build = f'{agent_build}-py{self.python_version[0]}'
 
             if self.metadata.get('use_jmx') and not agent_build.endswith('-jmx'):
@@ -138,14 +143,6 @@ class DockerAgent(AgentInterface):
         # Set up telemetry
         env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
         env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
-
-        # TODO: Remove this when Python 2 support is removed
-        #
-        # Don't write .pyc, needed to fix this issue (only Python 2):
-        # More info: https://github.com/DataDog/integrations-core/pull/5454
-        # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
-        # in the first place.
-        env_vars['PYTHONDONTWRITEBYTECODE'] = '1'
 
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:

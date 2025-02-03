@@ -8,9 +8,20 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the performance and usage of Mailchimp Campaigns and Audiences.",
-    "title": "Mailchimp",
-    "media": [],
+    "description": "Monitor the performance and usage of Mailchimp Campaigns and Audiences.", 
+    "title": "Mailchimp",  
+    "media": [
+      {
+        "caption": "Mailchimp - Campaigns",
+        "image_url": "images/mailchimp_campaigns.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mailchimp - Audiences",
+        "image_url": "images/mailchimp_audiences.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Metrics",
       "Offering::Integration",
@@ -27,12 +38,20 @@
       },
       "metrics": {
         "prefix": "mailchimp.",
-        "check": [],
+        "check": "mailchimp.campaigns.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Mailchimp - Campaigns" : "assets/dashboards/mailchimp_campaign.json",
+      "Mailchimp - Audiences" : "assets/dashboards/mailchimp_audience.json"
+    },
+    "monitors" : {
+      "Too Many Abuse Reports" : "assets/monitors/abuse_report_rate.json",
+      "Too Many Unsubscribes" : "assets/monitors/unsubscribe_rate.json"
     }
   },
   "author": {

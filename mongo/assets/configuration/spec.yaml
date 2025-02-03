@@ -149,7 +149,7 @@ files:
               - "admin$"
               - "config$"
               - "local$"
-        - name: max_collection_per_database
+        - name: max_collections_per_database
           description: |
             The maximum number of collections to collect metrics from per database.
             Defaults to 100.
@@ -166,9 +166,6 @@ files:
     - name: dbm
       description: |
         Set to `true` enable Database Monitoring.
-        
-        NOTE: Database Monitoring for MongoDB is currently in private beta.
-        If you are interested in participating, please reach out to your Datadog Customer Success Manager.
       enabled: false
       value:
         type: boolean
@@ -253,7 +250,7 @@ files:
             from collections and inferring schemas.
           value:
             type: number
-            example: 600
+            example: 3600
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -265,7 +262,7 @@ files:
         - name: max_collections
           description: |
             Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
-            per database is bounded by `database_autodiscovery.max_collection_per_database`. By setting this option, you
+            per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
             are adding an additional limit to the total number of collections across all monitored databases that schemas
             will be collected from. By default, this option is not set.
           value:
@@ -278,6 +275,13 @@ files:
           value:
             type: number
             example: 5
+        - name: collect_search_indexes
+          description: |
+            Set to `true` to collect search indexes for each collection.
+            NOTE: This option is only applicable to MongoDB Atlas clusters.
+          value:
+            type: boolean
+            example: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -287,8 +291,8 @@ files:
         example: true
     - name: timeout
       description: |
-        Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS
-        see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
+        Controls connectTimeoutMS, serverSelectionTimeoutMS, socketTimeoutMS and timeoutMS
+        see https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html
       value:
         type: integer
         example: 30
@@ -347,6 +351,32 @@ files:
           type: string
         example:
           [metrics.commands, tcmalloc, top, collection, jumbo_chunks, sharded_data_distribution]
+    - name: metrics_collection_interval
+      description: |
+        The interval in seconds at which to collect certain types of metrics.
+      hidden: true
+      options:
+        - name: collection
+          description: |
+            The interval in seconds at which to collect collection metrics.
+            Only applicable when `collection` is added to `additional_metrics`.
+          value:
+            type: integer
+            example: 15
+        - name: collections_indexes_stats
+          description: |
+            The interval in seconds at which to collect collection indexes stats metrics.
+            Only applicable when `collections_indexes_stats` is set to `true`.
+          value:
+            type: integer
+            example: 15
+        - name: sharded_data_distribution
+          description: |
+            The interval in seconds at which to collect sharded data distribution metrics.
+            Only applicable when `sharded_data_distribution` is added to `additional_metrics`.
+          value:
+            type: integer
+            example: 300
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
@@ -425,6 +455,36 @@ files:
                 type: <METRIC_TYPE>
             tags:
               - test:mongodb
+    - name: aws
+      description: |
+        This block defines the configuration for Amazon DocumentDB instances.
+
+        Complete this section if you have installed the Datadog AWS Integration
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
+        with DocumentDB integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
+            This value is optional if the value of `host` is already configured to the instance endpoint.
+
+            For more information on instance endpoints,
+            see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_Endpoint.html
+          value:
+            type: string
+            example: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
+        - name: cluster_identifier
+          description: |
+            Equal to the Cluster identifier of the instance the agent is connecting to.
+            This value is optional if the value of `cluster_name` is already configured to the cluster identifier.
+
+            For more information on cluster identifiers,
+            see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_DBCluster.html
+          value:
+            type: string
+            example: mydocdb
     - name: server
       deprecation:
         Agent version: "8.0.0"

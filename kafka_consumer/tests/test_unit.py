@@ -1,18 +1,48 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import concurrent.futures
 import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-from confluent_kafka.admin._group import ConsumerGroupListing, ListConsumerGroupsResult
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
 
 pytestmark = [pytest.mark.unit]
+
+
+def fake_consumer_offsets_for_times(partitions):
+    """In our testing environment the offset is 80 for all partitions and topics."""
+
+    return [(t, p, 80) for t, p in partitions]
+
+
+def seed_mock_client():
+    """Set some common defaults for the mock client to kafka."""
+    client = mock.create_autospec(KafkaClient)
+    client.list_consumer_groups.return_value = ["consumer_group1"]
+    client.get_partitions_for_topic.return_value = ['partition1']
+    client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
+    client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    client.consumer_get_cluster_id_and_list_topics.return_value = (
+        "cluster_id",
+        # topics
+        [
+            # Used in unit tets
+            ('topic1', ["partition1"]),
+            ('topic2', ["partition2"]),
+            # Copied from integration tests
+            ('dc', [0, 1]),
+            ('unconsumed_topic', [0, 1]),
+            ('marvel', [0, 1]),
+            ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+        ],
+    )
+    client.consumer_offsets_for_times = fake_consumer_offsets_for_times
+    return client
 
 
 @pytest.mark.parametrize(
@@ -149,24 +179,15 @@ def test_oauth_config(
 
 # TODO: After these tests are finished and the revamp is complete,
 # the tests should be refactored to be parameters instead of separate tests
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
-def test_when_consumer_lag_less_than_zero_then_emit_event(
-    mock_generic_client, check, kafka_instance, dd_run_check, aggregator
-):
+def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance, dd_run_check, aggregator):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_client.get_consumer_group_state.return_value = "STABLE"
-    mock_generic_client.return_value = mock_client
+    mock_client = seed_mock_client()
+    # We need the consumer offset to be higher than the highwater offset.
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 81)])]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
 
     # When
-    kafka_consumer_check = check(kafka_instance)
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -175,6 +196,52 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
         count=1,
         tags=['optional:tag1', 'partition:partition1', 'topic:topic1', 'kafka_cluster_id:cluster_id'],
     )
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_lag",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+    aggregator.assert_event(
+        "Consumer group: consumer_group1, "
+        "topic: topic1, partition: partition1 has negative consumer lag. "
+        "This should never happen and will result in the consumer skipping new messages "
+        "until the lag turns positive.",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+
+
+def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
+    mock_client = seed_mock_client()
+    kafka_instance["collect_consumer_group_state"] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
     aggregator.assert_metric(
         "kafka.consumer_offset",
         count=1,
@@ -199,41 +266,18 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
             'consumer_group_state:STABLE',
         ],
     )
-    aggregator.assert_event(
-        "Consumer group: consumer_group1, "
-        "topic: topic1, partition: partition1 has negative consumer lag. "
-        "This should never happen and will result in the consumer skipping new messages "
-        "until the lag turns positive.",
-        count=1,
-        tags=[
-            'consumer_group:consumer_group1',
-            'optional:tag1',
-            'partition:partition1',
-            'topic:topic1',
-            'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
-        ],
-    )
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
-def test_when_partition_is_none_then_emit_warning_log(
-    mock_generic_client, check, kafka_instance, dd_run_check, aggregator, caplog
-):
+def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_check, aggregator, caplog):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = None
-    mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
-    # When
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = []
     kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -261,24 +305,18 @@ def test_when_partition_is_none_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_partition_not_in_partitions_then_emit_warning_log(
-    mock_generic_client, check, kafka_instance, dd_run_check, aggregator, caplog
+    check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition2']
-    mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
-    # When
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = ['partition2']
     kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -306,54 +344,44 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
-    mock_generic_client, kafka_instance, dd_run_check, aggregator, caplog
+    check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
+    mock_client = seed_mock_client()
+    kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 2})
+    kafka_consumer_check.client = mock_client
+
     # When
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 2}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
 
     # Then
-    aggregator.assert_metric("kafka.broker_offset", count=2)
-    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.broker_offset", count=1)
+    aggregator.assert_metric("kafka.consumer_offset", count=1)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
 
-    expected_warning = "Discovered 3 metric contexts"
+    expected_warning = "Discovered 2 metric contexts"
 
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metrics(
-    mock_generic_client, kafka_instance, dd_run_check, aggregator, caplog
+    check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2, ("consumer_group1", "topic2", "partition2"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_generic_client.return_value = mock_client
     caplog.set_level(logging.DEBUG)
 
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [
+        ("consumer_group1", [("topic1", "partition1", 2)]),
+        ("consumer_group1", [("topic2", "partition2", 2)]),
+    ]
+    kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 3})
+    kafka_consumer_check.client = mock_client
+
     # When
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 3}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -369,19 +397,13 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
 
 
 def test_when_empty_string_consumer_group_then_skip(kafka_instance):
-    consumer_groups_result = ListConsumerGroupsResult(
-        valid=[
-            ConsumerGroupListing(group_id="", is_simple_consumer_group=True),  # Should be filtered out
-            ConsumerGroupListing(group_id="my_consumer", is_simple_consumer_group=True),
-        ]
-    )
-    kafka_instance['monitor_unlisted_consumer_groups'] = True
-    future = concurrent.futures.Future()
-    future.set_result(consumer_groups_result)
-
-    with mock.patch("datadog_checks.kafka_consumer.client.AdminClient.list_consumer_groups", return_value=future):
+    kafka_instance["monitor_unlisted_consumer_groups"] = True
+    with mock.patch(
+        "datadog_checks.kafka_consumer.kafka_consumer.KafkaClient.list_consumer_groups",
+        return_value=["", "my_consumer"],
+    ):
         kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-        assert kafka_consumer_check.client._get_consumer_groups() == ["my_consumer"]
+        assert kafka_consumer_check._get_consumer_groups() == ["my_consumer"]
 
 
 def test_get_interpolated_timestamp():
@@ -392,7 +414,7 @@ def test_get_interpolated_timestamp():
 
 
 @pytest.mark.parametrize(
-    'read_persistent_cache, kafka_instance_config, consumer_lag_seconds_count',
+    'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
     [
         pytest.param(
             "",
@@ -407,8 +429,8 @@ def test_get_interpolated_timestamp():
     ],
 )
 def test_load_broker_timestamps_empty(
-    read_persistent_cache,
-    kafka_instance_config,
+    persistent_cache_contents,
+    instance_overrides,
     consumer_lag_seconds_count,
     kafka_instance,
     dd_run_check,
@@ -416,10 +438,11 @@ def test_load_broker_timestamps_empty(
     aggregator,
     check,
 ):
-
-    kafka_instance.update(kafka_instance_config)
+    kafka_instance.update(instance_overrides)
+    mock_client = seed_mock_client()
     check = check(kafka_instance)
-    check.read_persistent_cache = mock.Mock(return_value=read_persistent_cache)
+    check.client = mock_client
+    check.read_persistent_cache = mock.Mock(return_value=persistent_cache_contents)
     dd_run_check(check)
 
     caplog.set_level(logging.WARN)
