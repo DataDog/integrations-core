@@ -21,7 +21,7 @@ To expose these metrics, ensure that Prometheus scraping is enabled for each com
 - prometheus.operator.enabled
 - prometheus.webhooks.enabled
 
-Alternatively, you can achieve this by providing the following configuration in a values.yaml file used during the Helm installation of Keda:
+Alternatively, you can achieve this by providing the following configuration in a values.yaml file used during the Helm installation of Keda: test
 
 ```yaml
 prometheus:
