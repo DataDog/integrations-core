@@ -1,0 +1,34 @@
+id: "octopus_deploy"
+tests:
+ -
+  sample: |-
+    2024-08-23 18:47:24.0518      7      1  INFO Defaulting server node
+          name to '"08c3dfcac5a3"'.
+  result:
+    custom:
+      message: 'test'
+ -
+  sample: |-
+    2024-08-23 18:47:15.8732      7      1  INFO  Octopus.Server version 2024.2.9409 (2024.2.9409) instance OctopusServer
+
+  result:
+    custom:
+      message: 'test'
+ -
+  sample: |-
+    2025-01-29 21:32:16.7923      1     75  INFO  "HTTP" "GET" to "localhost:8080""/api/octopusservernodes/ping" "completed" with 200 in 00:00:00.0224869 (22ms) by "<anonymous>"
+  result:
+    custom:
+      message: 'test'
+ -
+  sample: |-
+    2025-01-28 19:34:47.9679      1    111 ERROR  Executing task "Check target health for Default Machine Policy" "abandoned" after 290ms.
+  result:
+    custom:
+      message: 'test'
+ -
+  sample: |-
+    2025-01-27 21:00:40.7777      1    101  WARN  Ignoring incompatible step package "kustomize 1.0.12": "kustomize step package is deprecated"
+  result:
+    custom:
+      message: 'test'

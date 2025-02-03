@@ -28,6 +28,10 @@ No additional installation is needed on your server.
 
 3. [Restart the Agent][5].
 
+#### Logs
+
+The Octopus deploy integration collects two types of logs.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `octopus_deploy` under the Checks section.
