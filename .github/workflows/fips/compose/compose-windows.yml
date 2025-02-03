@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile-win
       args:
         BUILD_TARGET: server.exe
-    command: ["C:/app/http-server.exe", "non-fips"]
+    command: ["C:/app/server.exe", "non-fips"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
