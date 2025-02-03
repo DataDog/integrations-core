@@ -6,7 +6,7 @@ This integration is in public beta. Use caution if enabling it on production wor
 
 ## Overview
 
-This check monitors [Fly.io][1] metrics through the Datadog Agent.
+This check monitors [Fly.io][1] metrics through the Datadog Agent. 
 
 ## Setup
 
