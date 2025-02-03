@@ -18,7 +18,7 @@ jobs:
       matrix:
         platform: [linux, windows]
         agent-type: [fips-agent, standard-agent]
-    runs-on: ${{ matrix.platform == 'linux' && 'ubuntu-22.04' || 'windows-2025' }}
+    runs-on: ${{ matrix.platform == 'linux' && 'ubuntu-22.04' || 'windows-2022' }}
     name: "Test FIPS"
 
     env:
