@@ -147,6 +147,7 @@ class InstanceConfig(BaseModel):
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_config: Optional[MappingProxyType[str, Any]] = None
     tls_ignore_warning: Optional[bool] = None
     tls_name: Optional[str] = None

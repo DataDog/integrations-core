@@ -758,6 +758,10 @@ def test_failed_explain_handling(
 @pytest.mark.parametrize(
     "dbstrict,ignore_databases", [(True, []), (False, []), (False, ['foo']), (False, ['postgres'])]
 )
+@pytest.mark.parametrize(
+    "collect_raw_query_statement",
+    [True, False],
+)
 def test_statement_samples_collect(
     aggregator,
     integration_check,
@@ -775,12 +779,14 @@ def test_statement_samples_collect(
     expected_warnings,
     dbstrict,
     ignore_databases,
+    collect_raw_query_statement,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
+    dbm_instance['collect_raw_query_statement'] = {'enabled': collect_raw_query_statement}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -793,7 +799,8 @@ def test_statement_samples_collect(
     try:
         conn.cursor().execute(query, (arg,))
         run_one_check(check)
-        tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname)
+        additional_tags = {"raw_query_statement": "enabled"} if collect_raw_query_statement else {}
+        tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname, **additional_tags)
 
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
@@ -802,7 +809,9 @@ def test_statement_samples_collect(
         # Find matching events by checking if the expected query starts with the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements
         matching = [
-            e for e in dbm_samples if expected_query.encode("utf-8").startswith(e['db']['statement'].encode("utf-8"))
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8") and e['dbm_type'] == 'plan'
         ]
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
@@ -838,6 +847,24 @@ def test_statement_samples_collect(
                 assert event['db']['plan']['collection_errors'] is None
 
         assert check.warnings == expected_warnings
+
+        raw_plan_events = [
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8") and e['dbm_type'] == 'rqp'
+        ]
+        if collect_raw_query_statement:
+            if expected_error_tag:
+                assert len(raw_plan_events) == 0
+            else:
+                raw_plan_event = raw_plan_events[0]
+                assert set(raw_plan_event['ddtags'].split(',')) == set(tags)
+                assert raw_plan_event['db']['plan']['definition'] is not None, "missing raw execution plan"
+                assert 'Plan' in json.loads(raw_plan_event['db']['plan']['definition']), "invalid json execution plan"
+                assert raw_plan_event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
+                assert event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
+        else:
+            assert len(raw_plan_events) == 0
 
     finally:
         conn.close()
@@ -1222,8 +1249,49 @@ def test_activity_snapshot_collection(
         assert bobs_query['state'] == "idle in transaction"
 
     finally:
-        conn.close()
         blocking_conn.close()
+        conn.close()
+
+
+def test_activity_raw_statement_collection(aggregator, integration_check, dbm_instance, datadog_agent):
+
+    if POSTGRES_VERSION.split('.')[0] == "9":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return
+    # No need for query metrics here
+    dbm_instance['dbstrict'] = True
+    dbm_instance['dbname'] = "datadog_test"
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources']['enabled'] = False
+    dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    conn = psycopg2.connect(host=HOST, dbname='datadog_test', user='bob', password='bob')
+    query = "BEGIN TRANSACTION; SELECT * FROM persons WHERE city like 'hello';"
+    try:
+        conn.cursor().execute(query)
+        run_one_check(check)
+        expected_tags = _get_expected_tags(
+            check, dbm_instance, with_host=False, db="datadog_test", raw_query_statement="enabled"
+        )
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        raw_plan_events = [
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in query.encode("utf-8") and e['dbm_type'] == 'rqt'
+        ]
+
+        event = raw_plan_events[0]
+        assert event['host'] == "stubbed.hostname"
+        assert event['ddsource'] == "postgres"
+        assert event['dbm_type'] == "rqt"
+        assert event['ddagentversion'] == datadog_agent.get_version()
+        assert sorted(event['ddtags'].split(',')) == sorted(expected_tags)
+        assert event['db']['raw_query_signature'], "missing raw query signature"
+    finally:
+        conn.close()
 
 
 @pytest.mark.parametrize(
@@ -1760,7 +1828,6 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check._connect()
     check.check(dbm_instance)
 
-    print(check.warnings)
     assert check.warnings[0].startswith(
         "Unable to collect activity columns in dbname=datadog_test. Check that the function "
         "wrong_view exists in the database. See "

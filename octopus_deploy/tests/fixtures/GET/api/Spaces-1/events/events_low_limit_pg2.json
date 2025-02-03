@@ -1,0 +1,70 @@
+{
+    "ItemType": "Event",
+    "TotalResults": 3,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 2,
+    "LastPageNumber": 1,
+    "Items": [
+        {
+            "Id": "Events-4070",
+            "RelatedDocumentIds": [
+                "Deployments-144",
+                "Projects-2",
+                "Releases-104",
+                "Environments-1",
+                "ServerTasks-118143",
+                "Channels-63"
+            ],
+            "Category": "DeploymentFailed",
+            "UserId": "users-system",
+            "Username": "system",
+            "IsService": false,
+            "IdentityEstablishedWith": "",
+            "UserAgent": "Server",
+            "Occurred": "2024-09-23T14:45:11.123+00:00",
+            "Message": "Deploy to dev failed for project-new-2 release 0.0.2 to dev",
+            "MessageHtml": "<a href='#/deployments/Deployments-144'>Deploy to dev</a> failed for <a href='#/projects/Projects-63'>project-new-2</a> release <a href='#/releases/Releases-104'>0.0.2</a> to <a href='#/environments/Environments-1'>dev</a>",
+            "MessageReferences": [
+                {
+                    "ReferencedDocumentId": "Deployments-144",
+                    "StartIndex": 0,
+                    "Length": 13
+                },
+                {
+                    "ReferencedDocumentId": "Projects-63",
+                    "StartIndex": 25,
+                    "Length": 13
+                },
+                {
+                    "ReferencedDocumentId": "Releases-104",
+                    "StartIndex": 47,
+                    "Length": 5
+                },
+                {
+                    "ReferencedDocumentId": "Environments-1",
+                    "StartIndex": 56,
+                    "Length": 3
+                }
+            ],
+            "Comments": null,
+            "Details": null,
+            "ChangeDetails": {
+                "DocumentContext": null,
+                "Differences": null
+            },
+            "IpAddress": null,
+            "SpaceId": "Spaces-1",
+            "Links": {
+                "Self": "/api/events/Events-4070"
+            }
+        }
+    ],
+    "Links": {
+        "Self": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:15.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+        "Template": "/api/events{?skip,regarding,regardingAny,user,users,projects,projectGroups,environments,eventGroups,eventCategories,eventAgents,tags,tenants,from,to,internal,fromAutoId,toAutoId,documentTypes,asCsv,take,ids,spaces,includeSystem,excludeDifference}",
+        "Page.All": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:15.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+        "Page.Next": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:15.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+        "Page.Current": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:15.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+        "Page.Last": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:15.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted"
+    }
+}

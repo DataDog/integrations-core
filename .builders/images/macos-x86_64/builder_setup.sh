@@ -71,8 +71,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.9.1" \
-SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
+VERSION="8.11.1" \
+SHA256="a889ac9dbba3644271bd9d1302b5c22a088893719b72be3487bc3d401e5c4e80" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \
@@ -89,6 +89,7 @@ RELATIVE_PATH="curl-{{version}}" \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
+    --without-libpsl \
     --with-ssl="${DD_PREFIX_PATH}"
 # Remove the binary installed so that we consistenly use the same original `curl` binary
 rm "${DD_PREFIX_PATH}/bin/curl"

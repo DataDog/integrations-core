@@ -1,0 +1,74 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b6d1ad60-e67f-4612-92fd-4fe4b4182b22",
+  "app_id": "plivo",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Plivo messages (SMS, MMS, and WhatsApp) and voice call data.",
+    "title": "Plivo",
+    "media": [
+      {
+        "caption": "Plivo Messages",
+        "image_url": "images/plivo_messages_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Plivo Messages",
+        "image_url": "images/plivo_messages_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Plivo Voice Calls",
+        "image_url": "images/plivo_voice_calls_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Plivo Voice Calls",
+        "image_url": "images/plivo_voice_calls_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Collaboration",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 25490639,
+      "source_type_name": "Plivo",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Plivo Messages" : "assets/dashboards/plivo_messages.json",
+      "Plivo Voice Calls" : "assets/dashboards/plivo_voice_calls.json"
+    },
+    "monitors": {
+      "Messages Budget Overrun" : "assets/monitors/messages_budget_overrun.json",
+      "Messages Error Rate is Higher Than Usual" : "assets/monitors/messages_error_rate_is_higher_than_usual.json",
+      "Voice Calls Budget Overrun" : "assets/monitors/voice_calls_budget_overrun.json",
+      "Voice Calls Error Rate is Higher Than Usual" : "assets/monitors/voice_calls_error_rate_is_higher_than_usual.json"
+    },
+    "logs": {
+      "source": "plivo"
+    }
+  },
+  "author": {
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "support_email": "help@datadoghq.com"
+  }
+}
