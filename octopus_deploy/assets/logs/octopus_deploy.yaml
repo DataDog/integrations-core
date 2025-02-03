@@ -1,10 +1,10 @@
-id: octopus-deploy
-metric_id: octopus_deploy
+id: octopus_deploy
+metric_id: octopus-deploy
 backend_only: false
 facets: null
 pipeline:
   type: pipeline
-  name: "Octopus Deploy "
+  name: "Octopus Deploy"
   enabled: true
   filter:
     query: source:octopus_deploy
