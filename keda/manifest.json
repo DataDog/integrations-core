@@ -43,7 +43,7 @@
       }
     },
     "dashboards": {
-        "Keda Overview": "assets/dashboards/keda_overview.json"
+      "Keda Overview": "assets/dashboards/keda_overview.json"
     }
   },
   "author": {
