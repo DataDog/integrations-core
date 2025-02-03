@@ -9,7 +9,7 @@
 		"name": "[Supabase] High RAM Usage",
 		"type": "query alert",
 		"query": "avg(last_5m):100 - (avg:supabase.node.memory.mem_available_bytes{*} by {supabase_project_ref} * 100 / avg:supabase.node.memory.mem_total_bytes{*} by {supabase_project_ref}) >= 90",
-		"message": "{{#is_alert}}\n  Please check project {{supabase_project_ref.name}}, as reports usage of more than {{threshold}}% of available RAM for the last hour.\n{{/is_alert}}\n\n{{#is_recovery}}\n  RAM usage has recovered below {{threshold}}%. \n{{/is_recovery}}",
+		"message": "{{#is_alert}}\n  Please check project {{supabase_project_ref.name}}, as it reports usage of more than {{threshold}}% of available RAM for the last hour.\n{{/is_alert}}\n\n{{#is_recovery}}\n  RAM usage has recovered below {{threshold}}%. \n{{/is_recovery}}",
 		"tags": [],
 		"options": {
 			"thresholds": {
