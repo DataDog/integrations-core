@@ -392,33 +392,42 @@ class SparkCheck(AgentCheck):
 
         return spark_apps
 
+    def _describe_app(self, aspect, running_apps, addl_tags):
+        """
+        Get payloads that describe certain aspect of the running apps.
+
+        Examples of "aspects":
+        - the app's jobs
+        - the app's spark stages
+        """
+        for app_id, (app_name, tracking_url) in running_apps.items():
+            base_url = self._get_request_url(tracking_url)
+            response = self._rest_request(base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, aspect)
+            try:
+                yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
+            except JSONDecodeError:
+                self.log.debug('test')
+
     def _spark_job_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark job.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'jobs'
-            )
-
-            for job in response:
+        for jobs, app_tags in self._describe_app('jobs', running_apps, addl_tags):
+            for job in jobs:
+                job_tags = []
 
                 status = job.get('status')
-
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-                tags.append('status:%s' % str(status).lower())
+                job_tags.append('status:%s' % str(status).lower())
 
                 job_id = job.get('jobId')
                 if job_id is not None:
-                    tags.append('job_id:{}'.format(job_id))
+                    job_tags.append('job_id:{}'.format(job_id))
 
                 if not self._disable_spark_job_stage_tags:
                     for stage_id in job.get('stageIds', []):
-                        tags.append('stage_id:{}'.format(stage_id))
+                        job_tags.append('stage_id:{}'.format(stage_id))
 
+                tags = app_tags + job_tags
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)
 
@@ -426,25 +435,18 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark stage.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'stages'
-            )
-
-            for stage in response:
+        for stages, app_tags in self._describe_app('stages', running_apps, addl_tags):
+            for stage in stages:
+                stage_tags = []
 
                 status = stage.get('status')
-
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-                tags.append('status:%s' % str(status).lower())
+                stage_tags.append('status:%s' % str(status).lower())
 
                 stage_id = stage.get('stageId')
                 if stage_id is not None:
-                    tags.append('stage_id:{}'.format(stage_id))
+                    stage_tags.append('stage_id:{}'.format(stage_id))
 
+                tags = app_tags + stage_tags
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', COUNT, 1, tags)
 
@@ -452,73 +454,47 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark executor.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'executors'
-            )
-
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
-
-            for executor in response:
+        for executors, app_tags in self._describe_app('executors', running_apps, addl_tags):
+            for executor in executors:
                 if executor.get('id') == 'driver':
-                    self._set_metrics_from_json(tags, executor, SPARK_DRIVER_METRICS)
+                    self._set_metrics_from_json(app_tags, executor, SPARK_DRIVER_METRICS)
                 else:
-                    self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
+                    self._set_metrics_from_json(app_tags, executor, SPARK_EXECUTOR_METRICS)
 
                     if is_affirmative(self.instance.get('executor_level_metrics', False)):
                         self._set_metrics_from_json(
-                            tags + ['executor_id:{}'.format(executor.get('id', 'unknown'))],
+                            app_tags + ['executor_id:{}'.format(executor.get('id', 'unknown'))],
                             executor,
                             SPARK_EXECUTOR_LEVEL_METRICS,
                         )
 
-            if len(response):
-                self._set_metric('spark.executor.count', COUNT, len(response), tags)
+            if executors:
+                self._set_metric('spark.executor.count', COUNT, len(executors), app_tags)
 
     def _spark_rdd_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark RDD.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
+        for rdds, app_tags in self._describe_app('storage/rdd', running_apps, addl_tags):
+            for rdd in rdds:
+                self._set_metrics_from_json(app_tags, rdd, SPARK_RDD_METRICS)
 
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'storage/rdd'
-            )
-
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
-
-            for rdd in response:
-                self._set_metrics_from_json(tags, rdd, SPARK_RDD_METRICS)
-
-            if len(response):
-                self._set_metric('spark.rdd.count', COUNT, len(response), tags)
+            if rdds:
+                self._set_metric('spark.rdd.count', COUNT, len(rdds), app_tags)
 
     def _spark_streaming_statistics_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each application streaming statistics.
         """
-        for app_id, (app_name, tracking_url) in running_apps.items():
-            try:
-                base_url = self._get_request_url(tracking_url)
-                response = self._rest_request_to_json(
-                    base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'streaming/statistics'
-                )
-                self.log.debug('streaming/statistics: %s', response)
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-
-                # NOTE: response is a dict
-                self._set_metrics_from_json(tags, response, SPARK_STREAMING_STATISTICS_METRICS)
-            except HTTPError as e:
-                # NOTE: If api call returns response 404
-                # then it means that the application is not a streaming application, we should skip metric submission
-                if e.response.status_code != 404:
-                    raise
+        try:
+            for stats, app_tags in self._describe_app('streaming/statistics', running_apps, addl_tags):
+                self.log.debug('streaming/statistics: %s', stats)
+                self._set_metrics_from_json(app_tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
+        except HTTPError as e:
+            # NOTE: If api call returns response 404
+            # then it means that the application is not a streaming application, we should skip metric submission
+            if e.response.status_code != 404:
+                raise
 
     def _spark_structured_streams_metrics(self, running_apps, addl_tags):
         """
