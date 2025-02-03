@@ -16,26 +16,26 @@ services:
       interval: 5s
       timeout: 2s
       retries: 3
-  http-server-fips:
+  server-fips:
     build:
       context: server
       dockerfile: Dockerfile-nix
       args:
-        BUILD_TARGET: http-server
-    command: ["./http-server", "ECDHE-RSA-AES128-SHA256"]
+        BUILD_TARGET: server
+    command: ["./server", "fips"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s
       interval: 10s
       timeout: 5s
       retries: 3
-  http-server:
+  server:
     build:
       context: server
       dockerfile: Dockerfile-nix
       args:
-        BUILD_TARGET: http-server
-    command: ["./http-server", "ECDHE-RSA-CHACHA20-POLY1305"]
+        BUILD_TARGET: server
+    command: ["./server", "non-fips"]
     healthcheck:
       test: "curl -f localhost:443"
       start_period: 5s

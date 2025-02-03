@@ -3,12 +3,16 @@ import subprocess
 from conftest import AGENT_FIPS_MODE, parse_json
 
 REGULAR_AGENT = {
-    'http_status': 1,
     'http_status_fips': 1,
+    'ssh_status_fips': 1,
+    'http_status': 1,
+    'ssh_status': 0,
 }
 FIPS_AGENT = {
-    'http_status': 0,
     'http_status_fips': 1,
+    'ssh_status_fips': 1,
+    'http_status': 0,
+    'ssh_status': 0,
 }
 
 

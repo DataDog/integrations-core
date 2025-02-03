@@ -1,6 +1,10 @@
 init_config:
 
 instances:
-  - http_endpoint: https://http-server:443
-  - http_endpoint: https://http-server-fips:443
+  - host: server
+    http_port: 443
+    ssh_port: 22
+  - host: server-fips
+    http_port: 443
+    ssh_port: 22
 

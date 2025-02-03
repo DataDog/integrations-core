@@ -5,12 +5,11 @@ WORKDIR /app
 # Copy all files
 COPY . ./
 
-ENV GO111MODULE=off
 ENV WORKDIR=C:/app
 
 # Build the server
 ARG BUILD_TARGET
-RUN go build -o $env:BUILD_TARGET http-server.go
+RUN go build -o $env:BUILD_TARGET main.go
 
 # Expose port 443
 EXPOSE 443
