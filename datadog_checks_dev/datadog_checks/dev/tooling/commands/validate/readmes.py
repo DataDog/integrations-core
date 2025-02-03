@@ -149,9 +149,16 @@ def validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
     else:
         curr_header = soup.find('h2', text=header)
         curr_instructions = curr_header.find_next()
-        if curr_instructions.name == "h2":
-            files_failed[readme_path] = True
-            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
+        try:
+            if curr_instructions.name == "h2":
+                files_failed[readme_path] = True
+                display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
+        except Exception as e:
+            display_queue.append((echo_failure, f"      Error1:{e}"))
+            display_queue.append((echo_failure, f"      Error2:{header}"))
+            display_queue.append((echo_failure, f"      Error3:{curr_instructions}"))
+            display_queue.append((echo_failure, f"      Error4:{curr_header}"))
+
 
 
 # Method to validate no images are present within the header
