@@ -301,6 +301,8 @@ integration/karpenter:
 - karpenter/**/*
 integration/keda:
 - keda/**/*
+integration/keycloak:
+- keycloak/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:
