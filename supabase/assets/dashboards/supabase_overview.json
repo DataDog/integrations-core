@@ -75,7 +75,7 @@
               "id": 628034008442880,
               "definition": {
                 "type": "note",
-                "content": "This is an overview of service checks, monitors and connect statuses of your Supabase deployment",
+                "content": "This is an overview of service checks, monitors, and connect statuses of your Supabase deployment",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
