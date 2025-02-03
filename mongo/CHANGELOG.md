@@ -16,7 +16,7 @@
 
 * Fix error `CommandCursor is not subscriptable` in replication oplog size and oplog window collection. ([#19444](https://github.com/DataDog/integrations-core/pull/19444))
 
-## 8.3.1 / 2024-12-26
+## 8.3.1 / 2024-12-26 / Agent 7.62.0
 
 ***Fixed***:
 

@@ -34,6 +34,42 @@ For containerized environments, see the [Autodiscovery Integration Templates][3]
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Logs
+
+The Milvus integration can collect logs from the Milvus pods or containers.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+Apply this if you want to collect logs from Milvus standalone containers.
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `milvus.d/conf.yaml` file. Here's an example:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: milvus
+       service: milvus
+   ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+Apply this if you want to collect logs from a Milvus Kubernetes cluster.
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
+
+Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][11].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `milvus` under the Checks section.
@@ -66,3 +102,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/milvus/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/milvus/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration

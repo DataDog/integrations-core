@@ -8,7 +8,7 @@
 
 * Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
 
-## 4.2.0 / 2024-12-26
+## 4.2.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 

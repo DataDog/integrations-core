@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.5.1 / 2025-01-29
+
+***Fixed***:
+
+* Revert "Upgrade postgres to psycopg3" due to instability in testing ([#19499](https://github.com/DataDog/integrations-core/pull/19499))
+
 ## 22.5.0 / 2025-01-25
 
 ***Added***:
@@ -15,7 +21,7 @@
 * Resolved an issue in `QUERY_PG_CLASS` where multiple locks on the same table in `PG_LOCKS` caused duplicate rows, leading to inaccurate rate metric like `postgresql.rows_inserted`, `postgresql.rows_updated`, or `postgresql.rows_deleted`. ([#19351](https://github.com/DataDog/integrations-core/pull/19351))
 * Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
 
-## 22.4.0 / 2024-12-26
+## 22.4.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 

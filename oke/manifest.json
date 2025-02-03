@@ -12,7 +12,7 @@
     "title": "Oracle Container Engine for Kubernetes",
     "media": [],
     "classifier_tags": [
-     "Category::Configuration & Deployment",
+      "Category::Configuration & Deployment",
       "Category::Containers",
       "Category::Kubernetes",
       "Category::Metrics",
@@ -48,6 +48,9 @@
       },
       "source_type_id": 10255,
       "auto_install": true
+    },
+    "dashboards": {
+      "OCI OKE Overview": "assets/dashboards/oci_oke_overview.json"
     }
   }
 }
