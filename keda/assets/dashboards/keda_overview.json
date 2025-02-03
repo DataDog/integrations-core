@@ -89,7 +89,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Keda Overview show a quick summary of all reporting Keda instances and related monitors and their status.",
+                            "content": "KEDA Overview shows a quick summary of all reporting KEDA instances and related monitors and their status.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
