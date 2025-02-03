@@ -50,7 +50,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Further reading:**\n\n- [Datadog Keda Integration Documentation](https://docs.datadoghq.com/integrations/keda/)\n- [Keda Docs](https://keda.sh/docs/latest/concepts/)\n- [Keda Monitoring Docs](https://keda.sh/docs/latest/integrations/prometheus/)",
+                            "content": "**Further reading:**\n\n- [Datadog KEDA Integration Documentation](https://docs.datadoghq.com/integrations/keda/)\n- [KEDA Docs](https://keda.sh/docs/latest/concepts/)\n- [KEDA Monitoring Docs](https://keda.sh/docs/latest/integrations/prometheus/)",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
