@@ -44,6 +44,9 @@
     },
     "dashboards": {
         "Keda Overview": "assets/dashboards/keda_overview.json"
+    },
+    "monitors": {
+      "Keda Scaler Errors": "assets/monitors/scaler_errors.json"
     }
   },
   "author": {
