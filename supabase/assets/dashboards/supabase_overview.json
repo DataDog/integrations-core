@@ -345,7 +345,7 @@
             {
               "id": 1418540018030086,
               "definition": {
-                "title": "Rows fetched / returned / inserted / updated (per sec)",
+                "title": "Rows fetched / returned / inserted / updated (per second)",
                 "show_legend": true,
                 "legend_layout": "auto",
                 "legend_columns": [
