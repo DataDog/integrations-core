@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import binascii
 import time
 from typing import List, Optional
 
@@ -259,6 +260,28 @@ class MongoOperationSamples(DBMAsyncJob):
             "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
 
+    def _get_operation_lsid(self, operation: dict) -> Optional[dict]:
+        lsid = operation.get("lsid")
+        if not lsid or not lsid.get("id"):
+            return None
+
+        return {
+            "id": binascii.hexlify(lsid['id']).decode(),
+        }
+
+    def _get_operation_transaction(self, operation: dict) -> Optional[dict]:
+        transaction = operation.get("transaction")
+        if not transaction:
+            return None
+
+        return {
+            "txn_number": transaction.get("parameters", {}).get("txnNumber"),
+            "txn_retry_counter": transaction.get("parameters", {}).get("txnRetryCounter"),
+            "time_open_micros": transaction.get("timeOpenMicros"),
+            "time_active_micros": transaction.get("timeActiveMicros"),
+            "time_inactive_micros": transaction.get("timeInactiveMicros"),
+        }
+
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
         return {
             "active": operation.get("active", False),  # bool
@@ -269,7 +292,6 @@ class MongoOperationSamples(DBMAsyncJob):
             "query_framework": operation.get("queryFramework"),  # str
             "current_op_time": operation.get("currentOpTime"),  # str  start time of the operation
             "microsecs_running": operation.get("microsecs_running"),  # int
-            "transaction_time_open_micros": operation.get("transaction", {}).get("timeOpenMicros"),  # int
             # Conflicts
             "prepare_read_conflicts": operation.get("prepareReadConflicts", 0),  # int
             "write_conflicts": operation.get("writeConflicts", 0),  # int
@@ -291,6 +313,8 @@ class MongoOperationSamples(DBMAsyncJob):
             ),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
+            "transaction": self._get_operation_transaction(operation),  # dict
+            "lsid": self._get_operation_lsid(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:
