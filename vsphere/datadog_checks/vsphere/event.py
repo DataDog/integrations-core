@@ -23,7 +23,6 @@ from .constants import (
 
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
-    EMPTY_HOSTNAME = "AGENT_INT_EMPTY_HOSTNAME"
 
     def __init__(
         self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS, hostname=None
@@ -151,7 +150,7 @@ class VSphereEvent(object):
 
         # workaround to send empty hostname
         if self.hostname is None:
-            host_name = VSphereEvent.EMPTY_HOSTNAME
+            host_name = "AGENT_INT_EMPTY_HOSTNAME"
         else:
             host_name = self.hostname
         entity_name = self.raw_event.entity.name
