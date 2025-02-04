@@ -485,6 +485,8 @@ integration/riakcs:
 - riakcs/**/*
 integration/ringcentral:
 - ringcentral/**/*
+integration/sanity:
+- sanity/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
@@ -565,6 +567,8 @@ integration/system_swap:
 - system_swap/**/*
 integration/systemd:
 - systemd/**/*
+integration/tanium:
+- tanium/**/*
 integration/tcp_check:
 - tcp_check/**/*
 integration/tcp_queue_length:
