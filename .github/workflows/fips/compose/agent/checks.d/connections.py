@@ -8,7 +8,7 @@ class HelloCheck(AgentCheck):
         host = instance.get('host')
         http_port = instance.get('http_port')
         ssh_port = instance.get('ssh_port')
-        
+
         http_endpoint = f"https://{host}:{http_port}"
         ssh_endpoint = f"ssh://{host}:{ssh_port}"
 
@@ -18,8 +18,6 @@ class HelloCheck(AgentCheck):
         except SSLError as e:
             self.gauge('http_status', 0)
             self.log.warn(f"Exception when trying to connect to {http_endpoint}: {e}")
-        except Exception as e:
-            raise RuntimeError(f"Unhandled exception when trying to connect to {http_endpoint}: {e}")
         else:
             self.gauge('http_status', 1)
 
@@ -30,13 +28,9 @@ class HelloCheck(AgentCheck):
             transport.connect()
         except paramiko.ssh_exception.SSHException as e:
             self.gauge('ssh_status', 0)
-            self.log.warn(f"Exception when trying to connect to {ssh_endpoint}: {e}")
-            raise RuntimeError(f"Unhandled exception when trying to connect to {ssh_endpoint}: {e}")
+            self.log.info(f"Exception when trying to connect to {ssh_endpoint}: {e}")
         except paramiko.ssh_exception.IncompatiblePeer as e:
             self.gauge('ssh_status', 0)
-            self.log.warn(f"Exception when trying to connect to {ssh_endpoint}: {e}")
-            raise RuntimeError(f"Unhandled exception when trying to connect to {ssh_endpoint}: {e}")
-        except Exception as e:
-            raise RuntimeError(f"Unhandled exception when trying to connect to {ssh_endpoint}: {e}")
+            self.log.info(f"Exception when trying to connect to {ssh_endpoint}: {e}")
         else:
             self.gauge('ssh_status', 1)

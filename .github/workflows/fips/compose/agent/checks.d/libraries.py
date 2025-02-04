@@ -9,8 +9,6 @@ class HelloCheck(AgentCheck):
             hashes.Hash(hashes.MD5())
         except InternalError:
             self.gauge('cryptography_status', 0)
-        except Exception as e:
-            raise RuntimeError(f"Unhandled exception {e}")
         else:
             self.gauge('cryptography_status', 1)
 
