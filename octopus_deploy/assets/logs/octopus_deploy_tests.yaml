@@ -9,13 +9,14 @@ tests:
       level: "INFO"
       pid: 1.0
       tid: 7.0
+      timestamp: 1738090044051
     message: |-
       Defaulting server node
             name to '"08c3dfcac5a3"'.
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1738090044051
  -
   sample: "2025-01-28 18:47:15.8732      7      1  INFO  Octopus.Server version 2024.2.9409 (2024.2.9409) instance OctopusServer"
   result:
@@ -23,11 +24,12 @@ tests:
       level: "INFO"
       pid: 1.0
       tid: 7.0
+      timestamp: 1738090035873
     message: "Octopus.Server version 2024.2.9409 (2024.2.9409) instance OctopusServer"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1738090035873
  -
   sample: "2025-01-29 21:32:16.7923      1     75  INFO  \"HTTP\" \"GET\" to \"localhost:8080\"\"/api/octopusservernodes/ping\" \"completed\" with 200 in 00:00:00.0224869 (22ms) by \"<anonymous>\""
   result:
