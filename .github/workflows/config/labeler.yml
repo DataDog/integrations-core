@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/blazemeter:
+- blazemeter/**/*
 integration/boundary:
 - boundary/**/*
 integration/brevo:
@@ -487,6 +489,8 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/servicenow_performance:
+- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:
