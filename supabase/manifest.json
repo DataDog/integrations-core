@@ -44,6 +44,9 @@
     },
     "dashboards": {
         "Supabase Overview": "assets/dashboards/supabase_overview.json"
+    },
+    "monitors": {
+        "High RAM Usage": "assets/monitors/ram_usage.json"
     }
   },
   "author": {
