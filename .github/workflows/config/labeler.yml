@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/blazemeter:
+- blazemeter/**/*
 integration/boundary:
 - boundary/**/*
 integration/brevo:
@@ -167,6 +169,8 @@ integration/datadog_operator:
 - datadog_operator/**/*
 integration/dcgm:
 - dcgm/**/*
+integration/delinea_privilege_manager:
+- delinea_privilege_manager/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -283,6 +287,8 @@ integration/incident_io:
 - incident_io/**/*
 integration/istio:
 - istio/**/*
+integration/ivanti_connect_secure:
+- ivanti_connect_secure/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -297,6 +303,8 @@ integration/karpenter:
 - karpenter/**/*
 integration/keda:
 - keda/**/*
+integration/keycloak:
+- keycloak/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:

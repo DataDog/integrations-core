@@ -1,0 +1,70 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6ff76bca-1c9d-4ad2-a1f3-bf7feab9a678",
+  "app_id": "keycloak",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into the Keycloak events",
+    "title": "Keycloak",
+    "media": [
+      {
+        "caption": "Keycloak - Overview",
+        "image_url": "images/keycloak-overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Keycloak - User Events",
+        "image_url": "images/keycloak-user-events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Keycloak - Admin Events",
+        "image_url": "images/keycloak-admin-events.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 30165180,
+      "source_type_name": "Keycloak",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Keycloak - Overview": "assets/dashboards/keycloak_overview.json",
+      "Keycloak - User Events": "assets/dashboards/keycloak_user_events.json",
+      "Keycloak - Admin Events": "assets/dashboards/keycloak_admin_events.json"
+    },
+    "logs": {
+      "source": "keycloak"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
