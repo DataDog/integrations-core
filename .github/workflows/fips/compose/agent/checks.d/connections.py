@@ -26,6 +26,7 @@ class HelloCheck(AgentCheck):
         # Test connection with the SSH endpoint
         try:
             transport = paramiko.Transport(host, int(ssh_port))
+            transport._preferred_ciphers = ('aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'aes128-cbc', 'aes192-cbc', 'aes256-cbc', '3des-cbc', 'chacha20-poly1305@openssh.com')
             transport.connect()
         except paramiko.ssh_exception.SSHException as e:
             self.gauge('ssh_status', 0)
