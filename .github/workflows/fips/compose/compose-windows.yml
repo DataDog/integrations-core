@@ -14,8 +14,8 @@ services:
       - "./agent/checks.d:C:/ProgramData/Datadog/checks.d"
     healthcheck:
       test: ["CMD", "agent", "status"]
-      interval: 5s
-      timeout: 2s
+      interval: 10s
+      timeout: 5s
       retries: 3
   server-fips:
     build:

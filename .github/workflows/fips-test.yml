@@ -66,6 +66,7 @@ jobs:
 
     - name: Test docker exec
       run: |
+        sleep 30
         docker exec compose-agent-1 agent check connections --json
 
     - name: Run tests
