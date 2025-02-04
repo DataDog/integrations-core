@@ -489,6 +489,8 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/servicenow_performance:
+- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:
