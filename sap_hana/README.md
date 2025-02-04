@@ -97,6 +97,7 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
     ```shell
     GRANT AUDIT READ TO DD_MONITOR;
+    GRANT SELECT ON SYS.AUDIT_LOG TO DD_MONITOR
     ```
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
