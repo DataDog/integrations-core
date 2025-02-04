@@ -2,13 +2,13 @@
   "manifest_version": "2.0.0",
   "app_uuid": "961d21ab-c2c9-409f-8d2a-e54132004d1e",
   "app_id": "keda",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor the health and performance of KEDA",
     "title": "Keda",
     "media": [],
     "classifier_tags": [
@@ -38,12 +38,20 @@
         "check": "keda.process.uptime.seconds",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "keda",
+        "keda-admission-webhooks",
+        "keda-adapter"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
     },
     "dashboards": {
-        "Keda Overview": "assets/dashboards/keda_overview.json"
+      "Keda Overview": "assets/dashboards/keda_overview.json"
+    },
+    "monitors": {
+      "Keda Scaler Errors": "assets/monitors/scaler_errors.json"
     }
   },
   "author": {
