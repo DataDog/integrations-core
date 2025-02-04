@@ -64,6 +64,10 @@ jobs:
       run: |
         docker compose -f .github/workflows/fips/compose/compose-windows.yml up -d
 
+    - name: Test docker exec
+      run: |
+        docker exec compose-agent-1 agent check connections --json
+
     - name: Run tests
       run: |
         pytest -s -vv .github/workflows/fips/tests/test_connections.py
