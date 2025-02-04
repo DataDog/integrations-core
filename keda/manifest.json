@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of KEDA",
-    "title": "Keda",
+    "title": "KEDA",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
