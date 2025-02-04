@@ -34,7 +34,7 @@ The Octopus deploy integration collects two types of logs: deployment logs and s
 
 ##### Collecting Deployment Logs
 
-Deployment logs are gathered from deployment tasks, useful for debugging failed deployments. To collect deployment logs, configure
+Deployment logs are gathered from deployment tasks, useful for debugging failed deployments. To collect deployment logs, complete the following steps:
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
@@ -51,6 +51,8 @@ Deployment logs are gathered from deployment tasks, useful for debugging failed 
    ```
 
 ##### Collecting Server Logs
+
+Server logs are diagnostic information from the Octopus Server itself. They can only be collected when the Datadog Agent is running on same machine as the Octopus Server. To collect server logs, complete the following steps:
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 

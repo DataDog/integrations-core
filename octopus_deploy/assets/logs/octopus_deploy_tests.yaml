@@ -2,7 +2,7 @@ id: "octopus_deploy"
 tests:
  -
   sample: |-
-    2024-08-23 18:47:24.0518      7      1  INFO Defaulting server node
+    2025-01-28 18:47:24.0518      7      1  INFO Defaulting server node
           name to '"08c3dfcac5a3"'.
   result:
     custom:
@@ -17,7 +17,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1
  -
-  sample: "2024-08-23 18:47:15.8732      7      1  INFO  Octopus.Server version 2024.2.9409 (2024.2.9409) instance OctopusServer"
+  sample: "2025-01-28 18:47:15.8732      7      1  INFO  Octopus.Server version 2024.2.9409 (2024.2.9409) instance OctopusServer"
   result:
     custom:
       level: "INFO"
