@@ -591,6 +591,8 @@ integration/temporal_cloud:
 - temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
+integration/tenable_io:
+- tenable_io/**/*
 integration/teradata:
 - teradata/**/*
 integration/terraform:
