@@ -5,12 +5,12 @@
 import pytest
 
 INSTANCE = {
-    "SS_DATABASE_TYPE": "PostgreSQL",
-    "SS_DATABASE_NAME": "test_db",
-    "SS_DATABASE_SERVER_IP": "10.10.10.10",
-    "SS_DATABASE_PORT": 5432,
-    "SS_DATABASE_USERNAME": "test_user",
-    "SS_DATABASE_PASSWORD": "test_pass",
+    "SILVERSTRIPE_DATABASE_TYPE": "PostgreSQL",
+    "SILVERSTRIPE_DATABASE_NAME": "test_db",
+    "SILVERSTRIPE_DATABASE_SERVER_IP": "10.10.10.10",
+    "SILVERSTRIPE_DATABASE_PORT": 5432,
+    "SILVERSTRIPE_DATABASE_USERNAME": "test_user",
+    "SILVERSTRIPE_DATABASE_PASSWORD": "test_pass",
     "min_collection_interval": 300,
 }
 

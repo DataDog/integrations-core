@@ -14,22 +14,22 @@ from datadog_checks.silverstripe_cms.database_client import DatabaseClient
 from datadog_checks.silverstripe_cms.dataclasses import TableConfig
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_instance_check(dd_run_check, aggregator, instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
     assert isinstance(check, AgentCheck)
-    assert check.database_type == instance["SS_DATABASE_TYPE"]
-    assert check.database_name == instance["SS_DATABASE_NAME"]
-    assert check.database_server_ip == instance["SS_DATABASE_SERVER_IP"]
-    assert check.database_port == instance["SS_DATABASE_PORT"]
-    assert check.database_username == instance["SS_DATABASE_USERNAME"]
-    assert check.database_password == instance["SS_DATABASE_PASSWORD"]
+    assert check.database_type == instance["SILVERSTRIPE_DATABASE_TYPE"]
+    assert check.database_name == instance["SILVERSTRIPE_DATABASE_NAME"]
+    assert check.database_server_ip == instance["SILVERSTRIPE_DATABASE_SERVER_IP"]
+    assert check.database_port == instance["SILVERSTRIPE_DATABASE_PORT"]
+    assert check.database_username == instance["SILVERSTRIPE_DATABASE_USERNAME"]
+    assert check.database_password == instance["SILVERSTRIPE_DATABASE_PASSWORD"]
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_validate_configurations_without_database_type(instance):
-    field = "SS_DATABASE_TYPE"
+    field = "SILVERSTRIPE_DATABASE_TYPE"
     del instance[field]
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
@@ -40,14 +40,14 @@ def test_validate_configurations_without_database_type(instance):
         check.validate_configurations()
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_validate_configurations_with_wrong_database_type(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
-    # with wrong SS_DATABASE_TYPE field
+    # with wrong SILVERSTRIPE_DATABASE_TYPE field
     err_message = (
-        f"'SS_DATABASE_TYPE' must be one of {constants.SUPPORTED_DATABASE_TYPES}. "
-        "Please provide a valid SS_DATABASE_TYPE."
+        f"'SILVERSTRIPE_DATABASE_TYPE' must be one of {constants.SUPPORTED_DATABASE_TYPES}. "
+        "Please provide a valid SILVERSTRIPE_DATABASE_TYPE."
     )
     with pytest.raises(ConfigurationError) as err:
         check.database_type = "Postgres"
@@ -55,12 +55,12 @@ def test_validate_configurations_with_wrong_database_type(instance):
         assert str(err) == err_message
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_validate_configurations_with_wrong_database_server_ip(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
     err_message = (
-        "'SS_DATABASE_SERVER_IP' is not valid."
+        "'SILVERSTRIPE_DATABASE_SERVER_IP' is not valid."
         " Please provide a proper Silverstripe CMS database server IP address with ipv4 protocol."
     )
     with pytest.raises(ConfigurationError, match=err_message):
@@ -68,13 +68,13 @@ def test_validate_configurations_with_wrong_database_server_ip(instance):
         check.validate_configurations()
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_validate_configurations_with_wrong_port(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
     wrong_port = -10
     err_message = (
-        f"'SS_DATABASE_PORT' must be a positive integer in range of {constants.MIN_PORT}"
+        f"'SILVERSTRIPE_DATABASE_PORT' must be a positive integer in range of {constants.MIN_PORT}"
         f" to {constants.MAX_PORT}, got {check.database_port}."
     )
     with pytest.raises(ConfigurationError) as err:
@@ -83,7 +83,7 @@ def test_validate_configurations_with_wrong_port(instance):
         assert str(err) == err_message
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_validate_configurations_with_wrong_min_collection_interval(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
@@ -97,7 +97,7 @@ def test_validate_configurations_with_wrong_min_collection_interval(instance):
         check.validate_configurations()
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_initialize_db_client(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
     check.validate_configurations()
@@ -106,7 +106,7 @@ def test_initialize_db_client(instance):
     assert isinstance(check.db_client, DatabaseClient)
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 @patch.object(DatabaseClient, "build_query")
 @patch.object(DatabaseClient, "execute_query")
 @patch.object(SilverstripeCMSCheck, "ingest_query_result")
@@ -145,7 +145,7 @@ def test_success(
     assert mock_close_connection.call_count == 1
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 @patch.object(SilverstripeCMSCheck, "gauge")
 def test_ingest_query_result(mock_gauge, instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
@@ -165,7 +165,7 @@ def test_ingest_query_result(mock_gauge, instance):
     assert mock_gauge.call_count == 3
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_extract_metric_tags(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
 
@@ -174,31 +174,31 @@ def test_extract_metric_tags(instance):
     assert result == ["page_type:error_page", "id:1", "firstname:john"]
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_get_connection_url_for_mysql(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
     check.database_type = "MySQL"
     check.initialize_db_client()
 
     assert check.db_client.db_connection_url == (
-        f"{constants.MYSQL_DB_URL_PREFIX}://{instance.get('SS_DATABASE_USERNAME')}:{instance['SS_DATABASE_PASSWORD']}@"
-        f"{instance['SS_DATABASE_SERVER_IP']}:{instance['SS_DATABASE_PORT']}/{instance['SS_DATABASE_NAME']}"
+        f"{constants.MYSQL_DB_URL_PREFIX}://{instance.get('SILVERSTRIPE_DATABASE_USERNAME')}:{instance['SILVERSTRIPE_DATABASE_PASSWORD']}@"
+        f"{instance['SILVERSTRIPE_DATABASE_SERVER_IP']}:{instance['SILVERSTRIPE_DATABASE_PORT']}/{instance['SILVERSTRIPE_DATABASE_NAME']}"
     )
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_get_connection_url_for_postgres(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
     check.database_type = "PostgreSQL"
     check.initialize_db_client()
 
     assert check.db_client.db_connection_url == (
-        f"{constants.POSTGRES_DB_URL_PREFIX}://{instance.get('SS_DATABASE_USERNAME')}:{instance['SS_DATABASE_PASSWORD']}@"
-        f"{instance['SS_DATABASE_SERVER_IP']}:{instance['SS_DATABASE_PORT']}/{instance['SS_DATABASE_NAME']}"
+        f"{constants.POSTGRES_DB_URL_PREFIX}://{instance.get('SILVERSTRIPE_DATABASE_USERNAME')}:{instance['SILVERSTRIPE_DATABASE_PASSWORD']}@"
+        f"{instance['SILVERSTRIPE_DATABASE_SERVER_IP']}:{instance['SILVERSTRIPE_DATABASE_PORT']}/{instance['SILVERSTRIPE_DATABASE_NAME']}"
     )
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_build_query(instance):
     check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
     check.initialize_db_client()

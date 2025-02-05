@@ -27,12 +27,12 @@ class SilverstripeCMSCheck(AgentCheck):
 
         # Use self.instance to read the check configuration
         self.host_address = None
-        self.database_type = self.instance.get("SS_DATABASE_TYPE")
-        self.database_name = self.instance.get("SS_DATABASE_NAME")
-        self.database_server_ip = self.instance.get("SS_DATABASE_SERVER_IP")
-        self.database_port = self.instance.get("SS_DATABASE_PORT")
-        self.database_username = self.instance.get("SS_DATABASE_USERNAME")
-        self.database_password = self.instance.get("SS_DATABASE_PASSWORD")
+        self.database_type = self.instance.get("SILVERSTRIPE_DATABASE_TYPE")
+        self.database_name = self.instance.get("SILVERSTRIPE_DATABASE_NAME")
+        self.database_server_ip = self.instance.get("SILVERSTRIPE_DATABASE_SERVER_IP")
+        self.database_port = self.instance.get("SILVERSTRIPE_DATABASE_PORT")
+        self.database_username = self.instance.get("SILVERSTRIPE_DATABASE_USERNAME")
+        self.database_password = self.instance.get("SILVERSTRIPE_DATABASE_PASSWORD")
         self.min_collection_interval = self.instance.get("min_collection_interval")
         self.custom_tags = self.instance.get("tags")
 
@@ -133,8 +133,8 @@ class SilverstripeCMSCheck(AgentCheck):
     def validate_db_configurations(self) -> None:
         if self.database_type not in constants.SUPPORTED_DATABASE_TYPES:
             err_message = (
-                f"'SS_DATABASE_TYPE' must be one of {constants.SUPPORTED_DATABASE_TYPES}."
-                " Please provide a valid SS_DATABASE_TYPE."
+                f"'SILVERSTRIPE_DATABASE_TYPE' must be one of {constants.SUPPORTED_DATABASE_TYPES}."
+                " Please provide a valid SILVERSTRIPE_DATABASE_TYPE."
             )
             self.log.error(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=err_message))
             raise ConfigurationError(err_message)
@@ -144,7 +144,7 @@ class SilverstripeCMSCheck(AgentCheck):
             self.database_server_ip,
         ):
             err_message = (
-                "'SS_DATABASE_SERVER_IP' is not valid."
+                "'SILVERSTRIPE_DATABASE_SERVER_IP' is not valid."
                 " Please provide a proper Silverstripe CMS database server IP address with ipv4 protocol."
             )
             self.log.error(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=err_message))
@@ -152,7 +152,7 @@ class SilverstripeCMSCheck(AgentCheck):
 
         if not constants.MIN_PORT <= self.database_port <= constants.MAX_PORT:
             err_message = (
-                f"'SS_DATABASE_PORT' must be a positive integer in range of {constants.MIN_PORT}"
+                f"'SILVERSTRIPE_DATABASE_PORT' must be a positive integer in range of {constants.MIN_PORT}"
                 f" to {constants.MAX_PORT}, got {self.database_port}."
             )
             self.log.error(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=err_message))
@@ -176,20 +176,23 @@ class SilverstripeCMSCheck(AgentCheck):
         self.log.info(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=message))
         start_time = time.time()
 
-        try:
-            for metric_name, table_config in constants.METRIC_TO_TABLE_CONFIG_MAPPING.items():
+        for metric_name, table_config in constants.METRIC_TO_TABLE_CONFIG_MAPPING.items():
+            try:
                 sql_query = self.db_client.build_query(table_config)
                 query_result = self.db_client.execute_query(sql_query)
                 self.ingest_query_result(query_result, metric_name)
+            except Exception as err:
+                err_message = f"Error occurred while collecting/ingesting data. | Error={err}."
+                self.log.error(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=err_message))
 
-            for metric_name, sql_query in constants.METRIC_TO_QUERY_MAPPING.items():
+        for metric_name, sql_query in constants.METRIC_TO_QUERY_MAPPING.items():
+            try:
                 converted_query = self.db_client.convert_query_for_db(sql_query)
                 query_result = self.db_client.execute_query(converted_query)
                 self.ingest_query_result(query_result, metric_name)
-
-        except Exception as err:
-            err_message = f"Error occurred while collecting/ingesting data. | Error={err}."
-            self.log.error(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=err_message))
+            except Exception as err:
+                err_message = f"Error occurred while collecting/ingesting data. | Error={err}."
+                self.log.error(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=err_message))
 
         elapsed_time = time.time() - start_time
         message = f"End of the data collection/ingestion. Time taken: {elapsed_time:.3f} seconds."

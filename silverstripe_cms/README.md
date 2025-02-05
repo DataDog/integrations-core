@@ -25,33 +25,33 @@ The Silverstripe CMS integration is included in the [Datadog Agent package][1]. 
 ### Connect your Silverstripe CMS account to agent
 
 1. Copy the `conf.yaml.example` file.
-  ```sh
-  cp /etc/datadog-agent/conf.d/silverstripe_cms.d/conf.yaml.example /etc/datadog-agent/conf.d/silverstripe_cms.d/conf.yaml
-  ```
+   ```sh
+   cp /etc/datadog-agent/conf.d/silverstripe_cms.d/conf.yaml.example /etc/datadog-agent/conf.d/silverstripe_cms.d/conf.yaml
+   ```
 
 2. Add this configuration block to your `silverstripe_cms.d/conf.yaml` file to start collecting your metrics.
    - See the sample [silverstripe_cms.d/conf.yaml][2] for available configuration options.
-   - Example for the conf.yaml when multiple instances of Silverstripe CMS are configured:
+   - If you need to configure multiple instances of Silverstripe CMS in the `conf.yaml` file, reference the following example:
      ```yaml
        init_config:
        instances:
-         - SS_DATABASE_TYPE: PostgreSQL
-           SS_DATABASE_NAME: <DATABASE_NAME_1>
-           SS_DATABASE_SERVER_IP: <IPV4>
-           SS_DATABASE_PORT: <PORT_NUMBER>
-           SS_DATABASE_USERNAME: <USERNAME_1>
-           SS_DATABASE_PASSWORD: <PASSWORD_1>
+         - SILVERSTRIPE_DATABASE_TYPE: PostgreSQL
+           SILVERSTRIPE_DATABASE_NAME: <DATABASE_NAME_1>
+           SILVERSTRIPE_DATABASE_SERVER_IP: <IPV4>
+           SILVERSTRIPE_DATABASE_PORT: <PORT_NUMBER>
+           SILVERSTRIPE_DATABASE_USERNAME: <USERNAME_1>
+           SILVERSTRIPE_DATABASE_PASSWORD: <PASSWORD_1>
            min_collection_interval: 300
-         - SS_DATABASE_TYPE: MySQL
-           SS_DATABASE_NAME: <DATABASE_NAME_2>
-           SS_DATABASE_SERVER_IP: <IPV4>
-           SS_DATABASE_PORT: <PORT_NUMBER>
-           SS_DATABASE_USERNAME: <USERNAME_2>
-           SS_DATABASE_PASSWORD: <PASSWORD_2>
+         - SILVERSTRIPE_DATABASE_TYPE: MySQL
+           SILVERSTRIPE_DATABASE_NAME: <DATABASE_NAME_2>
+           SILVERSTRIPE_DATABASE_SERVER_IP: <IPV4>
+           SILVERSTRIPE_DATABASE_PORT: <PORT_NUMBER>
+           SILVERSTRIPE_DATABASE_USERNAME: <USERNAME_2>
+           SILVERSTRIPE_DATABASE_PASSWORD: <PASSWORD_2>
            min_collection_interval: 300
      ```
 
-3. Install the third-party dependent Python package:
+3. Install the package for the third-party Python dependency `sqlalchemy`:
    - Linux:
      ```sh
      sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install "sqlalchemy>=2.0.36"
@@ -61,18 +61,18 @@ The Silverstripe CMS integration is included in the [Datadog Agent package][1]. 
      "%programfiles%\Datadog\Datadog Agent\embedded3\python.exe" -m pip install "sqlalchemy>=2.0.36"
      ```
 
-4. [Restart the Agent.][3].
+4. [Restart the Agent][3].
 
 ### Validation
 
-- [Run the Agent's status subcommand][4] and look for `silverstripe_cms` under the Checks section.
+- [Run the Agent's status subcommand][4] and look for `silverstripe_cms` under the **Checks** section.
 
 - Alternatively, use the following command to obtain detailed information about the integration:
-    ```
+    ```sh
     sudo datadog-agent check silverstripe_cms
     ```
 
-- This Check returns OK if all the configurations are correct and the Agent is able to communicate with Silverstripe CMS.
+   The check returns OK if all the configurations are correct and the Agent is able to communicate with Silverstripe CMS.
 
 ## Data Collected
 
@@ -98,7 +98,7 @@ The Silverstripe CMS includes service checks that are listed in the [service_che
 
 For integrations running on the Agent:
 
-- Fully remove the integration by following the datadog-agent integration remove command. More information can be found [here][6].
+- Fully remove the integration using the `datadog-agent integration remove` command. For more information, see [Integration management][6].
 
 ## Support
 

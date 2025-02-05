@@ -2,35 +2,35 @@
 #
 instances:
 
-    ## @param SS_DATABASE_TYPE - string - required
+    ## @param SILVERSTRIPE_DATABASE_TYPE - string - required
     ## Silverstripe Database Type (MySQL or PostgreSQL).
     #
-  - SS_DATABASE_TYPE: <DATABASE_TYPE>
+  - SILVERSTRIPE_DATABASE_TYPE: <DATABASE_TYPE>
 
-    ## @param SS_DATABASE_NAME - string - required
+    ## @param SILVERSTRIPE_DATABASE_NAME - string - required
     ## Silverstripe Database Name.
     #
-    SS_DATABASE_NAME: <DATABASE_NAME>
+    SILVERSTRIPE_DATABASE_NAME: <DATABASE_NAME>
 
-    ## @param SS_DATABASE_SERVER_IP - string - required
+    ## @param SILVERSTRIPE_DATABASE_SERVER_IP - string - required
     ## Silverstripe Database Server IP.
     #
-    SS_DATABASE_SERVER_IP: <IP_ADDRESS>
+    SILVERSTRIPE_DATABASE_SERVER_IP: <IP_ADDRESS>
 
-    ## @param SS_DATABASE_PORT - integer - required
+    ## @param SILVERSTRIPE_DATABASE_PORT - integer - required
     ## Silverstripe Database Port.
     #
-    SS_DATABASE_PORT: 5432
+    SILVERSTRIPE_DATABASE_PORT: 5432
 
-    ## @param SS_DATABASE_USERNAME - string - required
+    ## @param SILVERSTRIPE_DATABASE_USERNAME - string - required
     ## Silverstripe Database Username.
     #
-    SS_DATABASE_USERNAME: <USERNAME>
+    SILVERSTRIPE_DATABASE_USERNAME: <USERNAME>
 
-    ## @param SS_DATABASE_PASSWORD - string - required
+    ## @param SILVERSTRIPE_DATABASE_PASSWORD - string - required
     ## Silverstripe Database Password.
     #
-    SS_DATABASE_PASSWORD: <PASSWORD>
+    SILVERSTRIPE_DATABASE_PASSWORD: <PASSWORD>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

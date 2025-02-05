@@ -34,12 +34,12 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    SS_DATABASE_NAME: str
-    SS_DATABASE_PASSWORD: str
-    SS_DATABASE_PORT: int = Field(..., ge=0, le=65535)
-    SS_DATABASE_SERVER_IP: str
-    SS_DATABASE_TYPE: str
-    SS_DATABASE_USERNAME: str
+    SILVERSTRIPE_DATABASE_NAME: str
+    SILVERSTRIPE_DATABASE_PASSWORD: str
+    SILVERSTRIPE_DATABASE_PORT: int = Field(..., ge=0, le=65535)
+    SILVERSTRIPE_DATABASE_SERVER_IP: str
+    SILVERSTRIPE_DATABASE_TYPE: str
+    SILVERSTRIPE_DATABASE_USERNAME: str
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
