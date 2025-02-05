@@ -1,0 +1,2166 @@
+{
+    "title": "Adyen Transactions",
+    "description": "This Dashboard provides a comprehensive overview of key logs related to transaction events. The dashboard visualizes transaction overviews, refund insights, and other transaction analytics. Additionally, it provide insights related to transactions by currency, merchant account, and payment method.",
+    "widgets": [
+        {
+            "id": 6509483665561548,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoiYWR5ZW5cL2ZpbGVcL1ZBanFlS3N5Ulc2ckZhVms5NTI1LnN2ZyJ9:adyen:r06pNrzaXXGyE0fhpig2QP-tBs3hC99-cwKlx-PdS68",
+                "url_dark_theme": "https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoiYWR5ZW5cL2ZpbGVcL1BrU051WngzanVnamZZZ0FZR0JrLnN2ZyJ9:adyen:qWZTSS0KDkayjczU8jwAJNPlbHzmxs1Wq_hYu7QR-Q4",
+                "sizing": "cover",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 4312287967442976,
+            "definition": {
+                "title": "Monitors Summary",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7229231341568784,
+                        "definition": {
+                            "title": "Monitors Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(source:adyen AND service:transaction)",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 8436695922142380,
+            "definition": {
+                "type": "note",
+                "content": "**Overview**\n\nThis Dashboard provides a comprehensive overview of key logs related to transaction events. The dashboard visualizes transaction overviews, refund insights, and other transaction analytics. Additionally, it provide insights related to transactions by currency, merchant account, and payment method.\n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 456217064815528,
+            "definition": {
+                "title": "Authorisation and Capture",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6961499151036918,
+                        "definition": {
+                            "title": "Total Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#a3f093"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1697490278253126,
+                        "definition": {
+                            "title": "Authorised Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#84f5e8"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4348831624447672,
+                        "definition": {
+                            "title": "Unauthorised Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f3bec4"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8735802905445058,
+                        "definition": {
+                            "title": "Cancelled Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CANCELLATION $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_bg_color": "#cff08a"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 296396547853044,
+                        "definition": {
+                            "title": "Successful Capture Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#abaede"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 750885913573374,
+                        "definition": {
+                            "title": "Failed Capture Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#abaede"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4352217977559220,
+                        "definition": {
+                            "title": "Card Scheme Capture Rejections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#bfeaf3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2566711069376236,
+                        "definition": {
+                            "title": "Externally Handled Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:HANDLED_EXTERNALLY $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 651378961103242,
+                        "definition": {
+                            "title": "Top Reasons for Unauthorized Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2492046748209724,
+                        "definition": {
+                            "title": "Top Reasons for Failed Capture Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8289074476620792,
+                        "definition": {
+                            "title": "Authorised and Unauthorised Transaction Logs over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Authorised",
+                                            "style": {
+                                                "palette": "green",
+                                                "palette_index": 4
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Unauthorised",
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 4
+                                            },
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "order_reverse": false,
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "min": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7373601600498598,
+                        "definition": {
+                            "title": "Captured Transaction Logs over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Successful Captures",
+                                            "style": {
+                                                "palette": "green",
+                                                "palette_index": 4
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Card Scheme Capture Rejections",
+                                            "style": {
+                                                "palette": "orange",
+                                                "palette_index": 4
+                                            },
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Failed Captures",
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 4
+                                            },
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "order_reverse": false,
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "min": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 19
+            }
+        },
+        {
+            "id": 5472163624460398,
+            "definition": {
+                "title": "Refund Transactions",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7563511495707992,
+                        "definition": {
+                            "title": "Successful Refunds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#b0ae73"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4040977939989402,
+                        "definition": {
+                            "title": "Reversed Refunds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUNDED_REVERSED $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_bg_color": "#f5d0b8"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5494881480544940,
+                        "definition": {
+                            "title": "Cancel or Refund Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CANCEL_OR_REFUND $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_bg_color": "#a5e0ee"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4771099778664500,
+                        "definition": {
+                            "title": "Top Reasons for Failed Refund Transactions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4979038803851076,
+                        "definition": {
+                            "title": "Failed Refunds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#b0ae73"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 675396501883988,
+                        "definition": {
+                            "title": "Card Scheme Refund Rejections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#ede3b1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 5,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 451265545877860,
+                        "definition": {
+                            "title": "Refund Transactions over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "style": {
+                                                "palette": "green",
+                                                "palette_index": 4
+                                            },
+                                            "alias": "Successful Refunds",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 4
+                                            },
+                                            "alias": "Card Scheme Refund Rejections",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "orange",
+                                                "palette_index": 4
+                                            },
+                                            "alias": "Reversed Refunds",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "classic",
+                                                "palette_index": 5
+                                            },
+                                            "alias": "Cancel/Refund Transactions",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "classic",
+                                                "palette_index": 5
+                                            },
+                                            "alias": "Failed Refunds",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUNDED_REVERSED $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query4",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:CANCEL_OR_REFUND $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query5",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "order_reverse": false,
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "min": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 12,
+                "height": 12
+            }
+        },
+        {
+            "id": 5723766196303778,
+            "definition": {
+                "title": "Authorisation Adjustments",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4678060022058734,
+                        "definition": {
+                            "title": "Successful Authorised Adjustments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4057284384980950,
+                        "definition": {
+                            "title": "Authorised Adjustments by Merchant Account",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.merchantAccountCode",
+                                                    "limit": 50,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4653596805177202,
+                        "definition": {
+                            "title": "Failed Authorised Adjustments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5598094566475786,
+                        "definition": {
+                            "title": "Top Reasons for Failed Authorised Adjustments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 8,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 5377373309638162,
+            "definition": {
+                "title": "Transaction Analytics",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2756476904721266,
+                        "definition": {
+                            "title": "Transactions by Currency",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.amount.currency",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3219374678265600,
+                        "definition": {
+                            "title": "Transactions by Merchant Account",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.merchantAccountCode",
+                                                    "limit": 50,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4249622615816588,
+                        "definition": {
+                            "title": "Authorised Transactions by Payment Method",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.paymentMethod",
+                                                    "limit": 50,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3283450362478202,
+                        "definition": {
+                            "title": "Unauthorised Transactions by Payment Method",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.paymentMethod",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 46,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 1363938150356684,
+            "definition": {
+                "title": "Transaction Logs over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Transaction Logs",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@evt.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:adyen service:transaction $MerchantAccount $PaymentMethod $Currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "datadog16",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 2473521832667872,
+            "definition": {
+                "title": "Transaction Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "hide_incomplete_cost_data": true
+                },
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:adyen service:transaction $MerchantAccount $PaymentMethod $Currency ",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "service",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "MerchantAccount",
+            "prefix": "@notificationItems.NotificationRequestItem.merchantAccountCode",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "PaymentMethod",
+            "prefix": "@notificationItems.NotificationRequestItem.paymentMethod",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Currency",
+            "prefix": "@notificationItems.NotificationRequestItem.amount.currency",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
