@@ -23,6 +23,7 @@ This integration collects logs and metrics from the sources listed above and sen
 * [Log Explorer][2]
 * [Metrics Explorer][3]
 
+## Setup
 
 #### Connect your ServiceNow instance to Datadog
 
