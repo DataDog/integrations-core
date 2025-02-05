@@ -16,6 +16,10 @@ def instance_close_admin_client():
     return True
 
 
+def instance_collect_consumer_group_state():
+    return False
+
+
 def instance_consumer_queued_max_messages_kbytes():
     return 1024
 

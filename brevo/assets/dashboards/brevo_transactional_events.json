@@ -31,7 +31,7 @@
                 "hide_zero_counts": true,
                 "show_status": true,
                 "last_triggered_format": "relative",
-                "query": "tag:brevo $subject $recipient_email $sender_email $event_name",
+                "query": "tag:brevo",
                 "sort": "status,asc",
                 "count": 50,
                 "start": 0,

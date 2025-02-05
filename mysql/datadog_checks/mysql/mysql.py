@@ -54,6 +54,7 @@ from .const import (
     TABLE_VARS,
     VARIABLES_VARS,
 )
+from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
@@ -130,6 +131,7 @@ class MySql(AgentCheck):
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+        self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -378,7 +380,8 @@ class MySql(AgentCheck):
 
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-
+        if self._index_metrics.include_index_metrics:
+            queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
         self._runtime_queries_cached.compile_queries()
         self.log.debug("initialized runtime queries")

@@ -1024,7 +1024,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:adyen service:dispute"
+                                    "query": "source:adyen service:dispute $PaymentMethod $MerchantAccount"
                                 },
                                 "storage": "hot"
                             }
@@ -1058,7 +1058,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:adyen service:dispute ",
+                            "query_string": "source:adyen service:dispute $PaymentMethod $MerchantAccount",
                             "indexes": [],
                             "storage": "hot",
                             "sort": {
@@ -1101,6 +1101,7 @@
         },
         {
             "name": "PaymentMethod",
+            "prefix": "@notificationItems.NotificationRequestItem.paymentMethod",
             "available_values": [],
             "default": "*"
         }

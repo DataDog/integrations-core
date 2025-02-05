@@ -203,11 +203,11 @@ After downloading the archive corresponding to your platform and architecture, e
 
     === "ARM"
         ```
-        pipx install ddev --python /opt/homebrew/bin/python3.11
+        pipx install ddev --python /opt/homebrew/bin/python3.12
         ```
     === "Intel"
         ```
-        pipx install ddev --python /usr/local/bin/python3.11
+        pipx install ddev --python /usr/local/bin/python3.12
         ```
 
     !!! warning

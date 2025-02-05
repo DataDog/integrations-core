@@ -1,0 +1,32 @@
+{
+    "version": 2,
+    "created_at": "2025-02-01",
+    "last_updated_at": "2025-02-01",
+    "title": "Keda Scaler Reporting Errors",
+    "description": "A Keda scaler monitors external event sources to trigger workload scaling, monitoring scaler errors helps detect issues early and ensure reliable autoscaling.",
+    "definition": {
+        "id": 163814976,
+        "name": "[Keda] Keda Scaler Errors",
+        "type": "query alert",
+        "query": "avg(last_15m):avg:keda.scaler.detail_errors.count{*} by {scaledobject,scaler,namespace} > 10",
+        "message": "{{#is_alert}}\nKeda Scaledobject {{scaledobject.name}} from {{scaler.name}} scaler in {{namespace.name}} namespace is high number of errors in the last 15 minutes.\n{{/is_alert}}\n\n{{#is_recovery}}\nKeda Scaledobject {{scaledobject.name}} from {{scaler.name}} scaler in {{namespace.name}} is back in a stable state.\n{{/is_recovery}}",
+        "tags": [],
+        "options": {
+            "thresholds": {
+                "critical": 10
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:keda"
+    ]
+}

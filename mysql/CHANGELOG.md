@@ -2,13 +2,24 @@
 
 <!-- towncrier release notes start -->
 
-## 14.4.0 / 2024-12-26
+## 14.5.0 / 2025-01-25
+
+***Added***:
+
+* Added an optional optimization to MySQL statement metrics collection to only query for queries that have run since the last check collection. ([#19321](https://github.com/DataDog/integrations-core/pull/19321))
+* Emit index usage and index metrics from mysql integration ([#19383](https://github.com/DataDog/integrations-core/pull/19383))
+
+***Fixed***:
+
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 14.4.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 
 * Add `mysql.performance.performance_schema_digest_lost`, the number of digest instances that could not be instrumented in the `events_statements_summary_by_digest` table. ([#19121](https://github.com/DataDog/integrations-core/pull/19121))
 
-## 14.3.0 / 2024-11-28
+## 14.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 
