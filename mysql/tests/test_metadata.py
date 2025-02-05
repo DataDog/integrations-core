@@ -166,21 +166,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "RestaurantName",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                             {
                                 "name": "District",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": True,
-                        "expression": None,
+                        "expression": "",
                     }
                 ],
             },
@@ -226,21 +226,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "RestaurantName",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                             {
                                 "name": "District",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": False,
-                        "expression": None,
+                        "expression": "",
                     }
                 ],
             },
@@ -286,14 +286,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "id",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": False,
                             }
                         ],
                         "non_unique": False,
-                        "expression": None,
+                        "expression": "",
                     },
                     {
                         "name": "single_column_index",
@@ -302,14 +302,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "population",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": False,
                             }
                         ],
                         "non_unique": True,
-                        "expression": None,
+                        "expression": "",
                     },
                     {
                         "name": "two_columns_index",
@@ -318,9 +318,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "id",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": False,
                             },
                             {
@@ -334,12 +334,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                     )
                                     else 'A'
                                 ),
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": True,
-                        "expression": None,
+                        "expression": "",
                     },
                     *(
                         [
@@ -441,14 +441,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "id",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": False,
                             }
                         ],
                         "non_unique": False,
-                        "expression": None,
+                        "expression": "",
                     }
                 ],
             },
@@ -496,14 +496,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "city_id",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": True,
-                        "expression": None,
+                        "expression": "",
                     }
                 ],
             },
@@ -547,14 +547,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "name",
-                                "sub_part": None,
+                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": None,
+                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": False,
-                        "expression": None,
+                        "expression": "",
                     }
                 ],
             },

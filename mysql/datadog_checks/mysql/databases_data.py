@@ -373,15 +373,15 @@ class DatabasesData:
             index_data["cardinality"] = int(row["cardinality"])
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
-            index_data["expression"] = str(row["expression"]) if row["expression"] else None
+            index_data["expression"] = str(row["expression"]) if row["expression"] else ""
 
             # Add column info, if exists
             if row["column_name"]:
                 column = {
                     "name": row["column_name"],
-                    "sub_part": int(row["sub_part"]) if row["sub_part"] else None,
-                    "collation": str(row["collation"]) if row["collation"] else None,
-                    "packed": str(row["packed"]) if row["packed"] else None,
+                    "sub_part": int(row["sub_part"]) if row["sub_part"] else 0,
+                    "collation": str(row["collation"]) if row["collation"] else "",
+                    "packed": str(row["packed"]) if row["packed"] else "",
                     "nullable": bool(row["nullable"].lower() == "yes"),
                 }
                 index_data["columns"].append(column)
