@@ -35,7 +35,7 @@ pipeline:
           _date_operator %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
           _level_adapter %{regex("[A-Z]"):level}
           _level_operator %{word:level}
-          _logger_adapter %{data:logger.file}:%{number:logger.line}
+          _logger_adapter %{regex("[^:]+"):logger.file}:%{number:logger.line}
           _pid %{integer:process.id}
           _logger_op %{notSpace:logger.name}
           _msg %{doubleQuotedString:msg}
