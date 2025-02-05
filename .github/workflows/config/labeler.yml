@@ -653,6 +653,8 @@ integration/yarn:
 - yarn/**/*
 integration/zeek:
 - zeek/**/*
+integration/zero_networks:
+- zero_networks/**/*
 integration/zk:
 - zk/**/*
 qa/skip-qa:
