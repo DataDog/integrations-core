@@ -22,7 +22,7 @@ services:
     healthcheck:
       test: ["CMD", "powershell", "-Command", "if ((Test-NetConnection -ComputerName localhost -Port 443).TcpTestSucceeded) { exit 0 } else { exit 1 }"]
       interval: 5s
-      timeout: 10s
+      timeout: 15s
       retries: 3
   server:
     build:
@@ -34,5 +34,5 @@ services:
     healthcheck:
       test: ["CMD", "powershell", "-Command", "if ((Test-NetConnection -ComputerName localhost -Port 443).TcpTestSucceeded) { exit 0 } else { exit 1 }"]
       interval: 5s
-      timeout: 10s
+      timeout: 15s
       retries: 3
