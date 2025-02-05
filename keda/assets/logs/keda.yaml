@@ -36,7 +36,7 @@ pipeline:
           _level_adapter %{regex("[A-Z]*"):level}
           _level_operator %{word:level}
           _logger_adapter %{data:logger.file}:%{number:logger.line}
-          _pid %{number:process.id}
+          _pid %{integer:process.id}
           _logger_op %{data:logger.name}
           _msg %{data:msg}
     - type: date-remapper
