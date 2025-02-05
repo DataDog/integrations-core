@@ -35,10 +35,7 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-deps = [
-    # Starting with Python 3.5 'scandir.scandir' is in the standard library as 'os.scandir'.
-    "scandir==1.10.0; python_version < '3.5'",
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

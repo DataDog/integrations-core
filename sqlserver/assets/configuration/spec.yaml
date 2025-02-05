@@ -137,7 +137,9 @@ files:
           description: |
             Configure collection of AlwaysOn availability group metrics.
 
-            When the `ao_metrics.enabled` is True, use `ao_metrics.availability_group` to specify the 
+            Set `ao_metrics.enabled` to true to enable collection of AlwaysOn metrics. Defaults to false.
+
+            When `ao_metrics.enabled` is True, use `ao_metrics.availability_group` to specify the 
             resource group id of a specific availability group that you would like to monitor. 
             If no availability group is specified, then we will collect AlwaysOn metrics for all 
             availability groups on the current replica.
@@ -163,6 +165,9 @@ files:
         - name: db_backup_metrics
           description: |
             Configure collection of database backup metrics.
+
+            Set `db_backup_metrics.enabled` to true to enable collection of database backup metrics. Defaults to true.
+
             Use `db_backup_metrics.collection_interval` to set the interval (in seconds) for the collection of 
             database backup metrics. Defaults to 300 seconds (5 minutes). If you intend on updating this value,
             it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
@@ -180,6 +185,8 @@ files:
         - name: db_files_metrics
           description: |
             Configure collection of database files metrics.
+
+            Set `db_files_metrics.enabled` to true to enable collection of database files metrics. Defaults to true.
           hidden: true
           value:
             type: object
@@ -190,6 +197,8 @@ files:
         - name: db_stats_metrics
           description: |
             Configure collection of database stats metrics
+
+            Set `db_stats_metrics.enabled` to true to enable collection of database stats metrics. Defaults to true.
           hidden: true
           value:
             type: object
@@ -202,6 +211,9 @@ files:
             Configure collection of database fragmentation metrics. 
             Note these queries can be resource intensive on large datasets. Recommend to limit these via 
             autodiscovery or specific database instances.
+
+            Set `db_fragmentation_metrics.enabled` to true to enable collection of 
+            database index fragmentation statistics. Defaults to false.
 
             Use `db_fragmentation_metrics.enabled_tempdb` to enable collection of database index fragmentation statistics
             in tempdb database from the `sys.dm_db_index_physical_stats` DMF.
@@ -219,7 +231,7 @@ files:
               - name: enabled
                 type: boolean
                 example: false
-              - name: enabled_tempdb               
+              - name: enabled_tempdb
                 type: boolean
                 example: false
               - name: collection_interval
@@ -228,8 +240,11 @@ files:
                 display_default: 300
         - name: fci_metrics
           description: |
-            Configure collection of failover Cluster Instance metrics. Note that these metrics
+            Configure collection of Failover Cluster Instance metrics. Note that these metrics
             requires a SQLServer set up with Failover Clustering enabled.
+
+            Set `fci_metrics.enabled` to true to enable collection of Failover Cluster Instance metrics.
+            Defaults to false.
           value:
             type: object
             properties:
@@ -239,6 +254,8 @@ files:
         - name: file_stats_metrics
           description: |
             Configure collection of file stats metrics.
+
+            Set `file_stats_metrics.enabled` to true to enable collection of file stats metrics. Defaults to true.
           hidden: true
           value:
             type: object
@@ -251,6 +268,9 @@ files:
             Configure collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
             Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
             `database_autodiscovery` or set `database`.
+
+            Set `index_usage_metrics.enabled` to true to enable collection of user table index usage statistics.
+            Defaults to true.
 
             Use `index_usage_metrics.enabled_tempdb` to enable collection of user table index usage statistics in tempdb
             database from the `sys.dm_db_index_usage_stats` DMV.
@@ -267,7 +287,7 @@ files:
             properties:
             - name: enabled
               type: boolean
-              example: false
+              example: true
             - name: enabled_tempdb
               type: boolean
               example: false
@@ -279,6 +299,9 @@ files:
           description: |
             Configure collection of server-level instance metrics.  When setting up multiple instances for
             different databases on the same host these metrics will be duplicated unless this option is turned off.
+
+            Set `instance_metrics.enabled` to true to enable collection of server-level instance metrics.
+            Defaults to true.
           value:
             type: object
             properties:
@@ -288,6 +311,9 @@ files:
         - name: master_files_metrics
           description: | 
             Configure collection of database file size and state from `sys.master_files`
+
+            Set `master_files_metrics.enabled` to true to enable collection of database file size and state metrics.
+            Defaults to false.
           value:
             type: object
             properties:
@@ -299,6 +325,9 @@ files:
             Configure collection of metrics for a log shipping setup. Required to run against the 
             primary instance in a transaction log shipping configuration. Note that
             the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+
+            Set `primary_log_shipping_metrics.enabled` to true to enable collection of primary log shipping metrics.
+            Defaults to false.
           value:
             type: object
             properties:
@@ -310,6 +339,9 @@ files:
             Configure collection of metrics for a log shipping setup. Required to run against the 
             secondary instance in a transaction log shipping configuration. Note that
             the Datadog user needs to be present in msdb and must be added to the db_datareader role.
+
+            Set `secondary_log_shipping_metrics.enabled` to true to enable collection of secondary log shipping metrics.
+            Defaults to false.
           value:
             type: object
             properties:
@@ -319,6 +351,8 @@ files:
         - name: server_state_metrics
           description: |
             Configure collection of server state metrics
+
+            Set `server_state_metrics.enabled` to true to enable collection of server state metrics. Defaults to true.
           hidden: true
           value:
             type: object
@@ -329,6 +363,9 @@ files:
         - name: task_scheduler_metrics
           description: |
             Configure collection of additional Task and Scheduler metrics.
+
+            Set `task_scheduler_metrics.enabled` to true to enable collection of additional Task and Scheduler metrics.
+            Defaults to false.
           value:
             type: object
             properties:
@@ -338,15 +375,20 @@ files:
         - name: tempdb_file_space_usage_metrics
           description: |
             Configure collection of tempdb file space usage metrics for how space is used in tempdb data files.
+
+            Set `tempdb_file_space_usage_metrics.enabled` to true to enable collection of 
+            tempdb file space usage metrics. Defaults to true.
           value:
             type: object
             properties:
             - name: enabled
               type: boolean
-              example: false
+              example: true
         - name: xe_metrics
           description: |
             Configure collection of extended events (XE) metrics. 
+
+            Set `xe_metrics.enabled` to true to enable collection of extended events metrics. Defaults to false.
           value:
             type: object
             properties:
@@ -354,7 +396,7 @@ files:
               type: boolean
               example: false
     - name: agent_jobs
-      description: Configure collection of agent jobs events and metrics
+      description: Configure collection of SQL Server Agent jobs events and metrics
       options:
         - name: enabled
           description: |
@@ -796,6 +838,22 @@ files:
         - name: keep_identifier_quotation
           description: |
             Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+    - name: collect_raw_query_statement
+      hidden: true
+      description: |
+        Configure the collection of raw query statements in query activity and execution plans.
+        Raw query statements and execution plans may contain sensitive information in query text.
+        Enabling this option will allow the collection and ingestion of raw query statements and
+        execution plans into Datadog. This option is disabled by default.
+        Note: This option only applies when `dbm` is enabled.
+      options:
+        - name: enabled
+          description: |
+            Set to `true` to collect the raw query statements.
           value:
             type: boolean
             example: false

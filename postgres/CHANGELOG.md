@@ -2,7 +2,36 @@
 
 <!-- towncrier release notes start -->
 
-## 22.3.0 / 2024-11-28
+## 22.5.1 / 2025-01-29
+
+***Fixed***:
+
+* Revert "Upgrade postgres to psycopg3" due to instability in testing ([#19499](https://github.com/DataDog/integrations-core/pull/19499))
+
+## 22.5.0 / 2025-01-25
+
+***Added***:
+
+* Upgrade psycopg to version 3 for Postgres integration ([#19322](https://github.com/DataDog/integrations-core/pull/19322))
+* Add index state attributes (is_unique, is_exclusion, is_immediate, is_clustered, is_valid, is_checkxmin, is_ready, is_live, is_replident, is_partial) from pg_index to PostgreSQL schema collection for enhanced index property visibility. ([#19406](https://github.com/DataDog/integrations-core/pull/19406))
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+***Fixed***:
+
+* Resolved an issue in `QUERY_PG_CLASS` where multiple locks on the same table in `PG_LOCKS` caused duplicate rows, leading to inaccurate rate metric like `postgresql.rows_inserted`, `postgresql.rows_updated`, or `postgresql.rows_deleted`. ([#19351](https://github.com/DataDog/integrations-core/pull/19351))
+* Bump datadog-checks-base version ([#19478](https://github.com/DataDog/integrations-core/pull/19478))
+
+## 22.4.0 / 2024-12-26 / Agent 7.62.0
+
+***Added***:
+
+* Add postgresql.relation.xmin metric ([#19218](https://github.com/DataDog/integrations-core/pull/19218))
+
+***Fixed***:
+
+* Fix check for Postgres collect query activity to avoid bugs with in-flight duration and missing blocking pids ([#19271](https://github.com/DataDog/integrations-core/pull/19271))
+
+## 22.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 
@@ -13,7 +42,7 @@
 
 * Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL. ([#19061](https://github.com/DataDog/integrations-core/pull/19061))
 
-## 22.2.0 / 2024-11-06
+## 22.2.0 / 2024-11-06 / Agent 7.60.0
 
 ***Added***:
 

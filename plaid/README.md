@@ -33,7 +33,7 @@ Configure the Datadog endpoint to forward Plaid logs to Datadog.
 
 ## Data Collected
 
-The crawler will implement data collection of Plaid logs for the List of Transfer events, remove sensitive data and send it to Datadog. 
+The crawler will implement data collection of Plaid logs for the List of Transfer events, remove sensitive data and send it to Datadog.
 
 
 ## Troubleshooting
