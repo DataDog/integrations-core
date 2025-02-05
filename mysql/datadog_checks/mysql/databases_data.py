@@ -213,7 +213,7 @@ class DatabasesData:
                                     - name (str): The name of the column.
                                     - sub_part (int): The number of indexed characters if column is partially indexed.
                                     - collation (str): The collation of the column.
-                                    - packed (str): How the index is packed. NONE if it is not.
+                                    - packed (str): How the index is packed.
                                     - nullable (bool): Whether the column is nullable.
                             - non_unique (bool): Whether the index can contain duplicates.
                             - expression (str): If index was built with a functional key part, the expression used.
@@ -236,7 +236,7 @@ class DatabasesData:
                                     - subpartition_expression (str): The subpartition expression.
                                     - table_rows (int): The number of rows in the subpartition.
                                     - data_length (int): The data length of the subpartition in bytes.
-                            - partition_ordinal_position (str): The ordinal position of the partition.
+                            - partition_ordinal_position (int): The ordinal position of the partition.
                             - partition_method (str): The partition method.
                             - partition_expression (str): The partition expression.
                             - partition_description (str): The description of the partition.
@@ -353,12 +353,6 @@ class DatabasesData:
         table_index_dict = defaultdict(
             lambda: defaultdict(
                 lambda: {
-                    "name": None,
-                    "cardinality": 0,
-                    "index_type": None,
-                    "columns": [],
-                    "non_unique": None,
-                    "expression": None,
                 }
             )
         )
@@ -373,17 +367,22 @@ class DatabasesData:
             index_data["cardinality"] = int(row["cardinality"])
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
-            index_data["expression"] = str(row["expression"]) if row["expression"] else ""
+            if row["expression"]:
+                index_data["expression"] = str(row["expression"])
 
             # Add column info, if exists
             if row["column_name"]:
+                index_data.setdefault("columns", [])
                 column = {
                     "name": row["column_name"],
-                    "sub_part": int(row["sub_part"]) if row["sub_part"] else 0,
-                    "collation": str(row["collation"]) if row["collation"] else "",
-                    "packed": str(row["packed"]) if row["packed"] else "",
-                    "nullable": bool(row["nullable"].lower() == "yes"),
+                    "nullable": bool(row["nullable"].lower() == "yes")
                 }
+                if row["sub_part"]:
+                    column["sub_part"] = int(row["sub_part"])
+                if row["collation"]:
+                    column["collation"] = str(row["collation"])
+                if row["packed"]:
+                    column["packed"] = str(row["packed"])
                 index_data["columns"].append(column)
 
         for table_name, index_dict in table_index_dict.items():
@@ -407,12 +406,6 @@ class DatabasesData:
         table_partitions_dict = defaultdict(
             lambda: defaultdict(
                 lambda: {
-                    "name": None,
-                    "subpartitions": [],
-                    "partition_ordinal_position": None,
-                    "partition_method": None,
-                    "partition_expression": None,
-                    "partition_description": None,
                     "table_rows": 0,
                     "data_length": 0,
                 }
@@ -436,6 +429,7 @@ class DatabasesData:
 
             # Add subpartition info, if exists
             if row["subpartition_name"]:
+                partition_data.setdefault("subpartitions", [])
                 subpartition = {
                     "name": row["subpartition_name"],
                     "subpartition_ordinal_position": int(row["subpartition_ordinal_position"]),

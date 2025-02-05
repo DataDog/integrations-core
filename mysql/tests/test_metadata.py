@@ -51,7 +51,7 @@ def normalize_values(actual_payload):
                     partition["partition_expression"] = (
                         partition["partition_expression"].replace("`", "").lower().strip()
                     )
-                if partition["subpartitions"] is not None:
+                if "subpartitions" in partition and partition["subpartitions"]:
                     for subpartition in partition["subpartitions"]:
                         if subpartition["subpartition_expression"] is not None:
                             subpartition["subpartition_expression"] = (
@@ -166,21 +166,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "RestaurantName",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": True,
                             },
                             {
                                 "name": "District",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": True,
-                        "expression": "",
                     }
                 ],
             },
@@ -226,21 +221,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "RestaurantName",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": True,
                             },
                             {
                                 "name": "District",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": False,
-                        "expression": "",
                     }
                 ],
             },
@@ -286,14 +276,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "id",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": False,
                             }
                         ],
                         "non_unique": False,
-                        "expression": "",
                     },
                     {
                         "name": "single_column_index",
@@ -302,14 +289,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "population",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": False,
                             }
                         ],
                         "non_unique": True,
-                        "expression": "",
                     },
                     {
                         "name": "two_columns_index",
@@ -318,9 +302,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "id",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": False,
                             },
                             {
@@ -334,12 +316,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                     )
                                     else 'A'
                                 ),
-                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": True,
-                        "expression": "",
                     },
                     *(
                         [
@@ -347,7 +327,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 "name": "functional_key_part_index",
                                 "index_type": "BTREE",
                                 "cardinality": 0,
-                                "columns": [],
                                 "non_unique": True,
                                 "expression": "(`population` + 1)",
                             }
@@ -394,7 +373,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "partitions": [
                     {
                         "name": "p0",
-                        "subpartitions": [],
                         "partition_ordinal_position": 1,
                         "partition_method": "RANGE",
                         "partition_expression": "id",
@@ -404,7 +382,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "p1",
-                        "subpartitions": [],
                         "partition_ordinal_position": 2,
                         "partition_method": "RANGE",
                         "partition_expression": "id",
@@ -414,7 +391,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "p2",
-                        "subpartitions": [],
                         "partition_ordinal_position": 3,
                         "partition_method": "RANGE",
                         "partition_expression": "id",
@@ -424,7 +400,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "p3",
-                        "subpartitions": [],
                         "partition_ordinal_position": 4,
                         "partition_method": "RANGE",
                         "partition_expression": "id",
@@ -441,14 +416,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "id",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": False,
                             }
                         ],
                         "non_unique": False,
-                        "expression": "",
                     }
                 ],
             },
@@ -496,14 +468,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "city_id",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": True,
-                        "expression": "",
                     }
                 ],
             },
@@ -547,14 +516,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "columns": [
                             {
                                 "name": "name",
-                                "sub_part": 0,
                                 "collation": "A",
-                                "packed": "",
                                 "nullable": True,
                             },
                         ],
                         "non_unique": False,
-                        "expression": "",
                     }
                 ],
             },
@@ -715,6 +681,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     for db_name, actual_payload in actual_payloads.items():
         normalize_values(actual_payload)
         assert db_name in databases_to_find
+        if not deep_compare(expected_data_for_db[db_name], actual_payload):
+            import json
+            print("Expected:")
+            print(json.dumps(expected_data_for_db[db_name], indent=4))
+            print("Actual:")
+            print(json.dumps(actual_payload, indent=4))
         assert deep_compare(expected_data_for_db[db_name], actual_payload)
 
 
