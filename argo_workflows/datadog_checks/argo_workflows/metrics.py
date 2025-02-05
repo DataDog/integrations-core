@@ -41,3 +41,26 @@ METRIC_MAP = {
     'go_memstats_sys_bytes': 'go.memstats.sys_bytes',
     'go_threads': 'go.threads',
 }
+
+# Metrics available in Argo Workflow v3.6+
+V3_6_PLUS_METRICS = {
+    'argo_workflows_cronworkflows_concurrencypolicy_triggered': 'cronworkflows.concurrencypolicy_triggered',
+    'argo_workflows_cronworkflows_triggered': 'cronworkflows.triggered',
+    'argo_workflows_deprecated_feature': 'deprecated.feature',
+    'argo_workflows_gauge': 'current_workflows',
+    'argo_workflows_is_leader': 'is_leader',
+    'argo_workflows_k8s_request_duration': 'k8s_request.duration',
+    'argo_workflows_log_messages': 'log_messages',
+    'argo_workflows_pod_pending_count': 'pod.pending',
+    'argo_workflows_pods_gauge': 'pods',
+    'argo_workflows_pods_total_count': 'pods_total',
+    'argo_workflows_queue_depth_gauge': 'queue_depth',
+    'argo_workflows_queue_duration': 'queue.duration',
+    'argo_workflows_queue_longest_running': 'queue.longest_running',
+    'argo_workflows_queue_retries': 'queue.retries',
+    'argo_workflows_queue_unfinished_work': 'queue.unfinished_work',
+    'argo_workflows_total_count': 'total',
+    'argo_workflows_version': 'version',
+    'argo_workflows_workflowtemplate_runtime': 'workflowtemplate.runtime',
+    'argo_workflows_workflowtemplate_triggered': 'workflowtemplate.triggered',
+}

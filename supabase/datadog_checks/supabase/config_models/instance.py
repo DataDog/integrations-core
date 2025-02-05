@@ -126,7 +126,7 @@ class InstanceConfig(BaseModel):
     openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
-    priviledged_metrics_endpoint: Optional[str] = None
+    privileged_metrics_endpoint: Optional[str] = None
     proxy: Optional[Proxy] = None
     raw_line_filters: Optional[tuple[str, ...]] = None
     raw_metric_prefix: Optional[str] = None
@@ -143,6 +143,7 @@ class InstanceConfig(BaseModel):
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_ignore_warning: Optional[bool] = None
     tls_private_key: Optional[str] = None
     tls_protocols_allowed: Optional[tuple[str, ...]] = None

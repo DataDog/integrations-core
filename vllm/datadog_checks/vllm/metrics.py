@@ -34,6 +34,29 @@ METRIC_MAP = {
     'vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
 }
 
+# RAY_METRIC_MAP for metrics exposed with ray_vllm. prefix when vllm run as a library
+RAY_METRIC_MAP = {
+    'ray_vllm:cache_config_info': 'cache_config_info',
+    'ray_vllm:num_requests_running': 'num_requests.running',
+    'ray_vllm:num_requests_waiting': 'num_requests.waiting',
+    'ray_vllm:num_requests_swapped': 'num_requests.swapped',
+    'ray_vllm:gpu_cache_usage_perc': 'gpu_cache_usage_perc',
+    'ray_vllm:cpu_cache_usage_perc': 'cpu_cache_usage_perc',
+    'ray_vllm:num_preemptions': 'num_preemptions',
+    'ray_vllm:prompt_tokens': 'prompt_tokens',
+    'ray_vllm:generation_tokens': 'generation_tokens',
+    'ray_vllm:time_to_first_token_seconds': 'time_to_first_token.seconds',
+    'ray_vllm:time_per_output_token_seconds': 'time_per_output_token.seconds',
+    'ray_vllm:e2e_request_latency_seconds': 'e2e_request_latency.seconds',
+    'ray_vllm:request_prompt_tokens': 'request.prompt_tokens',
+    'ray_vllm:request_generation_tokens': 'request.generation_tokens',
+    'ray_vllm:request_params_best_of': 'request.params.best_of',
+    'ray_vllm:request_params_n': 'request.params.n',
+    'ray_vllm:request_success': 'request.success',
+    'ray_vllm:avg_prompt_throughput_toks_per_s': 'avg.prompt.throughput.toks_per_s',
+    'ray_vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
+}
+
 RENAME_LABELS_MAP = {
     'version': 'python_version',
 }

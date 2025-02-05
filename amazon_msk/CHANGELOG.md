@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2025-01-25
+
+***Added***:
+
+* Reduced the volume of logging from the `botocore` library ([#19376](https://github.com/DataDog/integrations-core/pull/19376))
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 6.1.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 6.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

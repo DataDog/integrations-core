@@ -499,6 +499,23 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure collection of index metrics.
+    ## Metrics provided by the options:
+    ##   - mysql.index.size (per index)
+    ##   - mysql.index.reads (per index)
+    ##   - mysql.index.updates (per index)
+    ##   - mysql.index.deletes (per index)
+    ## Note that the index size metric requires the user defined for this instance to have 
+    ## SELECT privileges. Take a look at 
+    ## https://docs.datadoghq.com/integrations/mysql/?tab=host#prepare-mysql for further instructions.
+    #
+    # index_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of index metrics.
+        #
+        # enabled: true
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration

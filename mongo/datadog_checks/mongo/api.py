@@ -28,6 +28,10 @@ CRITICAL_FAILURE = (
     ProtocolError,
 )
 
+DD_OPERATION_ATTRIBUTES = {
+    'service': DD_APP_NAME,
+}
+
 
 class MongoApi(object):
     """Mongodb connection through pymongo.MongoClient
@@ -50,6 +54,7 @@ class MongoApi(object):
             'directConnection': True,
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,
+            'compressors': 'zlib',  # Enable zlib compression
         }
         if replicaset:
             options['replicaSet'] = replicaset
@@ -69,6 +74,7 @@ class MongoApi(object):
 
         # Check if the server supports the $collStats aggregation pipeline stage.
         self.coll_stats_pipeline_supported = True
+        self.__comment = ",".join([f"{k}='{v}'" for k, v in DD_OPERATION_ATTRIBUTES.items()])
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -82,13 +88,13 @@ class MongoApi(object):
             raise
 
     def ping(self):
-        return self['admin'].command('ping')
+        return self['admin'].command('ping', comment=self.__comment)
 
     def server_info(self, session=None):
         return self._cli.server_info(session)
 
     def list_database_names(self, session=None):
-        return self._cli.list_database_names(session)
+        return self._cli.list_database_names(session, comment=self.__comment)
 
     def current_op(self, session=None):
         # Use $currentOp stage to get all users and idle sessions.
@@ -96,7 +102,7 @@ class MongoApi(object):
         # Because the currentOp command and db.currentOp() helper method return the results in a single document,
         # the total size of the currentOp result set is subject to the maximum 16MB BSON size limit for documents.
         # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
-        return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
+        return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session, comment=self.__comment)
 
     def get_collection_stats(self, db_name, coll_name, stats=None, session=None):
         if not self.coll_stats_pipeline_supported:
@@ -128,23 +134,24 @@ class MongoApi(object):
                 },
             ],
             session=session,
+            comment=self.__comment,
         )
 
     def coll_stats_compatible(self, db_name, coll_name, session=None):
         # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
-        return self[db_name].command({'collStats': coll_name}, session=session)
+        return self[db_name].command({'collStats': coll_name}, session=session, comment=self.__comment)
 
     def index_stats(self, db_name, coll_name, session=None):
-        return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
+        return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session, comment=self.__comment)
 
     def index_information(self, db_name, coll_name, session=None):
-        return self[db_name][coll_name].index_information(session=session)
+        return self[db_name][coll_name].index_information(session=session, comment=self.__comment)
 
     def list_search_indexes(self, db_name, coll_name, session=None):
-        return self[db_name][coll_name].list_search_indexes(session=session)
+        return self[db_name][coll_name].list_search_indexes(session=session, comment=self.__comment)
 
     def sharded_data_distribution_stats(self, session=None):
-        return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
+        return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session, comment=self.__comment)
 
     def _is_auth_required(self, options):
         # Check if the node is an arbiter. If it is, usually it does not require authentication.
@@ -152,7 +159,7 @@ class MongoApi(object):
         try:
             # Try connect to the admin database to run the isMaster command without authentication.
             cli = MongoClient(**options)
-            is_master_payload = cli['admin'].command('isMaster')
+            is_master_payload = cli['admin'].command('isMaster', comment=self.__comment)
             is_arbiter = is_master_payload.get('arbiterOnly', False)
             # If the node is an arbiter and we are able to connect without authentication
             # we can assume that the node does not require authentication.
@@ -161,35 +168,37 @@ class MongoApi(object):
             return True
 
     def get_profiling_level(self, db_name, session=None):
-        return self[db_name].command('profile', -1, session=session)
+        return self[db_name].command('profile', -1, session=session, comment=self.__comment)
 
     def get_profiling_data(self, db_name, ts, session=None):
         filter = {'ts': {'$gt': ts}}
-        return self[db_name]['system.profile'].find(filter, session=session).sort('ts', 1)
+        return self[db_name]['system.profile'].find(filter, session=session, comment=self.__comment).sort('ts', 1)
 
     def get_log_data(self, session=None):
-        return self['admin'].command("getLog", "global", session=session)
+        return self['admin'].command("getLog", "global", session=session, comment=self.__comment)
 
     def sample(self, db_name, coll_name, sample_size, session=None):
-        return self[db_name][coll_name].aggregate([{"$sample": {"size": sample_size}}], session=session)
+        return self[db_name][coll_name].aggregate(
+            [{"$sample": {"size": sample_size}}], session=session, comment=self.__comment
+        )
 
     def get_cmdline_opts(self):
-        return self["admin"].command("getCmdLineOpts")["parsed"]
+        return self["admin"].command("getCmdLineOpts", comment=self.__comment)["parsed"]
 
     def replset_get_status(self):
-        return self["admin"].command("replSetGetStatus")
+        return self["admin"].command("replSetGetStatus", comment=self.__comment)
 
     def is_master(self):
-        return self["admin"].command("isMaster")
+        return self["admin"].command("isMaster", comment=self.__comment)
 
     def sharding_state_is_enabled(self):
-        return self["admin"].command("shardingState").get("enabled", False)
+        return self["admin"].command("shardingState", comment=self.__comment).get("enabled", False)
 
     def get_shard_map(self):
-        return self['admin'].command('getShardMap')
+        return self['admin'].command('getShardMap', comment=self.__comment)
 
     def server_status(self):
-        return self['admin'].command('serverStatus')
+        return self['admin'].command('serverStatus', comment=self.__comment)
 
     def list_authorized_collections(
         self,
@@ -201,11 +210,12 @@ class MongoApi(object):
             coll_names = self[db_name].list_collection_names(
                 filter={"type": "collection"},  # Only return collections, not views
                 authorizedCollections=True,
+                comment=self.__comment,
             )
         except OperationFailure as e:
             if e.code == 303 and e.details.get("errmsg") == "Field 'type' is currently not supported":
                 # Filter by type is not supported on AWS DocumentDB
-                coll_names = self[db_name].list_collection_names(authorizedCollections=True)
+                coll_names = self[db_name].list_collection_names(authorizedCollections=True, comment=self.__comment)
             else:
                 # The user is not authorized to run listCollections on this database.
                 # This is NOT a critical error, so we log it as a warning.
@@ -223,7 +233,9 @@ class MongoApi(object):
         try:
             # Check if the collection is sharded by looking for the collection config
             # in the config.collections collection.
-            collection_config = self["config"]["collections"].find_one({"_id": f"{db_name}.{coll_name}"})
+            collection_config = self["config"]["collections"].find_one(
+                {"_id": f"{db_name}.{coll_name}"}, comment=self.__comment
+            )
             return collection_config is not None
         except OperationFailure as e:
             self._log.warning("Could not determine if collection %s.%s is sharded: %s", db_name, coll_name, e)

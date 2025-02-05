@@ -1,0 +1,1 @@
+Collect `lsid` and `transaction` details from `$currentOp` for MongoDB activity sampling.

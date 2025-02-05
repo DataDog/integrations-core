@@ -66,6 +66,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_controller_admission_duration_seconds.count',
         NAMESPACE + '.request_duration_seconds.sum',
         NAMESPACE + '.request_duration_seconds.count',
+        NAMESPACE + '.process_cpu_total',
         NAMESPACE + '.process_resident_memory_bytes',
         NAMESPACE + '.process_virtual_memory_bytes',
         NAMESPACE + '.etcd_request_duration_seconds.sum',
