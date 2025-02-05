@@ -37,7 +37,7 @@ pipeline:
           _level_operator %{word:level}
           _logger_adapter %{data:logger.file}:%{number:logger.line}
           _pid %{integer:process.id}
-          _logger_op %{data:logger.name}
+          _logger_op %{notSpace:logger.name}
           _msg %{data:msg}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
