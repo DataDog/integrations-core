@@ -215,6 +215,8 @@ integration/fluxcd:
 - fluxcd/**/*
 integration/fly_io:
 - fly_io/**/*
+integration/forcepoint_secure_web_gateway:
+- forcepoint_secure_web_gateway/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
