@@ -24,7 +24,7 @@ services:
         BUILD_TARGET: server
     command: ["./server", "fips"]
     healthcheck:
-      test: "curl -f localhost:443"
+      test: "curl -kf https://localhost:443"
       start_period: 5s
       interval: 10s
       timeout: 5s
@@ -37,7 +37,7 @@ services:
         BUILD_TARGET: server
     command: ["./server", "non-fips"]
     healthcheck:
-      test: "curl -f localhost:443"
+      test: "curl -kf https://localhost:443"
       start_period: 5s
       interval: 10s
       timeout: 5s

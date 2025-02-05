@@ -12,11 +12,6 @@ services:
       - \\.\pipe\docker_engine:\\.\pipe\docker_engine
       - "./agent/conf.d:C:/ProgramData/Datadog/conf.d"
       - "./agent/checks.d:C:/ProgramData/Datadog/checks.d"
-    healthcheck:
-      test: ["CMD", "agent", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
   server-fips:
     build:
       context: server
@@ -25,10 +20,9 @@ services:
         BUILD_TARGET: server.exe
     command: ["C:/app/server.exe", "fips"]
     healthcheck:
-      test: "curl -f localhost:443"
-      start_period: 5s
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "powershell", "-Command", "if ((Test-NetConnection -ComputerName localhost -Port 443).TcpTestSucceeded) { exit 0 } else { exit 1 }"]
+      interval: 5s
+      timeout: 10s
       retries: 3
   server:
     build:
@@ -38,8 +32,7 @@ services:
         BUILD_TARGET: server.exe
     command: ["C:/app/server.exe", "non-fips"]
     healthcheck:
-      test: "curl -f localhost:443"
-      start_period: 5s
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "powershell", "-Command", "if ((Test-NetConnection -ComputerName localhost -Port 443).TcpTestSucceeded) { exit 0 } else { exit 1 }"]
+      interval: 5s
+      timeout: 10s
       retries: 3

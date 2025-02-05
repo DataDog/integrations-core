@@ -62,11 +62,7 @@ jobs:
         AGENT_IMAGE: "${{ matrix.agent-type == 'fips-agent' && 'datadog/agent-dev:main-py3-fips-win-servercore-ltsc2022' || 'datadog/agent-dev:master-py3-win-servercore' }}"
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        docker compose -f .github/workflows/fips/compose/compose-windows.yml up -d --wait 
-
-    - name: Test docker exec
-      run: |
-        docker exec compose-agent-1 agent check connections --json
+        docker compose -f .github/workflows/fips/compose/compose-windows.yml up --wait -d --no-deps --build
 
     - name: Run tests
       run: |
