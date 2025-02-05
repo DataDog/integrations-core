@@ -4,17 +4,13 @@ tests:
   sample: "I1216 14:53:06.261024       1 main.go:112] \"msg\"=\"Connecting Metrics Service gRPC client to the server\" \"address\"=\"keda-operator.keda.svc.cluster.local:9666\" \"logger\"=\"keda_metrics_adapter\""
   result:
     custom:
-      component:
-        address: "keda-operator.keda.svc.cluster.local:9666"
-        logger: "keda_metrics_adapter"
+      address: "keda-operator.keda.svc.cluster.local:9666"
       level: "I"
-      logger:
-        file: "main.go"
-        line: 112.0
+      logger: "keda_metrics_adapter"
       process:
-        id: 1.0
+        id: 1
       timestamp: 31503186261
-    message: "Connecting Metrics Service gRPC client to the server"
+    message: "\"Connecting Metrics Service gRPC client to the server\""
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -45,13 +41,14 @@ tests:
         name: "scale_handler"
       name: "csv-processor"
       namespace: "default"
+      timestamp: 1734963711000
       triggerIndex: 0
       type: "ScaledJob"
     message: "error resolving auth params"
     status: "error"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1734963711000
  -
   sample: "2024-12-23T14:21:38Z\tINFO\tKubeAPIWarningLogger\tunknown field \"status.authenticationsTypes\""
   result:
@@ -59,11 +56,12 @@ tests:
       level: "INFO"
       logger:
         name: "KubeAPIWarningLogger"
+      timestamp: 1734963698000
     message: "unknown field \"status.authenticationsTypes\""
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1734963698000
  -
   sample: "2024-12-16T14:53:12Z\tINFO\tcontroller-runtime.builder\tRegistering a validating webhook\t{\"GVK\": \"keda.sh/v1alpha1, Kind=ScaledObject\", \"path\": \"/validate-keda-sh-v1alpha1-scaledobject\"}"
   result:
@@ -73,8 +71,9 @@ tests:
       logger:
         name: "controller-runtime.builder"
       path: "/validate-keda-sh-v1alpha1-scaledobject"
+      timestamp: 1734360792000
     message: "Registering a validating webhook"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1734360792000
