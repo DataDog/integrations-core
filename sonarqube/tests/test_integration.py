@@ -3,12 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import pytest
-
 from .common import PROJECT
 from .metrics import WEB_METRICS
-
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 def test_check(aggregator, dd_run_check, sonarqube_check, web_instance):
