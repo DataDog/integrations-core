@@ -75,8 +75,6 @@ ALL_METRICS = (
     + DEPLOY_METRICS
 )
 
-E2E_METRICS = list(set(ALL_METRICS) - set(COMPLETED_METRICS))
-
 ALL_DEPLOYMENT_LOGS = [
     {
         'ddtags': 'octopus_server:http://localhost:80,deployment_id:Deployments-19,release_version:0.0.2,environment_name:dev,'
