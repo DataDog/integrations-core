@@ -94,6 +94,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_protocols_allowed': DEFAULT_PROTOCOL_VERSIONS,
     'tls_verify': True,
+    'tls_ciphers': 'ALL',
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
@@ -155,6 +156,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'tls_ciphers_allowed',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -349,6 +351,14 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
+        ciphers = config.get('tls_ciphers')
+        if ciphers:
+            if 'ALL' in ciphers:
+                updated_ciphers = "ALL"
+            else:
+                updated_ciphers = ":".join(ciphers)
+        self.tls_ciphers_allowed = updated_ciphers
+
     def get(self, url, **options):
         return self._request('get', url, options)
 
@@ -467,6 +477,7 @@ class RequestsWrapper(object):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
+                context.set_ciphers(self.tls_ciphers_allowed)
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)

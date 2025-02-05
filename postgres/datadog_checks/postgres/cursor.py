@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import psycopg
+import psycopg2.extensions
+import psycopg2.extras
 
 from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
 
@@ -27,9 +28,9 @@ class BaseCommenterCursor:
         return super().execute(query, vars)
 
 
-class CommenterCursor(BaseCommenterCursor, psycopg.ClientCursor):
+class CommenterCursor(BaseCommenterCursor, psycopg2.extensions.cursor):
     pass
 
 
-class CommenterDictCursor(BaseCommenterCursor, psycopg.ClientCursor):
+class CommenterDictCursor(BaseCommenterCursor, psycopg2.extras.DictCursor):
     pass

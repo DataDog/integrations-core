@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 2.3.0 / 2025-01-25
+
+***Added***:
+
+* Update Argo-Workflow Metric names for v3.6+ ([#19417](https://github.com/DataDog/integrations-core/pull/19417))
+* Add new Argo Workflow metrics for v3.6+ ([#19447](https://github.com/DataDog/integrations-core/pull/19447))
+
 ## 2.2.0 / 2025-01-16
 
 ***Added***:

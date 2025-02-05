@@ -23,8 +23,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.3.2" \
-SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
+VERSION="3.4.0" \
+SHA256="e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
@@ -93,13 +93,6 @@ RELATIVE_PATH="curl-{{version}}" \
     --with-ssl="${DD_PREFIX_PATH}"
 # Remove the binary installed so that we consistenly use the same original `curl` binary
 rm "${DD_PREFIX_PATH}/bin/curl"
-
-# libpq and pg_config as needed by psycopg
-DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
-VERSION="16.6" \
-SHA256="23369cdaccd45270ac5dcc30fa9da205d5be33fa505e1f17a0418d2caeca477b" \
-RELATIVE_PATH="postgresql-{{version}}" \
-  install-from-source --without-readline --with-openssl --without-icu
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \

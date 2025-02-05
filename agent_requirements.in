@@ -31,7 +31,7 @@ ply==3.11
 prometheus-client==0.21.1
 protobuf==5.29.3
 psutil==6.0.0
-psycopg[c]==3.2.3
+psycopg2-binary==2.9.9
 pyasn1==0.4.8
 pycryptodomex==3.21.0
 pydantic==2.10.5
@@ -63,7 +63,7 @@ securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.2
 service-identity[idna]==24.2.0
 simplejson==3.19.3
-snowflake-connector-python==3.12.4
+snowflake-connector-python==3.13.1
 supervisor==4.2.5
 tuf==4.0.0
 uptime==3.0.1

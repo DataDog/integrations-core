@@ -23,7 +23,7 @@ Make sure that the Prometheus-formatted metrics are exposed in your Karpenter cl
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `karpenter.nodes.terminated` metric is exposed only after a node is terminated.
 
 The only parameter required for configuring the Karpenter check is:
-- `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8000`, but it can be configured using the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+- `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8080`, but it can be configured using the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
 
 ```yaml
 apiVersion: v1
@@ -38,7 +38,7 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8000/metrics"
+              "openmetrics_endpoint": "http://%%host%%:8080/metrics"
             }
           ]
         }
