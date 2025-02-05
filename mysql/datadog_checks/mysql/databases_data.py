@@ -350,12 +350,7 @@ class DatabasesData:
         rows = cursor.fetchall()
         if not rows:
             return
-        table_index_dict = defaultdict(
-            lambda: defaultdict(
-                lambda: {
-                }
-            )
-        )
+        table_index_dict = defaultdict(lambda: defaultdict(lambda: {}))
         for row in rows:
             table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
@@ -373,10 +368,7 @@ class DatabasesData:
             # Add column info, if exists
             if row["column_name"]:
                 index_data.setdefault("columns", [])
-                column = {
-                    "name": row["column_name"],
-                    "nullable": bool(row["nullable"].lower() == "yes")
-                }
+                column = {"name": row["column_name"], "nullable": bool(row["nullable"].lower() == "yes")}
                 if row["sub_part"]:
                     column["sub_part"] = int(row["sub_part"])
                 if row["collation"]:

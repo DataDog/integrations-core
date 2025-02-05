@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import re
 from os import environ
 
@@ -682,7 +683,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_values(actual_payload)
         assert db_name in databases_to_find
         if not deep_compare(expected_data_for_db[db_name], actual_payload):
-            import json
             print("Expected:")
             print(json.dumps(expected_data_for_db[db_name], indent=4))
             print("Actual:")
