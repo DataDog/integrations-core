@@ -205,6 +205,8 @@ integration/exchange_server:
 - exchange_server/**/*
 integration/external_dns:
 - external_dns/**/*
+integration/extrahop:
+- extrahop/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
