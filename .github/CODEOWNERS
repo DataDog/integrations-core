@@ -287,6 +287,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mailchimp/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /mailchimp/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
+/metabase/                                                          @DataDog/saas-integrations
+/metabase/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/metabase/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/metabase/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /mimecast/                                                          @DataDog/saas-integrations
 /mimecast/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /mimecast/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
@@ -433,6 +438,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/zero_networks/                                                     @DataDog/saas-integrations
+/zero_networks/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
+/zero_networks/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
+/zero_networks/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
@@ -442,6 +452,8 @@ docs/developer/process/integration-release.md                         @DataDog/a
 /.github/workflows/                                                   @DataDog/agent-integrations
 /.github/workflows/build-deps.yml                                     @DataDog/agent-delivery
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
+/.github/CODEOWNERS                                                   @DataDog/agent-integrations @DataDog/saas-integrations
+/.github/workflows/config/labeler.yml                                 @DataDog/agent-integrations @DataDog/saas-integrations
 # Dev container
 /.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations
 /.devcontainer/dbm                                                     @DataDog/database-monitoring-agent

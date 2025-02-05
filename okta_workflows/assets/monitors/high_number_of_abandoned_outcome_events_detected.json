@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-23",
+	"last_updated_at": "2024-12-23",
+	"title": "High Number of Abandoned Outcome Events Detected",
+	"description": "Abandoned outcome events in Okta Workflows occur when workflows start but remain incomplete due to misconfigurations or user disengagement. This monitor tracks these events to prevent inefficiencies, resource waste, and ensure reliable automation. Immediate action is needed to resolve issues.",
+	"definition": {
+		"id": 159650724,
+		"name": "High Number of Abandoned Outcome Events Detected",
+		"type": "log alert",
+		"query": "logs(\"source:okta-workflows service:workflows @evt.outcome:ABANDONED @evt.name:workflows.*\").index(\"*\").rollup(\"cardinality\", \"@log.uuid\").last(\"1h\") > 50",
+		"message": "{{#is_alert}}\nAbandoned outcome events in Okta Workflows, indicates that a significant number of workflows are being initiated but not completed due to misconfigured processes, or user disengagement. This impacts automation reliability and may waste system resources.\n\nHigh number of abandoned outcome events detected in Okta Workflows. Immediate action is needed to identify and address the underlying causes.\n{{/is_alert}}",
+		"tags": [
+			"integration:okta-workflows"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 50
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:okta-workflows"
+	]
+}
