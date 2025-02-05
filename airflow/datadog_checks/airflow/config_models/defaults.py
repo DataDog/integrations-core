@@ -24,6 +24,10 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_collect_ongoing_duration():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 

@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "Notification of Fraud",
+	"description": "Notifications of fraud signal potentially suspicious activities, such as unusual spending patterns or stolen card usage, during payment processing. This monitor tracks potential fraud incidents to ensure prompt investigation and prevent unauthorized transactions.",
+	"definition": {
+		"id": 154210471,
+		"name": "Notification of Fraud",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}\nNotification of Fraud (NoF) is an alert that indicates a potentially fraudulent transaction has been identified by the payment system. This notification is triggered when Adyen detects activities such as unusual spending patterns, stolen card use, or other suspicious behaviors during payment processing. \n\nPotential fraudulent activity has been detected for pspReference {{log.attributes.pspReference}}. Immediate investigation is required to verify the legitimacy of the transactions and prevent unauthorized activity.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:dispute"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}
