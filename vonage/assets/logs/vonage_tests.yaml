@@ -32,6 +32,10 @@ tests:
   result:
     custom:
       account_id: "bf8d8cc9"
+      "error_code_description": "Delivered"
+      product: "vonage"
+      error_code: 0
+      latency: 945284
       account_ref: ""
       changed_from: ""
       client_ref: "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1"
