@@ -25,7 +25,7 @@ pipeline:
         - '2024-12-16T14:53:12Z	INFO	controller-runtime.builder	Registering a validating webhook	{"GVK": "keda.sh/v1alpha1, Kind=ScaledObject", "path": "/validate-keda-sh-v1alpha1-scaledobject"}'
       grok:
         matchRules: |
-          keda_metrics_adapter3 %{_level_adapter}%{_date_adapter}\s+%{_pid}.*\s+%{_logger_adapter}]\s+"msg"="%{_msg}" %{data:component:keyvalue}
+          keda_metrics_adapter3 %{_level_adapter}%{_date_adapter}\s+%{_pid}.*\s+%{_logger_adapter}]\s+"msg"=%{doubleQuotedString:msg} %{data::keyvalue}
           keda_metrics_adapter2 %{_level_adapter}%{_date_adapter}\s+%{_pid}.*\s+%{_logger_adapter}]\s+%{_msg}
           keda_metrics_adapter1 %{_level_adapter}%{_date_adapter}\s+%{_pid}.*\s+%{_logger_adapter}]\s+"%{data::keyvalue}" %{data:component.name:keyvalue}
           keda_operator2 %{_date_operator}\s+%{_level_operator}\s+%{_logger_op}\s+%{_msg}\t%{data::json}
