@@ -682,11 +682,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     for db_name, actual_payload in actual_payloads.items():
         normalize_values(actual_payload)
         assert db_name in databases_to_find
-        if not deep_compare(expected_data_for_db[db_name], actual_payload):
-            print("Expected:")
-            print(json.dumps(expected_data_for_db[db_name], indent=4))
-            print("Actual:")
-            print(json.dumps(actual_payload, indent=4))
         assert deep_compare(expected_data_for_db[db_name], actual_payload)
 
 
