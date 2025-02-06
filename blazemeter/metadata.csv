@@ -35,7 +35,7 @@ blazemeter.performance.summary_duration,gauge,,second,,Duration of Test Run,0,bl
 blazemeter.performance.summary_failed,gauge,,,,Total Number of Errors in the test run.,-1,blazemeter,,,
 blazemeter.performance.summary_hits,gauge,,,,Total number of successful requests processed.,1,blazemeter,,,
 blazemeter.performance.summary_hits_avg,gauge,,hit,second,Average number of hits per second.,0,blazemeter,,,
-blazemeter.performance.summary_latency,gauge,,millisecond,,Maximum Response Time for 50% of samples,-1,blazemeter,,,
+blazemeter.performance.summary_latency,gauge,,millisecond,,Average Latency of the test run.,-1,blazemeter,,,
 blazemeter.performance.summary_max,gauge,,millisecond,,Maximum Response Time.,-1,blazemeter,,,
 blazemeter.performance.summary_maxUsers,gauge,,,,The maximum concurrency the test reached.,1,blazemeter,,,
 blazemeter.performance.summary_min,gauge,,millisecond,,Minimum Response Time.,1,blazemeter,,,
