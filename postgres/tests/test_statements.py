@@ -22,7 +22,11 @@ from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
 )
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.statements import (
+    PG_STAT_STATEMENTS_METRICS_COLUMNS,
+    PG_STAT_STATEMENTS_TIMING_COLUMNS,
+    PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17,
+)
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
@@ -292,7 +296,12 @@ def test_statement_metrics(
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         if track_io_timing_enabled:
-            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
+            if float(POSTGRES_VERSION) >= 17.0:
+                assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
+            else:
+                assert (
+                    available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
+                ) == PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
         else:
             assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == set()
         for col in metric_columns:

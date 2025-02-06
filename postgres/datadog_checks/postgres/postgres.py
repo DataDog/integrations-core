@@ -64,6 +64,7 @@ from .util import (
     STAT_WAL_METRICS,
     SUBSCRIPTION_STATE_METRICS,
     VACUUM_PROGRESS_METRICS,
+    VACUUM_PROGRESS_METRICS_LT_17,
     WAL_FILE_METRICS,
     DatabaseConfigurationError,
     DatabaseHealthCheckError,  # noqa: F401
@@ -72,7 +73,7 @@ from .util import (
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionUtils
 
 try:
     import datadog_agent
@@ -314,7 +315,7 @@ class PostgreSql(AgentCheck):
             if self._config.collect_buffercache_metrics:
                 queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
-            queries.append(VACUUM_PROGRESS_METRICS)
+            queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
 
         if self.version >= V12:
