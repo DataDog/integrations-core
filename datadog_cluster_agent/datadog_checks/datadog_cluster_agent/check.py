@@ -37,7 +37,7 @@ DEFAULT_METRICS = {
     'autoscaling_workload_vertical_scaling_received_requests': 'autoscaling.workload.vertical_scaling_received_requests',  # noqa: E501
     'autoscaling_workload_store_load_entities': 'autoscaling.workload.store_load_entities',
     'autoscaling_workload_store_job_queue_length': 'autoscaling.workload.store_job_queue_length',
-    'autoscaling_workload_local_horizontal_scaling_recommended_replicas': 'autoscaling.workload.local.horizontal_scaling_recommended_replicas',
+    'autoscaling_workload_local_horizontal_scaling_recommended_replicas': 'autoscaling.workload.local.horizontal_scaling_recommended_replicas',  # noqa: E501
     'autoscaling_workload_local_horizontal_utilization_pct': 'autoscaling.workload.local.horizontal_utilization_pct',
     'autoscaling_workload_local_fallback_enabled': 'autoscaling.workload.local.fallback_enabled',
     'aggregator__flush': 'aggregator.flush',
