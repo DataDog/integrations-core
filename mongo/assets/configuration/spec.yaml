@@ -250,7 +250,7 @@ files:
             from collections and inferring schemas.
           value:
             type: number
-            example: 600
+            example: 3600
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -275,6 +275,13 @@ files:
           value:
             type: number
             example: 5
+        - name: collect_search_indexes
+          description: |
+            Set to `true` to collect search indexes for each collection.
+            NOTE: This option is only applicable to MongoDB Atlas clusters.
+          value:
+            type: boolean
+            example: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

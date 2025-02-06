@@ -93,6 +93,13 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 #### Log collection
 
+1. In your SAP HANA database, to make sure you can read audit logs, run the following command:
+
+    ```shell
+    GRANT AUDIT READ TO DD_MONITOR;
+    GRANT SELECT ON SYS.AUDIT_LOG TO DD_MONITOR
+    ```
+
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
    ```yaml

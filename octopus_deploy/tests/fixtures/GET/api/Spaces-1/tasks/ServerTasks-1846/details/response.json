@@ -1,0 +1,103 @@
+{
+    "Task": {
+      "Id": "ServerTasks-1846",
+      "SpaceId": "Spaces-1",
+      "Name": "Deploy",
+      "Description": "Deploy test release 0.0.1 to Staging",
+      "Arguments": {
+        "DeploymentId": "Deployments-18"
+      },
+      "State": "Success",
+      "Completed": "Monday, 23 September 2024 3:00:28 PM +00:00",
+      "QueueTime": "2024-09-23T14:42:50.123+00:00",
+      "QueueTimeExpiry": null,
+      "StartTime": "2024-09-23T14:44:20.123+00:00",
+      "LastUpdatedTime": "2024-09-23T15:00:28.272+00:00",
+      "CompletedTime": "2024-09-23T14:45:14.123+00:00",
+      "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+      "Duration": "2 seconds",
+      "ErrorMessage": "",
+      "HasBeenPickedUpByProcessor": true,
+      "IsCompleted": true,
+      "FinishedSuccessfully": true,
+      "HasPendingInterruptions": false,
+      "CanRerun": false,
+      "HasWarningsOrErrors": false,
+      "UnmetPreconditions": null,
+      "ProjectId": "Projects-3",
+      "Links": {
+        "Self": "/api/tasks/ServerTasks-1846",
+        "Web": "/app#/Spaces-1/tasks/ServerTasks-1846",
+        "Raw": "/api/tasks/ServerTasks-1846/raw",
+        "Rerun": "/api/tasks/rerun/ServerTasks-1846",
+        "Cancel": "/api/tasks/ServerTasks-1846/cancel",
+        "State": "/api/tasks/ServerTasks-1846/state",
+        "BlockedBy": "/api/tasks/ServerTasks-1846/blockedby",
+        "QueuedBehind": "/api/tasks/ServerTasks-1846/queued-behind{?skip,take}",
+        "Details": "/api/tasks/ServerTasks-1846/details{?verbose,tail,ranges}",
+        "StatusMessages": "/api/tasks/ServerTasks-1846/status/messages",
+        "Prioritize": "/api/tasks/ServerTasks-1846/prioritize",
+        "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1846",
+        "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1846"
+      }
+    },
+    "ActivityLogs": [
+      {
+        "Id": "ServerTasks-1846_KASX88AJS2",
+        "Name": "Deploy test release 0.0.1 to Staging",
+        "Started": "2024-09-23T15:00:26.164+00:00",
+        "Ended": "2024-09-23T15:00:28.257+00:00",
+        "Status": "Success",
+        "ShowAtSummaryLevel": true,
+        "Children": [
+          {
+            "Id": "ServerTasks-1846_KASX88AJS2/98723ab9023cc1232eeffa1232",
+            "Name": "Step 1: run hello",
+            "Started": "2024-09-23T15:00:26.870+00:00",
+            "Ended": "2024-09-23T15:00:27.676+00:00",
+            "Status": "Success",
+            "ShowAtSummaryLevel": true,
+            "Children": [
+              {
+                "Id": "ServerTasks-1846_KASX88AJS2/98723ab9023cc1232eeffa1232/0932a234bb23eff43531ab12",
+                "Name": "Octopus Server",
+                "Started": "2024-09-23T15:00:26.870+00:00",
+                "Ended": "2024-09-23T15:00:27.676+00:00",
+                "Status": "Success",
+                "ShowAtSummaryLevel": true,
+                "Children": [],
+                "LogElements": [
+                  {
+                    "OccurredAt": "2024-09-23T15:00:27.639+00:00",
+                    "Category": "Info",
+                    "MessageText": "hello",
+                    "Number": 44
+                  }
+                ]
+              }
+            ],
+            "LogElements": []
+          }
+        ],
+        "LogElements": [
+          {
+            "OccurredAt": "2024-09-23T15:00:28.255+00:00",
+            "Category": "Info",
+            "MessageText": "The deployment completed successfully.",
+            "Number": 3
+          }
+        ]
+      }
+    ],
+    "PhysicalLogSize": 11959,
+    "Progress": {
+      "ProgressPercentage": 0,
+      "EstimatedTimeRemaining": null
+    },
+    "Links": {
+      "Self": "/api/tasks/ServerTasks-1846/details",
+      "Task": "/api/tasks/ServerTasks-1846",
+      "Web": "/app#/Spaces-1/tasks/ServerTasks-1846",
+      "Raw": "/api/tasks/ServerTasks-1846/raw"
+    }
+  }
