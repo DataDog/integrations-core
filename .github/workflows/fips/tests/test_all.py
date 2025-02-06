@@ -9,7 +9,7 @@ def test_connections():
     parsed_json = parse_json(result.stdout)
     expected_json = FIPS_AGENT if AGENT_FIPS_MODE else REGULAR_AGENT
 
-    assert parsed_json == (parsed_json & expected_json)
+    assert parsed_json.issubset(expected_json)
 
 
 def test_libraries():
@@ -17,4 +17,4 @@ def test_libraries():
     parsed_json = parse_json(result.stdout)
     expected_json = FIPS_AGENT if AGENT_FIPS_MODE else REGULAR_AGENT
 
-    assert parsed_json == (parsed_json & expected_json)
+    assert parsed_json.issubset(expected_json)

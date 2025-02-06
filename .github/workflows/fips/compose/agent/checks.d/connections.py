@@ -10,7 +10,7 @@ class HelloCheck(AgentCheck):
         ssh_port = instance.get('ssh_port')
 
         http_endpoint = f"https://{host}:{http_port}"
-        ssh_endpoint = f"ssh://{host}:{ssh_port}"
+        ssh_endpoint = f"{host}:{ssh_port}"
 
         # Test connection with the HTTPS endpoint
         try:
