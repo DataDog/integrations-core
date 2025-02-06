@@ -819,7 +819,7 @@ class TestShareLabels:
 
         check = get_check(
             {'metrics': ['.+'], 'share_labels': {'go_memstats_free_bytes': True}, 'target_info': True}
-        )  # , 'cache_shared_labels': False
+        )
         check_var = check
 
         mock_http_response(
