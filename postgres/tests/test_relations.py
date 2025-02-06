@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import threading
+
 import psycopg2
 import pytest
 
@@ -113,6 +115,59 @@ def test_relations_metrics_access_exclusive_lock(aggregator, integration_check, 
     cursor.execute('COMMIT')
     cursor.close()
     conn.close()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_relations_metrics_share_lock(aggregator, integration_check, pg_instance):
+    '''
+    This test is to verify the PG_CLASS query does not reporte duplicate metrics
+    when a relation has multiple locks present in PG_LOCKS.
+    '''
+    pg_instance['relations'] = ['persons']
+    check = integration_check(pg_instance)
+
+    def access_share_lock():
+        conn = _get_superconn(pg_instance)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('BEGIN')
+            cursor.execute("LOCK persons IN SHARE MODE;")  # Acquires SHARE LOCK
+        finally:
+            cursor.execute('COMMIT')
+            cursor.close()
+            conn.close()
+
+    def row_share_lock():
+        conn = _get_superconn(pg_instance)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('BEGIN')
+            cursor.execute("SELECT * FROM persons FOR SHARE;")  # Acquires ROW SHARE LOCK
+        finally:
+            cursor.execute('COMMIT')
+            cursor.close()
+            conn.close()
+            print("ROW SHARE LOCK released.")
+
+    t1 = threading.Thread(target=access_share_lock)
+    t2 = threading.Thread(target=row_share_lock)
+
+    # Start threads
+    t1.start()
+    t2.start()
+
+    check.check(pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
+
+    for name in ('postgresql.rows_inserted', 'postgresql.rows_updated', 'postgresql.rows_deleted'):
+        # Expect no relation metrics to be collected for persons table
+        # because locked relations are skipped in the query
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+    # Wait for threads to complete
+    t1.join()
+    t2.join()
 
 
 @pytest.mark.integration

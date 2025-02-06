@@ -5,6 +5,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+import os
 from typing import Any  # noqa: F401
 
 import mock
@@ -1293,3 +1294,19 @@ def test_detect_typos_configuration_models(
         assert "Detected potential typo in configuration option" not in caplog.text
 
     assert typos == set(unknown_options)
+
+
+def test_env_var_logic_default():
+    with mock.patch.dict('os.environ', {'GOFIPS': '0'}):
+        AgentCheck()
+        assert os.getenv('OPENSSL_CONF', None) is None
+        assert os.getenv('OPENSSL_MODULES', None) is None
+
+
+def test_env_var_logic_preset():
+    preset_conf = 'path/to/openssl.cnf'
+    preset_modules = 'path/to/ossl-modules'
+    with mock.patch.dict('os.environ', {'GOFIPS': '1', 'OPENSSL_CONF': preset_conf, 'OPENSSL_MODULES': preset_modules}):
+        AgentCheck()
+        assert os.getenv('OPENSSL_CONF', None) == preset_conf
+        assert os.getenv('OPENSSL_MODULES', None) == preset_modules
