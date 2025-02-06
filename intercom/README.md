@@ -32,7 +32,6 @@ Configure the Datadog endpoint to forward Intercom events as logs to Datadog. Se
             - Read tickets
         3. Click **Save**.
     2. Select Webhook topics
-    ```
         1. Next, navigate to the **Webhooks** section using the left-side menu.
         2. Enter the endpoint URL that you generated in step 1 of [Webhook Configuration](#webhook-configuration).
         3. On the **Select a topic** dropdown menu, select the following webhook topics:
