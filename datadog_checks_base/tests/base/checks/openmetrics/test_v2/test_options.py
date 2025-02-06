@@ -817,9 +817,7 @@ class TestShareLabels:
 
     def test_target_info_w_shared_labels_cache(self, aggregator, dd_run_check, mock_http_response):
 
-        check = get_check(
-            {'metrics': ['.+'], 'share_labels': {'go_memstats_free_bytes': True}, 'target_info': True}
-        )
+        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_free_bytes': True}, 'target_info': True})
         check_var = check
 
         mock_http_response(
