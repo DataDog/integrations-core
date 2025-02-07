@@ -1,7 +1,6 @@
 ## Overview
 
-[Temporal Cloud][1] is a scalable platform for orchestrating complex workflows, with built-in reliability, resilience, and timing controls. Temporal Cloud enables developers to focus on application logic without worrying about fault tolerance and consistency.
-
+[Temporal Cloud][1] is a scalable platform for orchestrating complex workflows which enables developers to focus on building applications, without worrying about fault tolerance and consistency.
 
 This integration gathers Temporal Cloud metrics into Datadog, offering insights into system health, workflow efficiency, task execution, and performance bottlenecks.
 
