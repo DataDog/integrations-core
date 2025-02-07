@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/blazemeter:
+- blazemeter/**/*
 integration/boundary:
 - boundary/**/*
 integration/brevo:
@@ -167,6 +169,8 @@ integration/datadog_operator:
 - datadog_operator/**/*
 integration/dcgm:
 - dcgm/**/*
+integration/delinea_privilege_manager:
+- delinea_privilege_manager/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -201,6 +205,8 @@ integration/exchange_server:
 - exchange_server/**/*
 integration/external_dns:
 - external_dns/**/*
+integration/extrahop:
+- extrahop/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
@@ -209,6 +215,8 @@ integration/fluxcd:
 - fluxcd/**/*
 integration/fly_io:
 - fly_io/**/*
+integration/forcepoint_secure_web_gateway:
+- forcepoint_secure_web_gateway/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
@@ -283,6 +291,10 @@ integration/incident_io:
 - incident_io/**/*
 integration/istio:
 - istio/**/*
+integration/ivanti_nzta:
+- ivanti_nzta/**/*
+integration/ivanti_connect_secure:
+- ivanti_connect_secure/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -297,6 +309,8 @@ integration/karpenter:
 - karpenter/**/*
 integration/keda:
 - keda/**/*
+integration/keycloak:
+- keycloak/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:
@@ -477,10 +491,14 @@ integration/riakcs:
 - riakcs/**/*
 integration/ringcentral:
 - ringcentral/**/*
+integration/sanity:
+- sanity/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/servicenow_performance:
+- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:
@@ -555,6 +573,8 @@ integration/system_swap:
 - system_swap/**/*
 integration/systemd:
 - systemd/**/*
+integration/tanium:
+- tanium/**/*
 integration/tcp_check:
 - tcp_check/**/*
 integration/tcp_queue_length:
@@ -571,6 +591,8 @@ integration/temporal_cloud:
 - temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
+integration/tenable_io:
+- tenable_io/**/*
 integration/teradata:
 - teradata/**/*
 integration/terraform:
@@ -639,6 +661,8 @@ integration/yarn:
 - yarn/**/*
 integration/zeek:
 - zeek/**/*
+integration/zero_networks:
+- zero_networks/**/*
 integration/zk:
 - zk/**/*
 qa/skip-qa:

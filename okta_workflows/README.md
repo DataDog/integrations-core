@@ -7,13 +7,26 @@ The Okta Workflows integration collects Okta workflow event logs and sends them 
 
 ## Setup
 
-### Configuration
+### Generate API Credentials in Okta Workflows
+1. Log in to the [Okta Admin Console][2] as an **admin** which has the [Read-only administrators][3] role.
+2. Follow the steps in [this guide][5] to generate an API token.
 
-!!! Add list of steps to set up this integration !!!
+### Get Okta Workflows Domain
+1. Sign in to your Okta organization with your administrator account.
+2. Locate the **Domain** by clicking your username in the top-right corner of the Admin Console. The domain appears in the dropdown menu. Your Okta domain looks like:
+     - example.oktapreview.com
+     - example.okta.com
+     - example.okta-emea.com
 
-### Validation
+### Connect your Okta Workflows Account to Datadog
+1. Add your API Token and Okta Domain:
 
-!!! Add steps to validate integration is functioning as expected !!!
+   | Parameters           | Description                       |
+   |--------------------- |-----------------------------------|
+   | API Token            | The API Key of Okta Workflows    |
+   | Okta Domain          | The Domain of Okta Workflows     |
+
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 
@@ -31,7 +44,10 @@ The Okta Workflows integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][2].
+For further assistance, contact [Datadog Support][3].
 
 [1]: https://www.okta.com/products/workflows/
-[2]: https://docs.datadoghq.com/help/
+[2]: https://login.okta.com/
+[3]: https://help.okta.com/en-us/content/topics/security/administrators-read-only-admin.htm
+[4]: https://docs.datadoghq.com/help/
+[5]: https://help.okta.com/en-us/content/topics/security/api.htm?cshid=ext-create-api-token#create-okta-api-token

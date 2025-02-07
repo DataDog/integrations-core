@@ -1,0 +1,44 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8c52001a-e57a-4979-a50b-cda6252050e4",
+  "app_id": "blazemeter",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "BlazeMeter",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 33188074,
+      "source_type_name": "BlazeMeter",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "blazemeter.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

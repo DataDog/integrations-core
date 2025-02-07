@@ -1,0 +1,10 @@
+name: Keycloak
+files:
+- name: keycloak.yaml
+  options:
+  - template: logs
+    example:
+    - type: <tcp/udp>
+      port: <PORT>
+      service: keycloak
+      source: keycloak
