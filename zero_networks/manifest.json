@@ -33,7 +33,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 35533755,
-      "source_type_name": "Zero Networks",
+      "source_type_name": "zero-networks",
       "events": {
         "creates_events": false
       },
