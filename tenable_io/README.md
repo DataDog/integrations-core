@@ -7,7 +7,7 @@
 The Tenable.io integration collects the following types of logs:
 
 - **Activity**: This endpoint contains information of user actions, system events, scans, and security control tasks, such as managing permissions, assigning roles, and handling security events.
-- **Vulnerability**: This endpoint contains information of vulnerabilities and the associated vulnerable assets.
+- **Vulnerability**: This endpoint contains information on vulnerabilities and the associated vulnerable assets.
 
 This integration collects logs from the sources listed above and sends them to Datadog.
 
@@ -15,20 +15,19 @@ This integration collects logs from the sources listed above and sends them to D
 
 ### Generate API credentials in Tenable.io
 
-1. Log into your [Tenable.io][4] account.
-2. Click profile icon and select **My Profile**.
-3. Go to the **API Keys** option in the navigation.
-4. Click **Generate** button in the bottom right corner.
-5. Review the message in the warning dialog box and click **Continue**.
-6. The **access Key** and **secret Key** will be generated.
+1. Log in to your [Tenable.io][4] account.
+2. Click the profile icon and select **My Profile**.
+3. Navigate to the **API Keys** section.
+4. Click the **Generate** button in the lower right-corner of the page.
+5. Review the message in the warning dialog box and click **Continue** to generate the **access Key** and **secret Key**.
 
 ### Connect your Tenable.io account to Datadog
 
 1. Add your access key and secret key
     |Parameters|Description|
     |--------------------|--------------------|
-    |Access Key|The access key of Tenable.io account.|
-    |Secret Key|The secret key of Tenable.io account.|
+    |Access Key|The access key for your Tenable.io account.|
+    |Secret Key|The secret key for your Tenable.io account.|
 2. Click the **Save** button to save your settings.
 
 ## Data Collected
