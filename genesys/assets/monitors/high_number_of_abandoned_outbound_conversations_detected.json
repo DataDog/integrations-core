@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2024-11-18",
+	"last_updated_at": "2024-11-18",
+	"title": "High Number of Abandoned Outbound Conversations Detected",
+	"description": "Abandoned outbound conversations refer to the number of outbound dialer calls that were abandoned. This monitor tracks and alerts when a high number of abandoned outbound conversations are detected, helping to prevent potential customer dissatisfaction.",
+	"definition": {
+		"id": 157631120,
+		"name": "High Number of Abandoned Outbound Conversations Detected",
+		"type": "query alert",
+		"query": "sum(last_1d):sum:genesys.conversations.abandoned_outbound_conversations_count{*}.as_count() > 100",
+		"message": "{{#is_alert}}\nThe abandoned outbound conversations refer to the number of outbound dialer calls that were abandoned.\n\nA high number of abandoned outbound conversations has been detected. Please review and take necessary action.\n{{/is_alert}}",
+		"tags": [
+			"source:genesys"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 100
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:genesys"
+	]
+}

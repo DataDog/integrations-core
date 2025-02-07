@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2024-11-18",
+	"last_updated_at": "2024-11-18",
+	"title": "High Number of over SLA Conversations Detected",
+	"description": "Over-SLA conversations refer to the number of answered interactions that exceed the service level threshold. This monitor tracks and alerts when there is an increased count of conversations exceeding the SLA threshold, which could potentially impact response times.",
+	"definition": {
+		"id": 157630365,
+		"name": "High Number of over SLA Conversations Detected",
+		"type": "query alert",
+		"query": "sum(last_1d):sum:genesys.conversations.over_sla_count{*}.as_count() > 100",
+		"message": "{{#is_alert}}\nThe over SLA conversations refer to the number of answered interactions that were over the SLA threshold.\n\nHigh number of over SLA conversations has been detected. Please review and take necessary action.\n{{/is_alert}}",
+		"tags": [
+			"source:genesys"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 100
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:genesys"
+	]
+}

@@ -51,6 +51,7 @@ kube_apiserver.http_requests_total,gauge,,request,,The accumulated number of HTT
 kube_apiserver.http_requests_total.count,count,,request,,The monotonic count of the number of HTTP requests made,0,kubernetes_api_server_metrics,total count of requests,
 kube_apiserver.kubernetes_feature_enabled,gauge,,,,"Whether a Kubernetes feature gate is enabled or not, identified by name and stage (alpha; Kubernetes 1.26+)",0,kubernetes_api_server_metrics,kubernetes feature enabled,
 kube_apiserver.longrunning_gauge,gauge,,request,,"The gauge of all active long-running apiserver requests broken out by verb, group, version, resource, scope, and component. Not all requests are tracked this way.",-1,kubernetes_api_server_metrics,long running gauges,
+kube_apiserver.process_cpu_total,count,,second,,"Total user and system CPU time spent in seconds.",0,kubernetes_api_server_metrics,process cpu total,
 kube_apiserver.process_resident_memory_bytes,gauge,,byte,,The resident memory size in bytes,0,kubernetes_api_server_metrics,process rss,
 kube_apiserver.process_virtual_memory_bytes,gauge,,byte,,The virtual memory size in bytes,0,kubernetes_api_server_metrics,process virtual memory,
 kube_apiserver.registered_watchers,gauge,,object,,The number of currently registered watchers for a given resource,0,kubernetes_api_server_metrics,number of watchers,

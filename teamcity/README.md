@@ -59,23 +59,14 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
    init_config: 
 
    instances:
-     - server: http://teamcity.<ACCOUNT_NAME>.com
-
-       ## @param projects - mapping - optional
-       ## Mapping of TeamCity projects and build configurations to
-       ## collect events and metrics from the TeamCity REST API.
-       #
-       projects:
-         <PROJECT_A>:
-           include:    
-           - <BUILD_CONFIG_A>
-           - <BUILD_CONFIG_B>
-           exclude:
-           - <BUILD_CONFIG_C>
-         <PROJECT_B>:
-           include:
-           - <BUILD_CONFIG_D>
-         <PROJECT_C>: {}
+    - use_openmetrics: true
+    
+      ## @param server - string - required
+      ## Specify the server name of your TeamCity instance.
+      ## Enable Guest Authentication on your instance or specify `username` and `password` to
+      ## enable basic HTTP authentication.
+      #
+      server: http://teamcity.<ACCOUNT_NAME>.com
    ```
   
   To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), add the internal property, `teamcity.metrics.followOpenMetricsSpec=true`. See, [TeamCity Internal Properties][25].
