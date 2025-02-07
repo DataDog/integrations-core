@@ -62,28 +62,29 @@ class DNSCheck(AgentCheck):
         return resolver
 
     def check(self, _):
-        resolver = self._get_resolver()
-
         # Perform the DNS query, and report its duration as a gauge
-        t0 = get_precise_time()
+        resolver = self._get_resolver()
 
         try:
             self.log.debug('Querying "%s" record for hostname "%s"...', self.record_type, self.hostname)
             if self.record_type == "NXDOMAIN":
                 try:
+                    t0 = get_precise_time()
                     resolver.query(self.hostname)
                 except dns.resolver.NXDOMAIN:
-                    pass
+                    # Timing here to get the time it takes for us to get the NXDOMAIN Exception
+                    response_time = get_precise_time() - t0
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
+                t0 = get_precise_time()
                 answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
+                response_time = get_precise_time() - t0
+
                 assert any(it.to_text() for it in answer.rrset.items)
 
                 if self.resolves_as_ips:
                     self._check_answer(answer)
-
-            response_time = get_precise_time() - t0
 
         except dns.exception.Timeout:
             self.log.error('DNS resolution of %s timed out', self.hostname)

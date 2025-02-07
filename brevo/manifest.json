@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "df939a65-33b7-4bc8-848f-bfe65c022332",
+  "app_id": "brevo",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Brevo marketing and transactional events.",
+    "title": "Brevo",
+    "media": [
+      {
+        "caption": "Brevo - Transactional Events",
+        "image_url": "images/brevo_transactional_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Brevo - Marketing Events",
+        "image_url": "images/brevo_marketing_events.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 24822827,
+      "source_type_name": "Brevo",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Brevo - Transactional Events" : "assets/dashboards/brevo_transactional_events.json",
+      "Brevo - Marketing Events" : "assets/dashboards/brevo_marketing_events.json"
+    },
+    "logs": {
+      "source": "brevo"
+    },
+    "monitors": {
+      "High Block Rate by Subject" : "assets/monitors/brevo_high_block_rate_by_subject.json",
+      "High Bounce Rate by Subject" : "assets/monitors/brevo_high_bounce_rate_by_subject.json",
+      "High Error Rate by Subject" : "assets/monitors/brevo_high_error_rate_by_subject.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

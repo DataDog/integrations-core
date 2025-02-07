@@ -280,6 +280,15 @@ GROUP_REPLICATION_VARS_8_0_2 = [
     'mysql.replication.group.transactions_rollback',
 ]
 
+INDEX_SIZE_VARS = [
+    'mysql.index.size',
+]
+INDEX_USAGE_VARS = [
+    'mysql.index.reads',
+    'mysql.index.updates',
+    'mysql.index.deletes',
+]
+
 SIMPLE_OPERATION_TIME_METRICS = [
     'status_metrics',
     'innodb_metrics',

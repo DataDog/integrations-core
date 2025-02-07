@@ -11,15 +11,21 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
+Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides live and historical query snapshots, slow query metrics, database load, operation execution plans, and collections insights.
+
 **Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
 ## Setup
+
+<div class="alert alert-info">This page describes the standard MongoDB Agent integration. If you are looking for the Database Monitoring product for MongoDB, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
 The MongoDB check is included in the [Datadog Agent][2] package. No additional installation is necessary.
 
 ### Architecture
+
+**Note**: To install Database Monitoring for MongoDB, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
 
 Most low-level metrics (uptime, storage size etc.) need to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
 
@@ -605,3 +611,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/help/
 [26]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
 [27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
+[28]: https://docs.datadoghq.com/database_monitoring/
+[29]: https://docs.datadoghq.com/database_monitoring/#mongodb
