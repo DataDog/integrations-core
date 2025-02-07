@@ -16,10 +16,12 @@ Follow the instructions below to install and configure this check for an Agent r
 - This check requires Agent v7.61.0+
 - This check uses [OpenMetrics][10] for metric collection, which requires Python 3.
 
-### Installation
-
+`### Installation
 The NVIDIA NIM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
+#### LLM Observability: Get end-to-end visibility into your LLM application's calls to Nvidia Nim
+NVIDIA NIM uses the OpenAI client to handle API calls [Nvidia Nim][11]. In order to monitor your application using NVIDIA NIM and set up LLM Observability, please follow the instructions in the [OpenAI integration][12]
+`
 ### Configuration
 
 NVIDIA NIM provides Prometheus [metrics][1] indicating request statistics. By default, these metrics are available at http://localhost:8000/metrics. The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
@@ -62,3 +64,5 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/nvidia_nim/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/integrations/openmetrics/
+[11]: https://www.nvidia.com/en-us/ai/
+[12]: https://docs.datadoghq.com/integrations/openai
