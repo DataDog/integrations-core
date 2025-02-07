@@ -72,7 +72,7 @@ tests:
         credType: "STANDARD_OTP"
         status: "0000"
         statusMessage: "Success"
-      ts: "2017-04-04 16:39:23.090 +0000"
+      ts: 1491323963090
       txnId: "vipus7E94583921D0EA"
       usr:
         name: "7cc34F6DC"
@@ -114,9 +114,9 @@ tests:
         "_id" : "coloss4be-d2-tc.149132321663.2235348",
         "operation" : "addCredential",
         "txnId" : "vipus7E94583921D0EA",
-        "ts" : "2025-02-04 16:39:23.000 +0000"
+        "ts" : "2017-04-04 16:39:23.090 +0000"
       }
     service: "event-logs"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1738687163000
+    timestamp: 1491323963090
