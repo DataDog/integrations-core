@@ -313,7 +313,5 @@ class SonarqubeCheck(AgentCheck):
 
     @staticmethod
     def is_valid_metric(metric):
-        return (
-            not metric['hidden']
-            and metric['type'] in NUMERIC_TYPES
-        )
+        return not metric['hidden'] and metric['type'] in NUMERIC_TYPES
+
