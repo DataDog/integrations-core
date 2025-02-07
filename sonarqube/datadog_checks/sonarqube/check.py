@@ -104,7 +104,13 @@ class SonarqubeCheck(AgentCheck):
         for measure in metric_data['component']['measures']:
             tags = ['{}:{}'.format(tag_name, component)]
             tags.extend(self._tags)
-            self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
+            if 'value' in measure:
+                self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
+            elif 'period' in measure:
+                self.gauge(available_metrics[measure['metric']], measure['period']['value'], tags=tags)
+            elif 'periods' in measure:
+                for period in measure['periods']:
+                    self.gauge(available_metrics[measure['metric']], period['value'], tags=tags)
 
     def discover_available_metrics(self):
         available_metrics = {}
@@ -310,6 +316,4 @@ class SonarqubeCheck(AgentCheck):
         return (
             not metric['hidden']
             and metric['type'] in NUMERIC_TYPES
-            # https://github.com/DataDog/integrations-core/pull/8552
-            and not metric['key'].startswith('new_')
         )
