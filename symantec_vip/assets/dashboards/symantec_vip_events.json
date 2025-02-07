@@ -584,7 +584,7 @@
                     {
                         "id": 8584728911145830,
                         "definition": {
-                            "title": "User Authentication over Time",
+                            "title": "Failed Local Authentication Attempts by User over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -792,76 +792,6 @@
                         }
                     },
                     {
-                        "id": 4393854366667500,
-                        "definition": {
-                            "title": "Top Unauthorized Account Users to perform Operation",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:symantec-vip service:event-logs @result.status:6010 $Client_IP $Operation $User_Name $Status_Code $Detail_Code"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@operation",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 20,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
                         "id": 7408262452728046,
                         "definition": {
                             "title": "Top Not Allowed Operations",
@@ -925,9 +855,9 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
+                            "x": 0,
                             "y": 20,
-                            "width": 4,
+                            "width": 6,
                             "height": 4
                         }
                     },
@@ -995,9 +925,9 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
+                            "x": 6,
                             "y": 20,
-                            "width": 4,
+                            "width": 6,
                             "height": 4
                         }
                     },

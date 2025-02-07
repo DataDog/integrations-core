@@ -54,6 +54,16 @@ pipeline:
   filter:
     query: source:symantec-vip
   processors:
+    - type: grok-parser
+      name: Parsing the `ts` attribute to convert it into UNIX timestamp
+      enabled: true
+      source: ts
+      samples:
+        - 2025-02-07 03:22:37.051 +0000
+      grok:
+        supportRules: ""
+        matchRules: convert_to_millisecond (%{date("yyyy-MM-dd HH:mm:ss.SSS
+          Z"):ts}|%{date("yyyy-M-d H:m:s.SSS Z"):ts})
     - type: date-remapper
       name: Define `ts` as the official date of the log
       enabled: true
