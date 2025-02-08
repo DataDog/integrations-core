@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import socket
+import subprocess
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.network import ethtool
 from datadog_checks.network.const import ENA_METRIC_NAMES, ENA_METRIC_PREFIX
 
@@ -22,6 +22,10 @@ class LinuxNetwork(Network):
     def __init__(self, name, init_config, instances):
         super(LinuxNetwork, self).__init__(name, init_config, instances)
         self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
+
+    def _get_subprocess_output(self, cmd=None, env=None):
+        res = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        return res.stdout, res.stderr, res.returncode
 
     def check(self, _):
         """
@@ -61,7 +65,7 @@ class LinuxNetwork(Network):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                    output, _, _ = self._get_subprocess_output(["sh", "-c", cmd])
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -73,13 +77,13 @@ class LinuxNetwork(Network):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                    output, _, _ = self._get_subprocess_output(["sh", "-c", cmd], env=ss_env)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
                     if self._collect_cx_queues:
                         cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
-                        output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                        output, _, _ = self._get_subprocess_output(["sh", "-c", cmd])
                         for state, recvq, sendq in self._parse_queues("ss", output):
                             self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                             self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
@@ -89,7 +93,7 @@ class LinuxNetwork(Network):
 
             except OSError as e:
                 self.log.info("`ss` invocation failed: %s. Using `netstat` as a fallback", str(e))
-                output, _, _ = get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
+                output, _, _ = self._get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"])
                 lines = output.splitlines()
                 # Active Internet connections (w/o servers)
                 # Proto Recv-Q Send-Q Local Address           Foreign Address         State
@@ -110,7 +114,7 @@ class LinuxNetwork(Network):
                         self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                         self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
-            except SubprocessOutputEmptyError:
+            except subprocess.CalledProcessError:
                 self.log.exception("Error collecting connection states.")
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
@@ -364,7 +368,7 @@ class LinuxNetwork(Network):
             cmd = [conntrack_path, "-S"]
             if use_sudo_conntrack:
                 cmd.insert(0, "sudo")
-            output, _, _ = get_subprocess_output(cmd, self.log)
+            output, _, _ = self._get_subprocess_output(cmd)
             # conntrack -S sample:
             # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
             #       drop=1 early_drop=0 error=0 search_restart=39936711
@@ -382,7 +386,7 @@ class LinuxNetwork(Network):
                 for cell in cols:
                     metric, value = cell.split('=')
                     self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.debug("Couldn't use %s to get conntrack stats", conntrack_path)
 
     def _parse_short_state_lines(self, lines, metrics, tcp_states, ip_version):
