@@ -32,7 +32,6 @@ def test_integration_auth_file(aggregator, dd_run_check, check, instance, global
 
     check = check(instance)
     dd_run_check(check)
-
     assert_collection(aggregator, global_tags, use_openmetrics)
 
 
