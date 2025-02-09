@@ -213,6 +213,53 @@ class TestAuthTokenOAuthReaderCreation:
         ):
             RequestsWrapper(instance, init_config)
 
+class TestAuthTokenOIDCReaderCreation:
+    def test_url_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'oidc'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `url` setting of `auth_token` reader is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_url_not_string(self):
+        instance = {'auth_token': {'reader': {'type': 'oidc', 'url': {}}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `url` setting of `auth_token` reader must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_role_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'oidc', 'url': 'foo'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `role` setting of `auth_token` reader is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_role_not_string(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'oauth', 'url': 'foo', 'role': {}}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `role` setting of `auth_token` reader must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_headers_not_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'oauth', 'url': 'foo', 'role': 'bar', 'headers': ['header: value']},
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `headers` setting of `auth_token` reader must be a dict$'
+        ):
+            RequestsWrapper(instance, init_config)
+
 
 class TestAuthTokenDCOSReaderCreation:
     def test_login_url_missing(self):
