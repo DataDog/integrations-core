@@ -176,7 +176,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # (database_monitoring.metrics.batch_max_content_size) cannot be decreased, and increasing it
         # will typically cause the backend to reject the payload
         # It's set here as an option for potential debugging issues but should not be used otherwise
-        # NB: This value should always match the datadog.yaml value, and if that default changes, this should be updated
+        # NB: This value should always match the datadog.yaml value, whose default is set
+        # https://github.com/DataDog/datadog-agent/blob/96d253e8b91326c2418302b13a73b420ad5a6d92/comp/forwarder/eventplatform/eventplatformimpl/epforwarder.go#L79
+        # If that default changes, this should be updated
         self.batch_max_content_size = config.init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000)
         self._tags_no_db = None
         self.tags = None
