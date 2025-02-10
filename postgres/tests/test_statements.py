@@ -10,7 +10,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg2
-from datadog_checks.postgres.config import PostgresConfig
 import pytest
 from dateutil import parser
 from semver import VersionInfo
@@ -19,11 +18,16 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
+from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
 )
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS, PostgresStatementMetrics
+from datadog_checks.postgres.statements import (
+    PG_STAT_STATEMENTS_METRICS_COLUMNS,
+    PG_STAT_STATEMENTS_TIMING_COLUMNS,
+    PostgresStatementMetrics,
+)
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
@@ -2088,9 +2092,10 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     for conn in connections.values():
         conn.close()
 
+
 @pytest.mark.unit
 def test_get_query_metrics_payload_rows():
-    config = PostgresConfig({"host":"host", "username":"user"}, {}, None)
+    config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
     statement_metrics = PostgresStatementMetrics({}, config, None)
     wrapper = {}
 
@@ -2098,29 +2103,38 @@ def test_get_query_metrics_payload_rows():
 
     test_cases = [
         # Empty
-        TestCase(rows=[], max_size= 1000, expected= 0),
+        TestCase(rows=[], max_size=1000, expected=0),
         # Single row too large
-        TestCase(rows=[{'query': 'a' * 1000}], max_size= 10, expected= 0),
+        TestCase(rows=[{'query': 'a' * 1000}], max_size=10, expected=0),
         # Both rows fit
-        TestCase(rows=[{'query': 'a' * 20},{'query': 'b' * 20}], max_size= 100, expected= 1),
+        TestCase(rows=[{'query': 'a' * 20}, {'query': 'b' * 20}], max_size=100, expected=1),
         # Split rows once
-        TestCase(rows=[{'query': 'a' * 20},{'query': 'b' * 20},{'query': 'a' * 20},{'query': 'b' * 20}], max_size= 100, expected= 2),
+        TestCase(
+            rows=[{'query': 'a' * 20}, {'query': 'b' * 20}, {'query': 'a' * 20}, {'query': 'b' * 20}],
+            max_size=100,
+            expected=2,
+        ),
         # Split rows twice
-        TestCase(rows=[{'query': 'a' * 40},{'query': 'b' * 40},{'query': 'b' * 40},{'query': 'b' * 40}], max_size= 100, expected= 4),
+        TestCase(
+            rows=[{'query': 'a' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}],
+            max_size=100,
+            expected=4,
+        ),
         # Split rows once, last row too large
-        TestCase(rows=[{'query': 'a' * 40},{'query': 'b' * 40},{'query': 'b' * 40},{'query': 'b' * 400}], max_size= 100, expected= 3),
+        TestCase(
+            rows=[{'query': 'a' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}, {'query': 'b' * 400}],
+            max_size=100,
+            expected=3,
+        ),
         # Split rows once, first row too large
-        TestCase(rows=[{'query': 'a' * 400},{'query': 'b' * 40},{'query': 'b' * 40},{'query': 'b' * 40}], max_size= 100, expected= 3),
+        TestCase(
+            rows=[{'query': 'a' * 400}, {'query': 'b' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}],
+            max_size=100,
+            expected=3,
+        ),
     ]
 
     for tc in test_cases:
         statement_metrics.batch_max_content_size = tc.max_size
-        rows = statement_metrics._get_query_metrics_payloads(wrapper,tc.rows)
+        rows = statement_metrics._get_query_metrics_payloads(wrapper, tc.rows)
         assert len(rows) == tc.expected
-
-
-
-
-
-
-

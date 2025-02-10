@@ -263,7 +263,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 return
             for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-            
+
             payload_wrapper = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
@@ -283,7 +283,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
-    
+
     def _get_query_metrics_payloads(self, payload_wrapper, rows):
         payloads = []
 
@@ -293,7 +293,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             current = queue.pop()
             if len(current) == 0:
                 continue
-            
+
             payload = copy.deepcopy(payload_wrapper)
             payload["postgres_rows"] = current
             serialized_payload = json.dumps(payload, default=default_json_event_encoding)
@@ -303,8 +303,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             else:
                 if len(current) == 1:
                     self._log.warning(
-                        "A single query is too large to send to Datadog. This query will be dropped. "
-                        "size=%d",
+                        "A single query is too large to send to Datadog. This query will be dropped. " "size=%d",
                         size,
                     )
                     continue
