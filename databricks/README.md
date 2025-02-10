@@ -1,8 +1,8 @@
 # Agent Check: Databricks
 
-<div class="alert alert-warning">
+<div class="alert alert-info">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks cluster utilization metrics and logs.
+This page is limited to documentation for ingesting Databricks model serving metrics and cluster utilization data.
 </div>
 
 ![Databricks default dashboard][21]
@@ -23,11 +23,27 @@ Model serving metrics provide insights into how your  Databricks model serving i
 ## Setup
 
 ### Installation
+Gain insight into the health of your model serving infrastructure by following the [Model Serving Configuration](#model-serving-configuration) instructions.
 
-Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#configuration) instructions for your appropriate cluster. After that, install the [Spark integration][23] on Datadog to autoinstall the Databricks Overview dashboard.
+Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#spark-configuration) instructions for your appropriate cluster. Refer to [Spark Configuration](#spark-configuration) instructions.
 
 ### Configuration
+#### Model Serving Configuration
+1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
+2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
 
+   **Important:**
+   * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
+   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
+
+   As an alternative, follow the [official Databricks documentation][31] to generate an access token for a [service principal][31].
+
+3. In Datadog, open the Databricks integration tile.
+4. On the **Configure** tab, click **Add Databricks Workspace**.
+5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
+6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
+
+#### Spark Configuration
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
 
 Each script described below can be modified to suits your needs. For instance, you can:
@@ -452,8 +468,10 @@ chmod a+x /tmp/start_datadog.sh
 ## Data Collected
 
 ### Metrics
-
-See the [Spark integration documentation][8] for a list of metrics collected.
+#### Model Serving Metrics
+See [metadata.csv][29] for a list of metrics provided by this integration.
+#### Spark Metrics
+See the [Spark integration documentation][8] for a list of Spark metrics collected.
 
 ### Service Checks
 
@@ -501,3 +519,6 @@ Additional helpful documentation, links, and articles:
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
 [27]: https://www.datadoghq.com/product/log-management/
 [28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
+[29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
+[30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
+[31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal

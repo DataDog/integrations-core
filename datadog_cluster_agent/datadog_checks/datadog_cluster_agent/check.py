@@ -46,6 +46,7 @@ DEFAULT_METRICS = {
     'cluster_checks_busyness': 'cluster_checks.busyness',
     'cluster_checks_configs_dangling': 'cluster_checks.configs_dangling',
     'cluster_checks_configs_dispatched': 'cluster_checks.configs_dispatched',
+    'cluster_checks_unscheduled_check': 'cluster_checks.unscheduled_check',
     'cluster_checks_configs_info': 'cluster_checks.configs_info',
     'cluster_checks_failed_stats_collection': 'cluster_checks.failed_stats_collection',
     'cluster_checks_nodes_reporting': 'cluster_checks.nodes_reporting',
