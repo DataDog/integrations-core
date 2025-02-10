@@ -252,7 +252,7 @@
                         "id": 2164149458767982,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates Network Activity logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](https://app.datadoghq.com/security?query=source%3Azero-networks%20service%3Anetwork-activities). ",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Network Activity logs to detect threats to your environment in real time. If you don't see signals, make sure you've enabled [Datadog Cloud SIEM](https://app.datadoghq.com/security?query=source%3Azero-networks%20service%3Anetwork-activities). ",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "left",

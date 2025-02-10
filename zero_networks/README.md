@@ -6,21 +6,23 @@
 
 This integration ingests the following logs:
 
-- Audit: Records an event performed by the user, providing an overview of the event's timestamp, involved entities, actions, and more.
-- Network-Activities: Represents information about network communication events occurring within a system, including protocol and traffic type, source and destination information, process information, user information, threat scores, and more.
+- **Audit**: Records an event performed by the user, providing an overview of the event's timestamp, involved entities, actions, and more.
+- **Network-Activities**: Represents information about network communication events occurring within a system, including protocol and traffic type, source and destination information, process information, user information, threat scores, and more.
 
-This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into audit and network-activities through the out-of-the-box dashboards.
+This integration collects the listed logs and channels them into Datadog for analysis. These logs are parsed and enriched through the built-in logs pipeline, enabling effortless search and analysis. The integration provides insight into audit and network-activities through the out-of-the-box dashboards.
 
 ## Setup
 
 ### Generate API credentials in Zero Networks
 
 1. Log in to the Zero Networks platform.
-2. Navigate to **Settings**, click **API** under **Integrations**, click **Add new token** and specify the settings of the new API key.
+2. Navigate to **Settings**.
+3. Under **Integrations**, click **API**.
+4. Click **Add new token** and specify the settings of the new API key:
     - Token name: A meaningful name that can help you identify the API key.
     - Access type: The access permission assigned to the API key. Select **Read only**.
     - Expiry: The expiration duration of the API key. Select **36 months**.
-3. Click Add.
+5. Click **Add**.
 
 ### Connect your Zero Networks Account to Datadog
 
@@ -31,7 +33,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
     | Domain Name                           | The Domain Name from Zero Networks portal URL                 |
     | API Key                               | The Personal API key of Zero Networks                         |
 
-2. Click the Save button to save your settings.
+2. Click **Save**.
 
 ## Data Collected
 
