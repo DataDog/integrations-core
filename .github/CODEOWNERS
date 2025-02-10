@@ -448,6 +448,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /servicenow_performance/manifest.json                               @DataDog/saas-integrations @DataDog/documentation
 /servicenow_performance/assets/logs/                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/symantec_vip/                                                      @DataDog/saas-integrations
+/symantec_vip/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/symantec_vip/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/symantec_vip/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /tenable_io/                                                        @DataDog/saas-integrations
 /tenable_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
 /tenable_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
