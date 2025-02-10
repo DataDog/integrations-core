@@ -339,7 +339,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         'sharding_cluster_role:shardsvr',
         'hosting_type:self-hosted',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
@@ -836,7 +836,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
