@@ -19,7 +19,7 @@ Follow the instructions below to install and configure this check for an Agent r
 `### Installation
 The NVIDIA NIM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-#### LLM Observability: Get end-to-end visibility into your LLM application's calls to Nvidia Nim
+#### LLM Observability: Get end-to-end visibility into your LLM application's calls to NVIDIA Nim
 NVIDIA NIM uses the OpenAI client to handle API calls [Nvidia Nim][11]. In order to monitor your application using NVIDIA NIM and set up LLM Observability, please follow the instructions in the [OpenAI integration][12]
 `
 ### Configuration
