@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.0 / 2025-02-05
+
+***Added***:
+
+* Bump Snowflake dependency to 3.13.1 ([#19545](https://github.com/DataDog/integrations-core/pull/19545))
+
 ## 7.2.0 / 2025-01-25
 
 ***Added***:
