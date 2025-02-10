@@ -305,8 +305,8 @@ files:
         description: |
           The events that should be collected by the vSphere integration.
 
-          The "event" specifies the event type you want to include, and the "excluded_messages" is a list of
-          messages of that event type you do not want to collect. For example, if the key
+          The "event" specifies the event type you want to include, and optionally, the "excluded_messages" is
+          a list of messages of that event type you do not want to collect. For example, if the key
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
           then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.
@@ -391,6 +391,9 @@ files:
       - name: collect_vsan_data
         description: |
           If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+          Ensure that you have the vSAN Performance Service enabled:
+          https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
+          GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
         value:
           type: boolean
           example: false

@@ -1,7 +1,0 @@
-Add lookback_window config parameter to query_metrics.
-
-The current lookback window defaults to 2 times the collection interval, and is not able to be overridden.
-This means that infrequently-run queries are unlikely to have metrics captured for them. One common
-use case that falls into this bucket is ETL queries which can run hourly or even daily. These have
-a very small chance of having metrics captured for them. In that case, we will support setting a lookback
-window that will include such queries.

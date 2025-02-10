@@ -1,2 +1,0 @@
-Fix crash in DBM operation samples collection when a node is in recovering mode.
-

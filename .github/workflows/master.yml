@@ -29,11 +29,18 @@ jobs:
     secrets: inherit
 
   publish-test-results:
+    
     needs:
     - test
+
     if: success() || failure()
     concurrency:
       group: test-results
+
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
 
     uses: ./.github/workflows/test-results-master.yml
     secrets: inherit

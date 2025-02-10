@@ -18,7 +18,7 @@ The Task Metadata endpoint is only available from within the task definition its
 
 The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
 
-**Note**: Network Performance Monitoring (NPM) is not supported for ECS Fargate.
+**Note**: Cloud Network Monitoring (CNM) is not supported for ECS Fargate.
 
 ## Setup
 
@@ -439,6 +439,28 @@ partial -->
         "Name": "datadog",
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.datadoghq.eu",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      }
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="ap1" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "apikey": "<DATADOG_API_KEY>",
+        "Host": "http-intake.logs.ap1.datadoghq.com",
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",

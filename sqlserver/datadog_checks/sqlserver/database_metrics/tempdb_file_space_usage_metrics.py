@@ -4,7 +4,6 @@
 
 import functools
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 from .base import SqlserverDatabaseMetricsBase
@@ -32,8 +31,8 @@ TEMPDB_SPACE_USAGE_QUERY = {
 
 class SqlserverTempDBFileSpaceUsageMetrics(SqlserverDatabaseMetricsBase):
     @property
-    def include_tempdb_file_space_usage_metrics(self):
-        return is_affirmative(self.instance_config.get('include_tempdb_file_space_usage_metrics', True))
+    def include_tempdb_file_space_usage_metrics(self) -> bool:
+        return self.config.database_metrics_config['tempdb_file_space_usage_metrics']['enabled']
 
     @property
     def enabled(self):

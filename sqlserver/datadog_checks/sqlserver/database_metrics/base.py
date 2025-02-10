@@ -15,7 +15,6 @@ class SqlserverDatabaseMetricsBase:
     def __init__(
         self,
         config,
-        instance_config,
         new_query_executor,
         server_static_info,
         execute_query_handler,
@@ -23,7 +22,6 @@ class SqlserverDatabaseMetricsBase:
         databases=None,
     ):
         self.config: SQLServerConfig = config
-        self.instance_config: dict = instance_config  # TODO: Remove instance_config and use self.config
         self.server_static_info: dict = server_static_info
         self.new_query_executor: Callable[
             [List[dict], Callable, Optional[List[str]], Optional[bool]], QueryExecutor

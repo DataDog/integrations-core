@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
 )
@@ -37,8 +36,8 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
 
 class SqlserverFciMetrics(SqlserverDatabaseMetricsBase):
     @property
-    def include_fci_metrics(self):
-        return is_affirmative(self.instance_config.get('include_fci_metrics', False))
+    def include_fci_metrics(self) -> bool:
+        return self.config.database_metrics_config["fci_metrics"]["enabled"]
 
     @property
     def enabled(self):

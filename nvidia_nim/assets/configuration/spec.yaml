@@ -1,0 +1,21 @@
+name: nvidia_nim
+files:
+- name: nvidia_nim.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.value.example: http://localhost:8000/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing the NVIDIA NIM's Prometheus metrics. For more information refer to:
+          https://docs.nvidia.com/nim/large-language-models/latest/observability.html
+  - template: logs
+    example:
+    - type: docker
+      source: nvidia_nim
+      service: <SERVICE>

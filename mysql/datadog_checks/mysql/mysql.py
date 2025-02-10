@@ -54,6 +54,7 @@ from .const import (
     TABLE_VARS,
     VARIABLES_VARS,
 )
+from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
@@ -109,6 +110,7 @@ class MySql(AgentCheck):
         self.is_mariadb = None
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
@@ -129,6 +131,7 @@ class MySql(AgentCheck):
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+        self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -170,7 +173,16 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            self._database_hostname = self.resolve_db_host()
+        return self._database_hostname
+
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -368,7 +380,8 @@ class MySql(AgentCheck):
 
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-
+        if self._index_metrics.include_index_metrics:
+            queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
         self._runtime_queries_cached.compile_queries()
         self.log.debug("initialized runtime queries")
@@ -1303,6 +1316,7 @@ class MySql(AgentCheck):
             event = {
                 "host": self.resolved_hostname,
                 "port": self._config.port,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
                 "kind": "database_instance",

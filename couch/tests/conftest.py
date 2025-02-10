@@ -40,6 +40,15 @@ def active_tasks():
         return json.loads(f.read())
 
 
+@pytest.fixture
+def load_test_data():
+    """
+    Returns a raw response from `/_3.4_system.json`
+    """
+    with open(os.path.join(common.HERE, 'fixtures', '_3.4_system.json')) as f:
+        return json.load(f)
+
+
 @pytest.fixture(scope="session")
 def dd_environment():
     """

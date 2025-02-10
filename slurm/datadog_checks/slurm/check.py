@@ -316,18 +316,20 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge('sdiag.enabled', 1)
 
     def _update_sacct_params(self):
+        sacct_params = SACCT_PARAMS.copy()
         if self.last_run_time is not None:
             now = get_timestamp()
             delta = now - self.last_run_time
             start_time_param = f"--starttime=now-{int(delta)}seconds"
 
-            SACCT_PARAMS.append(start_time_param)
+            sacct_params = [param for param in sacct_params if not param.startswith('--starttime')]
+            sacct_params.append(start_time_param)
+            self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
 
         self.last_run_time = get_timestamp()
 
         # Update the sacct command with the dynamic SACCT_PARAMS
-        self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
-        self.sacct_cmd = self.get_slurm_command('sacct', SACCT_PARAMS)
+        self.sacct_cmd = self.get_slurm_command('sacct', sacct_params)
 
     def _process_sinfo_cpu_state(self, cpus_state, namespace, tags):
         # "0/2/0/2"

@@ -2,15 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.1 / 2025-01-25
+
+***Fixed***:
+
+* Drop unused scandir dependency. ([#19380](https://github.com/DataDog/integrations-core/pull/19380))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
 
@@ -21,6 +23,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 2.1.1 / 2024-02-16 / Agent 7.52.0
 

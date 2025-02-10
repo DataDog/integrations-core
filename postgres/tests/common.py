@@ -151,7 +151,7 @@ def _get_expected_tags(
     role='master',
     **kwargs,
 ):
-    base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}']
+    base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}'] + [f'database_hostname:{check.database_hostname}']
     if role:
         base_tags.append(f'replication_role:{role}')
     if with_db:

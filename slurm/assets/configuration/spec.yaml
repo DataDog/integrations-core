@@ -127,7 +127,21 @@ files:
           Most Slurm metrics are collected from calling the different binaries. Depending on the size of the Slurm cluster,
           this can be a very expensive operation. It is recommended to set this to a higher value than the default 15 
           seconds, but this can be adjusted based on the size of the cluster and the desired granularity of the metrics.
-        min_collection_interval.value.display_default: 15
+        min_collection_interval.value.display_default: 60
         min_collection_interval.value.default: 60
         min_collection_interval.value.example: 60
         min_collection_interval.enabled: true
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/slurm/slurmd.log 
+      source: slurm
+      service: slurm
+    - type: file
+      path: /var/log/slurm/slurmdbd.log
+      source: slurm
+      service: slurm
+    - type: file
+      path: /var/log/slurm/slurmctld.log
+      source: slurm
+      service: slurm

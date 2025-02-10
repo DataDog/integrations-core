@@ -115,22 +115,48 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
+SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
+    SELECT COUNT(*) as column_count
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'information_schema'
+      AND TABLE_NAME = 'STATISTICS'
+      AND COLUMN_NAME = 'EXPRESSION';
+"""
+
 SQL_INDEXES = """\
 SELECT
     table_name as `table_name`,
-    index_schema as `index_schema`,
     index_name as `name`,
     collation as `collation`,
+    cardinality as `cardinality`,
     index_type as `index_type`,
-    group_concat(seq_in_index order by seq_in_index asc) as seq_in_index,
-    group_concat(column_name order by seq_in_index asc) as columns,
-    group_concat(sub_part order by seq_in_index asc) as sub_parts,
-    group_concat(packed order by seq_in_index asc) as packed,
-    group_concat(nullable order by seq_in_index asc) as nullables,
-    group_concat(non_unique order by seq_in_index asc) as non_uniques
+    seq_in_index as `seq_in_index`,
+    column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    NULL as `expression`
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_schema = %s AND table_name IN ({})
-GROUP BY table_name, index_schema, index_name, collation, index_type;
+WHERE table_schema = %s AND table_name IN ({});
+"""
+
+SQL_INDEXES_8_0_13 = """\
+SELECT
+    table_name as `table_name`,
+    index_name as `name`,
+    collation as `collation`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    seq_in_index as `seq_in_index`,
+    column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    expression as `expression`
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_schema = %s AND table_name IN ({});
 """
 
 SQL_FOREIGN_KEYS = """\
@@ -163,12 +189,7 @@ SELECT
     subpartition_expression as `subpartition_expression`,
     partition_description as `partition_description`,
     table_rows as `table_rows`,
-    data_length as `data_length`,
-    max_data_length as `max_data_length`,
-    index_length as `index_length`,
-    data_free as `data_free`,
-    partition_comment as `partition_comment`,
-    tablespace_name as `tablespace_name`
+    data_length as `data_length`
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
     table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL

@@ -1,0 +1,49 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "3c9d29b9-e8c6-44ab-9c00-b32e7075896a",
+  "app_id": "servicenow-performance",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into ServiceNow account data.",
+    "title": "ServiceNow Performance",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 36227889,
+      "source_type_name": "ServiceNow Performance",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "servicenow_performance.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "logs": {
+      "source": "servicenow-performance"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

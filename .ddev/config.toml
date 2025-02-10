@@ -70,6 +70,7 @@ exclude = true
 aerospike = ['Apache-2.0']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
+# https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
@@ -99,6 +100,8 @@ requests-ntlm = ['ISC']
 requests-unixsocket2 = ['ISC']
 # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
 rethinkdb = ['Apache-2.0']
+# https://github.com/python-semver/python-semver/blob/master/LICENSE.txt
+semver = ['BSD-3-Clause']
 # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
 simplejson = ['MIT']
 # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
@@ -161,7 +164,6 @@ unsorted = [
 [overrides.dep.updates]
 exclude = [
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
@@ -171,9 +173,8 @@ exclude = [
     # We're not ready to switch to v3 of the postgres library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
-    # 2.4.10 is broken on py2 and they did not yank the version
-    'rethinkdb',
     'psutil',
+    'pymongo[srv]', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

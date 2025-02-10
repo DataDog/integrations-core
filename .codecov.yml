@@ -186,6 +186,10 @@ coverage:
         target: 75
         flags:
         - druid
+      DuckDB:
+        target: 75
+        flags:
+        - duckdb
       EKS_Fargate:
         target: 75
         flags:
@@ -310,6 +314,10 @@ coverage:
         target: 75
         flags:
         - karpenter
+      Keda:
+        target: 75
+        flags:
+        - keda
       Kong:
         target: 75
         flags:
@@ -410,6 +418,10 @@ coverage:
         target: 75
         flags:
         - mesos_master
+      Milvus:
+        target: 75
+        flags:
+        - milvus
       MongoDB:
         target: 75
         flags:
@@ -442,6 +454,10 @@ coverage:
         target: 75
         flags:
         - nvidia_triton
+      Octopus_Deploy:
+        target: 75
+        flags:
+        - octopus_deploy
       OpenLDAP:
         target: 75
         flags:
@@ -498,6 +514,10 @@ coverage:
         target: 75
         flags:
         - pulsar
+      Quarkus:
+        target: 75
+        flags:
+        - quarkus
       RabbitMQ:
         target: 75
         flags:
@@ -578,6 +598,10 @@ coverage:
         target: 75
         flags:
         - strimzi
+      Supabase:
+        target: 75
+        flags:
+        - supabase
       Supervisord:
         target: 75
         flags:
@@ -710,6 +734,10 @@ coverage:
         target: 75
         flags:
         - kyverno
+      nvidia_nim:
+        target: 75
+        flags:
+        - nvidia_nim
       tibco_ems:
         target: 75
         flags:
@@ -954,6 +982,11 @@ flags:
     paths:
     - druid/datadog_checks/druid
     - druid/tests
+  duckdb:
+    carryforward: true
+    paths:
+    - duckdb/datadog_checks/duckdb
+    - duckdb/tests
   ecs_fargate:
     carryforward: true
     paths:
@@ -1124,6 +1157,11 @@ flags:
     paths:
     - karpenter/datadog_checks/karpenter
     - karpenter/tests
+  keda:
+    carryforward: true
+    paths:
+    - keda/datadog_checks/keda
+    - keda/tests
   kong:
     carryforward: true
     paths:
@@ -1254,6 +1292,11 @@ flags:
     paths:
     - mesos_slave/datadog_checks/mesos_slave
     - mesos_slave/tests
+  milvus:
+    carryforward: true
+    paths:
+    - milvus/datadog_checks/milvus
+    - milvus/tests
   mongo:
     carryforward: true
     paths:
@@ -1289,11 +1332,21 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nvidia_nim:
+    carryforward: true
+    paths:
+    - nvidia_nim/datadog_checks/nvidia_nim
+    - nvidia_nim/tests
   nvidia_triton:
     carryforward: true
     paths:
     - nvidia_triton/datadog_checks/nvidia_triton
     - nvidia_triton/tests
+  octopus_deploy:
+    carryforward: true
+    paths:
+    - octopus_deploy/datadog_checks/octopus_deploy
+    - octopus_deploy/tests
   openldap:
     carryforward: true
     paths:
@@ -1364,6 +1417,11 @@ flags:
     paths:
     - pulsar/datadog_checks/pulsar
     - pulsar/tests
+  quarkus:
+    carryforward: true
+    paths:
+    - quarkus/datadog_checks/quarkus
+    - quarkus/tests
   rabbitmq:
     carryforward: true
     paths:
@@ -1464,6 +1522,11 @@ flags:
     paths:
     - strimzi/datadog_checks/strimzi
     - strimzi/tests
+  supabase:
+    carryforward: true
+    paths:
+    - supabase/datadog_checks/supabase
+    - supabase/tests
   supervisord:
     carryforward: true
     paths:

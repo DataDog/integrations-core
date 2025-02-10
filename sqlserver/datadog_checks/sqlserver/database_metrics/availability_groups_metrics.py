@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.config import is_affirmative
-
 from .base import SqlserverDatabaseMetricsBase
 
 AVAILABILITY_GROUPS_METRICS_QUERY = {
@@ -38,11 +36,11 @@ class SqlserverAvailabilityGroupsMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
     @property
     def include_ao_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_ao_metrics', False))
+        return self.config.database_metrics_config["ao_metrics"]["enabled"]
 
     @property
     def availability_group(self):
-        return self.instance_config.get('availability_group')
+        return self.config.database_metrics_config["ao_metrics"]["availability_group"]
 
     @property
     def enabled(self):

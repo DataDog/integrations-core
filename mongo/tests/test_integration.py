@@ -61,7 +61,13 @@ def _assert_mongodb_instance_event(
     }
 
 
-@pytest.mark.parametrize("dbm", [True, False])
+@pytest.mark.parametrize(
+    "dbm",
+    [
+        pytest.param(True, id="DBM enabled"),
+        pytest.param(False, id="DBM disabled"),
+    ],
+)
 def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_run_check, dbm):
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}
@@ -136,6 +142,19 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         cluster_type='sharded_cluster',
         cluster_name='my_cluster',
         modules=['enterprise'],
+    )
+    # run the check again to verify sharded data distribution metrics are NOT collected
+    # because the collection interval is not reached
+    aggregator.reset()
+    with mock_pymongo("mongos"):
+        dd_run_check(mongos_check)
+
+    assert_metrics(
+        mongos_check,
+        aggregator,
+        ['sharded-data-distribution'],
+        ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
+        count=0,
     )
 
 
@@ -320,7 +339,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         'sharding_cluster_role:shardsvr',
         'hosting_type:self-hosted',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
@@ -817,7 +836,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 

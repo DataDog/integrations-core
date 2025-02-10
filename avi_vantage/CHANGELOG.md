@@ -2,11 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.1.0 / 2024-10-04 / Agent 7.59.0
+## 5.2.0 / 2025-01-16
 
 ***Added***:
 
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 5.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:
 
@@ -17,6 +19,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 4.2.2 / 2024-07-05 / Agent 7.55.0
 
