@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import iteritems
 
 
 class _FreezeKey(object):
@@ -54,7 +53,7 @@ def freeze(o):
         return tuple(sorted((freeze(e) for e in o), key=_FreezeKey))
 
     if isinstance(o, dict):
-        return tuple(sorted(((k, freeze(v)) for k, v in iteritems(o)), key=_item_freeze_key))
+        return tuple(sorted(((k, freeze(v)) for k, v in o.items()), key=_item_freeze_key))
 
     if isinstance(o, (set, frozenset)):
         return tuple(sorted((freeze(e) for e in o), key=_FreezeKey))

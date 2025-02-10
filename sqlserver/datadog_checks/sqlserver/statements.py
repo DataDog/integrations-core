@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import binascii
+import copy
 import math
 import time
 
@@ -153,12 +154,7 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return (
-        row.get('database_name'),
-        row['query_signature'],
-        row['query_hash'],
-        row['query_plan_hash'],
-    )
+    return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
@@ -239,6 +235,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._last_stats_query_time = None
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
 
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -286,12 +284,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         )
         return self._statement_metrics_query
 
+    def lookback_window(self):
+        return self._config.statement_metrics_config.get('lookback_window', None)
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
         now = time.time()
         query_interval = self.collection_interval * 2
+        if self.lookback_window():
+            query_interval = self.lookback_window()
         if self._last_stats_query_time:
             query_interval = max(query_interval, now - self._last_stats_query_time)
         self._last_stats_query_time = now
@@ -444,6 +447,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
+            'service': self._config.service,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -500,6 +504,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
+                'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
@@ -583,7 +588,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
-                yield {
+                obfuscated_plan_event = {
                     "host": self._check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
@@ -593,6 +598,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "cloud_metadata": self._config.cloud_metadata,
                     'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                     'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                    'service': self._config.service,
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {
@@ -620,3 +626,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
+                if self._collect_raw_query_statement:
+                    raw_plan_event = copy.deepcopy(obfuscated_plan_event)
+                    raw_plan_event["dbm_type"] = "rqp"  # raw query plan
+                    raw_plan_event["db"]["plan"]["definition"] = raw_plan
+                    # add the raw signature to the event so we can use it to look up the raw plan
+                    raw_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
+                    obfuscated_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
+                    yield raw_plan_event
+                yield obfuscated_plan_event

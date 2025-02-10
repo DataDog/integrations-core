@@ -10,12 +10,15 @@ from urllib.parse import quote_plus
 
 import mock
 import pytest
+from bson import json_util
 from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
+from datadog_checks.mongo.dbm.utils import should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
 
@@ -33,6 +36,8 @@ DEFAULT_METRICS_LEN = len(
         for m_name, m_type in d.items()
     }
 )
+
+DD_OPERATION_COMMENT = "service='datadog-agent'"
 
 
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
@@ -143,7 +148,13 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('serverStatus'), mock.call('getCmdLineOpts'), mock.call('isMaster')])
+    mock_command.assert_has_calls(
+        [
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+        ]
+    )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
     assert check._resolved_hostname == 'test-hostname:27017'
@@ -173,10 +184,10 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus'),
-            mock.call('getCmdLineOpts'),
-            mock.call('isMaster'),
-            mock.call('replSetGetStatus'),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+            mock.call('replSetGetStatus', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -206,10 +217,10 @@ def test_when_replicaset_state_recovering_then_database_names_not_called(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus'),
-            mock.call('getCmdLineOpts'),
-            mock.call('isMaster'),
-            mock.call('replSetGetStatus'),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+            mock.call('replSetGetStatus', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -496,8 +507,12 @@ def test_collector_submit_payload(check, aggregator):
 
 def test_api_alibaba_mongos(check, aggregator):
     payload = {'isMaster': {'msg': 'isdbgrid'}}
+
+    def mocked_command(command, *args, **kwargs):
+        return payload[command]
+
     mocked_client = mock.MagicMock()
-    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=mocked_command))
     mocked_client.get_cmdline_opts.side_effect = OperationFailure('getCmdLineOpts is not supported')
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
@@ -514,8 +529,12 @@ def test_api_alibaba_mongod_shard(check, aggregator):
         'replSetGetStatus': {'myState': 1, 'set': 'foo', 'configsvr': False},
         'shardingState': {'enabled': True},
     }
+
+    def mocked_command(command, *args, **kwargs):
+        return payload[command]
+
     mocked_client = mock.MagicMock()
-    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=mocked_command))
     mocked_client.get_cmdline_opts.side_effect = OperationFailure('getCmdLineOpts is not supported')
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
@@ -536,8 +555,12 @@ def test_api_alibaba_mongod_shard(check, aggregator):
 
 def test_api_alibaba_configsvr(check, aggregator):
     payload = {'isMaster': {}, 'replSetGetStatus': {'myState': 2, 'set': 'config', 'configsvr': True}}
+
+    def mocked_command(command, *args, **kwargs):
+        return payload[command]
+
     mocked_client = mock.MagicMock()
-    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=mocked_command))
     mocked_client.get_cmdline_opts.side_effect = OperationFailure('getCmdLineOpts is not supported')
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
@@ -562,8 +585,12 @@ def test_api_alibaba_mongod(check, aggregator):
         'replSetGetStatus': {'myState': 1, 'set': 'foo', 'configsvr': False},
         'shardingState': {'enabled': False},
     }
+
+    def mocked_command(command, *args, **kwargs):
+        return payload[command]
+
     mocked_client = mock.MagicMock()
-    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=mocked_command))
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         check = check(common.INSTANCE_BASIC)
@@ -691,10 +718,10 @@ def test_emits_ok_service_check_for_documentdb_deployment(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus'),
-            mock.call('getCmdLineOpts'),
-            mock.call('isMaster'),
-            mock.call('replSetGetStatus'),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
+            mock.call('isMaster', comment=DD_OPERATION_COMMENT),
+            mock.call('replSetGetStatus', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -723,8 +750,8 @@ def test_emits_ok_service_check_for_mongodb_atlas_deployment(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
         [
-            mock.call('serverStatus'),
-            mock.call('getCmdLineOpts'),
+            mock.call('serverStatus', comment=DD_OPERATION_COMMENT),
+            mock.call('getCmdLineOpts', comment=DD_OPERATION_COMMENT),
         ]
     )
     mock_server_info.assert_called_once()
@@ -778,3 +805,135 @@ def seed_mock_client():
 def load_json_fixture(name):
     with open(os.path.join(common.HERE, "fixtures", name), 'r') as f:
         return json.load(f)
+
+
+@pytest.mark.parametrize(
+    'namespace,op,command,should_explain',
+    [
+        pytest.param(
+            "test.test",
+            "command",
+            {
+                "aggregate": "test",
+                "pipeline": [{"$collStats": {"latencyStats": {}, "storageStats": {}, "queryExecStats": {}}}],
+                "cursor": {},
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no-explain $collStats',
+        ),
+        pytest.param(
+            "test.test",
+            "command",
+            {
+                "aggregate": "test",
+                "pipeline": [{"$sample": {"size": "?"}}],
+                "cursor": {},
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain $sample',
+        ),
+        pytest.param(
+            "test.test",
+            "command",
+            {
+                "aggregate": "test",
+                "pipeline": [{"$indexStats": {}}],
+                "cursor": {},
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain $indexStats',
+        ),
+        pytest.param(
+            "test.test",
+            "command",
+            {"getMore": "?", "collection": "test", "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='no explain getMore',
+        ),
+        pytest.param(
+            "test.test",
+            "update",
+            {
+                "update": "test",
+                "updates": [{"q": {}, "u": {}, "multi": False, "upsert": False}],
+                "ordered": True,
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain update',
+        ),
+        pytest.param(
+            "test.test",
+            "insert",
+            {
+                "insert": "test",
+                "documents": [{"_id": "?", "a": 1}],
+                "ordered": True,
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain insert',
+        ),
+        pytest.param(
+            "test.test",
+            "remove",
+            {
+                "delete": "test",
+                "deletes": [{"q": {}, "limit": 1}],
+                "ordered": True,
+                "$db": "test",
+                "$readPreference": {"mode": "?"},
+            },
+            False,
+            id='no explain delete',
+        ),
+        pytest.param(
+            "test.test",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            True,
+            id='explain find',
+        ),
+        pytest.param(
+            None,
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='missing ns',
+        ),
+        pytest.param(
+            "",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='blank ns',
+        ),
+        pytest.param(
+            "db",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            True,
+            id='ns with no collection',
+        ),
+    ],
+)
+def test_should_explain_operation(namespace, op, command, should_explain):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    assert (
+        should_explain_operation(
+            namespace,
+            op,
+            command,
+            explain_plan_rate_limiter=check._operation_samples._explained_operations_ratelimiter,
+            explain_plan_cache_key=(namespace, op, compute_exec_plan_signature(json_util.dumps(command))),
+        )
+        == should_explain
+    )

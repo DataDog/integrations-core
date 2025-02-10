@@ -35,6 +35,15 @@ RUN curl -SL --output PowerShell-%POWERSHELL_VERSION%-win-x64.msi https://github
 COPY helpers.ps1 C:\helpers.ps1
 SHELL ["pwsh", "-Command", ". C:\\helpers.ps1;"]
 
+# Enable long paths
+# https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell#registry-setting-to-enable-long-paths
+RUN New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+ -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+# Reduce the chance of hitting path limits (the MSVC compiler cl.exe doesn't seem to respect that optioin)
+# This variable is honored by pip
+ENV TMP="C:\tmp" `
+    TEMP="C:\tmp"
+
 # Install 7-Zip ZS
 ENV 7ZIP_VERSION="22.01" `
     7ZIP_ZS_VERSION="1.5.5-R3"
@@ -73,35 +82,17 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.12.6"
+ENV PYTHON_VERSION="3.12.8"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '5914748e6580e70bedeb7c537a0832b3071de9e09a2e4e7e3d28060616045e0a'; `
+      -Hash '71bd44e6b0e91c17558963557e4cdb80b483de9b0a0a9717f06cf896f95ab598'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location virtualenv; `
     & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
     Add-ToPath -Append 'C:\Program Files\Python312'
-
-# Install Python 2
-ENV PYTHON_VERSION="2.7.18"
-RUN Get-RemoteFile `
-      -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION.amd64.msi `
-      -Path python-$Env:PYTHON_VERSION.amd64.msi `
-      -Hash 'b74a3afa1e0bf2a6fc566a7b70d15c9bfabba3756fb077797d16fffa27800c05'; `
-    Start-Process -Wait -FilePath msiexec -ArgumentList '/i', python-$Env:PYTHON_VERSION.amd64.msi, '/quiet', '/norestart', 'InstallAllUsers=1'; `
-    Remove-Item python-$Env:PYTHON_VERSION.amd64.msi; `
-    & 'C:\Python27\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Python27\python.exe' -m pip install --no-python-version-warning --no-warn-script-location virtualenv; `
-    & 'C:\Python27\python.exe' -m virtualenv 'C:\py2'
-RUN Get-RemoteFile `
-      -Uri https://s3.amazonaws.com/dd-agent-omnibus/VCForPython27.msi `
-      -Path VCForPython27.msi `
-      -Hash '070474db76a2e625513a5835df4595df9324d820f9cc97eab2a596dcbc2f5cbf'; `
-    Start-Process -Wait -FilePath msiexec -ArgumentList '/i', VCForPython27.msi, '/quiet'; `
-    Remove-Item VCForPython27.msi
 
 # Install IBM MQ
 ENV IBM_MQ_VERSION="9.2.4.0"
@@ -113,9 +104,37 @@ RUN Get-RemoteFile `
     Remove-Item $Env:IBM_MQ_VERSION-IBM-MQC-Redist-Win64.zip; `
     setx /M MQ_FILE_PATH 'C:\ibm_mq'
 
+# Perl
+ENV PERL_VERSION="5.40.0.1"
+RUN Get-RemoteFile `
+      -Uri https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54001_64bit_UCRT/strawberry-perl-$Env:PERL_VERSION-64bit-portable.zip `
+      -Path "strawberry-perl-$Env:PERL_VERSION-64bit.zip" `
+    -Hash '754f3e2a8e473dc68d1540c7802fb166a025f35ef18960c4564a31f8b5933907' && `
+    7z x "strawberry-perl-$Env:PERL_VERSION-64bit.zip" -o"C:\perl" && `
+    Add-ToPath -Append "C:\perl\perl\bin" && `
+    Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
+
+ENV OPENSSL_VERSION="3.4.0"
+
+ENV CURL_VERSION="8.11.1"
+
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
 RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.txt
+
+COPY build_script.ps1 C:\build_script.ps1
+COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
+ENV DD_BUILD_COMMAND="pwsh C:\build_script.ps1"
+
+# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
+ENV PIP_NO_BINARY="confluent_kafka"
+# Where to find native dependencies when building extensions and for wheel repairing
+RUN New-Item -Path "C:\include" -ItemType Directory
+RUN New-Item -Path "C:\lib" -ItemType Directory
+RUN New-Item -Path "C:\bin" -ItemType Directory
+ENV INCLUDE="C:\include"
+ENV LIB="C:\lib"
+RUN Add-ToPath -Append "C:\bin"
 
 # Restore the default Windows shell for correct batch processing.
 SHELL ["cmd", "/S", "/C"]

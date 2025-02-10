@@ -5,7 +5,9 @@
         "ddagentversion": "0.0.0",
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "network": {
             "client": {
                 "hostname": "192.168.65.1:39517",
@@ -142,11 +144,13 @@
             "query_framework": null,
             "current_op_time": "2024-05-16T18:06:38.419+00:00",
             "microsecs_running": 167,
-            "transaction_time_open_micros": null,
             "prepare_read_conflicts": 0,
             "write_conflicts": 0,
             "num_yields": 0,
             "waiting_for_lock": false,
+            "lsid": {
+                "id": "fe7f64529521475ca6263130bc2c926e"
+            },
             "locks": {
                 "feature_compatibility_version": "r",
                 "global": "r"
@@ -180,6 +184,7 @@
             "type": "op",
             "op": "query",
             "shard": null,
+            "transaction": null,
             "collection": "products",
             "comment": "find",
             "truncated": "not_truncated"

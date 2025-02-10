@@ -12,10 +12,13 @@ SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'
 TABLE_COUNT_LIMIT = 200
 
 DEFAULT_IGNORE_DATABASES = [
-    'template%',
+    'template0',
+    'template1',
     'rdsadmin',
     'azure_maintenance',
     'cloudsqladmin',
+    'alloydbadmin',
+    'alloydbmetadata',
     'postgres',
 ]
 
@@ -60,10 +63,6 @@ class PostgresConfig:
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
-        self.tags = self._build_tags(
-            custom_tags=instance.get('tags', []),
-            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
-        )
 
         ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
@@ -159,6 +158,12 @@ class PostgresConfig:
             ),
             'keep_json_path': is_affirmative(obfuscator_options_config.get('keep_json_path', False)),
         }
+        collect_raw_query_statement_config: dict = instance.get('collect_raw_query_statement', {}) or {}
+        self.collect_raw_query_statement = {
+            "enabled": is_affirmative(collect_raw_query_statement_config.get('enabled', False)),
+            "cache_max_size": int(collect_raw_query_statement_config.get('cache_max_size', 10000)),
+            "samples_per_hour_per_query": int(collect_raw_query_statement_config.get('samples_per_hour_per_query', 1)),
+        }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
@@ -166,8 +171,15 @@ class PostgresConfig:
             self.statement_metrics_config.get('incremental_query_metrics', False)
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
+        self.service = instance.get('service') or init_config.get('service') or ''
 
-    def _build_tags(self, custom_tags, propagate_agent_tags):
+        self.tags = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
+        )
+
+    def _build_tags(self, custom_tags, propagate_agent_tags, additional_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -198,6 +210,9 @@ class PostgresConfig:
                 raise ConfigurationError(
                     'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
                 )
+
+        if additional_tags:
+            tags.extend(additional_tags)
         return tags
 
     @staticmethod

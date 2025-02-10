@@ -383,6 +383,7 @@ QUERY_PG_REPLICATION_SLOTS = {
         CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
         CASE WHEN active THEN 'active' ELSE 'inactive' END,
         CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
+        CASE WHEN catalog_xmin IS NULL THEN NULL ELSE age(catalog_xmin) END,
         pg_wal_lsn_diff(
         CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
         pg_wal_lsn_diff(
@@ -395,6 +396,7 @@ QUERY_PG_REPLICATION_SLOTS = {
         {'name': 'slot_persistence', 'type': 'tag'},
         {'name': 'slot_state', 'type': 'tag'},
         {'name': 'replication_slot.xmin_age', 'type': 'gauge'},
+        {'name': 'replication_slot.catalog_xmin_age', 'type': 'gauge'},
         {'name': 'replication_slot.restart_delay_bytes', 'type': 'gauge'},
         {'name': 'replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
     ],

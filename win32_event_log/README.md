@@ -540,6 +540,7 @@ Additional helpful documentation, links, and articles:
 - [How to collect Windows Server 2012 metrics][10]
 - [Monitoring Windows Server 2012 with Datadog][11]
 - [Monitor Windows event logs with Datadog][27]
+- [Monitor your Windows event logs with Datadog Cloud SIEM][33]]
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest?platform=windows
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -572,3 +573,4 @@ Additional helpful documentation, links, and articles:
 [30]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_low.yaml.example
 [31]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_high.yaml.example
 [32]: https://app.datadoghq.com/integrations?integrationId=event-viewer
+[33]: https://www.datadoghq.com/blog/datadog-cloud-siem-windows-event-logs/

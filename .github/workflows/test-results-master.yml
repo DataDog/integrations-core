@@ -16,6 +16,11 @@ jobs:
       BADGES_BRANCH: badges
       BADGE_PATH: test-results.svg
 
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+
     steps:
     - uses: actions/checkout@v4
       with:

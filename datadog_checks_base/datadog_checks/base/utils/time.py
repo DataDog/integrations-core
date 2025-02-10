@@ -8,23 +8,10 @@ from datetime import datetime
 from time import time as epoch_offset
 
 from dateutil.tz import UTC
-from six import PY3
-
-from .platform import Platform
 
 EPOCH = datetime.fromtimestamp(0, UTC)
 
-
-if PY3:
-    # use higher precision clock available in Python3
-    time_func = time.perf_counter
-elif Platform.is_win32():
-    # for tiny time deltas, time.time on Windows reports the same value
-    # of the clock more than once, causing the computation of response_time
-    # to be often 0; let's use time.clock that is more precise.
-    time_func = time.clock
-else:
-    time_func = epoch_offset
+time_func = time.perf_counter
 
 
 def get_precise_time():
@@ -41,12 +28,9 @@ def get_timestamp(dt=None):
     If `dt` is not specified or `None`, the current time in UTC is assumed.
     """
     if dt is None:
-        # The precision is different between Python 2 and 3
         return epoch_offset()
 
-    # TODO: when we drop support for Python 2 switch to:
-    # return ensure_aware_datetime(dt).timestamp()
-    return (ensure_aware_datetime(dt) - EPOCH).total_seconds()
+    return ensure_aware_datetime(dt).timestamp()
 
 
 def get_current_datetime(tz=UTC):

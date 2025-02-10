@@ -6,10 +6,12 @@ import re
 from os import environ
 
 import pytest
+from packaging.version import parse as parse_version
 
 from datadog_checks.mysql import MySql
 
 from . import common
+from .common import MYSQL_VERSION_PARSED
 from .utils import deep_compare
 
 
@@ -49,12 +51,12 @@ def normalize_values(actual_payload):
                     partition["partition_expression"] = (
                         partition["partition_expression"].replace("`", "").lower().strip()
                     )
-                if partition["subpartition_expression"] is not None:
-                    partition["subpartition_expression"] = (
-                        partition["subpartition_expression"].replace("`", "").lower().strip()
-                    )
-                if partition["max_data_length"] is None:
-                    partition["max_data_length"] = 0
+                if "subpartitions" in partition and partition["subpartitions"]:
+                    for subpartition in partition["subpartitions"]:
+                        if subpartition["subpartition_expression"] is not None:
+                            subpartition["subpartition_expression"] = (
+                                subpartition["subpartition_expression"].replace("`", "").lower().strip()
+                            )
 
 
 @pytest.mark.integration
@@ -158,16 +160,22 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "FK_RestaurantNameDistrict",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1,2",
-                        "columns": "RestaurantName,District",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "true,true",
-                        "non_uniques": "1,1",
+                        "columns": [
+                            {
+                                "name": "RestaurantName",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                            {
+                                "name": "District",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": True,
                     }
                 ],
             },
@@ -207,16 +215,22 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "UC_RestaurantNameDistrict",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1,2",
-                        "columns": "RestaurantName,District",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "true,true",
-                        "non_uniques": "0,0",
+                        "columns": [
+                            {
+                                "name": "RestaurantName",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                            {
+                                "name": "District",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": False,
                     }
                 ],
             },
@@ -256,41 +270,70 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "PRIMARY",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1",
-                        "columns": "id",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "false",
-                        "non_uniques": "0",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "collation": "A",
+                                "nullable": False,
+                            }
+                        ],
+                        "non_unique": False,
                     },
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "single_column_index",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1",
-                        "columns": "population",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "false",
-                        "non_uniques": "1",
+                        "columns": [
+                            {
+                                "name": "population",
+                                "collation": "A",
+                                "nullable": False,
+                            }
+                        ],
+                        "non_unique": True,
                     },
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "two_columns_index",
-                        "collation": "A",
                         "index_type": "BTREE",
-                        "seq_in_index": "1,2",
-                        "columns": "id,name",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "false,true",
-                        "non_uniques": "1,1",
+                        "cardinality": 0,
+                        "columns": [
+                            {
+                                "name": "id",
+                                "collation": "A",
+                                "nullable": False,
+                            },
+                            {
+                                "name": "name",
+                                "sub_part": 3,
+                                "collation": (
+                                    'D'
+                                    if (
+                                        (MYSQL_VERSION_PARSED >= parse_version('8.0') and not is_maria_db)
+                                        or (MYSQL_VERSION_PARSED >= parse_version('10.8') and is_maria_db)
+                                    )
+                                    else 'A'
+                                ),
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": True,
                     },
+                    *(
+                        [
+                            {
+                                "name": "functional_key_part_index",
+                                "index_type": "BTREE",
+                                "cardinality": 0,
+                                "non_unique": True,
+                                "expression": "(`population` + 1)",
+                            }
+                        ]
+                        if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db
+                        else []
+                    ),
                 ],
             },
             {
@@ -330,89 +373,54 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "partitions": [
                     {
                         "name": "p0",
-                        "subpartition_name": None,
                         "partition_ordinal_position": 1,
-                        "subpartition_ordinal_position": None,
                         "partition_method": "RANGE",
-                        "subpartition_method": None,
                         "partition_expression": "id",
-                        "subpartition_expression": None,
                         "partition_description": "100",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
                     },
                     {
                         "name": "p1",
-                        "subpartition_name": None,
                         "partition_ordinal_position": 2,
-                        "subpartition_ordinal_position": None,
                         "partition_method": "RANGE",
-                        "subpartition_method": None,
                         "partition_expression": "id",
-                        "subpartition_expression": None,
                         "partition_description": "200",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
                     },
                     {
                         "name": "p2",
-                        "subpartition_name": None,
                         "partition_ordinal_position": 3,
-                        "subpartition_ordinal_position": None,
                         "partition_method": "RANGE",
-                        "subpartition_method": None,
                         "partition_expression": "id",
-                        "subpartition_expression": None,
                         "partition_description": "300",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
                     },
                     {
                         "name": "p3",
-                        "subpartition_name": None,
                         "partition_ordinal_position": 4,
-                        "subpartition_ordinal_position": None,
                         "partition_method": "RANGE",
-                        "subpartition_method": None,
                         "partition_expression": "id",
-                        "subpartition_expression": None,
                         "partition_description": "MAXVALUE",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
                     },
                 ],
                 "indexes": [
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "PRIMARY",
-                        "collation": "A",
+                        "cardinality": 4 if is_maria_db else 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1",
-                        "columns": "id",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "false",
-                        "non_uniques": "0",
+                        "columns": [
+                            {
+                                "name": "id",
+                                "collation": "A",
+                                "nullable": False,
+                            }
+                        ],
+                        "non_unique": False,
                     }
                 ],
             },
@@ -454,16 +462,17 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
-                        "index_schema": "datadog_test_schemas",
                         "name": "FK_CityId",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1",
-                        "columns": "city_id",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "true",
-                        "non_uniques": "1",
+                        "columns": [
+                            {
+                                "name": "city_id",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": True,
                     }
                 ],
             },
@@ -501,16 +510,17 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
-                        "index_schema": "datadog_test_schemas_second",
                         "name": "thingsindex",
-                        "collation": "A",
+                        "cardinality": 0,
                         "index_type": "BTREE",
-                        "seq_in_index": "1",
-                        "columns": "name",
-                        "sub_parts": None,
-                        "packed": None,
-                        "nullables": "true",
-                        "non_uniques": "0",
+                        "columns": [
+                            {
+                                "name": "name",
+                                "collation": "A",
+                                "nullable": True,
+                            },
+                        ],
+                        "non_unique": False,
                     }
                 ],
             },
@@ -542,111 +552,84 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "partitions": [
                     {
                         "name": "p0",
-                        "subpartition_name": "p0sp0",
+                        "subpartitions": [
+                            {
+                                "name": "p0sp0",
+                                "subpartition_ordinal_position": 1,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                            {
+                                "name": "p0sp1",
+                                "subpartition_ordinal_position": 2,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                        ],
                         "partition_ordinal_position": 1,
-                        "subpartition_ordinal_position": 1,
                         "partition_method": "RANGE",
-                        "subpartition_method": "HASH",
                         "partition_expression": "year(purchased)",
-                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "1990",
                         "table_rows": 0,
-                        "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
-                    },
-                    {
-                        "name": "p0",
-                        "subpartition_name": "p0sp1",
-                        "partition_ordinal_position": 1,
-                        "subpartition_ordinal_position": 2,
-                        "partition_method": "RANGE",
-                        "subpartition_method": "HASH",
-                        "partition_expression": "year(purchased)",
-                        "subpartition_expression": "to_days(purchased)",
-                        "partition_description": "1990",
-                        "table_rows": 0,
-                        "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
+                        "data_length": 32768,
                     },
                     {
                         "name": "p1",
-                        "subpartition_name": "p1sp0",
+                        "subpartitions": [
+                            {
+                                "name": "p1sp0",
+                                "subpartition_ordinal_position": 1,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                            {
+                                "name": "p1sp1",
+                                "subpartition_ordinal_position": 2,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                        ],
                         "partition_ordinal_position": 2,
-                        "subpartition_ordinal_position": 1,
                         "partition_method": "RANGE",
-                        "subpartition_method": "HASH",
                         "partition_expression": "year(purchased)",
-                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "2000",
                         "table_rows": 0,
-                        "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
-                    },
-                    {
-                        "name": "p1",
-                        "subpartition_name": "p1sp1",
-                        "partition_ordinal_position": 2,
-                        "subpartition_ordinal_position": 2,
-                        "partition_method": "RANGE",
-                        "subpartition_method": "HASH",
-                        "partition_expression": "year(purchased)",
-                        "subpartition_expression": "to_days(purchased)",
-                        "partition_description": "2000",
-                        "table_rows": 0,
-                        "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
+                        "data_length": 32768,
                     },
                     {
                         "name": "p2",
-                        "subpartition_name": "p2sp0",
+                        "subpartitions": [
+                            {
+                                "name": "p2sp0",
+                                "subpartition_ordinal_position": 1,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                            {
+                                "name": "p2sp1",
+                                "subpartition_ordinal_position": 2,
+                                "subpartition_method": "HASH",
+                                "subpartition_expression": "to_days(purchased)",
+                                "table_rows": 0,
+                                "data_length": 16384,
+                            },
+                        ],
                         "partition_ordinal_position": 3,
-                        "subpartition_ordinal_position": 1,
                         "partition_method": "RANGE",
-                        "subpartition_method": "HASH",
                         "partition_expression": "year(purchased)",
-                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "MAXVALUE",
                         "table_rows": 0,
-                        "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
-                    },
-                    {
-                        "name": "p2",
-                        "subpartition_name": "p2sp1",
-                        "partition_ordinal_position": 3,
-                        "subpartition_ordinal_position": 2,
-                        "partition_method": "RANGE",
-                        "subpartition_method": "HASH",
-                        "partition_expression": "year(purchased)",
-                        "subpartition_expression": "to_days(purchased)",
-                        "partition_description": "MAXVALUE",
-                        "table_rows": 0,
-                        "data_length": 16384,
-                        "max_data_length": 0,
-                        "index_length": 0,
-                        "data_free": 0,
-                        "partition_comment": "",
-                        "tablespace_name": None,
+                        "data_length": 32768,
                     },
                 ],
             },
@@ -659,7 +642,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     }
 
     dbm_instance['schemas_collection'] = {"enabled": True}
-
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
 
@@ -676,6 +658,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("dbms_version") is not None
         assert (schema_event.get("flavor") == "MariaDB") or (schema_event.get("flavor") == "MySQL")
         assert sorted(schema_event["tags"]) == [
+            'database_hostname:stubbed.hostname',
+            'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
             'dd.internal.resource:database_instance:stubbed.hostname',
             'port:13306',
             'tag1:value1',
@@ -700,6 +684,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert deep_compare(expected_data_for_db[db_name], actual_payload)
 
 
+@pytest.mark.integration
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
 
     dbm_instance['dbm'] = True

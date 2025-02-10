@@ -83,7 +83,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 - VmSuspendedEvent
 - VmPoweredOffEvent
 
-However, events can be added or removed using the `vsphere.d/conf.yaml` file. See the `include_events` parameter section in the [sample vsphere.d/conf.yaml][4].
+Use the `include_events` parameter section in the [sample vsphere.d/conf.yaml][4] to collect additional events from the `vim.event` class .
 
 ### Service Checks
 
@@ -97,7 +97,11 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 You can limit the number of VMs pulled in with the VMWare integration using the `vsphere.d/conf.yaml` file. See the `resource_filters` parameter section in the [sample vsphere.d/conf.yaml][4].
 
-### Monitoring vSphere Tanzu Kubernetes Grid (TKG)
+## Billing
+
+- [vSphere Integration Billing][17]
+
+## Monitoring vSphere Tanzu Kubernetes Grid (TKG)
 
 The Datadog vSphere integration collects metrics and events from your [TKG][13] VMs and control plane VMs automatically. To collect more granular information about your TKG cluster, including container-, pod-, and node-level metrics, you can install the [Datadog Agent][14] on your cluster. See the [distribution documentation][15] for example configuration files specific to TKG.
 
@@ -121,3 +125,4 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 [14]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator
 [15]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=operator#TKG
 [16]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[17]: https://docs.datadoghq.com/account_management/billing/vsphere

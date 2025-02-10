@@ -2,6 +2,57 @@
 
 <!-- towncrier release notes start -->
 
+## 11.1.0 / 2025-01-21
+
+***Security***:
+
+* Add FIPS switch ([#19179](https://github.com/DataDog/integrations-core/pull/19179))
+
+***Added***:
+
+* First version of helper for creating logs saved views. ([#17353](https://github.com/DataDog/integrations-core/pull/17353))
+* Add script to convert monitor export json into the JSON we can use ([#17936](https://github.com/DataDog/integrations-core/pull/17936))
+* Add decimal/binary specific byte units ([#19252](https://github.com/DataDog/integrations-core/pull/19252))
+
+***Fixed***:
+
+* Stop generating Python 2 markers for dependency updates. ([#19386](https://github.com/DataDog/integrations-core/pull/19386))
+
+## 11.0.0 / 2024-12-09
+
+***Removed***:
+
+* Remove manifest validation call that calls deprecated endpoint ([#19208](https://github.com/DataDog/integrations-core/pull/19208))
+
+***Changed***:
+
+* Ddev now uses the macos-13 runner instead of macos-13 for the generated test matrix, because the macos-12 runner is being discontinued by microsoft. ([#19163](https://github.com/DataDog/integrations-core/pull/19163))
+
+***Added***:
+
+* Add unit names for bolívar digital ([#19051](https://github.com/DataDog/integrations-core/pull/19051))
+* Bump dependencies for checking and fixing code style ([#19126](https://github.com/DataDog/integrations-core/pull/19126))
+
+## 10.4.0 / 2024-11-13
+
+***Added***:
+
+* Add MIT-0 license ([#18936](https://github.com/DataDog/integrations-core/pull/18936))
+* Add units for all circulating currencies ([#18947](https://github.com/DataDog/integrations-core/pull/18947))
+* Bump `datadog_checks_dev` to 34.1.0 ([#19049](https://github.com/DataDog/integrations-core/pull/19049))
+
+***Fixed***:
+
+* Don't hardcode location of payload file in script that serves static OpenMetrics payloads. ([#18993](https://github.com/DataDog/integrations-core/pull/18993))
+
+## 10.3.0 / 2024-10-28
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* add bit family as valid units ([#18845](https://github.com/DataDog/integrations-core/pull/18845))
+* Bumped datadog_checks_dev version to 34.0.0 ([#18918](https://github.com/DataDog/integrations-core/pull/18918))
+
 ## 10.2.0 / 2024-09-05
 
 ***Added***:

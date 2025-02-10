@@ -1,0 +1,1 @@
+Revert "Upgrade PGBouncer to psycopg3" due to instability in testing

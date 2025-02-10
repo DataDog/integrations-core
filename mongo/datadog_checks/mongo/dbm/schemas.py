@@ -32,6 +32,7 @@ class MongoSchemas(DBMAsyncJob):
         self._max_collections = self._schemas_config["max_collections"]
         self._sample_size = self._schemas_config["sample_size"]
         self._max_depth = self._schemas_config["max_depth"]
+        self._collect_search_indexes = self._schemas_config["collect_search_indexes"]
         self._max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
 
         super(MongoSchemas, self).__init__(
@@ -63,6 +64,7 @@ class MongoSchemas(DBMAsyncJob):
             "collection_interval": self._collection_interval,
             "dbms_version": self._check._mongo_version,
             "tags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
         }
 
         collected_collections = 0
@@ -209,6 +211,10 @@ class MongoSchemas(DBMAsyncJob):
         return "regular"
 
     def _discover_collection_search_indexes(self, dbname, collname):
+        if not self._collect_search_indexes:
+            self._check.log.debug("Search indexes collection is disabled")
+            return []
+
         if not self._check.deployment_type.hosting_type == HostingType.ATLAS:
             self._check.log.debug("Search indexes are only supported for Atlas deployments")
             return []

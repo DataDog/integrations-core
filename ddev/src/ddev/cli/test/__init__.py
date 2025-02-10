@@ -91,7 +91,6 @@ def test(
     import os
     import sys
 
-    from ddev.repo.constants import PYTHON_VERSION
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
     from ddev.testing.hatch import get_hatch_env_vars
     from ddev.utils.ci import running_in_ci
@@ -238,18 +237,11 @@ def test(
 
         if standard_tests:
             if ddtrace and (target.is_integration or target.name == 'datadog_checks_base'):
-                # TODO: remove this once we drop Python 2
-                if app.platform.windows and (
-                    (python_filter and python_filter != PYTHON_VERSION)
-                    or not all(env_name.startswith('py3') for env_name in chosen_environments)
-                ):
-                    app.display_warning('Tracing is only supported on Python 3 on Windows')
-                else:
-                    command.append('--ddtrace')
-                    env_vars['DDEV_TRACE_ENABLED'] = 'true'
-                    env_vars['DD_PROFILING_ENABLED'] = 'true'
-                    env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
-                    env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
+                command.append('--ddtrace')
+                env_vars['DDEV_TRACE_ENABLED'] = 'true'
+                env_vars['DD_PROFILING_ENABLED'] = 'true'
+                env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
+                env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
 
             if junit:
                 # In order to handle multiple environments the report files must contain the environment name.

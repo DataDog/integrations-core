@@ -1,0 +1,2 @@
+normal*|c[1-2]|1|up|1000|N/A|0/2/0/2|idle~|10|gpu:tesla:4|gpu:tesla:3(IDX:0,2-3)
+foo|c[3-4]|1|down|2000|N/A|1/2/3/4|idle*|11|(null)|(null)

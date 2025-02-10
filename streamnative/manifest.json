@@ -1,0 +1,81 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e92fa53b-f620-4167-bdaa-31ac3bc6be35",
+  "app_id": "streamnative",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into StreamNative metrics data.",
+    "title": "StreamNative",
+    "media": [    
+      {
+      "caption": "StreamNative - Health",
+      "image_url": "images/streamnative_health.png",
+      "media_type": "image"
+    },
+      {
+      "caption": "StreamNative - Kafka Connect",
+      "image_url": "images/streamnative_kafka_connect.png",
+      "media_type": "image"
+    },
+      {
+      "caption": "StreamNative - Pulsar Resource",
+      "image_url": "images/streamnative_pulsar_resource.png",
+      "media_type": "image"
+    },
+      {
+      "caption": "StreamNative - Sink Connector",
+      "image_url": "images/streamnative_sink_connector.png",
+      "media_type": "image"
+    },
+    {
+      "caption": "StreamNative - Source Connector",
+      "image_url": "images/streamnative_source_connector.png",
+      "media_type": "image"
+    }],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 27153739,
+      "source_type_name": "StreamNative",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "streamnative.",
+        "check": ["streamnative.pulsar_resource.pulsar_consumers_count"],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "StreamNative - Health" : "assets/dashboards/streamnative_health.json",
+      "StreamNative - Kafka Connect" : "assets/dashboards/streamnative_kafka_connect.json",
+      "StreamNative - Pulsar Resource" : "assets/dashboards/streamnative_pulsar_resource.json",
+      "StreamNative - Sink Connector" : "assets/dashboards/streamnative_sink_connector.json",
+      "StreamNative - Source Connector" : "assets/dashboards/streamnative_source_connector.json"
+    },
+    "monitors": {
+      "Backlog size exceeding threshold" : "assets/monitors/backlog_size_exceeding_threshold.json",
+      "Messaging service is down" : "assets/monitors/messaging_service_down.json",
+      "Webservice is down" : "assets/monitors/webservice_down.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

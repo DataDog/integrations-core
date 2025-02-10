@@ -296,7 +296,7 @@ files:
             - 'datacenter'
             - 'cluster'
             - 'storage_pod'
-            - 'vcenter_object_manager'
+            - 'vstorage_object_manager'
           type: array
           display_default: ['vm', 'host']
           items:
@@ -305,14 +305,15 @@ files:
         description: |
           The events that should be collected by the vSphere integration.
 
-          The "event" specifies the event type you want to include, and the "excluded_messages" is a list of
-          messages of that event type you do not want to collect. For example, if the key
+          The "event" specifies the event type you want to include, and optionally, the "excluded_messages" is
+          a list of messages of that event type you do not want to collect. For example, if the key
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
           then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.
           
-          Currently, events can only be collected from the following resources:
-          VMs, hosts, datacenters, datastores, and clusters.
+          Events can only be collected if their event type ID is in the 'vim.event' class:
+          https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
+          07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html
 
           The default events reported are listed here:
           https://github.com/DataDog/integrations-core/tree/master/vsphere#events
@@ -384,6 +385,15 @@ files:
           Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
           Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
           very CPU intensive and put pressure on the vCenter Server.
+        value:
+          type: boolean
+          example: false
+      - name: collect_vsan_data
+        description: |
+          If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+          Ensure that you have the vSAN Performance Service enabled:
+          https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
+          GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
         value:
           type: boolean
           example: false

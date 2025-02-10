@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# TODO: remove ignore when we stop invoking Mypy with --py2
-# type: ignore
 from collections import ChainMap
 from contextlib import contextmanager
 
 from requests.exceptions import RequestException
-from six import raise_from
 
 from ....errors import ConfigurationError
 from ....utils.tracing import traced_class
@@ -75,7 +72,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                     scraper.scrape()
                 except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
-                    raise_from(type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)), None)
+                    raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
 
     def configure_scrapers(self):
         """

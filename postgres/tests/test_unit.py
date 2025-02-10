@@ -142,6 +142,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'port:5432',
                 'foo:bar',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'database_hostname:stubbed.hostname',
             },
         ),
         (
@@ -152,6 +153,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'port:5432',
                 'server:localhost',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'database_hostname:stubbed.hostname',
             },
         ),
     ],

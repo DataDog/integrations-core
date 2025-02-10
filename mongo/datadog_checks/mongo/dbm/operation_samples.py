@@ -3,15 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import binascii
 import time
 from typing import List, Optional
 
 from bson import json_util
+from pymongo.errors import NotPrimaryError
 
 from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
     get_command_truncation_state,
+    get_db_from_namespace,
     get_explain_plan,
     obfuscate_command,
     should_explain_operation,
@@ -106,6 +109,9 @@ class MongoOperationSamples(DBMAsyncJob):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
+        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
+            self._check.log.debug("Skipping operation samples collection on node in recovering state")
+            return False
         return True
 
     def _get_operation_samples(self, now, databases_monitored: List[str]):
@@ -148,10 +154,16 @@ class MongoOperationSamples(DBMAsyncJob):
                 continue
 
     def _get_current_op(self):
-        operations = self._check.api_client.current_op()
-        for operation in operations:
-            self._check.log.debug("Found operation: %s", operation)
-            yield operation
+        try:
+            operations = self._check.api_client.current_op()
+            for operation in operations:
+                self._check.log.debug("Found operation: %s", operation)
+                yield operation
+        except NotPrimaryError as e:
+            # If the node is not primary or secondary, for example node is in recovering state
+            # we could not run the $currentOp command to collect operation samples.
+            self._check.log.warning("Could not collect operation samples, node is not primary or secondary")
+            self._check.log.debug("Error details: %s", e)
 
     def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
@@ -160,7 +172,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping operation without namespace: %s", operation)
             return False
 
-        db, _ = namespace.split(".", 1)
+        db = get_db_from_namespace(namespace)
         if db not in databases_monitored:
             self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
             return False
@@ -177,10 +189,6 @@ class MongoOperationSamples(DBMAsyncJob):
             # MongoDB drivers and clients use hello to determine the state of
             # the replica set members and to discover additional members of a replica set.
             self._check.log.debug("Skipping hello operation: %s", operation)
-            return False
-        if "explain" in command:
-            # Skip explain operations as explain cannot explain itself
-            self._check.log.debug("Skipping explain operation: %s", operation)
             return False
 
         return True
@@ -203,7 +211,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
     def _get_operation_metadata(self, operation: dict) -> OperationSampleOperationMetadata:
         namespace = operation.get("ns")
-        db, _ = namespace.split(".", 1)
+        db = get_db_from_namespace(namespace)
         command = operation.get("command", {})
         return {
             "type": operation.get("type"),
@@ -252,6 +260,28 @@ class MongoOperationSamples(DBMAsyncJob):
             "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
 
+    def _get_operation_lsid(self, operation: dict) -> Optional[dict]:
+        lsid = operation.get("lsid")
+        if not lsid or not lsid.get("id"):
+            return None
+
+        return {
+            "id": binascii.hexlify(lsid['id']).decode(),
+        }
+
+    def _get_operation_transaction(self, operation: dict) -> Optional[dict]:
+        transaction = operation.get("transaction")
+        if not transaction:
+            return None
+
+        return {
+            "txn_number": transaction.get("parameters", {}).get("txnNumber"),
+            "txn_retry_counter": transaction.get("parameters", {}).get("txnRetryCounter"),
+            "time_open_micros": transaction.get("timeOpenMicros"),
+            "time_active_micros": transaction.get("timeActiveMicros"),
+            "time_inactive_micros": transaction.get("timeInactiveMicros"),
+        }
+
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
         return {
             "active": operation.get("active", False),  # bool
@@ -262,7 +292,6 @@ class MongoOperationSamples(DBMAsyncJob):
             "query_framework": operation.get("queryFramework"),  # str
             "current_op_time": operation.get("currentOpTime"),  # str  start time of the operation
             "microsecs_running": operation.get("microsecs_running"),  # int
-            "transaction_time_open_micros": operation.get("transaction", {}).get("timeOpenMicros"),  # int
             # Conflicts
             "prepare_read_conflicts": operation.get("prepareReadConflicts", 0),  # int
             "write_conflicts": operation.get("writeConflicts", 0),  # int
@@ -284,6 +313,8 @@ class MongoOperationSamples(DBMAsyncJob):
             ),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
+            "transaction": self._get_operation_transaction(operation),  # dict
+            "lsid": self._get_operation_lsid(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:
@@ -305,9 +336,11 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
             "timestamp": now * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": operation_metadata["client"],
             },
+            "cloud_metadata": self._check._config.cloud_metadata,
             "db": {
                 "instance": operation_metadata["dbname"],
                 "plan": explain_plan,
@@ -359,6 +392,8 @@ class MongoOperationSamples(DBMAsyncJob):
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": now * 1000,
+            "service": self._check._config.service,
             "mongodb_activity": activities,
         }

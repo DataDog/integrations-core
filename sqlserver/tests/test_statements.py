@@ -123,7 +123,7 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,query,expected_queries_patterns,param_groups,exe_count,is_encrypted,is_proc,disable_secondary_tags",
+    "database,query,expected_queries_patterns,param_groups,exe_count,is_encrypted,is_proc,disable_secondary_tags,collect_raw_query_statement",
     [
         [
             "master",
@@ -137,6 +137,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             True,
             True,
+            False,
         ],
         [
             "master",
@@ -150,6 +151,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             True,
             True,
+            False,
         ],
         [
             "master",
@@ -160,6 +162,7 @@ test_statement_metrics_and_plans_parameterized = (
             True,
             True,
             True,
+            False,
         ],
         [
             "datadog_test-1",
@@ -167,6 +170,7 @@ test_statement_metrics_and_plans_parameterized = (
             [r"SELECT \* FROM ϑings"],
             ((),),
             1,
+            False,
             False,
             False,
             False,
@@ -184,6 +188,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             False,
             False,
+            False,
         ],
         [
             "datadog_test-1",
@@ -194,6 +199,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             True,
             True,
+            False,
         ],
         [
             "datadog_test-1",
@@ -204,6 +210,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             True,
             True,
+            False,
         ],
         [
             "master",
@@ -215,6 +222,7 @@ test_statement_metrics_and_plans_parameterized = (
                 (3,),
             ),
             1,
+            False,
             False,
             False,
             False,
@@ -232,6 +240,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             False,
             False,
+            False,
         ],
         [
             "datadog_test-1",
@@ -246,6 +255,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             False,
             True,
+            False,
         ],
         [
             "datadog_test-1",
@@ -262,6 +272,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
             True,
             True,
+            False,
         ],
         [
             "datadog_test-1",
@@ -276,6 +287,24 @@ test_statement_metrics_and_plans_parameterized = (
             ),
             5,
             False,
+            True,
+            True,
+            False,
+        ],
+        [
+            "datadog_test-1",
+            "EXEC bobProcParams @P1 = ?, @P2 = ?",
+            [
+                r"SELECT \* FROM ϑings WHERE id = @P1",
+                r"SELECT id FROM ϑings WHERE name = @P2",
+            ],
+            (
+                (1, "foo"),
+                (2, "bar"),
+            ),
+            5,
+            False,
+            True,
             True,
             True,
         ],
@@ -299,6 +328,7 @@ def test_statement_metrics_and_plans(
     is_proc,
     disable_secondary_tags,
     expected_queries_patterns,
+    collect_raw_query_statement,
     caplog,
     datadog_agent,
 ):
@@ -306,6 +336,12 @@ def test_statement_metrics_and_plans(
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
     dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    if collect_raw_query_statement:
+        dbm_instance["collect_raw_query_statement"] = {"enabled": True}
+        expected_instance_tags.add("raw_query_statement:enabled")
+    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -330,10 +366,6 @@ def test_statement_metrics_and_plans(
             available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
-
-    instance_tags = dbm_instance.get('tags', [])
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -429,6 +461,27 @@ def test_statement_metrics_and_plans(
             assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
             assert not event['sqlserver']['is_plan_encrypted']
             assert not event['sqlserver']['is_statement_encrypted']
+
+    if collect_raw_query_statement:
+        raw_plan_events = [s for s in matching_samples if s['dbm_type'] == "rqp"]
+        # raw plan events should be one to one with the plan events
+        assert len(raw_plan_events) == 1, "should have collected exactly one raw plan event"
+        for event in plan_events:
+            if is_encrypted:
+                assert not event['db']['plan']['definition']
+                assert event['sqlserver']['is_plan_encrypted']
+                assert event['sqlserver']['is_statement_encrypted']
+            elif is_proc:
+                assert event['db']['procedure_signature'], "missing proc signature"
+                assert event['db']['procedure_name'], "missing proc name"
+                assert not event['db']['query_signature'], "procedure plans should not have query_signature field set"
+            else:
+                assert event['db']['plan']['definition'], "event plan definition missing"
+                assert event['db']['plan']['raw_signature'], "event plan raw signature missing"
+                parsed_plan = ET.fromstring(event['db']['plan']['definition'])
+                assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
+                assert not event['sqlserver']['is_plan_encrypted']
+                assert not event['sqlserver']['is_statement_encrypted']
 
     fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
     assert len(fqt_events) == len(
@@ -572,6 +625,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
+                    'aggregate_sql_databases': False,
                 },
             },
         ),
@@ -586,6 +640,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
+                    'aggregate_sql_databases': False,
                 },
             },
         ),
@@ -606,6 +661,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
+                    'aggregate_sql_databases': False,
                 },
             },
         ),
@@ -1019,6 +1075,16 @@ def test_metrics_lookback_multiplier(instance_docker):
 
     check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
     mock_cursor.execute.assert_called_with(ANY, (6,))
+
+
+@pytest.mark.unit
+def test_metrics_lookback_window_config(instance_docker):
+    instance_docker['query_metrics'] = {'lookback_window': 86400}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _, mock_cursor = _mock_database_list()
+
+    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
+    mock_cursor.execute.assert_called_with(ANY, (86400,))
 
 
 @pytest.mark.flaky

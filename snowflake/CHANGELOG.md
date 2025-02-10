@@ -2,11 +2,43 @@
 
 <!-- towncrier release notes start -->
 
-## 6.0.0 / 2024-10-01
+## 7.3.0 / 2025-02-05
+
+***Added***:
+
+* Bump Snowflake dependency to 3.13.1 ([#19545](https://github.com/DataDog/integrations-core/pull/19545))
+
+## 7.2.0 / 2025-01-25
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 7.1.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Upgrade `snowflake-connector-python` to 3.12.3 ([#19010](https://github.com/DataDog/integrations-core/pull/19010))
+
+## 7.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 6.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 5.9.0 / 2024-09-05
 
@@ -18,7 +50,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 5.7.0 / 2024-07-05 / Agent 7.56.0
 
