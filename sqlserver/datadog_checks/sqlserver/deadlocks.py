@@ -60,6 +60,7 @@ class Deadlocks(DBMAsyncJob):
         self._xe_session_target = None
         self._dm_xe_targets = DEFAULT_DM_XE_TARGETS
         self._dm_xe_sessions = DEFAULT_DM_XE_SESSIONS
+        self._is_azure_sql_database = False
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -168,6 +169,7 @@ class Deadlocks(DBMAsyncJob):
         if self._xe_session_name is None:
             engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
             if is_azure_sql_database(engine_edition):
+                self._is_azure_sql_database = True
                 self._dm_xe_targets = "sys.dm_xe_database_session_targets"
                 self._dm_xe_sessions = "sys.dm_xe_database_sessions"
             try:
@@ -184,12 +186,16 @@ class Deadlocks(DBMAsyncJob):
                 convert_xml_to_str = False
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True
+                level = ""
+                if self._is_azure_sql_database:
+                    level = "database_"
                 query = get_deadlocks_query(
                     convert_xml_to_str=convert_xml_to_str,
                     xe_session_name=self._xe_session_name,
                     xe_target_name=self._xe_session_target,
                     dm_xe_targets=self._dm_xe_targets,
                     dm_xe_sessions=self._dm_xe_sessions,
+                    level=level,
                 )
                 lookback = self._get_lookback_seconds()
                 self._log.debug(
