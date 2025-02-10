@@ -11,6 +11,16 @@ files:
       value:
         example: false
         type: boolean
+    - name: metrics
+      options:
+      - name: batch_max_content_size
+        description: |
+          The maximum payload size in bytes that the check will send to the Datadog metrics intake at one time.
+          This value should match the value of `database_monitoring.metrics.batch_max_content_size` in the Datadog Agent configuration
+          and should only be set if that value has also been changed from the default.
+        value:
+          display_default: 20000000
+          type: integer
     - template: init_config/db
     - template: init_config/default
   - template: instances
