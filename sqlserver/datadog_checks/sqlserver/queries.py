@@ -132,15 +132,20 @@ GROUP BY
     FK.referenced_object_id;
 """
 
+DEFAULT_DM_XE_TARGETS = "sys.dm_xe_session_targets"
+DEFAULT_DM_XE_SESSIONS = "sys.dm_xe_sessions"
 XE_SESSION_DATADOG = "datadog"
 XE_SESSION_SYSTEM = "system_health"
-XE_SESSIONS_QUERY = f"""
+
+
+def get_xe_sessions_query(dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS):
+    return f"""
 SELECT
     s.name AS session_name, t.target_name AS target_name
 FROM
-    sys.dm_xe_sessions s
+    {dm_xe_sessions} s
 JOIN
-    sys.dm_xe_session_targets t
+    {dm_xe_targets} t
     ON s.address = t.event_session_address
 WHERE
     s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
@@ -150,11 +155,16 @@ DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
 
 
-def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER):
+def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER, dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS):
     """
     Construct the query to fetch deadlocks from the system_health extended event session
-    :param convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
-        that can't convert XML to str
+    :params:
+        convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
+            that can't convert XML to str
+        xe_session_name: The name of the extended event session to query
+        xe_target_name: The name of the extended event target to query
+        dm_xe_targets: The name of the DMV to query for extended event targets
+        dm_xe_sessions: The name of the DMV to query for extended event sessions
     :return: The query to fetch deadlocks
     """
     xml_expression = "xdr.query('.')"
@@ -165,8 +175,8 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DAT
         return f"""SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}],
             {xml_expression} AS [{DEADLOCK_XML_ALIAS}]
     FROM (SELECT CAST([target_data] AS XML) AS Target_Data
-                FROM sys.dm_xe_session_targets AS xt
-                INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
+                FROM {dm_xe_targets} AS xt
+                INNER JOIN {dm_xe_sessions} AS xs ON xs.address = xt.event_session_address
                 WHERE xs.name = N'{xe_session_name}'
                 AND xt.target_name = N'{XE_RING_BUFFER}'
         ) AS XML_Data

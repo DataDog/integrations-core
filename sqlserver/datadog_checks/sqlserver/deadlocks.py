@@ -15,11 +15,14 @@ from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVEN
 from datadog_checks.sqlserver.queries import (
     DEADLOCK_TIMESTAMP_ALIAS,
     DEADLOCK_XML_ALIAS,
+    DEFAULT_DM_XE_TARGETS,
+    DEFAULT_DM_XE_SESSIONS,
     XE_SESSION_DATADOG,
     XE_SESSION_SYSTEM,
-    XE_SESSIONS_QUERY,
     get_deadlocks_query,
+    get_xe_sessions_query,
 )
+from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 try:
     import datadog_agent
@@ -55,6 +58,8 @@ class Deadlocks(DBMAsyncJob):
         self._force_convert_xml_to_str = False
         self._xe_session_name = None
         self._xe_session_target = None
+        self._dm_xe_targets = DEFAULT_DM_XE_TARGETS
+        self._dm_xe_sessions = DEFAULT_DM_XE_SESSIONS
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -131,7 +136,7 @@ class Deadlocks(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 if self._xe_session_name is None:
-                    cursor.execute(XE_SESSIONS_QUERY)
+                    cursor.execute(get_xe_sessions_query(dm_xe_targets=self._dm_xe_targets, dm_xe_sessions=self._dm_xe_sessions))
                     rows = cursor.fetchall()
                     if not rows:
                         raise NoXESessionError(NO_XE_SESSION_ERROR)
@@ -159,6 +164,10 @@ class Deadlocks(DBMAsyncJob):
 
     def _query_deadlocks(self):
         if self._xe_session_name is None:
+            engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+            if is_azure_sql_database(engine_edition):
+                self._dm_xe_targets = "sys.dm_xe_database_session_targets"
+                self._dm_xe_sessions = "sys.dm_xe_database_sessions"
             try:
                 self._set_xe_session_name()
             except NoXESessionError as e:
@@ -177,6 +186,8 @@ class Deadlocks(DBMAsyncJob):
                     convert_xml_to_str=convert_xml_to_str,
                     xe_session_name=self._xe_session_name,
                     xe_target_name=self._xe_session_target,
+                    dm_xe_targets=self._dm_xe_targets,
+                    dm_xe_sessions=self._dm_xe_sessions,
                 )
                 lookback = self._get_lookback_seconds()
                 self._log.debug(
