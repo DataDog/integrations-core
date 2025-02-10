@@ -26,7 +26,7 @@
             "id": 1327646369801102,
             "definition": {
                 "type": "note",
-                "content": "**[Avast Business Hub](https://www.avast.com/business/business-hub)** is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints.\n\n**Avast - Task and Patch Summary** Dashboard provides a comprehensive overview of completed tasks and patch updates for your devices.\n\n**Tips:**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n\nFor more information, see the [Avast Integration Documentation](https://docs.datadoghq.com/integrations/avast/).",
+                "content": "**[Avast Business Hub](https://www.avast.com/business/business-hub)** is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints.\n\n**Avast - Task and Patch Summary** Dashboard provides a comprehensive overview of completed tasks and patch updates for your devices.\n\n**Tips:**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n\nFor more information, see the [Avast integration documentation](https://docs.datadoghq.com/integrations/avast/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
