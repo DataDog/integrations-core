@@ -5,6 +5,7 @@ class HelloCheck(AgentCheck):
     def check(self, instance):
         from cryptography.exceptions import InternalError
         from cryptography.hazmat.primitives import hashes
+
         try:
             hashes.Hash(hashes.MD5())
         except InternalError:

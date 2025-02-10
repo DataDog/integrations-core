@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: go run main.go <cipher>")
+		log.Fatal("Usage: go run main.go <mode>")
 	}
 
 	var fips_mode bool
