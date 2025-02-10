@@ -172,6 +172,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
             'pg_stat_statements_max_warning_threshold', 10000
         )
         self._config = config
+        # This config option isn't publicized because the related option in datadog.yaml
+        # (database_monitoring.metrics.batch_max_content_size) cannot be decreased, and increasing it
+        # will typically cause the backend to reject the payload
+        # It's set here as an option for potential debugging issues but should not be used otherwise
+        # NB: This value should always match the datadog.yaml value, and if that default changes, this should be updated
         self.batch_max_content_size = config.init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000)
         self._tags_no_db = None
         self.tags = None
