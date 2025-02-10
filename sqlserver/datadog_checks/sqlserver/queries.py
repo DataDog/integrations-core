@@ -155,7 +155,7 @@ DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
 
 
-def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER, dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS):
+def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER, dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS, level=""):
     """
     Construct the query to fetch deadlocks from the system_health extended event session
     :params:
@@ -165,6 +165,7 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DAT
         xe_target_name: The name of the extended event target to query
         dm_xe_targets: The name of the DMV to query for extended event targets
         dm_xe_sessions: The name of the DMV to query for extended event sessions
+        level: 'database_' for Azure database, '' for all other versions
     :return: The query to fetch deadlocks
     """
     xml_expression = "xdr.query('.')"
@@ -180,7 +181,7 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DAT
                 WHERE xs.name = N'{xe_session_name}'
                 AND xt.target_name = N'{XE_RING_BUFFER}'
         ) AS XML_Data
-    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
+    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="{level}xml_deadlock_report"]') AS XEventData(xdr)
     WHERE xdr.value('@timestamp', 'datetime')
         >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC')
     ;"""
