@@ -1,7 +1,6 @@
 import subprocess
 
-from conftest import (AGENT_FIPS_MODE, FIPS_AGENT, REGULAR_AGENT, WORKAROUND,
-                      parse_json)
+from conftest import AGENT_FIPS_MODE, FIPS_AGENT, REGULAR_AGENT, parse_json
 
 
 def test_connections():
