@@ -15,8 +15,8 @@ from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVEN
 from datadog_checks.sqlserver.queries import (
     DEADLOCK_TIMESTAMP_ALIAS,
     DEADLOCK_XML_ALIAS,
-    DEFAULT_DM_XE_TARGETS,
     DEFAULT_DM_XE_SESSIONS,
+    DEFAULT_DM_XE_TARGETS,
     XE_SESSION_DATADOG,
     XE_SESSION_SYSTEM,
     get_deadlocks_query,
@@ -136,7 +136,9 @@ class Deadlocks(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 if self._xe_session_name is None:
-                    cursor.execute(get_xe_sessions_query(dm_xe_targets=self._dm_xe_targets, dm_xe_sessions=self._dm_xe_sessions))
+                    cursor.execute(
+                        get_xe_sessions_query(dm_xe_targets=self._dm_xe_targets, dm_xe_sessions=self._dm_xe_sessions)
+                    )
                     rows = cursor.fetchall()
                     if not rows:
                         raise NoXESessionError(NO_XE_SESSION_ERROR)

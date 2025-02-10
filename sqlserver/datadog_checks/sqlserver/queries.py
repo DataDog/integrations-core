@@ -151,11 +151,19 @@ WHERE
     s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
 """
 
+
 DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
 
 
-def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER, dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS, level=""):
+def get_deadlocks_query(
+    convert_xml_to_str=False,
+    xe_session_name=XE_SESSION_DATADOG,
+    xe_target_name=XE_RING_BUFFER,
+    dm_xe_targets=DEFAULT_DM_XE_TARGETS,
+    dm_xe_sessions=DEFAULT_DM_XE_SESSIONS,
+    level="",
+):
     """
     Construct the query to fetch deadlocks from the system_health extended event session
     :params:
