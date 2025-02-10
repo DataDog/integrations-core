@@ -32,12 +32,11 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "foundationdb==6.3.24",
+    "foundationdb==7.3.59",
 ]
 
 [project.urls]
