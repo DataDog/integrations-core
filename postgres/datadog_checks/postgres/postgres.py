@@ -650,7 +650,7 @@ class PostgreSql(AgentCheck):
                         for scope in scopes:
                             self._query_scope(cursor, scope, instance_tags, False, db)
             except Exception as e:
-                self.log.error(f"Error collecting metrics for database %s {e}", db)
+                self.log.error("Error collecting metrics for database %s %s", db, str(e))
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             f"dd.postgres.{scope_type}.time",

@@ -14,7 +14,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 
-from .common import DB_NAME, HOST, PASSWORD_ADMIN, USER_ADMIN, PASSWORD_ADMIN, check_common_metrics, _get_expected_tags
+from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
@@ -299,6 +299,7 @@ def test_autodiscovery_dbname_specified(integration_check, pg_instance):
     with pytest.raises(ConfigurationError):
         integration_check(pg_instance)
 
+
 def _set_allow_connection(dbname: str, allow: bool):
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
@@ -307,6 +308,7 @@ def _set_allow_connection(dbname: str, allow: bool):
             (allow, dbname),
         )
         conn.commit()
+
 
 @pytest.mark.integration
 def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
@@ -322,4 +324,3 @@ def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
     expected_tags = _get_expected_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
     _set_allow_connection(db_to_disable, True)
-
