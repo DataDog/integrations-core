@@ -4,7 +4,7 @@
 
 [Sanity][1] is a headless content management system (CMS) designed for building flexible, real-time websites and applications. It enables developers and content teams to efficiently manage structured content across multiple platforms.
 
-Integrate Sanity with Datadog to gain insights into content and project related activity logs through the Sanity API and GROQ-powered Webhook. Pre-built dashboard visualizations provide immediate insights into Sanity activity logs.
+Integrate Sanity with Datadog to gain insights into content and project-related activity logs through the Sanity API and GROQ-powered Webhook. Pre-built dashboard visualizations provide immediate insights into Sanity activity logs.
 
 ## Setup
 
