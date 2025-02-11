@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Ivanti nZTA Logs",
     "title": "ivanti-nzta",
-    "media": [],
+    "media": [
+      {
+        "caption": "Ivanti nZTA - Analytics Logs",
+        "image_url": "images/ivanti_nzta_analytics_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti nZTA - Alerts",
+        "image_url": "images/ivanti_nzta_alerts.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +40,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Ivanti nZTA - Analytics Logs": "assets/dashboards/ivanti_nzta_analytics_logs.json",
+      "Ivanti nZTA - Alerts": "assets/dashboards/ivanti_nzta_alerts.json"
+    },
+    "logs": {
+      "source": "ivanti-nzta"
     }
   },
   "author": {
