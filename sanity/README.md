@@ -35,7 +35,7 @@ Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [
 1. Select an existing API key or create a new one by clicking one of the buttons below: <!-- UI Component to be added by Datadog team -->
 2. Log in to your [Sanity account][2] as an Administrator. You are automatically redirected to the [manage page][3].
 3. Select your project.
-4. In the navigation panel, click on **API**.
+4. In the navigation panel, click **API**.
 5. Click **Create Webhook**.
 6. Add the name and webhook URL generated in step 1.
 7. Select Dataset as `* (all datasets)`.
