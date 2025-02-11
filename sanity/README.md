@@ -57,7 +57,7 @@ Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [
 10. Ensure **POST** is selected under **HTTP method** in the **Advanced settings section**.
 11. Click **Save**.
 
-**Note**: These steps enable collection of document changes along with task & comment activity logs.
+**Note**: These steps enable collection of document changes along with task and comment activity logs.
 
 ## Data Collected
 
