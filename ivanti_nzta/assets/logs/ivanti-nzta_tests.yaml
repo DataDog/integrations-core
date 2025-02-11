@@ -3,20 +3,24 @@ tests:
   - sample: '{"controller":false,"device_id":"","gateway_id":"","gateway_name":"","message_id":"STS20641","raw_message":"Number
       of concurrent users logged in to the device:
       1","session_id":"","severity":"INFO","source_ip":"127.0.0.1","timestamp":1738821618,"user_name":"System"}'
+    service: "event-logs"
     result: null
   - sample: '{"controller":false,"device_id":"","gateway_id":"","gateway_name":"","message_id":"STS30667","raw_message":"Number
       of NCP connections:
       1","session_id":"","severity":"INFO","source_ip":"127.0.0.1","timestamp":1738821618,"user_name":"System"}'
+    service: "event-logs"
     result: null
   - sample: '{"controller":false,"device_id":"","gateway_id":"","gateway_name":"","message_id":"SYS32021","raw_message":"API
       GET call failed for resource [http://example.com?include_secret=true] with
       response code
       [404].","session_id":"","severity":"CRITICAL","source_ip":"10.10.10.10,
       20.20.20.20","timestamp":1738659494,"user_name":"test_user"}'
+    service: "event-logs"
     result: null
   - sample: '{"controller":false,"device_id":"","gateway_id":"test_gateway_id","gateway_name":"test_gateway","message_id":"SYS31982","raw_message":"Readiness
       failed. Details: Notification Channel Connectivity NOT
       Healthy.","session_id":"","severity":"CRITICAL","source_ip":"127.0.0.1","timestamp":1738659494,"user_name":"system"}'
+    service: "event-logs"
     result: null
   - sample: "{\"controller\":true,\"device_id\":\"\",\"gateway_id\":\"\",\"gateway_\
       name\":\"\",\"message_id\":\"AUT31985\",\"raw_message\":\"Login failed for
@@ -24,19 +28,23 @@ tests:
       Authentication').  Reason:
       'Failed'\",\"session_id\":\"\",\"severity\":\"INFO\",\"source_ip\":\"10.1\
       0.10.10\",\"timestamp\":1738659494,\"user_name\":\"test_user\"}"
+    service: "access-logs"
     result: null
   - sample: '{"controller":false,"device_id":"","gateway_id":"","gateway_name":"","message_id":"AUT24327","raw_message":"Primary
       authentication failed for test_user/User Auth from
       10.10.10.10","session_id":"","severity":"INFO","source_ip":"10.10.10.10","timestamp":1738659494,"user_name":"test_user"}'
+    service: "access-logs"
     result: null
   - sample: '{"controller":true,"device_id":"","gateway_id":"","gateway_name":"","message_id":"AUT31815","raw_message":"Authenticating
       user with Primary Authentication Server: "User
       Auth"","session_id":"","severity":"INFO","source_ip":"10.10.10.10","timestamp":1738659494,"user_name":"test_user"}'
+    service: "access-logs"
     result: null
   - sample: '{"controller":true,"device_id":"","gateway_id":"","gateway_name":"","message_id":"AUT23458","raw_message":"Login
       failed using auth server Admin Auth (Local Authentication). Reason:
       Invalid
       Credentials","session_id":"","severity":"INFO","source_ip":"10.10.10.10","timestamp":1738659494,"user_name":"test_user"}'
+    service: "admin-logs"
     result: null
   - sample: '{"controller":false,"device_id":"","gateway_id":"","gateway_name":"","message_id":"ADM24595","raw_message":"Created
       (Authentication > Auth Servers > Auth Server[Admin Auth] > Local
@@ -47,8 +55,10 @@ tests:
       [One-time user=false] [console-access=false] [Enabled=true] [Require user
       to change password at next sign
       in=false]","session_id":"","severity":"INFO","source_ip":"127.0.0.1","timestamp":1738319025,"user_name":"System"}'
+    service: "admin-logs"
     result: null
   - sample: '{"message_type":"AAA journal update successful, changes for update
       default session timeouts
       applied.","severity":"information","source_name":"","target":"","timestamp":1738738965,"type":"journal.success"}'
+    service: "alerts"
     result: null

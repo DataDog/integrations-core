@@ -52,7 +52,7 @@ pipeline:
       sources:
         - timestamp
     - type: message-remapper
-      name: Define `raw_message`,`message_type` as the official message of the log
+      name: Define `raw_message`, `message_type` as the official message of the log
       enabled: true
       sources:
         - raw_message
