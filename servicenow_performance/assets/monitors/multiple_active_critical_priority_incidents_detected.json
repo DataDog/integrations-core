@@ -3,7 +3,7 @@
 	"created_at": "2025-01-24",
 	"last_updated_at": "2025-01-24",
 	"title": "Multiple active critical priority incidents detected",
-	"description": "Incident is an unplanned disruption or degradation of an IT service that needs to be resolved to restore normal operations. This monitor tracks active incidents with critical priority and helps notifying when a high percentage of critical incidents are generated.",
+	"description": "Incident is an unplanned disruption or degradation of an IT service that needs to be resolved to restore normal operations. This monitor tracks active incidents with critical priority and notifies when a high percentage of critical incidents are generated.",
 	"definition": {
 		"id": 163258709,
 		"name": "Multiple active critical priority incidents detected",

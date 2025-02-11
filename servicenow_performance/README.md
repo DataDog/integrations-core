@@ -4,7 +4,7 @@
 
 [ServiceNow][1] is a comprehensive platform that helps streamline and automate IT service, asset, security, and configuration management processes. It enables organizations to enhance operational efficiency, mitigate risks, and improve service delivery.
 
-The ServiceNow integration collects below types of data:
+The ServiceNow integration collects the following types of data:
 
 1. Logs:
     * ITSM 
@@ -18,7 +18,7 @@ The ServiceNow integration collects below types of data:
     * SecOps Health Analytics (Vulnerability Response)
 
 
-This integration collects logs and metrics from the sources listed above and sends them to Datadog for analysis with our Log and Metrics Explorer.
+This integration collects logs and metrics from the sources listed above and sends them to Datadog for analysis using the Log and Metrics Explorer.
 
 * [Log Explorer][2]
 * [Metrics Explorer][3]
@@ -30,18 +30,18 @@ This integration collects logs and metrics from the sources listed above and sen
 1. Add your instance, username, password, and data preference options
     |Parameters|Description|
     |--------------------|--------------------|
-    |Instance Name|ServiceNow instance name/subdomain to connect with. [Ex. {instance-name}.service-now.com].|
+    |Instance Name|ServiceNow instance name/subdomain to connect with. For example, `{instance-name}.service-now.com`.|
     |Username| Username of ServiceNow instance.|
     |Password| Password of ServiceNow instance.|
-    |Data Collection Type|Dropdown to select the type of data collection: preconfigured or full.|
+    |Data Collection Type|Use the dropdown to select the type of data collection: preconfigured or full.|
     |Get ITSM|Enable to collect ITSM data from ServiceNow. The default value is True.|
     |Get ITAM|Enable to collect ITAM data from ServiceNow. The default value is True.|
     |Get CMDB Health|Enable to collect CMDB Health data from ServiceNow. The default value is True.|
-    |Get Security Incident Response|Enable to collect Security Incident Response data from ServiceNow. The default value is False. Note: Ensure Security Incident Response Plugin is installed before enabling|
-    |Get Vulnerability Response|Enable to collect Vulnerability Response data from ServiceNow. The default value is False. Note: Ensure Vulnerability Response Plugin is installed before enabling|
+    |Get Security Incident Response|Enable to collect Security Incident Response data from ServiceNow. The default value is False. Note: Ensure the Security Incident Response Plugin is installed before enabling.|
+    |Get Vulnerability Response|Enable to collect Vulnerability Response data from ServiceNow. The default value is False. Note: Ensure the Vulnerability Response Plugin is installed before enabling.|
 2. Click the **Save** button to save your settings.
 
-**Note:** You can create a new user with the necessary roles in ServiceNow for the integration.
+**Note**: You can create a new user in ServiceNow with the necessary roles for the integration.
 
 
 ## Data Collected

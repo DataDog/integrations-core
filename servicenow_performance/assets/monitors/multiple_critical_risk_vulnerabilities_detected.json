@@ -3,7 +3,7 @@
 	"created_at": "2025-01-24",
 	"last_updated_at": "2025-01-24",
 	"title": "Multiple critical risk vulnerabilities detected",
-	"description": "This monitor tracks multiple vulnerabilities having critical risk to ensure they are addressed promptly, helping to prevent potential breaches or security incidents.",
+	"description": "This monitor tracks multiple vulnerabilities with critical risk to ensure they are promptly addressed, helping to prevent potential breaches or security incidents.",
 	"definition": {
 		"id": 163259403,
 		"name": "Multiple critical risk vulnerabilities detected",
