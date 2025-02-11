@@ -40,7 +40,7 @@ Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [
 6. Add the name and webhook URL generated in step 1.
 7. Select Dataset as `* (all datasets)`.
 8. Under the **Trigger on** section, select the types of Document events you want to send to Datadog.
-9. Under **Projection** section, paste below json in the input:
+9. Under the **Projection** section, paste the below JSON:
     ```         
       { 
         "documentId": _id, 
