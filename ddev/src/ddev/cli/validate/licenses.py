@@ -439,7 +439,14 @@ def licenses(app: Application, sync: bool):
                     license_ids.add(known_spdx_licenses[normalized_license])
                 else:
                     license_ids.add(expanded_license)
-                    package_license_errors[package_name].append(f'unknown license: {expanded_license}')
+                    package_license_errors[package_name].append(
+                        'Encountered unknown license. Options to fix this error:\n'
+                        '- If it is truly a new license type, add it to exclusions '
+                        'or known licenses in ddev/cli/validate/license_utils.py\n'
+                        '- If it is known but formatted in a way that we cannot parse it, '
+                        'hard-code a known version of it .ddev/config.toml\n\n'
+                        f'Here is the license for reference:\n{expanded_license}'
+                    )
 
         for classifier in data['classifiers']:
             if classifier in licenses_utils.KNOWN_CLASSIFIERS:
