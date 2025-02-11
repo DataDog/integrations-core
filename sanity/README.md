@@ -10,7 +10,7 @@ Integrate Sanity with Datadog to gain insights into content and project-related 
 
 ### Generate API Token in Sanity
 
-1. Log in to your [Sanity account][2] as an Administrator, it will redirect you to the [manage page][3].
+1. Log in to your [Sanity account][2] as an Administrator. You are automatically redirected to the [manage page][3].
 2. Select your project.
 3. In the navigation panel, click **API**.
 4. In the left sidebar, select **Tokens**.
