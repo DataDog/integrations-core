@@ -53,7 +53,7 @@ Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [
         "timestamp": now()
       }
     ```
-    **Note**: It is recommended to _**uncheck**_ the checkbox (named as **Trigger webhook when drafts are modified**) under Drafts section.
+    **Note**: It is recommended to _**uncheck**_ the **Trigger webhook when drafts are modified** checkbox in the Drafts section.
 10. Ensure **POST** is selected under **HTTP method** in the **Advanced settings section**.
 11. Click **Save**.
 
