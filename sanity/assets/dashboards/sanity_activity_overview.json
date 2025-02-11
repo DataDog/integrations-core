@@ -69,7 +69,7 @@
       "id": 1514807046283536,
       "definition": {
         "type": "note",
-        "content": "[Sanity](https://www.sanity.io/) is a headless content management system (CMS) designed for building flexible, real-time websites and applications. It enables developers and content teams to efficiently manage structured content across multiple platforms.\n\nThis dashboard provides a comprehensive analysis of the content and project related activities for your Sanity projects.\n\nFor more information, see the [Sanity Integration Documentation](https://docs.datadoghq.com/integrations/sanity/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "content": "[Sanity](https://www.sanity.io/) is a headless content management system (CMS) designed for building flexible, real-time websites and applications. It enables developers and content teams to efficiently manage structured content across multiple platforms.\n\nThis dashboard provides a comprehensive analysis of the content and project-related activities for your Sanity projects.\n\nFor more information, see the [Sanity Integration Documentation](https://docs.datadoghq.com/integrations/sanity/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
         "background_color": "orange",
         "font_size": "14",
         "text_align": "left",
