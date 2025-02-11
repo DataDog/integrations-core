@@ -12,7 +12,7 @@ Integrate Sanity with Datadog to gain insights into content and project-related 
 
 1. Log in to your [Sanity account][2] as an Administrator, it will redirect you to the [manage page][3].
 2. Select your project.
-3. In the navigation panel, click on **API**.
+3. In the navigation panel, click **API**.
 4. In the left sidebar, select **Tokens**.
 5. Click **Add API Token**.
 6. Enter a name and set the permission to **Viewer**.
