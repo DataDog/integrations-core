@@ -14,7 +14,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 
-from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
+from .common import DB_NAME, HOST, PASSWORD_ADMIN, USER_ADMIN, PASSWORD_ADMIN, check_common_metrics, _get_expected_tags
 from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
@@ -298,3 +298,28 @@ def test_autodiscovery_dbname_specified(integration_check, pg_instance):
 
     with pytest.raises(ConfigurationError):
         integration_check(pg_instance)
+
+def _set_allow_connection(dbname: str, allow: bool):
+    with get_postgres_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            psycopg2.sql.SQL("UPDATE pg_database SET datallowconn = %s WHERE datname = %s;"),
+            (allow, dbname),
+        )
+        conn.commit()
+
+@pytest.mark.integration
+def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
+    db_to_disable = "dogs_0"
+    _set_allow_connection(db_to_disable, False)
+    pg_instance["database_autodiscovery"] = {"enabled": True, "include": ["dogs_[0-3]"]}
+    pg_instance['relations'] = [
+        {'relation_regex': '.*'},
+    ]
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance)
+    check_common_metrics(aggregator, expected_tags=expected_tags)
+    _set_allow_connection(db_to_disable, True)
+

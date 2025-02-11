@@ -644,10 +644,13 @@ class PostgreSql(AgentCheck):
         start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
-            with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
-                    for scope in scopes:
-                        self._query_scope(cursor, scope, instance_tags, False, db)
+            try:
+                with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                    with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                        for scope in scopes:
+                            self._query_scope(cursor, scope, instance_tags, False, db)
+            except Exception as e:
+                self.log.error(f"Error collecting metrics for database %s {e}", db)
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             f"dd.postgres.{scope_type}.time",
