@@ -214,7 +214,12 @@ class MySql(AgentCheck):
             )
         )
 
-    def set_version_tags(self):
+    def set_version(self, db):
+        version = get_version(db)
+        if version == self.version:
+            return
+
+        self.version = version
         if not self.version or not self.version.flavor:
             return
 
@@ -304,8 +309,7 @@ class MySql(AgentCheck):
                     self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
 
                 # version collection
-                self.version = get_version(db)
-                self.set_version_tags()
+                self.set_version(db)
                 self._send_metadata()
                 self._send_database_instance_metadata()
 
