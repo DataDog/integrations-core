@@ -31,12 +31,17 @@ class CiscoACICheck(AgentCheck):
         self.check_tags = ['cisco']
         self.tagger = CiscoTags(log=self.log)
 
-    def check(self, _):
+    def check(self, _): # JMW check
         start_time = time.time()
         aci_url = self.instance.get('aci_url')
         aci_urls = self.instance.get('aci_urls', [])
+        # print the aci_url and aci_urls
+        self.log.info('JMW aci_url: %s', aci_url)
+        self.log.info('JMW1 aci_urls: %s', aci_urls)
+
         if aci_url:
             aci_urls.append(aci_url)
+        self.log.info('JMW2 aci_urls: %s', aci_urls)
 
         if not aci_urls:
             raise ConfigurationError("The Cisco ACI check requires at least one url")
@@ -94,6 +99,7 @@ class CiscoACICheck(AgentCheck):
 
         self.tagger.api = api
 
+        # JMW tenant.collect()
         try:
             tenant = Tenant(self, api, self.instance, instance_hash)
             tenant.collect()
@@ -108,6 +114,7 @@ class CiscoACICheck(AgentCheck):
             api.close()
             raise
 
+        # JMW fabric.collect()
         try:
             fabric = Fabric(self, api, self.instance, self.instance.get('namespace', 'default'))
             fabric.collect()
@@ -122,6 +129,7 @@ class CiscoACICheck(AgentCheck):
             api.close()
             raise
 
+        # JMW capacity.collect()
         try:
             capacity = Capacity(api, self.instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
             capacity.collect()
@@ -136,6 +144,8 @@ class CiscoACICheck(AgentCheck):
             api.close()
             raise
 
+        # JMW add faults.collect()?
+
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         self.set_external_tags(self.get_external_host_tags())
@@ -144,6 +154,7 @@ class CiscoACICheck(AgentCheck):
 
         api.close()
 
+    # JMW add submit_faults()?
     def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge", hostname=None):
         if instance is None:
             instance = {}

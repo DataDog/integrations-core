@@ -162,7 +162,8 @@ class Api:
         for aci_url in self.aci_urls:
             self.sessions[aci_url] = self.login_for_url(aci_url)
 
-    def make_request(self, path):
+    def make_request(self, path):  # JMW
+        self.log.info('JMW api.make_request() path: %s', path)
         # allow for multiple APICs in a cluster to be included in one check so that the check
         # does not bombard a single APIC with dozens of requests and cause it to slow down
         aci_url = random.choice(tuple(self.sessions))
@@ -175,6 +176,7 @@ class Api:
             self.sessions[aci_url] = self.login_for_url(aci_url)  # refresh session for url
             return self.sessions[aci_url].make_request(path)
 
+    # JMW add get_faults() - Q: what entity(ies) should be queried for faults?  tenants? fabiric? apics?
     def get_apps(self, tenant):
         path = "/api/mo/uni/tn-{}.json?query-target=subtree&target-subtree-class=fvAp".format(tenant)
         response = self.make_request(path)
@@ -295,6 +297,12 @@ class Api:
             subtree, subtree_include, subtree_class
         )
         path = '/api/node/class/topology/pod-{}/node-{}/l1PhysIf.json?{}'.format(pod, node, query)
+        response = self.make_request(path)
+        return self._parse_response(response)
+
+    # JMWMOVE
+    def get_faults(self):
+        path = '/api/node/class/faultInst.json'
         response = self.make_request(path)
         return self._parse_response(response)
 
