@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: "postgres:13.4"
+    image: "postgres:${POSTGRES_IMAGE_TAG}"
     environment:
       POSTGRES_PASSWORD: d@tadog
     volumes:
