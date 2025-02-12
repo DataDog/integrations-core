@@ -16,7 +16,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
 ### Generate API credentials in ExtraHop
 
 1. Log in to the ExtraHop platform.
-2. Go to **System Settings** > **API Access** and click **Create Credentials** which is present at the bottom of the page under **Rest API Credentials** section.
+2. Go to **System Settings** > **API Access** and click **Create Credentials** which is at the bottom of the page under **Rest API Credentials** section.
 3. On **System Settings** > **API Access** > **Rest API Credentials**, at the top right corner; Click **Create Credentials** and specify the settings of the new Client ID and Client Secret.
     - Name: A meaningful name that can help you identify the Client ID and Client Secret.
     - System Access: The system access permission assigned to the ID and Secret. Select **Full read-only**.
