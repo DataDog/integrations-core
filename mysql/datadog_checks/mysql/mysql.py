@@ -219,8 +219,14 @@ class MySql(AgentCheck):
         if version == self.version:
             return
 
+        if self.version and self.version.flavor != version.flavor:
+            try:
+                self.tags.remove('dbms_flavor:{}'.format(self.version.flavor.lower()))
+            except ValueError:
+                pass
+
         self.version = version
-        if not self.version or not self.version.flavor:
+        if not self.version.flavor:
             return
 
         self.tags.append('dbms_flavor:{}'.format(self.version.flavor.lower()))
