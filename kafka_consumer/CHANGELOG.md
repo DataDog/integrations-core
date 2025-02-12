@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.0 / 2025-02-12
+
+***Added***:
+
+* Bump the OpenSSL version in confluent-kakfa to 3.3.3 on Linux and MacOS. ([#19591](https://github.com/DataDog/integrations-core/pull/19591))
+
 ## 6.3.0 / 2025-01-25
 
 ***Added***:
