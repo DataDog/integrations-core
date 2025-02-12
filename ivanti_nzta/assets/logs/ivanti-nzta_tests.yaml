@@ -191,7 +191,6 @@ tests:
       message_id: "AUT24327"
       network:
         client:
-          geoip: {}
           ip: "10.10.10.10"
       realm_name: "User Auth"
       session_id: ""
