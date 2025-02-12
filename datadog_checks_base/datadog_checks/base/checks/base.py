@@ -318,7 +318,9 @@ class AgentCheck(object):
         ha_enabled_instance = self.instance.get('ha_enabled', False) if self.instance else False
 
         if not self.HA_SUPPORTED and (ha_enabled_init or ha_enabled_instance):
-            raise ConfigurationError("High availability is not supported for this check")
+            raise ConfigurationError(
+                f"High Availability is enabled for check {self.name} but this integration does not support it"
+            )
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
