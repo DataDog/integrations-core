@@ -28,7 +28,7 @@ datadog.network_path.collector.flush.interval.count,rate,,second,,"Interval betw
 datadog.network_path.collector.flush.interval.max,gauge,,second,,"Interval between flush.",0,network_path,,,
 datadog.network_path.collector.flush.interval.median,gauge,,second,,"Interval between flush.",0,network_path,,,
 datadog.network_path.collector.worker.task_duration,gauge,,second,,"Duration of a worker task.",0,network_path,,,
-datadog.network_path.collector.worker.pathtest_processed,count,,,,"Number of dropped processed",0,network_path,,,
+datadog.network_path.collector.worker.pathtest_processed,rate,,,,"Number of dropped processed",0,network_path,,,
 datadog.network_path.collector.worker.pathtest_interval,gauge,,second,,"Interval between pathtest runs.",0,network_path,,,
 datadog.network_path.collector.schedule.conns_received,rate,,,,"Number of network connections received.",0,network_path,,,
 datadog.network_path.collector.schedule.pathtest_count,rate,,,,"Number of pathtest to scheduled.",0,network_path,,,
