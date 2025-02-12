@@ -26,7 +26,7 @@ $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
 # We set the desired tag to the latest release tag to ensure that we are building with the latest stable version.
 # The desired tag should be updated periodically or when critical fixes or features are released.
-$desired_tag = "2024.12.16"
+$desired_tag = "2024.12.16" # This needs to be updated!
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
