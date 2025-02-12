@@ -343,8 +343,10 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_INSTANCENAME] = instancename
 
                             self.tags.append("sqlserver_servername:{}".format(servername))
+                            self.non_internal_tags.append("sqlserver_servername:{}".format(servername))
                             if instancename:
                                 self.tags.append("sqlserver_instancename:{}".format(instancename))
+                                self.non_internal_tags.append("sqlserver_instancename:{}".format(instancename))
                         else:
                             self.log.warning("failed to load servername static information due to empty results")
 
