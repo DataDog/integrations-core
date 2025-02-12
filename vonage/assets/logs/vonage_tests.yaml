@@ -5,7 +5,6 @@ tests:
     {
       "country" : "IN",
       "changed_from" : "",
-      "ddtags" : "error_code_description:Delivered,product:my_product,error_code:0,latency:945284",
       "date_finalized" : "2024-11-05T07:18:37+00:00",
       "network" : "40471",
       "message_body" : "Hello from Vonage, checking for new data!",
@@ -29,6 +28,11 @@ tests:
       "to" : "919481686682",
       "status" : "delivered"
     }
+  tags:
+   - "error_code_description:Delivered"
+   - "product:my_product"
+   - "error_code:0"
+   - "latency:945284"
   result:
     custom:
       account_id: "bf8d8cc9"
@@ -45,7 +49,6 @@ tests:
       date_finalized: "2024-11-05T07:18:37+00:00"
       date_received: "2024-11-05T07:02:52+00:00"
       dcs: "0"
-      ddtags: "error_code_description:Delivered,product:my_product,error_code:0,latency:945284"
       direction: "outbound"
       forced_from: "918050290593"
       from: "918050290593"
@@ -90,3 +93,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+     - "error_code_description:Delivered"
+     - "product:my_product"
+     - "error_code:0"
+     - "latency:945284"
