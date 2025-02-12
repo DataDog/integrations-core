@@ -248,8 +248,8 @@ instances:
     metrics:
     - '.*'
     exclude_metrics:
-      - istio_*
-      - envoy_*
+      - istio_.*
+      - envoy_.*
 
 ```
 
