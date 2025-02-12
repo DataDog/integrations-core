@@ -79,8 +79,10 @@ from datadog_checks.sqlserver.const import (
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_INSTANCENAME,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_RDS,
+    STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
@@ -297,7 +299,14 @@ class SQLServer(AgentCheck):
 
     def load_static_information(self):
         engine_edition_reloaded = False
-        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
+        expected_keys = {
+            STATIC_INFO_VERSION,
+            STATIC_INFO_MAJOR_VERSION,
+            STATIC_INFO_ENGINE_EDITION,
+            STATIC_INFO_RDS,
+            STATIC_INFO_SERVERNAME,
+            STATIC_INFO_INSTANCENAME,
+        }
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
             with self.connection.open_managed_default_connection():
@@ -321,6 +330,24 @@ class SQLServer(AgentCheck):
                                 self.log.warning("failed to parse SQL Server major version from version: %s", version)
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_SERVERNAME not in self.static_info_cache:
+                        cursor.execute("select ServerProperty('ServerName')")
+                        result = cursor.fetchone()
+                        if result:
+                            full_servername = result[0]
+                            servername = full_servername.split("\\")[0]
+                            instancename = (
+                                full_servername.split("\\")[1] if len(full_servername.split("\\")) > 1 else None
+                            )
+                            self.static_info_cache[STATIC_INFO_SERVERNAME] = servername
+                            self.static_info_cache[STATIC_INFO_INSTANCENAME] = instancename
+
+                            self.tags.append("sqlserver_servername:{}".format(servername))
+                            if instancename:
+                                self.tags.append("sqlserver_instancename:{}".format(instancename))
+                        else:
+                            self.log.warning("failed to load servername static information due to empty results")
+
                     if STATIC_INFO_ENGINE_EDITION not in self.static_info_cache:
                         cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
                         result = cursor.fetchone()
