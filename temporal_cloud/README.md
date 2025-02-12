@@ -23,7 +23,7 @@ This integration gathers Temporal Cloud metrics into Datadog, offering insights 
     |Parameters|Description|
     |--------------------|--------------------|
     |Account ID|Temporal Cloud account ID to be used as part of the metrics endpoint URL: `https://<account_id>.tmprl.cloud/prometheus`.|
-    |End-entity certificate file content|Contents of the end-entity certificate for secure access and communication with the Metrics endpoint.|
+    |End-entity certificate file content|Content of the end-entity certificate for secure access and communication with the Metrics endpoint.|
     |End-entity certificate key file content|Content of the end-entity certificate key for secure access and communication with the Metrics endpoint.|
 
 2. Click the **Save** button to save your settings.
