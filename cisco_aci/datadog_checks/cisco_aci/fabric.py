@@ -43,10 +43,14 @@ class Fabric:
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
         fabric_nodes = self.api.get_fabric_nodes()
-        self.log.info("%s pods and %s nodes computed", len(fabric_nodes), len(fabric_pods))
+        self.log.info("JMWfabric.collect() %s pods and %s nodes computed", len(fabric_nodes), len(fabric_pods)) # added JMW
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
         if self.ndm_enabled():
+            faults = self.api.get_faults()  # JMW hack
+            for f in faults:
+                self.log.info("JMW hack fabric.collect fault: %s", f)  # JMW hack
+
             # get topology link metadata
             lldp_adj_eps = self.api.get_lldp_adj_eps()
             cdp_adj_eps = self.api.get_cdp_adj_eps()
