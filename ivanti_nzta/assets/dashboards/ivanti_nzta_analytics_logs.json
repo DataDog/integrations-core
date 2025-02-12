@@ -1185,11 +1185,11 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
+                                            "field": "timestamp",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "usr.name",
+                                            "field": "user_name",
                                             "width": "auto"
                                         },
                                         {

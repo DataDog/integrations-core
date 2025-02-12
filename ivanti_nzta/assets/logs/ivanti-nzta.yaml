@@ -12,7 +12,7 @@ facets:
     name: User Name
     path: usr.name
     source: log
-  - description: ""
+  - description: ''
     facetType: range
     groups:
       - Ivanti nZTA
@@ -20,7 +20,7 @@ facets:
     path: ivanti_nzta.concurrent_users
     source: log
     type: integer
-  - description: ""
+  - description: ''
     facetType: range
     groups:
       - Ivanti nZTA
@@ -128,7 +128,7 @@ pipeline:
 
               authentication_server_rule Authenticating with %{word} Authentication Server:%{_space}"%{regex("[^\"]*"):auth_server}"
 
-              create_user_rule Created \(%{regex(".*(?= Users)")} Users %{regex("[^)]*")}\) with the following attributes:%{_space}\[Username=%{regex("[^]]*"):usr.name}\]%{_space}\[Full name=%{regex("[^]]*"):full_name}\]%{_space}\[Email address=%{regex("[^]]*"):usr.email}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[Password Hash Format=%{regex("[^]]*"):password_hash_format}\]%{_space}\[One-time user=%{boolean:one_time_user}\]%{_space}\[console-access=%{boolean:console_access}\]%{_space}\[Enabled=%{boolean:is_enabled}\] %{data}
+              create_user_rule Created \(%{regex(".*(?= Users)")} Users %{regex("[^)]*")}\) with the following attributes:%{_space}\[Username=%{regex("[^]]*"):user_name}\]%{_space}\[Full name=%{regex("[^]]*"):full_name}\]%{_space}\[Email address=%{regex("[^]]*"):usr.email}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[%{regex("[^]]*")}\]%{_space}\[Password Hash Format=%{regex("[^]]*"):password_hash_format}\]%{_space}\[One-time user=%{boolean:one_time_user}\]%{_space}\[console-access=%{boolean:console_access}\]%{_space}\[Enabled=%{boolean:is_enabled}\] %{data}
 
               admin_change_rule Created \(%{regex("[^)]*")}\) with the following attributes:%{_space}%{data:attributes}
     - type: pipeline
@@ -180,11 +180,11 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               concurrent_users_rule Number of concurrent users logged in to the
-              device:%{_space}%{number:ivanti_nzta.concurrent_users}
+              device:%{_space}%{integer:ivanti_nzta.concurrent_users}
 
-              ncp_connections_rule Number of (JCP|NCP) connections:%{_space}%{number:ivanti_nzta.connections}
+              ncp_connections_rule Number of (JCP|NCP) connections:%{_space}%{integer:ivanti_nzta.connections}
 
-              api_failure_response_rule API %{word:http.method} call failed for resource \[%{regex("[^]]*"):http.url}\] with response code \[%{number:http.status_code}\].
+              api_failure_response_rule API %{word:http.method} call failed for resource \[%{regex("[^]]*"):http.url}\] with response code \[%{integer:http.status_code}\].
 
               user_group_added_rule User Group '%{regex("[^/']*"):user_group}' added.
 
@@ -206,10 +206,3 @@ pipeline:
       enabled: true
       sources:
         - status
-    - type: geo-ip-parser
-      name: Extracting geolocation information from the client IP
-      enabled: true
-      sources:
-        - network.client.ip
-      target: network.client.geoip
-      ip_processing_behavior: do-nothing
