@@ -1,8 +1,8 @@
 # Agent Check: Airflow
 
 <div class="alert alert-info">
-<a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring (in preview for Airflow)</a> provides tracing for Airflow DAG runs out-of-the-box so you can quickly troubleshoot problematic tasks, correlate DAG runs to logs, and understand complex pipelines with data lineage across DAGs.<br/><br/>
-This page is limited to documentation for collecting Airflow integration metrics & logs with the Datadog Agent.
+<a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> (in Preview for Airflow) provides out-of-the-box tracing for Airflow DAG runs, helping you quickly troubleshoot problematic tasks, correlate DAG runs to logs, and understand complex pipelines with data lineage across DAGs.<br/><br/>
+<strong>Note</strong>: This page covers only the documentation for collecting Airflow integration metrics and logs using the Datadog Agent.
 </div>
 
 ## Overview
