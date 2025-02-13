@@ -251,6 +251,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /extrahop/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /extrahop/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/falco/                                                             @DataDog/saas-integrations
+/falco/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/falco/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/falco/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /freshservice/                                                          @DataDog/saas-integrations
 /freshservice/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /freshservice/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
