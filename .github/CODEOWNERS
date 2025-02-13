@@ -437,11 +437,6 @@ hubspot_content_hub/*.md                                            @DataDog/saa
 hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
 hubspot_content_hub/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/forcepoint_security_service_edge/                                   @DataDog/saas-integrations
-/forcepoint_security_service_edge/*.md                               @DataDog/saas-integrations @DataDog/documentation
-/forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
-/forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 plaid/                                                              @DataDog/saas-integrations
 plaid/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 plaid/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
