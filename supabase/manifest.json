@@ -2,13 +2,13 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f22fec2a-ff0a-4380-8ddf-3348f1e7ff15",
   "app_id": "supabase",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor the health and performance of Supabase",
     "title": "Supabase",
     "media": [],
     "classifier_tags": [
@@ -44,6 +44,9 @@
     },
     "dashboards": {
         "Supabase Overview": "assets/dashboards/supabase_overview.json"
+    },
+    "monitors": {
+        "High RAM Usage": "assets/monitors/ram_usage.json"
     }
   },
   "author": {
