@@ -26,7 +26,7 @@ $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
 # We set the desired tag to the latest release tag to ensure that we are building with the latest stable version.
 # The desired tag should be updated periodically or when critical fixes or features are released.
-$desired_tag = "2024.12.16"
+$desired_tag = "5ee5eee0d3e9c6098b24d263e9099edcdcef6631" # Commit that incudes OpenSSL 3.4.1
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
