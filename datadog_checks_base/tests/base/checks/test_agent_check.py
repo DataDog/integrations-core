@@ -13,7 +13,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base import ConfigurationError
 
 from .utils import BaseModelTest
 
