@@ -1314,7 +1314,20 @@ def test_env_var_logic_preset():
 
 
 def test_ha_enabled_and_unsupported():
+    class TestNonHACheck(AgentCheck):
+        HA_SUPPORTED = False
+
+    TestNonHACheck('test', {}, [{}])
     with pytest.raises(ConfigurationError):
-        AgentCheck('test', {'ha_enabled': True}, [{}])
+        TestNonHACheck('test', {'ha_enabled': True}, [{}])
     with pytest.raises(ConfigurationError):
-        AgentCheck('test', {}, [{'ha_enabled': True}])
+        TestNonHACheck('test', {}, [{'ha_enabled': True}])
+
+
+def test_ha_enabled_and_supported():
+    class TestHACheck(AgentCheck):
+        HA_SUPPORTED = True
+
+    TestHACheck('test', {}, [{}])
+    TestHACheck('test', {'ha_enabled': True}, [{}])
+    TestHACheck('test', {}, [{'ha_enabled': True}])
