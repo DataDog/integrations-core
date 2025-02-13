@@ -25,16 +25,25 @@ def container_up(service_name, port):
     )
 
 
+def select_docker_compose_file(env_version):
+    """
+    Select the appropriate docker compose file based on the tested version of pgbouncer
+    """
+    if env_version < version.parse('1.10'):
+        return 'docker-compose-v1.yml'
+    if env_version < version.parse('1.23'):
+        return 'docker-compose-v2.yml'
+    # Version 1.23 and above
+    return 'docker-compose-v3.yml'
+
+
 @pytest.fixture(scope="session")
 def dd_environment():
     """
     Start postgres and install pgbouncer.
     If there's any problem executing `docker compose`, let the exception bubble up.
     """
-    compose_file = 'docker-compose.yml'
-    env_version = common.get_version_from_env()
-    if env_version < version.parse('1.10'):
-        compose_file = 'docker-compose-old.yml'
+    compose_file = select_docker_compose_file(common.get_version_from_env())
 
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', compose_file),

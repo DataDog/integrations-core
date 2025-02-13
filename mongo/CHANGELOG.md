@@ -2,13 +2,27 @@
 
 <!-- towncrier release notes start -->
 
-## 8.3.1 / 2024-12-26
+## 8.4.0 / 2025-01-25
+
+***Added***:
+
+* Add support for `zlib` network compression in the MongoDB integration client with fallback to uncompressed connections. ([#19395](https://github.com/DataDog/integrations-core/pull/19395))
+* Make MongoDB Atlas search indexes collection configurable and disable it by default for improved performance. ([#19396](https://github.com/DataDog/integrations-core/pull/19396))
+* Increased the default collection interval for MongoDB inferred schema and index definitions to 1 hour to reduce resource overhead. ([#19445](https://github.com/DataDog/integrations-core/pull/19445))
+* Include explain operations in MongoDB activity samples. ([#19450](https://github.com/DataDog/integrations-core/pull/19450))
+* Add `service=datadog-agent` comment to MongoDB integration operations for tagging integration operations. ([#19456](https://github.com/DataDog/integrations-core/pull/19456))
+
+***Fixed***:
+
+* Fix error `CommandCursor is not subscriptable` in replication oplog size and oplog window collection. ([#19444](https://github.com/DataDog/integrations-core/pull/19444))
+
+## 8.3.1 / 2024-12-26 / Agent 7.62.0
 
 ***Fixed***:
 
 * Skip unauthorized `local` database collections `system.replset`, `replset.election`, and `replset.minvalid` in collection and index stats gathering to avoid permission errors. ([#19244](https://github.com/DataDog/integrations-core/pull/19244))
 
-## 8.3.0 / 2024-11-28
+## 8.3.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 

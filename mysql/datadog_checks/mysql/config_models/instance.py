@@ -67,6 +67,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class IndexMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -196,6 +205,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None
+    index_metrics: Optional[IndexMetrics] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     max_custom_queries: Optional[int] = None
