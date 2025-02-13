@@ -458,6 +458,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /zero_networks/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
 /zero_networks/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/ivanti_nzta/                                                       @DataDog/saas-integrations
+/ivanti_nzta/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
+/ivanti_nzta/manifest.json                                          @DataDog/saas-integrations @DataDog/documentation
+/ivanti_nzta/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
