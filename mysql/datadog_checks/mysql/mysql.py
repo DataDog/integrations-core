@@ -95,6 +95,8 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+# TODO remove: trigger CI
+
 
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
