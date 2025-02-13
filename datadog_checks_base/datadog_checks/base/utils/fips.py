@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import os
+
+LOGGER = logging.getLogger(__file__)
 
 
 def enable_fips(path_to_openssl_conf=None, path_to_openssl_modules=None):
@@ -12,7 +15,7 @@ def enable_fips(path_to_openssl_conf=None, path_to_openssl_modules=None):
             path_to_embedded = _get_embedded_path() if path_to_embedded is None else path_to_embedded
             path_to_openssl_conf = path_to_embedded / "ssl" / "openssl.cnf"
             if not path_to_openssl_conf.exists():
-                raise RuntimeError(f'The configuration file "{path_to_openssl_conf}" does not exist')
+                LOGGER.warning('The configuration file "%s" does not exist', path_to_openssl_conf)
         os.environ["OPENSSL_CONF"] = str(path_to_openssl_conf)
 
     if os.getenv("OPENSSL_MODULES") is None:
@@ -20,7 +23,7 @@ def enable_fips(path_to_openssl_conf=None, path_to_openssl_modules=None):
             path_to_embedded = _get_embedded_path() if path_to_embedded is None else path_to_embedded
             path_to_openssl_modules = path_to_embedded / "lib" / "ossl-modules"
             if not path_to_openssl_conf.exists():
-                raise RuntimeError(f'The directory "{path_to_openssl_modules}" does not exist')
+                LOGGER.warning('The directory "%s" does not exist', path_to_openssl_modules)
         os.environ["OPENSSL_MODULES"] = str(path_to_openssl_modules)
 
 
