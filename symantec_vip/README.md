@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Symantec VIP][1] (Validation and ID Protection Service) is a user-friendly, leading cloud-based strong authentication service that enables enterprises to secure access to networks and applications without impacting productivity.
+[Symantec VIP][1] (Validation and ID Protection Service) is a cloud-based authentication service that helps enterprises secure access to networks and applications while maintaining productivity.
 
 This integration ingests the following logs:
 
@@ -14,15 +14,15 @@ This integration seamlessly collects all the above listed logs, channeling them 
 
 ### Generate API credentials in Symantec VIP
 
-- Obtaining VIP certificate
-  - Please follow the steps mentioned in the official documentation: [Obtaining VIP certificate][2]
+**Obtaining VIP certificate**:  
+Follow the steps in the official documentation: [Obtaining VIP certificate.][2]
 
-- Activating the VIP Report Streaming Service using VIP Certificate
-  - Before integrating the VIP Report Streaming Service, you must enable the service with Symantec. Contact your Symantec representative to enable the service. Once the service is enabled, activate the VIP Report Streaming Service for your VIP account using the activate API.
-  - Please follow steps mentioned in the official documentation to activate API: [Activate VIP Report Streaming Service][3]
+**Activating the VIP Report Streaming Service using VIP Certificate**:
+- Before integrating the VIP Report Streaming Service, you must enable the service with Symantec. Contact your Symantec representative to enable the service. Once the service is enabled, activate the VIP Report Streaming Service for your VIP account using the activate API.
+- Follow the steps mentioned in the official documentation to activate API: [Activate VIP Report Streaming Service][3]
 
-- Jurisdiction hash
-  - The jurisdiction hash of the user account is available on the **Account Information** tab of the **Account** page in VIP Manager.
+**Jurisdiction hash**:  
+The jurisdiction hash of the user account is available on the **Account Information** tab of the **Account** page in VIP Manager.
 
 ### Connect your Symantec VIP Account to Datadog
 
