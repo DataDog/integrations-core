@@ -7,12 +7,16 @@ on:
         description: "Agent image to use"
         required: false
         type: string
+      agent-image-fips:
+        description: "FIPS Agent image to use"
+        required: false
+        type: string
       target:
         description: "Target to test"
         required: false
         type: string
   pull_request:
-    path:
+    paths:
     - datadog_checks_base/datadog_checks/**
   schedule:
     - cron: '0 0,8,16 * * *'
@@ -29,7 +33,6 @@ jobs:
     env:
       FORCE_COLOR: "1"
       PYTHON_VERSION: "3.12"
-      DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-fips' }}"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
@@ -45,7 +48,7 @@ jobs:
 
     - name: Set environment variables with sanitized paths
       run: |
-        JOB_NAME="test-fips"
+        JOB_NAME="test-fips-e2e"
 
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
@@ -104,15 +107,17 @@ jobs:
 
     - name: Run E2E tests with FIPS disabled
       env:
+        DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-py3' }}"
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        ddev env test -e GOFIPS=0 --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
+        ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
     - name: Run E2E tests with FIPS enabled
       env:
+        DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'datadog/agent-dev:master-fips' }}"
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        ddev env test -e GOFIPS=1 --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
+        ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
 
     - name: View trace log
       if: always()
