@@ -432,11 +432,6 @@ vonage/assets/logs/                                                @DataDog/saas
 /asana/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
 /asana/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-hubspot_content_hub/                                                @DataDog/saas-integrations
-hubspot_content_hub/*.md                                            @DataDog/saas-integrations @DataDog/documentation
-hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
-hubspot_content_hub/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 plaid/                                                              @DataDog/saas-integrations
 plaid/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 plaid/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
