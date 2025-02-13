@@ -1,0 +1,156 @@
+name: Test FIPS E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent-image:
+        description: "Agent image to use"
+        required: false
+        type: string
+      agent-image-fips:
+        description: "FIPS Agent image to use"
+        required: false
+        type: string
+      target:
+        description: "Target to test"
+        required: false
+        type: string
+  pull_request:
+    paths:
+    - datadog_checks_base/datadog_checks/**
+  schedule:
+    - cron: '0 0,8,16 * * *'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run:
+    name: "Test FIPS"
+    runs-on: ["ubuntu-22.04"]
+
+    env:
+      FORCE_COLOR: "1"
+      PYTHON_VERSION: "3.12"
+      # Test results for later processing
+      TEST_RESULTS_BASE_DIR: "test-results"
+      # Tracing to monitor our test suite
+      DD_ENV: "ci"
+      DD_SERVICE: "ddev-integrations-core"
+      DD_TAGS: "team:agent-integrations"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
+      # Capture traces for a separate job to do the submission
+      TRACE_CAPTURE_BASE_DIR: "trace-captures"
+      TRACE_CAPTURE_LOG: "trace-captures/output.log"
+
+    steps:
+
+    - name: Set environment variables with sanitized paths
+      run: |
+        JOB_NAME="test-fips-e2e"
+
+        echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+        cache: 'pip'
+
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: '~/.cache/pip'
+        key: >-
+          ${{ format(
+            'v01-python-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+        restore-keys: |-
+          v01-python-${{ env.pythonLocation }}
+
+    - name: Install ddev from local folder
+      run: |-
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
+
+    - name: Configure ddev
+      run: |-
+        ddev config set repos.core .
+        ddev config set repo core
+
+    - name: Prepare for testing
+      env:
+        PYTHONUNBUFFERED: "1"
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
+        SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: ddev ci setup ${{ inputs.target || 'tls' }}
+
+    - name: Set up trace capturing
+      env:
+        PYTHONUNBUFFERED: "1"
+      run: |-
+        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
+        python .ddev/ci/scripts/traces.py capture --port "8126" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+
+    - name: Run E2E tests with FIPS disabled
+      env:
+        DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-py3' }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: |
+        ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
+
+    - name: Run E2E tests with FIPS enabled
+      env:
+        DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'datadog/agent-dev:master-fips' }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: |
+        ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
+
+    - name: View trace log
+      if: always()
+      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
+
+    - name: Upload captured traces
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: "traces-${{ inputs.target || 'tls' }}"
+        path: "${{ env.TRACE_CAPTURE_FILE }}"
+
+    - name: Finalize test results
+      if: always()
+      run: |-
+        mkdir -p "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target || 'tls' }}/.junit ]]; then
+          mv ${{ inputs.target || 'tls' }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        fi
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: "test-results-${{ inputs.target || 'tls' }}"
+        path: "${{ env.TEST_RESULTS_BASE_DIR }}"
+
+    - name: Upload coverage data
+      if: >
+        !github.event.repository.private &&
+        always()
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        flags: "${{ inputs.target || 'tls' }}"

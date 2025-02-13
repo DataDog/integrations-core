@@ -48,6 +48,14 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
+class CollectRawQueryStatement(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+
+
 class CollectSettings(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -137,7 +145,7 @@ class IndexUsageMetrics(BaseModel):
         frozen=True,
     )
     collection_interval: Optional[int] = Field(None, examples=[300])
-    enabled: Optional[bool] = Field(None, examples=[False])
+    enabled: Optional[bool] = Field(None, examples=[True])
     enabled_tempdb: Optional[bool] = Field(None, examples=[False])
 
 
@@ -343,6 +351,7 @@ class InstanceConfig(BaseModel):
     autodiscovery_include: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_settings: Optional[CollectSettings] = None
     command_timeout: Optional[int] = None
     connection_string: Optional[str] = None

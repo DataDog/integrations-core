@@ -8,6 +8,7 @@ except ImportError:
     from ..stubs import datadog_agent
 import json
 import time
+from collections import defaultdict
 from contextlib import closing
 
 import pymysql
@@ -20,6 +21,8 @@ from datadog_checks.mysql.queries import (
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
     SQL_INDEXES,
+    SQL_INDEXES_8_0_13,
+    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_PARTITION,
     SQL_TABLES,
 )
@@ -203,15 +206,17 @@ class DatabasesData:
                     - indexes (list): A list of index dictionaries.
                         - index (dict): A dictionary representing an index.
                             - name (str): The name of the index.
-                            - collation (str): The collation of the index.
-                            - cardinality (str): The cardinality of the index.
-                            - index_type (str): The type of the index.
-                            - seq_in_index (str): The sequence in index.
-                            - columns (str): The columns in the index.
-                            - sub_parts (str): The sub-parts of the index.
-                            - packed (str): Whether the index is packed.
-                            - nullables (str): The nullable columns in the index.
-                            - non_uniques (str): Whether the index is non-unique.
+                            - cardinality (int): The cardinality of the index.
+                            - index_type (str): The index method used.
+                            - columns (list): A list of column dictionaries
+                                - column (dict): A dictionary representing a column.
+                                    - name (str): The name of the column.
+                                    - sub_part (int): The number of indexed characters if column is partially indexed.
+                                    - collation (str): The collation of the column.
+                                    - packed (str): How the index is packed.
+                                    - nullable (bool): Whether the column is nullable.
+                            - non_unique (bool): Whether the index can contain duplicates.
+                            - expression (str): If index was built with a functional key part, the expression used.
                     - foreign_keys (list): A list of foreign key dictionaries.
                         - foreign_key (dict): A dictionary representing a foreign key.
                             - constraint_schema (str): The schema of the constraint.
@@ -223,21 +228,22 @@ class DatabasesData:
                     - partitions (list): A list of partition dictionaries.
                         - partition (dict): A dictionary representing a partition.
                             - name (str): The name of the partition.
-                            - subpartition_names (str): The names of the subpartitions.
-                            - partition_ordinal_position (str): The ordinal position of the partition.
-                            - subpartition_ordinal_positions (str): The ordinal positions of the subpartitions.
+                            - subpartitions (list): A list of subpartition dictionaries.
+                                - subpartition (dict): A dictionary representing a subpartition.
+                                    - name (str): The name of the subpartition.
+                                    - subpartition_ordinal_position (int): The ordinal position of the subpartition.
+                                    - subpartition_method (str): The subpartition method.
+                                    - subpartition_expression (str): The subpartition expression.
+                                    - table_rows (int): The number of rows in the subpartition.
+                                    - data_length (int): The data length of the subpartition in bytes.
+                            - partition_ordinal_position (int): The ordinal position of the partition.
                             - partition_method (str): The partition method.
-                            - subpartition_methods (str): The subpartition methods.
                             - partition_expression (str): The partition expression.
-                            - subpartition_expressions (str): The subpartition expressions.
                             - partition_description (str): The description of the partition.
-                            - table_rows (str): The number of rows in the partition.
-                            - data_lengths (str): The data lengths in the partition.
-                            - max_data_lengths (str): The maximum data lengths in the partition.
-                            - index_lengths (str): The index lengths in the partition.
-                            - data_free (str): The free data space in the partition.
-                            - partition_comment (str): The comment on the partition.
-                            - tablespace_name (str): The tablespace name.
+                            - table_rows (int): The number of rows in the partition. If partition has subpartitions,
+                                                this is the sum of all subpartitions table_rows.
+                            - data_length (int): The data length of the partition in bytes. If partition has
+                                                 subpartitions, this is the sum of all subpartitions data_length.
         """
         self._data_submitter.reset()
         self._tags = tags
@@ -262,14 +268,14 @@ class DatabasesData:
                 self._fetch_database_data(cursor, start_time, db_info['name'])
             except StopIteration as e:
                 self._log.error(
-                    "While executing fetch database data for databse {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occured {}".format(
                         db_info['name'], e
                     )
                 )
                 return
             except Exception as e:
                 self._log.error(
-                    "While executing fetch database data for databse {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occured {}".format(
                         db_info['name'], e
                     )
                 )
@@ -334,21 +340,45 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES.format(table_names), params=db_name)
+        self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
+        query = (
+            SQL_INDEXES_8_0_13.format(table_names)
+            if cursor.fetchone()["column_count"] > 0
+            else SQL_INDEXES.format(table_names)
+        )
+        self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
+        if not rows:
+            return
+        table_index_dict = defaultdict(lambda: defaultdict(lambda: {}))
         for row in rows:
-            table_name = str(row.pop("table_name"))
+            table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
-            if "nullables" in row:
-                nullables_arr = row["nullables"].split(',')
-                nullables_converted = ""
-                for s in nullables_arr:
-                    if s.lower() == "yes":
-                        nullables_converted += "true,"
-                    else:
-                        nullables_converted += "false,"
-                row["nullables"] = nullables_converted[:-1]
-            table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
+            index_name = str(row["name"])
+            index_data = table_index_dict[table_name][index_name]
+
+            # Update index-level info
+            index_data["name"] = index_name
+            index_data["cardinality"] = int(row["cardinality"])
+            index_data["index_type"] = str(row["index_type"])
+            index_data["non_unique"] = bool(row["non_unique"])
+            if row["expression"]:
+                index_data["expression"] = str(row["expression"])
+
+            # Add column info, if exists
+            if row["column_name"]:
+                index_data.setdefault("columns", [])
+                column = {"name": row["column_name"], "nullable": bool(row["nullable"].lower() == "yes")}
+                if row["sub_part"]:
+                    column["sub_part"] = int(row["sub_part"])
+                if row["collation"]:
+                    column["collation"] = str(row["collation"])
+                if row["packed"]:
+                    column["packed"] = str(row["packed"])
+                index_data["columns"].append(column)
+
+        for table_name, index_dict in table_index_dict.items():
+            table_list[table_name_to_table_index[table_name]]["indexes"] = list(index_dict.values())
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
@@ -363,7 +393,43 @@ class DatabasesData:
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
         rows = cursor.fetchall()
+        if not rows:
+            return
+        table_partitions_dict = defaultdict(
+            lambda: defaultdict(
+                lambda: {
+                    "table_rows": 0,
+                    "data_length": 0,
+                }
+            )
+        )
+
         for row in rows:
-            table_name = str(row.pop("table_name"))
+            table_name = str(row["table_name"])
             table_list[table_name_to_table_index[table_name]].setdefault("partitions", [])
-            table_list[table_name_to_table_index[table_name]]["partitions"].append(row)
+            partition_name = str(row["name"])
+            partition_data = table_partitions_dict[table_name][partition_name]
+
+            # Update partition-level info
+            partition_data["name"] = partition_name
+            partition_data["partition_ordinal_position"] = int(row["partition_ordinal_position"])
+            partition_data["partition_method"] = str(row["partition_method"])
+            partition_data["partition_expression"] = str(row["partition_expression"]).strip().lower()
+            partition_data["partition_description"] = str(row["partition_description"])
+            partition_data["table_rows"] += int(row["table_rows"])
+            partition_data["data_length"] += int(row["data_length"])
+
+            # Add subpartition info, if exists
+            if row["subpartition_name"]:
+                partition_data.setdefault("subpartitions", [])
+                subpartition = {
+                    "name": row["subpartition_name"],
+                    "subpartition_ordinal_position": int(row["subpartition_ordinal_position"]),
+                    "subpartition_method": str(row["subpartition_method"]),
+                    "subpartition_expression": str(row["subpartition_expression"]).strip().lower(),
+                    "table_rows": int(row["table_rows"]),
+                    "data_length": int(row["data_length"]),
+                }
+                partition_data["subpartitions"].append(subpartition)
+        for table_name, partitions_dict in table_partitions_dict.items():
+            table_list[table_name_to_table_index[table_name]]["partitions"] = list(partitions_dict.values())

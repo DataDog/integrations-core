@@ -30,21 +30,6 @@ exclude_members = [
   "hithwen",
 ]
 
-[teams."Platform Integrations"]
-jira_project = "PLINT"
-jira_issue_type = "Task"
-jira_statuses = [
-  "To Do",
-  "In Progress",
-  "Done",
-]
-github_team = "platform-integrations"
-exclude_members = [
-  "hithwen",
-  "shanelhuang",
-]
-github_labels = ["team/platform-integrations"]
-
 [teams."Container Integrations"]
 jira_project = "CONTINT"
 jira_issue_type = "Task"
