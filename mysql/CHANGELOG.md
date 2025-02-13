@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.4.1 / 2025-02-13
+
+***Fixed***:
+
+* Fix bug where `dbms_flavor` tag was repeatedly appended on each check run. ([#19598](https://github.com/DataDog/integrations-core/pull/19598))
+
 ## 14.4.0 / 2024-12-26
 
 ***Added***:

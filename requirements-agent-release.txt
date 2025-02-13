@@ -123,7 +123,7 @@ datadog-mesos-master==5.0.0; sys_platform != 'win32'
 datadog-mesos-slave==5.0.0; sys_platform != 'win32'
 datadog-milvus==1.0.0
 datadog-mongo==8.3.1
-datadog-mysql==14.4.0
+datadog-mysql==14.4.1
 datadog-nagios==3.0.0
 datadog-network==5.1.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
