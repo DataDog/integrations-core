@@ -37,6 +37,14 @@ class ConnectionErrorCode(Enum):
     ssl_security_error = 'ssl-security-error'
 
 
+class FailedImpersonationError(Exception):
+    """
+    Exception raised for impersonation errors.
+    """
+
+    pass
+
+
 # Connection error messages, which we expect to get from an ADO provider or
 # ODBC. These drivers can have inconsistent error codes across versions, so regex on
 # the known error messages

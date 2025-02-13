@@ -16,6 +16,10 @@ def instance_adoprovider():
     return 'SQLOLEDB'
 
 
+def instance_authentication_type():
+    return 'sql_login'
+
+
 def instance_autodiscovery_db_service_check():
     return True
 

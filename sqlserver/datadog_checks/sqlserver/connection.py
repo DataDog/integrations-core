@@ -4,11 +4,17 @@
 import logging
 import socket
 from contextlib import closing, contextmanager
+from enum import StrEnum, auto
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
 from datadog_checks.sqlserver.utils import construct_use_statement, is_collation_case_insensitive
+
+try:
+    import win32security
+except ImportError:
+    win32security = None
 
 try:
     import adodbapi
@@ -23,6 +29,7 @@ except ImportError:
 from .azure import generate_managed_identity_token
 from .connection_errors import (
     ConnectionErrorCode,
+    FailedImpersonationError,
     SQLConnectionError,
     error_with_tags,
     format_connection_exception,
@@ -38,6 +45,11 @@ SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/
 # used to specific azure AD access token, see the docs for more information on this attribute
 # https://learn.microsoft.com/en-us/sql/connect/odbc/using-azure-active-directory?view=sql-server-ver16
 SQL_COPT_SS_ACCESS_TOKEN = 1256
+
+
+class AuthenticationType(StrEnum):
+    SQL_LOGIN = auto()
+    WINDOWS_AUTHENTICATION = auto()
 
 
 def split_sqlserver_host_port(host):
@@ -166,8 +178,12 @@ class Connection(object):
             self.managed_identity_client_id = managed_identity.get("client_id")
             self.managed_identity_scope = managed_identity.get("identity_scope")
 
+        self._authentication_type = self.instance.get('authentication_type')
+        self._ad_impersonator = ADImpersonator(self.instance, self.log)
+
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
+        self._auth_handles = {}
         self.timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
         self.existing_databases = None
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
@@ -247,16 +263,26 @@ class Connection(object):
         """
         conn_key = self._conn_key(db_key, db_name, key_prefix)
 
-        _, host, _, _, database, driver = self._get_access_info(db_key, db_name)
+        _, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
 
         self._connection_options_validation(db_key, db_name)
 
+        imporsonate = False
+        if self._authentication_type == AuthenticationType.WINDOWS_AUTHENTICATION and username and password:
+            # if windows authentication is configured, username and password are used for AD authentication
+            # if authentication fails, exception will be raised
+            if not win32security:
+                self.log.warning("AD impersonation is not supported on this platform.")
+            else:
+                self._ad_impersonator.start_impersonation(username, password, conn_key)
+                imporsonate = True
+
         try:
             if self.connector == 'adodbapi':
-                cs += self._conn_string_adodbapi(db_key, db_name=db_name)
+                cs += self._conn_string_adodbapi(db_key, db_name=db_name, impersonate=imporsonate)
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
@@ -279,6 +305,7 @@ class Connection(object):
                 try:
                     # explicitly trying to avoid leaks...
                     self._conns[conn_key].close()
+                    self._ad_impersonator.stop_impersonation(conn_key)
                 except Exception as e:
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
@@ -337,6 +364,7 @@ class Connection(object):
         try:
             self._conns[conn_key].close()
             del self._conns[conn_key]
+            self._ad_impersonator.stop_impersonation(conn_key)
         except Exception as e:
             self.log.warning("Could not close adodbapi db connection\n%s", e)
 
@@ -591,7 +619,12 @@ class Connection(object):
             'yes',
             'true',
         } and (username or password):
-            self.log.warning("Username and password are ignored when using Windows authentication")
+            if not self._authentication_type or self._authentication_type == AuthenticationType.SQL_LOGIN:
+                self.log.warning("Username and password are ignored when using Windows authentication")
+            elif self._authentication_type == AuthenticationType.WINDOWS_AUTHENTICATION:
+                self.log.debug(
+                    "Windows authentication is configured, username and password are used for AD authentication"
+                )
 
         for key, value in connector_options.items():
             if key.lower() in lowercased_keys_cs and self.instance.get(value) is not None:
@@ -607,14 +640,14 @@ class Connection(object):
                     " however %s has been selected" % (key, other_connector, self.connector)
                 )
 
-    def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
+    def _conn_string_odbc(self, db_key, conn_key=None, db_name=None, imporsonate=False):
         """Return a connection string to use with odbc"""
         if conn_key:
             dsn, host, username, password, database, driver = conn_key.split(":")
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
-        if self.managed_auth_enabled:
+        if self.managed_auth_enabled or imporsonate:
             # if managed_identity authentication is configured,
             # remove the username/password from the CS, if set
             username = None
@@ -639,9 +672,13 @@ class Connection(object):
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'PWD={};'.format(password)
+        if imporsonate:
+            if 'Trusted_Connection' not in conn_str:
+                # Trusted_Connection is used for Windows Authentication
+                conn_str += 'Trusted_Connection={};'.format('yes')
         return conn_str
 
-    def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
+    def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None, impersonate=False):
         """Return a connection string to use with adodbapi"""
         if conn_key:
             _, host, username, password, database, _ = conn_key.split(":")
@@ -655,13 +692,20 @@ class Connection(object):
             retry_conn_count, self.adoprovider, host, database
         )
 
+        if impersonate:
+            username = None
+            password = None
+
         if username:
             conn_str += 'User ID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'Password={};'.format(password)
         if not username and not password:
-            conn_str += 'Integrated Security=SSPI;'
+            if 'Integrated Security' not in conn_str:
+                # Integrated Security is used for Windows Authentication
+                # and it is required to use the SSPI provider
+                conn_str += 'Integrated Security=SSPI;'
         return conn_str
 
     def test_network_connectivity(self):
@@ -717,3 +761,78 @@ class Connection(object):
                         cursor.execute(construct_use_statement(current_db))
                 except Exception as e:
                     self.log.error("Failed to switch back to the original database context %s: %s", current_db, e)
+
+    def _impersonate_ad_user(self):
+        handle = None
+        try:
+            domain, username = self.instance.get('username').split('\\')
+            password = self.instance.get('password')
+            handle = win32security.LogonUser(
+                username,
+                domain,
+                password,
+                win32security.LOGON32_LOGON_NEW_CREDENTIALS,  # Allows network authentication
+                win32security.LOGON32_PROVIDER_DEFAULT,
+            )
+
+            # Impersonate the user
+            win32security.ImpersonateLoggedOnUser(handle)
+            self.log.debug("Impersonated user %s", username)
+            return handle
+        except Exception as e:
+            self.log.error("Failed to impersonate AD user %s: %s", username, e)
+            win32security.RevertToSelf()
+            if handle:
+                handle.Close()
+            raise FailedImpersonationError("Failed to impersonate AD user {}: {}".format(username, e))
+
+    def _close_impersonation_handle(self, conn_key):
+        handle = self._auth_handles.get(conn_key)
+        if handle:
+            try:
+                handle.Close()
+            except Exception as e:
+                self.log.warning("Failed to close impersonation handle: %s", e)
+            finally:
+                del self._auth_handles[conn_key]
+
+
+class ADImpersonator:
+    def __init__(self, instance, log):
+        self._impersonation_handles = {}  # More descriptive name
+        self.log = log
+
+    def start_impersonation(self, username, password, conn_key):
+        """Impersonates an AD user and returns a handle for later reversion."""
+        handle = None
+        try:
+            domain, uid = username.split('\\')
+            handle = win32security.LogonUser(
+                uid,
+                domain,
+                password,
+                win32security.LOGON32_LOGON_NEW_CREDENTIALS,  # Allows network authentication
+                win32security.LOGON32_PROVIDER_DEFAULT,
+            )
+
+            # Start impersonation
+            win32security.ImpersonateLoggedOnUser(handle)
+            self.log.debug("Successfully impersonated AD user %s", username)
+            self._impersonation_handles[conn_key] = handle  # Store the handle
+        except Exception as e:
+            self.log.error("Failed to impersonate AD user %s: %s", username, e)
+            if handle:
+                win32security.RevertToSelf()
+                handle.Close()
+            raise FailedImpersonationError(f"Failed to impersonate AD user {username}: {e}")
+
+    def stop_impersonation(self, conn_key):
+        """Stops impersonation and closes the corresponding handle."""
+        handle = self._impersonation_handles.pop(conn_key, None)
+        if handle:
+            try:
+                win32security.RevertToSelf()
+                handle.Close()
+                self.log.debug("Successfully reverted impersonation for connection %s", conn_key)
+            except Exception as e:
+                self.log.error("Failed to close impersonation handle for %s: %s", conn_key, e)

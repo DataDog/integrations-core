@@ -65,6 +65,15 @@ files:
       value:
         type: string
         example: master
+    - name: authentication_type
+      description: |
+        Authentication type to use when connecting to the database.
+        Supported values are:
+          - sql_login
+          - windows_authentication
+      value:
+        type: string
+        example: sql_login
     - name: reported_hostname
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
