@@ -17,7 +17,7 @@ The GPU check is included in the [Datadog Agent][2] package. No additional insta
 
 The check also uses eBPF probes to assign GPU usage and performance metrics to processes. eBPF programs are loaded by the `system-probe` component.
 
-**Note**: Windows is not supported.
+**Note**: The `system-probe` GPU component (which generates per-process metrics) requires Linux kernel 5.8 or later. Windows is not supported.
 
 ### Configuration
 
