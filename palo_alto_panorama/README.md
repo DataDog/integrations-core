@@ -37,7 +37,7 @@ Linux command:
 
    ```yaml
    logs:
-     - type: tcp/udp
+     - type: tcp/udp #I think the docs need to clarify here that the "type" field is either "tcp" or "udp", but not "tcp/udp" as it is displayed in sample palo_alto_panorama.d/conf.yaml. I recenlty spent a lot of time in a POV trying to troubleshoot an issue, only later realizing that we needed to set the "type" to "udp", as opposed to "tcp/udp". Please let me know if I can clarify on what I mean here (owen.nelis@datadoghq.com)
        port: <PORT>
        service: palo-alto-panorama
        source: palo-alto-panorama
