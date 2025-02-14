@@ -55,7 +55,6 @@ def test_integ(aggregator, instance):
 @pytest.mark.skipif(PROTOCOL == 'tls', reason="Non-TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")
 def test_custom_metrics(aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
     instance['custom_queries'] = [
         {
             'metric_prefix': 'custom',
