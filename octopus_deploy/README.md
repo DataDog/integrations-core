@@ -17,13 +17,15 @@ No additional installation is needed on your server.
 
 1. Create an [API key][10] on your Octopus Server.
 
-2. Edit the `octopus_deploy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `octopus_deploy` performance data. See the [sample `octopus_deploy.d/conf.yaml`][4] for all available configuration options. Limit the amount of projects you collect data for by using the `projects` configuration options:
+2. Edit the `octopus_deploy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `octopus_deploy` performance data. See the [sample `octopus_deploy.d/conf.yaml`][4] for all available configuration options.
+
+ Ensure you limit the amount of projects you collect data for by using either the `spaces`, `project_groups`, or `projects` configuration options. For example, this configuration collects data about at most 10 projects, and only those projects whose names start with 'test':
 
     ```
     projects:
         limit: 10
         include:
-        - 'project.*'
+        - 'test.*'
     ```
 
 3. [Restart the Agent][5].
