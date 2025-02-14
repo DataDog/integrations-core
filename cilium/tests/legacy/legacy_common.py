@@ -50,6 +50,9 @@ AGENT_METRICS_1_14 = [
     'cilium.k8s_client.rate_limiter_duration.seconds.sum',
     'cilium.policy.change.total',
     'cilium.services.events.total',
+    # 1.16+
+    'cilium.fqdn.selectors',
+    'cilium.identity.label_sources',
 ]
 
 ADDL_AGENT_METRICS = [

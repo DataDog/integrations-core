@@ -120,6 +120,9 @@ AGENT_METRICS = {
     'cilium_k8s_workqueue_retries_total': 'k8s.workqueue.retries.total',
     'cilium_k8s_workqueue_unfinished_work_seconds': 'k8s.workqueue.unfinished.work.seconds',
     'cilium_version': 'version',
+    # Cilium 1.16+
+    'cilium_fqdn_selectors': 'fqdn.selectors',
+    'cilium_identity_label_sources': 'identity.label_sources',
 }
 
 OPERATOR_V2_OVERRIDES = {
