@@ -207,6 +207,8 @@ integration/external_dns:
 - external_dns/**/*
 integration/extrahop:
 - extrahop/**/*
+integration/falco:
+- falco/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
