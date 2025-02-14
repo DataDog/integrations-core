@@ -1,0 +1,10 @@
+init_config:
+
+instances:
+  - host: server
+    http_port: 443
+    ssh_port: 22
+  - host: server-fips
+    http_port: 443
+    ssh_port: 22
+
