@@ -34,7 +34,9 @@
         "prefix": "gpu.",
         "metadata_path": "metadata.csv"
       },
-      "service_checks": {},
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
       "source_type_id": 10066,
       "auto_install": true
     },
