@@ -9,6 +9,8 @@ import pytest
 from mock import MagicMock, call, create_autospec
 
 from datadog_checks.ssh_check import CheckSSH
+from datadog_checks.base.utils import fips
+from hashlib import sha256
 
 from . import common
 
@@ -17,6 +19,11 @@ pytestmark = pytest.mark.unit
 # paramiko.SSHClient.connect returns None if the connection is successful.
 # We use a variable with a descriptive name for clarity.
 CONNECTION_SUCCEEDED = None
+
+
+if fips.is_enabled():
+    # Patch to allow paramiko to use SHA-256 vs MD5
+    paramiko.PKey.get_fingerprint = lambda x: sha256(x.asbytes()).digest()
 
 
 def _setup_check_with_mock_client(instance, connect_result):
