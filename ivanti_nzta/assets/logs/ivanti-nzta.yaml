@@ -36,6 +36,9 @@ facets:
     path: ivanti_nzta.duration
     source: log
     type: integer
+    unit:
+      name: second
+      family: time
 pipeline:
   type: pipeline
   name: Ivanti nZTA

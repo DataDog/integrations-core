@@ -339,14 +339,13 @@ tests:
       gateway_id: ""
       gateway_name: ""
       ivanti_nzta:
-        duration: 360
+        duration: 360.0
       message_id: "NWC30993"
       network:
         bytes_read: 7200
         bytes_written: 98885
         client:
-          ip:
-           - "10.10.10.10"
+          ip: "10.10.10.10"
       session_id: ""
       severity: "INFO"
       status: "Info"
@@ -385,8 +384,7 @@ tests:
       message_id: "NWC23464"
       network:
         client:
-          ip:
-           - "10.10.10.10"
+          ip: "10.10.10.10"
       session_id: "sid34be074433c8d03d41ed12109d98bb4a4e16b02a4dca7dcd"
       severity: "INFO"
       status: "Info"
