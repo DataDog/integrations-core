@@ -239,6 +239,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/gpu:
+- gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
 integration/gunicorn:
