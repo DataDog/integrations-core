@@ -57,7 +57,7 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
    <div class="alert alert-warning"> Do not set `statsd_datadog_enabled` to true. Enabling `statsd_datadog_enabled` can create conflicts. To prevent issues, ensure that the variable is set to `False`.</div>
 
    ```conf
-   [scheduler]
+   [metrics]
    statsd_on = True
    # Hostname or IP of server running the Datadog Agent
    statsd_host = localhost
@@ -181,8 +181,6 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
-         - match: 'airflow.scheduler.tasks.running'
-           name: "airflow.scheduler.tasks.running"
          - match: 'airflow.scheduler.tasks.starving'
            name: "airflow.scheduler.tasks.starving"
          - match: 'airflow.sla_email_notification_failure'
@@ -340,18 +338,18 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
 The Airflow StatsD configuration can be enabled with the following environment variables in a Kubernetes Deployment:
   ```yaml
   env:
-    - name: AIRFLOW__SCHEDULER__STATSD_ON
+    - name: AIRFLOW__METRICS__STATSD_ON
       value: "True"
-    - name: AIRFLOW__SCHEDULER__STATSD_PORT
+    - name: AIRFLOW__METRICS__STATSD_PORT
       value: "8125"
-    - name: AIRFLOW__SCHEDULER__STATSD_PREFIX
+    - name: AIRFLOW__METRICS__STATSD_PREFIX
       value: "airflow"
-    - name: AIRFLOW__SCHEDULER__STATSD_HOST
+    - name: AIRFLOW__METRICS__STATSD_HOST
       valueFrom:
         fieldRef:
           fieldPath: status.hostIP
   ```
-The environment variable for the host endpoint `AIRFLOW__SCHEDULER__STATSD_HOST` is supplied with the node's host IP address to route the StatsD data to the Datadog Agent pod on the same node as the Airflow pod. This setup also requires the Agent to have a `hostPort` open for this port `8125` and accepting non-local StatsD traffic. For more information, see [DogStatsD on Kubernetes Setup][12].
+The environment variable for the host endpoint `AIRFLOW__METRICS__STATSD_HOST` is supplied with the node's host IP address to route the StatsD data to the Datadog Agent pod on the same node as the Airflow pod. This setup also requires the Agent to have a `hostPort` open for this port `8125` and accepting non-local StatsD traffic. For more information, see [DogStatsD on Kubernetes Setup][12].
 
 This should direct the StatsD traffic from the Airflow container to a Datadog Agent ready to accept the incoming data. The last portion is to update the Datadog Agent with the corresponding `dogstatsd_mapper_profiles` . This can be done by copying the `dogstatsd_mapper_profiles` provided in the [Host installation][13] into your `datadog.yaml` file. Or by deploying your Datadog Agent with the equivalent JSON configuration in the environment variable `DD_DOGSTATSD_MAPPER_PROFILES`. With respect to Kubernetes the equivalent environment variable notation is:
   ```yaml
