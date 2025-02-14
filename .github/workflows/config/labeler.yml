@@ -217,6 +217,8 @@ integration/fly_io:
 - fly_io/**/*
 integration/forcepoint_secure_web_gateway:
 - forcepoint_secure_web_gateway/**/*
+integration/forcepoint_security_service_edge:
+- forcepoint_security_service_edge/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:

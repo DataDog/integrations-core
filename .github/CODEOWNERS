@@ -443,6 +443,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/avast/                                                             @DataDog/saas-integrations
+/avast/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/avast/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/avast/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /symantec_vip/                                                      @DataDog/saas-integrations
 /symantec_vip/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /symantec_vip/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
@@ -461,7 +466,12 @@ plaid/assets/logs/                                                  @DataDog/saa
 /ivanti_nzta/                                                       @DataDog/saas-integrations
 /ivanti_nzta/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
 /ivanti_nzta/manifest.json                                          @DataDog/saas-integrations @DataDog/documentation
-/ivanti_nzta/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+/ivanti_nzta/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/forcepoint_security_service_edge/                                   @DataDog/saas-integrations
+/forcepoint_security_service_edge/*.md                               @DataDog/saas-integrations @DataDog/documentation
+/forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
+/forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
