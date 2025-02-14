@@ -68,10 +68,6 @@ class Capacity:
                         self.gauge(dd_metric, value, tags=tags, hostname=hostname)
 
     def _get_contexts(self):
-        faults = self.api.get_faults()  # JMW hack
-        for f in faults:
-            self.log.info("JMW capacity.collect fault: %s", f)  # JMW hack
-
         for c, metric_dict in aci_metrics.CAPACITY_CONTEXT_METRICS.items():
             dd_metric = metric_dict.get("metric_name")
             utilized_metric_name = dd_metric + ".utilized"
