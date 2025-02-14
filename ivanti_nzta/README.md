@@ -8,6 +8,7 @@ This integration ingests the following logs:
 
 - **Analytics Logs**: This endpoint contains information about system activity through Admin Logs, Access Logs, and Event Logs.
 - **Alerts**: This endpoint contains information about alerts triggered by Ivanti nZTA, including security risks, and configuration changes.
+- **Application Access**: This endpoint contains information about application accessed by users.
 
 This integration collects logs from the sources listed above and sends them to Datadog for analysis with our Log Explorer and Cloud SIEM products
 
@@ -54,7 +55,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 ### Logs
 
-The Ivanti nZTA integration collects and forwards analytics logs and alerts to Datadog.
+The Ivanti nZTA integration collects and forwards analytics logs, alerts, and application access logs to Datadog.
 
 ### Metrics
 
