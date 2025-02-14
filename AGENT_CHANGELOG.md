@@ -1,3 +1,7 @@
+## Datadog Agent version [7.62.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7623)
+
+* MySQL [14.4.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+
 ## Datadog Agent version [7.62.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7620)
 
 * Aerospike [4.0.1](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
