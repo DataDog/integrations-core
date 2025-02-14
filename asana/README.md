@@ -8,6 +8,8 @@ This integration ingests the following logs:
 
 This integration gathers audit logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Asana platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Disclaimer**: By enabling this integration, you consent to the integration accessing your content and data from Asana. Please note that Asana is not responsible for the privacy, security, or integrity of any of your data outside the Asana services.
+
 ## Setup
 
 ### Generate API Credentials in Asana
