@@ -7,6 +7,8 @@ import time
 import paramiko
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils import fips
+from hashlib import sha256
 
 # Example ssh remote version: http://supervisord.org/changes.html
 #   - SSH-2.0-OpenSSH_8.1
@@ -20,6 +22,11 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
     """,
     re.VERBOSE,
 )
+
+
+if fips.is_enabled():
+    # Patch to allow paramiko to use SHA-256 vs MD5
+    paramiko.PKey.get_fingerprint = lambda x: sha256(x.asbytes()).digest()
 
 
 class CheckSSH(AgentCheck):
