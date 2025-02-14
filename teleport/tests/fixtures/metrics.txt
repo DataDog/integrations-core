@@ -1090,6 +1090,10 @@ auth_generate_seconds_bucket{le="+Inf"} 30
 auth_generate_seconds_sum 33.0
 auth_generate_seconds_count 30
 
+# HELP teleport_roles_total Number of roles that exist in the cluster
+# TYPE teleport_roles_total gauge
+teleport_roles_total 70
+
 # TYPE teleport_audit_emit_events counter
 teleport_audit_emit_events_total 0
 

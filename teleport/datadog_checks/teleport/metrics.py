@@ -61,6 +61,8 @@ AUTH_SERVICE_METRICS_MAP = {
     "teleport_migrations": "auth.migrations",
     "watcher_event_sizes": "auth.watcher_event_sizes",
     "watcher_events": "auth.watcher_events",
+    "heartbeat_connections_received": "auth.heartbeat_connections_received",
+    "teleport_roles_total": "auth.roles",
 }
 
 AUTH_AUDIT_LOG_METRICS_MAP = {

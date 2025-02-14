@@ -1,6 +1,6 @@
 services:
   teleport-service:
-    image: public.ecr.aws/gravitational/teleport:14.3
+    image: public.ecr.aws/gravitational/teleport-distroless:17.2
     ports:
       - 3000:3000
       - 3080:3080
