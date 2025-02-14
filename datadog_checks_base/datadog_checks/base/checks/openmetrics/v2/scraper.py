@@ -58,6 +58,7 @@ class OpenMetricsScraper:
 
         # Parse the configuration
         self.endpoint = config['openmetrics_endpoint']
+        self.target_info = config.get('target_info', False)
 
         self.metric_transformer = MetricTransformer(self.check, config)
         self.label_aggregator = LabelAggregator(self.check, config)
@@ -238,7 +239,13 @@ class OpenMetricsScraper:
         """
         runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
 
-        for metric in self.consume_metrics(runtime_data):
+        # Determine which consume method to use based on target_info config
+        if self.target_info:
+            consume_method = self.consume_metrics_w_target_info
+        else:
+            consume_method = self.consume_metrics
+
+        for metric in consume_method(runtime_data):
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
@@ -249,21 +256,50 @@ class OpenMetricsScraper:
 
     def consume_metrics(self, runtime_data):
         """
-        Yield the processed metrics and filter out excluded metrics.
+        Yield the processed metrics and filter out excluded metrics, without checking for target_info metrics.
         """
 
         metric_parser = self.parse_metrics()
+
         if not self.flush_first_value and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
 
         for metric in metric_parser:
+            # Skip excluded metrics
             if metric.name in self.exclude_metrics or (
                 self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
             ):
                 self.submit_telemetry_number_of_ignored_metric_samples(metric)
                 continue
+
+            yield metric
+
+    def consume_metrics_w_target_info(self, runtime_data):
+        """
+        Yield the processed metrics and filter out excluded metrics.
+        Additionally, handle target_info metrics.
+        """
+
+        metric_parser = self.parse_metrics()
+
+        if not self.flush_first_value and self.use_process_start_time:
+            metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
+        if self.label_aggregator.configured:
+            metric_parser = self.label_aggregator(metric_parser)
+
+        for metric in metric_parser:
+            # Skip excluded metrics
+            if metric.name in self.exclude_metrics or (
+                self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
+            ):
+                self.submit_telemetry_number_of_ignored_metric_samples(metric)
+                continue
+
+            # Process target_info metrics
+            if metric.name == 'target_info':
+                self.label_aggregator.process_target_info(metric)
 
             yield metric
 
@@ -312,7 +348,6 @@ class OpenMetricsScraper:
         """
         Yield a sample of processed data.
         """
-
         label_normalizer = get_label_normalizer(metric.type)
 
         for sample in metric.samples:
