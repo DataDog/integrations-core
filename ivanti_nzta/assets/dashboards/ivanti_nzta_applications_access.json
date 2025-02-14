@@ -1,6 +1,6 @@
 {
     "title": "Ivanti nZTA - Applications Access",
-    "description": "This dashboard provides a comprehensive view of application usage, user activity, and device access patterns across locations. It helps monitor security, optimize resource allocation, and identify potential access anomalies.",
+    "description": "This dashboard provides a comprehensive summary of Ivanti nZTA Applications Access logs",
     "widgets": [
         {
             "id": 5763859388305502,
@@ -89,7 +89,7 @@
                                             "comparator": ">",
                                             "value": 0,
                                             "palette": "custom_bg",
-                                            "custom_bg_color": "#dbff99"
+                                            "custom_bg_color": "#8c909b"
                                         }
                                     ]
                                 }
@@ -119,7 +119,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -171,7 +170,6 @@
                             "title": "Top Applications Accessed",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -242,7 +240,6 @@
                             "title": "Top Application Protocols",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -313,7 +310,6 @@
                             "title": "Top Application Protocol Display Name",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -385,7 +381,6 @@
                             "title": "Distribution of Events by Application Types",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -453,7 +448,6 @@
                             "title": "Total Unique Devices Who Access the Applications",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -502,7 +496,6 @@
                             "title": "Devices by Location",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -572,7 +565,6 @@
                             "title": "Top Device Types",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -641,7 +633,6 @@
                             "title": "Top Users by App Access",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -722,7 +713,6 @@
                             "title": "Log Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
