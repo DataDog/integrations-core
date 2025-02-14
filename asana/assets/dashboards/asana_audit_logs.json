@@ -6,10 +6,12 @@
             "id": 3098264915522038,
             "definition": {
                 "type": "image",
-                "url": "https://assets.asana.biz/transform/74c5faee-1258-451a-a331-e577c6eb59ca/logo-primary?io=transform:fill,width:2560&format=webp",
-                "sizing": "cover",
-                "has_background": true,
-                "has_border": true,
+                "url": "https://brand.asana.biz/image/upload/fl_preserve_transparency/v1715795607/Asana-Logo-Horizontal-Dark-Coral-PNG.jpg",
+                "url_dark_theme": "https://brand.asana.biz/image/upload/fl_preserve_transparency/v1715795606/Asana-Logo-Horizontal-Bright-Coral-PNG.jpg",
+                "sizing": "contain",
+                "margin": "lg",
+                "has_background": false,
+                "has_border": false,
                 "vertical_align": "center",
                 "horizontal_align": "center"
             },

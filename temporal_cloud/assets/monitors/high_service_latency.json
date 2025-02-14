@@ -8,7 +8,7 @@
     "id": 160133052,
     "name": "High service latency",
     "type": "query alert",
-    "query": "avg(last_5m):avg:temporal_cloud.cloud_metrics.v0_service_latency_p99{*} by {temporal_namespace,operation} > 0.2",
+    "query": "avg(last_5m):avg:temporal.cloud.v0_service_latency_p99{*} by {temporal_namespace,operation} > 0.2",
     "message": "{{#is_warning}}\nThe P99 service latency for Temporal Cloud operation: **{{operation.name}}** in namespace: **{{temporal_namespace.name}}** has exceeded the warning threshold.\nCurrent Service Latency (P99): **{{value}} seconds**\nThreshold: {{warn_threshold}} seconds\n{{/is_warning}}\n\n{{#is_alert}}\nThe P99 service latency for Temporal Cloud operation: **{{operation.name}}** in namespace: **{{temporal_namespace.name}}** has exceeded the alert threshold.\nCurrent Service Latency (P99): **{{value}} seconds**\nThreshold: {{threshold}} seconds\n{{/is_alert}}\n\n@example@example.com",
     "tags": [
       "integration:temporal-cloud"
