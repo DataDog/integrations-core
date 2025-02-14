@@ -64,4 +64,8 @@ WEB_METRICS = [
     'sonarqube.size.statements',
 ]
 
-ALL_METRICS = WEB_METRICS + JMX_METRICS
+WEB_NEW_METRICS = [
+    'sonarqube.issues.new_blocker_violations',
+]
+
+ALL_METRICS = WEB_METRICS + JMX_METRICS + WEB_NEW_METRICS
