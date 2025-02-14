@@ -7,7 +7,7 @@ Use LLM Observability to investigate the root cause of issues, monitor operation
 
 See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
 
-Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LangChain][1] Python library requests using Datadog metrics, APM, and logs.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LangChain][1] Python library requests using Datadog metrics and APM.
 
 ## Setup
 
@@ -145,14 +145,6 @@ See the [APM Python library documentation][2] for more advanced usage.
 
 See the [APM Python library documentation][3] for all the available configuration options.
 
-#### Log Prompt & Completion Sampling
-
-To enable log prompt and completion sampling, set the `DD_LANGCHAIN_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
-
-To adjust the log sample rate, see the [APM library documentation][3].
-
-**Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
-
 #### Validation
 
 Validate that the APM Python library can communicate with your Agent using:
@@ -179,8 +171,6 @@ This displays any errors sending data:
 
    ```
    ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-   WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
-   DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
    ```
 
 ## Data Collected

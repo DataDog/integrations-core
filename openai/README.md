@@ -6,7 +6,7 @@ Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatb
 
 [LLM Obs tracing view video][16]
 
-Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics, APM, and logs.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics and APM.
 
 ## Setup
 <!-- xxx tabs xxx -->
@@ -170,14 +170,6 @@ See the [APM Python library documentation][2] for more advanced usage.
 
 See the [APM Python library documentation][3] for all the available configuration options.
 
-##### Log Prompt & Completion Sampling
-
-To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
-
-To adjust the log sample rate, see the [APM library documentation][3].
-
-**Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
-
 ##### Validation
 
 Validate that the APM Python library can communicate with your Agent using:
@@ -204,8 +196,6 @@ This displays any errors sending data:
 
    ```
    ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-   WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
-   DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
    ```
 
 
@@ -343,14 +333,6 @@ See the [APM Node.js OpenAI documentation][8] for more advanced usage.
 
 See the [APM Node.js library documentation][9] for all the available configuration options.
 
-##### Log prompt and completion sampling
-
-To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests emit logs containing the prompts and completions.
-
-To adjust the log sample rate, see the [APM library documentation][3].
-
-**Note**: Logs submission requires `DD_API_KEY` to be specified.
-
 ##### Validation
 
 Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field and a correlating value of `openai.request`. See below for a truncated example of this output:
@@ -423,14 +405,6 @@ See the [APM PHP library documentation][17] for more advanced usage.
 ### Configuration
 
 See the [APM PHP library documentation][17] for all the available configuration options.
-
-#### Log prompt and completion sampling (Preview) 
-
-To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
-
-To adjust the log sample rate, see the [APM library documentation][17].
-
-**Note**: To ensure logs are correlated with traces, Datadog recommends you enable `DD_LOGS_INJECTION`.
 
 ### Validation
 
