@@ -507,7 +507,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(log_element.get("OccurredAt")))
                 payload['status'] = log_element.get("Category")
                 payload['stage_name'] = name
-                self.send_log(payload)
+                self.send_log(payload)  # JMWTUE try something like this
 
             self._submit_activity_logs(children, tags)
 

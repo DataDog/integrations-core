@@ -28,7 +28,7 @@ class LogCrawlerCheck(AgentCheck, ABC):
         for stream in self.get_log_streams():
             last_cursor = self.get_log_cursor(stream.name)
             for record in stream.records(cursor=last_cursor):
-                self.send_log(record.data, cursor=record.cursor, stream=stream.name)
+                self.send_log(record.data, cursor=record.cursor, stream=stream.name)  # JMWSEND_LOG
 
     def check(self, _) -> None:
         self.process_streams()

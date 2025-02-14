@@ -989,7 +989,7 @@ class AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
-    def send_log(self, data, cursor=None, stream='default'):
+    def send_log(self, data, cursor=None, stream='default'):  # JMWSEND_LOG try sending log(s) with this - look at how other integrations use this
         # type: (dict[str, str], dict[str, Any] | None, str) -> None
         """Send a log for submission.
 
