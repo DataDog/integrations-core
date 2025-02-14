@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-01-02",
+	"last_updated_at": "2025-01-02",
+	"title": "High number of dataset deletions",
+	"description": "This monitor triggers when multiple datasets are deleted in quick succession, which may signal potential data loss, unauthorized bulk deletions, or unintended actions that could impact data integrity and availability in your Sanity project.",
+	"definition": {
+		"id": 161218109,
+		"name": "High number of dataset deletions",
+		"type": "log alert",
+		"query": "logs(\"source:sanity service:activity-logs @evt.name:project.datasets.delete\").index(\"*\").rollup(\"count\").by(\"@projectId\").last(\"10m\") > 10",
+		"message": "{{#is_warning}}\nDataset deletion count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nDataset deletion count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nDataset deletion count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nDataset deletion count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:sanity"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "show_no_data",
+			"include_tags": false,
+			"silenced": {},
+			"new_group_delay": 0
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:sanity"
+	]
+}
