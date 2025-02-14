@@ -330,3 +330,5 @@ class NetworkDevicesMetadata(BaseModel):
         if isinstance(metadata, TopologyLinkMetadata):
             self.links.append(metadata)
         self.size += 1
+
+# JMW do I need any model(s) for faults?

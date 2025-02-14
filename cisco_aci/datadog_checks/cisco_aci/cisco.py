@@ -10,6 +10,7 @@ from datadog_checks.cisco_aci.aci_metrics import make_tenant_metrics
 from datadog_checks.cisco_aci.api import Api
 from datadog_checks.cisco_aci.capacity import Capacity
 from datadog_checks.cisco_aci.fabric import Fabric
+from datadog_checks.cisco_aci.faults import Faults
 from datadog_checks.cisco_aci.tags import CiscoTags
 from datadog_checks.cisco_aci.tenant import Tenant
 
@@ -144,7 +145,20 @@ class CiscoACICheck(AgentCheck):
             api.close()
             raise
 
-        # JMW add faults.collect()?
+        # JMW new faults.collect()?
+        try:
+            faults = Faults(self, api, self.instance, self.instance.get('namespace', 'default'))  # JMWFRI
+            faults.collect()
+        except Exception as e:
+            self.log.error('faults collection failed: %s', e)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="aci faults operations failed, returning a status of {}".format(e),
+                tags=service_check_tags,
+            )
+            api.close()
+            raise
 
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
