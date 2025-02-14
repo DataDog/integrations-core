@@ -346,6 +346,7 @@ class InstanceConfig(BaseModel):
     )
     adoprovider: Optional[str] = None
     agent_jobs: Optional[AgentJobs] = None
+    authentication_type: Optional[str] = None
     autodiscovery_db_service_check: Optional[bool] = None
     autodiscovery_exclude: Optional[tuple[str, ...]] = None
     autodiscovery_include: Optional[tuple[str, ...]] = None
