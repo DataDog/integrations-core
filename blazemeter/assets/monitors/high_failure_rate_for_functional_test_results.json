@@ -1,0 +1,32 @@
+{
+	"version": 2,
+	"created_at": "2025-01-08",
+	"last_updated_at": "2025-01-08",
+	"title": "High failure rate for functional test results",
+	"description": "Monitors the failure rate of functional tests, which check if the application works as expected. A high failure rate indicates that key features, like forms or buttons, may not be working properly. This monitor helps catch issues early to ensure a smooth user experience.",
+	"definition": {
+        "id": 160563299,
+        "name": "High failure rate for functional test results",
+        "type": "query alert",
+        "query": "avg(last_1h):(1 - avg:blazemeter.functional.gridSummary_passedPercent{*} by {masterid}) * 100 > 10",
+        "message": "{{#is_warning}}\nThe Failure for Master Id: **{{masterid.name}}** has exceeded the warning threshold. \nFailure Rate: **{{value}}**%\nThreshold: {{warn_threshold}} %\n{{/is_warning}}\n\n{{#is_alert}}\nThe Failure for Master Id: **{{masterid.name}}** has exceeded the alert threshold. \nFailure Rate: **{{value}}**%\nThreshold: {{threshold}} %\n{{/is_alert}}\n\n@example@example.com",
+        "tags": [
+            "integration:blazemeter",
+            "service:functional"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 10,
+                "warning": 5
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60
+        },
+        "priority": null
+    },
+	"tags": [
+			"integration:blazemeter"
+	]
+}
