@@ -1,7 +1,7 @@
 id: octopus_deploy
 metric_id: octopus-deploy
 backend_only: false
-facets: null
+facets: []
 pipeline:
   type: pipeline
   name: "Octopus Deploy"
