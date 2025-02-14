@@ -1,1 +1,0 @@
-Fix bug where `dbms_flavor` tag was repeatedly appended on each check run.
