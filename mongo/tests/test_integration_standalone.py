@@ -32,6 +32,7 @@ METRIC_VAL_CHECKS_OLD = {
     ],
 )
 def test_mongo_authdb(aggregator, check, instance_authdb, dd_run_check):
+    # dummy change
     check = check(instance_authdb)
     dd_run_check(check)
 
