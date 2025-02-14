@@ -37,8 +37,8 @@ facets:
     source: log
     type: integer
     unit:
-      name: second
       family: time
+      name: second
 pipeline:
   type: pipeline
   name: Ivanti nZTA
