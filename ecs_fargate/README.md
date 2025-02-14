@@ -263,6 +263,7 @@ For environment variables available with the Docker Agent container, see the [Do
 
 | Environment Variable               | Description                                    |
 |------------------------------------|------------------------------------------------|
+| `DD_TAGS`                          | Add tags. For example: `key1:value1 key2:value2`. |
 | `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
