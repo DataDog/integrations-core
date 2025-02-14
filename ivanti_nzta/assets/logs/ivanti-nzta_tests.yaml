@@ -209,6 +209,40 @@ tests:
   sample: |-
     {
       "severity" : "INFO",
+      "controller" : false,
+      "device_id" : "",
+      "raw_message" : "Closed connection to 10.10.10.10 after 360 seconds, with 7200 bytes read and 98885 bytes written",
+      "user_name" : "test_user",
+      "session_id" : "",
+      "message_id" : "NWC30993",
+      "gateway_id" : "",
+      "gateway_name" : "",
+      "source_ip" : "10.10.10.10",
+      "timestamp" : 1738659494
+    }
+  service: "access-logs"
+  result: null
+  -
+  sample: |-
+    {
+      "severity" : "INFO",
+      "controller" : false,
+      "device_id" : "",
+      "raw_message" : "VPN Tunneling: Session started for user  (session: sid34be074433c8d03d41ed12109d98bb4a4e16b02a4dca7dcd) with IPv4 address 10.10.10.10, hostname localhost",
+      "user_name" : "test_user",
+      "session_id" : "",
+      "message_id" : "NWC23464",
+      "gateway_id" : "",
+      "gateway_name" : "",
+      "source_ip" : "10.10.10.10",
+      "timestamp" : 1738659494
+    }
+  service: "access-logs"
+  result: null
+ -
+  sample: |-
+    {
+      "severity" : "INFO",
       "controller" : true,
       "device_id" : "",
       "raw_message" : "Login failed using auth server Admin Auth (Local Authentication). Reason: Invalid Credentials",

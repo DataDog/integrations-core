@@ -28,6 +28,14 @@ facets:
     path: ivanti_nzta.connections
     source: log
     type: integer
+  - description: ''
+    facetType: range
+    groups:
+      - Ivanti nZTA
+    name: Duration
+    path: ivanti_nzta.duration
+    source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Ivanti nZTA
@@ -157,6 +165,10 @@ pipeline:
               failed_login_rule2 %{word} authentication failed for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ip:network.client.ip}
 
               authentication_server_rule Authenticating user with %{word} Authentication Server:%{_space}"%{regex("[^\"]*"):auth_server}"
+
+              vpn_tunnelling_rule VPN Tunneling: Session started for user%{_space}\(session:%{_space}%{notSpace:session_id}\)%{_space}with IPv4 address %{ipv4:network.client.ip},%{_space}hostname %{data:hostname}
+
+              connection_rule Closed connection to %{ip:network.client.ip} after %{number:ivanti_nzta.duration} seconds, with %{integer:network.bytes_read} bytes read and %{integer:network.bytes_written} bytes written
     - type: pipeline
       name: Event Logs
       enabled: true

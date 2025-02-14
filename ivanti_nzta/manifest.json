@@ -20,6 +20,11 @@
         "caption": "Ivanti nZTA - Alerts",
         "image_url": "images/ivanti_nzta_alerts.png",
         "media_type": "image"
+      },
+      {
+        "caption": "Ivanti nZTA - Applications Access",
+        "image_url": "images/ivanti_nzta_applications_access.png",
+        "media_type": "image"
       }
     ],
     "classifier_tags": [
@@ -43,7 +48,8 @@
     },
     "dashboards": {
       "Ivanti nZTA - Analytics Logs": "assets/dashboards/ivanti_nzta_analytics_logs.json",
-      "Ivanti nZTA - Alerts": "assets/dashboards/ivanti_nzta_alerts.json"
+      "Ivanti nZTA - Alerts": "assets/dashboards/ivanti_nzta_alerts.json",
+      "Ivanti nZTA - Applications Access": "assets/dashboards/ivanti_nzta_applications_access.json"
     },
     "logs": {
       "source": "ivanti-nzta"
