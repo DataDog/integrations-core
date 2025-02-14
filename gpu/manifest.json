@@ -1,6 +1,6 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "a18dccd2-35c0-40e2-9c0a-7a01a5daf5f3",
+  "app_uuid": "1f730d2a-144d-43bc-aec3-9cf274ba8d73",
   "app_id": "gpu",
   "display_on_public_website": false,
   "tile": {
@@ -40,7 +40,6 @@
       },
       "source_type_id": 23066,
       "auto_install": true
-    },
-    "dashboards": {}
+    }
   }
 }
