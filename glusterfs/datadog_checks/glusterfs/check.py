@@ -22,6 +22,8 @@ CLUSTER_STATUS = 'cluster_status'
 
 GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
 
+# TODO remove: trigger CI
+
 
 class GlusterfsCheck(AgentCheck):
     __NAMESPACE__ = 'glusterfs'
