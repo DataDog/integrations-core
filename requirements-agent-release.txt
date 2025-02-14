@@ -92,7 +92,7 @@ datadog-impala==3.2.0
 datadog-istio==8.1.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
-datadog-kafka-consumer==6.4.0
+datadog-kafka-consumer==6.5.0
 datadog-kafka==4.0.0
 datadog-karpenter==2.2.0
 datadog-keda==1.0.0
@@ -124,7 +124,7 @@ datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
 datadog-milvus==1.1.0
 datadog-mongo==8.4.0
-datadog-mysql==14.5.0
+datadog-mysql==14.5.1
 datadog-nagios==3.0.0
 datadog-network==5.1.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
