@@ -36,10 +36,13 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM persons;
     SELECT * FROM persons;
     SELECT * FROM persons;
+    VACUUM ANALYZE persons;
     CREATE SCHEMA public2;
     CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
+
+
 EOSQL
 
 # Create publication for logical replication tests
