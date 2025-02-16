@@ -392,9 +392,9 @@ class SparkCheck(AgentCheck):
 
         return spark_apps
 
-    def _describe_app(self, aspect, running_apps, addl_tags):
+    def _describe_app(self, property, running_apps, addl_tags):
         """
-        Get payloads that describe certain aspect of the running apps.
+        Get payloads that describe certain property of the running apps.
 
         Examples of "aspects":
         - the app's jobs
@@ -402,11 +402,14 @@ class SparkCheck(AgentCheck):
         """
         for app_id, (app_name, tracking_url) in running_apps.items():
             base_url = self._get_request_url(tracking_url)
-            response = self._rest_request(base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, aspect)
+            response = self._rest_request(base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, property)
             try:
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
             except JSONDecodeError:
-                self.log.debug('test')
+                self.log.debug(
+                    'Skipping metrics for %s from app %s due to unparseable JSON payload.', property, app_name
+                )
+                continue
 
     def _spark_job_metrics(self, running_apps, addl_tags):
         """
@@ -491,10 +494,8 @@ class SparkCheck(AgentCheck):
                 self.log.debug('streaming/statistics: %s', stats)
                 self._set_metrics_from_json(app_tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
         except HTTPError as e:
-            # NOTE: If api call returns response 404
-            # then it means that the application is not a streaming application, we should skip metric submission
-            if e.response.status_code != 404:
-                raise
+            self.log.debug("Got an error collecting streaming/statistics", e, exc_info=True)
+            pass
 
     def _spark_structured_streams_metrics(self, running_apps, addl_tags):
         """
