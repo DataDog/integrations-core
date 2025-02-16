@@ -5,7 +5,7 @@
 import datetime as dt
 import re
 
-from dateutil.tz import UTC
+from dateutil import tz
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
@@ -99,6 +99,22 @@ class IBMMQConfig:
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
+
+        try:
+            if self.qm_timezone != 'UTC':
+                self.qm_stats_tz = tz.gettz(self.qm_timezone)
+                if self.qm_stats_tz is None:
+                    raise ValueError(f"'{self.qm_timezone}' is not a recognized timezone.")
+            else:
+                self.qm_stats_tz = tz.UTC
+        except ValueError as e:
+            self.log.error(
+                "Invalid timezone: %s. Defaulting to UTC. Please specify a valid time zone in IANA/Olson format. %s",
+                self.qm_timezone,
+                e,
+            )
+            self.qm_stats_tz = tz.UTC
+
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
 
         custom_tags = instance.get('tags', [])  # type: List[str]
@@ -168,7 +184,7 @@ class IBMMQConfig:
         else:
             self.queue_manager_process_pattern = None
 
-        self.instance_creation_datetime = dt.datetime.now(UTC)
+        self.instance_creation_datetime = dt.datetime.now(tz.UTC)
 
     def add_queues(self, new_queues):
         # add queues without duplication
