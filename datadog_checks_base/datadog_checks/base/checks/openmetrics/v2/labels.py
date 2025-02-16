@@ -7,17 +7,23 @@ from ....utils.functions import no_op
 class LabelAggregator:
     def __init__(self, check, config):
         share_labels = config.get('share_labels', {})
+        self.target_info = config.get('target_info', False)
+
         if not isinstance(share_labels, dict):
             raise TypeError('Setting `share_labels` must be a mapping')
-        elif not share_labels:
+
+        if not isinstance(self.target_info, bool):
+            raise TypeError('Setting `target_info` must be a boolean')
+
+        if not share_labels and not self.target_info:
             self.populate = no_op
-            return
 
         self.cache_shared_labels = config.get('cache_shared_labels', True)
         self.shared_labels_cached = False
-
+        self.info_metric = {'target_info': {}}
         self.metric_config = {}
         for metric, config in share_labels.items():
+            check.log.debug("Share label items, metrics is: %s, config is %s", metric, config)
             data = self.metric_config[metric] = {}
 
             if config is True:
@@ -31,6 +37,7 @@ class LabelAggregator:
                     raise TypeError(f'Option `values` for metric `{metric}` of setting `share_labels` must be an array')
 
                 allowed_values = set()
+
                 for i, value in enumerate(values, 1):
                     value = str(value)
 
@@ -89,17 +96,19 @@ class LabelAggregator:
         else:
             try:
                 metric_config = self.metric_config.copy()
-
-                # Cache every encountered metric until the desired labels have been collected
+                target_info_metric = self.info_metric.copy()
                 cached_metrics = []
 
                 for metric in metrics:
-                    if metric.name in metric_config:
+                    if metric_config and metric.name in metric_config:
                         self.collect(metric, metric_config.pop(metric.name))
+
+                    if target_info_metric and metric.name in target_info_metric:
+                        self.collect(metric, target_info_metric.pop(metric.name))
 
                     cached_metrics.append(metric)
 
-                    if not metric_config:
+                    if not (metric_config or target_info_metric):
                         break
 
                 yield from cached_metrics
