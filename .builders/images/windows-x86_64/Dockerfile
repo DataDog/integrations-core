@@ -126,8 +126,6 @@ COPY build_script.ps1 C:\build_script.ps1
 COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
 ENV DD_BUILD_COMMAND="pwsh C:\build_script.ps1"
 
-# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
-ENV PIP_NO_BINARY="confluent_kafka"
 # Where to find native dependencies when building extensions and for wheel repairing
 RUN New-Item -Path "C:\include" -ItemType Directory
 RUN New-Item -Path "C:\lib" -ItemType Directory
