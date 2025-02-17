@@ -1,0 +1,26 @@
+{
+    "ItemType": "OctopusServerNode",
+    "TotalResults": 1,
+    "ItemsPerPage": 3,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "Items": [
+      {
+        "Id": "OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
+        "Name": "octopus-i8932-79236734bc234-09h234n",
+        "MaxConcurrentTasks": 5,
+        "IsInMaintenanceMode": false,
+        "Links": {
+          "Self": "/api/octopusservernodes/OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
+          "Details": "/api/octopusservernodes/OctopusServerNodes-octopus-i8932-79236734bc234-09h234n/details"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/octopusservernodes?skip=0&take=30",
+      "Template": "/api/octopusservernodes{?skip,take,ids,partialName}",
+      "Page.All": "/api/octopusservernodes?skip=0&take=2147483647",
+      "Page.Current": "/api/octopusservernodes?skip=0&take=30",
+      "Page.Last": "/api/octopusservernodes?skip=0&take=30"
+    }
+  }

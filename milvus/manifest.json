@@ -1,0 +1,70 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "38ddb395-6770-4b81-9730-e43cf4b4b2a0",
+  "app_id": "milvus",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the performance and usage of your Milvus deployments.",
+    "title": "Milvus",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::AI/ML",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 30880529,
+      "source_type_name": "Milvus",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "milvus.",
+        "check": "milvus.build_info",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "milvus"
+      ]
+    },
+    "dashboards": {
+      "Milvus Overview": "assets/dashboards/milvus_overview.json"
+    },
+    "monitors": {
+      "DML channel lag": "assets/monitors/dml_channel_lag.json",
+      "Request latency": "assets/monitors/request_latency.json",
+      "Index build latency": "assets/monitors/index_build_latency.json"
+    },
+    "saved_views": {
+      "Milvus Logs Overview": "assets/saved_views/logs_overview.json",
+      "Milvus Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "logs": {
+      "source": "milvus"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

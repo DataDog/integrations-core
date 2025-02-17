@@ -305,8 +305,8 @@ files:
         description: |
           The events that should be collected by the vSphere integration.
 
-          The "event" specifies the event type you want to include, and the "excluded_messages" is a list of
-          messages of that event type you do not want to collect. For example, if the key
+          The "event" specifies the event type you want to include, and optionally, the "excluded_messages" is
+          a list of messages of that event type you do not want to collect. For example, if the key
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
           then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.
