@@ -8,7 +8,7 @@ This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog 
 
 ### Installation
 
-Starting from Agent release 7.47.0, the DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data. As the default counters are not sufficient, Datadog recommends using the following DCGM configuration to cover the same ground as the NVML integration in addition to having useful metrics.
+Starting from Agent release 7.47.0, the DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data. As the default counters are not sufficient, Datadog recommends using the following DCGM configuration to cover the same ground as the NVML integration in addition to having useful metrics. This integration is fully supported by Agent 7.59+. Some telemetry may not be available for older agent versions.
 
 ```
 # Format

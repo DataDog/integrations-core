@@ -2553,7 +2553,7 @@ def test_machines_metrics(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2567,7 +2567,7 @@ def test_machines_metrics(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2580,8 +2580,8 @@ def test_machines_metrics(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "tag",
-            "test",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2594,8 +2594,8 @@ def test_machines_metrics(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
-            "tag",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
 
@@ -2610,7 +2610,7 @@ def test_machines_metrics(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2624,7 +2624,7 @@ def test_machines_metrics(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
 
@@ -2688,7 +2688,7 @@ def test_machines_pagination(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2702,7 +2702,7 @@ def test_machines_pagination(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2715,8 +2715,8 @@ def test_machines_pagination(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "tag",
-            "test",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2729,8 +2729,8 @@ def test_machines_pagination(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
-            "tag",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
 
@@ -2745,7 +2745,7 @@ def test_machines_pagination(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2759,7 +2759,7 @@ def test_machines_pagination(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
 

@@ -112,6 +112,17 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     )
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_mysql_version_set(aggregator, dd_run_check, instance_basic):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    # run check twice to test the version is set once and only once
+    dd_run_check(mysql_check, cancel=False)
+    dd_run_check(mysql_check, cancel=True)
+    assert mysql_check.version is not None
+    assert mysql_check.tags.count('dbms_flavor:{}'.format(mysql_check.version.flavor.lower())) == 1
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
