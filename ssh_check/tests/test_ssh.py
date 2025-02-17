@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 from copy import deepcopy
+from hashlib import sha256
 
 import paramiko
 import pytest
 from mock import MagicMock, call, create_autospec
 
-from datadog_checks.ssh_check import CheckSSH
 from datadog_checks.base.utils import fips
-from hashlib import sha256
+from datadog_checks.ssh_check import CheckSSH
 
 from . import common
 

@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import time
+from hashlib import sha256
 
 import paramiko
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils import fips
-from hashlib import sha256
 
 # Example ssh remote version: http://supervisord.org/changes.html
 #   - SSH-2.0-OpenSSH_8.1
