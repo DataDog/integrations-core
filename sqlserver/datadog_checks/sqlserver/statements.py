@@ -626,9 +626,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
-                yield obfuscated_plan_event
                 if self._collect_raw_query_statement:
                     raw_plan_event = copy.deepcopy(obfuscated_plan_event)
                     raw_plan_event["dbm_type"] = "rqp"  # raw query plan
                     raw_plan_event["db"]["plan"]["definition"] = raw_plan
+                    # add the raw signature to the event so we can use it to look up the raw plan
+                    raw_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
+                    obfuscated_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
                     yield raw_plan_event
+                yield obfuscated_plan_event

@@ -9,7 +9,7 @@
         path /api/spaces
     }
     route @get_spaces {
-        rewrite * /GET/api/spaces/skip=0/take=30/response.json
+        rewrite * /GET/api/spaces/high_limit_pg1.json
         file_server
     }
     @get_projectgroups {
@@ -17,7 +17,7 @@
         path /api/Spaces-1/projectgroups
     }
     route @get_projectgroups {
-        rewrite * /GET/api/Spaces-1/projectgroups/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/projectgroups/high_limit_pg1.json
         file_server
     }
     @get_projectgroups_1_projects {
@@ -25,7 +25,7 @@
         path /api/Spaces-1/projectgroups/ProjectGroups-1/projects
     }
     route @get_projectgroups_1_projects {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-1/projects/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-1/projects/high_limit_pg1.json
         file_server
     }
     @get_projectgroups_2_projects {
@@ -33,7 +33,7 @@
         path /api/Spaces-1/projectgroups/ProjectGroups-2/projects
     }
     route @get_projectgroups_2_projects {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-2/projects/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-2/projects/high_limit_pg1.json
         file_server
     }
     @get_projectgroups_3_projects {
@@ -41,7 +41,7 @@
         path /api/Spaces-1/projectgroups/ProjectGroups-3/projects
     }
     route @get_projectgroups_3_projects {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/projects/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/projects/high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_1 {
@@ -50,7 +50,7 @@
         expression {query.project}.contains("Projects-1") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project_1_in_progress_high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_2 {
@@ -59,7 +59,7 @@
         expression {query.project}.contains("Projects-2") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project_2_in_progress_high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_3 {
@@ -68,7 +68,7 @@
         expression {query.project}.contains("Projects-3") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project_3_in_progress_high_limit_pg1.json
         file_server
     }
     @get_running_tasks_project_4 {
@@ -77,7 +77,7 @@
         expression {query.project}.contains("Projects-4") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
     route @get_running_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project_4_in_progress_high_limit_pg1.json
         file_server
     }
     @get_completed_tasks_project_1 {
@@ -86,7 +86,7 @@
         expression {query.project}.contains("Projects-1") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_1 {
-        rewrite * "/GET/api/Spaces-1/tasks/name=Deploy/project=Projects-1/fromCompletedDate=14_45_00.123000/toCompletedDate=14_45_00.123000/skip=0/take=30/response.json"
+        rewrite * /GET/api/Spaces-1/tasks/project_1_completed_high_limit_pg1.json
         file_server
     }
     @get_completed_tasks_project_2 {
@@ -95,7 +95,7 @@
         expression {query.project}.contains("Projects-2") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_2 {
-        rewrite * "/GET/api/Spaces-1/tasks/name=Deploy/project=Projects-2/fromCompletedDate=14_45_00.123000/toCompletedDate=14_45_00.123000/skip=0/take=30/response.json"
+        rewrite * /GET/api/Spaces-1/tasks/project_2_completed_high_limit_pg1.json
         file_server
     }
     @get_completed_tasks_project_3 {
@@ -104,7 +104,7 @@
         expression {query.project}.contains("Projects-3") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_3 {
-        rewrite * "/GET/api/Spaces-1/tasks/name=Deploy/project=Projects-3/fromCompletedDate=14_45_00.123000/toCompletedDate=14_45_00.123000/skip=0/take=30/response.json"
+        rewrite * /GET/api/Spaces-1/tasks/project_3_completed_high_limit_pg1.json
         file_server
     }
     @get_completed_tasks_project_4 {
@@ -113,7 +113,7 @@
         expression {query.project}.contains("Projects-4") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
     route @get_completed_tasks_project_4 {
-        rewrite * "/GET/api/Spaces-1/tasks/name=Deploy/project=Projects-4/fromCompletedDate=14_45_00.123000/toCompletedDate=14_45_00.123000/skip=0/take=30/response.json"
+        rewrite * /GET/api/Spaces-1/tasks/project_4_completed_high_limit_pg1.json
         file_server
     }
     @get_octopusservernodes {
@@ -121,7 +121,7 @@
         path /api/octopusservernodes
     }
     route @get_octopusservernodes {
-        rewrite * /GET/api/octopusservernodes/skip=0/take=30/response.json
+        rewrite * /GET/api/octopusservernodes/high_limit_pg1.json
         file_server
     }
     @get_machines {
@@ -129,7 +129,7 @@
         path /api/Spaces-1/machines
     }
     route @get_machines {
-        rewrite * /GET/api/Spaces-1/machines/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/machines/high_limit_pg1.json
         file_server
     }
     @get_tasks_1844 {
@@ -169,7 +169,7 @@
         path /api/Spaces-1/environments
     }
     route @get_environments {
-        rewrite * /GET/api/Spaces-1/environments/skip=0/take=30/response.json
+        rewrite * /GET/api/Spaces-1/environments/high_limit_pg1.json
         file_server
     }
     @get_releases_1 {

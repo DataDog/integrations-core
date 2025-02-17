@@ -1,6 +1,6 @@
 # Elasticsearch Integration
 
-![Elastic search dashboard][1]
+![Elasticsearch dashboard][1]
 
 ## Overview
 
@@ -60,7 +60,7 @@ To configure this check for an Agent running on a host:
       - All requests to the Amazon ES configuration API must be signed. See the [Making and signing OpenSearch Service requests][6] for details.
       - The `aws` auth type relies on [boto3][7] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
       - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI.
-      - If you have enabled security features in Elastic Search, you can use `monitor` or `manage` privilege while using the API to make the calls to the Elastic Search indices.
+      - If you have enabled security features in Elasticsearch, you can use `monitor` or `manage` privilege while using the API to make the calls to the Elasticsearch indices.
       - Include the following properties in the created role:
         ```json
         name = "datadog"
@@ -81,9 +81,9 @@ To configure this check for an Agent running on a host:
 
 ###### Custom Queries
 
-The ElasticSearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
+The Elasticsearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
 
-**Note:** When running custom queries, use a read only account to ensure that the ElasticSearch instance does not change.
+**Note:** When running custom queries, use a read only account to ensure that the Elasticsearch instance does not change.
 
 ```yaml
 custom_queries:
@@ -124,7 +124,7 @@ The custom query sends as a `GET` request. If you use an optional `payload` para
 Datadog APM integrates with Elasticsearch to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
 
 1. [Enable trace collection in Datadog][9].
-2. [Instrument your application that makes requests to ElasticSearch][10].
+2. [Instrument your application that makes requests to Elasticsearch][10].
 
 ##### Log collection
 

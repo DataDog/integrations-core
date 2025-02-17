@@ -15,11 +15,17 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+Follow [these steps][10] to set up metric generation in Quarkus.
+
+Then configure the Agent:
+
 1. Edit the `quarkus.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Quarkus performance data. See the [sample quarkus.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
 #### Collecting Logs
+
+Follow [these steps][11] to configure Quarkus to emit logs.
 
 Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
@@ -69,3 +75,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/quarkus/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/quarkus/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://quarkus.io/guides/telemetry-micrometer-tutorial
+[11]: https://quarkus.io/guides/logging

@@ -8,13 +8,13 @@ import re
 import time
 from contextlib import contextmanager
 
-import psycopg
-import psycopg.sql
+import psycopg2
+import psycopg2.sql
 import pytest
 
 from datadog_checks.base import ConfigurationError
 
-from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
+from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
@@ -75,7 +75,7 @@ CHECKSUM_METRICS = {
 @contextmanager
 def get_postgres_connection(dbname="postgres"):
     conn_args = {'host': HOST, 'dbname': dbname, 'user': USER_ADMIN, 'password': PASSWORD_ADMIN}
-    conn = psycopg.connect(**conn_args)
+    conn = psycopg2.connect(**conn_args)
     conn.autocommit = True
     yield conn
 
@@ -172,7 +172,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute(psycopg.sql.SQL("CREATE DATABASE {}").format(psycopg.sql.Identifier(database_to_find)))
+            cursor.execute(psycopg2.sql.SQL("CREATE DATABASE {}").format(psycopg2.sql.Identifier(database_to_find)))
 
             time.sleep(pg_instance["database_autodiscovery"]['refresh'])
             databases = check.autodiscovery.get_items()
@@ -180,7 +180,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
         finally:
             # Need to drop the new database to clean up the environment for next tests.
             cursor.execute(
-                psycopg.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg.sql.Identifier(database_to_find))
+                psycopg2.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg2.sql.Identifier(database_to_find))
             )
 
 
@@ -298,3 +298,29 @@ def test_autodiscovery_dbname_specified(integration_check, pg_instance):
 
     with pytest.raises(ConfigurationError):
         integration_check(pg_instance)
+
+
+def _set_allow_connection(dbname: str, allow: bool):
+    with get_postgres_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            psycopg2.sql.SQL("UPDATE pg_database SET datallowconn = %s WHERE datname = %s;"),
+            (allow, dbname),
+        )
+        conn.commit()
+
+
+@pytest.mark.integration
+def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
+    db_to_disable = "dogs_0"
+    _set_allow_connection(db_to_disable, False)
+    pg_instance["database_autodiscovery"] = {"enabled": True, "include": ["dogs_[0-3]"]}
+    pg_instance['relations'] = [
+        {'relation_regex': '.*'},
+    ]
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance)
+    check_common_metrics(aggregator, expected_tags=expected_tags)
+    _set_allow_connection(db_to_disable, True)

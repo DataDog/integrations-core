@@ -1,3 +1,24 @@
+## Datadog Agent version [7.62.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7623)
+
+* MySQL [14.4.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+
+## Datadog Agent version [7.62.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7620)
+
+* Aerospike [4.0.1](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
+* Airflow [6.2.0](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
+* Datadog Checks Base [37.3.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [4.2.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* Datadog Cluster Agent [5.2.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+* DNS [5.0.1](https://github.com/DataDog/integrations-core/blob/master/dns_check/CHANGELOG.md)
+* Keda [1.0.0](https://github.com/DataDog/integrations-core/blob/master/keda/CHANGELOG.md)
+* Milvus [1.0.0](https://github.com/DataDog/integrations-core/blob/master/milvus/CHANGELOG.md)
+* MongoDB [8.3.1](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [14.4.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Postgres [22.4.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Quarkus [1.0.0](https://github.com/DataDog/integrations-core/blob/master/quarkus/CHANGELOG.md)
+* SQL Server [21.0.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md) **BREAKING CHANGE**
+* Supabase [1.0.0](https://github.com/DataDog/integrations-core/blob/master/supabase/CHANGELOG.md)
+
 ## Datadog Agent version [7.61.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7610)
 
 * ArgoCD [3.2.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)

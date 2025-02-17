@@ -600,7 +600,7 @@ jobs:
         merge-multiple: true
 
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@v1
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         skip-existing: true
         user: __token__

@@ -4,15 +4,12 @@
 import os
 
 import mock
-import pytest
 import requests
 
 from datadog_checks.dev.http import MockResponse
 
 from .common import HERE
 from .metrics import WEB_METRICS
-
-pytestmark = [pytest.mark.unit]
 
 
 def test_service_check_critical(aggregator, dd_run_check, sonarqube_check, web_instance):
