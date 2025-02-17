@@ -24,20 +24,20 @@ This integration collects logs from the sources listed above and sends them to D
 1. Log in to your Ivanti nZTA platform.
 2. Go to **Secure Access** > **Manage Users**
 3. Navigate to **Authentication Servers** tab.
-4. Under the **Admin Auth**, Click on **Create User** and enter the following details:
+4. Under **Admin Auth**, click **Create User** and enter the following details:
    - **Full Name**: Enter a descriptive and identifiable name.
    - **User Name**: Enter a unique username.
    - **Password**: Enter a strong password.
    - **Confirm Password**: Re-enter the password.
 5. Uncheck the **Temporary password** checkbox.
-6. Click on **Create User** to create the user.
+6. Click **Create User**.
 
-**Note**: Use a newly created admin user only for this integration and not for UI login to ensure smooth execution.
+**Note**: Use a newly created admin user solely for this integration, rather than the UI login, to ensure smooth execution.
 
 #### Identify the Host
 
 1. To identify the host of your Ivanti nZTA, check the Ivanti nZTA platform URL.
-   <br>**For example**: example.pulsezta.net
+   <br>**For example**: `example.pulsezta.net`
 
 ### Connect your Ivanti nZTA Account to Datadog
 
@@ -49,7 +49,7 @@ This integration collects logs from the sources listed above and sends them to D
    | Username   | The Tenant Admin Username of your Ivanti nZTA platform. |
    | Password   | The Password of your Ivanti nZTA platform.              |
 
-2. Click the Save button to save your settings.
+2. Click **Save**.
 
 ## Data Collected
 
