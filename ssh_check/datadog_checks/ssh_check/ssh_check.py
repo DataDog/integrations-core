@@ -24,9 +24,13 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
 )
 
 
-if fips.is_enabled():
+def patch_paramiko():
     # Patch to allow paramiko to use SHA-256 vs MD5
     paramiko.PKey.get_fingerprint = lambda x: sha256(x.asbytes()).digest()
+
+
+if fips.is_enabled():
+    patch_paramiko()
 
 
 class CheckSSH(AgentCheck):
