@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import paramiko
-from datadog_checks.ssh_check.ssh_check import patch_paramiko
 from mock import patch
+
+from datadog_checks.ssh_check.ssh_check import patch_paramiko
 
 
 def test_paramiko_uses_md5():
@@ -23,7 +24,7 @@ def test_patch():
     '''
     with patch("paramiko.pkey.md5") as mock_md5, patch("datadog_checks.ssh_check.ssh_check.sha256") as mock_sha256:
         patch_paramiko()
-        mock_sha256.assert_not_called()  # Checking that the patch definition does not count as a function call to SHA256
+        mock_sha256.assert_not_called()  # Checking that the patch definition does not count as a function call
         paramiko.PKey().get_fingerprint()
         mock_md5.assert_not_called()
         mock_sha256.assert_called_once()
