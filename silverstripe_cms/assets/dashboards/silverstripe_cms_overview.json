@@ -157,11 +157,6 @@
                             },
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -171,6 +166,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -180,9 +183,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -569,11 +569,6 @@
                             },
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -583,6 +578,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -592,9 +595,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -724,11 +724,6 @@
                             },
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -738,6 +733,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -747,9 +750,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -939,7 +939,7 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 3,
+                            "width": 2,
                             "height": 4
                         }
                     },
@@ -956,11 +956,6 @@
                             },
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -970,6 +965,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -979,9 +982,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -991,9 +991,9 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 2,
                             "y": 0,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -1148,7 +1148,7 @@
                     {
                         "id": 4863776750485412,
                         "definition": {
-                            "title": "Broken Page Types Over Time",
+                            "title": "Published Broken Page Types Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1178,7 +1178,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages.broken_content{$Silverstripe_Host} by {page_type}"
+                                            "query": "sum:silverstripe_cms.pages_live.broken_content{$Silverstripe_Host} by {page_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1353,11 +1353,6 @@
                             },
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -1367,6 +1362,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -1376,9 +1379,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -1427,7 +1427,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files.count{$Silverstripe_Host} by {file_type}"
+                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host} by {file_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1508,11 +1508,6 @@
                             },
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -1522,6 +1517,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -1531,9 +1534,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
