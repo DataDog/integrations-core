@@ -8,9 +8,15 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into ExtraHop logs.",
+    "description": "Gain insights into ExtraHop detection and investigation logs.",
     "title": "ExtraHop",
-    "media": [],
+    "media": [
+      {
+        "caption": "ExtraHop - Detections",
+        "image_url": "images/extrahop_detections.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +35,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "ExtraHop - Detections": "assets/dashboards/extrahop_detections.json"
     }
   },
   "author": {
@@ -36,6 +45,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

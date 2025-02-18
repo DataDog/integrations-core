@@ -172,6 +172,14 @@ class PostgresStatementMetrics(DBMAsyncJob):
             'pg_stat_statements_max_warning_threshold', 10000
         )
         self._config = config
+        # This config option isn't publicized because the related option in datadog.yaml
+        # (database_monitoring.metrics.batch_max_content_size) cannot be decreased, and increasing it
+        # will typically cause the backend to reject the payload
+        # It's set here as an option for potential debugging issues but should not be used otherwise
+        # NB: This value should always match the datadog.yaml value, whose default is set
+        # https://github.com/DataDog/datadog-agent/blob/96d253e8b91326c2418302b13a73b420ad5a6d92/comp/forwarder/eventplatform/eventplatformimpl/epforwarder.go#L79
+        # If that default changes, this should be updated
+        self.batch_max_content_size = config.init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000)
         self._tags_no_db = None
         self.tags = None
         self._state = StatementMetrics()
@@ -262,22 +270,54 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 return
             for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-            payload = {
+
+            payload_wrapper = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
                 'cloud_metadata': self._config.cloud_metadata,
-                'postgres_rows': rows,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
                 'ddagenthostname': self._check.agent_hostname,
                 'service': self._config.service,
             }
-            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+
+            payloads = self._get_query_metrics_payloads(payload_wrapper, rows)
+
+            for payload in payloads:
+                self._check.database_monitoring_query_metrics(payload)
         except Exception:
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
+
+    def _get_query_metrics_payloads(self, payload_wrapper, rows):
+        payloads = []
+
+        max_size = self.batch_max_content_size
+        queue = [rows]
+        while queue:
+            current = queue.pop()
+            if len(current) == 0:
+                continue
+
+            payload = copy.deepcopy(payload_wrapper)
+            payload["postgres_rows"] = current
+            serialized_payload = json.dumps(payload, default=default_json_event_encoding)
+            size = len(serialized_payload)
+            if size < max_size:
+                payloads.append(serialized_payload)
+            else:
+                if len(current) == 1:
+                    self._log.warning(
+                        "A single query is too large to send to Datadog. This query will be dropped. " "size=%d",
+                        size,
+                    )
+                    continue
+                mid = len(current) // 2
+                queue.append(current[:mid])
+                queue.append(current[mid:])
+        return payloads
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
