@@ -475,7 +475,6 @@ aerospike.namespace.tombstones,gauge,,,,[Legacy] The total number tombstones in 
 aerospike.namespace.total_bytes_disk,gauge,,byte,,[Legacy] The total bytes of disk space allocated to this namespace on this node. Deprecated since 3.9,0,aerospike,,
 aerospike.namespace.total_bytes_memory,gauge,,byte,,[Legacy] The total bytes of memory allocated to this namespace on this node. Deprecated since 3.9,0,aerospike,,
 aerospike.namespace.tps.read,gauge,,,,[Legacy] The throughput performance of reads. [Removed in 5.1.0],0,aerospike,,
-aerospike.namespace.tps.write,gauge,,,,[Legacy] The throughput performance of writes. [Removed in 5.1.0],0,aerospike,,
 aerospike.namespace.transaction_pending_limit,gauge,,transaction,,[Legacy] The maximum pending transactions that can be queued up to work on the same key.,0,aerospike,,
 aerospike.namespace.truncate_lut,gauge,,,,[Legacy] The 'most covering' truncate_lut for this namespace.,0,aerospike,,
 aerospike.namespace.truncate_threads,gauge,,thread,,[Legacy] The number of dedicated threads to use for truncations in the namespace.,0,aerospike,,
