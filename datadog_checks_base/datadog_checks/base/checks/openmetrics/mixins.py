@@ -10,8 +10,6 @@ from math import isinf, isnan
 from os.path import isfile
 from re import compile
 
-from prometheus_client.samples import Sample
-
 from datadog_checks.base.agent import datadog_agent
 
 from ...config import is_affirmative
@@ -1063,6 +1061,8 @@ class OpenMetricsScraperMixin(object):
         """
         Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
         """
+        from prometheus_client.samples import Sample
+
         bucket_values_by_context_upper_bound = {}
         for sample in metric.samples:
             if sample[self.SAMPLE_NAME].endswith("_bucket"):

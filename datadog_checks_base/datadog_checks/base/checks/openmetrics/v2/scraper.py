@@ -9,9 +9,6 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
-from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
-from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-
 from datadog_checks.base.agent import datadog_agent
 
 from ....config import is_affirmative
@@ -332,6 +329,8 @@ class OpenMetricsScraper:
 
     @property
     def parse_metric_families(self):
+        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+        from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
         media_type = self._content_type.split(';')[0]
         # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
         # the format will be chosen based on the media type specified in the response's content-header.
