@@ -11,7 +11,6 @@ from typing import List  # noqa: F401
 
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 
@@ -19,7 +18,6 @@ from ....config import is_affirmative
 from ....constants import ServiceCheck
 from ....errors import ConfigurationError
 from ....utils.functions import no_op, return_true
-from ....utils.http import RequestsWrapper
 from .first_scrape_handler import first_scrape_handler
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
@@ -50,6 +48,7 @@ class OpenMetricsScraper:
         """
         The base class for any scraper overrides.
         """
+        from ....utils.http import RequestsWrapper
 
         self.config = config
 
@@ -393,6 +392,7 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
+        from requests.exceptions import ConnectionError
 
         try:
             with self.get_connection() as connection:
