@@ -31,6 +31,7 @@ def _parse_payload(fd):
     """
     from prometheus_client.metrics_core import Metric
     from prometheus_client.parser import _parse_sample, _replace_help_escaping
+
     name = ''
     documentation = ''
     typ = 'untyped'
