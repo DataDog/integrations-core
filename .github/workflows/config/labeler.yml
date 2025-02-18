@@ -205,6 +205,8 @@ integration/exchange_server:
 - exchange_server/**/*
 integration/external_dns:
 - external_dns/**/*
+integration/extrahop:
+- extrahop/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
@@ -213,6 +215,10 @@ integration/fluxcd:
 - fluxcd/**/*
 integration/fly_io:
 - fly_io/**/*
+integration/forcepoint_secure_web_gateway:
+- forcepoint_secure_web_gateway/**/*
+integration/forcepoint_security_service_edge:
+- forcepoint_security_service_edge/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/freshservice:
@@ -287,6 +293,8 @@ integration/incident_io:
 - incident_io/**/*
 integration/istio:
 - istio/**/*
+integration/ivanti_nzta:
+- ivanti_nzta/**/*
 integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
 integration/jboss_wildfly:
@@ -563,6 +571,8 @@ integration/suricata:
 - suricata/**/*
 integration/symantec_endpoint_protection:
 - symantec_endpoint_protection/**/*
+integration/symantec_vip:
+- symantec_vip/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -587,6 +597,8 @@ integration/temporal_cloud:
 - temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
+integration/tenable_io:
+- tenable_io/**/*
 integration/teradata:
 - teradata/**/*
 integration/terraform:
@@ -655,6 +667,8 @@ integration/yarn:
 - yarn/**/*
 integration/zeek:
 - zeek/**/*
+integration/zero_networks:
+- zero_networks/**/*
 integration/zk:
 - zk/**/*
 qa/skip-qa:

@@ -1,0 +1,1 @@
+Split Postgres query metrics payload to conform to max payload size and enable larger query metrics collection

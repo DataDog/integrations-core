@@ -10,7 +10,23 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Avast logs.",
     "title": "Avast",
-    "media": [],
+    "media": [
+      {
+        "caption": "Avast - Audit Summary",
+        "image_url": "images/avast_audit_summary.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Avast - Task and Patch Summary",
+        "image_url": "images/avast_task_and_patch_summary.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Avast - Threat Summary",
+        "image_url": "images/avast_threat_summary.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +45,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Avast - Audit Summary": "assets/dashboards/avast_audit_summary.json",
+      "Avast - Task and Patch Summary": "assets/dashboards/avast_task_and_patch_summary.json",
+      "Avast - Threat Summary": "assets/dashboards/avast_threat_summary.json"
     },
     "logs": {
       "source": "avast"

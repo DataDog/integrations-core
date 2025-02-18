@@ -92,7 +92,7 @@ datadog-impala==3.2.0
 datadog-istio==8.1.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
-datadog-kafka-consumer==6.3.0
+datadog-kafka-consumer==6.4.0
 datadog-kafka==4.0.0
 datadog-karpenter==2.2.0
 datadog-keda==1.0.0
@@ -167,7 +167,7 @@ datadog-silk==4.1.0
 datadog-singlestore==4.1.0
 datadog-slurm==1.0.3; sys_platform == 'linux2'
 datadog-snmp==9.2.0
-datadog-snowflake==7.2.0
+datadog-snowflake==7.3.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.2.0
 datadog-sonicwall-firewall==1.0.0
