@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 deps = [
     "clickhouse-cityhash==1.0.2.4",
     "clickhouse-driver==0.2.9",
-    "lz4==4.3.3",
+    "lz4==4.4.3",
 ]
 
 [project.urls]
