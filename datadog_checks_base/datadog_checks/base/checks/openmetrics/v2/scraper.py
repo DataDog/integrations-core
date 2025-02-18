@@ -295,8 +295,8 @@ class OpenMetricsScraper:
 
     @property
     def parse_metric_families(self):
-        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
         from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 
         media_type = self._content_type.split(';')[0]
         # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
