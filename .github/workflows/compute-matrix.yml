@@ -15,7 +15,7 @@ defaults:
     shell: bash
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
   MATRIX_SCRIPT: "ddev/src/ddev/utils/scripts/ci_matrix.py"
 
 jobs:
