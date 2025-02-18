@@ -2204,10 +2204,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -2252,10 +2249,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
