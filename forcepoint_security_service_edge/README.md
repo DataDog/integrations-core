@@ -5,10 +5,10 @@
 
 This integration ingests the following logs:
 
-- **Cloud Logs (CloudSummary, CloudAudit)**: It contains logs related to scanning results of each file.
-- **Access Logs**: It contains logs related to various application activities.
-- **Admin Logs**: It contains all admin events performed within the admin portal.
-- **Health Logs (HealthProxy, HealthApi, HealthSystem)**: It contains logs related to system, api and proxy health. 
+- **Cloud Logs (CloudSummary, CloudAudit)**: Logs related to scanning results of each file.
+- **Access Logs**: Logs related to various application activities.
+- **Admin Logs**: Admin events performed within the admin portal.
+- **Health Logs (HealthProxy, HealthApi, HealthSystem)**: Logs related to system, API, and proxy health. 
 
 
 Forcepoint Security Service Edge integration gathers these logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured out-of-the-box dashboards, the integration offers clear visibility into activities within the Forcepoint Security Service Edge platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
@@ -19,37 +19,38 @@ Forcepoint Security Service Edge integration gathers these logs and forwards the
 ### Generate OAuth Token in Forcepoint Security Service Edge:
 1. Login to the Forcepoint ONE Security Service Edge Platform.
 2. Navigate to **SETTINGS > API Interface > OAuth**.
-3. **REST API OAuth Configuration** page opens which allows you to add and configure different levels of API permissions.
-4. To add a new configuration, click the **green** plus icons.
-5. On the **Edit Application** dialog, fill out the information as mentioned below:
+3. On the open **REST API OAuth Configuration** page, add and configure different levels of API permissions.
+4. Click the **green** plus icons to add a new configuration.
+5. On the **Edit Application** dialog, fill out the information as follows:
 
     a. **Name**: Name for the new application configuration
 
     b. **Permissions**: Select **Access your Forcepoint logs (logs api)** option.
 
-    c. **Permitted User Group**: Select as per your requirement. Default is **All**.
+    c. **Permitted User Group**: Default is **All**. Select based on your requirements.
 
-    d. Click **Ok** to save the changes.
-    - You will now see your application added to the list, but still listed as **Pending** under status.
-6. Select the name of your application in the **Application** column to  go into the **Edit Application**.
+    d. Click **Ok** to save the changes. You should see your application added to the list, but listed as **Pending** under status.
 
-    a. On the **Edit Application** dialog, you will need the **Token Authorization URL** to authorize your current permission and get the access token.
+6. Select the name of your application in the **Application** column to go into the **Edit Application**.
 
-    b. Click on the URL and it will take you to the **Requested Access** page allowing you to **Approve** or **Deny** the application permission settings. Again you will need to send this URL to each permitted user and have them **Approve** their access.
-7. After you approve, you will be given an **Access Token** that is unique to that user  and that the user must keep. This access token will be required to configure integration in datadog. The token is valid forever and must be included in each request for authorization.
+    a. On the **Edit Application** dialog, click the **Token Authorization URL** to authorize your current permission and get the access token.
+
+    b. On the **Requested Access** page send this URL to each permitted user and have them **Approve** their access. The **Requested Access** page allows you to **Approve** or **Deny** the application permission settings.
+
+7. After the user approves, they are given an **Access Token** that is unique to that user. The user must keep this access token, it is required to configure integrations in Datadog. The token is valid forever and must be included in each request for authorization.
 8. Once access has been approved, you will notice that **Status** is changed to **Authorized**.
 
 
-For reference: [Setting up an OAuth token Documentation][2]
+For more information, see the [Setting up an OAuth token][2] documentation.
 
 ### Connect your Forcepoint Security Service Edge Account to Datadog
 
 1. Add your Access Token.
    | Parameters          | Description                                                                           |
    | ------------------- | ------------------------------------------------------------------------------------- |
-   | Access Token       | Access token from Forcepoint Security Service Edge                         |
+   | Access Token        | Access token from Forcepoint Security Service Edge                         |
 
-2. Click the Save button to save your settings.
+2. Click **Save**.
 
 ## Data Collected
 
