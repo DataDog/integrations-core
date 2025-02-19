@@ -93,8 +93,6 @@ if TYPE_CHECKING:
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
-# TODO remove: trigger CI
-
 
 @traced_class
 class AgentCheck(object):

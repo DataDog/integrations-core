@@ -21,8 +21,6 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
     re.VERBOSE,
 )
 
-# TODO remove: trigger CI
-
 
 class CheckSSH(AgentCheck):
     SSH_SERVICE_CHECK_NAME = 'ssh.can_connect'
