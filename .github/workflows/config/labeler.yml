@@ -207,6 +207,8 @@ integration/external_dns:
 - external_dns/**/*
 integration/extrahop:
 - extrahop/**/*
+integration/falco:
+- falco/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
@@ -241,6 +243,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/gpu:
+- gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
 integration/gunicorn:
@@ -431,6 +435,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/orca_security:
+- orca_security/**/*
 integration/ossec_security:
 - ossec_security/**/*
 integration/otel:

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import logging
 from contextlib import nullcontext as does_not_raise
 
@@ -54,8 +55,7 @@ from .constants import (
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_can_connect(get_current_datetime, dd_run_check, aggregator, expected_exception, can_connect):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_can_connect(get_current_datetime, dd_run_check, aggregator, expected_exception, can_connect, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
 
@@ -67,12 +67,21 @@ def test_can_connect(get_current_datetime, dd_run_check, aggregator, expected_ex
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_all_metrics_covered(
-    get_current_datetime,
-    dd_run_check,
-    aggregator,
-):
+def test_no_filtering(get_current_datetime, dd_run_check):
     instance = {'octopus_endpoint': 'http://localhost:80'}
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+
+    with pytest.raises(
+        Exception, match="A configuration for projects, project_groups, or spaces is required for this integratio"
+    ):
+        dd_run_check(check)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_all_metrics_covered(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
@@ -104,8 +113,7 @@ def test_all_metrics_covered(
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_empty_spaces(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_empty_spaces(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
 
@@ -116,8 +124,7 @@ def test_empty_spaces(get_current_datetime, dd_run_check, aggregator):
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_one_space(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_one_space(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
 
@@ -132,8 +139,7 @@ def test_one_space(get_current_datetime, dd_run_check, aggregator):
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_project_groups(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_project_groups(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
 
@@ -173,8 +179,7 @@ def test_project_groups(get_current_datetime, dd_run_check, aggregator):
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_projects(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_projects(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
 
@@ -228,8 +233,7 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
 
@@ -444,8 +448,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_completed_tasks(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
 
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1046,8 +1049,7 @@ def test_empty_include(get_current_datetime, dd_run_check, aggregator):
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_tasks_endpoint_unavailable(get_current_datetime, dd_run_check, expected_log, caplog):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_tasks_endpoint_unavailable(get_current_datetime, dd_run_check, expected_log, caplog, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     caplog.set_level(logging.WARNING)
@@ -1057,8 +1059,7 @@ def test_tasks_endpoint_unavailable(get_current_datetime, dd_run_check, expected
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
@@ -1111,8 +1112,7 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggregator, expected_log, caplog):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggregator, expected_log, caplog, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     caplog.set_level(logging.WARNING)
@@ -1174,7 +1174,7 @@ def test_deployment_logs(
     project_groups,
     expected_logs,
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['project_groups'] = project_groups
     datadog_agent._config['logs_enabled'] = logs_enabled
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -1193,8 +1193,8 @@ def test_deployment_logs(
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_events(get_current_datetime, dd_run_check, aggregator, expected_events, events_enabled):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_events(get_current_datetime, dd_run_check, aggregator, expected_events, events_enabled, instance):
+    instance = copy.deepcopy(instance)
     instance['collect_events'] = events_enabled
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1207,8 +1207,7 @@ def test_events(get_current_datetime, dd_run_check, aggregator, expected_events,
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_environment_metrics(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_environment_metrics(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
@@ -1284,8 +1283,9 @@ def test_environment_metrics(get_current_datetime, dd_run_check, aggregator):
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_environments_discovery_one_include(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['dev']}}
+def test_environments_discovery_one_include(get_current_datetime, dd_run_check, aggregator, instance):
+    instance = copy.deepcopy(instance)
+    instance['environments'] = {'include': ['dev']}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1368,8 +1368,9 @@ def test_environments_discovery_one_include(get_current_datetime, dd_run_check, 
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'exclude': ['dev'], 'include': ['.*']}}
+def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, aggregator, instance):
+    instance = copy.deepcopy(instance)
+    instance['environments'] = {'exclude': ['dev'], 'include': ['.*']}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1451,8 +1452,9 @@ def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, 
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_environments_discovery_include_invalid(get_current_datetime, dd_run_check, aggregator):
-    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['test']}}
+def test_environments_discovery_include_invalid(get_current_datetime, dd_run_check, aggregator, instance):
+    instance = copy.deepcopy(instance)
+    instance['environments'] = {'include': ['test']}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1554,8 +1556,11 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_environments_metrics_http_failure(get_current_datetime, dd_run_check, aggregator, expected_log, caplog):
-    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['test']}}
+def test_environments_metrics_http_failure(
+    get_current_datetime, dd_run_check, aggregator, expected_log, caplog, instance
+):
+    instance = copy.deepcopy(instance)
+    instance['environments'] = {'include': ['test']}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1657,8 +1662,9 @@ def test_environments_metrics_http_failure(get_current_datetime, dd_run_check, a
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_check, aggregator, expected_log, caplog):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+def test_deployment_metrics_releases_http_failure(
+    get_current_datetime, dd_run_check, aggregator, expected_log, caplog, instance
+):
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -1886,10 +1892,8 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_deployment_metrics_deployments_http_failure(
-    get_current_datetime, dd_run_check, aggregator, expected_log, caplog
+    get_current_datetime, dd_run_check, aggregator, expected_log, caplog, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
-
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     caplog.set_level(logging.DEBUG)
@@ -2120,9 +2124,10 @@ def test_deployment_metrics_deployments_http_failure(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_deployment_metrics_environments_http_failure(
-    get_current_datetime, dd_run_check, aggregator, expected_log, caplog
+    get_current_datetime, dd_run_check, aggregator, expected_log, caplog, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['test']}}
+    instance = copy.deepcopy(instance)
+    instance['environments'] = {'include': ['test']}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
@@ -2140,9 +2145,7 @@ def test_deployment_metrics_environments_http_failure(
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
-
+def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
@@ -2175,9 +2178,9 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get):
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_paginated_limit_octopusservernodes(
-    get_current_datetime, dd_run_check, aggregator, paginated_limit, mock_http_get
+    get_current_datetime, dd_run_check, aggregator, paginated_limit, mock_http_get, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2260,8 +2263,9 @@ def test_paginated_limit_events(
     mock_http_get,
     expected_skip_take_args,
     caplog,
+    instance,
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
     instance['collect_events'] = True
 
@@ -2311,13 +2315,9 @@ def test_paginated_limit_events(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_paginated_limit_spaces(
-    get_current_datetime,
-    dd_run_check,
-    paginated_limit,
-    mock_http_get,
-    expected_skip_take_args,
+    get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2359,13 +2359,9 @@ def test_paginated_limit_spaces(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_paginated_limit_project_groups(
-    get_current_datetime,
-    dd_run_check,
-    paginated_limit,
-    mock_http_get,
-    expected_skip_take_args,
+    get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2407,13 +2403,9 @@ def test_paginated_limit_project_groups(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_paginated_limit_projects_projectgroups1(
-    get_current_datetime,
-    dd_run_check,
-    paginated_limit,
-    mock_http_get,
-    expected_skip_take_args,
+    get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2456,13 +2448,9 @@ def test_paginated_limit_projects_projectgroups1(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_paginated_limit_tasks(
-    get_current_datetime,
-    dd_run_check,
-    paginated_limit,
-    mock_http_get,
-    expected_skip_take_args,
+    get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2504,13 +2492,9 @@ def test_paginated_limit_tasks(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_paginated_limit_environments(
-    get_current_datetime,
-    dd_run_check,
-    paginated_limit,
-    mock_http_get,
-    expected_skip_take_args,
+    get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2531,13 +2515,7 @@ def test_paginated_limit_environments(
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_machines_metrics(
-    get_current_datetime,
-    dd_run_check,
-    aggregator,
-):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
-
+def test_machines_metrics(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
 
     get_current_datetime.return_value = MOCKED_TIME1
@@ -2553,7 +2531,7 @@ def test_machines_metrics(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2567,7 +2545,7 @@ def test_machines_metrics(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2580,8 +2558,8 @@ def test_machines_metrics(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "tag",
-            "test",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2594,8 +2572,8 @@ def test_machines_metrics(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
-            "tag",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
 
@@ -2610,7 +2588,7 @@ def test_machines_metrics(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2624,7 +2602,7 @@ def test_machines_metrics(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
 
@@ -2652,14 +2630,9 @@ def test_machines_metrics(
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_machines_pagination(
-    get_current_datetime,
-    dd_run_check,
-    aggregator,
-    expected_skip_take_args,
-    mock_http_get,
-    paginated_limit,
+    get_current_datetime, dd_run_check, aggregator, expected_skip_take_args, mock_http_get, paginated_limit, instance
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['paginated_limit'] = paginated_limit
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2688,7 +2661,7 @@ def test_machines_pagination(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2702,7 +2675,7 @@ def test_machines_pagination(
             "machine_slug:test-machine",
             "health_status:Healthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test-tag",
+            "role_name:test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -2715,8 +2688,8 @@ def test_machines_pagination(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "tag",
-            "test",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2729,8 +2702,8 @@ def test_machines_pagination(
             "machine_slug:test-machine1",
             "health_status:Healthy with warnings",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
-            "tag",
+            "role_name:tag",
+            "role_name:test",
         ],
     )
 
@@ -2745,7 +2718,7 @@ def test_machines_pagination(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
     aggregator.assert_metric(
@@ -2759,7 +2732,7 @@ def test_machines_pagination(
             "machine_slug:test-machine3",
             "health_status:Unhealthy",
             "operating_system:Ubuntu 24.04.1 LTS",
-            "test",
+            "role_name:test",
         ],
     )
 
@@ -2798,8 +2771,9 @@ def test_unified_service_tagging(
     disable_generic_tags,
     unified_service_tagging,
     expect_service_tags,
+    instance,
 ):
-    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance = copy.deepcopy(instance)
     instance['disable_generic_tags'] = disable_generic_tags
     instance['unified_service_tagging'] = unified_service_tagging
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])

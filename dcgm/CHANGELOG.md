@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 3.3.0 / 2025-01-25
+## 3.3.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
 

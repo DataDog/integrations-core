@@ -251,6 +251,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /extrahop/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /extrahop/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/falco/                                                             @DataDog/saas-integrations
+/falco/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/falco/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/falco/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /freshservice/                                                          @DataDog/saas-integrations
 /freshservice/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /freshservice/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
@@ -307,6 +312,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mux/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /mux/metadata.csv                                                   @DataDog/saas-integrations @DataDog/documentation
 
+/orca_security/                                                      @DataDog/saas-integrations
+/orca_security/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/orca_security/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/orca_security/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /okta_workflows/                                                     @DataDog/saas-integrations
 /okta_workflows/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
 /okta_workflows/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
@@ -329,6 +339,8 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 
 /snowflake/                                                          @DataDog/saas-integrations
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
+/snowflake/changelog.d/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
+/snowflake/pyproject.toml                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
 /sonicwall_firewall/                                                  @DataDog/saas-integrations

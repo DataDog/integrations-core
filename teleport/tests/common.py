@@ -84,8 +84,13 @@ AUTH_METRICS = [
     "auth.grpc_server_msg_sent.count",
     "auth.grpc_server_started.count",
     "auth.cluster_name_not_found.count",
+    "auth.connected_resources",
+    "auth.registered_servers",
+    "auth.registered_servers_by_install_methods",
     "auth.user_login.count",
     "auth.migrations",
+    "auth.heartbeat_connections_received.count",
+    "auth.roles",
 ]
 
 

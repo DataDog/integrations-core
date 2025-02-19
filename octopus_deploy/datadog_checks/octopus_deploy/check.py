@@ -474,7 +474,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f"health_status:{health_status}",
                 f"operating_system:{os}",
             ]
-            machine_tags += roles
+            machine_tags += [f"role_name:{role}" for role in roles]
             environment_ids = machine.get("EnvironmentIds")
             env_tags = []
             for env_id in environment_ids:

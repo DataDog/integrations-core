@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2025-02-13 / Agent 7.63.0
+
+***Added***:
+
+* Bump OpenSSL in confluent-kafka to 3.4.1 on Windows. ([#19608](https://github.com/DataDog/integrations-core/pull/19608))
+
 ## 6.4.0 / 2025-02-12
 
 ***Added***:
