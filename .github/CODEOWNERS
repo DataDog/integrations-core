@@ -335,7 +335,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /sanity/                                                            @DataDog/saas-integrations
 /sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /sanity/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/sanity/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+/sanity/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /snowflake/                                                          @DataDog/saas-integrations
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
