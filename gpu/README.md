@@ -62,11 +62,11 @@ datadog:
     enabled: true
 ```
 
-For **mixed environments**, two different Helm charts need to be deployed with different affinity sets and with one of them joining the other's cluster agent [as documented here](https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux).
+For **mixed environments**, two different Helm charts need to be deployed with different affinity sets and with one of them joining the other's Cluster Agent [as documented here](https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux).
 
 Assuming we have already a `values.yml` file for a regular, non-GPU deployment, the steps to enable GPU monitoring only on GPU nodes are the following:
 
-1. In `agents.affinity`, add a node selector that stops the non-GPU agent from running on GPU nodes:
+1. In `agents.affinity`, add a node selector that stops the non-GPU Agent from running on GPU nodes:
 
 ```yaml
 # Base values.yaml (for non-GPU nodes)
@@ -84,12 +84,12 @@ agents:
 
 The `nvidia.com/gpu.present` tag is used above as it's automatically added to GPU nodes by the NVIDIA GPU operator. However, any other appropriate tag may be chosen.
 
-2. Create another file (for example, `values-gpu.yaml`) to apply on top of the previous one. In this file, enable GPU monitoring, configure the cluster agent to join the existing cluster as per the [instructions],(https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux) and include the affinity for the GPU nodes:
+2. Create another file (for example, `values-gpu.yaml`) to apply on top of the previous one. In this file, enable GPU monitoring, configure the Cluster Agent to join the existing cluster as per the [instructions],(<https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux>) and include the affinity for the GPU nodes:
 
 ```yaml
 # GPU-specific values-gpu.yaml (for GPU nodes)
 datadog:
-  kubeStateMetricsEnabled: false # Disabled as we're joining an existing cluster agent
+  kubeStateMetricsEnabled: false # Disabled as we're joining an existing Cluster Agent
   gpuMonitoring:
     enabled: true
 
