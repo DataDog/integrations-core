@@ -1,11 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 datadog.network_path.check_duration,gauge,,second,,"The duration of a check run in seconds. The time needed for the network_path integration to traceroute one endpoint, including time to collect snmp data, processing and submitting metrics/events/etc.",0,network_path,,,
 datadog.network_path.check_interval,gauge,,second,,The interval between check runs in seconds. The time delta between current check run and last check run.,0,network_path,,,
-datadog.network_path.collector.flush.duration.95percentile,gauge,,second,,Duration of flush.,0,network_path,,,
-datadog.network_path.collector.flush.duration.avg,gauge,,second,,Duration of flush.,0,network_path,,,
-datadog.network_path.collector.flush.duration.count,rate,,second,,Duration of flush.,0,network_path,,,
-datadog.network_path.collector.flush.duration.max,gauge,,second,,Duration of flush.,0,network_path,,,
-datadog.network_path.collector.flush.duration.median,gauge,,second,,Duration of flush.,0,network_path,,,
+datadog.network_path.collector.flush.duration,rate,,second,,Duration of flush.,0,network_path,,,
 datadog.network_path.collector.flush.interval,gauge,,second,,Interval between flush.,0,network_path,,,
 datadog.network_path.collector.flush.pathtest_count,rate,,,,Number of flushed pathtest.,0,network_path,,,
 datadog.network_path.collector.flush.pathtest_dropped,rate,,,,Number of dropped pathtest.,0,network_path,,,
