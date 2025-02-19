@@ -33,10 +33,10 @@ gpu_monitoring:
   enabled: true
 ```
 
-The check in the agent configuration file is enabled by default whenever NVIDIA GPUs and their drivers are detected in the system. However, it can also be configured manually following these steps:
+The check in the Agent configuration file is enabled by default whenever NVIDIA GPUs and their drivers are detected in the system. However, it can also be configured manually following these steps:
 
 1. Edit the `gpu.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your GPU performance data.
+   Agent's configuration directory, to start collecting your GPU performance data.
    See the [sample gpu.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
@@ -48,9 +48,9 @@ This check is automatically enabled when the Agent is running on a host with NVI
 
 #### Important: Running on Helm/Kubernetes in mixed environments
 
-One important thing to note in the deployment for Kubernetes clusters is that, in order to access the GPUs, the Datadog Agent pods will need access to both the GPUs and NVIDIA's NVML library (`libnvidia-ml.so`). Due to the design of NVIDIA's k8s device plugin, in order to have access to those features the agent pods will need to run with the `nvidia` runtime class. This means that the agent pods will not be able to run in the default runtime class.
+One important thing to note in the deployment for Kubernetes clusters is that, in order to access the GPUs, the Datadog Agent pods needs access to both the GPUs and NVIDIA's NVML library (`libnvidia-ml.so`). Due to the design of NVIDIA's Kubernetes Device Plugin, in order to have access to those features the Agent pods will need to run with the `nvidia` runtime class. This means that the Agent pods will not be able to run in the default runtime class.
 
-This can cause issues in clusters where some nodes have GPUs and others don't: if we deploy with a single runtime class the agent will only run on a subset of the cluster nodes. Both the Helm and Datadog Operator deployments can be configured to deploy in this situation correctly to both types of nodes, but it requires some additional configuration as described below.
+This can cause issues in clusters where some nodes have GPUs and others don't: if we deploy with a single runtime class, the Agent will only run on a subset of the cluster nodes. Both the Helm and Datadog Operator deployments can be configured to deploy in this situation correctly to both types of nodes, but it requires some additional configuration as described below.
 
 #### Helm
 
@@ -62,7 +62,7 @@ datadog:
     enabled: true
 ```
 
-For **mixed environments**, two different Helm charts will need to be deployed with different affinity sets and with one of them joining the other's cluster agent [as documented here](https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux).
+For **mixed environments**, two different Helm charts need to be deployed with different affinity sets and with one of them joining the other's cluster agent [as documented here](https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux).
 
 Assuming we have already a `values.yml` file for a regular, non-GPU deployment, the steps to enable GPU monitoring only on GPU nodes are the following:
 
@@ -82,9 +82,9 @@ agents:
               - "true"
 ```
 
-Here we chose the `nvidia.com/gpu.present` tag as it's automatically added to GPU nodes by the NVIDIA GPU operator. However, any other appropriate tag may be chosen
+The `nvidia.com/gpu.present` tag is used above as it's automatically added to GPU nodes by the NVIDIA GPU operator. However, any other appropriate tag may be chosen.
 
-2. Create another file (e.g., `values-gpu.yaml`) that will be applied on top of the previous one. In this file we enable GPU monitoring, configure the clusteragent to join the existing cluster as per the [instructions](https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux) and include the affinity for the GPU nodes:
+2. Create another file (for example, `values-gpu.yaml`) to apply on top of the previous one. In this file, enable GPU monitoring, configure the cluster agent to join the existing cluster as per the [instructions],(https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux) and include the affinity for the GPU nodes:
 
 ```yaml
 # GPU-specific values-gpu.yaml (for GPU nodes)
@@ -135,7 +135,7 @@ spec:
       enabled: true
 ```
 
-For **mixed environments** we will need to use the [DatadogAgentProfiles feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which will allow us to deploy different configurations for different nodes. In this case, it is not necessary to modify the DatadogAgent manifest, but instead creating a profile that enables the configuration on GPU nodes only:
+For **mixed environments**, use the [DatadogAgentProfiles feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. In this case, it is not necessary to modify the DatadogAgent manifest. Instead, create a profile that enables the configuration on GPU nodes only:
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
