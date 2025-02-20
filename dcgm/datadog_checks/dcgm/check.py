@@ -36,6 +36,10 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
 
         def add_tag_to_sample(entry):
+            # Helper function to duplicate specific GPU tags. The transformer expects a generator of 
+            # tuples (sample, tags, hostname). Since sample_data is immutable, we create a copy with 
+            # the additional tags and return the updated tuple to the transformer.
+            # Tags duplicated here are UUID to gpu_uuid and DCGM_FI_DEV_BRAND to gpu_vendor.
             sample, tags, hostname = entry
             gpu_tags = []
 
@@ -52,6 +56,8 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         metric_name = metric.name
 
         if metric_name not in METRIC_MAP:
+            # Exit early if the metric isn't in the METRIC_MAP since we don't want to collect metrics
+            # that aren't mapped.
             return
 
         new_metric_name = METRIC_MAP[metric_name]
@@ -65,11 +71,16 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         modified_sample_data = (add_tag_to_sample(entry) for entry in sample_data)
 
         if metric_type == "counter_gauge":
+            # This is the only non-native transformer in the check. We need to use it to handle the
+            # counter_gauge type. We create the transformer and then call it with the modified sample
+            # data.
             counter_gauge_transformer = get_counter_gauge(
                 self, new_metric_name, None, metric_transformer.global_options
             )
             counter_gauge_transformer(metric, modified_sample_data, _runtime_data)
         else:
+            # Everything else that isn't a counter_gauge type can use the native dynamic transformer.
+            # This relies on the payload to determine the metric type and transformer to use.
             native_transformer = get_native_dynamic_transformer(
                 self, new_metric_name, None, metric_transformer.global_options
             )
