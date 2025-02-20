@@ -27,7 +27,7 @@ datadog-cassandra==3.0.0
 datadog-ceph==4.0.0; sys_platform != 'win32'
 datadog-cert-manager==5.2.0
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.6.0
+datadog-checks-base==37.6.1
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==7.1.0
 datadog-cilium==5.2.0
