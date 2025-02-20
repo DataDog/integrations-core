@@ -36,8 +36,8 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
 
         def add_tag_to_sample(entry):
-            # Helper function to duplicate specific GPU tags. The transformer expects a generator of 
-            # tuples (sample, tags, hostname). Since sample_data is immutable, we create a copy with 
+            # Helper function to duplicate specific GPU tags. The transformer expects a generator of
+            # tuples (sample, tags, hostname). Since sample_data is immutable, we create a copy with
             # the additional tags and return the updated tuple to the transformer.
             # Tags duplicated here are UUID to gpu_uuid and DCGM_FI_DEV_BRAND to gpu_vendor.
             sample, tags, hostname = entry
