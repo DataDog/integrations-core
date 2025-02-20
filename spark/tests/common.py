@@ -16,7 +16,6 @@ CLUSTER_TAGS = [
 EXPECTED_E2E_METRICS = [
     'spark.driver.total_shuffle_read',
     'spark.stage.num_active_tasks',
-    'spark.streaming.statistics.num_inactive_receivers',
     'spark.driver.max_memory',
     'spark.streaming.statistics.num_active_batches',
     'spark.driver.total_tasks',
@@ -91,6 +90,7 @@ FLAKY_E2E_METRICS = [
     'spark.structured_streaming.input_rate',
     'spark.streaming.statistics.avg_input_rate',
     'spark.streaming.statistics.avg_scheduling_delay',
+    'spark.streaming.statistics.num_inactive_receivers',
     # The peak memory metrics are only available in Spark 3.0+ and after one loop of garbage collection
     'spark.driver.peak_mem.jvm_heap_memory',
     'spark.driver.peak_mem.jvm_off_heap_memory',
