@@ -182,6 +182,9 @@ pipeline:
       name: Define `time` as the official date of the log
       enabled: true
       sources:
+        - properties.createdDateTime
+        - properties.activityDateTime
+        - properties.timeGenerated
         - time
     - type: status-remapper
       name: Define `level` as the official status of the log
