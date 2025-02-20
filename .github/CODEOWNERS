@@ -444,6 +444,10 @@ vonage/assets/logs/                                                @DataDog/saas
 /asana/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
 /asana/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/tanium/                                                            @DataDog/saas-integrations
+/tanium/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/tanium/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/tanium/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 plaid/                                                              @DataDog/saas-integrations
 plaid/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
