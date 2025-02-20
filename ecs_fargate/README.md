@@ -263,6 +263,7 @@ For environment variables available with the Docker Agent container, see the [Do
 
 | Environment Variable               | Description                                    |
 |------------------------------------|------------------------------------------------|
+| `DD_TAGS`                          | Add tags. For example: `key1:value1 key2:value2`. |
 | `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
@@ -439,6 +440,28 @@ partial -->
         "Name": "datadog",
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.datadoghq.eu",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      }
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="ap1" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "apikey": "<DATADOG_API_KEY>",
+        "Host": "http-intake.logs.ap1.datadoghq.com",
         "dd_service": "firelens-test",
         "dd_source": "redis",
         "dd_message_key": "log",

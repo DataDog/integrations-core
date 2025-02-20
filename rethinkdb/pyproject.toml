@@ -32,12 +32,11 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.10post1",
+    "rethinkdb==2.4.10.post1",
 ]
 
 [project.urls]

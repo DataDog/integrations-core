@@ -36,6 +36,11 @@ jobs:
     concurrency:
       group: test-results
 
+    permissions:
+      checks: write # Needed for test-results-master
+      contents: write # Needed for test-results-master
+      pull-requests: write # Needed for test-results-master
+      
     uses: ./.github/workflows/test-results-master.yml
     secrets: inherit
 
