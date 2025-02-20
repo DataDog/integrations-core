@@ -179,7 +179,7 @@ pipeline:
         matchRules: |
           extract_resource_name /%{_subscriptions}\/%{_non_extracted_resource}\/%{_resource_groups}\/%{_non_extracted_resource}\/%{_providers}%{_non_extracted_resource}\/%{_non_extracted_resource}\/%{data}\/%{_resource_name}
     - type: date-remapper
-      name: Define `time` as the official date of the log
+      name: Define `properties.createdDateTime`, `properties.activityDateTime`, `properties.timeGenerated`, `time` as the official date of the log
       enabled: true
       sources:
         - properties.createdDateTime
