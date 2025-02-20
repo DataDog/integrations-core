@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
-    "title": "ElasticSearch",
+    "title": "Elasticsearch",
     "media": [],
     "classifier_tags": [
       "Category::Data Stores",

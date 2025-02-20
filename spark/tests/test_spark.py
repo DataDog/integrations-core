@@ -1248,6 +1248,57 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, capl
     assert 'No running apps found. No metrics will be collected.' in caplog.text
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'property_url, missing_metrics',
+    [
+        pytest.param(YARN_SPARK_JOB_URL, SPARK_JOB_RUNNING_METRIC_VALUES, id='jobs'),
+        pytest.param(YARN_SPARK_STAGE_URL, SPARK_STAGE_RUNNING_METRIC_VALUES, id='stages'),
+        pytest.param(
+            YARN_SPARK_EXECUTOR_URL,
+            SPARK_EXECUTOR_METRIC_VALUES.keys() | SPARK_EXECUTOR_LEVEL_METRIC_VALUES.keys(),
+            id='executors',
+        ),
+        pytest.param(YARN_SPARK_RDD_URL, SPARK_RDD_METRIC_VALUES, id='storage/rdd'),
+        pytest.param(
+            YARN_SPARK_STREAMING_STATISTICS_URL, SPARK_STREAMING_STATISTICS_METRIC_VALUES, id='streaming/statistics'
+        ),
+    ],
+)
+def test_yarn_no_json_for_app_properties(aggregator, dd_run_check, mocker, property_url, missing_metrics):
+    """
+    In some yarn deployments apps stop exposing properties (such as jobs and stages) by the time we query them.
+
+    In these cases we skip only the specific missing apps and metrics while collecting all others.
+    """
+
+    def get_without_json(url, *args, **kwargs):
+        arg_url = Url(url)
+        if arg_url == property_url:
+            return MockResponse(content="")  # this should trigger json error
+        return yarn_requests_get_mock(url, *args, **kwargs)
+
+    mocker.patch('requests.get', get_without_json)
+    dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
+    for m in missing_metrics:
+        aggregator.assert_metric(m, count=0)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('status_code', [404, 500])
+def test_yarn_streaming_metrics_http_error(aggregator, dd_run_check, mocker, caplog, status_code):
+    def get_raise_error(url, *args, **kwargs):
+        arg_url = Url(url)
+        if arg_url == YARN_SPARK_STREAMING_STATISTICS_URL:
+            return MockResponse(status_code=status_code)
+        return yarn_requests_get_mock(url, *args, **kwargs)
+
+    mocker.patch('requests.get', get_raise_error)
+    dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
+    for m in SPARK_STREAMING_STATISTICS_METRIC_VALUES:
+        aggregator.assert_metric(m, count=0)
+
+
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
