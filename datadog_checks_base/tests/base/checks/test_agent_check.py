@@ -11,7 +11,7 @@ from typing import Any  # noqa: F401
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
 
 from .utils import BaseModelTest
@@ -1310,23 +1310,3 @@ def test_env_var_logic_preset():
         AgentCheck()
         assert os.getenv('OPENSSL_CONF', None) == preset_conf
         assert os.getenv('OPENSSL_MODULES', None) == preset_modules
-
-
-def test_ha_enabled_and_unsupported():
-    class TestNonHACheck(AgentCheck):
-        HA_SUPPORTED = False
-
-    TestNonHACheck('test', {}, [{}])
-    with pytest.raises(ConfigurationError):
-        TestNonHACheck('test', {'ha_enabled': True}, [{}])
-    with pytest.raises(ConfigurationError):
-        TestNonHACheck('test', {}, [{'ha_enabled': True}])
-
-
-def test_ha_enabled_and_supported():
-    class TestHACheck(AgentCheck):
-        HA_SUPPORTED = True
-
-    TestHACheck('test', {}, [{}])
-    TestHACheck('test', {'ha_enabled': True}, [{}])
-    TestHACheck('test', {}, [{'ha_enabled': True}])
