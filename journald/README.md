@@ -130,9 +130,12 @@ Example:
 ```yaml
 logs:
     - type: journald
-      path: /var/log/journal/
-      include_matches:
-          - _TRANSPORT=kernel
+      # path: this parameter is not required for default locations </var/log/journal> nor </run/log/journal>
+      log_processing_rules:
+      - type: exclude_at_match
+        name: exclude_datadoghq_users
+        ## Regexp can be anything
+        pattern: \w+@datadoghq.com
 ```
 
 ##### Tailing the same journal multiple times
@@ -188,6 +191,13 @@ journald does not include any events.
 
 Need help? Contact [Datadog support][7].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Agent Advanced Log collection configurations][8]
+- [Host Agent Log collection][9]
+
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -195,3 +205,5 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
+[9]: https://docs.datadoghq.com/agent/logs/?tab=journald
