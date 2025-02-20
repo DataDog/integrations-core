@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 14.6.0 / 2025-02-20
+
+***Added***:
+
+* Update mysql schema data model ([#19472](https://github.com/DataDog/integrations-core/pull/19472))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
 ## 14.5.1 / 2025-02-13 / Agent 7.63.0
 
 ***Fixed***:
