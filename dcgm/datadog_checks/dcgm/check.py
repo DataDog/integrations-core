@@ -34,10 +34,6 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
 
     def _add_gpu_tags(self, metric, sample_data, _runtime_data):
         metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
-        sample_list = list(sample_data)
-
-        if not sample_list:
-            return
 
         def add_tag_to_sample(entry):
             sample, tags, hostname = entry
@@ -66,7 +62,7 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         else:
             metric_type = None
 
-        modified_sample_data = (add_tag_to_sample(entry) for entry in sample_list)
+        modified_sample_data = (add_tag_to_sample(entry) for entry in sample_data)
 
         if metric_type == "counter_gauge":
             counter_gauge_transformer = get_counter_gauge(
