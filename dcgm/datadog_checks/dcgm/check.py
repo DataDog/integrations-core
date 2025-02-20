@@ -39,8 +39,8 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         if not sample_list:
             return
 
-        def add_tag_to_sample(sample):
-            sample, tags, hostname = sample
+        def add_tag_to_sample(entry):
+            sample, tags, hostname = entry
             gpu_tags = []
 
             for tag in tags:
@@ -53,29 +53,28 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
 
             return sample, tags + gpu_tags, hostname
 
-        modified_sample_data = (add_tag_to_sample(sample) for sample in sample_list)
+        metric_name = metric.name
 
-        for _sample, _tags, _hostname in sample_list:
-            metric_name = metric.name
+        if metric_name not in METRIC_MAP:
+            return
 
-            if metric_name not in METRIC_MAP:
-                continue
+        new_metric_name = METRIC_MAP[metric_name]
 
-            new_metric_name = METRIC_MAP[metric_name]
+        if isinstance(new_metric_name, dict):
+            metric_type = new_metric_name.get("type")
+            new_metric_name = new_metric_name["name"]
+        else:
+            metric_type = None
 
-            if isinstance(new_metric_name, dict):
-                metric_type = new_metric_name.get("type")
-                new_metric_name = new_metric_name["name"]
-            else:
-                metric_type = None
+        modified_sample_data = (add_tag_to_sample(entry) for entry in sample_list)
 
-            if metric_type == "counter_gauge":
-                counter_gauge_transformer = get_counter_gauge(
-                    self, new_metric_name, None, metric_transformer.global_options
-                )
-                counter_gauge_transformer(metric, modified_sample_data, _runtime_data)
-            else:
-                native_transformer = get_native_dynamic_transformer(
-                    self, new_metric_name, None, metric_transformer.global_options
-                )
-                native_transformer(metric, modified_sample_data, _runtime_data)
+        if metric_type == "counter_gauge":
+            counter_gauge_transformer = get_counter_gauge(
+                self, new_metric_name, None, metric_transformer.global_options
+            )
+            counter_gauge_transformer(metric, modified_sample_data, _runtime_data)
+        else:
+            native_transformer = get_native_dynamic_transformer(
+                self, new_metric_name, None, metric_transformer.global_options
+            )
+            native_transformer(metric, modified_sample_data, _runtime_data)
