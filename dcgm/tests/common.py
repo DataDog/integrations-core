@@ -64,3 +64,5 @@ EXPECTED_METRICS = [
 
 EXPECTED_METRICS = [f'dcgm.{m}' for m in EXPECTED_METRICS]
 assert sorted(EXPECTED_METRICS) == EXPECTED_METRICS, 'Please keep this list in alphabetic order!'
+
+DUPLICATED_TAGS = ["UUID:GPU-abc", "gpu_uuid:GPU-abc", "gpu_vendor:NVIDIA", "DCGM_FI_DEV_BRAND:NVIDIA"]
