@@ -1,1 +1,0 @@
-Gracefully handle unavailable apps and their aspects. Before we would throw an exception as soon as we encountered an error, which left a lot of available metrics uncollected.
