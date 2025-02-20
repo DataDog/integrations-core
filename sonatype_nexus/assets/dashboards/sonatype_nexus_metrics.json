@@ -1,6 +1,6 @@
 {
   "title": "Sonatype Nexus Metrics",
-  "description": "This dashboard provides insights into Sonatype Nexus repository performance, resource utilization, and activity trends. It tracks instance uptime, memory usage, repository statistics, blobstore metrics, and data transfers. and security metrics, including vulnerabilities and cleanup operations.",
+  "description": "This dashboard provides insights into Sonatype Nexus repository performance, resource utilization, and activity trends. It tracks instance uptime, memory usage, repository statistics, blobstore metrics, data transfers, and security metrics, including vulnerabilities and cleanup operations.",
   "widgets": [
     {
       "id": 2500690820607342,

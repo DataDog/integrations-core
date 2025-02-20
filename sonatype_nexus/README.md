@@ -14,9 +14,9 @@ The Sonatype Nexus check is included in the [Datadog Agent package][1]. No addit
 
 1. The `Username` and `Password` of either the **Administrator** account or a user with the **nx-metrics-all** privilege
 
-2. The `Server URL` of the Repository instance. For Ex: https://123.123.123.123:8081
+2. The `Server URL` of the Repository instance (for example, https://123.123.123.123:8081)
 
-### Connect your Sonatype Nexus account to agent
+### Connect your Sonatype Nexus account to the agent
 
 1. Copy the `conf.yaml.example` file.
 
@@ -83,9 +83,7 @@ The Sonatype Nexus integration collects and forwards analytics, and instance hea
 
 ### Events
 
-The Sonatype Nexus integration forwards below events to Datadog.
-1. sonatype_nexus.conf_validation
-2. sonatype_nexus.authentication_validation
+The Sonatype Nexus integration forwards the `sonatype_nexus.authentication_validation` event to Datadog.
 
 ### Service Checks
 

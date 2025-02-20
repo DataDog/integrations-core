@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into sonatype nexus analytics and instance health data.",
+    "description": "Gain insights into Sonatype Nexus analytics and instance health data.",
     "title": "Sonatype Nexus",
     "media": [
       {

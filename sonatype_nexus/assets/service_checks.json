@@ -9,6 +9,6 @@
             "critical"
         ],
         "name": "Sonatype Nexus Status",
-        "description": "Returns `CRITICAL` if the user configurations are invalid or sonatype nexus authentication fails. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the user configurations are invalid or Sonatype Nexus authentication fails. Returns `OK` otherwise."
     }
 ]
