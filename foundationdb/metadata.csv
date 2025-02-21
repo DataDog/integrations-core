@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+foundationdb.clients.connected,gauge,,connection,,Number of connected clients tagged by client version,0,foundationdb,connected clients,
 foundationdb.data.least_operating_space_bytes_log_server,gauge,,byte,,,0,foundationdb,,
 foundationdb.data.moving_data.in_flight_bytes,gauge,,byte,,,0,foundationdb,in flight bytes,
 foundationdb.data.moving_data.in_queue_bytes,gauge,,byte,,,0,foundationdb,in queue bytes,

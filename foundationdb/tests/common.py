@@ -63,6 +63,7 @@ E2E_METADATA = {
 }
 
 METRICS = [
+    "foundationdb.clients.connected",
     "foundationdb.latency_probe.batch_priority_transaction_start_seconds",
     "foundationdb.latency_probe.commit_seconds",
     "foundationdb.latency_probe.immediate_priority_transaction_start_seconds",

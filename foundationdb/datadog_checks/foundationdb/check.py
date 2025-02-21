@@ -258,6 +258,17 @@ class FoundationdbCheck(AgentCheck):
             for k, v in cluster["latency_probe"].items():
                 self.gauge("foundationdb.latency_probe." + k, v)
 
+        if "clients" in cluster:
+            clients = cluster["clients"]
+
+            if "supported_versions" in clients:
+                for supported_version in clients["supported_versions"]:
+                    if "count" in supported_version and "client_version" in supported_version:
+                        client_version_tag = ["fdb_client_version:" + supported_version["client_version"]]
+                        self.gauge("foundationdb.clients.connected", supported_version["count"], client_version_tag)
+            else:
+                self.maybe_gauge("foundationdb.clients.connected", clients, "count")
+
         degraded_processes = 0
         if "degraded_processes" in cluster:
             self.gauge("foundationdb.degraded_processes", cluster["degraded_processes"])
