@@ -230,6 +230,9 @@ class FoundationdbCheck(AgentCheck):
                 "least_operating_space_bytes_log_server",
             )
 
+            self.maybe_gauge("foundationdb.data.average_partition_size_bytes", data, "average_partition_size_bytes")
+            self.maybe_gauge("foundationdb.data.partitions_count", data, "partitions_count")
+
             if "moving_data" in data:
                 self.maybe_gauge(
                     "foundationdb.data.moving_data.in_flight_bytes", data["moving_data"], "in_flight_bytes"
