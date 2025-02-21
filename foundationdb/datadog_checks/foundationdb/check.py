@@ -258,6 +258,16 @@ class FoundationdbCheck(AgentCheck):
                 for k in operations:
                     self.maybe_hz_counter("foundationdb.workload.operations." + k, operations, k)
 
+            if "keys" in workload:
+                keys = workload["keys"]
+                for k in keys:
+                    self.maybe_hz_counter("foundationdb.workload.keys." + k, keys, k)
+
+            if "bytes" in workload:
+                bytes = workload["bytes"]
+                for k in bytes:
+                    self.maybe_hz_counter("foundationdb.workload.bytes." + k, bytes, k)
+
         if "latency_probe" in cluster:
             for k, v in cluster["latency_probe"].items():
                 self.gauge("foundationdb.latency_probe." + k, v)
