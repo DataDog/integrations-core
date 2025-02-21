@@ -309,6 +309,7 @@ class FoundationdbCheck(AgentCheck):
             )
 
         self.maybe_gauge("foundationdb.maintenance_seconds_remaining", cluster, "maintenance_seconds_remaining")
+        self.maybe_gauge("foundationdb.cluster_generation", cluster, "generation")
 
     def maybe_gauge(self, metric, obj, key, tags=None):
         if key in obj:
