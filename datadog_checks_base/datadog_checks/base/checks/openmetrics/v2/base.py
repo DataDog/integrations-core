@@ -4,8 +4,6 @@
 from collections import ChainMap
 from contextlib import contextmanager
 
-from requests.exceptions import RequestException
-
 from ....errors import ConfigurationError
 from ....utils.tracing import traced_class
 from ... import AgentCheck
@@ -62,6 +60,8 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Another thing to note is that this check ignores its instance argument completely.
         We take care of instance-level customization at initialization time.
         """
+        from requests.exceptions import RequestException
+
         self.refresh_scrapers()
 
         for endpoint, scraper in self.scrapers.items():
