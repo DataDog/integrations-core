@@ -1,6 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 foundationdb.clients.connected,gauge,,connection,,Number of connected clients tagged by client version,0,foundationdb,connected clients,
 foundationdb.cluster_generation,gauge,,,,,0,foundationdb,cluster generation,
+foundationdb.coordinators,gauge,,instance,,Number of coordinators tagged by reachability,0,foundationdb,coordinators,
 foundationdb.data.average_partition_size_bytes,gauge,,byte,,,0,foundationdb,average partition size,
 foundationdb.data.least_operating_space_bytes_log_server,gauge,,byte,,,0,foundationdb,,
 foundationdb.data.moving_data.in_flight_bytes,gauge,,byte,,,0,foundationdb,in flight bytes,

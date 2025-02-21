@@ -197,6 +197,19 @@ class FoundationdbCheck(AgentCheck):
         if "cluster" not in status:
             raise ValueError("JSON Status data doesn't include cluster data")
 
+        if "client" in status:
+            client = status["client"]
+
+            if "coordinators" in client:
+                if "coordinators" in client["coordinators"]:
+                    coordinators = client["coordinators"]["coordinators"]
+
+                    reachable_coordinators = sum([1 for coordinator in coordinators if coordinator["reachable"]])
+                    unreachable_coordinators = len(coordinators) - reachable_coordinators
+
+                    self.gauge("foundationdb.coordinators", reachable_coordinators, ["reachable:true"])
+                    self.gauge("foundationdb.coordinators", unreachable_coordinators, ["reachable:false"])
+
         cluster = status["cluster"]
         if "machines" in cluster:
             included_machines = 0
