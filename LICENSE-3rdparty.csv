@@ -33,11 +33,11 @@ kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin"
-mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2024 Hajime Senuma
+mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2025 Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2019 The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,Copyright OpenStack
-orjson,PyPI,Apache-2.0,Copyright 2018 ijl <ijl@mailbox.org>
-orjson,PyPI,MIT,Copyright (c) 2018 ijl <ijl@mailbox.org>
+orjson,PyPI,Apache-2.0,Copyright ijl <ijl@mailbox.org>
+orjson,PyPI,MIT,Copyright (c) ijl <ijl@mailbox.org>
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors.
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors.
 paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
@@ -45,7 +45,8 @@ ply,PyPI,BSD-3-Clause,Copyright (C) 2001-2018
 prometheus-client,PyPI,Apache-2.0,Copyright 2015 The Prometheus Authors
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola"
-psycopg,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
+psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
+psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
 pyOpenSSL,PyPI,Apache-2.0,Copyright The pyOpenSSL developers
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs

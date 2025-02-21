@@ -83,7 +83,6 @@ class MySQLMetadata(DBMAsyncJob):
         self._version_processed = False
         self._connection_args = connection_args
         self._db = None
-        self._check = check
         self._databases_data = DatabasesData(self, check, config)
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0

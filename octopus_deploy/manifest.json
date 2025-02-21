@@ -41,6 +41,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Octopus Deploy Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "Deployment Failed": "assets/monitors/deployment_failed.json"
     }
   },
   "author": {

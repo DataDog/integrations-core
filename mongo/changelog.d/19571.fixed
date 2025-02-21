@@ -1,0 +1,1 @@
+Skip host info system metrics collection on arbiter node due to `HostInfo` command cannot not be ran on arbiter without admin access.
