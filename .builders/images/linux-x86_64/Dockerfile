@@ -19,8 +19,8 @@ ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.4.0" \
- SHA256="e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf" \
+ VERSION="3.4.1" \
+ SHA256="002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -47,6 +47,19 @@ ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
 RUN /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON3_VERSION}/bin/python3 -m virtualenv /py3
+
+# Rust toolchain (needed for cryptography)
+ENV RUST_VERSION="1.76"
+ENV RUSTC_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
+ARG RUSTUP_VERSION="1.26.0"
+ARG RUSTUP_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
+ && echo "${RUSTUP_SHA256} rustup-init" | sha256sum --check \
+ && chmod +x ./rustup-init \
+ && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
+ && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
+ && rm ./rustup-init
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # MQ Client library required by pymqi
 ENV IBM_MQ_VERSION="9.2.4.0"
@@ -166,6 +179,10 @@ RUN \
     --without-libpsl \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
+
+# Environment variables to help openssl crate find OpenSSL
+ENV OPENSSL_LIB_DIR="/usr/local/lib64"
+ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt
