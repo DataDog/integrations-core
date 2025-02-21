@@ -22,8 +22,8 @@ This integration collects logs from the sources listed above and sends them to D
 #### Create a new Admin User
 
 1. Log in to your Ivanti nZTA platform.
-2. Go to **Secure Access** > **Manage Users**
-3. Navigate to **Authentication Servers** tab.
+2. Go to **Secure Access** > **Manage Users**.
+3. Navigate to the **Authentication Servers** tab.
 4. Under **Admin Auth**, click **Create User** and enter the following details:
    - **Full Name**: Enter a descriptive and identifiable name.
    - **User Name**: Enter a unique username.
