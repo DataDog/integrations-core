@@ -267,12 +267,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /genesys/metadata.csv                                               @DataDog/saas-integrations @DataDog/documentation
 /genesys/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/genesys/                                                           @DataDog/saas-integrations
-/genesys/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
-/genesys/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
-/genesys/metadata.csv                                               @DataDog/saas-integrations @DataDog/documentation
-/genesys/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 /godaddy/                                                           @DataDog/saas-integrations
 /godaddy/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
 /godaddy/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
@@ -389,11 +383,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /temporal_cloud/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
 /temporal_cloud/metadata.csv                                        @DataDog/saas-integrations @DataDog/documentation
 
-/temporal_cloud/                                                    @DataDog/saas-integrations
-/temporal_cloud/*.md                                                @DataDog/saas-integrations @DataDog/documentation
-/temporal_cloud/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
-/temporal_cloud/metadata.csv                                        @DataDog/saas-integrations @DataDog/documentation
-
 /trend_micro_email_security/                                        @DataDog/saas-integrations
 /trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
@@ -419,11 +408,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /shopify/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
 /shopify/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/shopify/                                                           @DataDog/saas-integrations
-/shopify/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
-/shopify/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
-/shopify/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 /asana/                                                             @DataDog/saas-integrations
 /asana/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
 /asana/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
@@ -438,12 +422,6 @@ vonage/                                                            @DataDog/saas
 vonage/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
-
-/asana/                                                             @DataDog/saas-integrations
-/asana/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
-/asana/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
-/asana/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 
 plaid/                                                              @DataDog/saas-integrations
 plaid/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
