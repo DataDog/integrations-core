@@ -22,6 +22,14 @@ INSTANCE = {
     'tls_verify_peers': 'Check.Valid=0',
 }
 
+COPY_CLUSTER_FILE_INSTANCE = {
+    'cluster_file': CLUSTER_FILE,
+    'copy_cluster_file': True,
+    'tls_certificate_file': TLS_CERT_FILE,
+    'tls_key_file': TLS_KEY_FILE,
+    'tls_verify_peers': 'Check.Valid=0',
+}
+
 TLS_INSTANCE = {
     'cluster_file': TLS_CLUSTER_FILE,
     'tls_certificate_file': TLS_CERT_FILE,

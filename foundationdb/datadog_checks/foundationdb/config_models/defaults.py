@@ -12,6 +12,10 @@ def instance_cluster_file():
     return '/var/lib/foundationdb/fdb.cluster'
 
 
+def instance_copy_cluster_file():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 

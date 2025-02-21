@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     cluster_file: Optional[str] = None
+    copy_cluster_file: Optional[bool] = None
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
