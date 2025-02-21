@@ -18,7 +18,7 @@ The StreamNative integration collects the following types of [metrics][2]:
 
 1. Log into [StreamNative Cloud Console Account][3].
 2. Click the profile icon and navigate to the **Accounts & Accesses** tab.
-3. Find the Service Account with **Admin** permissions or binding with `metrics-viewer` role.
+3. Find the Service Account with **Admin** permissions or a binding to the `metrics-viewer` role.
    - If no Service Account exists, select **New -> Service Account** to create one, and make sure to enable the **Super Admin** option.
    - To bind a service account with `metrics-viewer`, your refer the [metrics-viewer rolebinding](https://docs.streamnative.io/docs/cloud-metrics-api#metrics-authorization).
 4. On the right side of the chosen Service Account, click the `...` button.
