@@ -311,6 +311,24 @@ class FoundationdbCheck(AgentCheck):
         self.maybe_gauge("foundationdb.maintenance_seconds_remaining", cluster, "maintenance_seconds_remaining")
         self.maybe_gauge("foundationdb.cluster_generation", cluster, "generation")
 
+        if "qos" in cluster:
+            qos = cluster["qos"]
+
+            self.maybe_gauge("foundationdb.qos.transactions_per_second_limit", qos, "transactions_per_second_limit")
+            self.maybe_gauge(
+                "foundationdb.qos.batch_transactions_per_second_limit", qos, "batch_transactions_per_second_limit"
+            )
+
+            self.maybe_gauge(
+                "foundationdb.qos.released_transactions_per_second", qos, "released_transactions_per_second"
+            )
+
+            self.maybe_gauge(
+                "foundationdb.qos.worst_queue_bytes_storage_server", qos, "worst_queue_bytes_storage_server"
+            )
+
+            self.maybe_gauge("foundationdb.qos.worst_queue_bytes_log_server", qos, "worst_queue_bytes_log_server")
+
     def maybe_gauge(self, metric, obj, key, tags=None):
         if key in obj:
             self.gauge(metric, obj[key], tags=tags)

@@ -193,4 +193,9 @@ METRICS = [
     "foundationdb.processes_per_role.ratekeeper",
     "foundationdb.processes_per_role.resolver",
     "foundationdb.processes_per_role.storage",
+    "foundationdb.qos.batch_transactions_per_second_limit",
+    "foundationdb.qos.released_transactions_per_second",
+    "foundationdb.qos.transactions_per_second_limit",
+    "foundationdb.qos.worst_queue_bytes_log_server",
+    "foundationdb.qos.worst_queue_bytes_storage_server",
 ]
