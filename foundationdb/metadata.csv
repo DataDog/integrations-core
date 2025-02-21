@@ -19,6 +19,7 @@ foundationdb.latency_probe.read_seconds,gauge,,second,,,0,foundationdb,probe rea
 foundationdb.latency_probe.transaction_start_seconds,gauge,,second,,,0,foundationdb,probe transaction start,
 foundationdb.machines,gauge,,host,,,0,foundationdb,machines,
 foundationdb.process.cpu.usage_cores,gauge,,core,,,0,foundationdb,cores usage,
+foundationdb.process.disk.busy,gauge,,fraction,,,0,foundationdb,disk busy fraction,
 foundationdb.process.disk.free_bytes,gauge,,byte,,,0,foundationdb,free bytes,
 foundationdb.process.disk.reads.hz,gauge,,read,,,0,foundationdb,disk reads,
 foundationdb.process.disk.total_bytes,gauge,,byte,,,0,foundationdb,disk total bytes,

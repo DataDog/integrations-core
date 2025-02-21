@@ -92,6 +92,7 @@ class FoundationdbCheck(AgentCheck):
             self.maybe_gauge("foundationdb.process.cpu.usage_cores", process["cpu"], "usage_cores", tags)
         if "disk" in process:
             disk = process["disk"]
+            self.maybe_gauge("foundationdb.process.disk.busy", disk, "busy", tags)
             self.maybe_gauge("foundationdb.process.disk.free_bytes", disk, "free_bytes", tags)
             self.maybe_gauge("foundationdb.process.disk.total_bytes", disk, "total_bytes", tags)
             if "reads" in disk:

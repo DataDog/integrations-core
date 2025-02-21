@@ -138,6 +138,7 @@ METRICS = [
     "foundationdb.process.role.kvstore_total_size",
     "foundationdb.process.role.kvstore_used_bytes",
     "foundationdb.process.cpu.usage_cores",
+    "foundationdb.process.disk.busy",
     "foundationdb.process.disk.free_bytes",
     "foundationdb.process.disk.reads.hz",
     "foundationdb.process.disk.total_bytes",
