@@ -155,6 +155,10 @@ class FoundationdbCheck(AgentCheck):
         self.maybe_gauge("foundationdb.process.role.kvstore_total_nodes", role, "kvstore_total_nodes", tags)
         self.maybe_gauge("foundationdb.process.role.kvstore_total_size", role, "kvstore_total_size", tags)
         self.maybe_gauge("foundationdb.process.role.kvstore_used_bytes", role, "kvstore_used_bytes", tags)
+        self.maybe_gauge(
+            "foundationdb.process.role.queue_disk_available_bytes", role, "queue_disk_available_bytes", tags
+        )
+        self.maybe_gauge("foundationdb.process.role.queue_disk_total_bytes", role, "queue_disk_total_bytes", tags)
 
         if "data_lag" in role:
             self.maybe_gauge("foundationdb.process.role.data_lag.seconds", role["data_lag"], "seconds", tags)

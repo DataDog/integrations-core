@@ -78,6 +78,8 @@ foundationdb.process.role.mutation_bytes.hz,gauge,,byte,,,0,foundationdb,mutatio
 foundationdb.process.role.mutations.counter,count,,item,,,0,foundationdb,mutations,
 foundationdb.process.role.mutations.hz,gauge,,item,,,0,foundationdb,mutations,
 foundationdb.process.role.query_queue_max,gauge,,query,,,0,foundationdb,query queue max,
+foundationdb.process.role.queue_disk_available_bytes,gauge,,byte,,,0,foundationdb,space available for log queue,
+foundationdb.process.role.queue_disk_total_bytes,gauge,,byte,,,0,foundationdb,log queue total size,
 foundationdb.process.role.queue_length,gauge,,item,,,0,foundationdb,queue length,
 foundationdb.process.role.read_latency_statistics.count,count,,millisecond,,,0,foundationdb,read latency,
 foundationdb.process.role.read_latency_statistics.max,gauge,,millisecond,,,0,foundationdb,read latency,

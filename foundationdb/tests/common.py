@@ -138,6 +138,8 @@ METRICS = [
     "foundationdb.process.role.mutations.counter",
     "foundationdb.process.role.stored_bytes",
     "foundationdb.process.role.query_queue_max",
+    "foundationdb.process.role.queue_disk_available_bytes",
+    "foundationdb.process.role.queue_disk_total_bytes",
     "foundationdb.process.role.local_rate",
     "foundationdb.process.role.kvstore_available_bytes",
     "foundationdb.process.role.kvstore_free_bytes",
