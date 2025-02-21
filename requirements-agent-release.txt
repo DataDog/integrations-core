@@ -46,6 +46,7 @@ datadog-couchbase==5.1.0
 datadog-crio==4.1.0
 datadog-datadog-cluster-agent==5.4.0
 datadog-dcgm==3.3.0
+datadog-delinea-privilege-manager==1.0.0
 datadog-directory==4.0.1
 datadog-disk==7.0.0
 datadog-dns-check==5.1.0
@@ -90,12 +91,14 @@ datadog-ignite==3.1.0
 datadog-iis==5.1.0; sys_platform == 'win32'
 datadog-impala==3.2.0
 datadog-istio==8.1.0
+datadog-ivanti-connect-secure==1.0.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
 datadog-kafka-consumer==6.5.0
 datadog-kafka==4.0.0
 datadog-karpenter==2.2.0
 datadog-keda==1.0.0
+datadog-keycloak==1.0.0
 datadog-kong==5.1.0
 datadog-kube-apiserver-metrics==6.2.0
 datadog-kube-controller-manager==7.1.0
