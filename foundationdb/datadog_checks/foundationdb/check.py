@@ -283,6 +283,21 @@ class FoundationdbCheck(AgentCheck):
         else:
             self.service_check("foundationdb.can_connect", AgentCheck.OK)
 
+        if "fault_tolerance" in cluster:
+            fault_tolerance = cluster["fault_tolerance"]
+
+            self.maybe_gauge(
+                "foundationdb.fault_tolerance.max_zone_failures_without_losing_availability",
+                fault_tolerance,
+                "max_zone_failures_without_losing_availability",
+            )
+
+            self.maybe_gauge(
+                "foundationdb.fault_tolerance.max_zone_failures_without_losing_data",
+                fault_tolerance,
+                "max_zone_failures_without_losing_data",
+            )
+
     def maybe_gauge(self, metric, obj, key, tags=None):
         if key in obj:
             self.gauge(metric, obj[key], tags=tags)
