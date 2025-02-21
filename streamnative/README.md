@@ -71,3 +71,4 @@ Need help? Contact [Datadog support][4].
 [2]: https://docs.streamnative.io/docs/cloud-metrics-api#metrics-endpoint
 [3]: https://console.streamnative.cloud/
 [4]: https://docs.datadoghq.com/help/
+[5]: https://docs.streamnative.io/docs/cloud-metrics-api#metrics-authorization
