@@ -298,6 +298,8 @@ class FoundationdbCheck(AgentCheck):
                 "max_zone_failures_without_losing_data",
             )
 
+        self.maybe_gauge("foundationdb.maintenance_seconds_remaining", cluster, "maintenance_seconds_remaining")
+
     def maybe_gauge(self, metric, obj, key, tags=None):
         if key in obj:
             self.gauge(metric, obj[key], tags=tags)
