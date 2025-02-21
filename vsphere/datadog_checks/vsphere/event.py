@@ -25,7 +25,7 @@ class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
     def __init__(
-        self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS, hostname=None
+        self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS, hostname="AGENT_INT_EMPTY_HOSTNAME"
     ):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
@@ -148,11 +148,7 @@ class VSphereEvent(object):
                 md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
-        # workaround to send empty hostname
-        if self.hostname is None:
-            host_name = "AGENT_INT_EMPTY_HOSTNAME"
-        else:
-            host_name = self.hostname
+        host_name = self.hostname
         entity_name = self.raw_event.entity.name
 
         # for backwards compatibility, vm host type is capitalized
