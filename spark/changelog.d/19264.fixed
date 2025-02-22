@@ -1,0 +1,2 @@
+Stage and job metrics from Spark apps will continue being processed if there is an error getting data from one app.
+
