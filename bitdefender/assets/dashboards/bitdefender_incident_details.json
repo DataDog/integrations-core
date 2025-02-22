@@ -1,0 +1,806 @@
+{
+    "title": "Bitdefender - Incident Details",
+    "description": "The Bitdefender Incident Details dashboard provides insights about root cause analysis and threats Sandbox Analyzer has detected.",
+    "widgets": [
+      {
+        "id": 5837391553621968,
+        "definition": {
+          "type": "image",
+          "url": "https://fieldtrust.be/wp-content/uploads/2023/09/Bitdefender_Masterbrand_Logo_Positive-1-1024x236.png",
+          "sizing": "contain",
+          "margin": "md",
+          "has_background": true,
+          "has_border": true,
+          "vertical_align": "center",
+          "horizontal_align": "center"
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 523955291856876,
+        "definition": {
+          "type": "note",
+          "content": "**Dashboard Overview**\n\nThe Bitdefender Incident Details dashboard provides insights about root cause analysis and threats Sandbox Analyzer has detected.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+          "background_color": "white",
+          "font_size": "14",
+          "text_align": "left",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 6,
+          "y": 0,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 8153260704445598,
+        "definition": {
+          "title": "Sandbox Analyzer Events Overview",
+          "background_color": "vivid_purple",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 2350048175721612,
+              "definition": {
+                "title": "Total Sandbox Analyzer Detection Logs Count",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:network-sandboxing $Threat_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 4
+              }
+            },
+            {
+              "id": 4201122715229096,
+              "definition": {
+                "title": "Sandbox Analyzer Detection Logs Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "alias": "COUNT",
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:network-sandboxing $Threat_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "timeseries",
+                    "style": {
+                      "palette": "dog_classic",
+                      "order_by": "values",
+                      "line_type": "solid",
+                      "line_width": "normal"
+                    },
+                    "display_type": "line"
+                  }
+                ]
+              },
+              "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 4
+              }
+            },
+            {
+              "id": 1962843502067156,
+              "definition": {
+                "title": "Events by Threat Type",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.threatType",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:network-sandboxing $Threat_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "sort": {
+                      "count": 500,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    },
+                    "style": {
+                      "palette": "datadog16"
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "table"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 5
+              }
+            },
+            {
+              "id": 4679425647408418,
+              "definition": {
+                "title": "Top 10 File Paths",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.filePaths",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:network-sandboxing $Threat_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "datadog16"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 4
+              }
+            },
+            {
+              "id": 1616976204098170,
+              "definition": {
+                "title": "Sandbox Analyzer Detection Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "event_list",
+                    "query": {
+                      "data_source": "logs_stream",
+                      "query_string": "source:bitdefender @params.events.module:network-sandboxing $Threat_Type",
+                      "indexes": [],
+                      "storage": "hot"
+                    },
+                    "columns": [
+                      {
+                        "field": "status_line",
+                        "width": "auto"
+                      },
+                      {
+                        "field": "timestamp",
+                        "width": "auto"
+                      },
+                      {
+                        "field": "content",
+                        "width": "compact"
+                      }
+                    ]
+                  }
+                ],
+                "type": "list_stream"
+              },
+              "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 5
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 4,
+          "width": 12,
+          "height": 1
+        }
+      },
+      {
+        "id": 7298181558851306,
+        "definition": {
+          "title": "Incident Events Overview",
+          "background_color": "vivid_green",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 6347101803377740,
+              "definition": {
+                "title": "Total Incident Logs Count",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:new-incident $Severity"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 4
+              }
+            },
+            {
+              "id": 2063017158930460,
+              "definition": {
+                "title": "Incident Logs Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "alias": "COUNT",
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:new-incident $Severity"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "timeseries",
+                    "style": {
+                      "palette": "dog_classic",
+                      "order_by": "values",
+                      "line_type": "solid",
+                      "line_width": "normal"
+                    },
+                    "display_type": "line"
+                  }
+                ]
+              },
+              "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 4
+              }
+            },
+            {
+              "id": 3048381249985922,
+              "definition": {
+                "title": "Events by Severity",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.severity",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:new-incident $Severity"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "style": {
+                      "palette": "datadog16"
+                    },
+                    "sort": {
+                      "count": 500,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "table"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 5
+              }
+            },
+            {
+              "id": 8335776689453932,
+              "definition": {
+                "title": "Top 10 Attack Types",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.attack_types",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:new-incident $Severity"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "dog_classic"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 6,
+                "height": 4
+              }
+            },
+            {
+              "id": 1819006243094860,
+              "definition": {
+                "title": "Top 10 Detections",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.detection_name",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:new-incident $Severity"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "dog_classic"
+                }
+              },
+              "layout": {
+                "x": 6,
+                "y": 9,
+                "width": 6,
+                "height": 4
+              }
+            },
+            {
+              "id": 4622866420524426,
+              "definition": {
+                "title": "Top 10 Attack IDs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.att_ck_id",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:new-incident $Severity"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "dog_classic"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 4
+              }
+            },
+            {
+              "id": 7531074996520,
+              "definition": {
+                "title": "Incident Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "event_list",
+                    "query": {
+                      "data_source": "logs_stream",
+                      "query_string": "source:bitdefender @params.events.module:new-incident $Severity",
+                      "indexes": [],
+                      "storage": "hot"
+                    },
+                    "columns": [
+                      {
+                        "field": "status_line",
+                        "width": "auto"
+                      },
+                      {
+                        "field": "timestamp",
+                        "width": "auto"
+                      },
+                      {
+                        "field": "content",
+                        "width": "compact"
+                      }
+                    ]
+                  }
+                ],
+                "type": "list_stream"
+              },
+              "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 5
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 5,
+          "width": 12,
+          "height": 1,
+          "is_column_break": true
+        }
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "Threat_Type",
+        "prefix": "@params.events.threatType",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Severity",
+        "prefix": "@params.events.severity",
+        "available_values": [],
+        "default": "*"
+      }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+  }
