@@ -68,3 +68,13 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
 
+# TO REMOVE:
+$openssldir="C:\openssl"
+Get-ChildItem -Path ${openssldir} -Recurse # Debug
+# New-Item -Path ${openssldir}\lib -ItemType Directory -Force
+# New-Item -Path ${openssldir}\include -ItemType Directory -Force
+# Copy-Item "${librdkafka_dir}\vcpkg_installed\x64-windows\lib\libcrypto.lib","${librdkafka_dir}\vcpkg_installed\x64-windows\x64-windows\lib\libssl.lib" -Destination "${openssldir}\lib"
+# Copy-Item "${librdkafka_dir}\vcpkg_installed\x64-windows\include\openssl" -Destination "${openssldir}\include" -Recurse
+
+# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
+Add-Content -Path $Env:DD_ENV_FILE -Value "PIP_NO_BINARY=confluent_kafka,cryptography"
