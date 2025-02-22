@@ -5,16 +5,6 @@ tests:
     {
       "country" : "IN",
       "changed_from" : "",
-      "date_finalized" : "2024-11-05T07:18:37+00:00",
-      "network" : "40471",
-      "message_body" : "Hello from Vonage, checking for new data!",
-      "dcs" : "0",
-      "country_name" : "India",
-      "from" : "918050290593",
-      "currency" : "EUR",
-      "date_received" : "2024-11-05T07:02:52+00:00",
-      "id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
-      "direction" : "outbound",
       "account_ref" : "",
       "total_price" : "0.07268000",
       "client_ref" : "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1",
@@ -22,10 +12,20 @@ tests:
       "network_name" : "BSNL - Karnataka",
       "message_id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
       "ip_address" : "49.249.95.150",
+      "date_finalized" : "2024-11-05T07:18:37+00:00",
+      "network" : "40471",
       "account_id" : "bf8d8cc9",
+      "message_body" : "Hello from Vonage, checking for new data!",
+      "dcs" : "0",
+      "country_name" : "India",
       "udh" : "",
       "forced_from" : "918050290593",
+      "from" : "918050290593",
+      "currency" : "EUR",
+      "date_received" : "2024-11-05T07:02:52+00:00",
+      "id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
       "to" : "919481686682",
+      "direction" : "outbound",
       "status" : "delivered"
     }
   tags:
@@ -36,10 +36,6 @@ tests:
   result:
     custom:
       account_id: "bf8d8cc9"
-      error_code_description: "Delivered"
-      product: "vonage"
-      error_code: "0"
-      latency: "945284"
       account_ref: ""
       changed_from: ""
       client_ref: "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1"
@@ -50,10 +46,13 @@ tests:
       date_received: "2024-11-05T07:02:52+00:00"
       dcs: "0"
       direction: "outbound"
+      error_code: "0"
+      error_code_description: "Delivered"
       forced_from: "918050290593"
       from: "918050290593"
       id: "19118688-07e9-45b8-8ca4-340850f8dde7"
       ip_address: "49.249.95.150"
+      latency: "945284"
       message_body: "Hello from Vonage, checking for new data!"
       message_id: "19118688-07e9-45b8-8ca4-340850f8dde7"
       network: "40471"
@@ -63,21 +62,11 @@ tests:
       total_price: "0.07268000"
       udh: ""
       validity_period: "241106080252000+"
+      vonage_product: "my_product"
     message: |-
       {
         "country" : "IN",
         "changed_from" : "",
-        "ddtags" : "error_code_description:Delivered,product:my_product,error_code:0,latency:945284",
-        "date_finalized" : "2024-11-05T07:18:37+00:00",
-        "network" : "40471",
-        "message_body" : "Hello from Vonage, checking for new data!",
-        "dcs" : "0",
-        "country_name" : "India",
-        "from" : "918050290593",
-        "currency" : "EUR",
-        "date_received" : "2024-11-05T07:02:52+00:00",
-        "id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
-        "direction" : "outbound",
         "account_ref" : "",
         "total_price" : "0.07268000",
         "client_ref" : "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1",
@@ -85,10 +74,20 @@ tests:
         "network_name" : "BSNL - Karnataka",
         "message_id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
         "ip_address" : "49.249.95.150",
+        "date_finalized" : "2024-11-05T07:18:37+00:00",
+        "network" : "40471",
         "account_id" : "bf8d8cc9",
+        "message_body" : "Hello from Vonage, checking for new data!",
+        "dcs" : "0",
+        "country_name" : "India",
         "udh" : "",
         "forced_from" : "918050290593",
+        "from" : "918050290593",
+        "currency" : "EUR",
+        "date_received" : "2024-11-05T07:02:52+00:00",
+        "id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
         "to" : "919481686682",
+        "direction" : "outbound",
         "status" : "delivered"
       }
     tags:
