@@ -25,12 +25,18 @@ def mock_output_old_format(*args, **kwargs):
     return _read_fixture('nodetool_output_1.2')
 
 
-@patch('datadog_checks.cassandra_nodetool.cassandra_nodetool.get_subprocess_output', side_effect=mock_output)
+@patch(
+    'datadog_checks.cassandra_nodetool.cassandra_nodetool.CassandraNodetoolCheck._get_subprocess_output',
+    side_effect=mock_output,
+)
 def test_check(mock_output, aggregator):
     _check(mock_output, aggregator)
 
 
-@patch('datadog_checks.cassandra_nodetool.cassandra_nodetool.get_subprocess_output', side_effect=mock_output_old_format)
+@patch(
+    'datadog_checks.cassandra_nodetool.cassandra_nodetool.CassandraNodetoolCheck._get_subprocess_output',
+    side_effect=mock_output_old_format,
+)
 def test_check_old_format(mock_output, aggregator):
     _check(mock_output, aggregator)
 

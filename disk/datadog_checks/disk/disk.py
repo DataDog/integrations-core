@@ -6,13 +6,13 @@ from __future__ import division
 import os
 import platform
 import re
+import subprocess
 from xml.etree import ElementTree as ET
 
 import psutil
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
 if platform.system() == 'Windows':
@@ -164,6 +164,10 @@ class Disk(AgentCheck):
                     self.service_check('disk.read_write', AgentCheck.UNKNOWN, tags=tags)
 
         self.collect_latency_metrics()
+
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
 
     def _get_tags(self, part):
         device_name = part.mountpoint if self._use_mount else part.device
@@ -444,7 +448,7 @@ class Disk(AgentCheck):
             # Use raw output mode (space-separated fields encoded in UTF-8).
             # We want to be compatible with lsblk version 2.19 since
             # it is the last version supported by CentOS 6 and SUSE 11.
-            lsblk_out, _, _ = get_subprocess_output(["lsblk", "--noheadings", "--raw", "--output=NAME,LABEL"], self.log)
+            lsblk_out, _, _ = self._get_subprocess_output(["lsblk", "--noheadings", "--raw", "--output=NAME,LABEL"])
 
             for line in lsblk_out.splitlines():
                 device, _, label = line.partition(' ')
@@ -453,7 +457,7 @@ class Disk(AgentCheck):
                     # sda1  MY LABEL
                     devices_labels["/dev/" + device] = ['label:{}'.format(label), 'device_label:{}'.format(label)]
 
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.debug("Couldn't use lsblk to have device labels")
 
         return devices_labels
@@ -461,7 +465,7 @@ class Disk(AgentCheck):
     def _get_devices_label_from_blkid(self):
         devices_label = {}
         try:
-            blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
+            blkid_out, _, _ = self._get_subprocess_output(['blkid'])
             all_devices = [l.split(':', 1) for l in blkid_out.splitlines()]
 
             for d in all_devices:
@@ -471,7 +475,7 @@ class Disk(AgentCheck):
                 if labels:
                     devices_label[d[0]] = ['label:{}'.format(labels[0]), 'device_label:{}'.format(labels[0])]
 
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.debug("Couldn't use blkid to have device labels")
 
         return devices_label
