@@ -318,15 +318,22 @@ class KafkaCheck(AgentCheck):
 
         topic_partition_checked = set()
 
-        for consumer_group, _topic, _partition in consumer_offsets:
+        sorted_consumer_offsets = dict(sorted(consumer_offsets.items(), key=lambda item: item[0][0]))
+        current_group = None
+
+        for consumer_group, _topic, _partition in sorted_consumer_offsets:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)
             if (_topic, _partition) in topic_partition_checked:
                 self.log.debug('Highwater offset already collected for topic %s with partition %s', _topic, _partition)
                 continue
 
             topic_partitions_for_highwater_offsets = set()
+            if current_group != consumer_group:
+                if current_group is not None:
+                    self.client.close_consumer()
+                current_group = consumer_group
+                self.client.open_consumer(consumer_group)
 
-            self.client.open_consumer(consumer_group)
             cluster_id, topics = self.client.consumer_get_cluster_id_and_list_topics(consumer_group)
 
             for topic, partitions in topics:
@@ -363,6 +370,7 @@ class KafkaCheck(AgentCheck):
             else:
                 self.log.debug('No new highwater offsets to query for consumer group %s', consumer_group)
 
+        if current_group is not None:
             self.client.close_consumer()
 
         self.log.debug('Got %s highwater offsets', len(highwater_offsets))
