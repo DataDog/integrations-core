@@ -28,7 +28,6 @@ from typing import (  # noqa: F401
 )
 
 import yaml
-from pydantic import BaseModel, ValidationError
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 
@@ -48,7 +47,6 @@ from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.diagnose import Diagnosis
 from ..utils.fips import enable_fips
-from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
@@ -396,6 +394,8 @@ class AgentCheck(object):
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
+        from ..utils.http import RequestsWrapper
+
         if not hasattr(self, '_http'):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
@@ -500,6 +500,7 @@ class AgentCheck(object):
     def log_typos_in_options(self, user_config, models_config, level):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
+        from pydantic import BaseModel
 
         user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}
@@ -567,6 +568,8 @@ class AgentCheck(object):
                 return
 
             raise
+
+        from pydantic import ValidationError
 
         model = getattr(package, model_name, None)
         if model is not None:
