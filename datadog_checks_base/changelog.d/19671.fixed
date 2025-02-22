@@ -1,0 +1,1 @@
+Remove HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA.
