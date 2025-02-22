@@ -8,11 +8,43 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Gain insights into content and project-related activities from Sanity.",
     "title": "Sanity",
-    "media": [],
+    "media": [
+      {
+        "caption": "Sanity - Activity Overview 1",
+        "image_url": "images/sanity_activity_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sanity - Activity Overview 2",
+        "image_url": "images/sanity_activity_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sanity - Activity Overview 3",
+        "image_url": "images/sanity_activity_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sanity - Activity Overview 4",
+        "image_url": "images/sanity_activity_overview_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sanity - Activity Overview 5",
+        "image_url": "images/sanity_activity_overview_5.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sanity - Activity Overview 6",
+        "image_url": "images/sanity_activity_overview_6.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
+      "Category::Developer Tools",
       "Submitted Data Type::Logs",
       "Offering::Integration"
     ]
@@ -28,6 +60,19 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Sanity - Activity Overview": "assets/dashboards/sanity_activity_overview.json"
+    },
+    "logs": {
+      "source": "sanity"
+    },
+    "monitors": {
+      "High number of document deletions": "assets/monitors/high_number_of_document_deletions.json",
+      "High number of External studio host deletions": "assets/monitors/high_number_of_external_studio_host_deletions.json",
+      "High number of dataset deletions": "assets/monitors/high_number_of_dataset_deletions.json",
+      "High number of resource permission updates": "assets/monitors/high_number_of_resource_permission_updates.json",
+      "Open task deleted": "assets/monitors/open_task_deleted.json"
     }
   },
   "author": {
