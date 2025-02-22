@@ -28,7 +28,6 @@ from typing import (  # noqa: F401
 )
 
 import yaml
-from pydantic import BaseModel, ValidationError
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 
@@ -511,6 +510,7 @@ class AgentCheck(object):
     def log_typos_in_options(self, user_config, models_config, level):
         # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
+        from pydantic import BaseModel
 
         user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}
@@ -578,6 +578,8 @@ class AgentCheck(object):
                 return
 
             raise
+
+        from pydantic import ValidationError
 
         model = getattr(package, model_name, None)
         if model is not None:
