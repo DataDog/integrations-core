@@ -228,7 +228,35 @@ QUERY_PG_CONTROL_CHECKPOINT = {
     ],
 }
 
-COMMON_BGW_METRICS = {
+QUERY_PG_BGWRITER_CHECKPOINTER = {
+    'name': 'bgw_metrics',
+    'query': """
+        SELECT
+            cp.num_timed,
+            cp.num_requested,
+            cp.buffers_written,
+            bg.buffers_clean,
+            bg.maxwritten_clean,
+            bg.buffers_alloc,
+            cp.write_time,
+            cp.sync_time
+        FROM pg_stat_bgwriter bg, pg_stat_checkpointer cp
+    """.strip(),
+    'metrics': {
+        'checkpoints_timed': ('bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
+        'checkpoints_req': ('bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
+        'buffers_checkpoint': ('bgwriter.buffers_checkpoint', AgentCheck.monotonic_count),
+        'buffers_clean': ('bgwriter.buffers_clean', AgentCheck.monotonic_count),
+        'maxwritten_clean': ('bgwriter.maxwritten_clean', AgentCheck.monotonic_count),
+        'buffers_alloc': ('bgwriter.buffers_alloc', AgentCheck.monotonic_count),
+        'checkpoint_write_time': ('bgwriter.write_time', AgentCheck.monotonic_count),
+        'checkpoint_sync_time': ('bgwriter.sync_time', AgentCheck.monotonic_count),
+    },
+    'descriptors': [],
+    'relation': False,
+}
+
+COMMON_BGW_METRICS_LT_17 = {
     'checkpoints_timed': ('bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
     'buffers_checkpoint': ('bgwriter.buffers_checkpoint', AgentCheck.monotonic_count),
@@ -238,9 +266,9 @@ COMMON_BGW_METRICS = {
     'buffers_alloc': ('bgwriter.buffers_alloc', AgentCheck.monotonic_count),
 }
 
-NEWER_91_BGW_METRICS = {'buffers_backend_fsync': ('bgwriter.buffers_backend_fsync', AgentCheck.monotonic_count)}
+NEWER_91_BGW_METRICS_LT_17 = {'buffers_backend_fsync': ('bgwriter.buffers_backend_fsync', AgentCheck.monotonic_count)}
 
-NEWER_92_BGW_METRICS = {
+NEWER_92_BGW_METRICS_LT_17 = {
     'checkpoint_write_time': ('bgwriter.write_time', AgentCheck.monotonic_count),
     'checkpoint_sync_time': ('bgwriter.sync_time', AgentCheck.monotonic_count),
 }
@@ -502,8 +530,30 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
     ],
 }
 
-# Requires PG10+
 VACUUM_PROGRESS_METRICS = {
+    'name': 'vacuum_progress_metrics',
+    'query': """
+SELECT v.datname, c.relname, v.phase,
+       v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
+       v.index_vacuum_count, v.max_dead_tuple_bytes, v.num_dead_item_ids
+  FROM pg_stat_progress_vacuum as v
+  JOIN pg_class c on c.oid = v.relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_vacuumed', 'type': 'gauge'},
+        {'name': 'vacuum.index_vacuum_count', 'type': 'gauge'},
+        {'name': 'vacuum.max_dead_tuples', 'type': 'gauge'},
+        {'name': 'vacuum.num_dead_tuples', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG10+
+VACUUM_PROGRESS_METRICS_LT_17 = {
     'name': 'vacuum_progress_metrics',
     'query': """
 SELECT v.datname, c.relname, v.phase,
