@@ -1,0 +1,15 @@
+FROM golang:1.23
+
+WORKDIR /app
+
+# Copy all files
+COPY . ./
+
+ENV WORKDIR=C:/app
+
+# Build the server
+ARG BUILD_TARGET
+RUN go build -o $env:BUILD_TARGET main.go
+
+# Expose port 443
+EXPOSE 443
