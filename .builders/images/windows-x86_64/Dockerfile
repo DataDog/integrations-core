@@ -116,7 +116,7 @@ RUN Get-RemoteFile `
 
 ENV OPENSSL_VERSION="3.4.1"
 
-ENV CURL_VERSION="8.11.1"
+ENV CURL_VERSION="8.12.1"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
