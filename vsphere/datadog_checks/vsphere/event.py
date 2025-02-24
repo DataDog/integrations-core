@@ -24,7 +24,14 @@ from .constants import (
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
-    def __init__(self, raw_event, event_config, tags, event_resource_filters, hostname, exclude_filters=EXCLUDE_FILTERS,
+    def __init__(
+        self,
+        raw_event,
+        event_config,
+        tags,
+        event_resource_filters,
+        hostname,
+        exclude_filters=EXCLUDE_FILTERS,
     ):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):

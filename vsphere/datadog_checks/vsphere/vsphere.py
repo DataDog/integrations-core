@@ -784,7 +784,9 @@ class VSphereCheck(AgentCheck):
                 self.log.debug(
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
-                event_default_hostname = "AGENT_INT_EMPTY_HOSTNAME" if self._config.empty_default_hostname else self._hostname
+                event_default_hostname = (
+                    "AGENT_INT_EMPTY_HOSTNAME" if self._config.empty_default_hostname else self._hostname
+                )
                 normalized_event = VSphereEvent(
                     event,
                     event_config,
