@@ -49,6 +49,7 @@ class CiscoACICheck(AgentCheck):
 
         username = self.instance['username']
         pwd = self.instance.get('pwd')
+        self.log.info('JMW username: %s password: %s', username, pwd)
         instance_hash = hash_mutable(self.instance)
 
         appcenter = _is_affirmative(self.instance.get('appcenter'))

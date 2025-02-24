@@ -58,6 +58,11 @@ To configure this check for an Agent running on a host:
         ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
         #
         # send_ndm_metadata: false
+
+        # JMWNAME send_faults_as_logs - boolean - optional - default: false
+        # Set to `true` to send Cisco ACI faults as logs.
+        #
+        # send_faults_as_logs: false
    ```
    
    *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.

@@ -502,9 +502,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
             for log_element in log_elements:
                 payload = {}
-                payload['ddtags'] = ",".join(tags)
+                payload['ddtags'] = ",".join(tags)  # JMW same for faults?
                 payload['message'] = log_element.get("MessageText")
-                payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(log_element.get("OccurredAt")))
+                payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(log_element.get("OccurredAt")))  # JMWTIMESTAMP
                 payload['status'] = log_element.get("Category")
                 payload['stage_name'] = name
                 self.send_log(payload)  # JMWTUE try something like this
