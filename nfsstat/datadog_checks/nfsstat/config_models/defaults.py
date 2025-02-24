@@ -23,5 +23,5 @@ def instance_empty_default_hostname():
 def instance_min_collection_interval():
     return 15
 
-def instance_ignore_missing_mountpoints_warning():
+def instance_disable_missing_mountpoints_warning():
     return False
