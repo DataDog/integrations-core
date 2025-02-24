@@ -156,6 +156,7 @@ tests:
           }
       }
     service: "itsm.incident"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -305,6 +306,7 @@ tests:
           }
       }
     service: "itsm.change_request"
+    source: "servicenow-performance"
     result: null
   - sample: >-
       {
@@ -414,6 +416,7 @@ tests:
           }
       }
     service: "itsm.task"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -547,6 +550,7 @@ tests:
           }
       }
     service: "itam.alm_asset"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -604,6 +608,7 @@ tests:
           }
       }
     service: "itam.alm_transfer_order"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -710,6 +715,7 @@ tests:
           }
       }
     service: "itam.sc_req_item"
+    source: "servicenow-performance"
     result: null
   - sample: >-
       {
@@ -830,6 +836,7 @@ tests:
           }
       }
     service: "itam.ast_contract"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -903,6 +910,7 @@ tests:
           }
       }
     service: "itam.ast_license_base"
+    source: "servicenow-performance"
     result: null
   - sample: >-
       {
@@ -1068,6 +1076,7 @@ tests:
           }
       }
     service: "security_incident_response.sn_si_incident"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -1217,6 +1226,7 @@ tests:
           }
       }
     service: "vulnerability_response.sn_vul_vulnerable_item"
+    source: "servicenow-performance"
     result: null
   - sample: |-
       {
@@ -1370,6 +1380,7 @@ tests:
           }
       }
     service: "vulnerability_response.sn_vul_app_vulnerable_item"
+    source: "servicenow-performance"
     result: null
   - sample: >-
       {
@@ -1535,6 +1546,7 @@ tests:
           }
       }
     service: "vulnerability_response.sn_vul_container_image_vulnerable_item"
+    source: "servicenow-performance"
     result: null
   - sample: >-
       {
@@ -1620,6 +1632,7 @@ tests:
           }
       }
     service: "cmdb_health.cmdb_health_result"
+    source: "servicenow-performance"
     result: null
   - sample: >-
       {
@@ -1681,4 +1694,5 @@ tests:
           }
       }
     service: "cmdb_health.relation_health_result"
+    source: "servicenow-performance"
     result: null
