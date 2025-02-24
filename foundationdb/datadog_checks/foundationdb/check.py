@@ -198,11 +198,6 @@ class FoundationdbCheck(AgentCheck):
         if "processes" in cluster:
             self.gauge("foundationdb.processes", len(cluster["processes"]))
 
-            self.count(
-                "foundationdb.instances",
-                sum((len(p["roles"]) if "roles" in p else 0 for p in cluster["processes"].values())),
-            )
-
             role_counts = {}
             for process_key in cluster["processes"]:
                 process = cluster["processes"][process_key]
@@ -217,7 +212,7 @@ class FoundationdbCheck(AgentCheck):
                                 role_counts[rolename] = 1
 
             for role in role_counts:
-                self.gauge("foundationdb.processes_per_role." + role, role_counts[role])
+                self.gauge("foundationdb.instances", role_counts[role], ["fdb_role:" + role])
 
         if "data" in cluster:
             data = cluster["data"]

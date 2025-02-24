@@ -171,13 +171,4 @@ METRICS = [
     "foundationdb.process.role.read_latency_statistics.p90",
     "foundationdb.process.role.read_latency_statistics.p99",
     "foundationdb.process.role.queue_length",
-    "foundationdb.processes_per_role.cluster_controller",
-    "foundationdb.processes_per_role.coordinator",
-    "foundationdb.processes_per_role.data_distributor",
-    "foundationdb.processes_per_role.log",
-    "foundationdb.processes_per_role.master",
-    "foundationdb.processes_per_role.proxy",
-    "foundationdb.processes_per_role.ratekeeper",
-    "foundationdb.processes_per_role.resolver",
-    "foundationdb.processes_per_role.storage",
 ]
