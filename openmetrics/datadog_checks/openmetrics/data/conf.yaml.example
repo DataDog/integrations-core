@@ -447,7 +447,8 @@ instances:
     ##
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
-    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     value: The template value, for example `"Bearer <TOKEN>"`. Note that 
+<TOKEN> is not something that you are supposed to replace, just leave it alone. The default is: <TOKEN>
     ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
