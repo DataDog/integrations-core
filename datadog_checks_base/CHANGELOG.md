@@ -2,7 +2,21 @@
 
 <!-- towncrier release notes start -->
 
-## 37.5.0 / 2025-01-25
+## 37.6.1 / 2025-02-20
+
+***Fixed***:
+
+* Remove HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA. ([#19671](https://github.com/DataDog/integrations-core/pull/19671))
+
+## 37.6.0 / 2025-02-20
+
+***Added***:
+
+* Add support for target_info metric w/ shared label cache ([#19397](https://github.com/DataDog/integrations-core/pull/19397))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+* Adds HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA. ([#19580](https://github.com/DataDog/integrations-core/pull/19580))
+
+## 37.5.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
 
