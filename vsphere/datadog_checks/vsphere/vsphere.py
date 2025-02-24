@@ -792,8 +792,8 @@ class VSphereCheck(AgentCheck):
                     event_config,
                     self._config.base_tags,
                     self._config.event_resource_filters,
-                    event_default_hostname,
                     self._config.exclude_filters,
+                    event_default_hostname,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
