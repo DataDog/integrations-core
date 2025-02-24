@@ -56,6 +56,11 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_missing_mountpoints_warning - boolean - optional - default: false
+    ## No warning is logged if host has check enabled but no nfs mount point is found.
+    #
+    # disable_missing_mountpoints_warning: false
+
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
