@@ -31,7 +31,7 @@ class VSphereEvent(object):
         tags,
         event_resource_filters,
         exclude_filters=EXCLUDE_FILTERS,
-        hostname="AGENT_INT_EMPTY_HOSTNAME"
+        hostname="AGENT_INT_EMPTY_HOSTNAME",
     ):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
