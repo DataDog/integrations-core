@@ -16,7 +16,7 @@
 		// When updating it, modify both the base Dockerfile and the devcontainer.json reference.
 		// Ref: https://github.com/devcontainers/features/blob/562305d37b97d47331d96306ffc2a0a3cce55e64/src/python/install.sh#L10
 		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.12"
+			"version": "3.13"
 		}
 	},
 

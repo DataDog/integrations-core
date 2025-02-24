@@ -8,7 +8,7 @@ def test_nonexistent(ddev, helpers, mocker):
     restart = mocker.patch('ddev.e2e.agent.docker.DockerAgent.restart')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
 
     result = ddev('env', 'reload', integration, environment)
 
@@ -26,7 +26,7 @@ def test_basic(ddev, helpers, data_dir, mocker):
     restart = mocker.patch('ddev.e2e.agent.docker.DockerAgent.restart')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
     env_data.write_metadata({})
 
