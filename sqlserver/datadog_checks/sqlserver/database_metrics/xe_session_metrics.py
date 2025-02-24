@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -47,6 +48,8 @@ XE_EVENTS_NOT_IN_XML = {
 class SQLServerXESessionMetrics(SqlserverDatabaseMetricsBase):
     @property
     def enabled(self):
+        if is_azure_sql_database(self.engine_edition):
+            return False
         self.deadlocks_config: dict = self.config.deadlocks_config
         return self.config.database_metrics_config["xe_metrics"]["enabled"] or is_affirmative(
             self.deadlocks_config.get('enabled', False)
