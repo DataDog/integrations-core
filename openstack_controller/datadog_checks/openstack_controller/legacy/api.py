@@ -7,6 +7,7 @@ from os import environ
 from urllib.parse import urljoin
 
 import requests
+
 try:
     from openstack import connection
 except ImportError:
