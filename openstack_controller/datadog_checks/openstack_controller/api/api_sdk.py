@@ -5,8 +5,11 @@ from os import environ
 
 from keystoneauth1 import session
 from keystoneauth1.identity import v3
-from openstack import connection
-from openstack.config import loader
+try:
+    from openstack import connection
+    from openstack.config import loader
+except ImportError:
+    pass
 
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
