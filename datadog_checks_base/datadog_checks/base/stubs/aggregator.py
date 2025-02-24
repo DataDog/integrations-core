@@ -369,7 +369,9 @@ class AggregatorStub(object):
             condition = len(candidates) >= at_least
         self._assert(condition, msg=msg, expected_stub=expected_metric, submitted_elements=self._metrics)
 
-    def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None, message_contains=None):
+    def assert_service_check(
+        self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None, message_contains=None
+    ):
         """
         Assert a service check was processed by this stub
         """
