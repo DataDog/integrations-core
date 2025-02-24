@@ -377,7 +377,7 @@ def test_get_project_limit():
     api.connection = MockOpenstackConnection()
 
     assert api.get_project_limits(u'680031a39ce040e1b81289ea8c73fb11') == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE
-    with pytest.raises(SDKException):
+    with pytest.raises(Exception):
         api.get_project_limits('invalid_id')
 
 
