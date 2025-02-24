@@ -9,6 +9,7 @@ from collections import defaultdict
 from datetime import datetime
 
 import requests
+
 try:
     from openstack.config.loader import OpenStackConfig
 except ImportError:
