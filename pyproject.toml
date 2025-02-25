@@ -90,6 +90,7 @@ ignore = [
   "B905",  # TODO: remove when we drop Python 2
   # Ignore McCabe complexity
   "C901",
+  "I001",
 ]
 unfixable = [
   # Don't touch unused imports
