@@ -45,10 +45,9 @@ from ..types import (
     ServiceCheckStatus,  # noqa: F401
 )
 from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, to_native_string
+from ..utils.common import ensure_bytes, import_lazily, to_native_string
 from ..utils.diagnose import Diagnosis
 from ..utils.fips import enable_fips
-from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
@@ -56,6 +55,8 @@ from ..utils.serialization import from_json, to_json
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
+
+http_util = import_lazily('datadog_checks.base.utils.http')
 
 if AGENT_RUNNING:
     from ..log import CheckLoggingAdapter, init_logging
@@ -397,7 +398,9 @@ class AgentCheck(object):
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = http_util.RequestsWrapper(
+                self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+            )
 
         return self._http
 
