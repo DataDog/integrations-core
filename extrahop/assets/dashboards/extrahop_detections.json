@@ -911,11 +911,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -945,6 +940,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -954,9 +957,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -1257,11 +1257,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -1291,6 +1286,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -1300,9 +1303,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -1395,14 +1395,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -1434,6 +1426,20 @@
                                     "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
@@ -1457,11 +1463,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -1491,6 +1492,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -1500,9 +1509,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -2196,6 +2202,7 @@
                             "title": "Total In-Progress Investigations",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2205,15 +2212,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:extrahop service:investigation @status:in-progress"
+                                                "query": "source:extrahop service:investigation @status:in_progress"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [],
                                             "compute": {
-                                                "aggregation": "count",
-                                                "metric": "count"
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -2424,11 +2430,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -2458,6 +2459,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -2467,9 +2476,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -2493,11 +2499,6 @@
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -2527,6 +2528,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -2536,9 +2545,6 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
@@ -2557,9 +2563,10 @@
                     {
                         "id": 3952932045796307,
                         "definition": {
-                            "title": "Investigation Log Details",
+                            "title": "Investigation Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
