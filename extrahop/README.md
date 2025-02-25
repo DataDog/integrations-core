@@ -31,7 +31,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
 
     | ExtraHop Parameters                   | Description                                                  |
     | ------------------------------------- | ------------------------------------------------------------ |
-    | Sub Domain                                | The Sub Domain of your ExtraHop Console                          |
+    | Sub Domain                            | The Sub Domain of your ExtraHop Console                      |
     | Client ID                             | The Client ID of your ExtraHop Console                       |
     | Client Secret                         | The Client Secret of your ExtraHop Console                   |
 
