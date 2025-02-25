@@ -14,7 +14,7 @@ from datadog_checks.cisco_aci.faults import Faults
 from datadog_checks.cisco_aci.tags import CiscoTags
 from datadog_checks.cisco_aci.tenant import Tenant
 
-SOURCE_TYPE = 'cisco_aci'
+SOURCE_TYPE = 'cisco_aci'  # JMW use this for logs source?
 
 SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 
@@ -148,7 +148,7 @@ class CiscoACICheck(AgentCheck):
 
         # JMW new faults.collect()?
         try:
-            faults = Faults(self, api, self.instance, self.instance.get('namespace', 'default'))  # JMWFRI
+            faults = Faults(self, api, self.instance, self.instance.get('namespace', 'default'), self.send_log)  # JMWFRI
             faults.collect()
         except Exception as e:
             self.log.error('faults collection failed: %s', e)

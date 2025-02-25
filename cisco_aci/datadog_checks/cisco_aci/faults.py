@@ -23,12 +23,13 @@ class Faults:
     Collect faults from the APIC
     """
 
-    def __init__(self, check, api, instance, namespace):
+    def __init__(self, check, api, instance, namespace, send_log):
         self.check = check
         self.api = api
         self.instance = instance
         self.check_tags = check.check_tags
         self.namespace = namespace
+        self.send_log = send_log  # JMW is this the proper way to do this?
 
         # Config for submitting device/interface metadata to NDM
         self.send_ndm_metadata = self.instance.get('send_ndm_metadata', False)
@@ -92,14 +93,14 @@ class Faults:
     def submit_faults(self, faults):
         for fault in faults:
             self.log.info("JMW faults submit_faults() fault: %s", fault)
-            if isinstance(fault, dict):
-                self.log.info("JMW fault is a dictionary")
-            else:
-                self.log.info("JMW fault is NOT a dictionary")
-            if isinstance(fault, str):
-                self.log.info("JMW fault is a str")
-            else:
-                self.log.info("JMW fault is NOT a str")
+            # if isinstance(fault, dict):
+            #     self.log.info("JMW fault is a dictionary")
+            # else:
+            #     self.log.info("JMW fault is NOT a dictionary")
+            # if isinstance(fault, str):
+            #     self.log.info("JMW fault is a str")
+            # else:
+            #     self.log.info("JMW fault is NOT a str")
 
             # for log_element in log_elements:
             #     payload = {}
@@ -118,15 +119,15 @@ class Faults:
 # last_transition = fault.get("faultInst", {}).get("attributes", {}).get("lastTransition")
 
             faultinst = fault.get("faultInst", {})  # JMW dict
-            #if isinstance(faultinst, dict):
-                #self.log.info("JMW faultinst is a dictionary")
-            #else:
-                #self.log.info("JMW faultinst is NOT a dictionary")
-            #if isinstance(faultinst, str):
-                #self.log.info("JMW faultinst is a str")
-            #else:
-                #self.log.info("JMW faultinst is NOT a str")
-            #self.log.info("JMW faultinst: %s", faultinst)
+            # if isinstance(faultinst, dict):
+            #     self.log.info("JMW faultinst is a dictionary")
+            # else:
+            #     self.log.info("JMW faultinst is NOT a dictionary")
+            # if isinstance(faultinst, str):
+            #     self.log.info("JMW faultinst is a str")
+            # else:
+            #     self.log.info("JMW faultinst is NOT a str")
+            # self.log.info("JMW faultinst: %s", faultinst)
 
             attributes = faultinst.get("attributes", {})  # JMW dict
 
@@ -140,7 +141,10 @@ class Faults:
             # self.log.info("JMW submit_faults() trying to get timstamp from created ", fault.get("faultInst", {}).get("attributes", {}).get("created"))
             # self.log.info("JMW submit_faults() trying to get timstamp from lastTransition ", fault.get("faultInst", {}).get("attributes", {}).get("lastTransition"))
             # payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(fault.get("created")))
+
+            # from base.py<check> comment: - timestamp: should be an integer or float representing the number of seconds since the Unix epoch
             payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(last_transition))
+
             payload['status'] = fault.get("severity")
             # JMW other fields
 
@@ -152,30 +156,3 @@ class Faults:
             # exit out of for loop so we only send the first fault
             self.log.info("JMW HACK faults submit_faults() breaking out of loop")  # JMW debug
             break
-
-# {
-#   "ack": "no",
-#   "alert": "no",
-#   "cause": "interface-physical-down",
-#   "changeSet": "accessVlan:unknown,backplaneMac:00:00:00:00:00:00,bundleBupId:0,bundleIndex:unspecified,cfgAccessVlan:unknown,cfgNativeVlan:unknown,currErrIndex:0,diags:none,encap:0,errDisTimerRunning:no,errVlanStatusHt:0,hwBdId:0,hwResourceId:0,intfT:phy,iod:0,lastErrors:8192,lastLinkStChg:1970-01-01T00:00:00.000+00:00,media:0,nativeVlan:unknown,numOfSI:0,operDceMode:off,operDuplex:auto,operEEERxWkTime:0,operEEEState:not-applicable,operEEETxWkTime:0,operErrDisQual:admin-down,operFecMode:inherit,operFlowCtrl:15,operMdix:auto,operMode:trunk,operModeDetail:trunk,operPhyEnSt:down,operRouterMac:00:00:00:00:00:00,operSpeed:inherit,operSt:down,operStQual:admin-down,operStQualCode:0,osSum:ok,portCfgWaitFlags:0,primaryVlan:unknown,resetCtr:0,txT:unknown,usage:discovery,userCfgdFlags:0,vdcId:0",
-#   "childAction": "",
-#   "code": "F0546",
-#   "created": "2025-02-11T10:07:21.128+00:00",
-#   "delegated": "no",
-#   "descr": "Portisdown,reason:disabled(disabled),usedby:Discovery",
-#   "dn": "topology/pod-1/node-103/sys/phys-[eth9/24]/phys/fault-F0546",
-#   "domain": "access",
-#   "highestSeverity": "warning",
-# JMWFRI can I convert lastTransition to timestamp?  and will logging backend throw out duplicate logs w/ same timestamp?
-#   "lastTransition": "2025-02-11T10:09:22.790+00:00",
-#   "lc": "raised",
-#   "occur": "1",
-#   "origSeverity": "warning",
-#   "prevSeverity": "warning",
-#   "rule": "ethpm-if-port-down-no-infra",
-#   "severity": "warning",
-#   "status": "",
-#   "subject": "port-down",
-#   "title": "",
-#   "type": "communications"
-# }

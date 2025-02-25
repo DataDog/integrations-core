@@ -1007,12 +1007,12 @@ class AgentCheck(object):
                 Has no effect if `cursor` argument is `None`.
         """
         attributes = data.copy()
-        if 'ddtags' not in attributes and self.formatted_tags:
-            attributes['ddtags'] = self.formatted_tags
+        if 'ddtags' not in attributes and self.formatted_tags:  # JMW
+            attributes['ddtags'] = self.formatted_tags  # JMW
 
-        timestamp = attributes.get('timestamp')
+        timestamp = attributes.get('timestamp')  # JMW
         if timestamp is not None:
-            # convert seconds to milliseconds
+            # convert seconds to milliseconds  # JMW
             attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(to_json(attributes), self.check_id)
