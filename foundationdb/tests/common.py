@@ -105,7 +105,6 @@ METRICS = [
     "foundationdb.data.moving_data.in_queue_bytes",
     "foundationdb.data.moving_data.total_written_bytes",
     "foundationdb.datacenter_lag.seconds",
-    "foundationdb.instances",
     "foundationdb.process.role.input_bytes.hz",
     "foundationdb.process.role.input_bytes.counter",
     "foundationdb.process.role.durable_bytes.hz",
