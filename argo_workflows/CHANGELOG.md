@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 2.3.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update Argo-Workflow Metric names for v3.6+ ([#19417](https://github.com/DataDog/integrations-core/pull/19417))
+* Add new Argo Workflow metrics for v3.6+ ([#19447](https://github.com/DataDog/integrations-core/pull/19447))
+
+## 2.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 2.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:

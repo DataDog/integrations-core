@@ -35,6 +35,11 @@ DEFAULT_METRICS = {
     'autoscaling_workload_vertical_rollout_triggered': 'autoscaling.workload.vertical_rollout_triggered',
     'autoscaling_workload_vertical_scaling_received_limits': 'autoscaling.workload.vertical_scaling_received_limits',
     'autoscaling_workload_vertical_scaling_received_requests': 'autoscaling.workload.vertical_scaling_received_requests',  # noqa: E501
+    'autoscaling_workload_store_load_entities': 'autoscaling.workload.store_load_entities',
+    'autoscaling_workload_store_job_queue_length': 'autoscaling.workload.store_job_queue_length',
+    'autoscaling_workload_local_horizontal_scaling_recommended_replicas': 'autoscaling.workload.local.horizontal_scaling_recommended_replicas',  # noqa: E501
+    'autoscaling_workload_local_horizontal_utilization_pct': 'autoscaling.workload.local.horizontal_utilization_pct',
+    'autoscaling_workload_local_fallback_enabled': 'autoscaling.workload.local.fallback_enabled',
     'aggregator__flush': 'aggregator.flush',
     'aggregator__processed': 'aggregator.processed',
     'api_requests': 'api_requests',
@@ -44,6 +49,7 @@ DEFAULT_METRICS = {
     'cluster_checks_busyness': 'cluster_checks.busyness',
     'cluster_checks_configs_dangling': 'cluster_checks.configs_dangling',
     'cluster_checks_configs_dispatched': 'cluster_checks.configs_dispatched',
+    'cluster_checks_unscheduled_check': 'cluster_checks.unscheduled_check',
     'cluster_checks_configs_info': 'cluster_checks.configs_info',
     'cluster_checks_failed_stats_collection': 'cluster_checks.failed_stats_collection',
     'cluster_checks_nodes_reporting': 'cluster_checks.nodes_reporting',

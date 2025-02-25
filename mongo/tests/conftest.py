@@ -140,6 +140,7 @@ def instance_integration_autodiscovery(instance_integration):
     instance["database_autodiscovery"] = {
         "enabled": True,
     }
+    instance.pop("collections", None)
     return instance
 
 
@@ -176,7 +177,7 @@ def mock_pymongo(deployment):
         mock_is_localhost.return_value = False
         with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
             'pymongo.collection.Collection'
-        ), mock.patch('pymongo.command_cursor') as cur:
+        ), mock.patch('pymongo.synchronous.command_cursor') as cur:
             cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
             yield mocked_client
 
@@ -230,7 +231,7 @@ def setup_sharding(compose_file):
 
 class InitializeDB(LazyFunction):
     def __call__(self):
-        cli = pymongo.mongo_client.MongoClient(
+        cli = pymongo.MongoClient(
             f"mongodb://{common.HOST}:{common.PORT1}",
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
@@ -280,7 +281,7 @@ class InitializeDB(LazyFunction):
 
 class InitializeAuthDB(LazyFunction):
     def __call__(self):
-        cli = pymongo.mongo_client.MongoClient(
+        cli = pymongo.MongoClient(
             f"mongodb://root:rootPass@{common.HOST}:{common.PORT1}",
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,

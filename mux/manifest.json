@@ -1,0 +1,78 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "9c1e5a09-836f-49c8-bbb2-2dd7f86ad0de",
+  "app_id": "mux",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Mux video performance and metrics.",
+    "title": "Mux",
+    "media": [
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_5.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 26205496,
+      "source_type_name": "Mux",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mux.",
+        "check": "mux.metric.views",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Mux - Metrics": "assets/dashboards/mux_metrics.json"
+    },
+    "monitors": {
+      "Anomaly Detected in Page Load Time": "assets/monitors/anomaly_detected_in_page_load_time.json",
+      "Playback Failure Percentage is higher than usual": "assets/monitors/playback_failure_percentage_is_higher_than_usual.json",
+      "Video Startup Failure Percentage is higher than usual": "assets/monitors/video_startup_failure_percentage_is_higher_than_usual.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

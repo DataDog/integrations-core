@@ -53,6 +53,15 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-dd-cluster-agent",  # excluding this since actual integration is called `datadog-cluster-agent`
     "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
     "datadog-go-metro",  # excluding this since `go-metro` check is Agent v5 only
+    "datadog-agent-metrics",  # excluding this since `agent-metrics` check is Agent v5 only
+    "datadog-amazon-kafka",  # excluding this since `amazon-kafka` wasn't an official release
+    "datadog-tokumx",  # excluding this since `tokumx` was dropped in py3
+    "datadog-ntp",  # excluding this since `ntp` was Agent 5 only
+]
+
+EXCLUDED_LOG_INTEGRATIONS = [
+    # Temporary exclusion until we re-release the integration or come up with a better solution.
+    "datadog-zeek",  # log only integration released by Florent. Will fail until we re-release it.
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
@@ -450,7 +459,7 @@ def test_downloader():
         if not match:
             continue
         integration_name = match.group(1)
-        if integration_name in EXCLUDED_INTEGRATIONS:
+        if integration_name in EXCLUDED_INTEGRATIONS + EXCLUDED_LOG_INTEGRATIONS:
             continue
         if integration_name not in integrations_metadata:
             raise Exception(

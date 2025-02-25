@@ -1,0 +1,39 @@
+{
+	"version": 2,
+	"created_at": "2024-10-01",
+	"last_updated_at": "2024-10-01",
+	"title": "Product Inventory is Out of Stock",
+	"description": "Out-of-stock inventory refers to products that are sold out and unavailable for purchase. This monitor tracks product inventory to help manage stock levels, prevent overselling, and ensure timely restocking.",
+	"definition": {
+		"id": 155142623,
+		"name": "Product Inventory is Out of Stock",
+		"type": "log alert",
+		"query": "logs(\"source:shopify service:product @tracksInventory:true @totalInventory:<=0\").index(\"*\").rollup(\"count\").by(\"@legacyResourceId,@title\").last(\"4h\") > 0",
+		"message": "{{#is_alert}}\nProduct {{@title.name}} (ID: {{@legacyResourceId.name}}) is currently out of stock. Please restock to ensure it's availability.\n{{/is_alert}}\n\n@abc@example.com",
+		"tags": [
+			"shopify"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "resolve",
+			"include_tags": false,
+			"new_group_delay": 60,
+			"renotify_interval": 0,
+			"escalation_message": "",
+			"notification_preset_name": "hide_query",
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:shopify"
+	]
+}

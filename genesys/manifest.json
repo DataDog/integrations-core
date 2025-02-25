@@ -1,0 +1,101 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a0f0e600-1f10-4505-8fc3-64442e78b1a3",
+  "app_id": "genesys",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Conversations Analytics Metrics and Audit logs",
+    "title": "Genesys",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Genesys Audit",
+        "image_url": "images/genesys_audit.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Genesys Callback",
+        "image_url": "images/genesys_callback.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Genesys Chat",
+        "image_url": "images/genesys_chat.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Genesys Conversation Overview",
+        "image_url": "images/genesys_conversation_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Genesys Email",
+        "image_url": "images/genesys_email.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Genesys Message",
+        "image_url": "images/genesys_message.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Genesys Voice",
+        "image_url": "images/genesys_voice.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Category::Collaboration",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 30683213,
+      "source_type_name": "Genesys",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "genesys.",
+        "check": ["genesys.conversations.total_voice", "genesys.conversations.wait_time_avg"],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Genesys Conversation Overview": "assets/dashboards/genesys_conversation_overview.json",
+      "Genesys Audit": "assets/dashboards/genesys_audit.json",
+      "Genesys Email": "assets/dashboards/genesys_email.json",
+      "Genesys Message": "assets/dashboards/genesys_message.json",
+      "Genesys Callback": "assets/dashboards/genesys_callback.json",
+      "Genesys Chat": "assets/dashboards/genesys_chat.json",
+      "Genesys Voice": "assets/dashboards/genesys_voice.json"
+    },
+    "monitors": {
+      "High number of abandoned outbound conversations detected": "assets/monitors/high_number_of_abandoned_outbound_conversations_detected.json",
+      "High number of errored conversations detected": "assets/monitors/high_number_of_errored_conversations_detected.json",
+      "High number of over SLA conversations detected": "assets/monitors/high_number_of_over_sla_conversations_detected.json",
+      "High number of state transition errors detected": "assets/monitors/high_number_of_state_transition_errors_detected.json"
+    },
+    "logs": {
+      "source": "genesys"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

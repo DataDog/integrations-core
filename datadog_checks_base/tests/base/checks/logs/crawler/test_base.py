@@ -6,7 +6,6 @@ from datadog_checks.base.checks.logs.crawler.stream import LogRecord, LogStream
 
 
 def test_submission(dd_run_check, datadog_agent):
-
     class TestLogStream(LogStream):
         def __init__(self, start, **kwargs):
             super().__init__(**kwargs)

@@ -97,6 +97,7 @@ class Schemas(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_search_indexes: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_collections: Optional[float] = None
