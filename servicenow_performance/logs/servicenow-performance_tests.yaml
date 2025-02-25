@@ -4,11 +4,11 @@ tests:
       "value": "2025-01-24 06:39:42" }, "sys_id": { "display_value":
       "399999c5555f1a000e82fb96fffff3b3", "value":
       "399999c5555f1a000e82fb96fffff3b3" } }'
-    service: cmdb_health.cmdb_health_result
+    service: cmdb_health
     result: null
   - sample: '{ "sys_id": { "display_value": "399999c5555f1a000e82fb96fffff3b3",
       "value": "399999c5555f1a000e82fb96fffff3b3" }, "sys_updated_on": {
       "display_value": "2024-05-15 12:53:47", "value": "2024-05-15 19:53:47" }
       }'
-    service: itsm.incident
+    service: itsm
     result: null
