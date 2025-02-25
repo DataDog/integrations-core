@@ -1,6 +1,6 @@
 ## Overview
 
-[Forcepoint Secure Web Gateway][1] applies web security policies in the cloud or on the endpoint with distributed enforcement for secure, high-speed access to the web, wherever your people are. It also offers advanced data loss prevention(DLP) capabilities to keep sensitive information from leaking onto websites.
+[Forcepoint Secure Web Gateway][1] applies web security policies in the cloud or on the endpoint with distributed enforcement for secure, high-speed access to the web, wherever your people are. It also offers advanced data loss prevention (DLP) capabilities to keep sensitive information from leaking onto websites.
 
 
 
