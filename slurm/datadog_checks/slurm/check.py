@@ -329,11 +329,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # PID      JOBID    STEPID   LOCALID GLOBALID
         # 3771     14       batch    0       0
         # 3772     14       batch    -       -
-
-        if len(self.scontrol_cmd) > 1:
-            base_cmd = self.scontrol_cmd[:-1]
-        else:
-            base_cmd = self.scontrol_cmd
+        base_cmd = self.scontrol_cmd[:-1]
         hostname = os.uname()[1]
         slurm_node = get_subprocess_output(base_cmd + ["show", "hostname", hostname]).strip().decode("utf-8")
         lines = output.strip().splitlines()
