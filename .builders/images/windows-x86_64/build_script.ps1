@@ -24,9 +24,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-# We set the desired commit to ensure that we are building with a recent version.
-# The desired commit should be updated periodically or when critical fixes or features are released.
-$desired_commit = "5ee5eee0d3e9c6098b24d263e9099edcdcef6631" # Commit that incudes OpenSSL 3.4.1
+$desired_commit = "master" # Set the commit to master so we don't have to update manually
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
