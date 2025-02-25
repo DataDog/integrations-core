@@ -1,6 +1,6 @@
 id: "servicenow-performance"
 tests:
-  - sample: >-
+  - sample: |-
       {
         "sys_id": {
             "display_value": "399999c5555f1a000e82fb96fffff3b3",
