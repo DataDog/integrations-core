@@ -158,8 +158,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.11.1" \
- SHA256="a889ac9dbba3644271bd9d1302b5c22a088893719b72be3487bc3d401e5c4e80" \
+ VERSION="8.12.1" \
+ SHA256="7b40ea64947e0b440716a4d7f0b7aa56230a5341c8377d7b609649d4aea8dbcf" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \
