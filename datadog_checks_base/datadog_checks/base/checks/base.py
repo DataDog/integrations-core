@@ -163,8 +163,6 @@ class AgentCheck(object):
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
 
-    HA_SUPPORTED = False
-
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
         try:
@@ -312,14 +310,6 @@ class AgentCheck(object):
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
-
-        ha_enabled_init = self.init_config.get('ha_enabled', False) if self.init_config else False
-        ha_enabled_instance = self.instance.get('ha_enabled', False) if self.instance else False
-
-        if not self.HA_SUPPORTED and (ha_enabled_init or ha_enabled_instance):
-            raise ConfigurationError(
-                f"High Availability is enabled for check {self.name} but this integration does not support it"
-            )
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])

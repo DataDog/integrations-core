@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 22.5.1 / 2025-01-29
+## 22.6.0 / 2025-02-20
+
+***Added***:
+
+* Add support for collecting raw query statements and explain plans when `collect_raw_query_statement.enabled` is true. ([#19493](https://github.com/DataDog/integrations-core/pull/19493))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+***Fixed***:
+
+* Split Postgres query metrics payload to conform to max payload size and enable larger query metrics collection ([#19582](https://github.com/DataDog/integrations-core/pull/19582))
+* Fix exception handling for auto discovered databases ([#19586](https://github.com/DataDog/integrations-core/pull/19586))
+
+## 22.5.1 / 2025-01-29 / Agent 7.63.0
 
 ***Fixed***:
 

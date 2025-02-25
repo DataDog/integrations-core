@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.1.0 / 2025-01-16
+## 1.1.1 / 2025-02-20
+
+***Fixed***:
+
+* Fix endpoint parameter name in conf.yaml ([#19502](https://github.com/DataDog/integrations-core/pull/19502))
+
+## 1.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
 
