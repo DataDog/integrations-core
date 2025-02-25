@@ -25,7 +25,7 @@ pipeline:
             supportRules: ""
             matchRules: last_evaluated_on_parser %{date("yyyy-MM-dd HH:mm:ss"):timestamp}
     - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+      name: Define `timestamt` as the official time of the log
       enabled: true
       sources:
         - timestamp
