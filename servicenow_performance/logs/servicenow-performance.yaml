@@ -7,7 +7,7 @@ pipeline:
   name: ServiceNow Performance
   enabled: true
   filter:
-    query: source:servicenow-performance
+    query: "source:servicenow-performance"
   processors:
     - type: attribute-remapper
       name: Map `sys_id.value` to `record_id`
@@ -17,5 +17,4 @@ pipeline:
       sourceType: attribute
       target: record_id
       targetType: attribute
-      preserveSource: true
       overrideOnConflict: false
