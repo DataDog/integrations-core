@@ -2,7 +2,16 @@
 
 <!-- towncrier release notes start -->
 
-## 21.1.0 / 2025-01-25
+## 21.2.0 / 2025-02-20
+
+***Added***:
+
+* Add support for collecting raw query statements and explain plans when `collect_raw_query_statement.enabled` is true. ([#19421](https://github.com/DataDog/integrations-core/pull/19421))
+* Add `raw_signature` to raw query plan event payload. ([#19495](https://github.com/DataDog/integrations-core/pull/19495))
+* Add deadlock support for Azure DB ([#19577](https://github.com/DataDog/integrations-core/pull/19577))
+* Add SQLServer ServerName and InstanceName to tags ([#19600](https://github.com/DataDog/integrations-core/pull/19600))
+
+## 21.1.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
 

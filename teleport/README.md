@@ -49,8 +49,8 @@ These endpoints aren't activated by default. To enable the diagnostic HTTP endpo
      - type: file
        path: /var/log/teleport/teleport.log
        source: teleport
-       service: telepor-service
-      log_processing_rules:
+       service: teleport-service
+       log_processing_rules:
          - type: multi_line
          name: logs_start_with_date
          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
