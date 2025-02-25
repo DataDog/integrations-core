@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: "postgres:${POSTGRES_IMAGE_TAG}"
+    environment:
+      POSTGRES_PASSWORD: d@tadog
+    volumes:
+      - ${TEST_RESOURCES_PATH}/pg:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  pgbouncer:
+    image: "pgbouncer/pgbouncer:${PGBOUNCER_IMAGE_TAG}"
+    environment:
+      DATABASES_USER: postgres
+      DATABASES_PASSWORD: d@tadog
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      PGBOUNCER_LISTEN_PORT: 6432
+    ports:
+      - "6432:6432"
+    depends_on:
+      - postgres

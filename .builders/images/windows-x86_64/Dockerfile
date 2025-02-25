@@ -82,11 +82,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.12.6"
+ENV PYTHON_VERSION="3.12.9"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '5914748e6580e70bedeb7c537a0832b3071de9e09a2e4e7e3d28060616045e0a'; `
+      -Hash '2a52993092a19cfdffe126e2eeac46a4265e25705614546604ad44988e040c0f'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -114,9 +114,9 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\perl\perl\bin" && `
     Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
 
-ENV OPENSSL_VERSION="3.3.2"
+ENV OPENSSL_VERSION="3.4.1"
 
-ENV CURL_VERSION="8.11.1"
+ENV CURL_VERSION="8.12.1"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

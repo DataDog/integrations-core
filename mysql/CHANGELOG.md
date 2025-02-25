@@ -2,7 +2,35 @@
 
 <!-- towncrier release notes start -->
 
-## 14.4.0 / 2024-12-26
+## 14.6.0 / 2025-02-20
+
+***Added***:
+
+* Update mysql schema data model ([#19472](https://github.com/DataDog/integrations-core/pull/19472))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 14.5.1 / 2025-02-13 / Agent 7.63.0
+
+***Fixed***:
+
+* Fix bug where `dbms_flavor` tag was repeatedly appended on each check run. ([#19598](https://github.com/DataDog/integrations-core/pull/19598))
+
+## 14.5.0 / 2025-01-25
+
+***Added***:
+
+* Added an optional optimization to MySQL statement metrics collection to only query for queries that have run since the last check collection. ([#19321](https://github.com/DataDog/integrations-core/pull/19321))
+* Emit index usage and index metrics from mysql integration ([#19383](https://github.com/DataDog/integrations-core/pull/19383))
+  (Note: does not contain the`dmbs_flavor` fix from 14.4.1)
+
+## 14.4.1 / 2025-02-13 / Agent 7.62.3
+
+***Fixed***:
+
+* Fix bug where `dbms_flavor` tag was repeatedly appended on each check run. ([#19598](https://github.com/DataDog/integrations-core/pull/19598))
+  (Note: not included in 14.5.0)
+
+## 14.4.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 

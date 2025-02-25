@@ -18,8 +18,9 @@ The StreamNative integration collects the following types of [metrics][2]:
 
 1. Log into [StreamNative Cloud Console Account][3].
 2. Click the profile icon and navigate to the **Accounts & Accesses** tab.
-3. Find the Service Account with **Admin** permissions set to **Enabled**.
+3. Find the Service Account with **Admin** permissions or a binding to the `metrics-viewer` role.
    - If no Service Account exists, select **New -> Service Account** to create one, and make sure to enable the **Super Admin** option.
+   - To bind a service account with the `metrics-viewer` role, refer to the [metrics-viewer rolebinding][5] documentation. 
 4. On the right side of the chosen Service Account, click the `...` button.
 5. Select **Download OAuth2 Key** to obtain the **Client ID** and **Client Secret**.
 
@@ -70,3 +71,4 @@ Need help? Contact [Datadog support][4].
 [2]: https://docs.streamnative.io/docs/cloud-metrics-api#metrics-endpoint
 [3]: https://console.streamnative.cloud/
 [4]: https://docs.datadoghq.com/help/
+[5]: https://docs.streamnative.io/docs/cloud-metrics-api#metrics-authorization

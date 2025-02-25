@@ -2,13 +2,39 @@
 
 <!-- towncrier release notes start -->
 
+## 37.6.1 / 2025-02-20
+
+***Fixed***:
+
+* Remove HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA. ([#19671](https://github.com/DataDog/integrations-core/pull/19671))
+
+## 37.6.0 / 2025-02-20
+
+***Added***:
+
+* Add support for target_info metric w/ shared label cache ([#19397](https://github.com/DataDog/integrations-core/pull/19397))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+* Adds HA_SUPPORTED as a class attribute to the AgentCheck to let integrations self declare that they support HA. ([#19580](https://github.com/DataDog/integrations-core/pull/19580))
+
+## 37.5.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+* Add tls_ciphers option for http ([#19469](https://github.com/DataDog/integrations-core/pull/19469))
+
+***Fixed***:
+
+* Handle unexpected values for `expires_in` in OAuth Access response ([#19371](https://github.com/DataDog/integrations-core/pull/19371))
+* Drop unused importlib-metadata dependency. ([#19382](https://github.com/DataDog/integrations-core/pull/19382))
+
 ## 37.4.0 / 2025-01-16
 
 ***Added***:
 
 * Allow for Ciphers to be customizable in the SSLContext creation ([#19312](https://github.com/DataDog/integrations-core/pull/19312))
 
-## 37.3.0 / 2024-12-26
+## 37.3.0 / 2024-12-26 / Agent 7.62.0
 
 ***Security***:
 

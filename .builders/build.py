@@ -118,6 +118,7 @@ def build_macos():
             'DD_PY2_BUILDENV_PATH': builder_root / 'py2' / 'bin' / 'python',
             # Path where we'll install libraries that we build
             'DD_PREFIX_PATH': prefix_path,
+            'PATH': f'{prefix_path}/bin:{os.environ["PATH"]}',
             # Common compilation flags
             'LDFLAGS': f'-L{prefix_path}/lib',
             'CFLAGS': f'-I{prefix_path}/include -O2',
@@ -223,7 +224,7 @@ def build_image():
 
             # Assumption: if a digest was provided we're not changing the build image and therefore
             # we're fine with reusing wheels we've built previously
-            if args.digest or True:
+            if args.digest:
                 script_args.append('--use-built-index')
 
             check_process([

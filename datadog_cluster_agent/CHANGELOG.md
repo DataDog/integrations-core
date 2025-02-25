@@ -2,13 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.0 / 2025-02-20
+
+***Added***:
+
+* Collect telemetry for autoscaling local fallback ([#19522](https://github.com/DataDog/integrations-core/pull/19522))
+
+## 5.4.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Add telemetry for checks that are not scheduled. ([#19306](https://github.com/DataDog/integrations-core/pull/19306))
+
 ## 5.3.0 / 2025-01-16
 
 ***Added***:
 
 * Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
 
-## 5.2.0 / 2024-12-26
+## 5.2.0 / 2024-12-26 / Agent 7.62.0
 
 ***Added***:
 
