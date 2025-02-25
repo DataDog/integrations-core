@@ -44,7 +44,7 @@ FROM pg_settings
 """
 
 PG_EXTENSIONS_QUERY = """
-SELECT extname FROM pg_extension;
+SELECT extname, nspname schemaname FROM pg_extension left join pg_namespace on extnamespace = pg_namespace.oid;
 """
 
 PG_EXTENSION_LOADER_QUERY = {
@@ -709,7 +709,12 @@ class PostgresMetadata(DBMAsyncJob):
                 for row in rows:
                     extension = row['extname']
                     if extension in PG_EXTENSION_LOADER_QUERY:
-                        query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                        if row['schemaname'] in ['pg_catalog', 'public']:
+                            query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                        else:
+                            self._log.warning(
+                                "unable to collect settings for extension %s in schema %s", extension, row['schemaname']
+                            )
                     else:
                         self._log.warning("unable to collect settings for unknown extension %s", extension)
 
