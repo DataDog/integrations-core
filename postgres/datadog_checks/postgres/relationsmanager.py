@@ -408,8 +408,11 @@ class RelationsManager(object):
             relation_filter = []
             if r.get(RELATION_NAME):
                 relation_filter.append("( relname = '{}'".format(r[RELATION_NAME]))
-            elif r.get(RELATION_REGEX):
+            elif r.get(RELATION_REGEX) and r.get(RELATION_REGEX) != ".*":
                 relation_filter.append("( relname ~ '{}'".format(r[RELATION_REGEX]))
+            else:
+                # Stub filter to allow for appending
+                relation_filter.append("( 1=1")
 
             if ALL_SCHEMAS not in r[SCHEMAS]:
                 schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])

@@ -11,10 +11,6 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def has_admin_role(self):
-        pass  # pragma: no cover
-
-    @abstractmethod
     def authorize_user(self):
         pass  # pragma: no cover
 
