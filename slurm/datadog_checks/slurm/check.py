@@ -15,6 +15,8 @@ from .constants import (
     PARTITION_MAP,
     SACCT_MAP,
     SACCT_PARAMS,
+    SCONTROL_PARAMS,
+    SCONTROL_TAG_MAPPING,
     SDIAG_MAP,
     SINFO_ADDITIONAL_NODE_PARAMS,
     SINFO_NODE_PARAMS,
@@ -62,6 +64,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sdiag_stats = is_affirmative(self.instance.get('collect_sdiag_stats', True))
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
+        self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
@@ -95,6 +98,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if self.collect_sshare_stats:
             self.sshare_cmd = self.get_slurm_command('sshare', SSHARE_PARAMS)
 
+        if self.collect_scontrol_stats:
+            self.scontrol_cmd = self.get_slurm_command('scontrol', SCONTROL_PARAMS)
+
         # Metric and Tag configuration
         self.last_run_time = None
         self.tags = self.instance.get('tags', [])
@@ -106,6 +112,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.debug_sdiag_stats = is_affirmative(self.instance.get('debug_sdiag_stats', False))
         self.debug_sshare_stats = is_affirmative(self.instance.get('debug_sshare_stats', False))
         self.debug_sacct_stats = is_affirmative(self.instance.get('debug_sacct_stats', False))
+        self.debug_scontrol_stats = is_affirmative(self.instance.get('debug_scontrol_stats', False))
 
     def check(self, _):
         self.collect_metadata()
@@ -133,6 +140,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             # Set timestamp here so we can use it for the next run and collect sacct stats only
             # between the 2 runs.
             self.last_run_time = get_timestamp()
+
+        if self.collect_scontrol_stats:
+            commands.append(('scontrol', self.scontrol_cmd, self.process_scontrol))
 
         for name, cmd, process_func in commands:
             self.log.debug("Running %s command: %s", name, cmd)
@@ -314,6 +324,30 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge(f'sdiag.{name}', value, tags=self.tags)
 
         self.gauge('sdiag.enabled', 1)
+
+    def process_scontrol(self, output):
+        # PID      JOBID    STEPID   LOCALID GLOBALID
+        # 3771     14       batch    0       0
+        # 3772     14       batch    -       -
+
+        if len(self.scontrol_cmd) > 1:
+            base_cmd = self.scontrol_cmd[:-1]
+        else:
+            base_cmd = self.scontrol_cmd
+        hostname = os.uname()[1]
+        slurm_node = get_subprocess_output(base_cmd + ["show", "hostname", hostname]).strip().decode("utf-8")
+        lines = output.strip().splitlines()
+        headers = lines[0].split()
+
+        for line in lines[1:]:
+            tags = [f"slurm_node_name:{slurm_node}"]
+            fields = line.split()
+
+            for header, value in zip(headers, fields):
+                new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
+                tags.append(f"{new_header}:{value}")
+
+            self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 
     def _update_sacct_params(self):
         sacct_params = SACCT_PARAMS.copy()

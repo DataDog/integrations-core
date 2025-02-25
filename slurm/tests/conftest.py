@@ -20,4 +20,5 @@ def instance():
         'collect_sshare_stats': False,
         'collect_sacct_stats': False,
         'collect_gpu_stats': True,
+        'collect_scontrol_stats': False,
     }

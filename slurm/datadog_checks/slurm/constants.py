@@ -15,6 +15,7 @@ SACCT_PARAMS = [
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
     "--units=M",
 ]
+SCONTROL_PARAMS = ["listpid"]
 
 PARTITION_MAP = {
     "tags": [
@@ -155,4 +156,13 @@ SDIAG_MAP = {
         'backfill.last_table_size': 'Last table size:',
         'backfill.mean_table_size': 'Mean table size:',
     },
+}
+
+
+SCONTROL_TAG_MAPPING = {
+    "PID": "pid",
+    "JOBID": "slurm_jobid",
+    "STEPID": "slurm_stepid",
+    "LOCALID": "slurm_localid",
+    "GLOBALID": "slurm_globalid",
 }
