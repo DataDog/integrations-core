@@ -1091,7 +1091,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1152,7 +1152,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace} by {operation}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace} by {operation}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1187,7 +1187,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1248,7 +1248,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace} by {operation}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace} by {operation}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1283,7 +1283,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_resource_exhausted_error_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_resource_exhausted_error{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1346,7 +1346,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_resource_exhausted_error_increase1m{$Namespace} by {resource_exhausted_cause}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_resource_exhausted_error{$Namespace} by {resource_exhausted_cause}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1381,7 +1381,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_state_transition_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_state_transition{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1443,7 +1443,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_state_transition_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_state_transition{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1478,7 +1478,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_total_action_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_total_action{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1541,7 +1541,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_total_action_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_total_action{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1576,13 +1576,13 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1645,7 +1645,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_total_action_increase1m{$Namespace} by {namespace_mode}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_total_action{$Namespace} by {namespace_mode}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1691,7 +1691,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace} by {operation}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace} by {operation}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1740,7 +1740,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_resource_exhausted_error_increase1m{$Namespace} by {resource_exhausted_cause}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_resource_exhausted_error{$Namespace} by {resource_exhausted_cause}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1790,7 +1790,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace} by {operation}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace} by {operation}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1858,7 +1858,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1919,7 +1919,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace} by {task_type}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace} by {task_type}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1954,13 +1954,13 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2014,7 +2014,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2068,7 +2068,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_timeout_increase1m{$Namespace} by {task_type}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_timeout{$Namespace} by {task_type}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2108,7 +2108,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_timeout_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_timeout{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2163,19 +2163,19 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_timeout_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_timeout{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2225,7 +2225,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace} by {task_type}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace} by {task_type}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2267,7 +2267,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace} by {task_type}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace} by {task_type}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2322,7 +2322,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_action_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_action_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2383,7 +2383,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_action_success_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_action_success{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2418,7 +2418,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2479,7 +2479,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2515,7 +2515,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2576,7 +2576,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2616,7 +2616,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_rate_limited_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_rate_limited{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2673,7 +2673,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_rate_limited_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_rate_limited{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2726,7 +2726,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_cancel_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_cancel{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2787,7 +2787,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_cancel_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_cancel{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2823,7 +2823,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2885,7 +2885,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2920,7 +2920,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_failed_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_failed{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2981,7 +2981,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_failed_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_failed{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3016,7 +3016,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -3077,7 +3077,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_success_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_success{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3112,7 +3112,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_terminate_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_terminate{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -3173,7 +3173,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_terminate_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_terminate{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3209,7 +3209,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_timeout_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_timeout{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -3270,7 +3270,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_timeout_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_timeout{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
