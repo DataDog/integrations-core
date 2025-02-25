@@ -1,14 +1,4 @@
-id: "servicenow-performance"
+id: servicenow-performance
 tests:
-  - sample: |-
-      {
-        "sys_id": {
-            "display_value": "399999c5555f1a000e82fb96fffff3b3",
-            "value": "399999c5555f1a000e82fb96fffff3b3"
-        },
-        "sys_created_by": {
-            "display_value": "system",
-            "value": "system"
-        }
-      }
+  - sample: '{"sys_id":{"display_value":"399999c5555f1a000e82fb96fffff3b3","value":"399999c5555f1a000e82fb96fffff3b3"},"sys_created_by":{"display_value":"system","value":"system"}}'
     result: null
