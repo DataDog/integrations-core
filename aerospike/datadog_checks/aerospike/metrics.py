@@ -59,3 +59,16 @@ METRIC_MAP = {
     'aerospike_xdr_retry_no_node': 'xdr.retry_no_node',
     'aerospike_xdr_success': 'xdr.success',
 }
+
+
+METRIC_MAP_2 = {
+    # all metrics ( except latencies), will be treated as gauge, as we need latest values, without having up-down changes
+    "aerospike_users(.*)": {"name": "$1", "type": "gauge"},
+    "aerospike_namespace(.*)": {"name": "$1", "type": "gauge"},
+    "aerospike_node(.*)": {"name": "$1", "type": "gauge"},
+    "aerospike_sets(.*)": {"name": "$1", "type": "gauge"},
+    "aerospike_sindex(.*)": {"name": "$1", "type": "gauge"},
+    "aerospike_xdr(.*)": {"name": "$1", "type": "gauge"},
+    "aerospike_sysinfo(.*)": {"name": "$1", "type": "gauge"},    
+    "aerospike_latencies(.*)": {"name": "$1", "type": "gauge"},    
+}

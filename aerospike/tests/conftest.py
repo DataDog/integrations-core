@@ -9,7 +9,7 @@ from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
-from .common import COMPOSE_FILE, HOST, INSTANCE, OPENMETRICS_V2_INSTANCE, PORT
+from .common import HERE, COMPOSE_FILE, HOST, INSTANCE, OPENMETRICS_V2_INSTANCE, PORT
 
 
 def init_db():
@@ -57,6 +57,7 @@ def dd_environment():
     with docker_run(
         COMPOSE_FILE,
         conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
+        env_vars={'AEROSPIKE_CONFIG': os.path.join(HERE, 'docker/config')},                
         attempts=2,
     ):
         yield OPENMETRICS_V2_INSTANCE
