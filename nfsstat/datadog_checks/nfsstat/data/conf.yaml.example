@@ -57,7 +57,7 @@ instances:
     # empty_default_hostname: false
 
     ## @param disable_missing_mountpoints_warning - boolean - optional - default: false
-    ## No warning is logged if host has check enabled but no nfs mount point is found.
+    ## If false, no warning is logged if host has check enabled but no NFS mount point is found.
     #
     # disable_missing_mountpoints_warning: false
 
