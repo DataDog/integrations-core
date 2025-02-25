@@ -57,8 +57,8 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     aggregator.assert_metric('snmp.cpqHeThermalSystemFanStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cpqHeThermalTempStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['temperature_index:11'],
         ['temperature_index:13'],
+        ['temperature_index:23'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
