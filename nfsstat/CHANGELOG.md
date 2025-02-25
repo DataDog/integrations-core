@@ -1,5 +1,11 @@
 # CHANGELOG - Nfsstat
 
+## Unreleased
+
+***Added***:
+
+* Add option to disable missing mountpoints warning ([#19695](https://github.com/DataDog/integrations-core/pull/19695))
+
 <!-- towncrier release notes start -->
 
 ## 3.0.0 / 2024-10-04 / Agent 7.59.0
