@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2025-02-25 / Agent 7.64.0
+
+***Added***:
+
+* New dashboards to show various important Aerospike metrics in multiple dashboards
+
+***Fixed***:
+
+* Allows all metrics from aerospike-prometheus-exporter to be available in datadog
+
 ## 4.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
