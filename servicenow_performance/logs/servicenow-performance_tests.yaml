@@ -5,10 +5,12 @@ tests:
       "399999c5555f1a000e82fb96fffff3b3", "value":
       "399999c5555f1a000e82fb96fffff3b3" } }'
     service: cmdb_health
+    source: servicenow-performance
     result: null
   - sample: '{ "sys_id": { "display_value": "399999c5555f1a000e82fb96fffff3b3",
       "value": "399999c5555f1a000e82fb96fffff3b3" }, "sys_updated_on": {
       "display_value": "2024-05-15 12:53:47", "value": "2024-05-15 19:53:47" }
       }'
     service: itsm
+    source: servicenow-performance
     result: null
