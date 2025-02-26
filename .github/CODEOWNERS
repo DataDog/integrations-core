@@ -456,7 +456,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /bitdefender/                                                       @DataDog/saas-integrations
 /bitdefender/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
 /bitdefender/manifest.json                                          @DataDog/saas-integrations @DataDog/documentation
-/bitdefender/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/bitdefender/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
 /ivanti_nzta/                                                       @DataDog/saas-integrations
 /ivanti_nzta/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
