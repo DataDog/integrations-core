@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-01-02",
+	"last_updated_at": "2025-01-02",
+	"title": "High number of document deletions",
+	"description": "This monitor warns of a spike in document deletions, which may represent accidental mass deletions, malicious activity, or unintended bulk operations that could result in significant data loss and impact the integrity of your Sanity content.",
+	"definition": {
+		"id": 161218326,
+		"name": "High number of document deletions",
+		"type": "log alert",
+		"query": "logs(\"source:sanity service:activity-logs @evt.name:document.delete -@documentType:comment -@documentType:tasks.task\").index(\"*\").rollup(\"count\").by(\"@projectId\").last(\"10m\") > 10",
+		"message": "{{#is_warning}}\nThe documents deletion count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nDocument deletion count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nThe documents deletion count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nDocument deletion count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:sanity"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "show_no_data",
+			"include_tags": false,
+			"silenced": {},
+			"new_group_delay": 0
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:sanity"
+	]
+}
