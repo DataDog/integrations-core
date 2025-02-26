@@ -1,13 +1,10 @@
-name: Python Upgrade
+name: Master
 
 on:
   push:
     branches:
     - master
-    paths-ignore:
-    - datadog_checks_base/datadog_checks/**
-    - datadog_checks_dev/datadog_checks/dev/*.py
-  pull_request:
+
 jobs:
   cache:
     uses: ./.github/workflows/cache-shared-deps.yml
