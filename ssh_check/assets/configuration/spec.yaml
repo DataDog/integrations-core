@@ -31,6 +31,12 @@ files:
             value:
               type: string
 
+          - name: passphrase
+            description: |
+              Passphrase to use for the SSH private key decryption.
+            value:
+              type: string
+
           - name: port
             description: Port used for SSH connection.
             value:
@@ -70,6 +76,13 @@ files:
               The SSH client assumes SHA2 encryption, so it crashes when connecting to such a server.
               While it's strongly recommended to upgrade the SSH server to support the more secure SHA2, you can force
               the client to use SHA1 encryption by setting this option to 'true'.
+            value:
+              example: false
+              type: boolean
+
+          - name: use_password_and_pkey
+            description: |
+              Set to true if the SSH connection requires both a password and a private key.
             value:
               example: false
               type: boolean

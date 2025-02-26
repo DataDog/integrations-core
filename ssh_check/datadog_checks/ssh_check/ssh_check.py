@@ -32,10 +32,12 @@ class CheckSSH(AgentCheck):
         self.port = int(self.instance.get('port', 22))
         self.username = self.instance['username']
         self.password = self.instance.get('password')
+        self.passphrase = self.instance.get('passphrase')
         self.private_key_file = self.instance.get('private_key_file')
         self.private_key_type = self.instance.get('private_key_type', 'rsa')
         self.sftp_check = is_affirmative(self.instance.get('sftp_check', True))
         self.add_missing_keys = is_affirmative(self.instance.get('add_missing_keys'))
+        self.use_password_and_pkey = is_affirmative(self.instance.get('use_password_and_pkey'))
         self.base_tags = self.instance.get('tags', [])
         self.base_tags.append("instance:{0}-{1}".format(self.host, self.port))
         self._connection_settings_to_force_sha1 = (
@@ -50,13 +52,17 @@ class CheckSSH(AgentCheck):
         if self.private_key_file is not None:
             try:
                 if self.private_key_type == 'ecdsa':
-                    private_key = paramiko.ECDSAKey.from_private_key_file(self.private_key_file, password=self.password)
+                    private_key = paramiko.ECDSAKey.from_private_key_file(
+                        self.private_key_file, password=self.passphrase or self.password
+                    )
                 else:
-                    private_key = paramiko.RSAKey.from_private_key_file(self.private_key_file, password=self.password)
+                    private_key = paramiko.RSAKey.from_private_key_file(
+                        self.private_key_file, password=self.passphrase or self.password
+                    )
             except IOError:
                 self.warning("Unable to find private key file: %s", self.private_key_file)
             except paramiko.ssh_exception.PasswordRequiredException:
-                self.warning("Private key file is encrypted but no password was given")
+                self.warning("Private key file is encrypted but no password nor passphrase was given")
             except paramiko.ssh_exception.SSHException:
                 self.warning("Private key file is invalid")
 
@@ -69,10 +75,15 @@ class CheckSSH(AgentCheck):
         # If the private key is not valid and we pass password instead of passphrase it will attempt to connect
         # using the password and the error will be misleading
         connect_kwargs = (
-            {'password': self.password} if private_key is None else {'passphrase': self.password, 'pkey': private_key}
+            {'password': self.password}
+            if private_key is None
+            else {'passphrase': self.passphrase or self.password, 'pkey': private_key}
         )
+        if self.use_password_and_pkey:
+            connect_kwargs["password"] = self.password
         # Passing all kwargs together is needed to stay compatible with Python 2.
         connect_kwargs.update(self._connection_settings_to_force_sha1)
+        # If the SSH server requires both a password and private key, replace the passphrase kwarg with password
 
         try:
             # Try to connect to check status of SSH

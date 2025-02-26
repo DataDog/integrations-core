@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     host: str
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    passphrase: Optional[str] = None
     password: Optional[str] = None
     port: Optional[int] = None
     private_key_file: Optional[str] = None
@@ -48,6 +49,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     sftp_check: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    use_password_and_pkey: Optional[bool] = None
     username: str
 
     @model_validator(mode='before')
