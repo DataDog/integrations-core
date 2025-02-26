@@ -18,8 +18,7 @@
 				"warning": 80
 			},
 			"notify_audit": false,
-			"notify_no_data": true,
-			"no_data_timeframe": 15,
+			"on_missing_data": "show_and_notify_no_data",
 			"renotify_interval": 0,
 			"include_tags": true,
 			"new_group_delay": 60
