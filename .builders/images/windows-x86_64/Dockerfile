@@ -133,6 +133,8 @@ RUN Get-RemoteFile `
     -Hash '002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl3-src && `
+    Remove-Item openssl-$Env:OPENSSL_VERSION.tar.gz && `
+    Remove-Item openssl-$Env:OPENSSL_VERSION.tar && `
     cd C:\openssl3-src\openssl-$Env:OPENSSL_VERSION && `
     RunOnVSConsole -Command `
     'C:\perl\perl\bin\perl.exe Configure `
