@@ -32,14 +32,14 @@ class TestValidations:
         mocker.patch('subprocess.run', side_effect=_save_result_file)
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
 
         result = ddev('env', 'start', integration, environment)
 
         assert result.exit_code == 1, result.output
         assert result.output == helpers.dedent(
             f"""
-            ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+            ─────────────────────────────── Starting: py3.13 ───────────────────────────────
             No E2E result file found: {result_file}
             """
         )
@@ -48,7 +48,7 @@ class TestValidations:
         mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         env_data = EnvDataStorage(data_dir).get(integration, environment)
         env_data.write_metadata({})
 
@@ -70,7 +70,7 @@ def test_stop_on_error(ddev, helpers, data_dir, write_result_file, mocker):
     stop = mocker.patch('ddev.e2e.agent.docker.DockerAgent.stop')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment)
@@ -78,9 +78,9 @@ def test_stop_on_error(ddev, helpers, data_dir, write_result_file, mocker):
     assert result.exit_code == 1, result.output
     assert result.output == helpers.dedent(
         """
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
         Unable to start the Agent: foo
-        ────────────────────────── Stopping: postgres:py3.12 ───────────────────────────
+        ────────────────────────── Stopping: postgres:py3.13 ───────────────────────────
         """
     )
 
@@ -101,7 +101,7 @@ def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment)
@@ -109,7 +109,7 @@ def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -141,7 +141,7 @@ def test_agent_build_config(ddev, config_file, helpers, data_dir, write_result_f
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment)
@@ -149,7 +149,7 @@ def test_agent_build_config(ddev, config_file, helpers, data_dir, write_result_f
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -181,7 +181,7 @@ def test_agent_build_env_var(ddev, config_file, helpers, data_dir, write_result_
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     with EnvVars({E2EEnvVars.AGENT_BUILD: 'datadog/agent:6'}):
@@ -190,7 +190,7 @@ def test_agent_build_env_var(ddev, config_file, helpers, data_dir, write_result_
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -222,7 +222,7 @@ def test_agent_build_flag(ddev, config_file, helpers, data_dir, write_result_fil
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     with EnvVars({E2EEnvVars.AGENT_BUILD: 'datadog/agent:6'}):
@@ -231,7 +231,7 @@ def test_agent_build_flag(ddev, config_file, helpers, data_dir, write_result_fil
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -260,7 +260,7 @@ def test_local_dev(ddev, helpers, local_repo, data_dir, write_result_file, mocke
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment, '--dev')
@@ -268,7 +268,7 @@ def test_local_dev(ddev, helpers, local_repo, data_dir, write_result_file, mocke
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -297,7 +297,7 @@ def test_local_base(ddev, helpers, local_repo, data_dir, write_result_file, mock
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment, '--base')
@@ -305,7 +305,7 @@ def test_local_base(ddev, helpers, local_repo, data_dir, write_result_file, mock
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -337,7 +337,7 @@ def test_env_vars(ddev, helpers, data_dir, write_result_file, mocker):
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment, '-e', 'FOO=BAR')
@@ -345,7 +345,7 @@ def test_env_vars(ddev, helpers, data_dir, write_result_file, mocker):
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -374,7 +374,7 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev(
@@ -397,7 +397,7 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -433,7 +433,7 @@ def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment)
@@ -441,7 +441,7 @@ def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -470,7 +470,7 @@ def test_dogstatsd(ddev, helpers, data_dir, write_result_file, mocker):
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment)
@@ -478,7 +478,7 @@ def test_dogstatsd(ddev, helpers, data_dir, write_result_file, mocker):
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}
@@ -522,7 +522,7 @@ def test_mount_log(ddev, helpers, data_dir, write_result_file, mocker):
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
 
     result = ddev('env', 'start', integration, environment)
@@ -530,7 +530,7 @@ def test_mount_log(ddev, helpers, data_dir, write_result_file, mocker):
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
-        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+        ─────────────────────────────── Starting: py3.13 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
         Execute tests -> ddev env test {integration} {environment}

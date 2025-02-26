@@ -85,7 +85,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'use_jmx': use_jmx}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -143,7 +143,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -203,7 +203,7 @@ class TestStart:
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
@@ -259,7 +259,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'docker_platform': 'windows'}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -314,7 +314,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'docker_volumes': ['/a/b/c:/d/e/f']}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -375,7 +375,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'docker_volumes': ['/a/b/c:/d/e/f', f'{config_file}:/mnt/{config_file.name}']}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -438,7 +438,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'docker_volumes': [f'{config_file.parent.parent}:C:\\mnt'], 'docker_platform': 'windows'}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -498,7 +498,7 @@ class TestStart:
         )
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
@@ -556,7 +556,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'custom_hosts': [['host2', '127.0.0.1'], ['host1', '127.0.0.1']]}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -618,7 +618,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -680,7 +680,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'proxy': {'http': 'http://localhost:8080', 'https': 'https://localhost:4443'}}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -742,7 +742,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'start_commands': ['echo "hello world"']}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -807,7 +807,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'post_install_commands': ['echo "hello world"']}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -872,7 +872,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -953,7 +953,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'docker_platform': 'windows'}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -1030,7 +1030,7 @@ class TestStart:
         config_file.touch()
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'start_commands': ['echo "hello world1"'], 'post_install_commands': ['echo "hello world2"']}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
@@ -1102,7 +1102,7 @@ class TestStop:
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
@@ -1127,7 +1127,7 @@ class TestStop:
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'stop_commands': ['echo "hello world"']}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
@@ -1155,7 +1155,7 @@ class TestRestart:
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
@@ -1176,7 +1176,7 @@ class TestInvoke:
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
@@ -1197,7 +1197,7 @@ class TestEnterShell:
         mocker.patch('sys.stdout', return_value=mocker.MagicMock(isatty=lambda: True))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
@@ -1216,7 +1216,7 @@ class TestEnterShell:
         mocker.patch('sys.stdout', return_value=mocker.MagicMock(isatty=lambda: True))
 
         integration = 'postgres'
-        environment = 'py3.12'
+        environment = 'py3.13'
         metadata = {'docker_platform': 'windows'}
 
         agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))

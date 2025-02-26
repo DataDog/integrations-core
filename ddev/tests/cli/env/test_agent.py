@@ -8,7 +8,7 @@ def test_nonexistent(ddev, helpers, mocker):
     invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
 
     result = ddev('env', 'agent', integration, environment, 'status')
 
@@ -26,7 +26,7 @@ def test_not_trigger_run(ddev, data_dir, mocker):
     invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
     env_data.write_metadata({})
 
@@ -42,7 +42,7 @@ def test_trigger_run(ddev, data_dir, mocker):
     invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
     env_data.write_metadata({})
 
@@ -58,7 +58,7 @@ def test_trigger_run_inject_integration(ddev, data_dir, mocker):
     invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
 
     integration = 'postgres'
-    environment = 'py3.12'
+    environment = 'py3.13'
     env_data = EnvDataStorage(data_dir).get(integration, environment)
     env_data.write_metadata({})
 

@@ -18,5 +18,5 @@ class MockEnvVars:
 def test_env_vars_repo(ddev, helpers, data_dir, write_result_file, mocker):
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': {}, 'config': {}}))
     with mock.patch('ddev.utils.structures.EnvVars', side_effect=MockEnvVars):
-        result = ddev('env', 'test', 'postgres', 'py3.12')
+        result = ddev('env', 'test', 'postgres', 'py3.13')
         assert result.exit_code == 0, result.output
