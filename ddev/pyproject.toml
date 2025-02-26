@@ -83,7 +83,6 @@ extend-exclude = "src/ddev/_version.py"
 exclude = []
 target-version = "py312"
 line-length = 120
-respect-gitignore = true
 
 [tool.ruff.lint]
 # Rules were ported over from the legacy flake8 settings for parity
