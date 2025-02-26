@@ -582,5 +582,5 @@ instances:
 #
 # logs:
 #   - type: integration
-#     source: octopus-deploy
+#     source: octopus_deploy
 #     service: <SERVICE_NAME>

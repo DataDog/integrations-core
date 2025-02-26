@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 6.3.0 / 2025-02-20
+
+***Added***:
+
+* Allow for check to skip over nodes with empty `BrokerNodeInfo` fields ([#19552](https://github.com/DataDog/integrations-core/pull/19552))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
 ## 6.2.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:

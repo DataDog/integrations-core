@@ -106,6 +106,7 @@ ignore = [
   "B027",
   # Ignore McCabe complexity
   "C901",
+  "I001",
 ]
 unfixable = [
   # Don't touch unused imports

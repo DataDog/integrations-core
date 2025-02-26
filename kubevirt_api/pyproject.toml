@@ -30,7 +30,6 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.4.0",
-    "kubernetes>=30.1.0",
 ]
 dynamic = [
     "version",
@@ -38,6 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
+    "kubernetes==32.0.0"
 ]
 
 [project.urls]
