@@ -10,5 +10,3 @@ Jira: https://datadoghq.atlassian.net/browse/NDMII-3342
 - Tagged cpqHeFltTolPowerSupplyTable table with cpqHeFltTolPowerSupplyBay in _hp-compaq-health.yaml according to the MIB.
 
 - Add a comment to precise that HP iLO5 devices support only a maximum bulk size of 5.
-
-- Changed tests to match the updated profiles.
