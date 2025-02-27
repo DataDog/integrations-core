@@ -6,7 +6,7 @@ import re
 import pytest
 
 from datadog_checks.ssh_check import CheckSSH
-from tests.conftest import PRIVATE_KEY_FILE
+from tests.conftest import PRIVATE_KEY_FILE, PRIVATE_KEY_PASSPHRASE
 
 from . import common
 
@@ -47,7 +47,7 @@ def test_metadata(aggregator, instance, datadog_agent):
 @pytest.mark.usefixtures("dd_environment_keypair")
 def test_check_keypair(aggregator, instance):
     instance['private_key_file'] = PRIVATE_KEY_FILE
-    instance['password'] = 'testpassprase'
+    instance['password'] = PRIVATE_KEY_PASSPHRASE
     check = CheckSSH('ssh_check', {}, [instance])
     check.check(instance)
     common._test_check(aggregator, instance)
