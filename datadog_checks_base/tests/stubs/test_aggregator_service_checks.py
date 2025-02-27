@@ -88,8 +88,8 @@ class TestServiceChecks(object):
         ):
             aggregator.assert_service_checks(service_check_definition)
 
-    def test_assert_service_check_message_contains(self, aggregator):
+    def test_assert_service_check_message_substring(self, aggregator):
         check = AgentCheck()
 
         check.service_check('test.service_check', AgentCheck.CRITICAL, message="Some service check message")
-        aggregator.assert_service_check('test.service_check', message_contains="check")
+        aggregator.assert_service_check('test.service_check', message="check")
