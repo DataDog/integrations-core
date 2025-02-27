@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.7.0 / 2025-02-26
+
+***Added***:
+
+* Add support for Postgres 17 ([#19625](https://github.com/DataDog/integrations-core/pull/19625))
+
 ## 22.6.1 / 2025-02-25
 
 ***Fixed***:
