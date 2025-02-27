@@ -70,16 +70,6 @@ def test_acct_command_params(instance):
         assert check.sacct_cmd == expected_cmd
 
 
-def test_scontrol_base_cmd(instance):
-    # Assert the base command for scontrol
-    instance['collect_scontrol_stats'] = True
-
-    check = SlurmCheck('slurm', {}, [instance])
-    base_cmd = ['/usr/bin/scontrol']
-
-    assert check.scontrol_cmd[:-1] == base_cmd
-
-
 @pytest.mark.parametrize(
     "expected_metrics, binary",
     [
@@ -111,6 +101,8 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
         mock_output_partition = (mock_output('sinfo_partition.txt'), "", 0)
         mock_get_subprocess_output.side_effect = [mock_output_metadata, mock_output_partition, mock_output_main]
     elif binary == 'scontrol':
+        base_cmd = ['/usr/bin/scontrol']
+        assert check.scontrol_cmd[:-1] == base_cmd
         mock_output_node = b"c1"
         mock_get_subprocess_output.side_effect = [mock_output_main, mock_output_node]
     else:
