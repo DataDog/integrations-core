@@ -9,6 +9,8 @@ import pytest
 from mock import MagicMock, call, create_autospec
 
 from datadog_checks.ssh_check import CheckSSH
+from datadog_checks.ssh_check.ssh_check import patch_paramiko
+from tests.conftest import PRIVATE_KEY_FILE
 
 from . import common
 
@@ -195,3 +197,22 @@ def test_force_sha1_enabled(aggregator, dd_run_check):
             disabled_algorithms={'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']},
         ),
     ]
+
+
+def test_paramiko_uses_md5():
+    '''
+    By default, paramiko uses MD5 for the PKey.get_fingerprint function.
+    If this is no longer the case, the patch can be removed.
+    '''
+    key = paramiko.RSAKey.from_private_key_file(PRIVATE_KEY_FILE, b"testpassprase")
+    assert key.get_fingerprint() == b'\x81\x15\xfc\xd8\xec\xf5\x01\x08\xa4H\x9f\xfbN3c\xff'
+
+
+def test_patched_paramiko_uses_sha256():
+    '''
+    This test checks that the patch function works by verifying that hashlib.md5 is replaced by
+    hashlib.sha256 in the get_fingerprint function.
+    '''
+    key = paramiko.RSAKey.from_private_key_file(PRIVATE_KEY_FILE, b"testpassprase")
+    patch_paramiko()
+    assert key.get_fingerprint() == b"\xaa%\x8b\xff\x97\xdc\x0c\\\xb0\xc1\x1d\n\xd1\xc8\x1342P'\xf8\x00I\x85[\x83x'\xf9\xfe0\xe3["

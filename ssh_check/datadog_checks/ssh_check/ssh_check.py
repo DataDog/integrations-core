@@ -26,6 +26,7 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
 
 def patch_paramiko():
     # Patch to allow paramiko to use SHA-256 vs MD5
+    # https://github.com/paramiko/paramiko/issues/396
     paramiko.PKey.get_fingerprint = lambda x: sha256(x.asbytes()).digest()
 
 
