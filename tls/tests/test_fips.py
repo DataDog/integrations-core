@@ -54,5 +54,5 @@ def test_connection_after_non_fips(clean_fips_environment, dd_fips_environment, 
     aggregator = dd_agent_check(instance_e2e_non_fips)
     aggregator.assert_service_check(
         SERVICE_CHECK_VALIDATION,
-        message_contains="[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE]",
+        message="[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] ssl/tls alert handshake failure (_ssl.c:1000)",
     )
