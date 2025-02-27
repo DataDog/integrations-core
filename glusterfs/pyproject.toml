@@ -35,10 +35,15 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-deps = []
+deps = [
+    "gstatus @ git+https://github.com/NouemanKHAL/gstatus.git@31ab59f6f17c82d9994710a4bf98faf1fc1ab8d6",
+]
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 path = "datadog_checks/glusterfs/__about__.py"
