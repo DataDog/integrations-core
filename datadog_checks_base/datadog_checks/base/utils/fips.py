@@ -2,11 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import logging
 import os
-import sys
-
-LOGGER = logging.getLogger(__file__)
 
 
 def enable_fips(path_to_openssl_conf=None, path_to_openssl_modules=None):
@@ -26,30 +22,6 @@ def enable_fips(path_to_openssl_conf=None, path_to_openssl_modules=None):
             if not path_to_openssl_conf.exists():
                 raise RuntimeError(f'The directory "{path_to_openssl_modules}" does not exist')
         os.environ["OPENSSL_MODULES"] = str(path_to_openssl_modules)
-
-
-def is_enabled():
-    enabled = False
-    # On Windows, FIPS mode is activated through a registry
-    # https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp4825.pdf
-    if sys.platform == "win32":
-        try:
-            import winreg
-
-            with winreg.OpenKey(
-                winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Lsa\FipsAlgorithmPolicy"
-            ) as key:
-                fips_registry, _ = winreg.QueryValueEx(key, "Enabled")
-                enabled = fips_registry == 1
-        except Exception as e:
-            LOGGER.debug(
-                "Windows error encountered when fetching FipsAlgorithmPolicy registry key,\
-                    assuming FIPS mode is disabled: %s",
-                e,
-            )
-    else:
-        enabled = os.environ.get("GOFIPS", "0") == "1"
-    return enabled
 
 
 def _get_embedded_path():
