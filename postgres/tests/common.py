@@ -93,14 +93,13 @@ COMMON_BGW_METRICS = [
     'postgresql.bgwriter.buffers_checkpoint',
     'postgresql.bgwriter.buffers_clean',
     'postgresql.bgwriter.maxwritten_clean',
-    'postgresql.bgwriter.buffers_backend',
     'postgresql.bgwriter.buffers_alloc',
-    'postgresql.bgwriter.buffers_backend_fsync',
     'postgresql.bgwriter.write_time',
     'postgresql.bgwriter.sync_time',
 ]
 
 COMMON_BGW_METRICS_PG_ABOVE_94 = ['postgresql.archiver.archived_count', 'postgresql.archiver.failed_count']
+COMMON_BGW_METRICS_PG_BELOW_17 = ['postgresql.bgwriter.buffers_backend', 'postgresql.bgwriter.buffers_backend_fsync']
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 CONNECTION_METRICS_DB = ['postgresql.connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
@@ -361,6 +360,10 @@ def check_bgw_metrics(aggregator, expected_tags, count=1):
     for name in COMMON_BGW_METRICS:
         aggregator.assert_metric(name, count=count, tags=expected_tags)
 
+    if float(POSTGRES_VERSION) < 17:
+        for name in COMMON_BGW_METRICS_PG_BELOW_17:
+            aggregator.assert_metric(name, count=count, tags=expected_tags)
+
     if float(POSTGRES_VERSION) >= 9.4:
         for name in COMMON_BGW_METRICS_PG_ABOVE_94:
             aggregator.assert_metric(name, count=count, tags=expected_tags)
@@ -370,7 +373,27 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 13.0:
         return
 
-    slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
+    slru_caches = [
+        'subtransaction',
+        'serializable',
+        'multixact_member',
+        'transaction',
+        'other',
+        'notify',
+        'commit_timestamp',
+        'multixact_offset',
+    ]
+    if float(POSTGRES_VERSION) < 17.0:
+        slru_caches = [
+            'Subtrans',
+            'Serial',
+            'MultiXactMember',
+            'Xact',
+            'other',
+            'Notify',
+            'CommitTs',
+            'MultiXactOffset',
+        ]
     for metric_name in _iterate_metric_name(SLRU_METRICS):
         for slru_cache in slru_caches:
             aggregator.assert_metric(

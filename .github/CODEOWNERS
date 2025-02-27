@@ -223,6 +223,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /authorize_net/metadata.csv                                          @DataDog/saas-integrations @DataDog/documentation
 /authorize_net/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/blazemeter/                                                        @DataDog/saas-integrations
+/blazemeter/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
+/blazemeter/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
+/blazemeter/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
+
 /brevo/                                                              @DataDog/saas-integrations
 /brevo/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 /brevo/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
@@ -331,9 +336,15 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /postmark/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /postmark/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/sanity/                                                            @DataDog/saas-integrations
+/sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/sanity/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/sanity/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 /snowflake/                                                          @DataDog/saas-integrations
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/changelog.d/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
+/snowflake/datadog_checks/snowflake/__about__.py                     @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/pyproject.toml                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
@@ -452,6 +463,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /zero_networks/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
 /zero_networks/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
 /zero_networks/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
+/bitdefender/                                                       @DataDog/saas-integrations
+/bitdefender/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
+/bitdefender/manifest.json                                          @DataDog/saas-integrations @DataDog/documentation
+/bitdefender/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
 /ivanti_nzta/                                                       @DataDog/saas-integrations
 /ivanti_nzta/*.md                                                   @DataDog/saas-integrations @DataDog/documentation

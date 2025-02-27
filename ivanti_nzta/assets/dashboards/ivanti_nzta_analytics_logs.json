@@ -1179,7 +1179,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:ivanti-nzta service:admin-logs @message_id:ADM24595 $Severity $User-Name $Gateway-Name",
+                                        "query_string": "source:ivanti-nzta service:admin-logs @message_id:ADM24595 @user_name:* $Severity $User-Name $Gateway-Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
