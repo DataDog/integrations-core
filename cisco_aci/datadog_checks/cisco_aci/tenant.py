@@ -36,14 +36,14 @@ class Tenant:
             self.log.warning('No tenants were listed in the config, skipping tenant collection')
             return
 
-        self.log.info("JMWtenant.collect() collecting from %s tenants", len(tenants)) # added JMW
+        # self.log.info("JMWtenant.collect() collecting from %s tenants", len(tenants)) # added JMW
         # check if tenant exist before proceeding.
         for t in tenants:
             try:
                 list_apps = self.api.get_apps(t) # JMW
                 if list_apps is None:
                     break
-                self.log.info("JMWtenant.collect() collecting %s apps from %s", len(list_apps), t) # added JMW
+                # self.log.info("JMWtenant.collect() collecting %s apps from %s", len(list_apps), t) # added JMW
                 for app in list_apps:
                     self._submit_app_data(t, app)
                     app_name = app.get('fvAp', {}).get('attributes', {}).get('name')
@@ -51,7 +51,7 @@ class Tenant:
                         break
                     try:
                         list_epgs = self.api.get_epgs(t, app_name)
-                        self.log.info("JMWtenant.collect() collecting %s endpoint groups from %s", len(list_epgs), app_name) # added JMW
+                        # self.log.info("JMWtenant.collect() collecting %s endpoint groups from %s", len(list_epgs), app_name) # added JMW
                         self._submit_epg_data(t, app_name, list_epgs)
                     except (exceptions.APIConnectionException, exceptions.APIParsingException):
                         pass

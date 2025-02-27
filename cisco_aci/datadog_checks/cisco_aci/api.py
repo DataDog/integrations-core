@@ -163,7 +163,7 @@ class Api:
             self.sessions[aci_url] = self.login_for_url(aci_url)
 
     def make_request(self, path):  # JMW
-        self.log.info('JMW api.make_request() path: %s', path)
+        # self.log.info('JMW api.make_request() path: %s', path)
         # allow for multiple APICs in a cluster to be included in one check so that the check
         # does not bombard a single APIC with dozens of requests and cause it to slow down
         aci_url = random.choice(tuple(self.sessions))

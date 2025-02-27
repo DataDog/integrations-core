@@ -23,7 +23,7 @@ class Capacity:
         self.log = log
 
     def collect(self):
-        self.log.info("JMW capacity.collect collecting capacity data")  # added JMW
+        # self.log.info("JMW capacity.collect collecting capacity data")  # added JMW
         try:
             self._get_contexts()
         except (exceptions.APIConnectionException, exceptions.APIParsingException):

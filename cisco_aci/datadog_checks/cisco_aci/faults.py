@@ -113,7 +113,7 @@ class Faults:
 
             payload = {}
             # JMWTAGS? payload['ddtags'] = ",".join(tags)  # JMW same for faults?
-            payload['ddsource'] = "cisco-aci-faults"  # JMW?
+            # payload['ddsource'] = "cisco-aci-faults"  # JMW?
 
             # get created timestamp
 # last_transition = fault.get("faultInst", {}).get("attributes", {}).get("lastTransition")
@@ -136,14 +136,16 @@ class Faults:
             payload['message'] = attributes.get("descr")
             payload['severity'] = attributes.get("severity")
             last_transition = attributes.get("lastTransition")  # JMW str
-            self.log.info("JMW last_transition: %s", last_transition)
+            # self.log.info("JMW last_transition: %s", last_transition)
 
             # self.log.info("JMW submit_faults() trying to get timstamp from created ", fault.get("faultInst", {}).get("attributes", {}).get("created"))
             # self.log.info("JMW submit_faults() trying to get timstamp from lastTransition ", fault.get("faultInst", {}).get("attributes", {}).get("lastTransition"))
             # payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(fault.get("created")))
 
             # from base.py<check> comment: - timestamp: should be an integer or float representing the number of seconds since the Unix epoch
-            payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(last_transition))
+            # get current time in seconds
+            payload['timestamp'] = get_timestamp()
+            # JMW payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(last_transition))
 
             payload['status'] = fault.get("severity")
             # JMW other fields

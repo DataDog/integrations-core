@@ -37,19 +37,19 @@ class CiscoACICheck(AgentCheck):
         aci_url = self.instance.get('aci_url')
         aci_urls = self.instance.get('aci_urls', [])
         # print the aci_url and aci_urls
-        self.log.info('JMW aci_url: %s', aci_url)
-        self.log.info('JMW1 aci_urls: %s', aci_urls)
+        # self.log.info('JMW aci_url: %s', aci_url)
+        # self.log.info('JMW1 aci_urls: %s', aci_urls)
 
         if aci_url:
             aci_urls.append(aci_url)
-        self.log.info('JMW2 aci_urls: %s', aci_urls)
+        # self.log.info('JMW2 aci_urls: %s', aci_urls)
 
         if not aci_urls:
             raise ConfigurationError("The Cisco ACI check requires at least one url")
 
         username = self.instance['username']
         pwd = self.instance.get('pwd')
-        self.log.info('JMW username: %s password: %s', username, pwd)
+        # self.log.info('JMW username: %s password: %s', username, pwd)
         instance_hash = hash_mutable(self.instance)
 
         appcenter = _is_affirmative(self.instance.get('appcenter'))
