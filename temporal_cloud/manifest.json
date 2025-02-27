@@ -55,7 +55,7 @@
       },
       "metrics": {
         "prefix": "temporal.cloud.",
-        "check": "temporal.cloud.v0_frontend_service_request_increase1m",
+        "check": "temporal.cloud.v0_frontend_service_request",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
