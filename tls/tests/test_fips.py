@@ -52,6 +52,7 @@ def test_connection_after_non_fips(clean_fips_environment, dd_fips_environment, 
     Connection to the non-FIPS server after enabling FIPS mode should fail.
     """
     aggregator = dd_agent_check(instance_e2e_non_fips)
+    # TODO: Change message to only caps part
     aggregator.assert_service_check(
         SERVICE_CHECK_VALIDATION,
         message="[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] ssl/tls alert handshake failure (_ssl.c:1000)",
