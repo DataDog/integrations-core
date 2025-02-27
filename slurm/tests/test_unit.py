@@ -70,6 +70,16 @@ def test_acct_command_params(instance):
         assert check.sacct_cmd == expected_cmd
 
 
+def test_scontrol_base_cmd(instance):
+    # Assert the base command for scontrol
+    instance['collect_scontrol_stats'] = True
+
+    check = SlurmCheck('slurm', {}, [instance])
+    base_cmd = ['/usr/bin/scontrol']
+
+    assert check.scontrol_cmd[:-1] == base_cmd
+
+
 @pytest.mark.parametrize(
     "expected_metrics, binary",
     [
