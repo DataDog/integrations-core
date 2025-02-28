@@ -1,1 +1,1 @@
-Modify the TLS FIPS E2E test condition to include more causes for SSL handshake failure
+Include substrings in service check message assertion
