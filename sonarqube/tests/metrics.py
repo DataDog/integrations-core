@@ -65,7 +65,10 @@ WEB_METRICS = [
 ]
 
 WEB_NEW_METRICS = [
+    # This is an example of a metric with a 'periods' field.
     'sonarqube.issues.new_blocker_violations',
+    # This is an example of a metric with a 'period' field.
+    'sonarqube.security.new_vulnerabilities',
 ]
 
 ALL_METRICS = WEB_METRICS + JMX_METRICS + WEB_NEW_METRICS

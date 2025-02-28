@@ -159,12 +159,13 @@
 				"value": "7",
 				"bestValue": false
 			  }
-			],
-			"period": {
-			  "index": 1,
-			  "value": "6",
-			  "bestValue": true
-			}
-		  }]
+			]
+		}, {
+			  "metric": "new_vulnerabilities",
+			  "period": {
+				    "value": "0",
+				    "bestValue": true
+			  }
+    }]
 	}
 }
