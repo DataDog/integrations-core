@@ -103,7 +103,7 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
     elif binary == 'scontrol':
         base_cmd = ['/usr/bin/scontrol']
         assert check.scontrol_cmd[:-1] == base_cmd
-        mock_output_node = b"c1"
+        mock_output_node = ("c1", "", 0)
         mock_get_subprocess_output.side_effect = [mock_output_main, mock_output_node]
     else:
         mock_get_subprocess_output.side_effect = [mock_output_main]

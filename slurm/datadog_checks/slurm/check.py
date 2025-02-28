@@ -331,7 +331,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # 3772     14       batch    -       -
         base_cmd = self.scontrol_cmd[:-1]
         hostname = os.uname()[1]
-        slurm_node = get_subprocess_output(base_cmd + ["show", "hostname", hostname]).strip().decode("utf-8")
+        slurm_node, _, _ = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
+        slurm_node.strip()
         lines = output.strip().splitlines()
         headers = lines[0].split()
 

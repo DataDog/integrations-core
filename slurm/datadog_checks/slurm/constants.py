@@ -161,8 +161,8 @@ SDIAG_MAP = {
 
 SCONTROL_TAG_MAPPING = {
     "PID": "pid",
-    "JOBID": "slurm_jobid",
-    "STEPID": "slurm_stepid",
-    "LOCALID": "slurm_localid",
-    "GLOBALID": "slurm_globalid",
+    "JOBID": "slurm_job_id",
+    "STEPID": "slurm_step_id",
+    "LOCALID": "slurm_local_id",
+    "GLOBALID": "slurm_global_id",
 }

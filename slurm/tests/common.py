@@ -1225,11 +1225,11 @@ SCONTROL_MAP = {
             'value': 1,
             'tags': [
                 "pid:3771",
-                "slurm_globalid:0",
-                "slurm_jobid:14",
-                "slurm_localid:0",
+                "slurm_global_id:0",
+                "slurm_job_id:14",
+                "slurm_local_id:0",
                 "slurm_node_name:c1",
-                "slurm_stepid:batch",
+                "slurm_step_id:batch",
             ],
         },
         {
@@ -1237,11 +1237,11 @@ SCONTROL_MAP = {
             'value': 1,
             'tags': [
                 "pid:3772",
-                "slurm_globalid:-",
-                "slurm_jobid:14",
-                "slurm_localid:-",
+                "slurm_global_id:-",
+                "slurm_job_id:14",
+                "slurm_local_id:-",
                 "slurm_node_name:c1",
-                "slurm_stepid:batch",
+                "slurm_step_id:batch",
             ],
         },
     ]
