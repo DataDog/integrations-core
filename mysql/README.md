@@ -551,6 +551,12 @@ The check does not collect all metrics by default. Set the following boolean con
 | ---------------------- | ----------- |
 | mysql.info.schema.size | GAUGE       |
 
+**Note:** You may have to grant additional permissions to the Datadog Agent to collect `schema_size_metrics`.
+
+```shell
+mysql> GRANT SELECT ON *.* TO 'datadog'@'%';
+```
+
 ### Events
 
 The MySQL check does not include any events.
