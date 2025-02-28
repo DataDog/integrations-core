@@ -28,7 +28,7 @@ def test_call_sonatype_nexus_api_success():
 
     mock_http.get.return_value = mock_response
 
-    URL = "http://example.com/api"
+    URL = "https://example.com/api"
     response = sonatype_nexus_client.call_sonatype_nexus_api(URL)
 
     mock_http.get.assert_called_once_with(URL)
