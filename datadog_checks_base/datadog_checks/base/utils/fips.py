@@ -30,8 +30,10 @@ def enable_fips(path_to_openssl_conf=None, path_to_openssl_modules=None):
 
 def is_enabled():
     enabled = False
-    # On Windows, FIPS mode is activated through a registry
+    # On Windows, FIPS mode is activated through a registry:
     # https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp4825.pdf
+    # We copy the Agent's implementation for this function:
+    # https://github.com/DataDog/datadog-agent/tree/main/pkg/fips
     if sys.platform == "win32":
         try:
             import winreg
