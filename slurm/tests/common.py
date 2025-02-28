@@ -1214,3 +1214,35 @@ SSHARE_MAP = {
         },
     ]
 }
+
+SCONTROL_MAP = {
+    # PID      JOBID    STEPID   LOCALID GLOBALID
+    # 3771     14       batch    0       0
+    # 3772     14       batch    -       -
+    'metrics': [
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3771",
+                "slurm_global_id:0",
+                "slurm_job_id:14",
+                "slurm_local_id:0",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+            ],
+        },
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3772",
+                "slurm_global_id:-",
+                "slurm_job_id:14",
+                "slurm_local_id:-",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+            ],
+        },
+    ]
+}

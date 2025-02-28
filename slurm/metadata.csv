@@ -24,6 +24,7 @@ slurm.sacct.slurm_job_avgcpu,gauge,,second,,Average (system + user) CPU time of 
 slurm.sacct.slurm_job_avgrss,gauge,,,,Average resident set size of all tasks in job.,1,slurm,slurm_sacct_slurm_job_avgrss,,
 slurm.sacct.slurm_job_cputime,gauge,,second,,Time used (Elapsed time * CPU count) by a job or step in cpu-seconds.,1,slurm,slurm_sacct_slurm_job_cputime,,
 slurm.sacct.slurm_job_maxrss,gauge,,,,Maximum resident set size of all tasks in job.,1,slurm,slurm_sacct_slurm_job_maxrss,,
+slurm.scontrol.job.info,gauge,,job,,Status of running jobs on worker node.,1,slurm,slurm_scontrol_job_running,,
 slurm.sdiag.agent_count,gauge,,thread,,Number of agent threads.,1,slurm,slurm_sdiag_agent_count,,
 slurm.sdiag.agent_queue_size,gauge,,request,,Number of enqueued outgoing RPC requests in an internal retry list.,1,slurm,slurm_sdiag_agent_queue_size,,
 slurm.sdiag.agent_thread_count,gauge,,thread,,Total count of active threads created by all the agent threads.,1,slurm,slurm_sdiag_agent_thread_count,,
