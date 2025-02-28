@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 import requests
+
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.constants import STATUS_METRICS_MAP
