@@ -1,0 +1,44 @@
+services:
+  agent:
+    image: $AGENT_IMAGE
+    pid: host
+    environment:
+      - DD_API_KEY=$DD_API_KEY
+      - DD_SITE=datad0g.com
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+      - ./agent/conf.d/:/etc/datadog-agent/conf.d/
+      - ./agent/checks.d/:/etc/datadog-agent/checks.d/
+    healthcheck:
+      test: ["CMD", "agent", "status"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+  server-fips:
+    build:
+      context: server
+      dockerfile: Dockerfile-nix
+      args:
+        BUILD_TARGET: server
+    command: ["./server", "fips"]
+    healthcheck:
+      test: "curl -kf https://localhost:443"
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  server:
+    build:
+      context: server
+      dockerfile: Dockerfile-nix
+      args:
+        BUILD_TARGET: server
+    command: ["./server", "non-fips"]
+    healthcheck:
+      test: "curl -kf https://localhost:443"
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
