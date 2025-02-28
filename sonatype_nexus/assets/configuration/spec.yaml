@@ -16,7 +16,7 @@ files:
             value:
               type: string
               example: test_password
-          - name: sonatype_nexus_server_url
+          - name: server_url
             required: true
             description: "The Server URL of your Sonatype Nexus account."
             value:

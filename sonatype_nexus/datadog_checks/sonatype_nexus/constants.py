@@ -1,28 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-STATUS_ENDPOINT = "/service/rest/v1/status/check"
-ANALYTICS_ENDPOINT = "/service/metrics/data"
-
-
-# Integration metrics and logs prefix
-INTEGRATION_PREFIX = "sonatype_nexus"
-
-STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
-
-# ServiceCheck and Events constants
-SONATYPE_NEXUS_CHECK_NAME = "status"
-
-AUTH_TAG = ["tag:sonatype_nexus_authentication_validation"]
-AUTH_TITLE = "Sonatype Nexus Authentication validations"
-AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".authentication_validation"
-
-# API Client Constants
-REQUEST_TIMEOUT = 30
-MAX_RETRIES = 3
-BACKOFF_FACTOR = 2
-STATUS_FORCELIST = [429, 500, 502, 503, 504]
-
 METRIC_CONFIGS_BY_FORMAT_TYPE = {
     "analytics.uploaded_bytes_by_format": {
         "metric_key": "nexus.analytics.bytes_transferred_by_format",
@@ -165,5 +143,3 @@ STATUS_METRICS_MAP = {
     "Scripting": "status.scripting_health",
     "Thread Deadlock Detector": "status.thread_deadlock_detector",
 }
-
-SUCCESSFUL_STATUS_CODES = list(range(200, 299))

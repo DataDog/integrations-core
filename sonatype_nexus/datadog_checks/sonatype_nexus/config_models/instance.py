@@ -40,7 +40,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: float = Field(..., ge=300.0, le=64800.0)
     password: str
     service: Optional[str] = None
-    sonatype_nexus_server_url: str
+    server_url: str
     tags: Optional[tuple[str, ...]] = None
     username: str
 

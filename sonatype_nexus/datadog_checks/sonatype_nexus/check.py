@@ -12,6 +12,10 @@ from . import constants
 from .api_client import SonatypeNexusClient
 
 
+STATUS_ENDPOINT = "/service/rest/v1/status/check"
+ANALYTICS_ENDPOINT = "/service/metrics/data"
+STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
+
 class SonatypeNexusCheck(AgentCheck):
     __NAMESPACE__ = "sonatype_nexus"
 
@@ -20,7 +24,7 @@ class SonatypeNexusCheck(AgentCheck):
 
         self._username = (self.instance.get("username") or "").strip()
         self._password = (self.instance.get("password") or "").strip()
-        self._sonatype_nexus_server_url = self.instance.get("sonatype_nexus_server_url")
+        self._server_url = self.instance.get("server_url")
         self.min_collection_interval = self.instance.get("min_collection_interval")
         self.sonatype_nexus_client = SonatypeNexusClient(self)
         self.custom_tags = self.instance.get("tags")
@@ -31,11 +35,11 @@ class SonatypeNexusCheck(AgentCheck):
 
     def extract_ip_from_url(self) -> str | None:
         pattern = r"http[s]?://([\d\.]+)"
-        match = re.search(pattern, self._sonatype_nexus_server_url)
+        match = re.search(pattern, self._server_url)
         return match.group(1) if match else None
 
     def generate_and_yield_status_metrics(self):
-        url = f"{self._sonatype_nexus_server_url}{constants.STATUS_ENDPOINT}"
+        url = f"{self._server_url}{STATUS_ENDPOINT}"
         try:
             response_json = self.sonatype_nexus_client.call_sonatype_nexus_api(url).json()
         except requests.exceptions.JSONDecodeError as ex:
@@ -53,7 +57,7 @@ class SonatypeNexusCheck(AgentCheck):
                 raise KeyError(f"Expected key, '{key}' is not present in API response.") from None
 
     def generate_and_yield_analytics_metrics(self):
-        url = f"{self._sonatype_nexus_server_url}{constants.ANALYTICS_ENDPOINT}"
+        url = f"{self._server_url}{ANALYTICS_ENDPOINT}"
         try:
             response_json = self.sonatype_nexus_client.call_sonatype_nexus_api(url).json()
         except requests.exceptions.JSONDecodeError as ex:
@@ -104,18 +108,11 @@ class SonatypeNexusCheck(AgentCheck):
         tags = [f"{metric_info['tag_key']}:{format_type}"]
         self.gauge(metric_name, int(value), base_tags + tags, hostname=None)
 
-    def ingest_service_check_and_event(self, **service_check_event_args):
-        self.service_check(
-            constants.SONATYPE_NEXUS_CHECK_NAME,
-            service_check_event_args.get("status"),
-            service_check_event_args.get("tags"),
-            self.extract_ip_from_url(),
-            service_check_event_args.get("message"),
-        )
+    def ingest_event(self, **service_check_event_args):
         self.event(
             {
                 "sonatype_host": self.extract_ip_from_url(),
-                "alert_type": constants.STATUS_NUMBER_TO_VALUE[service_check_event_args.get("status")],
+                "alert_type": STATUS_NUMBER_TO_VALUE[service_check_event_args.get("status")],
                 "tags": service_check_event_args.get("tags"),
                 "msg_text": service_check_event_args.get("message"),
                 "msg_title": service_check_event_args.get("title"),

@@ -12,10 +12,10 @@ instances:
     #
     password: test_password
 
-    ## @param sonatype_nexus_server_url - string - required
+    ## @param server_url - string - required
     ## The Server URL of your Sonatype Nexus account.
     #
-    sonatype_nexus_server_url: https://0.0.0.0:8081
+    server_url: https://0.0.0.0:8081
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

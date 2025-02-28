@@ -14,26 +14,6 @@ from datadog_checks.sonatype_nexus.constants import STATUS_METRICS_MAP
 SONATYPE_HOST = "sonatype_host:127.0.0.1"
 
 
-class TestExtractIpFromUrl(unittest.TestCase):
-    @patch("datadog_checks.sonatype_nexus.check.AgentCheck")
-    def setUp(self, mock_agent_check):
-        self.check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
-        # Mock the instance attribute to avoid 'NoneType' error
-        self.check.instance = MagicMock()
-
-
-def setup_check():
-    check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
-    check.instance = Mock()
-    return check
-
-
-def test_valid_integer_value():
-    check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
-    check.min_collection_interval = 300
-    assert check.min_collection_interval == 300
-
-
 @pytest.mark.e2e
 @patch("datadog_checks.sonatype_nexus.check.SonatypeNexusCheck.extract_ip_from_url")
 @patch("datadog_checks.sonatype_nexus.check.SonatypeNexusClient")
@@ -338,16 +318,15 @@ def test_service_check_and_event_with_all_required_arguments():
     check.event = MagicMock()
     check.extract_ip_from_url = MagicMock(return_value="127.0.0.1")
 
-    with patch("datadog_checks.sonatype_nexus.constants.STATUS_NUMBER_TO_VALUE") as mock_status_number_to_value:
+    with patch("datadog_checks.sonatype_nexus.check.STATUS_NUMBER_TO_VALUE") as mock_status_number_to_value:
         mock_status_number_to_value.get.return_value = "OK"
-        check.ingest_service_check_and_event(
+        check.ingest_event(
             status=0,
             tags=["tag1", "tag2"],
             message="Test message",
             title="Test title",
             source_type="Test source type",
         )
-        check.service_check.assert_called_once()
         check.event.assert_called_once()
 
 
@@ -356,14 +335,13 @@ def test_service_check_and_event_with_none_values_for_tags_and_message():
     check.service_check = MagicMock()
     check.event = MagicMock()
     check.extract_ip_from_url = MagicMock(return_value="127.0.0.1")
-    check.ingest_service_check_and_event(
+    check.ingest_event(
         status=0,
         tags=None,
         message=None,
         title="Test title",
         source_type="Test source type",
     )
-    check.service_check.assert_called_once()
     check.event.assert_called_once()
 
 
@@ -373,25 +351,25 @@ def check():
 
 
 def test_valid_url_with_ip(check):
-    check._sonatype_nexus_server_url = "https://0.0.0.0"
+    check._server_url = "https://0.0.0.0"
     assert check.extract_ip_from_url() == "0.0.0.0"
 
 
 def test_valid_url_with_domain(check):
-    check._sonatype_nexus_server_url = "https://example.com"
+    check._server_url = "https://example.com"
     assert check.extract_ip_from_url() is None
 
 
 def test_invalid_url(check):
-    check._sonatype_nexus_server_url = " invalid url "
+    check._server_url = " invalid url "
     assert check.extract_ip_from_url() is None
 
 
 def test_url_with_no_ip_or_domain(check):
-    check._sonatype_nexus_server_url = "https://"
+    check._server_url = "https://"
     assert check.extract_ip_from_url() is None
 
 
 def test_url_with_multiple_ips(check):
-    check._sonatype_nexus_server_url = "https://0.0.0.0,0.0.0.2"
+    check._server_url = "https://0.0.0.0,0.0.0.2"
     assert check.extract_ip_from_url() == "0.0.0.0"

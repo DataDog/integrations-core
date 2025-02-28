@@ -30,7 +30,6 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.0.0",
-    "datadog-api-client>=2.16.0"
 ]
 dynamic = [
     "version",

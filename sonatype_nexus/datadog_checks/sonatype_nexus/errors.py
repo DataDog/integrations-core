@@ -54,6 +54,9 @@ ERROR_TYPES = {
 }
 
 
+SUCCESSFUL_STATUS_CODES = list(range(200, 299))
+
+
 def handle_errors(method: Callable) -> Callable:
     def wrapper(self, *args: Any, **kwargs: Any) -> Any:
         try:
@@ -68,7 +71,7 @@ def handle_errors(method: Callable) -> Callable:
             if response.status_code in [500, 502, 503, 504]:
                 raise ServerError()
 
-            if response.status_code not in constants.SUCCESSFUL_STATUS_CODES:
+            if response.status_code not in SUCCESSFUL_STATUS_CODES:
                 raise APIError(
                     message=(
                         f"API request failed. URL: {response.url}. "
@@ -120,8 +123,3 @@ def handle_errors(method: Callable) -> Callable:
             raise APIError("Unexpected error occurred.") from ex
 
     return wrapper
-
-
-def log_and_raise_exception(self, error_message: str, exception_type: type[Exception]) -> None:
-    self.log.error("%s | HOST=%s | MESSAGE=%s", constants.INTEGRATION_PREFIX, self.hostname, error_message)
-    raise exception_type(error_message)

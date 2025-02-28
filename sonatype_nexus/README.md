@@ -42,7 +42,7 @@ The Sonatype Nexus check is included in the [Datadog Agent package][1]. No addit
         ## @param server_url - string - required
         ## Sonatype Nexus server url
         #
-        sonatype_nexus_server_url: <SONATYPE_NEXUS_SERVER_URL>
+        server_url: <SONATYPE_NEXUS_SERVER_URL>
 
         ## @param min_collection_interval - number - required
         ## This changes the collection interval of the check. For more information, see:
@@ -57,11 +57,11 @@ The Sonatype Nexus check is included in the [Datadog Agent package][1]. No addit
       - min_collection_interval: 1800
         username: <SONATYPE_NEXUS_USERNAME>
         password: <SONATYPE_NEXUS_PASSWORD>
-        sonatype_nexus_server_url: <SONATYPE_NEXUS_SERVER_URL>
+        server_url: <SONATYPE_NEXUS_SERVER_URL>
       - min_collection_interval: 1800
         username: <SONATYPE_NEXUS_USERNAME>
         password: <SONATYPE_NEXUS_PASSWORD>
-        sonatype_nexus_server_url: <SONATYPE_NEXUS_SERVER_URL>
+        server_url: <SONATYPE_NEXUS_SERVER_URL>
     ```
 
 3. [Restart the Agent][2].

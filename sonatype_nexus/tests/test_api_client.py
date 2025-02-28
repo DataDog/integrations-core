@@ -14,13 +14,35 @@ ACCEPT_HEADER = 'application/json'
 
 def test_call_sonatype_nexus_api_success():
     instance_check = MagicMock()
+    
+    mock_http = MagicMock()
+    instance_check.http = mock_http
+
     sonatype_nexus_client = SonatypeNexusClient(instance_check)
-    with patch(REQUEST_URL) as mock_get:
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_get.return_value = mock_response
-        response = sonatype_nexus_client.call_sonatype_nexus_api(URL)
-        assert response == mock_response
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.text = '{"key": "value"}'
+    mock_response.json.return_value = {"key": "value"}
+    mock_response.raise_for_status.return_value = None
+
+    mock_http.get.return_value = mock_response
+
+    URL = "http://example.com/api"
+    response = sonatype_nexus_client.call_sonatype_nexus_api(URL)
+
+    mock_http.get.assert_called_once_with(URL)
+
+    assert response == mock_response
+    assert response.status_code == 200
+
+    instance_check.ingest_event.assert_called_once_with(
+        status=0,
+        tags=["tag:sonatype_nexus_authentication_validation"],
+        message="Successfully called the Sonatype Nexus API.",
+        title="Sonatype Nexus Authentication validations",
+        source_type="sonatype_nexus.authentication_validation"
+    )
 
 
 def test_raises_error_if_instance_check_is_none():
@@ -28,34 +50,50 @@ def test_raises_error_if_instance_check_is_none():
         SonatypeNexusClient(None)
 
 
-def test_session_creation():
+def test_http_client_initialization():
     instance_check = MagicMock()
     instance_check._username = 'test_username'
     instance_check._password = 'test_password'
+    
+    mock_http = MagicMock()
+    mock_http.options = {'headers': {}}
+    instance_check.http = mock_http
+
     client = SonatypeNexusClient(instance_check)
-    with patch('requests.Session') as mock_session:
-        session = client.prepare_session()
-        assert isinstance(session, type(mock_session.return_value))
+
+    assert client.http == mock_http
+
+    assert 'Authorization' in mock_http.options['headers']
+
+    auth_header = mock_http.options['headers']['Authorization']
+    assert auth_header.startswith('Basic ')
+    
+    decoded = base64.b64decode(auth_header.split(' ')[1]).decode('ascii')
+    assert decoded == f"{instance_check._username}:{instance_check._password}"
+
+    assert mock_http.options['headers']['Accept'] == ACCEPT_HEADER
+    assert mock_http.options['headers']['Content-Type'] == ACCEPT_HEADER
 
 
-def test_session_headers():
+def test_http_client_configuration():
     instance_check = MagicMock()
     instance_check._username = 'test_username'
     instance_check._password = 'test_password'
-    client = SonatypeNexusClient(instance_check)
-    with patch('requests.Session') as mock_session:
-        mock_session.return_value.headers.get.side_effect = lambda key: {
-            "Accept": ACCEPT_HEADER,
-            "Content-Type": ACCEPT_HEADER,
-            "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'\
-                .encode()).decode('ascii')}",
-        }.get(key)
-        session = client.prepare_session()
-        expected_headers = {
-            "Accept": ACCEPT_HEADER,
-            "Content-Type": ACCEPT_HEADER,
-            "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'\
-                .encode()).decode('ascii')}",
-        }
-        for key, value in expected_headers.items():
-            assert session.headers.get(key) == value
+    
+    instance_check.http = MagicMock()
+    instance_check.http.options = {'headers': {}}
+
+    _ = SonatypeNexusClient(instance_check)
+
+    expected_headers = {
+        "Accept": ACCEPT_HEADER,
+        "Content-Type": ACCEPT_HEADER,
+        "Authorization": f"Basic {base64.b64encode(f'{instance_check._username}:{instance_check._password}'.encode()).decode('ascii')}",
+    }
+
+    for key, value in expected_headers.items():
+        assert instance_check.http.options['headers'].get(key) == value
+
+    assert set(expected_headers.keys()).issubset(set(instance_check.http.options['headers'].keys()))
+
+    assert len(instance_check.http.options['headers']) == len(expected_headers)
