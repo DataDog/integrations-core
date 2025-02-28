@@ -14,7 +14,7 @@ ACCEPT_HEADER = 'application/json'
 
 def test_call_sonatype_nexus_api_success():
     instance_check = MagicMock()
-    
+
     mock_http = MagicMock()
     instance_check.http = mock_http
 
@@ -41,7 +41,7 @@ def test_call_sonatype_nexus_api_success():
         tags=["tag:sonatype_nexus_authentication_validation"],
         message="Successfully called the Sonatype Nexus API.",
         title="Sonatype Nexus Authentication validations",
-        source_type="sonatype_nexus.authentication_validation"
+        source_type="sonatype_nexus.authentication_validation",
     )
 
 
@@ -54,7 +54,7 @@ def test_http_client_initialization():
     instance_check = MagicMock()
     instance_check._username = 'test_username'
     instance_check._password = 'test_password'
-    
+
     mock_http = MagicMock()
     mock_http.options = {'headers': {}}
     instance_check.http = mock_http
@@ -67,7 +67,7 @@ def test_http_client_initialization():
 
     auth_header = mock_http.options['headers']['Authorization']
     assert auth_header.startswith('Basic ')
-    
+
     decoded = base64.b64decode(auth_header.split(' ')[1]).decode('ascii')
     assert decoded == f"{instance_check._username}:{instance_check._password}"
 
@@ -79,7 +79,7 @@ def test_http_client_configuration():
     instance_check = MagicMock()
     instance_check._username = 'test_username'
     instance_check._password = 'test_password'
-    
+
     instance_check.http = MagicMock()
     instance_check.http.options = {'headers': {}}
 

@@ -16,6 +16,7 @@ STATUS_ENDPOINT = "/service/rest/v1/status/check"
 ANALYTICS_ENDPOINT = "/service/metrics/data"
 STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
 
+
 class SonatypeNexusCheck(AgentCheck):
     __NAMESPACE__ = "sonatype_nexus"
 
