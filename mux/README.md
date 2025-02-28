@@ -8,6 +8,8 @@ Integrate Mux with Datadog to gain insights into mux video performance data.
 
 ## Setup
 
+**Note:** Only cloud instances running Pro and Enterprise plans are currently supported.
+
 ### Generate Access Token ID and Secret Key in Mux
 
 1. Login to [MUX account][2].

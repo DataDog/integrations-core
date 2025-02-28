@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bitdefender:
+- bitdefender/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
