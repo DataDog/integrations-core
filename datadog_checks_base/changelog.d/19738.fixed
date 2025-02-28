@@ -1,1 +1,1 @@
-Use regex in service check message assertion
+Accept callable for message argument in assert_service_check
