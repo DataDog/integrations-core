@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import unittest
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 import requests
-
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.constants import STATUS_METRICS_MAP
+
 
 SONATYPE_HOST = "sonatype_host:127.0.0.1"
 
@@ -18,7 +18,7 @@ SONATYPE_HOST = "sonatype_host:127.0.0.1"
 @patch("datadog_checks.sonatype_nexus.check.SonatypeNexusCheck.extract_ip_from_url")
 @patch("datadog_checks.sonatype_nexus.check.SonatypeNexusClient")
 def test_success(mock_client_class, mock_extract_ip):
-    check = SonatypeNexusCheck('sonatype_nexus', {}, [{}])
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
     check.gauge = MagicMock()
     check.log = MagicMock()
     mock_extract_ip.return_value = "127.0.0.1"
@@ -30,9 +30,7 @@ def test_success(mock_client_class, mock_extract_ip):
 
     check.generate_and_yield_status_metrics()
 
-    expected_calls = [
-        call(metric_name, 1, [SONATYPE_HOST], hostname=None) for metric_name in STATUS_METRICS_MAP.values()
-    ]
+    expected_calls = [call(metric_name, 1, [SONATYPE_HOST], hostname=None) for metric_name in STATUS_METRICS_MAP.values()]
     check.gauge.assert_has_calls(expected_calls, any_order=True)
     assert check.gauge.call_count == len(STATUS_METRICS_MAP)
 

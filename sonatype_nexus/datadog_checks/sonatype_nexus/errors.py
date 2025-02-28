@@ -6,8 +6,6 @@ from typing import Any
 
 import requests
 
-from . import constants
-
 
 class APIError(Exception):
     default_message = "An unknown API error occurred."

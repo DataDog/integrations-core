@@ -4,7 +4,6 @@
 
 from base64 import b64encode
 
-from . import constants
 from .errors import handle_errors
 
 
@@ -23,7 +22,7 @@ class SonatypeNexusClient:
 
     def _set_auth_header(self):
         token = b64encode(f"{self.instance_check._username}:{self.instance_check._password}".encode()).decode("ascii")
-        self.http.options['headers'].update(
+        self.http.options["headers"].update(
             {
                 "Authorization": f"Basic {token}",
                 "Accept": "application/json",
@@ -46,9 +45,7 @@ class SonatypeNexusClient:
                     source_type=AUTH_SOURCE_TYPE,
                 )
             if response.status_code == 401:
-                err_message = (
-                    "Error occurred with provided Sonatype Nexus credentials. Please check logs for more details."
-                )
+                err_message = "Error occurred with provided Sonatype Nexus credentials. Please check logs for more details."
                 self.instance_check.ingest_event(
                     status=2,
                     tags=AUTH_TAG,
@@ -66,9 +63,7 @@ class SonatypeNexusClient:
                     source_type=AUTH_SOURCE_TYPE,
                 )
             elif response.status_code == 403:
-                err_message = (
-                    "Insufficient permissions to call the Sonatype Nexus API. Please check logs for more details."
-                )
+                err_message = "Insufficient permissions to call the Sonatype Nexus API. Please check logs for more details."
                 self.instance_check.ingest_event(
                     status=2,
                     tags=AUTH_TAG,

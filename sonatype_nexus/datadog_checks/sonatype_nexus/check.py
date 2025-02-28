@@ -5,7 +5,6 @@
 import re
 
 import requests
-
 from datadog_checks.base import AgentCheck
 
 from . import constants
