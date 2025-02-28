@@ -79,11 +79,23 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][8].
 
-###### Custom Queries
+###### Custom queries
 
-The Elasticsearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
+The Elasticsearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. A custom query endpoint can collect multiple metrics and tags.
+
+Each custom query has the following parameters:
+
+- `endpoint` (required): The Elasticsearch API endpoint to query
+- `data_path` (required): The JSON path up to (not including) the metric. Cannot contain wildcards. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `data_path` is `breakers.parent`.
+- `columns` (required): A list representing the data to be collected from the JSON query. Each item in this list includes:
+   - `value_path` (required): The JSON path from the `data_path` to the metric. This path can include string keys and list indices. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `value_path` is `estimated_size_in_bytes`.
+   - `name` (required): The full metric name sent to Datadog. If you also set `type` to `tag`, then every metric collected by this query is tagged with this name.
+   - `type` (optional): Designates the type of data sent. Possible values: `gauge`, `monotonic_count`, `rate`, `tag`. Defaults to `gauge`.
+- `payload` (optional): If declared, turns the GET request into a POST request. Use YAML formatting and a read-only user when writing custom queries with a payload.
 
 **Note:** When running custom queries, use a read only account to ensure that the Elasticsearch instance does not change.
+
+Examples:
 
 ```yaml
 custom_queries:
@@ -118,6 +130,7 @@ The custom query sends as a `GET` request. If you use an optional `payload` para
 ```
 
 `value_path: foo.bar.1` returns the value `result1`.
+
 
 ##### Trace collection
 
