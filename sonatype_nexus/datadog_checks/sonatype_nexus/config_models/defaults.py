@@ -22,4 +22,3 @@ def instance_disable_generic_tags():
 
 def instance_empty_default_hostname():
     return False
-
