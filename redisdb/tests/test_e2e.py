@@ -63,6 +63,11 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.clients.recent_max_input_buffer', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.recent_max_output_buffer', count=2, tags=tags)
     aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.dataset', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.fragmentation', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.clients_slaves', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.clients_normal', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.scripts', count=2, tags=tags)
 
     if not is_affirmative(common.CLOUD_ENV):
         assert_non_cloud_metrics(aggregator, tags)
@@ -98,6 +103,12 @@ def test_e2e(dd_agent_check, master_instance):
     if redis_version == 'latest' or int(redis_version) > 6:
         aggregator.assert_metric('redis.cpu.sys_main_thread', count=1, tags=tags)
         aggregator.assert_metric('redis.cpu.user_main_thread', count=1, tags=tags)
+        aggregator.assert_metric('redis.mem.functions', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.scripts_eval', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.total_replication_buffers', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.vm_eval', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.vm_functions', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.vm_total', count=2, tags=tags)
 
     assert_optional_slowlog_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
