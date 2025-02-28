@@ -8,9 +8,18 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_skip_proxy():
+    return False
+
+
+def shared_timeout():
+    return 10
+
+
 def instance_disable_generic_tags():
     return False
 
 
 def instance_empty_default_hostname():
     return False
+

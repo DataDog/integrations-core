@@ -39,8 +39,8 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: float = Field(..., ge=300.0, le=64800.0)
     password: str
-    service: Optional[str] = None
     server_url: str
+    service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     username: str
 
