@@ -30,7 +30,9 @@ def test_success(mock_client_class, mock_extract_ip):
 
     check.generate_and_yield_status_metrics()
 
-    expected_calls = [call(metric_name, 1, [SONATYPE_HOST], hostname=None) for metric_name in STATUS_METRICS_MAP.values()]
+    expected_calls = [
+        call(metric_name, 1, [SONATYPE_HOST], hostname=None) for metric_name in STATUS_METRICS_MAP.values()
+    ]
     check.gauge.assert_has_calls(expected_calls, any_order=True)
     assert check.gauge.call_count == len(STATUS_METRICS_MAP)
 

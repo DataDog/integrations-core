@@ -45,7 +45,9 @@ class SonatypeNexusClient:
                     source_type=AUTH_SOURCE_TYPE,
                 )
             if response.status_code == 401:
-                err_message = "Error occurred with provided Sonatype Nexus credentials. Please check logs for more details."
+                err_message = (
+                    "Error occurred with provided Sonatype Nexus credentials. Please check logs for more details."
+                )
                 self.instance_check.ingest_event(
                     status=2,
                     tags=AUTH_TAG,
@@ -63,7 +65,9 @@ class SonatypeNexusClient:
                     source_type=AUTH_SOURCE_TYPE,
                 )
             elif response.status_code == 403:
-                err_message = "Insufficient permissions to call the Sonatype Nexus API. Please check logs for more details."
+                err_message = (
+                    "Insufficient permissions to call the Sonatype Nexus API. Please check logs for more details."
+                )
                 self.instance_check.ingest_event(
                     status=2,
                     tags=AUTH_TAG,
