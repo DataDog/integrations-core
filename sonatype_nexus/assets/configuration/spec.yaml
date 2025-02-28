@@ -2,6 +2,10 @@ name: sonatype_nexus
 files:
   - name: sonatype_nexus.yaml
     options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
       - template: instances
         options:
           - name: username
