@@ -1,1 +1,0 @@
-Patch paramiko get_fingerprint function to use SHA256 over MD5 when the Agent's FIPS mode is enabled.
