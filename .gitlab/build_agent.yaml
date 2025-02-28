@@ -41,7 +41,6 @@ build-agent-manual-release:
       when: manual
       variables:
         _AGENT_BRANCH: ${CI_COMMIT_BRANCH}
-    - when: manual
 
 # Split both manual build to give visibility over which one was triggered on the pipeline
 # We can remove this once the behavior in AI-5006 is understood.
