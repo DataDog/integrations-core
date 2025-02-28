@@ -22,6 +22,8 @@ ENGINE_EDITION_AZURE_SQL_EDGE = 9
 ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 
 # Keys of the static info cache, used to cache server info which does not change
+STATIC_INFO_SERVERNAME = 'servername'
+STATIC_INFO_INSTANCENAME = 'instancename'
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'

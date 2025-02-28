@@ -54,8 +54,8 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "temporal_cloud.",
-        "check": "temporal_cloud.cloud_metrics.v0_frontend_service_request_increase1m",
+        "prefix": "temporal.cloud.",
+        "check": "temporal.cloud.v0_frontend_service_request",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
