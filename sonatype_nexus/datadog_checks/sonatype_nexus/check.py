@@ -5,6 +5,7 @@
 import re
 
 import requests
+
 from datadog_checks.base import AgentCheck
 
 from . import constants
@@ -12,7 +13,6 @@ from .api_client import SonatypeNexusClient
 
 STATUS_ENDPOINT = "/service/rest/v1/status/check"
 ANALYTICS_ENDPOINT = "/service/metrics/data"
-
 STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
 
 
