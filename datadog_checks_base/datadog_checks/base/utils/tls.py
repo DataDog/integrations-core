@@ -28,6 +28,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_private_key_password': None,
     'tls_validate_hostname': True,
+    'tls_ciphers': 'ALL',
 }
 
 
@@ -114,6 +115,15 @@ class TlsContextWrapper(object):
             context.check_hostname = self.config.get('tls_validate_hostname', True)
         else:
             context.check_hostname = False
+
+        ciphers = self.config.get('tls_ciphers')
+        if ciphers:
+            if 'ALL' in ciphers:
+                updated_ciphers = "ALL"
+            else:
+                updated_ciphers = ":".join(ciphers)
+
+            context.set_ciphers(updated_ciphers)
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs

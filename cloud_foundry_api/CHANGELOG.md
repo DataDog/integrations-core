@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.2.0 / 2025-02-20
+
+***Added***:
+
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 5.1.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 5.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

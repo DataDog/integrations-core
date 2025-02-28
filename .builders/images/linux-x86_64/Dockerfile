@@ -19,8 +19,8 @@ ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.3.2" \
- SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
+ VERSION="3.4.1" \
+ SHA256="002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -35,18 +35,31 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.12.6
+ENV PYTHON3_VERSION=3.12.8
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="85a4c1be906d20e5c5a69f2466b00da769c221d6a684acfd3a514dbf5bf10a66" \
+ SHA256="5978435c479a376648cb02854df3b892ace9ed7d32b1fead652712bee9d03a45" \
  RELATIVE_PATH="Python-{{version}}" \
- bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
-ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
+ bash install-from-source.sh --prefix=/opt/python/${PYTHON3_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
+ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
 # Set up virtual environment for Python 3
-RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
- && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
+RUN /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+ && /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON3_VERSION}/bin/python3 -m virtualenv /py3
+
+# Rust toolchain (needed for cryptography)
+ENV RUST_VERSION="1.76"
+ENV RUSTC_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
+ARG RUSTUP_VERSION="1.26.0"
+ARG RUSTUP_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
+ && echo "${RUSTUP_SHA256} rustup-init" | sha256sum --check \
+ && chmod +x ./rustup-init \
+ && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
+ && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
+ && rm ./rustup-init
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # MQ Client library required by pymqi
 ENV IBM_MQ_VERSION="9.2.4.0"
@@ -145,8 +158,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.9.1" \
- SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
+ VERSION="8.11.1" \
+ SHA256="a889ac9dbba3644271bd9d1302b5c22a088893719b72be3487bc3d401e5c4e80" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \
@@ -163,8 +176,13 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
+    --without-libpsl \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
+
+# Environment variables to help openssl crate find OpenSSL
+ENV OPENSSL_LIB_DIR="/usr/local/lib64"
+ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt

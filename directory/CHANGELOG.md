@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.1 / 2025-01-25 / Agent 7.63.0
+
+***Fixed***:
+
+* Drop unused scandir dependency. ([#19380](https://github.com/DataDog/integrations-core/pull/19380))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

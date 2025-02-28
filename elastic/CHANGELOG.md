@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 8.0.1 / 2024-12-11 / Agent 7.61.0
+
+***Fixed***:
+
+* Regression fix: Handle missing index fields in payload. ([#19249](https://github.com/DataDog/integrations-core/pull/19249))
+
 ## 8.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

@@ -1,43 +1,58 @@
-# Agent Check: asana
-
 ## Overview
 
-This check monitors [asana][1].
+[Asana][1] is a cloud-based work management tool designed to help individuals and teams keep track of tasks, delegate responsibilities, monitor progress, and communicate in real-time. By providing a centralized platform for collaboration, Asana helps teams stay organized and focused, ensuring that projects are completed on time.
+
+This integration ingests the following logs:
+
+- **Audit Logs**: Audit logs provide a detailed record of significant events, enabling your teams to identify and mitigate the impact of incidents as they arise, while also reviewing configuration changes with precision.
+
+This integration gathers audit logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Asana platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+
+**Disclaimer**: By enabling this integration, you consent to the integration accessing your content and data from Asana. Asana is not responsible for the privacy, security, or integrity of any of your data outside the Asana services.
 
 ## Setup
 
-### Installation
+### Generate API Credentials in Asana
 
-The asana check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to your [Asana Admin Console][3] as a **Super Admin** of an Enterprise+ organization.
+2. Navigate to the **Apps** tab in your Admin Console.
+3. Click on **Service Accounts**.
+4. Select the **Add Service Account** button and complete the following steps:
+   1. Enter a descriptive and identifiable name under **Name**.
+   2. Under **Permission Scopes**, select **Scoped permissions** and check the **Audit Logs** box.
+5. Click **Save Changes** and copy the **Service Account PAT** for later use.
+6. Go to the **Settings** tab in your Admin Console.
+7. Scroll to the bottom of the page to locate the **Domain ID (Workspace ID)**.
 
-### Configuration
+### Connect your Asana Account to Datadog
 
-!!! Add list of steps to set up this integration !!!
+1. Add your Workspace ID and Service Account PAT.
+   | Parameters          | Description                                                                           |
+   | ------------------- | ------------------------------------------------------------------------------------- |
+   | Workspace ID        | The Workspace ID of your organization in the Asana platform.                          |
+   | Service Account PAT | The Service Account Personal Access Token of your organization in the Asana platform. |
 
-### Validation
-
-!!! Add steps to validate integration is functioning as expected !!!
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The Asana integration collects and forwards audit logs to Datadog. For more details on the logs we collect with this integration, see the Asana Audit Logs API [Docs][4].
+
 ### Metrics
 
-asana does not include any metrics.
-
-### Service Checks
-
-asana does not include any service checks.
+The Asana integration does not include any metrics.
 
 ### Events
 
-asana does not include any events.
+The Asana integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+For any further assistance, contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://asana.com/
+[2]: https://docs.datadoghq.com/help/
+[3]: https://app.asana.com/admin
+[4]: https://developers.asana.com/docs/audit-log-events
