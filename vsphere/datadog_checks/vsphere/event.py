@@ -24,7 +24,15 @@ from .constants import (
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
-    def __init__(self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS):
+    def __init__(
+        self,
+        raw_event,
+        event_config,
+        tags,
+        event_resource_filters,
+        exclude_filters=EXCLUDE_FILTERS,
+        hostname="AGENT_INT_EMPTY_HOSTNAME",
+    ):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]
@@ -44,6 +52,7 @@ class VSphereEvent(object):
             self.event_config = event_config
         self.exclude_filters = exclude_filters
         self.event_resource_filters = event_resource_filters
+        self.hostname = hostname
 
     def _is_filtered(self):
         # Filter the unwanted types
@@ -145,7 +154,7 @@ class VSphereEvent(object):
                 md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
-        host_name = None
+        host_name = self.hostname
         entity_name = self.raw_event.entity.name
 
         # for backwards compatibility, vm host type is capitalized
@@ -178,8 +187,7 @@ class VSphereEvent(object):
             "vCenter monitor status changed on this alarm, "
             "it was {before} and it's now {after}.".format(before=trans_before, after=trans_after)
         )
-        if host_name is not None:
-            self.payload['host'] = host_name
+        self.payload['host'] = host_name
 
         # VMs and hosts submit these as host tags
         if self.host_type.lower() not in DEFAULT_EVENT_RESOURCES:
