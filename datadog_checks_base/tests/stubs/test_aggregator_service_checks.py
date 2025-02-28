@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import re
+
+import pytest
 
 from datadog_checks.base import AgentCheck
 
@@ -92,6 +93,8 @@ class TestServiceChecks(object):
     def test_assert_service_check_message_function(self, aggregator):
         check = AgentCheck()
 
-        message_func = (lambda s: re.search("check", s))
+        def message_func(s):
+            return re.search("check", s)
+
         check.service_check('test.service_check', AgentCheck.CRITICAL, message="Some service check message")
         aggregator.assert_service_check('test.service_check', message=message_func)
