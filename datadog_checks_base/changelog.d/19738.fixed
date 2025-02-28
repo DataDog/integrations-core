@@ -1,1 +1,1 @@
-Make aggregator assert_service_check accept callable message
+Use regex in service check message assertion
