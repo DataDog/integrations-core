@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import importlib.util
 import os
 import re
+import sys
 from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Text, Union  # noqa: F401
 from urllib.parse import urlparse
@@ -117,3 +119,13 @@ def _filter(items, pattern_list, key):
 
 def __return_self(obj):
     return obj
+
+
+def import_lazily(name):
+    spec = importlib.util.find_spec(name)
+    loader = importlib.util.LazyLoader(spec.loader)
+    spec.loader = loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    loader.exec_module(module)
+    return module
