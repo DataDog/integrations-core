@@ -30,15 +30,26 @@ build-agent-auto:
           - .deps/*
           - .gitlab/build_agent.yaml
 
-build-agent-manual:
+build-agent-manual-release:
   extends: .build-agent-tpl
   # We don't want to require the manual build job for regular pipelines.
   allow_failure: true
   rules:
     # By default we test with Agent's main branch.
     # From a release branch we want to use the same release branch in the agent repo.
-    - if: $CI_COMMIT_BRANCH =~ "/^7.\d+.x$/"
+    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
       when: manual
       variables:
         _AGENT_BRANCH: ${CI_COMMIT_BRANCH}
+    - when: manual
+
+# Split both manual build to give visibility over which one was triggered on the pipeline
+# We can remove this once the behavior in AI-5006 is understood.
+build-agent-manual:
+  extends: .build-agent-tpl
+  # We don't want to require the manual build job for regular pipelines.
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+      when: never
     - when: manual
