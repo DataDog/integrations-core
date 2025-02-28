@@ -20,6 +20,7 @@ tests:
         "id" : "c05d5f20-89a3-4948-bcc6-8cc6e2aab3fe"
       } ]
     }
+  service: "audit"
   result:
     custom:
       auditType: 73
@@ -101,6 +102,7 @@ tests:
       "state" : 3,
       "timestamp" : 1734584254851
     }
+  service: "network-activities"
   result:
     custom:
       dst:

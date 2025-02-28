@@ -109,6 +109,11 @@ pipeline:
   filter:
     query: source:zero-networks
   processors:
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
     - type: date-remapper
       name: Define `record.timestamp` as the official date of the log
       enabled: true
