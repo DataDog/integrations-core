@@ -10,7 +10,6 @@ from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.constants import STATUS_METRICS_MAP
 
-
 SONATYPE_HOST = "sonatype_host:127.0.0.1"
 
 

@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 
 from datadog_checks.sonatype_nexus.api_client import SonatypeNexusClient
 
-
 REQUEST_URL = "requests.Session.get"
 URL = "https://example.com"
 ACCEPT_HEADER = "application/json"

@@ -6,7 +6,6 @@ from base64 import b64encode
 
 from .errors import handle_errors
 
-
 INTEGRATION_PREFIX = "sonatype_nexus"
 AUTH_TAG = ["tag:sonatype_nexus_authentication_validation"]
 AUTH_TITLE = "Sonatype Nexus Authentication validations"
