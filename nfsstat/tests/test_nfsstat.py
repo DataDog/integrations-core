@@ -28,8 +28,9 @@ class TestNfsstat:
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
         c.log = mock.MagicMock()
 
-        with mock.patch(
-            'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
+        with mock.patch.object(
+            c,
+            '_get_subprocess_output',
             return_value=('No NFS mount points were found', '', 0),
         ):
             c.check(instance)
@@ -42,8 +43,9 @@ class TestNfsstat:
         c = NfsStatCheck(self.CHECK_NAME, init_config, [instance])
         c.log = mock.MagicMock()
 
-        with mock.patch(
-            'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
+        with mock.patch.object(
+            c,
+            '_get_subprocess_output',
             return_value=('No NFS mount points were found', '', 0),
         ):
             c.check(instance)
@@ -56,7 +58,7 @@ class TestNfsstat:
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
             mock_output = ensure_unicode(f.read())
 
-        with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output', return_value=(mock_output, '', 0)):
+        with mock.patch.object(c, '_get_subprocess_output', return_value=(mock_output, '', 0)):
             c.check(instance)
 
         tags = list(instance['tags'])
