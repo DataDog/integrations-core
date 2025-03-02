@@ -833,7 +833,7 @@ eks_fargate does not include any events.
 
 ### Datadog Agent Container Security Context
 
-The Datadog Agent container is designed to run as the dd-agent user (UID: 100). If you override the default security context by setting, for example, `runAsUser: 1000` in your pod spec, the container will fail to start due to insufficient permissions. You may see errors such as:
+The Datadog Agent container is designed to run as the dd-agent user (UID: 100). If you override the default security context by setting, for example, `runAsUser: 1000` in your pod spec, the container fails to start due to insufficient permissions. You may see errors such as:
 
 ```log
 [s6-init] making user provided files available at /var/run/s6/etc...exited 0.
