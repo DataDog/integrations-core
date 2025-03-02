@@ -1,0 +1,78 @@
+id: freshservice
+metric_id: freshservice
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Freshservice
+  enabled: true
+  filter:
+    query: "source:freshservice"
+  processors:
+    - type: pipeline
+      name: Ticket
+      enabled: true
+      filter:
+        query: "service:ticket"
+      processors:
+        - type: date-remapper
+          name: Define `updated_at` as the official date of the log
+          enabled: true
+          sources:
+            - updated_at
+        - name: Lookup on `priority` to `ticket_priority`
+          enabled: true
+          source: priority
+          target: ticket_priority
+          lookupTable: |-
+            1,Low
+            2,Medium
+            3,High
+            4,Urgent
+          type: lookup-processor
+        - name: Lookup on `ticket_priority` to `severity`
+          enabled: true
+          source: ticket_priority
+          target: severity
+          lookupTable: |-
+            Low, info
+            Medium, warning
+            High, critical
+            Urgent, critical
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `severity` as the official status of the log
+          enabled: true
+          sources:
+            - severity
+        - name: Lookup on `source` to `source_type`
+          enabled: true
+          source: source
+          target: source_type
+          lookupTable: |-
+            1, Email                             
+            2, Portal                             
+            3, Phone                            
+            4, Chat                               
+            5, Feedback widget           
+            6, Yammer                         
+            7, AWS Cloudwatch          
+            8, Pagerduty                     
+            9, Walkup                          
+            10, Slack       
+          type: lookup-processor
+        - name: Lookup on `status` to `status_type`
+          enabled: true
+          source: status
+          target: status_type
+          lookupTable: |-
+            2, Open               
+            3, Pending           
+            4, Resolved         
+            5, Closed
+          type: lookup-processor
+        - type: message-remapper
+          name: Define `subject` as the official message of the log
+          enabled: true
+          sources:
+            - subject
