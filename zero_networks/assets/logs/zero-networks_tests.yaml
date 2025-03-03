@@ -3,27 +3,33 @@ tests:
  -
   sample: |-
     {
-      "reportedObjectId" : "",
-      "performedBy" : {
-        "name" : "Test User",
-        "id" : "c05d5f20-89a3-4948-bcc6-8cc6e2aab3fe"
-      },
-      "enforcementSource" : 4,
-      "parentObjectId" : "",
-      "details" : "{\"publicIp\":\"163.116.212.44\",\"tokenTtl\":\"2025-01-07T08:35:30.000Z\",\"idp\":1,\"role\":1}",
-      "auditType" : 73,
-      "userRole" : 1,
-      "isoTimestamp" : "2024-12-31T08:35:30.990Z",
-      "timestamp" : 1735634130990,
-      "destinationEntitiesList" : [ {
-        "name" : "Test User",
-        "id" : "c05d5f20-89a3-4948-bcc6-8cc6e2aab3fe"
-      } ]
-    }
+      "record": {
+        "reportedObjectId" : "",
+        "performedBy" : {
+          "name" : "Test User",
+          "id" : "c05d5f20-89a3-4948-bcc6-8cc6e2aab3fe"
+        },
+        "enforcementSource" : 4,
+        "parentObjectId" : "",
+        "details" : "{\"publicIp\":\"163.116.212.44\",\"tokenTtl\":\"2025-01-07T08:35:30.000Z\",\"idp\":1,\"role\":1}",
+        "auditType" : 1,
+        "userRole" : 1,
+        "isoTimestamp" : "2024-12-31T08:35:30.990Z",
+        "timestamp" : 1735634130990,
+        "destinationEntitiesList" : [ {
+          "name" : "Test User",
+          "id" : "c05d5f20-89a3-4948-bcc6-8cc6e2aab3fe"
+        } ]
+       },
+       "fields_mapping": {
+            "auditType": "Test"
+        }
+      }
+      
   service: "audit"
   result:
     custom:
-      auditType: 73
+      auditType: 1
       destinationEntitiesList:
        -
         name: "Test User"
@@ -63,44 +69,51 @@ tests:
  - 
   sample: |-
     {
-      "reason" : 5,
-      "protocol" : 17,
-      "dst" : {
-        "networkProtectionState" : 5,
-        "processPath" : "C:\\Windows\\System32\\svchost.exe (W32Time) (1056)",
-        "ipThreatScore" : 0,
-        "fqdn" : "dc01.posh.local",
-        "ip" : "10.0.0.4",
-        "userName" : "NT AUTHORITY\\LOCAL SERVICE",
-        "userId" : "S-1-5-19",
-        "assetType" : 2,
-        "eventRecordId" : 43174318,
-        "assetSrc" : 3,
-        "port" : 123,
-        "processId" : "1056",
-        "processName" : "svchost.exe (W32Time) (1056)",
-        "assetId" : "a:a:VWW2G2C8"
-      },
-      "src" : {
-        "networkProtectionState" : 6,
-        "processPath" : "C:\\Windows\\System32\\svchost.exe (W32Time) (1072)",
-        "ipThreatScore" : 0,
-        "fqdn" : "fs02.posh.local",
-        "ip" : "10.0.0.8",
-        "userName" : "NT AUTHORITY\\LOCAL SERVICE",
-        "envGroupId" : "g:e:zUnrnhfa",
-        "userId" : "S-1-5-19",
-        "assetType" : 2,
-        "eventRecordId" : 24143201,
-        "assetSrc" : 3,
-        "port" : 123,
-        "processId" : "1072",
-        "processName" : "svchost.exe (W32Time) (1072)",
-        "assetId" : "a:a:ka62y0mc"
-      },
-      "trafficType" : 1,
-      "state" : 3,
-      "timestamp" : 1734584254851
+      "record": {
+        "reason" : 5,
+        "protocol" : 17,
+        "dst" : {
+          "networkProtectionState" : 5,
+          "processPath" : "C:\\Windows\\System32\\svchost.exe (W32Time) (1056)",
+          "ipThreatScore" : 0,
+          "fqdn" : "dc01.posh.local",
+          "ip" : "10.0.0.4",
+          "userName" : "NT AUTHORITY\\LOCAL SERVICE",
+          "userId" : "S-1-5-19",
+          "assetType" : 2,
+          "eventRecordId" : 43174318,
+          "assetSrc" : 3,
+          "port" : 123,
+          "processId" : "1056",
+          "processName" : "svchost.exe (W32Time) (1056)",
+          "assetId" : "a:a:VWW2G2C8"
+        },
+        "src" : {
+          "networkProtectionState" : 6,
+          "processPath" : "C:\\Windows\\System32\\svchost.exe (W32Time) (1072)",
+          "ipThreatScore" : 0,
+          "fqdn" : "fs02.posh.local",
+          "ip" : "10.0.0.8",
+          "userName" : "NT AUTHORITY\\LOCAL SERVICE",
+          "envGroupId" : "g:e:zUnrnhfa",
+          "userId" : "S-1-5-19",
+          "assetType" : 2,
+          "eventRecordId" : 24143201,
+          "assetSrc" : 3,
+          "port" : 123,
+          "processId" : "1072",
+          "processName" : "svchost.exe (W32Time) (1072)",
+          "assetId" : "a:a:ka62y0mc"
+        },
+        "trafficType" : 1,
+        "state" : 3,
+        "timestamp" : 1734584254851
+        },
+        "fields_mapping": {
+            "trafficType": "Internal",
+            "state": "Established",
+            "protocol": "UDP"
+        }
     }
   service: "network-activities"
   result:
