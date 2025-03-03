@@ -66,3 +66,5 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
 
+# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
+Add-Content -Path $Env:DD_ENV_FILE -Value "PIP_NO_BINARY=confluent_kafka,cryptography"

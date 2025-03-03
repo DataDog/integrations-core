@@ -25,6 +25,7 @@ RUN curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtoo
      --add Microsoft.VisualStudio.Workload.VCTools `
      || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
  && del /q vs_buildtools.exe
+ENV VCVARSALL_BAT="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
 
 # Upgrade PowerShell
 ENV POWERSHELL_VERSION="7.4.0"
@@ -116,6 +117,34 @@ RUN Get-RemoteFile `
 
 ENV OPENSSL_VERSION="3.4.1"
 
+# Nasm
+ENV NASM_VERSION="2.16.03"
+RUN Get-RemoteFile `
+    -Uri https://www.nasm.us/pub/nasm/releasebuilds/$Env:NASM_VERSION/win64/nasm-$Env:NASM_VERSION-win64.zip `
+    -Path "nasm-$Env:NASM_VERSION-win64.zip" `
+    -Hash '3ee4782247bcb874378d02f7eab4e294a84d3d15f3f6ee2de2f47a46aa7226e6' && `
+    7z x "nasm-$Env:NASM_VERSION-win64.zip" -o"C:\nasm" && `
+    Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
+    Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
+# openssl
+RUN Get-RemoteFile `
+    -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
+    -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
+    -Hash '002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3'; `
+    7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
+    7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl3-src && `
+    Remove-Item openssl-$Env:OPENSSL_VERSION.tar.gz && `
+    Remove-Item openssl-$Env:OPENSSL_VERSION.tar && `
+    cd C:\openssl3-src\openssl-$Env:OPENSSL_VERSION && `
+    RunOnVSConsole -Command `
+    'C:\perl\perl\bin\perl.exe Configure `
+    "--prefix=C:\openssl" `
+    "--libdir=lib" `
+    no-module no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost`
+    && `
+    nmake && `
+    nmake install_sw'
+
 ENV CURL_VERSION="8.12.1"
 
 # Set up runner
@@ -126,8 +155,6 @@ COPY build_script.ps1 C:\build_script.ps1
 COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
 ENV DD_BUILD_COMMAND="pwsh C:\build_script.ps1"
 
-# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
-ENV PIP_NO_BINARY="confluent_kafka"
 # Where to find native dependencies when building extensions and for wheel repairing
 RUN New-Item -Path "C:\include" -ItemType Directory
 RUN New-Item -Path "C:\lib" -ItemType Directory
@@ -135,6 +162,9 @@ RUN New-Item -Path "C:\bin" -ItemType Directory
 ENV INCLUDE="C:\include"
 ENV LIB="C:\lib"
 RUN Add-ToPath -Append "C:\bin"
+
+# Environment variables to help openssl crate find OpenSSL
+ENV OPENSSL_DIR="C:\openssl"
 
 # Restore the default Windows shell for correct batch processing.
 SHELL ["cmd", "/S", "/C"]
