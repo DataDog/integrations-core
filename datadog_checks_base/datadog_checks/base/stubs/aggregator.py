@@ -385,7 +385,7 @@ class AggregatorStub(object):
             if hostname is not None and hostname != sc.hostname:
                 continue
 
-            if message is not None and message != sc.message:
+            if message is not None and re.search(message, sc.message) is None:
                 continue
 
             candidates.append(sc)
