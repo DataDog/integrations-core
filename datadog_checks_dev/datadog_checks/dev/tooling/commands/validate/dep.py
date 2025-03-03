@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from urllib.parse import urlparse
 
 import click
 from packaging.requirements import Requirement
@@ -114,6 +115,26 @@ def verify_dependency(source, name, python_versions, file):
         for dependency_definition, checks in dependency_definitions.items():
             requirement = Requirement(dependency_definition)
             specifier_set = requirement.specifier
+
+            # git support: https://pip.pypa.io/en/stable/topics/vcs-support/
+            valid_schemes = ["git+file", "git+https", "git+ssh", "git+http", "git+git",  "git"]
+            
+            if requirement.url:
+                u = urlparse(requirement.url)
+                if u.scheme not in valid_schemes:
+                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}'
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+                
+                fields = requirement.url.split("@")
+                if len(fields) < 2:
+                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}'
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+                
+                return True
 
             if not specifier_set:
                 message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'
