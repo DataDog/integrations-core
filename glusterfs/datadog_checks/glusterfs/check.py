@@ -20,7 +20,7 @@ from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
 
-GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
+GSTATUS_PATH = '/opt/datadog-agent/embedded/bin/gstatus'
 
 
 class GlusterfsCheck(AgentCheck):

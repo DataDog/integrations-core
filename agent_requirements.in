@@ -14,6 +14,7 @@ cryptography==43.0.1
 ddtrace==2.10.6
 dnspython==2.7.0
 foundationdb==6.3.24
+gstatus@ git+https://github.com/DataDog/gstatus.git@591f657a048ccc9f11c8940f750adbcd1d7dc8a0
 hazelcast-python-client==5.5.0
 in-toto==2.0.0
 jellyfish==1.1.3
