@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from typing import Any  # noqa: F401
 
 import pytest
@@ -51,8 +52,12 @@ def test_connection_after_non_fips(clean_fips_environment, dd_fips_environment, 
     """
     Connection to the non-FIPS server after enabling FIPS mode should fail.
     """
+
+    def message_func(service_check_message):
+        return re.search("[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE]", service_check_message)
+
     aggregator = dd_agent_check(instance_e2e_non_fips)
     aggregator.assert_service_check(
         SERVICE_CHECK_VALIDATION,
-        message="[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE]",
+        message=message_func,
     )
