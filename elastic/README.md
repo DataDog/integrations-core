@@ -85,7 +85,7 @@ The Elasticsearch integration allows you to collect custom metrics through custo
 
 Each custom query has the following parameters:
 
-- `endpoint` (required): The Elasticsearch API endpoint to query
+- `endpoint` (required): The Elasticsearch API endpoint to query.
 - `data_path` (required): The JSON path up to (not including) the metric. Cannot contain wildcards. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `data_path` is `breakers.parent`.
 - `columns` (required): A list representing the data to be collected from the JSON query. Each item in this list includes:
    - `value_path` (required): The JSON path from the `data_path` to the metric. This path can include string keys and list indices. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `value_path` is `estimated_size_in_bytes`.
