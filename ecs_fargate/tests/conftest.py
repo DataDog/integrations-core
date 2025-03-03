@@ -39,6 +39,7 @@ EXPECTED_CONTAINER_METRICS_LINUX = [
     'ecs.fargate.mem.pgmajfault',
     'ecs.fargate.mem.mapped_file',
     'ecs.fargate.mem.max_usage',
+    'ecs.fargate.uptime',
 ]
 
 EXPECTED_CONTAINER_METRICS_WINDOWS = [
@@ -52,6 +53,7 @@ EXPECTED_CONTAINER_METRICS_WINDOWS = [
     'ecs.fargate.io.bytes.write',
     'ecs.fargate.io.ops.read',
     'ecs.fargate.io.bytes.read',
+    'ecs.fargate.uptime',
 ]
 
 EXPECTED_TASK_METRICS = [
