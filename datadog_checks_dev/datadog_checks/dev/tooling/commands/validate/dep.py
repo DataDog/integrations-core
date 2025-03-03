@@ -117,8 +117,8 @@ def verify_dependency(source, name, python_versions, file):
             specifier_set = requirement.specifier
 
             # git support: https://pip.pypa.io/en/stable/topics/vcs-support/
-            valid_schemes = ["git+file", "git+https", "git+ssh", "git+http", "git+git",  "git"]
-            
+            valid_schemes = ["git+file", "git+https", "git+ssh", "git+http", "git+git", "git"]
+
             if requirement.url:
                 u = urlparse(requirement.url)
                 if u.scheme not in valid_schemes:
@@ -126,14 +126,14 @@ def verify_dependency(source, name, python_versions, file):
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
-                
+
                 fields = requirement.url.split("@")
                 if len(fields) < 2:
                     message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}'
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
-                
+
                 return True
 
             if not specifier_set:
