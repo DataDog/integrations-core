@@ -4,7 +4,7 @@
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+COMPOSE_FILE = os.path.join(HERE, 'docker', os.environ.get('DOCKER_COMPOSE_FILENAME'))
 
 # from datadog_checks.dev import get_docker_hostname
 # HOST = get_docker_hostname()
@@ -15,11 +15,14 @@ HOST = "127.0.0.1"
 PORT = 3000
 EXPORTER_PORT = 9145
 VERSION = os.environ.get('AEROSPIKE_VERSION')
+AEROSPIKE_EXPORTER_VERSION = os.environ.get('AEROSPIKE_EXPORTER_VERSION')
 
 OPENMETRICS_V2_INSTANCE = {
     'openmetrics_endpoint': 'http://{}:{}/metrics'.format(HOST, EXPORTER_PORT),
     'tags': ['openmetrics_instance'],
 }
+
+AEROSPIKE_V7 = 7
 
 EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.namespace.client_delete_error.count',

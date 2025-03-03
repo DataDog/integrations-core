@@ -1,0 +1,212 @@
+{
+  "title": "Alerts View",
+  "description": "Alerts View dashboard provides multi-level metrics regarding alerts and their states of warning, errors and critical as well as info",
+  "widgets": [
+    {
+      "id": 5221527285160222,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/logos/aerospike_small.svg",
+        "sizing": "cover",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 2,
+        "height": 1
+      }
+    },
+    {
+      "id": 2626756733441590,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": []
+      },
+      "layout": {
+        "x": 2,
+        "y": 0,
+        "width": 10,
+        "height": 1
+      }
+    },
+    {
+      "id": 2860830786402142,
+      "definition": {
+        "title": " ",
+        "type": "manage_status",
+        "display_format": "counts",
+        "color_preference": "background",
+        "hide_zero_counts": true,
+        "show_status": true,
+        "last_triggered_format": "relative",
+        "query": "group:($aerospike_cluster AND $aerospike_service)",
+        "sort": "name,desc",
+        "count": 50,
+        "start": 0,
+        "summary_type": "groups",
+        "show_priority": false,
+        "show_last_triggered": false
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 2
+      }
+    },
+    {
+      "id": 8920091690369624,
+      "definition": {
+        "title": "Critical",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3185098878215232,
+            "definition": {
+              "title": " ",
+              "type": "manage_status",
+              "display_format": "list",
+              "color_preference": "background",
+              "hide_zero_counts": false,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "group_status:\"alert\" AND group:($aerospike_cluster AND $aerospike_service)",
+              "sort": "name,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "groups",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 12,
+        "height": 1
+      }
+    },
+    {
+      "id": 3598741547608336,
+      "definition": {
+        "title": "Warning",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7091709491570682,
+            "definition": {
+              "title": " ",
+              "type": "manage_status",
+              "display_format": "list",
+              "color_preference": "background",
+              "hide_zero_counts": false,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "group_status:\"Warn\" group:($aerospike_cluster AND $aerospike_service)",
+              "sort": "name,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "groups",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 12,
+        "height": 1
+      }
+    },
+    {
+      "id": 5982092018187716,
+      "definition": {
+        "title": "Ok",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3141260706502906,
+            "definition": {
+              "title": " ",
+              "type": "manage_status",
+              "display_format": "list",
+              "color_preference": "background",
+              "hide_zero_counts": false,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "group_status:\"Ok\" group:($aerospike_cluster AND $aerospike_service)",
+              "sort": "name,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "groups",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 1
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "aerospike_cluster",
+      "prefix": "aerospike_cluster",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "aerospike_service",
+      "prefix": "aerospike_service",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
