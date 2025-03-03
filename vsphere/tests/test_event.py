@@ -369,6 +369,30 @@ def test_include_events_ok(aggregator, realtime_instance, dd_run_check, mock_api
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
+def test_include_events_no_excluded_message(aggregator, realtime_instance, dd_run_check, mock_api):
+    realtime_instance['include_events'] = [{"event": "AlarmStatusChangedEvent"}]
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    event1 = vim.event.AlarmStatusChangedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    setattr(event1, 'from', 'green')
+    event1.to = 'red'
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "Green to Red"
+    mock_api.side_effect = mock_api_with_events([event1])
+
+    dd_run_check(check)
+
+    assert len(aggregator.events) == 1
+    assert aggregator.events[0]['msg_title'] == "[Triggered] alarm1 on VM vm1 is now red"
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_include_events_filtered(aggregator, realtime_instance, dd_run_check, mock_api):
     realtime_instance['include_events'] = [
         {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
@@ -561,3 +585,42 @@ def test_vsan_event_include_events_filter_set(aggregator, realtime_instance, dd_
 
     dd_run_check(check)
     assert len(aggregator.events) == 1
+
+
+@pytest.mark.parametrize(
+    'empty_default_hostname, event_hostname',
+    [
+        (True, "AGENT_INT_EMPTY_HOSTNAME"),
+        (False, "stubbed.hostname"),
+    ],
+)
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
+def test_empty_hostname_for_events(
+    aggregator, realtime_instance, dd_run_check, mock_api, empty_default_hostname, event_hostname
+):
+    realtime_instance['event_resource_filters'] = ['datacenter', 'cluster', 'datastore']
+    realtime_instance['empty_default_hostname'] = empty_default_hostname
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    time1 = dt.datetime.now()
+    event4 = vim.event.AlarmStatusChangedEvent()
+    event4.createdTime = time1
+    event4.entity = vim.event.ManagedEntityEventArgument()
+    event4.entity.entity = vim.ClusterComputeResource(moId="c1")
+    event4.entity.name = "c1"
+    event4.alarm = vim.event.AlarmEventArgument()
+    event4.alarm.name = "alarm1"
+    setattr(event4, 'from', 'red')
+    event4.to = 'green'
+    event4.datacenter = vim.event.DatacenterEventArgument()
+    event4.datacenter.name = "dc1"
+    event4.fullFormattedMessage = "Red to Green"
+    mock_api.side_effect = mock_api_with_events([event4])
+    dd_run_check(check)
+    aggregator.assert_event(
+        "vCenter monitor status changed on this alarm, it was red and it's now green.",
+        tags=['vsphere_type:cluster', 'vsphere_resource:c1', 'vcenter_server:FAKE'],
+        count=1,
+    )
+    assert len(aggregator.events) == 1
+    assert aggregator.events[0]['host'] == event_hostname

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import binascii
 import time
 from datetime import datetime
 
@@ -358,6 +359,7 @@ class MongoSlowOperations(DBMAsyncJob):
                     "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
                     "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),
                     "cursor": self._get_slow_operation_cursor(slow_operation),
+                    "lsid": self._get_slow_operation_lsid(slow_operation["command"]),
                 }
             ),
         }
@@ -386,6 +388,15 @@ class MongoSlowOperations(DBMAsyncJob):
                 "comment": slow_operation.get("originatingCommandComment"),
             }
         return None
+
+    def _get_slow_operation_lsid(self, command):
+        lsid = command.get("lsid")
+        if not lsid or not lsid.get("id"):
+            return None
+
+        return {
+            "id": binascii.hexlify(lsid['id']).decode(),
+        }
 
     def _get_slow_operation_lock_stats(self, slow_operation):
         lock_stats = slow_operation.get("locks")

@@ -125,6 +125,3 @@ benchmark_*.svg
 
 ## Direnv
 .envrc
-
-# Auto-generated during builds
-/ddev/src/ddev/_version.py

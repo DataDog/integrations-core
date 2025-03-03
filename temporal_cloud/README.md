@@ -1,41 +1,55 @@
 ## Overview
 
-This check monitors [Temporal_Cloud][1].
+[Temporal Cloud][1] is a scalable platform for orchestrating complex workflows which enables developers to focus on building applications, without worrying about fault tolerance and consistency.
+
+This integration gathers Temporal Cloud metrics into Datadog, offering insights into system health, workflow efficiency, task execution, and performance bottlenecks.
 
 ## Setup
 
-### Installation
+### Generate a Metrics endpoint URL in Temporal Cloud
 
-The Temporal_Cloud check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. To generate a CA certificate and an end-entity certificate, see [certificate management][2].
+    - **Note**: An expired root CA certificate invalidates all downstream certificates. To avoid disruptions to your systems, use certificates with long validity periods.
+2. Log in to [Temporal Cloud][3] with an account owner or global admin role.
+3. Go to **Settings**, and select the **Observability** tab.
+4. Under the **Certificates** section, add your root CA certificate (`.pem` file content) and save it.
+    - **Note**: If an observability endpoint is already set up, you can append your root CA certificate.
+5. Click **Save** to generate the endpoint URL under the **Endpoint** section. The URL should look like: `https://<account_id>.tmprl.cloud/prometheus`.
 
-### Configuration
 
-!!! Add list of steps to set up this integration !!!
+### Connect your Temporal Cloud account to Datadog
 
-### Validation
+1. Add your Account ID, End-entity Certificate file content, and End-entity Certificate key file content    
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Account ID|Temporal Cloud account ID to be used as part of the metrics endpoint URL: `https://<account_id>.tmprl.cloud/prometheus`.|
+    |End-entity certificate file content|Content of the end-entity certificate for secure access and communication with the Metrics endpoint.|
+    |End-entity certificate key file content|Content of the end-entity certificate key for secure access and communication with the Metrics endpoint.|
 
-!!! Add steps to validate integration is functioning as expected !!!
+2. Click the **Save** button to save your settings.
+
 
 ## Data Collected
 
 ### Metrics
 
-Temporal_Cloud does not include any metrics.
+See [metadata.csv][4] for a list of metrics provided by this integration.
+
 
 ### Service Checks
 
-Temporal_Cloud does not include any service checks.
+The Temporal Cloud integration does not include any service checks.
 
 ### Events
 
-Temporal_Cloud does not include any events.
+The Temporal Cloud integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][5].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://temporal.io/cloud/
+[2]: https://docs.temporal.io/cloud/certificates#use-certstrap/
+[3]: https://cloud.temporal.io/
+[4]: https://github.com/DataDog/integrations-core/blob/master/temporal_cloud/metadata.csv
+[5]: https://docs.datadoghq.com/help/

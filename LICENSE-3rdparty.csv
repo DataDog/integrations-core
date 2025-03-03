@@ -25,8 +25,7 @@ dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
-hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2023, Hazelcast, Inc. All Rights Reserved."
-importlib-metadata,PyPI,Apache-2.0,"Copyright 2017-2019 Jason R. Coombs, Barry Warsaw"
+hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2023, Hazelcast, Inc. All Rights Reserved."
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
 kentik-snmp-profiles,"https://github.com/kentik/snmp-profiles",Apache-2.0,
@@ -34,11 +33,11 @@ kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin"
-mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2023 Hajime Senuma
+mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2025 Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2019 The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,Copyright OpenStack
-orjson,PyPI,Apache-2.0,Copyright 2018 ijl <ijl@mailbox.org>
-orjson,PyPI,MIT,Copyright (c) 2018 ijl <ijl@mailbox.org>
+orjson,PyPI,Apache-2.0,Copyright ijl <ijl@mailbox.org>
+orjson,PyPI,MIT,Copyright (c) ijl <ijl@mailbox.org>
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors.
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors.
 paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
@@ -55,7 +54,7 @@ pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the publ
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
-pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
+pyodbc,PyPI,MIT-0,Copyright 2008 Michael Kleehammer
 pysmi,PyPI,BSD-2-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-2-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
@@ -76,7 +75,6 @@ requests-oauthlib,PyPI,ISC,Copyright (c) 2014 Kenneth Reitz.
 requests-toolbelt,PyPI,Apache-2.0,"Copyright 2014 Ian Cordasco, Cory Benfield"
 requests-unixsocket2,PyPI,ISC,Copyright (c) 2024 - 2024 thelab
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
-scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack and the service-identity contributors

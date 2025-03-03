@@ -65,6 +65,7 @@ class InstanceConfig(BaseModel):
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_private_key: Optional[str] = None
     tls_private_key_password: Optional[str] = None
     tls_validate_hostname: Optional[bool] = None

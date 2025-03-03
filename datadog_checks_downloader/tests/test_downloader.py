@@ -59,6 +59,11 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-ntp",  # excluding this since `ntp` was Agent 5 only
 ]
 
+EXCLUDED_LOG_INTEGRATIONS = [
+    # Temporary exclusion until we re-release the integration or come up with a better solution.
+    "datadog-zeek",  # log only integration released by Florent. Will fail until we re-release it.
+]
+
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
 EXCLUDED_INTEGRATION_VERSION = [
     "simple/datadog-ibm-mq/datadog_ibm_mq-4.1.0rc1-py2.py3-none-any.whl",
@@ -454,7 +459,7 @@ def test_downloader():
         if not match:
             continue
         integration_name = match.group(1)
-        if integration_name in EXCLUDED_INTEGRATIONS:
+        if integration_name in EXCLUDED_INTEGRATIONS + EXCLUDED_LOG_INTEGRATIONS:
             continue
         if integration_name not in integrations_metadata:
             raise Exception(

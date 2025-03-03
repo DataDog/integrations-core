@@ -5,7 +5,7 @@ import datetime
 import re
 import select
 import time
-from collections import Counter
+from collections import Counter, namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
@@ -18,11 +18,17 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
+from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
 )
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.statements import (
+    PG_STAT_STATEMENTS_METRICS_COLUMNS,
+    PG_STAT_STATEMENTS_TIMING_COLUMNS,
+    PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17,
+    PostgresStatementMetrics,
+)
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
@@ -292,7 +298,12 @@ def test_statement_metrics(
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         if track_io_timing_enabled:
-            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
+            if float(POSTGRES_VERSION) >= 17.0:
+                assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
+            else:
+                assert (
+                    available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
+                ) == PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
         else:
             assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == set()
         for col in metric_columns:
@@ -758,6 +769,10 @@ def test_failed_explain_handling(
 @pytest.mark.parametrize(
     "dbstrict,ignore_databases", [(True, []), (False, []), (False, ['foo']), (False, ['postgres'])]
 )
+@pytest.mark.parametrize(
+    "collect_raw_query_statement",
+    [True, False],
+)
 def test_statement_samples_collect(
     aggregator,
     integration_check,
@@ -775,12 +790,14 @@ def test_statement_samples_collect(
     expected_warnings,
     dbstrict,
     ignore_databases,
+    collect_raw_query_statement,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
+    dbm_instance['collect_raw_query_statement'] = {'enabled': collect_raw_query_statement}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -793,7 +810,8 @@ def test_statement_samples_collect(
     try:
         conn.cursor().execute(query, (arg,))
         run_one_check(check)
-        tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname)
+        additional_tags = {"raw_query_statement": "enabled"} if collect_raw_query_statement else {}
+        tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname, **additional_tags)
 
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
@@ -802,7 +820,9 @@ def test_statement_samples_collect(
         # Find matching events by checking if the expected query starts with the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements
         matching = [
-            e for e in dbm_samples if expected_query.encode("utf-8").startswith(e['db']['statement'].encode("utf-8"))
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8") and e['dbm_type'] == 'plan'
         ]
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
@@ -838,6 +858,24 @@ def test_statement_samples_collect(
                 assert event['db']['plan']['collection_errors'] is None
 
         assert check.warnings == expected_warnings
+
+        raw_plan_events = [
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8") and e['dbm_type'] == 'rqp'
+        ]
+        if collect_raw_query_statement:
+            if expected_error_tag:
+                assert len(raw_plan_events) == 0
+            else:
+                raw_plan_event = raw_plan_events[0]
+                assert set(raw_plan_event['ddtags'].split(',')) == set(tags)
+                assert raw_plan_event['db']['plan']['definition'] is not None, "missing raw execution plan"
+                assert 'Plan' in json.loads(raw_plan_event['db']['plan']['definition']), "invalid json execution plan"
+                assert raw_plan_event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
+                assert event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
+        else:
+            assert len(raw_plan_events) == 0
 
     finally:
         conn.close()
@@ -1222,8 +1260,49 @@ def test_activity_snapshot_collection(
         assert bobs_query['state'] == "idle in transaction"
 
     finally:
-        conn.close()
         blocking_conn.close()
+        conn.close()
+
+
+def test_activity_raw_statement_collection(aggregator, integration_check, dbm_instance, datadog_agent):
+
+    if POSTGRES_VERSION.split('.')[0] == "9":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return
+    # No need for query metrics here
+    dbm_instance['dbstrict'] = True
+    dbm_instance['dbname'] = "datadog_test"
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources']['enabled'] = False
+    dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    conn = psycopg2.connect(host=HOST, dbname='datadog_test', user='bob', password='bob')
+    query = "BEGIN TRANSACTION; SELECT * FROM persons WHERE city like 'hello';"
+    try:
+        conn.cursor().execute(query)
+        run_one_check(check)
+        expected_tags = _get_expected_tags(
+            check, dbm_instance, with_host=False, db="datadog_test", raw_query_statement="enabled"
+        )
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        raw_plan_events = [
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in query.encode("utf-8") and e['dbm_type'] == 'rqt'
+        ]
+
+        event = raw_plan_events[0]
+        assert event['host'] == "stubbed.hostname"
+        assert event['ddsource'] == "postgres"
+        assert event['dbm_type'] == "rqt"
+        assert event['ddagentversion'] == datadog_agent.get_version()
+        assert sorted(event['ddtags'].split(',')) == sorted(expected_tags)
+        assert event['db']['raw_query_signature'], "missing raw query signature"
+    finally:
+        conn.close()
 
 
 @pytest.mark.parametrize(
@@ -1760,7 +1839,6 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check._connect()
     check.check(dbm_instance)
 
-    print(check.warnings)
     assert check.warnings[0].startswith(
         "Unable to collect activity columns in dbname=datadog_test. Check that the function "
         "wrong_view exists in the database. See "
@@ -2019,3 +2097,50 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 
     for conn in connections.values():
         conn.close()
+
+
+@pytest.mark.unit
+def test_get_query_metrics_payload_rows():
+    config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
+    statement_metrics = PostgresStatementMetrics({}, config, None)
+    wrapper = {}
+
+    TestCase = namedtuple('TestCase', 'rows max_size expected')
+
+    test_cases = [
+        # Empty
+        TestCase(rows=[], max_size=1000, expected=0),
+        # Single row too large
+        TestCase(rows=[{'query': 'a' * 1000}], max_size=10, expected=0),
+        # Both rows fit
+        TestCase(rows=[{'query': 'a' * 20}, {'query': 'b' * 20}], max_size=100, expected=1),
+        # Split rows once
+        TestCase(
+            rows=[{'query': 'a' * 20}, {'query': 'b' * 20}, {'query': 'a' * 20}, {'query': 'b' * 20}],
+            max_size=100,
+            expected=2,
+        ),
+        # Split rows twice
+        TestCase(
+            rows=[{'query': 'a' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}],
+            max_size=100,
+            expected=4,
+        ),
+        # Split rows once, last row too large
+        TestCase(
+            rows=[{'query': 'a' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}, {'query': 'b' * 400}],
+            max_size=100,
+            expected=3,
+        ),
+        # Split rows once, first row too large
+        TestCase(
+            rows=[{'query': 'a' * 400}, {'query': 'b' * 40}, {'query': 'b' * 40}, {'query': 'b' * 40}],
+            max_size=100,
+            expected=3,
+        ),
+    ]
+
+    for tc in test_cases:
+        statement_metrics.batch_max_content_size = tc.max_size
+        rows = statement_metrics._get_query_metrics_payloads(wrapper, tc.rows)
+        assert len(rows) == tc.expected

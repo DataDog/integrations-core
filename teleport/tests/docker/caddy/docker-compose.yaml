@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  teleport-caddy:
+    image: caddy:2.6.2-alpine
+    build: .
+    container_name: teleport-caddy
+    volumes:
+      - ./fixtures:/usr/share/caddy
+      - ./etc/caddy/teleport-service:/etc/caddy/
+    ports:
+      - "3000:80"
