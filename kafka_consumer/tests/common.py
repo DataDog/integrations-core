@@ -71,7 +71,6 @@ else:
 
 E2E_INSTANCE = copy.deepcopy(INSTANCE)
 
-E2E_INSTANCE['collect_consumer_group_state'] = True
 
 if AUTHENTICATION == "ssl":
     E2E_INSTANCE["tls_cert"] = "/tmp/certificate/cert.pem"
@@ -92,7 +91,7 @@ def get_cluster_id():
     return client.list_topics(timeout=5).cluster_id
 
 
-def assert_check_kafka(aggregator, consumer_groups):
+def assert_check_kafka(aggregator, consumer_groups, collect_consumer_group_state=False):
     cluster_id = get_cluster_id()
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
@@ -105,7 +104,9 @@ def assert_check_kafka(aggregator, consumer_groups):
 
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname)
-                    tags = tags + [f"consumer_group:{name}", "consumer_group_state:EMPTY"]
+                    tags = tags + [f"consumer_group:{name}"]
+                    if collect_consumer_group_state:
+                        tags = tags + ["consumer_group_state:STABLE"]
                     for tag in tags:
                         aggregator.assert_metric_has_tag(mname, tag)
 

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import json
 import logging
 from collections import defaultdict
@@ -40,6 +41,13 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
+
+
+def test_collect_consumer_group_state_tag(aggregator, check, kafka_instance, dd_run_check):
+    instance = copy.deepcopy(kafka_instance)
+    instance["collect_consumer_group_state"] = True
+    dd_run_check(check(instance))
+    assert_check_kafka(aggregator, instance['consumer_groups'], collect_consumer_group_state=True)
 
 
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):
