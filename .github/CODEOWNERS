@@ -444,6 +444,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/servicenow_performance/                                            @DataDog/saas-integrations
+/servicenow_performance/*.md                                        @DataDog/saas-integrations @DataDog/documentation
+/servicenow_performance/manifest.json                               @DataDog/saas-integrations @DataDog/documentation
+/servicenow_performance/assets/logs/                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /avast/                                                             @DataDog/saas-integrations
 /avast/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
 /avast/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
