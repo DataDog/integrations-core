@@ -38,3 +38,7 @@ def instance_private_key_type():
 
 def instance_sftp_check():
     return True
+
+
+def instance_use_password_and_pkey():
+    return False
