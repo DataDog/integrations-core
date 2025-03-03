@@ -26,7 +26,7 @@ def seed_mock_client():
     client.list_consumer_groups.return_value = ["consumer_group1"]
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
-    client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    client.describe_consumer_groups.return_value = ('consumer_group', "ConsumerGroupState.STABLE")
     client.consumer_get_cluster_id_and_list_topics.return_value = (
         "cluster_id",
         # topics

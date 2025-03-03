@@ -180,9 +180,7 @@ class KafkaClient:
         :rtype: dict[str, future]
         """
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()
-        consumer_group_result_state = str(desc.state)
-        consumer_group_state = consumer_group_result_state.split('.')[1]
-        return (desc.group_id, consumer_group_state)
+        return (desc.group_id, str(desc.state))
 
     def close_admin_client(self):
         self._kafka_client = None
