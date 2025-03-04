@@ -1,1 +1,1 @@
-Avoid re-executing long-running MongoDB queries during explain collection by using the queryPlanner verbosity mode.
+Added support for configuring explain verbosity mode in MongoDB integration via `operation_samples.explain_verbosity` and `slow_operations.explain_verbosity` options.
