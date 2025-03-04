@@ -831,6 +831,89 @@ eks_fargate does not include any events.
 
 ## Troubleshooting
 
+### Datadog Agent Container Security Context
+
+The Datadog Agent container is designed to run as the dd-agent user (UID: 100). If you override the default security context by setting, for example, `runAsUser: 1000` in your pod spec, the container fails to start due to insufficient permissions. You may see errors such as:
+
+```log
+[s6-init] making user provided files available at /var/run/s6/etc...exited 0.
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-ecs.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-eks.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/60-network-check.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/59-defaults.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/60-sysprobe-check.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-ci.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/89-copy-customfiles.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/01-check-apikey.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/51-docker.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-kubernetes.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-mesos.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/trace/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/security/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/sysprobe/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/agent/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/process/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/security/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/trace/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/sysprobe/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/agent/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/process/finish: Operation not permitted
+[s6-init] ensuring user provided files have correct perms...exited 0.
+[fix-attrs.d] applying ownership & permissions fixes...
+[fix-attrs.d] done.
+[cont-init.d] executing container initialization scripts...
+[cont-init.d] 01-check-apikey.sh: executing... 
+[cont-init.d] 01-check-apikey.sh: exited 0.
+[cont-init.d] 50-ci.sh: executing... 
+[cont-init.d] 50-ci.sh: exited 0.
+[cont-init.d] 50-ecs.sh: executing... 
+[cont-init.d] 50-ecs.sh: exited 0.
+[cont-init.d] 50-eks.sh: executing... 
+ln: failed to create symbolic link '/etc/datadog-agent/datadog.yaml': Permission denied
+[cont-init.d] 50-eks.sh: exited 0.
+[cont-init.d] 50-kubernetes.sh: executing... 
+[cont-init.d] 50-kubernetes.sh: exited 0.
+[cont-init.d] 50-mesos.sh: executing... 
+[cont-init.d] 50-mesos.sh: exited 0.
+[cont-init.d] 51-docker.sh: executing... 
+[cont-init.d] 51-docker.sh: exited 0.
+[cont-init.d] 59-defaults.sh: executing... 
+touch: cannot touch '/etc/datadog-agent/datadog.yaml': Permission denied
+[cont-init.d] 59-defaults.sh: exited 1.
+```
+
+Since Datadog Cluster Agent v7.62+, overriding the security context for the Datadog Agent sidecar allows you to maintain consistent security standards across your Kubernetes deployments. Whether using the DatadogAgent custom resource or Helm values, you can ensure that the Agent container runs with the appropriate user, dd-agent (UID 100), as needed by your environment.
+
+By following the examples, you can deploy the Agent sidecar in environments where the default Pod security context must be overridden.
+
+Datadog Operator
+
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
+        - securityContext:
+            runAsUser: 100
+```
+
+Helm
+
+```yaml
+clusterAgent:
+  admissionController:
+    agentSidecarInjection:
+      profiles:
+        - securityContext:
+            runAsUser: 100
+```
+
 Need help? Contact [Datadog support][20].
 
 ## Further Reading
