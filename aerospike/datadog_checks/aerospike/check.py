@@ -40,9 +40,8 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
 
         if self.build_version is None:
             self._fetch_build_info_from_metric()
-
             version_parts = [int(p) for p in self.build_version.split('.')]
-            if version_parts[0] >= 7:
+            if self.build_version is None or version_parts[0] >= 7:
                 return METRIC_MAP_V7
 
         return METRIC_MAP
@@ -58,7 +57,8 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
             self.build_version = self._extract_node_up_with_build(response.text.strip())
 
         except Exception:
-            self.build_version = None
+            # if any exception or unable to reach exporter fall to back Server version 7
+            self.build_version = "7.2.0.0"
 
     def _extract_node_up_with_build(self, metrics_text):
         """
