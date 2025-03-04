@@ -327,6 +327,14 @@ instances:
     #
     # collections_indexes_stats: false
 
+    ## @param system_database_stats - boolean - optional - default: true
+    ## Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+    ## (`admin`, `local`, and `config`).
+    ## By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+    ## Set to `false` to disable collection of stats for all system databases.
+    #
+    # system_database_stats: true
+
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.

@@ -96,6 +96,7 @@ class MongoConfig(object):
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
         self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
+        self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
 
@@ -273,4 +274,6 @@ class MongoConfig(object):
             ),
             # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
             'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
+            'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
+            'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
         }
