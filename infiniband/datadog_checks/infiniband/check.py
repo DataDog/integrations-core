@@ -17,6 +17,7 @@ class InfinibandCheck(AgentCheck):
         super(InfinibandCheck, self).__init__(name, init_config, instances)
         self.tags = self.instance.get('tags', [])
         self.base_path = self.instance.get('infiniband_path', '/sys/class/infiniband')
+        # Test to see if the path exist. In containerized environments it's customary to mount it to /host
         if not os.path.exists(self.base_path):
             alternative_path = os.path.join('/host', self.base_path.lstrip('/'))
             if os.path.exists(alternative_path):
