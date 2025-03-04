@@ -90,6 +90,7 @@ class OperationSamples(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
 
 
 class Schemas(BaseModel):
@@ -112,6 +113,7 @@ class SlowOperations(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
     max_operations: Optional[float] = None
 
 
