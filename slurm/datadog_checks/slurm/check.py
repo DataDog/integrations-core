@@ -326,57 +326,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         self.gauge('sdiag.enabled', 1)
 
-    def process_scontrol(self, output):
-        # PID      JOBID    STEPID   LOCALID GLOBALID
-        # 3771     14       batch    0       0
-        # 3772     14       batch    -       -
-        base_cmd = self.scontrol_cmd[:-1]
-        hostname = os.uname()[1]
-        slurm_node, _, _ = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
-        slurm_node.strip()
-        lines = output.strip().splitlines()
-        headers = lines[0].split()
-
-        for line in lines[1:]:
-            tags = [f"slurm_node_name:{slurm_node}"]
-            fields = line.split()
-
-            for header, value in zip(headers, fields):
-                new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
-                tags.append(f"{new_header}:{value}")
-
-                if header == "JOBID" and value.isdigit():
-                    job_id = value
-
-            if job_id:
-                job_details = self._enrich_scontrol_tags(job_id)
-                tags.extend(job_details)
-
-            self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
-
-    def _enrich_scontrol_tags(self, job_id):
-        try:
-            cmd = self.get_slurm_command('squeue', ["-j", job_id, "-ho", "%u %T %j"])
-            res, err, code = get_subprocess_output(cmd)
-
-            if code == 0 and res.strip():
-                output_line = res.strip()
-                parts = output_line.split(maxsplit=2)
-
-                if len(parts) == 3:
-                    user, state, job_name = parts
-                    return [
-                        f"slurm_job_user:{user}",
-                        f"slurm_job_state:{state}",
-                        f"slurm_job_name:{job_name}"
-                    ]
-            else:
-                self.log.debug("Error fetching squeue details for job %s: %s", job_id, err)
-        except Exception as e:
-            self.log.debug(f"Error fetching squeue details for job {job_id}: {e}")
-
-        return []
-
     def _update_sacct_params(self):
         sacct_params = SACCT_PARAMS.copy()
         if self.last_run_time is not None:
@@ -493,6 +442,56 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 continue
 
             self.gauge(metric_info["name"], metric_value, tags)
+
+    def process_scontrol(self, output):
+        # This is for worker nodes only. The local PID of the job isn't available in the slurm controller output.
+        # It's only available where the job is running.
+        # PID      JOBID    STEPID   LOCALID GLOBALID
+        # 3771     14       batch    0       0
+        # 3772     14       batch    -       -
+        base_cmd = self.scontrol_cmd[:-1]
+        hostname = os.uname()[1]
+        slurm_node, _, _ = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
+        lines = output.strip().splitlines()
+        headers = lines[0].split()
+
+        for line in lines[1:]:
+            tags = [f"slurm_node_name:{slurm_node.strip()}"]
+            fields = line.split()
+
+            for header, value in zip(headers, fields):
+                new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
+                tags.append(f"{new_header}:{value}")
+
+                if header == "JOBID" and value.isdigit():
+                    job_id = value
+
+            if job_id:
+                job_details = self._enrich_scontrol_tags(job_id)
+                tags.extend(job_details)
+
+            self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
+
+    def _enrich_scontrol_tags(self, job_id):
+        # Tries to enrich the scontrol job with additional details from squeue.
+        # breakpoint()
+        try:
+            cmd = self.get_slurm_command('squeue', ["-j", job_id, "-ho", "%u %T %j"])
+            res, err, code = get_subprocess_output(cmd)
+
+            if code == 0 and res.strip():
+                output_line = res.strip()
+                parts = output_line.split(maxsplit=2)
+
+                if len(parts) == 3:
+                    user, state, job_name = parts
+                    return [f"slurm_job_user:{user}", f"slurm_job_state:{state}", f"slurm_job_name:{job_name}"]
+            else:
+                self.log.debug("Error fetching squeue details for job %s: %s", job_id, err)
+        except Exception as e:
+            self.log.debug("Error fetching squeue details for job %s: %s", job_id, e)
+
+        return []
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
