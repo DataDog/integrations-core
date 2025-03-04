@@ -1,0 +1,1 @@
+Parse new_* metrics available through sonarqube WEB API. We stopped handling them to avoid crashes in https://github.com/DataDog/integrations-core/pull/8552, but now they're back by popular demand!
