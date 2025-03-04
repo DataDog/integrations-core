@@ -104,7 +104,16 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
         base_cmd = ['/usr/bin/scontrol']
         assert check.scontrol_cmd[:-1] == base_cmd
         mock_output_node = ("c1", "", 0)
-        mock_get_subprocess_output.side_effect = [mock_output_main, mock_output_node]
+        mock_output_squeue = (mock_output('scontrol_squeue.txt'), "", 0)
+        # The below essentially mocks the return of all the function calls in the scontrol method. The first call mocks the
+        # mocks the scontrol command output. The second mocks the hostname check. The third and fourth mocks the squeue command
+        # output when the 2 lines of scontrol are iterated over for metric submission.
+        mock_get_subprocess_output.side_effect = [
+            mock_output_main,
+            mock_output_node,
+            mock_output_squeue,
+            mock_output_squeue,
+        ]
     else:
         mock_get_subprocess_output.side_effect = [mock_output_main]
 

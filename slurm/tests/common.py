@@ -29,6 +29,14 @@ def mock_output(filename):
         return f.read().strip()
 
 
+"""
+These expected values below are really strict and are hardcoded. I opted for this approach because this whole check
+relies on the output and proper parsing of each field. I believe that the most accurate way was to ensure we know
+exactly what is being parsed out and what is being submitted to the agent.
+
+If the fixtures are ever updated, then these expected results below will need to be updated as well.
+"""
+
 SINFO_MAP = {
     'metrics': [
         {
@@ -1230,6 +1238,9 @@ SCONTROL_MAP = {
                 "slurm_local_id:0",
                 "slurm_node_name:c1",
                 "slurm_step_id:batch",
+                "slurm_job_name:my_job",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
             ],
         },
         {
@@ -1242,6 +1253,9 @@ SCONTROL_MAP = {
                 "slurm_local_id:-",
                 "slurm_node_name:c1",
                 "slurm_step_id:batch",
+                "slurm_job_name:my_job",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
             ],
         },
     ]
