@@ -100,6 +100,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         if self.collect_scontrol_stats:
             self.scontrol_cmd = self.get_slurm_command('scontrol', SCONTROL_PARAMS)
+            self.squeue_enrich_cmd = self.get_slurm_command('squeue', ["-j"])
 
         # Metric and Tag configuration
         self.last_run_time = None
@@ -344,7 +345,37 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
                 tags.append(f"{new_header}:{value}")
 
+                if header == "JOBID" and value.isdigit():
+                    job_id = value
+
+            if job_id:
+                job_details = self._enrich_scontrol_tags(job_id)
+                tags.extend(job_details)
+
             self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
+
+    def _enrich_scontrol_tags(self, job_id):
+        try:
+            cmd = self.get_slurm_command('squeue', ["-j", job_id, "-ho", "%u %T %j"])
+            res, err, code = get_subprocess_output(cmd)
+
+            if code == 0 and res.strip():
+                output_line = res.strip()
+                parts = output_line.split(maxsplit=2)
+
+                if len(parts) == 3:
+                    user, state, job_name = parts
+                    return [
+                        f"slurm_job_user:{user}",
+                        f"slurm_job_state:{state}",
+                        f"slurm_job_name:{job_name}"
+                    ]
+            else:
+                self.log.debug("Error fetching squeue details for job %s: %s", job_id, err)
+        except Exception as e:
+            self.log.debug(f"Error fetching squeue details for job {job_id}: {e}")
+
+        return []
 
     def _update_sacct_params(self):
         sacct_params = SACCT_PARAMS.copy()
