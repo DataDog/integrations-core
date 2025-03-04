@@ -395,7 +395,7 @@ class SparkCheck(AgentCheck):
     def _describe_app(self, property, running_apps, addl_tags):
         """
         Get payloads that describe certain property of the running apps.
-        Examples of "aspects":
+        Examples of properties:
         - the app's jobs
         - the app's spark stages
         """
@@ -405,8 +405,8 @@ class SparkCheck(AgentCheck):
                 response = self._rest_request(
                     base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, property
                 )
-            except HTTPError as e:
-                self.log.debug("Got an error collecting streaming/statistics", e, exc_info=True)
+            except HTTPError:
+                self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
             try:
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
