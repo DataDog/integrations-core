@@ -42,6 +42,7 @@ class MongoSlowOperations(DBMAsyncJob):
         self._slow_operations_config = check._config.slow_operations
         self._collection_interval = self._slow_operations_config["collection_interval"]
         self._max_operations = self._slow_operations_config["max_operations"]
+        self._explain_verbosity = self._slow_operations_config["explain_verbosity"]
         self._cursor_timeout = check._config.timeout
 
         # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
@@ -203,6 +204,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 command=slow_operation["command"],
                 explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                 explain_plan_cache_key=(dbname, slow_operation["query_signature"]),
+                verbosity=self._explain_verbosity,
             ):
                 if slow_operation.get("execStats"):
                     # execStats is available with profiling, so we just need to format it
@@ -215,6 +217,7 @@ class MongoSlowOperations(DBMAsyncJob):
                         dbname=dbname,
                         op_duration=self._get_operation_duration_microsecs(slow_operation),
                         cursor_timeout=self._cursor_timeout,
+                        verbosity=self._explain_verbosity,
                     )
 
                 explain_plan_payload = self._create_slow_operation_explain_plan_payload(slow_operation, explain_plan)

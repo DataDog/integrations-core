@@ -110,7 +110,10 @@ def should_explain_operation(
     command: dict,
     explain_plan_rate_limiter: RateLimitingTTLCache,
     explain_plan_cache_key: Tuple[str, str],
+    verbosity: str = 'executionStats',
 ) -> bool:
+    if verbosity == "disabled":
+        return False
     if not op or op == "none":
         # Skip operations that are not queries
         return False
@@ -147,9 +150,21 @@ def should_explain_operation(
     return True
 
 
-def get_explain_plan(api_client, command: dict, dbname: str, op_duration: int, cursor_timeout: int) -> dict:
+def get_explain_plan(
+    api_client, command: dict, dbname: str, op_duration: int, cursor_timeout: int, verbosity: str = 'executionStats'
+) -> dict:
+    if verbosity != "queryPlanner" and op_duration >= cursor_timeout:
+        # If the operation duration exceeds the cursor timeout,
+        # explain with non-queryPlanner verbosity will likely timeout
+        # so we log a warning and fallback to queryPlanner
+        log.warning(
+            "Operation took %s seconds to execute, which exceeds the cursor timeout of %s seconds. "
+            "Falling back to queryPlanner verbosity for the explain command.",
+            op_duration,
+            cursor_timeout,
+        )
+        verbosity = "queryPlanner"
     dbname = command.pop("$db", dbname)
-    verbosity = get_explain_command_verbosity(op_duration, cursor_timeout)
     try:
         for key in EXPLAIN_COMMAND_EXCLUDE_KEYS:
             command.pop(key, None)
@@ -159,13 +174,10 @@ def get_explain_plan(api_client, command: dict, dbname: str, op_duration: int, c
         except (ExecutionTimeout, NetworkTimeout) as e:
             # If the operation times out, we try one more time with a different verbosity
             if verbosity != "queryPlanner":
-                log.debug(
-                    "Explaining command %s timed out, retrying with verbosity %s", json_util.dumps(command), verbosity
-                )
+                log.warning("Explaining command timed out with verbosity %s, retrying with queryPlanner", verbosity)
                 verbosity = "queryPlanner"
                 explain_plan = api_client.explain_command(dbname, command, verbosity)
                 return format_explain_plan(explain_plan)
-
             raise e
     except Exception as e:
         return {
@@ -177,14 +189,6 @@ def get_explain_plan(api_client, command: dict, dbname: str, op_duration: int, c
                 }
             ],
         }
-
-
-def get_explain_command_verbosity(op_duration: int, cursor_timeout: int) -> str:
-    if op_duration > cursor_timeout:
-        # If the operation duration is greater than the cursor timeout,
-        # we use "queryPlanner" to avoid the cursor timeout
-        return "queryPlanner"
-    return "executionStats"
 
 
 def format_explain_plan(explain_plan: dict) -> dict:
