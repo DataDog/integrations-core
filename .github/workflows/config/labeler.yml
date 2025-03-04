@@ -311,6 +311,8 @@ integration/jmeter:
 - jmeter/**/*
 integration/journald:
 - journald/**/*
+integration/juniper_srx_firewall:
+- juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
 integration/kafka_consumer:
