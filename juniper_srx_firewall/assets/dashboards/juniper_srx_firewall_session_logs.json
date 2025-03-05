@@ -834,7 +834,7 @@
                     {
                         "id": 34493201515560,
                         "definition": {
-                            "title": "Bytes Transferred over Time",
+                            "title": "Average Bytes Transferred over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1260,12 +1260,6 @@
                                 {
                                     "formulas": [
                                         {
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            },
                                             "alias": "Avg. Elapsed Time",
                                             "formula": "query1"
                                         }
@@ -1648,7 +1642,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Initiated Sessions",
+                                            "alias": "Application related Sessions",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2245,7 +2239,7 @@
                     {
                         "id": 6545828223475376,
                         "definition": {
-                            "title": "Bytes Transferred over Time",
+                            "title": "Average Bytes Transferred over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -2397,14 +2391,20 @@
                                             "group_by": [],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@juniper_srx_firewall.packets_from_server_client"
+                                                "metric": "@juniper_srx_firewall.packets_from_server"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2447,11 +2447,23 @@
                                     "formulas": [
                                         {
                                             "alias": "Packets Received",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            }
                                         },
                                         {
                                             "alias": "Packets Sent",
-                                            "formula": "query2"
+                                            "formula": "query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -2483,7 +2495,7 @@
                                             "group_by": [],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@juniper_srx_firewall.packets_from_server_client"
+                                                "metric": "@juniper_srx_firewall.packets_from_server"
                                             },
                                             "storage": "hot"
                                         }
@@ -2536,7 +2548,13 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            }
                                         }
                                     ],
                                     "conditional_formats": [
@@ -2647,12 +2665,6 @@
                                 {
                                     "formulas": [
                                         {
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            },
                                             "alias": "Avg. Elapsed Time",
                                             "formula": "query1"
                                         }
@@ -2722,10 +2734,6 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "src-nat-rule-type",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "nat-destination-address",
                                             "width": "auto"
                                         },
@@ -2735,10 +2743,6 @@
                                         },
                                         {
                                             "field": "dst-nat-rule-name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dst-nat-rule-type",
                                             "width": "auto"
                                         }
                                     ]

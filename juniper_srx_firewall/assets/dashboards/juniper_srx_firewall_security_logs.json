@@ -383,7 +383,7 @@
                     {
                         "id": 4284411461867030,
                         "definition": {
-                            "title": "Threat Score over Time",
+                            "title": "Average Threat Score over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -980,7 +980,7 @@
                     {
                         "id": 1018089274750064,
                         "definition": {
-                            "title": "Malware Verdicts over Time",
+                            "title": "Average Malware Verdicts over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -3002,7 +3002,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@threat-severity",
+                                                    "facet": "@protocol-name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3280,7 +3280,7 @@
                     {
                         "id": 3195784804040600,
                         "definition": {
-                            "title": "Bytes Over Time  for Inbound and Outbound Connection",
+                            "title": "Average Bytes Over Time  for Inbound and Outbound Connection",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -3360,7 +3360,7 @@
                     {
                         "id": 1866963838442444,
                         "definition": {
-                            "title": "Packets Over Time  for Inbound and Outbound Connection",
+                            "title": "Average Packets Over Time  for Inbound and Outbound Connection",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -4618,7 +4618,7 @@
                     {
                         "id": 7116387885727594,
                         "definition": {
-                            "title": "Most Common Blocking Reason",
+                            "title": "Most Common Blocking Reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4686,7 +4686,7 @@
                     {
                         "id": 7230463361676282,
                         "definition": {
-                            "title": "Top 10 Blocked File",
+                            "title": "Top 10 Blocked Files",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -5230,7 +5230,7 @@
                     {
                         "id": 185492404663456,
                         "definition": {
-                            "title": "Most Common Reason",
+                            "title": "Most Common Reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

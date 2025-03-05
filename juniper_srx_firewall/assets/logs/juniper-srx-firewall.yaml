@@ -97,6 +97,26 @@ facets:
     name: Destination Port
     path: network.destination.port
     source: log
+  - facetType: range
+    groups:
+      - Web Access
+    name: Network Bytes Read
+    path: network.bytes_read
+    source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
+  - facetType: range
+    groups:
+      - Web Access
+    name: Bytes Written
+    path: network.bytes_written
+    source: log
+    type: double
+    unit:
+      family: bytes
+      name: byte
   - description: ""
     facetType: range
     groups:
