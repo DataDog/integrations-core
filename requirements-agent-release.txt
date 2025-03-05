@@ -6,7 +6,7 @@ datadog-activemq-xml==5.1.0
 datadog-activemq==5.0.0
 datadog-aerospike==4.1.0; sys_platform == 'linux2'
 datadog-airflow==6.3.0
-datadog-amazon-msk==6.2.0
+datadog-amazon-msk==6.3.0
 datadog-ambari==6.1.0; sys_platform != 'win32'
 datadog-apache==6.1.0
 datadog-appgate-sdp==1.1.0; sys_platform != 'win32'
@@ -27,15 +27,15 @@ datadog-cassandra==3.0.0
 datadog-ceph==4.0.0; sys_platform != 'win32'
 datadog-cert-manager==5.2.0
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.5.0
+datadog-checks-base==37.7.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==7.1.0
-datadog-cilium==5.1.0
+datadog-cilium==5.2.0
 datadog-cisco-aci==4.3.0
 datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==5.1.0
-datadog-clickhouse==5.1.0
-datadog-cloud-foundry-api==5.1.0
+datadog-clickhouse==5.2.0
+datadog-cloud-foundry-api==5.2.0
 datadog-cloudera==3.2.0
 datadog-cockroachdb==5.1.0
 datadog-confluent-platform==3.0.0
@@ -44,8 +44,9 @@ datadog-coredns==5.1.0; sys_platform == 'linux2'
 datadog-couch==8.2.0
 datadog-couchbase==5.1.0
 datadog-crio==4.1.0
-datadog-datadog-cluster-agent==5.4.0
+datadog-datadog-cluster-agent==5.5.0
 datadog-dcgm==3.3.0
+datadog-delinea-privilege-manager==1.0.0
 datadog-directory==4.0.1
 datadog-disk==7.0.0
 datadog-dns-check==5.1.0
@@ -64,7 +65,7 @@ datadog-flink==3.0.0
 datadog-fluentd==5.1.0
 datadog-fluxcd==2.2.0
 datadog-fly-io==2.1.0
-datadog-foundationdb==3.0.0
+datadog-foundationdb==3.1.0
 datadog-gearmand==5.0.0; sys_platform != 'win32'
 datadog-gitlab-runner==6.1.0
 datadog-gitlab==9.1.0
@@ -90,12 +91,14 @@ datadog-ignite==3.1.0
 datadog-iis==5.1.0; sys_platform == 'win32'
 datadog-impala==3.2.0
 datadog-istio==8.1.0
+datadog-ivanti-connect-secure==1.0.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
-datadog-kafka-consumer==6.3.0
+datadog-kafka-consumer==6.5.0
 datadog-kafka==4.0.0
 datadog-karpenter==2.2.0
-datadog-keda==1.0.0
+datadog-keda==1.0.1
+datadog-keycloak==1.0.0
 datadog-kong==5.1.0
 datadog-kube-apiserver-metrics==6.2.0
 datadog-kube-controller-manager==7.1.0
@@ -122,9 +125,9 @@ datadog-marklogic==6.1.0
 datadog-mcache==6.1.0; sys_platform != 'win32'
 datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
-datadog-milvus==1.1.0
-datadog-mongo==8.4.0
-datadog-mysql==14.5.0
+datadog-milvus==1.2.0
+datadog-mongo==8.5.0
+datadog-mysql==14.6.0
 datadog-nagios==3.0.0
 datadog-network==5.1.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
@@ -132,10 +135,10 @@ datadog-nginx-ingress-controller==4.1.0
 datadog-nginx==8.1.0
 datadog-nvidia-nim==1.1.0
 datadog-nvidia-triton==2.2.0
-datadog-octopus-deploy==1.0.0
+datadog-octopus-deploy==1.0.1
 datadog-openldap==3.0.0
 datadog-openmetrics==6.1.0
-datadog-openstack-controller==8.2.0
+datadog-openstack-controller==8.3.0
 datadog-openstack==4.0.0
 datadog-oracle==6.0.0
 datadog-ossec-security==2.0.0
@@ -146,7 +149,7 @@ datadog-pgbouncer==8.1.1; sys_platform != 'win32'
 datadog-php-fpm==5.1.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.5.1
+datadog-postgres==22.6.0
 datadog-powerdns-recursor==4.1.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
@@ -157,9 +160,9 @@ datadog-quarkus==1.1.0
 datadog-rabbitmq==7.1.0
 datadog-ray==2.2.0
 datadog-redisdb==7.1.0
-datadog-rethinkdb==5.0.0
+datadog-rethinkdb==5.1.0
 datadog-riak==5.1.0
-datadog-riakcs==4.1.0
+datadog-riakcs==4.2.0
 datadog-sap-hana==5.1.0
 datadog-scylla==4.1.0
 datadog-sidekiq==3.0.0
@@ -167,17 +170,17 @@ datadog-silk==4.1.0
 datadog-singlestore==4.1.0
 datadog-slurm==1.0.3; sys_platform == 'linux2'
 datadog-snmp==9.2.0
-datadog-snowflake==7.2.0
+datadog-snowflake==7.4.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.2.0
 datadog-sonicwall-firewall==1.0.0
 datadog-spark==6.2.0
-datadog-sqlserver==21.1.0
+datadog-sqlserver==21.2.0
 datadog-squid==4.1.0
-datadog-ssh-check==4.1.0
+datadog-ssh-check==4.2.0
 datadog-statsd==3.0.0
 datadog-strimzi==3.2.0
-datadog-supabase==1.1.0
+datadog-supabase==1.1.1
 datadog-supervisord==4.0.0
 datadog-suricata==2.0.0
 datadog-symantec-endpoint-protection==1.0.0
@@ -186,7 +189,7 @@ datadog-system-swap==3.0.0
 datadog-tcp-check==6.0.0
 datadog-teamcity==6.1.0
 datadog-tekton==2.2.0
-datadog-teleport==2.2.0
+datadog-teleport==2.3.0
 datadog-temporal==3.2.0
 datadog-tenable==3.0.0
 datadog-teradata==4.0.0; sys_platform != 'darwin'
