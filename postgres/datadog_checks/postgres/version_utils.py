@@ -62,12 +62,15 @@ class VersionUtils(object):
         except ValueError:
             pass
         try:
-            # Version may be missing minor eg: 10.0 and it might have an edition suffix (e.g. 12.3_TDE_1.0)
-            version = re.split('[ _]', raw_version)[0].split('.')
+            # Version may be missing minor eg: 10.0 and it might have an edition suffix
+            # (e.g. 12.3_TDE_1.0, 11.22-RDS.20241121)
+            version_parts = re.split('[ _-]', raw_version, maxsplit=1)
+            version = version_parts[0].split('.')
             version = [int(part) for part in version]
             while len(version) < 3:
                 version.append(0)
-            return VersionInfo(*version)
+            version_info = VersionInfo(*version)
+            return version_info
         except ValueError:
             # Postgres might be in development, with format \d+[beta|rc]\d+
             match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)

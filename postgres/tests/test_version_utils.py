@@ -41,6 +41,9 @@ def test_parse_version():
     v12_3_tde = VersionUtils.parse_version('12.3_TDE_1.0')
     assert v12_3_tde == VersionInfo(12, 3, 0)
 
+    v11_22_RDS = VersionUtils.parse_version('11.22-RDS.20241121')
+    assert v11_22_RDS == VersionInfo(11, 22, 0)
+
 
 def test_throws_exception_for_unknown_version_format():
     with pytest.raises(Exception) as e:
