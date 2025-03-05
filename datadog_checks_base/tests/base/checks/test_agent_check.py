@@ -6,6 +6,7 @@
 import json
 import logging
 import os
+import re
 from typing import Any  # noqa: F401
 
 import mock
@@ -111,7 +112,7 @@ class TestSecretsSanitization:
         secret = 'p@$$w0rd'
         check = AgentCheck()
         check.register_secret(secret)
-        sanitized = check.sanitize(secret)
+        sanitized = re.escape(check.sanitize(secret))
 
         check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
 

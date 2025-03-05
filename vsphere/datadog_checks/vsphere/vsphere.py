@@ -784,12 +784,16 @@ class VSphereCheck(AgentCheck):
                 self.log.debug(
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
+                event_default_hostname = (
+                    "AGENT_INT_EMPTY_HOSTNAME" if self._config.empty_default_hostname else self._hostname
+                )
                 normalized_event = VSphereEvent(
                     event,
                     event_config,
                     self._config.base_tags,
                     self._config.event_resource_filters,
                     self._config.exclude_filters,
+                    event_default_hostname,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()

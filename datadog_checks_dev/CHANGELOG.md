@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 35.0.0 / 2025-02-26
+
+***Removed***:
+
+* Remove trello client. ([#19536](https://github.com/DataDog/integrations-core/pull/19536))
+
+***Security***:
+
+* Removed dependency on psycopg2 ([#19325](https://github.com/DataDog/integrations-core/pull/19325))
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+* Add tls_ciphers config to templates ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+***Fixed***:
+
+* Revert "Upgrade PGBouncer to psycopg3" due to instability in testing ([#19497](https://github.com/DataDog/integrations-core/pull/19497))
+* Pin beautifulsoup4 ([#19538](https://github.com/DataDog/integrations-core/pull/19538))
+
 ## 34.1.0 / 2024-11-13
 
 ***Added***:

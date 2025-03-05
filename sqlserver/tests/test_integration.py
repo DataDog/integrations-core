@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import re
 from copy import copy, deepcopy
 
 import mock
@@ -56,7 +57,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
             'connection_host:{}'.format(instance_docker.get('host')),
         ]
         + sqlserver_check._config.tags,
-        message=str(excinfo.value),
+        message=re.escape(str(excinfo.value)),
     )
 
 

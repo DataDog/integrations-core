@@ -87,6 +87,200 @@
       }
     },
     {
+      "id": 7939379235471620,
+      "definition": {
+        "title": "Avg Actions Per Second (APS)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "metrics",
+                "query": "sum:temporal.cloud.v0_total_action{$Namespace}.as_rate()",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_fg_color": "#f00a0a",
+                "custom_bg_color": "#65a8e6"
+              }
+            ]
+          }
+        ],
+        "autoscale": false,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 3
+      }
+    },
+    {
+      "id": 786592074502738,
+      "definition": {
+        "title": "Actions Per Second over Time",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "metrics",
+                "query": "sum:temporal.cloud.v0_total_action{$Namespace} by {temporal_namespace}.as_rate()"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 9,
+        "height": 3
+      }
+    },
+    {
+      "id": 5478455287138638,
+      "definition": {
+        "title": "Avg Workflow Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "metrics",
+                "query": "sum:temporal.cloud.v0_workflow_success{$Namespace}.as_rate()",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "black_on_light_green"
+              }
+            ]
+          }
+        ],
+        "autoscale": false,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 3,
+        "height": 3
+      }
+    },
+    {
+      "id": 2007567121576290,
+      "definition": {
+        "title": "Workflow Success Rate over Time ",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "metrics",
+                "query": "sum:temporal.cloud.v0_workflow_success{$Namespace} by {temporal_namespace}.as_rate()"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 3,
+        "width": 9,
+        "height": 3
+      }
+    },
+    {
       "id": 6745713151482410,
       "definition": {
         "title": "Service Latency Metrics",
@@ -95,247 +289,6 @@
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
-          {
-            "id": 6596360524579660,
-            "definition": {
-              "title": "Avg StartWorkflowExecution Service Latency (P50)",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:temporal.cloud.v0_service_latency_p50{operation:startworkflowexecution,$Namespace}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "value": 0.1,
-                      "palette": "black_on_light_green"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 0.1,
-                      "palette": "black_on_light_yellow"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 0.2,
-                      "palette": "black_on_light_red"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": false,
-              "precision": 2,
-              "timeseries_background": {
-                "yaxis": {
-                  "include_zero": true
-                },
-                "type": "area"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 8775051559517178,
-            "definition": {
-              "title": "Avg SignalWorkflowExecution Service Latency (P50)",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:temporal.cloud.v0_service_latency_p50{operation:signalworkflowexecution,$Namespace}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "value": 0.1,
-                      "palette": "black_on_light_green",
-                      "custom_bg_color": "#f82a2a"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 0.1,
-                      "palette": "black_on_light_yellow",
-                      "custom_bg_color": "#3cec7f"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 0.2,
-                      "palette": "black_on_light_red"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": false,
-              "precision": 2,
-              "timeseries_background": {
-                "type": "area"
-              }
-            },
-            "layout": {
-              "x": 4,
-              "y": 0,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 2585371837746560,
-            "definition": {
-              "title": "Avg SignalWithStartWorkflowExecution Service Latency (P50)",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:temporal.cloud.v0_service_latency_p50{operation:signalwithstartworkflowexecution,$Namespace}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "value": 0.1,
-                      "palette": "black_on_light_green",
-                      "custom_bg_color": "#9f1e1e"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 0.1,
-                      "palette": "black_on_light_yellow",
-                      "custom_bg_color": "#73e28f"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 0.2,
-                      "palette": "black_on_light_red"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": false,
-              "precision": 2,
-              "timeseries_background": {
-                "yaxis": {
-                  "include_zero": true
-                },
-                "type": "area"
-              }
-            },
-            "layout": {
-              "x": 8,
-              "y": 0,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 8602979691001942,
-            "definition": {
-              "title": "Service Latency (P50) over Time",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:temporal.cloud.v0_service_latency_p50{$Namespace} by {operation}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 12,
-              "height": 4
-            }
-          },
           {
             "id": 2720217781741226,
             "definition": {
@@ -395,7 +348,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 7,
+              "y": 0,
               "width": 4,
               "height": 3
             }
@@ -458,7 +411,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 7,
+              "y": 0,
               "width": 4,
               "height": 3
             }
@@ -524,7 +477,7 @@
             },
             "layout": {
               "x": 8,
-              "y": 7,
+              "y": 0,
               "width": 4,
               "height": 3
             }
@@ -557,6 +510,247 @@
                       "name": "query1",
                       "data_source": "metrics",
                       "query": "avg:temporal.cloud.v0_service_latency_p90{$Namespace} by {operation}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 6596360524579660,
+            "definition": {
+              "title": "Avg StartWorkflowExecution Service Latency (P50)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:temporal.cloud.v0_service_latency_p50{operation:startworkflowexecution,$Namespace}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 0.1,
+                      "palette": "black_on_light_green"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0.1,
+                      "palette": "black_on_light_yellow"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0.2,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8775051559517178,
+            "definition": {
+              "title": "Avg SignalWorkflowExecution Service Latency (P50)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:temporal.cloud.v0_service_latency_p50{operation:signalworkflowexecution,$Namespace}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 0.1,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#f82a2a"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0.1,
+                      "palette": "black_on_light_yellow",
+                      "custom_bg_color": "#3cec7f"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0.2,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 2585371837746560,
+            "definition": {
+              "title": "Avg SignalWithStartWorkflowExecution Service Latency (P50)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:temporal.cloud.v0_service_latency_p50{operation:signalwithstartworkflowexecution,$Namespace}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 0.1,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#9f1e1e"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0.1,
+                      "palette": "black_on_light_yellow",
+                      "custom_bg_color": "#73e28f"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0.2,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 7,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8602979691001942,
+            "definition": {
+              "title": "Service Latency (P50) over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:temporal.cloud.v0_service_latency_p50{$Namespace} by {operation}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1063,9 +1257,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 11,
         "width": 12,
-        "height": 1
+        "height": 29
       }
     },
     {
@@ -1091,7 +1285,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1152,7 +1346,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace} by {operation}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace} by {operation}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1187,7 +1381,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1248,7 +1442,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace} by {operation}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace} by {operation}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1283,7 +1477,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_resource_exhausted_error_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_resource_exhausted_error{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1346,7 +1540,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_resource_exhausted_error_increase1m{$Namespace} by {resource_exhausted_cause}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_resource_exhausted_error{$Namespace} by {resource_exhausted_cause}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1381,7 +1575,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_state_transition_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_state_transition{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1443,7 +1637,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_state_transition_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_state_transition{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1465,104 +1659,6 @@
             }
           },
           {
-            "id": 7939379235471620,
-            "definition": {
-              "title": "Avg Actions Per Second (APS)",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_total_action_increase1m{$Namespace}.as_rate()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "value": 0,
-                      "palette": "custom_bg",
-                      "custom_fg_color": "#f00a0a",
-                      "custom_bg_color": "#65a8e6"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": false,
-              "precision": 2,
-              "timeseries_background": {
-                "yaxis": {
-                  "include_zero": true
-                },
-                "type": "area"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 12,
-              "width": 3,
-              "height": 3
-            }
-          },
-          {
-            "id": 786592074502738,
-            "definition": {
-              "title": "Actions Per Second over Time",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_total_action_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 3,
-              "y": 12,
-              "width": 9,
-              "height": 3
-            }
-          },
-          {
             "id": 5981689788717980,
             "definition": {
               "title": "gRPC Error Percentage",
@@ -1576,13 +1672,13 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1623,7 +1719,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 15,
+              "y": 12,
               "width": 3,
               "height": 4
             }
@@ -1636,16 +1732,11 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_total_action_increase1m{$Namespace} by {namespace_mode}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_total_action{$Namespace} by {namespace_mode}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1653,6 +1744,11 @@
                   "style": {
                     "palette": "datadog16"
                   },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
@@ -1673,7 +1769,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 15,
+              "y": 12,
               "width": 9,
               "height": 4
             }
@@ -1691,7 +1787,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_request_increase1m{$Namespace} by {operation}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_request{$Namespace} by {operation}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1722,7 +1818,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 19,
+              "y": 16,
               "width": 4,
               "height": 4
             }
@@ -1740,7 +1836,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_resource_exhausted_error_increase1m{$Namespace} by {resource_exhausted_cause}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_resource_exhausted_error{$Namespace} by {resource_exhausted_cause}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1772,7 +1868,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 19,
+              "y": 16,
               "width": 4,
               "height": 4
             }
@@ -1790,7 +1886,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_frontend_service_error_increase1m{$Namespace} by {operation}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_frontend_service_error{$Namespace} by {operation}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1821,7 +1917,7 @@
             },
             "layout": {
               "x": 8,
-              "y": 19,
+              "y": 16,
               "width": 4,
               "height": 4
             }
@@ -1830,9 +1926,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 40,
         "width": 12,
-        "height": 1
+        "height": 21
       }
     },
     {
@@ -1858,7 +1954,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1919,7 +2015,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace} by {task_type}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace} by {task_type}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1954,13 +2050,13 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2014,7 +2110,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2056,25 +2152,31 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "order": "desc"
-                      }
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_timeout_increase1m{$Namespace} by {task_type}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_timeout{$Namespace} by {task_type}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
                   "style": {
                     "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
                   }
                 }
               ],
@@ -2108,7 +2210,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_timeout_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_timeout{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2144,7 +2246,6 @@
               "title": "Poll Timeout Percentage",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -2163,19 +2264,19 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_timeout_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_timeout{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2213,25 +2314,31 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "order": "desc"
-                      }
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_increase1m{$Namespace} by {task_type}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success{$Namespace} by {task_type}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
                   "style": {
                     "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
                   }
                 }
               ],
@@ -2255,25 +2362,31 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "order": "desc"
-                      }
-                    }
-                  ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_poll_success_sync_increase1m{$Namespace} by {task_type}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_poll_success_sync{$Namespace} by {task_type}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
                   "style": {
                     "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
                   }
                 }
               ],
@@ -2293,9 +2406,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 61,
         "width": 12,
-        "height": 1,
+        "height": 14,
         "is_column_break": true
       }
     },
@@ -2322,7 +2435,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_action_success_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_action_success{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2383,7 +2496,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_action_success_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_action_success{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2418,7 +2531,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2479,7 +2592,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_buffer_overruns{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2506,7 +2619,6 @@
               "title": "Avg Missed Catch-Up Window Rate",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -2515,7 +2627,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2576,7 +2688,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_missed_catchup_window{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2603,7 +2715,6 @@
               "title": "Avg Rate-Limited Workflow Rate",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -2616,7 +2727,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_rate_limited_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_schedule_rate_limited{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2673,7 +2784,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_schedule_rate_limited_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_schedule_rate_limited{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2698,9 +2809,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 8,
+        "y": 75,
         "width": 12,
-        "height": 1
+        "height": 13
       }
     },
     {
@@ -2726,7 +2837,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_cancel_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_cancel{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2787,7 +2898,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_cancel_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_cancel{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2814,7 +2925,6 @@
               "title": "Avg Continued-As-New Workflow Rate",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -2823,7 +2933,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2885,7 +2995,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_continued_as_new{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2920,7 +3030,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_failed_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_failed{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -2981,7 +3091,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_failed_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_failed{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3003,102 +3113,6 @@
             }
           },
           {
-            "id": 5478455287138638,
-            "definition": {
-              "title": "Avg Workflow Success Rate",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_success_increase1m{$Namespace}.as_rate()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "value": 0,
-                      "palette": "black_on_light_green"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": false,
-              "precision": 2,
-              "timeseries_background": {
-                "yaxis": {
-                  "include_zero": true
-                },
-                "type": "area"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 9,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 2007567121576290,
-            "definition": {
-              "title": "Workflow Success Rate over Time ",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_success_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 4,
-              "y": 9,
-              "width": 8,
-              "height": 3
-            }
-          },
-          {
             "id": 6862787917948638,
             "definition": {
               "title": "Avg Workflow Termination Rate",
@@ -3112,7 +3126,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_terminate_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_terminate{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -3141,7 +3155,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 12,
+              "y": 9,
               "width": 4,
               "height": 3
             }
@@ -3173,7 +3187,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_terminate_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_terminate{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3189,7 +3203,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 12,
+              "y": 9,
               "width": 8,
               "height": 3
             }
@@ -3200,7 +3214,6 @@
               "title": "Avg Workflow Timeout Rate",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -3209,7 +3222,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_timeout_increase1m{$Namespace}.as_rate()",
+                      "query": "sum:temporal.cloud.v0_workflow_timeout{$Namespace}.as_rate()",
                       "aggregator": "avg"
                     }
                   ],
@@ -3238,7 +3251,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 15,
+              "y": 12,
               "width": 4,
               "height": 3
             }
@@ -3270,7 +3283,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:temporal.cloud.v0_workflow_timeout_increase1m{$Namespace} by {temporal_namespace}.as_rate()"
+                      "query": "sum:temporal.cloud.v0_workflow_timeout{$Namespace} by {temporal_namespace}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3286,7 +3299,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 15,
+              "y": 12,
               "width": 8,
               "height": 3
             }
@@ -3295,9 +3308,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 88,
         "width": 12,
-        "height": 1
+        "height": 16
       }
     },
     {
@@ -3385,7 +3398,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -3495,7 +3507,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -3751,9 +3762,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 104,
         "width": 12,
-        "height": 1
+        "height": 13
       }
     }
   ],

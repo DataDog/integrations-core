@@ -1,4 +1,8 @@
 # Profile defining metadata for HP servers
+extends:
+  - _generic-if.yaml
+  - _generic-host-resources.yaml
+
 metadata:
   device:
     fields:

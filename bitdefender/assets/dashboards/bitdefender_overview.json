@@ -1,0 +1,1111 @@
+{
+    "title": "Bitdefender - Overview",
+    "description": "The Bitdefender Overview dashboard provides insights about the logs Bitdefender Agent has generated.",
+    "widgets": [
+      {
+        "id": 1772370063521600,
+        "definition": {
+          "type": "image",
+          "url": "https://fieldtrust.be/wp-content/uploads/2023/09/Bitdefender_Masterbrand_Logo_Positive-1-1024x236.png",
+          "sizing": "contain",
+          "margin": "md",
+          "has_background": true,
+          "has_border": true,
+          "vertical_align": "center",
+          "horizontal_align": "center"
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 3
+        }
+      },
+      {
+        "id": 2513558489343594,
+        "definition": {
+          "title": "Bitdefender Events Overview",
+          "background_color": "vivid_blue",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 3510710746326624,
+              "definition": {
+                "title": "Total Logs Count",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+              }
+            },
+            {
+              "id": 543432719528612,
+              "definition": {
+                "title": "Logs Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "alias": "COUNT",
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "timeseries",
+                    "style": {
+                      "palette": "dog_classic",
+                      "order_by": "values",
+                      "line_type": "solid",
+                      "line_width": "normal"
+                    },
+                    "display_type": "line"
+                  }
+                ]
+              },
+              "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 6,
+                "height": 4
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 6,
+          "y": 0,
+          "width": 6,
+          "height": 7
+        }
+      },
+      {
+        "id": 1416870792948964,
+        "definition": {
+          "type": "note",
+          "content": "Bitdefender provides cybersecurity solutions with leading security efficacy, performance, and ease of use to small and medium businesses, mid-market enterprises, and consumers. Bitdefender EDR effectively stops ransomware and breaches with automated cross-endpoint correlation and seamlessly integrated prevention, protection, detection, and response.\n\nThe Bitdefender Overview dashboard provides insights about the logs Bitdefender Agent has generated.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+          "background_color": "white",
+          "font_size": "14",
+          "text_align": "left",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 3,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 7711882531555356,
+        "definition": {
+          "title": "Events by Module",
+          "title_size": "16",
+          "title_align": "left",
+          "requests": [
+            {
+              "response_format": "scalar",
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "queries": [
+                {
+                  "name": "query1",
+                  "data_source": "logs",
+                  "search": {
+                    "query": "source:bitdefender $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                  },
+                  "indexes": [
+                    "*"
+                  ],
+                  "group_by": [
+                    {
+                      "facet": "@params.events.module",
+                      "limit": 15,
+                      "sort": {
+                        "aggregation": "count",
+                        "order": "desc",
+                        "metric": "count"
+                      },
+                      "should_exclude_missing": true
+                    }
+                  ],
+                  "compute": {
+                    "aggregation": "count",
+                    "metric": "count"
+                  },
+                  "storage": "hot"
+                }
+              ],
+              "style": {
+                "palette": "datadog16"
+              },
+              "sort": {
+                "count": 10,
+                "order_by": [
+                  {
+                    "type": "formula",
+                    "index": 0,
+                    "order": "desc"
+                  }
+                ]
+              }
+            }
+          ],
+          "type": "sunburst",
+          "legend": {
+            "type": "table"
+          }
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 12,
+          "height": 5
+        }
+      },
+      {
+        "id": 885756733251444,
+        "definition": {
+          "title": "Top 10 Computers",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "toplist",
+          "requests": [
+            {
+              "queries": [
+                {
+                  "data_source": "logs",
+                  "name": "query1",
+                  "indexes": [
+                    "*"
+                  ],
+                  "compute": {
+                    "aggregation": "count"
+                  },
+                  "group_by": [
+                    {
+                      "facet": "@params.events.computer_name",
+                      "limit": 10,
+                      "sort": {
+                        "order": "desc",
+                        "aggregation": "count"
+                      }
+                    }
+                  ],
+                  "search": {
+                    "query": "source:bitdefender $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                  },
+                  "storage": "hot"
+                }
+              ],
+              "response_format": "scalar",
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "sort": {
+                "count": 10,
+                "order_by": [
+                  {
+                    "type": "formula",
+                    "index": 0,
+                    "order": "desc"
+                  }
+                ]
+              }
+            }
+          ],
+          "style": {
+            "display": {
+              "type": "stacked",
+              "legend": "automatic"
+            },
+            "palette": "datadog16"
+          }
+        },
+        "layout": {
+          "x": 0,
+          "y": 5,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 856275084165270,
+        "definition": {
+          "title": "Top 10 Computer IPs",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "toplist",
+          "requests": [
+            {
+              "queries": [
+                {
+                  "data_source": "logs",
+                  "name": "query1",
+                  "indexes": [
+                    "*"
+                  ],
+                  "compute": {
+                    "aggregation": "count"
+                  },
+                  "group_by": [
+                    {
+                      "facet": "@params.events.computer_ip",
+                      "limit": 10,
+                      "sort": {
+                        "order": "desc",
+                        "aggregation": "count"
+                      }
+                    }
+                  ],
+                  "search": {
+                    "query": "source:bitdefender $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                  },
+                  "storage": "hot"
+                }
+              ],
+              "response_format": "scalar",
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "sort": {
+                "count": 10,
+                "order_by": [
+                  {
+                    "type": "formula",
+                    "index": 0,
+                    "order": "desc"
+                  }
+                ]
+              }
+            }
+          ],
+          "style": {
+            "display": {
+              "type": "stacked",
+              "legend": "automatic"
+            },
+            "palette": "datadog16"
+          }
+        },
+        "layout": {
+          "x": 6,
+          "y": 5,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 266333322257234,
+        "definition": {
+          "title": "Top 10 Antiexploit Users",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "toplist",
+          "requests": [
+            {
+              "queries": [
+                {
+                  "data_source": "logs",
+                  "name": "query1",
+                  "indexes": [
+                    "*"
+                  ],
+                  "compute": {
+                    "aggregation": "count"
+                  },
+                  "group_by": [
+                    {
+                      "facet": "@params.events.detection_username",
+                      "limit": 10,
+                      "sort": {
+                        "order": "desc",
+                        "aggregation": "count"
+                      }
+                    }
+                  ],
+                  "search": {
+                    "query": "source:bitdefender $Computer_IP $Antiexploit_Users $Computer_Name $Module_Type"
+                  },
+                  "storage": "hot"
+                }
+              ],
+              "response_format": "scalar",
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "sort": {
+                "count": 10,
+                "order_by": [
+                  {
+                    "type": "formula",
+                    "index": 0,
+                    "order": "desc"
+                  }
+                ]
+              }
+            }
+          ],
+          "style": {
+            "display": {
+              "type": "stacked",
+              "legend": "automatic"
+            },
+            "palette": "datadog16"
+          }
+        },
+        "layout": {
+          "x": 0,
+          "y": 9,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 5564782282379954,
+        "definition": {
+          "title": "Top 10 Incident Users",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "toplist",
+          "requests": [
+            {
+              "queries": [
+                {
+                  "data_source": "logs",
+                  "name": "query1",
+                  "indexes": [
+                    "*"
+                  ],
+                  "compute": {
+                    "aggregation": "count"
+                  },
+                  "group_by": [
+                    {
+                      "facet": "@params.events.username",
+                      "limit": 10,
+                      "sort": {
+                        "order": "desc",
+                        "aggregation": "count"
+                      }
+                    }
+                  ],
+                  "search": {
+                    "query": "source:bitdefender $Computer_IP $Computer_Name $Incident_Users $Module_Type"
+                  },
+                  "storage": "hot"
+                }
+              ],
+              "response_format": "scalar",
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "sort": {
+                "count": 10,
+                "order_by": [
+                  {
+                    "type": "formula",
+                    "index": 0,
+                    "order": "desc"
+                  }
+                ]
+              }
+            }
+          ],
+          "style": {
+            "display": {
+              "type": "stacked",
+              "legend": "automatic"
+            },
+            "palette": "datadog16"
+          }
+        },
+        "layout": {
+          "x": 6,
+          "y": 9,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 851077346663358,
+        "definition": {
+          "title": "Bitdefender Logs",
+          "title_size": "16",
+          "title_align": "left",
+          "requests": [
+            {
+              "response_format": "event_list",
+              "query": {
+                "data_source": "logs_stream",
+                "query_string": "source:bitdefender $Computer_IP $Computer_Name $Antiexploit_Users $Incident_Users $Module_Type",
+                "indexes": [],
+                "storage": "hot"
+              },
+              "columns": [
+                {
+                  "field": "status_line",
+                  "width": "auto"
+                },
+                {
+                  "field": "timestamp",
+                  "width": "auto"
+                },
+                {
+                  "field": "content",
+                  "width": "compact"
+                }
+              ]
+            }
+          ],
+          "type": "list_stream"
+        },
+        "layout": {
+          "x": 0,
+          "y": 13,
+          "width": 12,
+          "height": 5
+        }
+      },
+      {
+        "id": 5365780402052110,
+        "definition": {
+          "title": "Datadog Cloud SIEM",
+          "title_align": "center",
+          "background_color": "vivid_blue",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 161897206113872,
+              "definition": {
+                "type": "note",
+                "content": "Datadog Cloud SIEM analyzes Bitdefender logs to detect threats to your environment in real time. If you don't see signals, please make sure you've enabled [Datadog Cloud SIEM](/security).",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 1
+              }
+            },
+            {
+              "id": 4941398597597436,
+              "definition": {
+                "title": "CRITICALs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender status:critical $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#bc303c"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                  "type": "area"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 1,
+                "width": 2,
+                "height": 2
+              }
+            },
+            {
+              "id": 3857920975680044,
+              "definition": {
+                "title": "HIGHs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender status:high $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#d33043"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 2,
+                "y": 1,
+                "width": 2,
+                "height": 2
+              }
+            },
+            {
+              "id": 4757813804641268,
+              "definition": {
+                "title": "Critical Security Signals",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@workflow.rule.name",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender status:critical $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#bc303c"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  }
+                }
+              },
+              "layout": {
+                "x": 4,
+                "y": 1,
+                "width": 8,
+                "height": 4
+              }
+            },
+            {
+              "id": 1686691393561208,
+              "definition": {
+                "title": "MEDIUMs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender status:medium $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#e5a21c"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 2,
+                "height": 2
+              }
+            },
+            {
+              "id": 5428716467431762,
+              "definition": {
+                "title": "LOWs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender status:low $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#ffb52b"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 2,
+                "y": 3,
+                "width": 2,
+                "height": 1
+              }
+            },
+            {
+              "id": 1935865788994180,
+              "definition": {
+                "title": "INFOs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender status:info $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#84c1e0"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 2,
+                "y": 4,
+                "width": 2,
+                "height": 1
+              }
+            },
+            {
+              "id": 6817140051266884,
+              "definition": {
+                "title": "High Security Signals",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@workflow.rule.name",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender status:high $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#d33043"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  }
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 4
+              }
+            },
+            {
+              "id": 4478619600785126,
+              "definition": {
+                "title": "Medium Security Signals",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "security_signals",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@workflow.rule.name",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender status:medium $Computer_IP $Antiexploit_Users $Computer_Name $Incident_Users $Module_Type"
+                        }
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#e5a21c"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  }
+                }
+              },
+              "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 6,
+                "height": 4
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 25,
+          "width": 12,
+          "height": 1
+        }
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "Computer_IP",
+        "prefix": "@params.events.computer_ip",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Computer_Name",
+        "prefix": "@params.events.computer_name",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Antiexploit_Users",
+        "prefix": "@params.events.detection_username",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Incident_Users",
+        "prefix": "@params.events.username",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Module_Type",
+        "prefix": "@params.events.module",
+        "available_values": [],
+        "default": "*"
+      }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+  }

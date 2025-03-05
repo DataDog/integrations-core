@@ -1878,7 +1878,7 @@ def test_proliant(aggregator):
         'snmp.{}'.format("cpqDaCntlrCondition"), metric_type=aggregator.GAUGE, tags=controller_index, count=1
     )
 
-    tags = ['chassis_num:30', 'power_supply_status:3'] + common_tags
+    tags = ['chassis_num:30', 'bay_num:3', 'power_supply_status:3'] + common_tags
     aggregator.assert_metric(
         'snmp.{}'.format("cpqHeFltTolPowerSupplyCapacityUsed"),
         metric_type=aggregator.GAUGE,
