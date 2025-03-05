@@ -19,11 +19,21 @@ TOPICS = ['marvel', 'dc', 'unconsumed_topic']
 PARTITIONS = [0, 1]
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+
+POSSIBLE_CONSUMER_GROUP_STATES = {
+    'EMPTY',
+    'STABLE',
+    'UNKNOWN',
+    'DEAD',
+    'PREPARING_REBALANCING',
+    'COMPLETING_REBALANCING',
+}
+
+
 AUTHENTICATION = os.environ.get('AUTHENTICATION', 'noauth')
 DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', AUTHENTICATION, "docker-compose.yaml")
 
 metrics = BROKER_METRICS + CONSUMER_METRICS
-
 
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'docker', 'ssl', 'certificate')
 ROOT_CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'caroot.pem')
