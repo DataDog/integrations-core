@@ -76,7 +76,7 @@ class MockedDB(object):
     def __getitem__(self, coll_name):
         return MockedCollection(self._db_name, coll_name, self.deployment)
 
-    def command(self, command, *args, **kwargs):
+    def command(self, command, *args, **_):
         filename = command
         if "dbStats" in command:
             filename = f"dbstats-{self._db_name}"
