@@ -16,6 +16,7 @@ FLUX_V1_METRICS = {
 assert sorted(FLUX_V1_METRICS) == list(FLUX_V1_METRICS)
 
 FLUX_V2_METRICS = {
+    "gotk_resource_info": "gotk.resource.info",
     "leader_election_master_status": "leader_election_master_status",
     "process_cpu_seconds": "process.cpu_seconds",
     "process_max_fds": "process.max_fds",
@@ -29,7 +30,7 @@ FLUX_V2_METRICS = {
     "workqueue_longest_running_processor_seconds": "workqueue.longest_running_processor",
     "workqueue_retries": "workqueue.retries",
     "workqueue_unfinished_work_seconds": "workqueue.unfinished_work",
-    "gotk_resource_info": "gotk.resource.info",
+    
 }
 assert sorted(FLUX_V2_METRICS) == list(FLUX_V2_METRICS)
 METRIC_MAP = {**FLUX_V1_METRICS, **FLUX_V2_METRICS}
