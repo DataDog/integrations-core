@@ -17,7 +17,7 @@ container.memory.limit,gauge,,byte,,The container memory limit,0,container,mem_l
 container.memory.major_page_faults,count,,,,Number of major page faults incurred,0,container,pgmajfault,
 container.memory.oom_events,gauge,,,,The number of OOM events triggered by the container,0,container,mem_oom_events,
 container.memory.page_faults,count,,,,Total number of page faults incurred,0,container,pgfault,
-container.memory.rss,gauge,,byte,,The container RSS usage,0,container,mem_rss,
+container.memory.rss,gauge,,byte,,The 'anon' memory used by the container,0,container,mem_rss,
 container.memory.soft_limit,gauge,,byte,,The container memory soft limit,0,container,mem_soft_limit,
 container.memory.swap,gauge,,byte,,The container swap usage,0,container,mem_swap,
 container.memory.usage,gauge,,byte,,The container total memory usage,0,container,mem_usage,
