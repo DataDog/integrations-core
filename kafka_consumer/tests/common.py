@@ -29,11 +29,11 @@ POSSIBLE_CONSUMER_GROUP_STATES = {
     'COMPLETING_REBALANCING',
 }
 
-
 AUTHENTICATION = os.environ.get('AUTHENTICATION', 'noauth')
 DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', AUTHENTICATION, "docker-compose.yaml")
 
 metrics = BROKER_METRICS + CONSUMER_METRICS
+
 
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'docker', 'ssl', 'certificate')
 ROOT_CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'caroot.pem')
@@ -80,7 +80,6 @@ else:
     }
 
 E2E_INSTANCE = copy.deepcopy(INSTANCE)
-
 
 if AUTHENTICATION == "ssl":
     E2E_INSTANCE["tls_cert"] = "/tmp/certificate/cert.pem"
