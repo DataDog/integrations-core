@@ -16,6 +16,7 @@ class FoundationdbCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(FoundationdbCheck, self).__init__(name, init_config, instances)
+        self._tags = self.instance.get('tags', [])
         self._db = None
 
     def construct_database(self):
@@ -67,10 +68,10 @@ class FoundationdbCheck(AgentCheck):
             if not query_type:
                 self.log.error("custom query field `query_type` is required for metric_prefix `%s`", metric_prefix)
                 continue
-            query_tags = query['tags']
-            if not query_tags:
+            if not query['tags']:
                 self.log.error("custom query field `tags` is required for metric_prefix `%s`", metric_prefix)
                 continue
+            query_tags = self._tags + query['tags']
             result = self._db[query_key.encode('UTF-8')]
             if not result:
                 raise ValueError("No result for " + query_key)
@@ -90,7 +91,7 @@ class FoundationdbCheck(AgentCheck):
     def report_process(self, process):
         if "address" not in process:
             return
-        tags = ["fdb_process:" + process["address"]]
+        tags = self._tags + ["fdb_process:" + process["address"]]
 
         if "cpu" in process:
             self.maybe_gauge("process.cpu.usage_cores", process["cpu"], "usage_cores", tags)
@@ -127,7 +128,7 @@ class FoundationdbCheck(AgentCheck):
     def report_role(self, role, process_tags):
         if "role" not in role:
             return
-        tags = process_tags + ["fdb_role:" + role["role"]]
+        tags = self._tags + process_tags + ["fdb_role:" + role["role"]]
 
         self.maybe_hz_counter("process.role.input_bytes", role, "input_bytes", tags)
         self.maybe_hz_counter("process.role.durable_bytes", role, "durable_bytes", tags)
@@ -182,15 +183,18 @@ class FoundationdbCheck(AgentCheck):
         if "cluster" not in status:
             raise ValueError("JSON Status data doesn't include cluster data")
 
+        tags = self._tags
+
         cluster = status["cluster"]
         if "machines" in cluster:
-            self.gauge("machines", len(cluster["machines"]))
+            self.gauge("machines", len(cluster["machines"]), tags)
         if "processes" in cluster:
-            self.gauge("processes", len(cluster["processes"]))
+            self.gauge("processes", len(cluster["processes"]), tags)
 
             self.count(
                 "instances",
                 sum((len(p["roles"]) if "roles" in p else 0 for p in cluster["processes"].values())),
+                tags,
             )
 
             role_counts = {}
@@ -207,52 +211,58 @@ class FoundationdbCheck(AgentCheck):
                                 role_counts[rolename] = 1
 
             for role in role_counts:
-                self.gauge("processes_per_role." + role, role_counts[role])
+                self.gauge("processes_per_role." + role, role_counts[role], tags)
 
         if "data" in cluster:
             data = cluster["data"]
-            self.maybe_gauge("data.system_kv_size_bytes", data, "system_kv_size_bytes")
-            self.maybe_gauge("data.total_disk_used_bytes", data, "total_disk_used_bytes")
-            self.maybe_gauge("data.total_kv_size_bytes", data, "total_kv_size_bytes")
+            self.maybe_gauge("data.system_kv_size_bytes", data, "system_kv_size_bytes", tags)
+            self.maybe_gauge("data.total_disk_used_bytes", data, "total_disk_used_bytes", tags)
+            self.maybe_gauge("data.total_kv_size_bytes", data, "total_kv_size_bytes", tags)
             self.maybe_gauge(
                 "data.least_operating_space_bytes_log_server",
                 data,
                 "least_operating_space_bytes_log_server",
+                tags,
             )
 
             if "moving_data" in data:
-                self.maybe_gauge("data.moving_data.in_flight_bytes", data["moving_data"], "in_flight_bytes")
-                self.maybe_gauge("data.moving_data.in_queue_bytes", data["moving_data"], "in_queue_bytes")
-                self.maybe_gauge("data.moving_data.total_written_bytes", data["moving_data"], "total_written_bytes")
+                self.maybe_gauge("data.moving_data.in_flight_bytes", data["moving_data"], "in_flight_bytes", tags)
+                self.maybe_gauge("data.moving_data.in_queue_bytes", data["moving_data"], "in_queue_bytes", tags)
+                self.maybe_gauge(
+                    "data.moving_data.total_written_bytes",
+                    data["moving_data"],
+                    "total_written_bytes",
+                    tags,
+                )
 
         if "datacenter_lag" in cluster:
-            self.gauge("datacenter_lag.seconds", cluster["datacenter_lag"]["seconds"])
+            self.gauge("datacenter_lag.seconds", cluster["datacenter_lag"]["seconds"], tags)
 
         if "workload" in cluster:
             workload = cluster["workload"]
             if "transactions" in workload:
                 transactions = workload["transactions"]
                 for k in transactions:
-                    self.maybe_hz_counter("workload.transactions." + k, transactions, k)
+                    self.maybe_hz_counter("workload.transactions." + k, transactions, k, tags)
 
             if "operations" in workload:
                 operations = workload["operations"]
                 for k in operations:
-                    self.maybe_hz_counter("workload.operations." + k, operations, k)
+                    self.maybe_hz_counter("workload.operations." + k, operations, k, tags)
 
         if "latency_probe" in cluster:
             for k, v in cluster["latency_probe"].items():
-                self.gauge("latency_probe." + k, v)
+                self.gauge("latency_probe." + k, v, tags)
 
         degraded_processes = 0
         if "degraded_processes" in cluster:
-            self.gauge("degraded_processes", cluster["degraded_processes"])
+            self.gauge("degraded_processes", cluster["degraded_processes"], tags)
             degraded_processes = cluster["degraded_processes"]
 
         if degraded_processes > 0:
-            self.service_check("can_connect", AgentCheck.WARNING, message="There are degraded processes")
+            self.service_check("can_connect", AgentCheck.WARNING, message="There are degraded processes", tags=tags)
         else:
-            self.service_check("can_connect", AgentCheck.OK)
+            self.service_check("can_connect", AgentCheck.OK, tags)
 
     def maybe_gauge(self, metric, obj, key, tags=None):
         if key in obj:
