@@ -179,6 +179,13 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param explain_verbosity - string - optional - default: executionStats
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        #
+        # explain_verbosity: executionStats
+
     ## Configure collection of MongoDB slow operations.
     #
     # slow_operations:
@@ -198,6 +205,13 @@ instances:
         ## Set the maximum number of slow operations to collect per interval.
         #
         # max_operations: 1000
+
+        ## @param explain_verbosity - string - optional - default: executionStats
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        #
+        # explain_verbosity: executionStats
 
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #

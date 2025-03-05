@@ -213,6 +213,14 @@ files:
           value:
             type: number
             example: 10
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+            To disable explain plans completely, set this option to 'disabled'.
+          value:
+            type: string
+            example: executionStats
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
       options:
@@ -235,6 +243,14 @@ files:
           value:
             type: number
             example: 1000
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+            To disable explain plans completely, set this option to 'disabled'.
+          value:
+            type: string
+            example: executionStats
     - name: schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       options:

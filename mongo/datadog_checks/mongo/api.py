@@ -241,6 +241,9 @@ class MongoApi(object):
             self._log.warning("Could not determine if collection %s.%s is sharded: %s", db_name, coll_name, e)
             return False
 
+    def explain_command(self, db_name, command, verbosity="executionStats", session=None):
+        return self[db_name].command("explain", command, verbosity=verbosity, session=session)
+
     @property
     def hostname(self):
         if self.__hostname:
