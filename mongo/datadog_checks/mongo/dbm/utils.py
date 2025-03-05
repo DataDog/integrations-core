@@ -12,14 +12,13 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
+from datadog_checks.mongo.common import MONGODB_SYSTEM_DATABASES
 
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-
-MONGODB_SYSTEM_DATABASES = frozenset(["admin", "config", "local"])
 
 # exclude keys in sampled operation that cause issues with the explain command
 EXPLAIN_COMMAND_EXCLUDE_KEYS = frozenset(
@@ -56,6 +55,8 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "explain",
         "profile",  # command to get profile level
         "listCollections",
+        "listDatabases",
+        'dbStats',
     ]
 )
 

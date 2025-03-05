@@ -80,6 +80,8 @@ class MetricsCollectionInterval(BaseModel):
     )
     collection: Optional[int] = None
     collections_indexes_stats: Optional[int] = None
+    db_stats: Optional[int] = None
+    session_stats: Optional[int] = None
     sharded_data_distribution: Optional[int] = None
 
 
@@ -152,6 +154,7 @@ class InstanceConfig(BaseModel):
     server: Optional[str] = None
     service: Optional[str] = None
     slow_operations: Optional[SlowOperations] = None
+    system_database_stats: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None

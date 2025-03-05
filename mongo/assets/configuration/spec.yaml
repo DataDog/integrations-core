@@ -393,6 +393,18 @@ files:
           value:
             type: integer
             example: 300
+        - name: db_stats
+          description: |
+            The interval in seconds at which to collect db stats metrics.
+          value:
+            type: integer
+            example: 15
+        - name: session_stats
+          description: |
+            The interval in seconds at which to collect session stats metrics.
+          value:
+            type: integer
+            example: 15
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
@@ -417,6 +429,15 @@ files:
       value:
         type: boolean
         example: false
+    - name: system_database_stats
+      description: |
+        Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+        (`admin`, `local`, and `config`).
+        By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+        Set to `false` to disable collection of stats for all system databases.
+      value:
+        type: boolean
+        example: true
     - name: add_node_tag_to_events
       description: |
         Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
