@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-12-23",
+	"last_updated_at": "2024-12-23",
+	"title": "Multiple asset deletion activities detected",
+	"description": "Asset deletion refers to the removal of assets from the system. This monitor tracks asset deletion activity to notify unauthorized or accidental deletions, ensuring that critical assets are not removed without proper oversight.",
+	"definition": {
+		"id": 159876464,
+		"name": "Multiple asset deletion activities detected",
+		"type": "log alert",
+		"query": "logs(\"source:tenable-io service:activity @evt.name:asset.hard.delete\").index(\"*\").rollup(\"count\").by(\"@usr.name\").last(\"1d\") > 5",
+		"message": "{{#is_warning}}\nUser {{[@usr.name].name}} has deleted {{eval \"int(value)\"}} assets, which exceed the threshold value of {{eval \"int(warn_threshold)\"}}.\n{{/is_warning}}\n\n{{#is_alert}}\nUser {{[@usr.name].name}} has deleted {{eval \"int(value)\"}} assets, which exceed the threshold value of {{eval \"int(threshold)\"}}.\n{{/is_alert}}\n\n@email@example.com",
+		"tags": [
+			"tenable-io"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5,
+				"warning": 3
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:tenable-io"
+	]
+}
