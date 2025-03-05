@@ -20,8 +20,11 @@
 build-agent-auto:
   extends: .build-agent-tpl
   rules:
-    # Only trigger this job on a PR that modifies agent related files
-    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+    # Do not run on release branches
+    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+      when: never
+    # Only run if the branch is not a merge train one from GitHub
+    - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
       changes:
         # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
         # https://gitlab.com/gitlab-org/gitlab/-/issues/369916#note_1972773223
