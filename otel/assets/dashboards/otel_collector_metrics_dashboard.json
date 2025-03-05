@@ -2592,7 +2592,7 @@
                         "id": 3312471392848186,
                         "definition": {
                             "type": "note",
-                            "content": "**Deprecated**: When feature gate `connector.datadogconnector.NativeIngest` is enabled (default is enabled since OTel collector v0.107.0), the Datadog connector uses a different code path that does not emit these metrics. Traces and spans ingested/s represents the rate of OTLP traces received and processed by the legecy trace API. The trace API receives data from both the Datadog Exporter and the Datadog Connector, which can be grouped by the `source` tag.",
+                            "content": "**Deprecated**: When feature gate `connector.datadogconnector.NativeIngest` is enabled (default is enabled since OTel collector v0.107.0), the Datadog connector uses a different code path that does not emit these metrics. Traces and spans ingested/s represents the rate of OTLP traces received and processed by the legacy trace API. The trace API receives data from both the Datadog Exporter and the Datadog Connector, which can be grouped by the `source` tag.",
                             "background_color": "white",
                             "font_size": "12",
                             "text_align": "left",
