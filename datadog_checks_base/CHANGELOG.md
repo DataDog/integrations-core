@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 37.7.0 / 2025-03-05
+
+***Added***:
+
+* Add is_enabled() to FIPS utils ([#19735](https://github.com/DataDog/integrations-core/pull/19735))
+
+***Fixed***:
+
+* Use regex in service check message assertion ([#19736](https://github.com/DataDog/integrations-core/pull/19736))
+
 ## 37.6.1 / 2025-02-20
 
 ***Fixed***:
