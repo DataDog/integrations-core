@@ -100,5 +100,4 @@ TEST_METRICS = {
     'velero.volume_snapshot.success.count': 'monotonic_count',
 }
 
-OTHER_TEST_METRICS = {
-}
+OTHER_TEST_METRICS = {}

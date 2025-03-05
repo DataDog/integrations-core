@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from typing import Any, Callable, Dict  # noqa: F401
+
 import pytest
 
 from datadog_checks.base import AgentCheck  # noqa: F401

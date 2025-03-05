@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import logging
 
-from .common import MOCKED_INSTANCE, COMPOSE_FILE
+import pytest
+
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
+
+from .common import COMPOSE_FILE, MOCKED_INSTANCE
 
 
 @pytest.fixture(scope='session')
