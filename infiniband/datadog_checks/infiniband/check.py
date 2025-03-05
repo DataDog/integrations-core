@@ -7,6 +7,7 @@ import os
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck # noqa: F401
+from .metrics import IB_COUNTERS, EFA_COUNTERS, RDMA_COUNTERS
 
 class InfinibandCheck(AgentCheck):
 
@@ -41,12 +42,19 @@ class InfinibandCheck(AgentCheck):
                 if os.path.isdir(counters_path):
                     for file in glob.glob(f"{counters_path}/*"):
                         filename = os.path.basename(file)
-                        with open(file, "r") as f:
-                            self.gauge(f"infiniband.{filename}", int(f.read()), tags=tags)
+                        if filename in IB_COUNTERS:
+                            with open(file, "r") as f:
+                                self.gauge(f"infiniband.{filename}", int(f.read().strip()), tags=tags)
 
                 hw_counters_path = os.path.join(port_path, "hw_counters")
                 if os.path.isdir(hw_counters_path):
                     for file in glob.glob(f"{hw_counters_path}/*"):
                         filename = os.path.basename(file)
-                        with open(file, "r") as f:
-                            self.gauge(f"rdma.{filename}", int(f.read()), tags=tags)
+                        if filename in EFA_COUNTERS:
+                            metric_name = f"rdma.efa.{filename}"
+                            with open(file, "r") as f:
+                                self.gauge(metric_name, int(f.read().strip()), tags=tags)
+                        elif filename in RDMA_COUNTERS:
+                            metric_name = f"rdma.{filename}"
+                            with open(file, "r") as f:
+                                self.gauge(metric_name, int(f.read().strip()), tags=tags)
