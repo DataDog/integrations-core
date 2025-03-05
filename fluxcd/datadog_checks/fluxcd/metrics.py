@@ -30,7 +30,6 @@ FLUX_V2_METRICS = {
     "workqueue_longest_running_processor_seconds": "workqueue.longest_running_processor",
     "workqueue_retries": "workqueue.retries",
     "workqueue_unfinished_work_seconds": "workqueue.unfinished_work",
-    
 }
 assert sorted(FLUX_V2_METRICS) == list(FLUX_V2_METRICS)
 METRIC_MAP = {**FLUX_V1_METRICS, **FLUX_V2_METRICS}
