@@ -317,14 +317,14 @@ pipeline:
       encoded: false
       combineVersionDetails: false
     - type: grok-parser
-      name: Extract custom_location list
+      name: Extract customlocation list
       enabled: true
-      source: custom_location
+      source: customlocation
       samples:
         - '["Guest","Guest2"]'
       grok:
         supportRules: ""
-        matchRules: custom_location_rule %{data:custom_location:array(",")}
+        matchRules: custom_location_rule %{data:customlocation:array(",")}
     - type: grok-parser
       name: Extract usergroup list
       enabled: true
@@ -333,7 +333,7 @@ pipeline:
         - "['355160', 'All Users']"
       grok:
         supportRules: ""
-        matchRules: usergroup_rule %{data:usergroup:array(",")}
+        matchRules: usergroup_rule %{data:usergroup:array(", ")}
     - type: grok-parser
       name: Extract webcategories list
       enabled: true
