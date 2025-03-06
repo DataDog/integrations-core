@@ -1,0 +1,1 @@
+When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces.
