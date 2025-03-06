@@ -29,7 +29,9 @@ from datadog_checks.sqlserver.queries import (
     XE_SESSION_SYSTEM,
 )
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
+
+from datadog_checks.dev.utils import running_on_windows_ci
 
 try:
     import pyodbc
@@ -149,6 +151,7 @@ def _create_deadlock(dd_environment, dbm_instance):
         [XE_SESSION_SYSTEM, XE_EVENT_FILE],
     ],
 )
+@pytest.mark.skipif(not running_on_windows_ci() and SQLSERVER_MAJOR_VERSION < 2019, reason='Deadlock test crashes mssql 2017 container on linux')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, xe_session_name, xe_session_target):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.deadlocks._force_convert_xml_to_str = convert_xml_to_str
@@ -187,6 +190,7 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, x
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(not running_on_windows_ci() and SQLSERVER_MAJOR_VERSION < 2019, reason='Deadlock test crashes mssql 2017 container on linux')
 def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, aggregator):
     check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
     with patch.object(
@@ -200,6 +204,7 @@ def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, ag
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(not running_on_windows_ci() and SQLSERVER_MAJOR_VERSION < 2019, reason='Deadlock test crashes mssql 2017 container on linux')
 def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
     dbm_instance_no_dbm = deepcopy(dbm_instance)
     dbm_instance_no_dbm['dbm'] = False
@@ -215,6 +220,7 @@ def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(not running_on_windows_ci() and SQLSERVER_MAJOR_VERSION < 2019, reason='Deadlock test crashes mssql 2017 container on linux')
 def test_xe_session(dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
