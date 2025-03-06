@@ -1,25 +1,24 @@
-# (C) Datadog, Inc. 2025-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-
+import os
 import pytest
-
-INSTANCE = {
-    "SILVERSTRIPE_DATABASE_TYPE": "PostgreSQL",
-    "SILVERSTRIPE_DATABASE_NAME": "test_db",
-    "SILVERSTRIPE_DATABASE_SERVER_IP": "10.10.10.10",
-    "SILVERSTRIPE_DATABASE_PORT": 5432,
-    "SILVERSTRIPE_DATABASE_USERNAME": "test_user",
-    "SILVERSTRIPE_DATABASE_PASSWORD": "test_pass",
-    "min_collection_interval": 300,
-}
+from datadog_checks.dev import docker_run
+from .common import INSTANCE, COMPOSE
+from copy import deepcopy
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def dd_environment():
-    yield
-
-
+    compose_file = os.path.join(COMPOSE, 'docker-compose.yaml')
+    
+    with docker_run(
+        compose_file,
+        log_patterns=[r'.*'],
+        build=True,
+        service_name='silverstripe',
+        sleep=30,
+    ):
+        instance = INSTANCE.copy()
+        yield instance
+    
 @pytest.fixture
 def instance():
-    return INSTANCE.copy()
+    return deepcopy(INSTANCE)

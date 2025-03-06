@@ -45,7 +45,7 @@ class SilverstripeCMSCheck(AgentCheck):
             self.ingest_service_check_and_event(
                 status=0,
                 tags=constants.CONF_VAL_TAG,
-                message=message,
+                message="",
                 title=constants.CONF_VAL_TITLE,
                 source_type=constants.CONF_VAL_SOURCE_TYPE,
             )
@@ -73,7 +73,7 @@ class SilverstripeCMSCheck(AgentCheck):
             self.ingest_service_check_and_event(
                 status=0,
                 tags=constants.AUTH_TAG,
-                message=message,
+                message="",
                 title=constants.AUTH_TITLE,
                 source_type=constants.AUTH_SOURCE_TYPE,
             )
