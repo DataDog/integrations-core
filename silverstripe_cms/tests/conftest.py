@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import pytest
-from .common import INSTANCE, COMPOSE
 from copy import deepcopy
+
+import pytest
 from datadog_checks.dev import docker_run
+
+from .common import COMPOSE, INSTANCE
 
 
 @pytest.fixture(scope='session')
