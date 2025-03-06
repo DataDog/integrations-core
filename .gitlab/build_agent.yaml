@@ -23,7 +23,7 @@ build-agent-auto:
     # Do not run on release branches
     - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
       when: never
-    # Only run if the branch is not a merge train one from GitHub
+    # Only run if the branch is not a Github Merge Queue one.
     - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
       changes:
         # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
