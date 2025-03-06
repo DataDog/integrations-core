@@ -477,7 +477,7 @@ class PostgreSql(AgentCheck):
         if config_identifier:
             return config_identifier
         include_port = self._config.database_identifier.get('include_port', False)
-        return "{}{}".format(self.resolved_hostname, ":" + self._config.port if include_port else "")
+        return "{}{}".format(self.resolved_hostname, "." + self._config.port if include_port else "")
 
     def set_resolved_hostname_metadata(self):
         """
@@ -936,7 +936,7 @@ class PostgreSql(AgentCheck):
     def _send_database_instance_metadata(self):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
                 "port": self._config.port,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),

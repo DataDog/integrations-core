@@ -263,7 +263,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
             payload = {
-                'host': self._check.resolved_hostname,
+                'host': self._check.reported_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
