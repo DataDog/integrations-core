@@ -37,7 +37,7 @@ Linux command:
 
    ```yaml
    logs:
-     - type: tcp/udp
+     - type: tcp  # Choose either 'tcp' or 'udp' based on your requirements
        port: <PORT>
        service: palo-alto-panorama
        source: palo-alto-panorama

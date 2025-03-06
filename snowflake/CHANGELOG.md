@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 7.4.0 / 2025-02-20
+
+***Added***:
+
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 7.3.0 / 2025-02-05 / Agent 7.63.0
+
+***Added***:
+
+* Bump Snowflake dependency to 3.13.1 ([#19545](https://github.com/DataDog/integrations-core/pull/19545))
+
 ## 7.2.0 / 2025-01-25
 
 ***Added***:
