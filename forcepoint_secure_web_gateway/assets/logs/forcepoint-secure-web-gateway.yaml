@@ -339,7 +339,7 @@ pipeline:
       enabled: true
       source: webcategories
       samples:
-        - '["WR:Streaming Media", "WR:test"]'
+        - '["WR:Streaming Media","WR:test"]'
       grok:
         supportRules: ""
         matchRules: webcategories_rule %{data:webcategories:array(",")}
