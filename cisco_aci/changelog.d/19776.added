@@ -1,1 +1,1 @@
-Enabled HA Support
+Add failover support for http_check with Agent High Availability feature.
