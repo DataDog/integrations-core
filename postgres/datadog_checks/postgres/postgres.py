@@ -172,6 +172,7 @@ class PostgreSql(AgentCheck):
     def add_core_tags(self):
         self.tags.append("database_hostname:{}".format(self.database_hostname))
         self.tags.append("database_identifier:{}".format(self.database_identifier))
+        self.tags.append("database_instance:{}".format(self.database_instance))
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -476,10 +477,10 @@ class PostgreSql(AgentCheck):
     @property
     def database_identifier(self):
         # type: () -> str
-        config_identifier = self._config.get('database_identifier', {}).get('identifier')
+        config_identifier = self._config.database_identifier.get('identifier')
         if config_identifier:
             return config_identifier
-        include_port = self._config.get('database_identifier', {}).get('include_port', False)
+        include_port = self._config.database_identifier.get('include_port', False)
         return "{}{}".format(self.resolved_hostname, "." + self._config.port if include_port else "")
 
     def set_resolved_hostname_metadata(self):
@@ -939,7 +940,7 @@ class PostgreSql(AgentCheck):
     def _send_database_instance_metadata(self):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
                 "port": self._config.port,
                 "database_hostname": self.database_hostname,
                 "database_identifier": self.database_identifier,
