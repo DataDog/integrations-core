@@ -181,3 +181,19 @@ def test_osd_status_metrics_non_osd_health(_, aggregator):
 
     aggregator.assert_metric('ceph.num_full_osds', value=0, count=1, tags=EXPECTED_TAGS)
     aggregator.assert_metric('ceph.num_near_full_osds', value=0, count=1, tags=EXPECTED_TAGS)
+
+
+@mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_stats_by_class.json"))
+def test_stats_by_class_metrics(_, aggregator):
+    """
+    Test with populated stats by class field
+    """
+
+    ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
+    ceph_check.check({})
+
+    for osd in ['hdd', 'nvme']:
+        tags = EXPECTED_TAGS + [f'ceph_osd_device_class:{osd}']
+
+        aggregator.assert_metric('ceph.class_pct_used', count=1, tags=tags)
+        aggregator.assert_metric('ceph.class_pct_used', count=1, tags=tags)
