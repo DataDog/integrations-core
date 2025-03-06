@@ -9,7 +9,7 @@
 
 ***Added***:
 
-* Added `gpu.core.usage`, `gpu.core.limit`, `gpu.memory.limit` metrics
+* Added `gpu.core.usage`, `gpu.core.limit`, and `gpu.memory.limit` metrics.
 
 ## 0.1.0
 
