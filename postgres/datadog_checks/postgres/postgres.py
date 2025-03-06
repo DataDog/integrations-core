@@ -174,12 +174,7 @@ class PostgreSql(AgentCheck):
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
-<<<<<<< HEAD
         self.tags.append("database_instance:{}".format(self.database_identifier))
-=======
-        self.tags.append("database_identifier:{}".format(self.database_identifier))
-        self.tags.append("database_instance:{}".format(self.database_instance))
->>>>>>> seth.samuel/DBMON-4869-respect-empty-default-hostname-option-in-all-database-integrations
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
