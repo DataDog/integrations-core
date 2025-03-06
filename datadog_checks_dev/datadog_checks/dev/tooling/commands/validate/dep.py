@@ -117,18 +117,19 @@ def verify_dependency(source, name, python_versions, file):
             specifier_set = requirement.specifier
 
             # git support: https://pip.pypa.io/en/stable/topics/vcs-support/
+            pip_vcs_support_link = "https://pip.pypa.io/en/stable/topics/vcs-support/"
             valid_schemes = ["git+file", "git+https", "git+ssh", "git+http", "git+git", "git"]
 
             if requirement.url:
                 u = urlparse(requirement.url)
                 if u.scheme not in valid_schemes:
-                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}'
+                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}. Please see `{pip_vcs_support_link}` for more information.'
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
                 _, _, git_ref = requirement.url.partition("@")
                 if not git_ref:
-                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}'
+                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}. Please see `{pip_vcs_support_link}` for more information.'
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
