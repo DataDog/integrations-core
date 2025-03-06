@@ -90,6 +90,9 @@ class MockedDB(object):
             filename = f"custom-query-{command}"
         elif command == "explain":
             filename = f"explain-{self.deployment}"
+            verbosity = kwargs.get("verbosity")
+            if verbosity:
+                filename = f"{filename}-{verbosity}"
         elif command == "profile":
             filename = f"profile-{self._db_name}"
         elif command == "getLog":
