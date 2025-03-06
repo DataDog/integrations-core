@@ -5,6 +5,7 @@
 CERT_METRICS = {
     'certmanager_certificate_ready_status': 'certificate.ready_status',
     'certmanager_certificate_expiration_timestamp_seconds': 'certificate.expiration_timestamp',
+    'certmanager_certificate_renewal_timestamp_seconds': 'certificate.renewal_timestamp',
 }
 
 CONTROLLER_METRICS = {
