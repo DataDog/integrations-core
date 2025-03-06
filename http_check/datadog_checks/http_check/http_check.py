@@ -32,6 +32,7 @@ class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = "system"
     SC_STATUS = "http.can_connect"
     SC_SSL_CERT = "http.ssl_cert"
+    HA_SUPPORTED = True
 
     DEFAULT_HTTP_CONFIG_REMAPPER = {
         "client_cert": {"name": "tls_cert"},
