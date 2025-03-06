@@ -123,13 +123,13 @@ def verify_dependency(source, name, python_versions, file):
             if requirement.url:
                 u = urlparse(requirement.url)
                 if u.scheme not in valid_schemes:
-                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}.\nSupported URL schemes are: {", ".join(valid_schemes)}.\nFor more information, please visit `{pip_vcs_support_link}`'
+                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}.\nSupported URL schemes are: {", ".join(valid_schemes)}.\nFor more information, please visit: {pip_vcs_support_link}'
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
                 _, _, git_ref = requirement.url.partition("@")
                 if not git_ref:
-                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}. \nFor more information, please visit `{pip_vcs_support_link}`'
+                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}. \nFor more information, please visit: {pip_vcs_support_link}'
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
