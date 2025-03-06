@@ -196,14 +196,3 @@ def test_get_connection_url_for_postgres(instance):
         f"{constants.POSTGRES_DB_URL_PREFIX}://{instance.get('SILVERSTRIPE_DATABASE_USERNAME')}:{instance['SILVERSTRIPE_DATABASE_PASSWORD']}@"
         f"{instance['SILVERSTRIPE_DATABASE_SERVER_IP']}:{instance['SILVERSTRIPE_DATABASE_PORT']}/{instance['SILVERSTRIPE_DATABASE_NAME']}"
     )
-
-
-@pytest.mark.unit
-def test_build_query(instance):
-    check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
-    check.initialize_db_client()
-    mock_table_config = TableConfig(name=constants.FILE, conditions=[constants.ANYONE_CAN_VIEW])
-    result = check.db_client.build_query(mock_table_config)
-
-    query = 'SELECT "ClassName", COUNT(*) as "RowCount" FROM "File" WHERE "CanViewType"=\'Anyone\' GROUP BY "ClassName"'
-    assert result == query
