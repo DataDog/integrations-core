@@ -11,7 +11,6 @@ from sqlalchemy.engine.cursor import CursorResult
 from datadog_checks.base import AgentCheck, ConfigurationError  # noqa: F401
 from datadog_checks.silverstripe_cms import SilverstripeCMSCheck, constants
 from datadog_checks.silverstripe_cms.database_client import DatabaseClient
-from datadog_checks.silverstripe_cms.dataclasses import TableConfig
 
 
 @pytest.mark.unit
