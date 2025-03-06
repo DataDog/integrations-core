@@ -19,11 +19,11 @@
                 "total_used_raw_ratio": 0.27713733911514282
             },
             "nvme": {
-                "total_bytes": 18435652190208,
-                "total_avail_bytes": 10128804130816,
-                "total_used_bytes": 8306848059392,
-                "total_used_raw_bytes": 8306848059392,
-                "total_used_raw_ratio": 0.45058605074882507
+                "total_bytes": 0,
+                "total_avail_bytes": 0,
+                "total_used_bytes": 0,
+                "total_used_raw_bytes": 0,
+                "total_used_raw_ratio": 0
             }
         },
         "pools": [

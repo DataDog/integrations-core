@@ -192,8 +192,5 @@ def test_stats_by_class_metrics(_, aggregator):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
     ceph_check.check({})
 
-    for osd in ['hdd', 'nvme']:
-        tags = EXPECTED_TAGS + [f'ceph_osd_device_class:{osd}']
-
-        aggregator.assert_metric('ceph.class_pct_used', count=1, tags=tags)
-        aggregator.assert_metric('ceph.class_pct_used', count=1, tags=tags)
+    aggregator.assert_metric('ceph.class_pct_used', count=1, tags=EXPECTED_TAGS + ['ceph_osd_device_class:hdd'])
+    aggregator.assert_metric('ceph.class_pct_used', count=0, tags=EXPECTED_TAGS + ['ceph_osd_device_class:nvme'])
