@@ -44,7 +44,7 @@ class InfinibandCheck(AgentCheck):
                         filename = os.path.basename(file)
                         if filename in IB_COUNTERS:
                             with open(file, "r") as f:
-                                self.gauge(f"infiniband.{filename}", int(f.read().strip()), tags=tags)
+                                self.gauge(f"{filename}", int(f.read().strip()), tags=tags)
 
                 hw_counters_path = os.path.join(port_path, "hw_counters")
                 if os.path.isdir(hw_counters_path):
