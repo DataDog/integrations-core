@@ -10,6 +10,8 @@ class VeleroCheck(OpenMetricsBaseCheckV2):
 
     __NAMESPACE__ = 'velero'
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super(VeleroCheck, self).__init__(name, init_config, instances)
 
