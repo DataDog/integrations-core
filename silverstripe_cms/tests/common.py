@@ -11,5 +11,5 @@ INSTANCE = {
     "SILVERSTRIPE_DATABASE_USERNAME": "silverstripe_user",
     "SILVERSTRIPE_DATABASE_PASSWORD": "your_password",
     "min_collection_interval": 300,
-    "tags": ["sample_tag:sample_value"]
+    "tags": ["sample_tag:sample_value"],
 }
