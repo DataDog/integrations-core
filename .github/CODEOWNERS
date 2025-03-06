@@ -481,7 +481,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 
 /gpu/                                                                @DataDog/ebpf-platform
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
-/gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/documentation
+/gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
