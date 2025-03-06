@@ -72,6 +72,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         """
         The base class for any Prometheus-based integration.
         """
+        # See Performance Optimizations in this package's README.md.
         import requests
 
         args = list(args)

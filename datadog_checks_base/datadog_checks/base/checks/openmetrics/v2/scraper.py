@@ -45,6 +45,7 @@ class OpenMetricsScraper:
         """
         The base class for any scraper overrides.
         """
+        # See Performance Optimizations in this package's README.md.
         from ....utils.http import RequestsWrapper
 
         self.config = config
@@ -329,6 +330,7 @@ class OpenMetricsScraper:
 
     @property
     def parse_metric_families(self):
+        # See Performance Optimizations in this package's README.md.
         from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
         from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 
@@ -392,6 +394,7 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
+        # See Performance Optimizations in this package's README.md.
         from requests.exceptions import ConnectionError
 
         try:

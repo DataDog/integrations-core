@@ -29,6 +29,7 @@ def _parse_payload(fd):
 
     Yields Metric's.
     """
+    # See Performance Optimizations in this package's README.md.
     from prometheus_client.metrics_core import Metric
     from prometheus_client.parser import _parse_sample, _replace_help_escaping
 

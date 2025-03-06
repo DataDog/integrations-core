@@ -60,6 +60,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Another thing to note is that this check ignores its instance argument completely.
         We take care of instance-level customization at initialization time.
         """
+        # See Performance Optimizations in this package's README.md.
         from requests.exceptions import RequestException
 
         self.refresh_scrapers()

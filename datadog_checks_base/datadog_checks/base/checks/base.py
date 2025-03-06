@@ -395,6 +395,7 @@ class AgentCheck(object):
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
+        # See Performance Optimizations in this package's README.md.
         from ..utils.http import RequestsWrapper
 
         if not hasattr(self, '_http'):
