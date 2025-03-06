@@ -19,16 +19,12 @@ def mock_http_response(mocker):
 
 @pytest.mark.e2e
 def test_successful_metrics_collection(dd_run_check, mock_http_response):
-    status_metrics_response_data = {
-        key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()
-    }
+    status_metrics_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
 
     mock_http_response(
         "https://example.com/service/rest/v1/status/check",
         status_code=200,
-        json_data=status_metrics_response_data.update(
-            {"gauges": {"jvm.memory.heap.used": {"value": 123456789}}}
-        ),
+        json_data=status_metrics_response_data.update({"gauges": {"jvm.memory.heap.used": {"value": 123456789}}}),
     )
 
     instance = {
