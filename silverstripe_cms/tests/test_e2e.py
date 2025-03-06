@@ -1,5 +1,4 @@
 import pytest
-from datadog_checks.silverstripe_cms import SilverstripeCMSCheck
 
 
 @pytest.mark.e2e

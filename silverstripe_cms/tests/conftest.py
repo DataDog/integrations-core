@@ -4,9 +4,9 @@
 
 import os
 import pytest
-from datadog_checks.dev import docker_run
 from .common import INSTANCE, COMPOSE
 from copy import deepcopy
+from datadog_checks.dev import docker_run
 
 
 @pytest.fixture(scope='session')
