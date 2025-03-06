@@ -3440,7 +3440,7 @@ jobs:
       job-name: SQL Server on Linux
       target: sqlserver
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
