@@ -126,9 +126,8 @@ def verify_dependency(source, name, python_versions, file):
                     echo_failure(message)
                     annotate_error(file, message)
                     return False
-
-                fields = requirement.url.split("@")
-                if len(fields) < 2:
+                _, _, git_ref = requirement.url.partition("@")
+                if not git_ref:
                     message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}'
                     echo_failure(message)
                     annotate_error(file, message)
