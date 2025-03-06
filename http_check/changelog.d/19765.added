@@ -1,1 +1,1 @@
-Add failover support for http_check with Agent High Availability feature.
+Add primary/standby failover support for http_check with Agent High Availability feature.
