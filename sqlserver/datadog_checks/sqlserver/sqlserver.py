@@ -197,7 +197,7 @@ class SQLServer(AgentCheck):
             self,
             queries=queries,
             tags=tags,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=track_operation_time,
         )
 
@@ -263,6 +263,13 @@ class SQLServer(AgentCheck):
 
     def resolve_db_host(self):
         return agent_host_resolver(self.host)
+
+    @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.empty_default_hostname:
+            return None
+        return self.resolved_hostname
 
     @property
     def resolved_hostname(self):
@@ -735,7 +742,7 @@ class SQLServer(AgentCheck):
             if self._query_manager is None:
                 # use QueryManager to process custom queries
                 self._query_manager = QueryManager(
-                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+                    self, self.execute_query_raw, tags=self.tags, hostname=self.reported_hostname
                 )
                 self._query_manager.compile_queries()
             self._send_database_instance_metadata()

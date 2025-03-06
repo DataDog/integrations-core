@@ -174,7 +174,12 @@ class PostgreSql(AgentCheck):
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
+<<<<<<< HEAD
         self.tags.append("database_instance:{}".format(self.database_identifier))
+=======
+        self.tags.append("database_identifier:{}".format(self.database_identifier))
+        self.tags.append("database_instance:{}".format(self.database_instance))
+>>>>>>> seth.samuel/DBMON-4869-respect-empty-default-hostname-option-in-all-database-integrations
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -215,7 +220,7 @@ class PostgreSql(AgentCheck):
             self,
             queries=queries,
             tags=self.tags_without_db,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=True,
         )
 
@@ -406,7 +411,7 @@ class PostgreSql(AgentCheck):
                 "wal_age",
                 wal_file_age,
                 tags=self.tags_without_db,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
             )
 
     def _get_local_wal_file_age(self):
@@ -459,6 +464,13 @@ class PostgreSql(AgentCheck):
         if self.is_aurora is None:
             self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
+
+    @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.empty_default_hostname:
+            return None
+        return self.resolved_hostname
 
     @property
     def resolved_hostname(self):
@@ -625,7 +637,7 @@ class PostgreSql(AgentCheck):
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
-                submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
+                submit_metric(self, name, value, tags=set(tags), hostname=self.reported_hostname)
 
                 # if relation-level metrics idx_scan or seq_scan, cache it
                 if name in ('index_scans', 'seq_scans'):
@@ -669,7 +681,7 @@ class PostgreSql(AgentCheck):
             f"dd.postgres.{scope_type}.time",
             elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             raw=True,
         )
         telemetry_metric = scope_type.replace("_", "", 1)  # remove the first underscore to match telemetry convention
@@ -699,7 +711,7 @@ class PostgreSql(AgentCheck):
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _emit_running_metric(self):
-        self.gauge("running", 1, tags=self.tags_without_db, hostname=self.resolved_hostname)
+        self.gauge("running", 1, tags=self.tags_without_db, hostname=self.reported_hostname)
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -759,7 +771,7 @@ class PostgreSql(AgentCheck):
                         "db.count",
                         results_len,
                         tags=self.tags_without_db,
-                        hostname=self.resolved_hostname,
+                        hostname=self.reported_hostname,
                     )
 
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -776,7 +788,7 @@ class PostgreSql(AgentCheck):
                         "checksums.enabled",
                         1,
                         tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
-                        hostname=self.resolved_hostname,
+                        hostname=self.reported_hostname,
                     )
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
@@ -900,7 +912,7 @@ class PostgreSql(AgentCheck):
                 "dd.postgres.error",
                 1,
                 tags=self.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
 
@@ -1018,7 +1030,7 @@ class PostgreSql(AgentCheck):
                 AgentCheck.CRITICAL,
                 tags=tags,
                 message=message,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
             raise e
@@ -1027,7 +1039,7 @@ class PostgreSql(AgentCheck):
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=tags,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
         finally:

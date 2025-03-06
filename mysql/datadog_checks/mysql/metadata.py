@@ -119,7 +119,7 @@ class MySQLMetadata(DBMAsyncJob):
                 "dd.mysql.db.error",
                 1,
                 tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             raise
 
@@ -170,7 +170,7 @@ class MySQLMetadata(DBMAsyncJob):
             rows = cursor.fetchall()
             settings = [dict(row) for row in rows]
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "agent_version": datadog_agent.get_version(),
             "dbms": "mysql",
             "kind": "mysql_variables",

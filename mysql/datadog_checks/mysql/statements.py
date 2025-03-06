@@ -129,7 +129,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                     'troubleshooting#%s for more details',
                     DatabaseConfigurationError.performance_schema_not_enabled.value,
                     code=DatabaseConfigurationError.performance_schema_not_enabled.value,
-                    host=self._check.resolved_hostname,
+                    host=self._check.reported_hostname,
                 ),
             )
             return
@@ -160,7 +160,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             "dd.mysql.collect_per_statement_metrics.rows",
             len(rows),
             tags=tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
         )
 
     def _collect_per_statement_metrics(self):
@@ -236,7 +236,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             row_tags = tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else tags
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
