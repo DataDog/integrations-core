@@ -12,6 +12,7 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123
       - TZ=${TZ}
+      - MSSQL_ERROR_LOG_FILE=/var/opt/mssql/log/errorlog
     ports:
       - "1433:1433"
     volumes:

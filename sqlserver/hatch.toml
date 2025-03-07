@@ -5,7 +5,13 @@ base-package-features = ["deps", "db", "json"]
 python = ["3.12"]
 os = ["linux"]
 version = ["2017", "2019", "2022"]
-setup = ["single", "ha"]
+setup = ["single"]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+os = ["linux"]
+version = ["2019", "2022"]
+setup = ["ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone
 [[envs.default.matrix]]
