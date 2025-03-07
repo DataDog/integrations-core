@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.collectors.base import MongoCollector, collection_interval_checker
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
 
@@ -17,6 +17,8 @@ class DbStatCollector(MongoCollector):
         super(DbStatCollector, self).__init__(check, tags)
         self.db_name = db_name
         self.dbstats_tag_dbname = dbstats_tag_dbname
+        self._collection_interval = check._config.metrics_collection_interval['db_stats']
+        self._collector_key = (self.__class__.__name__, db_name)  # db_name is part of collector key
 
     def compatible_with(self, deployment):
         # Can theoretically be run on any node as long as it contains data.
@@ -32,6 +34,7 @@ class DbStatCollector(MongoCollector):
         else:
             return isinstance(deployment, (StandaloneDeployment, MongosDeployment)) or deployment.is_primary
 
+    @collection_interval_checker
     def collect(self, api):
         db = api[self.db_name]
         # Submit the metric

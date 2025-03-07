@@ -48,6 +48,10 @@ def instance_replica_check():
     return True
 
 
+def instance_system_database_stats():
+    return True
+
+
 def instance_timeout():
     return 30
 

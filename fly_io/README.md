@@ -14,7 +14,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Fly.io check is included in the [Datadog Agent][2] package. We recommend running the Fly.io check on the Datadog Agent in a Fly.io application. The Agent collects [Prometheus metrics][19] as well as some additional data from the [Machines API][20]. Additionally, you can configure the Agent to receive [traces](#Application-Traces) and custom metrics from all of your Fly.io applications inside the organization.
+The Fly.io check is included in the [Datadog Agent][2] package. We recommend deploying one Fly.io application dedicated to running the Datadog Agent. This agent can run the Fly.io check, which collects [Prometheus metrics][19] as well as some additional data from the [Machines API][20]. Additionally, you can configure the Agent to receive [traces](#Application-Traces) and custom metrics from all of your Fly.io applications inside the organization.
 
 #### Deploying the Agent as a Fly.io application
 

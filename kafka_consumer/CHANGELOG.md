@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.1 / 2025-03-06
+
+***Fixed***:
+
+* Collect consumer state tag as string name instead of int value. ([#19744](https://github.com/DataDog/integrations-core/pull/19744))
+
 ## 6.5.0 / 2025-02-13 / Agent 7.63.0
 
 ***Added***:

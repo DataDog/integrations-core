@@ -1191,3 +1191,64 @@ def test_integration_localhost_process_stats(instance_integration, aggregator, c
         'process-stats',
     ]
     assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
+
+
+def test_integration_skip_system_database_stats(instance_integration_autodiscovery, aggregator, check, dd_run_check):
+    instance_integration_autodiscovery['system_database_stats'] = False
+    mongo_check = check(instance_integration_autodiscovery)
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
+    ]
+    metrics_categories = [
+        'dbstats-non-system',
+        'indexes-stats-non-system',
+        'collection-non-system',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+
+
+def test_integration_custom_metrics_collection_interval(
+    instance_integration_autodiscovery, aggregator, check, dd_run_check
+):
+    instance_integration_autodiscovery['metrics_collection_interval'] = {
+        'collection': 300,
+        'collections_indexes_stats': 300,
+        'db_stats': 300,
+    }
+
+    mongo_check = check(instance_integration_autodiscovery)
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
+    ]
+    metrics_categories = [
+        'dbstats-local',
+        'dbstats',
+        'indexes-stats-autodiscover',
+        'collection-autodiscover',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+
+    aggregator.reset()
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    # No new metrics should be collected as the interval is set to 300 seconds
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags, count=0)

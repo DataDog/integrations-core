@@ -21,6 +21,7 @@ SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 class CiscoACICheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'pwd': {'name': 'password'}}
+    HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
         super(CiscoACICheck, self).__init__(name, init_config, instances)

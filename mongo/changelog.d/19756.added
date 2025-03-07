@@ -1,0 +1,1 @@
+Added `system_database_stats` to control system database stats collection and `metrics_collection_interval.db_stats`, `metrics_collection_interval.session_stats` for customizable collection intervals.

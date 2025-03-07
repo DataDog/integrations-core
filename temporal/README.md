@@ -2,7 +2,9 @@
 
 ## Overview
 
-This check monitors [Temporal][1] through the Datadog Agent. **Note**: This check can only be installed if you are self-hosting Temporal and is not supported for the managed Temporal Cloud offering. 
+This check monitors [Temporal][1] through the Datadog Agent. 
+
+**Note**: This check can only be installed if you are self-hosting Temporal. **To monitor your Temporal Cloud instance**, follow the [Datadog Temporal Cloud integration documentation][13]. 
 
 ## Setup
 
@@ -91,3 +93,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
 [12]: https://www.datadoghq.com/blog/temporal-server-integration/
+[13]: https://docs.datadoghq.com/integrations/temporal_cloud/

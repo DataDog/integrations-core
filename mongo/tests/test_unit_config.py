@@ -206,22 +206,45 @@ def test_amazon_docdb_cloud_metadata(instance_integration_cluster, aws_cloud_met
     'metrics_collection_interval, expected_metrics_collection_interval',
     [
         pytest.param(
-            {}, {'collection': 15, 'collections_indexes_stats': 15, 'sharded_data_distribution': 300}, id='default'
+            {},
+            {
+                'collection': 15,
+                'collections_indexes_stats': 15,
+                'sharded_data_distribution': 300,
+                'db_stats': 15,
+                'session_stats': 15,
+            },
+            id='default',
         ),
         pytest.param(
             {
                 'collection': '60',
                 'collections_indexes_stats': '30',
                 'sharded_data_distribution': '600',
+                'db_stats': '30',
+                'session_stats': '30',
             },
-            {'collection': 60, 'collections_indexes_stats': 30, 'sharded_data_distribution': 600},
+            {
+                'collection': 60,
+                'collections_indexes_stats': 30,
+                'sharded_data_distribution': 600,
+                'db_stats': 30,
+                'session_stats': 30,
+            },
             id='custom',
         ),
         pytest.param(
             {
                 'collection': 60,
+                'db_stats': 30,
             },
-            {'collection': 60, 'collections_indexes_stats': 15, 'sharded_data_distribution': 300},
+            {
+                'collection': 60,
+                'collections_indexes_stats': 15,
+                'sharded_data_distribution': 300,
+                'db_stats': 30,
+                'session_stats': 15,
+            },
             id='partial',
         ),
     ],

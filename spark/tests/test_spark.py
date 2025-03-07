@@ -23,6 +23,7 @@ from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIV
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
 SPARK_APP_ID = 'app_001'
+SPARK_APP2_ID = 'app_002'
 
 APP_NAME = 'PySparkShell'
 
@@ -159,6 +160,23 @@ STANDALONE_SPARK_METRICS_JSON_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, 'metri
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
+DEFAULT_RESPONSES = {
+    '/jobs': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics')),
+    '/stages': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics')),
+    '/executors': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics')),
+    '/storage/rdd': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics')),
+    '/streaming/statistics': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics')),
+    '/metrics/json': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json')),
+    '/api/v1/version': MockResponse(file_path=os.path.join(FIXTURE_DIR, 'version')),
+}
+
+
+def get_default_mock(url):
+    for k, v in DEFAULT_RESPONSES.items():
+        if url.endswith(k):
+            return v
+    raise KeyError(f"{url} does not match any response fixtures.")
+
 
 def yarn_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
@@ -167,18 +185,7 @@ def yarn_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'yarn_apps'))
     elif arg_url == YARN_SPARK_APP_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    elif arg_url == YARN_SPARK_JOB_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
-    elif arg_url == YARN_SPARK_STAGE_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
-    elif arg_url == YARN_SPARK_EXECUTOR_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
-    elif arg_url == YARN_SPARK_RDD_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
-    elif arg_url == YARN_SPARK_STREAMING_STATISTICS_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
-    elif arg_url == YARN_SPARK_METRICS_JSON_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+    return get_default_mock(url)
 
 
 def yarn_requests_auth_mock(*args, **kwargs):
@@ -1246,6 +1253,82 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, capl
         )
 
     assert 'No running apps found. No metrics will be collected.' in caplog.text
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "mock_response",
+    [
+        pytest.param(MockResponse(content=""), id="Invalid JSON"),  # this triggers json parsing error,
+        pytest.param(MockResponse(status_code=404), id="property not found"),
+        pytest.param(MockResponse(status_code=500), id="Spark internal server error"),  # reported by users in the wild
+    ],
+)
+@pytest.mark.parametrize(
+    'property_url, missing_metrics',
+    [
+        pytest.param(YARN_SPARK_JOB_URL, SPARK_JOB_RUNNING_METRIC_VALUES, id='jobs'),
+        pytest.param(YARN_SPARK_STAGE_URL, SPARK_STAGE_RUNNING_METRIC_VALUES, id='stages'),
+        pytest.param(
+            YARN_SPARK_EXECUTOR_URL,
+            SPARK_EXECUTOR_METRIC_VALUES.keys() | SPARK_EXECUTOR_LEVEL_METRIC_VALUES.keys(),
+            id='executors',
+        ),
+        pytest.param(YARN_SPARK_RDD_URL, SPARK_RDD_METRIC_VALUES, id='storage/rdd'),
+        pytest.param(
+            YARN_SPARK_STREAMING_STATISTICS_URL, SPARK_STREAMING_STATISTICS_METRIC_VALUES, id='streaming/statistics'
+        ),
+    ],
+)
+def test_yarn_no_json_for_app_properties(
+    aggregator, dd_run_check, mocker, mock_response, property_url, missing_metrics
+):
+    """
+    In some yarn deployments apps stop exposing properties (such as jobs and stages) by the time we query them.
+    In these cases we skip only the specific missing apps and metrics while collecting all others.
+    """
+
+    def get_without_json(url, *args, **kwargs):
+        arg_url = Url(url)
+        if arg_url == property_url:
+            return mock_response
+        elif arg_url == YARN_SPARK_APP_URL:
+            return MockResponse(
+                json_data=[
+                    {
+                        "id": SPARK_APP_ID,
+                        "name": "PySparkShell",
+                        "attempts": [
+                            {
+                                "startTime": "2016-04-12T12:48:17.576GMT",
+                                "endTime": "1969-12-31T23:59:59.999GMT",
+                                "sparkUser": "",
+                                "completed": False,
+                            }
+                        ],
+                    },
+                    {
+                        "id": SPARK_APP2_ID,
+                        "name": "PySparkShell2",
+                        "attempts": [
+                            {
+                                "startTime": "2016-04-12T12:48:17.576GMT",
+                                "endTime": "1969-12-31T23:59:59.999GMT",
+                                "sparkUser": "",
+                                "completed": False,
+                            }
+                        ],
+                    },
+                ]
+            )
+        else:
+            return yarn_requests_get_mock(url, *args, **kwargs)
+
+    mocker.patch('requests.get', get_without_json)
+    dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
+    for m in missing_metrics:
+        aggregator.assert_metric_has_tag(m, 'app_name:PySparkShell', count=0)
+        aggregator.assert_metric_has_tag(m, 'app_name:PySparkShell2')
 
 
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
