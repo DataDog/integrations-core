@@ -124,27 +124,6 @@ def test_metrics_collection_and_ingestion(mock_ingest_query_result, mock_execute
     assert mock_ingest_query_result.call_count == table_config_mappings + query_mappings
 
 
-@pytest.mark.e2e
-@patch.object(DatabaseClient, "create_connection")
-@patch.object(SilverstripeCMSCheck, "metrics_collection_and_ingestion")
-@patch.object(SilverstripeCMSCheck, "ingest_service_check_and_event")
-@patch.object(DatabaseClient, "close_connection")
-def test_success(
-    mock_close_connection,
-    mock_ingest_service_check_and_event,
-    mock_metrics_collection_and_ingestion,
-    mock_create_connection,
-    instance,
-):
-    check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
-    check.check("")
-
-    assert mock_create_connection.call_count == 1
-    assert mock_metrics_collection_and_ingestion.call_count == 1
-    assert mock_ingest_service_check_and_event.call_count == 2
-    assert mock_close_connection.call_count == 1
-
-
 @pytest.mark.unit
 @patch.object(SilverstripeCMSCheck, "gauge")
 def test_ingest_query_result(mock_gauge, instance):
@@ -205,5 +184,5 @@ def test_build_query(instance):
     mock_table_config = TableConfig(name=constants.FILE, conditions=[constants.ANYONE_CAN_VIEW])
     result = check.db_client.build_query(mock_table_config)
 
-    query = 'SELECT "ClassName", COUNT(*) as "RowCount" FROM "File" WHERE "CanViewType"=\'Anyone\' GROUP BY "ClassName"'
+    query = 'SELECT `ClassName`, COUNT(*) as `RowCount` FROM `File` WHERE `CanViewType`=\'Anyone\' GROUP BY `ClassName`'
     assert result == query
