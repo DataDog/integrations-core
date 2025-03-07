@@ -47,7 +47,7 @@ files:
         min_collection_interval.required: true
         min_collection_interval.value.example: 300
         min_collection_interval.value.minimum: 1
-        min_collection_interval.value.maximum: 64800
+        min_collection_interval.value.maximum: 14400
         service.hidden: true
         empty_default_hostname.hidden: true
         metric_patterns.hidden: true

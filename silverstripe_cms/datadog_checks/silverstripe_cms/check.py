@@ -42,7 +42,7 @@ class SilverstripeCMSCheck(AgentCheck):
             message = "All the provided configurations in conf.yaml are valid."
             self.log.info(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=message))
 
-            self.ingest_service_check_and_event(
+            self.ingest_event(
                 status=0,
                 tags=constants.CONF_VAL_TAG,
                 message=message,
@@ -54,7 +54,7 @@ class SilverstripeCMSCheck(AgentCheck):
                 "Error occurred while validating the provided configurations in conf.yaml."
                 " Please check logs for more details."
             )
-            self.ingest_service_check_and_event(
+            self.ingest_event(
                 status=2,
                 tags=constants.CONF_VAL_TAG,
                 message=err_message,
@@ -70,7 +70,7 @@ class SilverstripeCMSCheck(AgentCheck):
             message = "Authentication with Silverstripe CMS host is successful."
             self.log.info(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=message))
 
-            self.ingest_service_check_and_event(
+            self.ingest_event(
                 status=0,
                 tags=constants.AUTH_TAG,
                 message=message,
@@ -82,7 +82,7 @@ class SilverstripeCMSCheck(AgentCheck):
                 "Error occurred while authenticating the Silverstripe CMS credentials."
                 "Please check logs for more details."
             )
-            self.ingest_service_check_and_event(
+            self.ingest_event(
                 status=2,
                 tags=constants.AUTH_TAG,
                 message=err_message,
@@ -230,24 +230,17 @@ class SilverstripeCMSCheck(AgentCheck):
                 tags.append(f"{column_name.lower()}:{value}")
         return tags
 
-    def ingest_service_check_and_event(self, **service_check_event_args) -> None:
+    def ingest_event(self, **event_args) -> None:
         """
-        Ingest Service Check and Event for any particular milestone with success or error status.
+        Ingest Event for any particular milestone with success or error status.
         """
-        self.service_check(
-            constants.SILVERSTRIPE_CMS_CHECK_NAME,
-            service_check_event_args.get("status"),
-            service_check_event_args.get("tags"),
-            self.host_address,
-            service_check_event_args.get("message"),
-        )
         self.event(
             {
                 "host": self.host_address,
-                "alert_type": constants.STATUS_NUMBER_TO_VALUE[service_check_event_args.get("status")],
-                "tags": service_check_event_args.get("tags"),
-                "msg_text": service_check_event_args.get("message"),
-                "msg_title": service_check_event_args.get("title"),
-                "source_type_name": service_check_event_args.get("source_type"),
+                "alert_type": constants.STATUS_NUMBER_TO_VALUE[event_args.get("status")],
+                "tags": event_args.get("tags"),
+                "msg_text": event_args.get("message"),
+                "msg_title": event_args.get("title"),
+                "source_type_name": event_args.get("source_type"),
             }
         )
