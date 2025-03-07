@@ -14,8 +14,8 @@ This integration provides enrichment and visualization for above mentioned event
 
 1. Log in to the Trellix ePO Saas.
 2. Navigate to the **[Client Credentials][2]** page.
-3. Click **Add** on top right-corner of the page.
-4. From **Scopes** menu, select `epo.evt.r`, which is listed in front of `Events`
+3. Click **Add** at the top right of the page.
+4. From the **Scopes** menu, select `epo.evt.r`, which is listed in front of `Events`.
 5. Click **Create**.
 6. Copy the `Client ID`, `Client Secret`, and `API Key`.
 
