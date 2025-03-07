@@ -1480,7 +1480,7 @@ jobs:
       job-name: GlusterFS
       target: glusterfs
       platform: linux
-      runner: '["ubuntu-20.04"]'
+      runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
@@ -2580,7 +2580,7 @@ jobs:
       job-name: MySQL
       target: mysql
       platform: linux
-      runner: '["ubuntu-20.04"]'
+      runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
@@ -3420,7 +3420,7 @@ jobs:
       job-name: Spark
       target: spark
       platform: linux
-      runner: '["ubuntu-20.04"]'
+      runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
@@ -3460,7 +3460,7 @@ jobs:
       job-name: SQL Server on Linux
       target: sqlserver
       platform: linux
-      runner: '["ubuntu-20.04"]'
+      runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}

@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bitdefender:
+- bitdefender/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
@@ -125,6 +127,8 @@ integration/cisco_secure_endpoint:
 - cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
+integration/cisco_secure_web_appliance:
+- cisco_secure_web_appliance/**/*
 integration/cisco_umbrella_dns:
 - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
@@ -207,6 +211,8 @@ integration/external_dns:
 - external_dns/**/*
 integration/extrahop:
 - extrahop/**/*
+integration/falco:
+- falco/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
@@ -241,6 +247,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/gpu:
+- gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
 integration/gunicorn:
@@ -431,6 +439,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/orca_security:
+- orca_security/**/*
 integration/ossec_security:
 - ossec_security/**/*
 integration/otel:

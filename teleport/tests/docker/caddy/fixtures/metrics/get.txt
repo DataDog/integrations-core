@@ -43,6 +43,11 @@ auth_generate_seconds_bucket{le="32.768"} 4
 auth_generate_seconds_bucket{le="+Inf"} 4
 auth_generate_seconds_sum 0.016478917
 auth_generate_seconds_count 4
+
+# HELP teleport_roles_total Number of roles that exist in the cluster
+# TYPE teleport_roles_total gauge
+teleport_roles_total 70
+
 # HELP backend_batch_read_requests_total Number of read requests to the backend
 # TYPE backend_batch_read_requests_total counter
 backend_batch_read_requests_total{component="backend"} 56

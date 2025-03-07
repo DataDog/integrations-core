@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 8.4.0 / 2025-01-25
+## 8.5.0 / 2025-02-20
+
+***Added***:
+
+* Collect `lsid` and `transaction` details from `$currentOp` for MongoDB activity sampling. ([#19553](https://github.com/DataDog/integrations-core/pull/19553))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+* Bump `pymongo` to 4.11. ([#19610](https://github.com/DataDog/integrations-core/pull/19610))
+
+***Fixed***:
+
+* Skip host info system metrics collection on arbiter node due to `HostInfo` command cannot not be ran on arbiter without admin access. ([#19571](https://github.com/DataDog/integrations-core/pull/19571))
+
+## 8.4.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
 

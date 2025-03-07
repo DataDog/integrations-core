@@ -1,0 +1,2 @@
+Add collection of the `certmanager_certificate_renewal_timestamp_seconds` metric as `certificate.renewal_timestamp`
+
