@@ -23,6 +23,8 @@ class CiscoACICheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'pwd': {'name': 'password'}}
     HA_SUPPORTED = True
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(CiscoACICheck, self).__init__(name, init_config, instances)
         self.tenant_metrics = make_tenant_metrics()
