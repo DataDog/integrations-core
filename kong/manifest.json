@@ -45,7 +45,10 @@
       },
       "metrics": {
         "prefix": "kong.",
-        "check": "kong.total_requests",
+        "check": [
+          "kong.total_requests",
+          "kong.nginx.requests.total"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

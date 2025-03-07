@@ -122,8 +122,6 @@ The Kubeflow integration does not include any events.
 
 ### Service Checks
 
-The Kubeflow integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting

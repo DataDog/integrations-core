@@ -179,6 +179,13 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param explain_verbosity - string - optional - default: executionStats
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        #
+        # explain_verbosity: executionStats
+
     ## Configure collection of MongoDB slow operations.
     #
     # slow_operations:
@@ -199,6 +206,13 @@ instances:
         #
         # max_operations: 1000
 
+        ## @param explain_verbosity - string - optional - default: executionStats
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        #
+        # explain_verbosity: executionStats
+
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #
     # schemas:
@@ -208,11 +222,11 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 600
+        ## @param collection_interval - number - optional - default: 3600
         ## Set the schemas collection interval in seconds. Each collection involves sampling documents
         ## from collections and inferring schemas.
         #
-        # collection_interval: 600
+        # collection_interval: 3600
 
         ## @param sample_size - number - optional - default: 10
         ## Set the sample size for each collection. The sample size is the number of documents to sample
@@ -233,6 +247,12 @@ instances:
         ## Set the maximum depth of nested documents to sample.
         #
         # max_depth: 5
+
+        ## @param collect_search_indexes - boolean - optional - default: false
+        ## Set to `true` to collect search indexes for each collection.
+        ## NOTE: This option is only applicable to MongoDB Atlas clusters.
+        #
+        # collect_search_indexes: false
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
@@ -320,6 +340,14 @@ instances:
     ## the 'collections' list. This is available starting MongoDB 3.2.
     #
     # collections_indexes_stats: false
+
+    ## @param system_database_stats - boolean - optional - default: true
+    ## Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+    ## (`admin`, `local`, and `config`).
+    ## By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+    ## Set to `false` to disable collection of stats for all system databases.
+    #
+    # system_database_stats: true
 
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo

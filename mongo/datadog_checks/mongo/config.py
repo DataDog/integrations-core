@@ -96,6 +96,7 @@ class MongoConfig(object):
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
         self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
+        self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
 
@@ -180,6 +181,7 @@ class MongoConfig(object):
             'enabled': enabled,
             'collection_interval': self._operation_samples_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
+            'explain_verbosity': self._operation_samples_config.get('explain_verbosity', 'executionStats'),
             'explained_operations_cache_maxsize': int(
                 self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -199,6 +201,7 @@ class MongoConfig(object):
             'collection_interval': self._slow_operations_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
             'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
+            'explain_verbosity': self._slow_operations_config.get('explain_verbosity', 'executionStats'),
             'explained_operations_cache_maxsize': int(
                 self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -216,11 +219,12 @@ class MongoConfig(object):
         max_collections = self._schemas_config.get('max_collections')
         return {
             'enabled': enabled,
-            'collection_interval': self._schemas_config.get('collection_interval', 600),
+            'collection_interval': self._schemas_config.get('collection_interval', 3600),
             'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
             'sample_size': int(self._schemas_config.get('sample_size', 10)),
             'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
+            'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
         }
 
     def _get_database_autodiscovery_config(self, instance):
@@ -272,4 +276,6 @@ class MongoConfig(object):
             ),
             # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
             'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
+            'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
+            'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
         }

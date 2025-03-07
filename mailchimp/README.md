@@ -13,35 +13,35 @@ The Mailchimp integration collects metrics from campaigns and lists, directing t
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Mailchimp
 
-#### Get API credentials for Mailchimp
-
-1. Log in to your [Mailchimp account][2] and click the profile icon
-2. Navigate to the **Extras** tab
-3. Click **API keys**
-4. Scroll down to the **Your API Keys** section and click **Create A Key**
-5. Enter your preferred name for the API key and click **Ok**
-6. Once the API key is generated, copy and save it as you will only see it once
+1. Log in to your [Mailchimp account][2]. 
+2. Check the url for the Server prefix. It is the `xxxx`part of the url(eg: `https://xxxx.admin.mailchimp.com/`).
+3. Click on the profile icon and select Profile option.
+4. Navigate to the **Extras** tab and click on **API keys** from the Dropdown.
+5. Scroll down to the **Your API Keys** section and click **Create A Key**.
+6. Enter your preferred name for the API key and click on **Generate Key**. Your API key is now generated.
 
 
-#### Mailchimp DataDog integration configuration
+### Connect your Mailchimp Account to Datadog
 
-Configure the Datadog endpoint to forward  Mailchimp metrics to Datadog.
+1. Add your Marketing API Key and Server Prefix    
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Marketing API key|API key for your Mailchimp marketing account.|
+    |Server prefix|Server prefix (for example: us13) of the Mailchimp account.|
 
-1. Navigate to the `Mailchimp` integration tile in Datadog.
-2. Add your Mailchimp credentials.
+2. Click the Save button to save your settings.
 
-| Mailchimp parameters | Description  |
-| -------------------- | ------------ |
-| Marketing API key    | API key for your Mailchimp marketing account.  |
-| Server prefix        | Server prefix (for example: us13) of the Mailchimp account. It is the `xxxx` part of `https://xxxx.admin.mailchimp.com/`.   |
+By using this integration, you grant your permission to Datadog to access your Mailchimp account.
 
 ## Data Collected
 
 ### Metrics
 
 The Mailchimp integration collects and forwards campaign and list (audience) metrics to Datadog.
+
+{{< get-metrics-from-git "mailchimp" >}}
 
 ### Service Checks
 

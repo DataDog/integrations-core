@@ -6,16 +6,22 @@ This check monitors [NVIDIA NIM][1] through the Datadog Agent.
 
 ## Setup
 
+<div class="alert alert-warning">
+This integration is currently in Preview. Its availability is subject to change in the future. 
+</div>
+
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 **Requirements**:
 - This check requires Agent v7.61.0+
 - This check uses [OpenMetrics][10] for metric collection, which requires Python 3.
 
-### Installation
-
+`### Installation
 The NVIDIA NIM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
+#### LLM Observability: Get end-to-end visibility into your LLM application's calls to NVIDIA Nim
+NVIDIA NIM uses the OpenAI client to handle API calls from [NVIDIA NIM][11]. To monitor your application using NVIDIA NIM and set up LLM Observability, follow the instructions in the [OpenAI integration][12] documentation.
+`
 ### Configuration
 
 NVIDIA NIM provides Prometheus [metrics][1] indicating request statistics. By default, these metrics are available at http://localhost:8000/metrics. The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
@@ -41,8 +47,6 @@ The NVIDIA NIM integration does not include any events.
 
 ### Service Checks
 
-The NVIDIA NIM integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
@@ -60,3 +64,5 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/nvidia_nim/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/integrations/openmetrics/
+[11]: https://www.nvidia.com/en-us/ai/
+[12]: https://docs.datadoghq.com/integrations/openai

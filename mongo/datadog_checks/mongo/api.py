@@ -50,6 +50,7 @@ class MongoApi(object):
             'directConnection': True,
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,
+            'compressors': 'zlib',  # Enable zlib compression
         }
         if replicaset:
             options['replicaSet'] = replicaset
@@ -228,6 +229,9 @@ class MongoApi(object):
         except OperationFailure as e:
             self._log.warning("Could not determine if collection %s.%s is sharded: %s", db_name, coll_name, e)
             return False
+
+    def explain_command(self, db_name, command, verbosity="executionStats", session=None):
+        return self[db_name].command("explain", command, verbosity=verbosity, session=session)
 
     @property
     def hostname(self):

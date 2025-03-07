@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Support IPv6. ([#19359](https://github.com/DataDog/integrations-core/pull/19359))
+
 ## 6.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

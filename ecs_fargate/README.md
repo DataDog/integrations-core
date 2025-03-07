@@ -263,6 +263,7 @@ For environment variables available with the Docker Agent container, see the [Do
 
 | Environment Variable               | Description                                    |
 |------------------------------------|------------------------------------------------|
+| `DD_TAGS`                          | Add tags. For example: `key1:value1 key2:value2`. |
 | `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
 | `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
 | `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
@@ -452,6 +453,28 @@ partial -->
 {{< /site-region >}}
 partial -->
 <!-- partial
+{{< site-region region="ap1" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "apikey": "<DATADOG_API_KEY>",
+        "Host": "http-intake.logs.ap1.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      }
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
 {{< site-region region="gov" >}}
   ```json
   {
@@ -473,6 +496,175 @@ partial -->
   ```
 {{< /site-region >}}
 partial -->
+
+{{% collapse-content title="Example using secretOptions to avoid exposing the API Key in plain text" level="h4" %}}
+<!-- partial
+{{< site-region region="us" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+   }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="us3" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.us3.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="us5" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.us5.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="eu" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.datadoghq.eu",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="ap1" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.ap1.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+<!-- partial
+{{< site-region region="gov" >}}
+  ```json
+  {
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "options": {
+        "Name": "datadog",
+        "Host": "http-intake.logs.ddog-gov.datadoghq.com",
+        "dd_service": "firelens-test",
+        "dd_source": "redis",
+        "dd_message_key": "log",
+        "dd_tags": "project:fluentbit",
+        "TLS": "on",
+        "provider": "ecs"
+      },
+      "secretOptions": [
+      {
+        "name": "apikey",
+        "valueFrom": "<API_SECRET_ARN>"
+      }
+    ]
+    }
+  }
+  ```
+{{< /site-region >}}
+partial -->
+
+
+To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
+
+{{% /collapse-content %}}
 
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}

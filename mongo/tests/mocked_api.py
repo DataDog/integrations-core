@@ -59,13 +59,13 @@ class MockedCollection(object):
     def aggregate(self, pipeline, session=None, **kwargs):
         if '$indexStats' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$indexStats-{self._coll_name}"), 'r') as f:
-                return json.load(f, object_hook=json_util.object_hook)
+                return iter(json.load(f, object_hook=json_util.object_hook))
         elif '$collStats' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$collStats-{self._coll_name}"), 'r') as f:
-                return json.load(f, object_hook=json_util.object_hook)
+                return iter(json.load(f, object_hook=json_util.object_hook))
         elif '$sample' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$sample-{self._coll_name}"), 'r') as f:
-                return json.load(f, object_hook=json_util.object_hook)
+                return iter(json.load(f, object_hook=json_util.object_hook))
 
 
 class MockedDB(object):
@@ -76,7 +76,7 @@ class MockedDB(object):
     def __getitem__(self, coll_name):
         return MockedCollection(self._db_name, coll_name, self.deployment)
 
-    def command(self, command, *args, **_):
+    def command(self, command, *args, **kwargs):
         filename = command
         if "dbStats" in command:
             filename = f"dbstats-{self._db_name}"
@@ -90,6 +90,9 @@ class MockedDB(object):
             filename = f"custom-query-{command}"
         elif command == "explain":
             filename = f"explain-{self.deployment}"
+            verbosity = kwargs.get("verbosity")
+            if verbosity:
+                filename = f"{filename}-{verbosity}"
         elif command == "profile":
             filename = f"profile-{self._db_name}"
         elif command == "getLog":
@@ -108,10 +111,10 @@ class MockedDB(object):
         if pipeline[0] == {'$currentOp': {'allUsers': True}}:
             # mock the $currentOp aggregation used for operation sampling
             with open(os.path.join(HERE, "fixtures", f"$currentOp-{self.deployment}"), 'r') as f:
-                return json.load(f, object_hook=json_util.object_hook)
+                return iter(json.load(f, object_hook=json_util.object_hook))
         elif pipeline[0] == {"$shardedDataDistribution": {}}:
             with open(os.path.join(HERE, "fixtures", "$shardedDataDistribution"), 'r') as f:
-                return json.load(f, object_hook=json_util.object_hook)
+                return iter(json.load(f, object_hook=json_util.object_hook))
         return []
 
 

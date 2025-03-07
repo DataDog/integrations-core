@@ -4,15 +4,12 @@
 import os
 
 import mock
-import pytest
 import requests
 
 from datadog_checks.dev.http import MockResponse
 
 from .common import HERE
 from .metrics import WEB_METRICS
-
-pytestmark = [pytest.mark.unit]
 
 
 def test_service_check_critical(aggregator, dd_run_check, sonarqube_check, web_instance):
@@ -153,8 +150,9 @@ def test_service_check_ok_with_autodiscovery_include_all_and_exclude(
         global_tags.extend(web_instance_with_autodiscovery_include_all_and_exclude['tags'])
         dd_run_check(check)
         for metric_name in WEB_METRICS:
+            expect_count = 2 if metric_name == 'sonarqube.issues.new_blocker_violations' else 1
             aggregator.assert_metric(
-                metric_name, count=1, tags=global_tags + ['project:org.sonarqube:sonarqube-scanner']
+                metric_name, count=expect_count, tags=global_tags + ['project:org.sonarqube:sonarqube-scanner']
             )
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
@@ -176,7 +174,8 @@ def test_service_check_ok_with_autodiscovery_include_all_and_limit(
         global_tags.extend(web_instance_with_autodiscovery_include_all_and_limit['tags'])
         dd_run_check(check)
         for metric_name in WEB_METRICS:
-            aggregator.assert_metric(metric_name, count=1, tags=global_tags + ['project:tmp_project'])
+            expect_count = 2 if metric_name == 'sonarqube.issues.new_blocker_violations' else 1
+            aggregator.assert_metric(metric_name, count=expect_count, tags=global_tags + ['project:tmp_project'])
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 
@@ -197,7 +196,8 @@ def test_service_check_ok_with_component_and_autodiscovery(
         global_tags.extend(web_instance_with_component_and_autodiscovery['tags'])
         dd_run_check(check)
         for metric_name in WEB_METRICS:
-            aggregator.assert_metric(metric_name, count=1)
+            expect_count = 2 if metric_name == 'sonarqube.issues.new_blocker_violations' else 1
+            aggregator.assert_metric(metric_name, count=expect_count)
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 

@@ -213,6 +213,14 @@ files:
           value:
             type: number
             example: 10
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+            To disable explain plans completely, set this option to 'disabled'.
+          value:
+            type: string
+            example: executionStats
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
       options:
@@ -235,6 +243,14 @@ files:
           value:
             type: number
             example: 1000
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'executionStats'.
+            To disable explain plans completely, set this option to 'disabled'.
+          value:
+            type: string
+            example: executionStats
     - name: schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       options:
@@ -250,7 +266,7 @@ files:
             from collections and inferring schemas.
           value:
             type: number
-            example: 600
+            example: 3600
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -275,6 +291,13 @@ files:
           value:
             type: number
             example: 5
+        - name: collect_search_indexes
+          description: |
+            Set to `true` to collect search indexes for each collection.
+            NOTE: This option is only applicable to MongoDB Atlas clusters.
+          value:
+            type: boolean
+            example: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -370,6 +393,18 @@ files:
           value:
             type: integer
             example: 300
+        - name: db_stats
+          description: |
+            The interval in seconds at which to collect db stats metrics.
+          value:
+            type: integer
+            example: 15
+        - name: session_stats
+          description: |
+            The interval in seconds at which to collect session stats metrics.
+          value:
+            type: integer
+            example: 15
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
@@ -394,6 +429,15 @@ files:
       value:
         type: boolean
         example: false
+    - name: system_database_stats
+      description: |
+        Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+        (`admin`, `local`, and `config`).
+        By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+        Set to `false` to disable collection of stats for all system databases.
+      value:
+        type: boolean
+        example: true
     - name: add_node_tag_to_events
       description: |
         Adds the Mongo node to events as a tag rather than creating a seperate host for the event.

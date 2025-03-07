@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import re
 from copy import copy, deepcopy
 
 import mock
@@ -56,7 +57,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
             'connection_host:{}'.format(instance_docker.get('host')),
         ]
         + sqlserver_check._config.tags,
-        message=str(excinfo.value),
+        message=re.escape(str(excinfo.value)),
     )
 
 
@@ -790,7 +791,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "sqlserver"
-    assert event['tags'] == ['optional:tag1']
+    assert len(event['tags']) == 2
+    assert event['tags'][0] == 'optional:tag1'
+    assert event['tags'][1].startswith('sqlserver_servername:')
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {
@@ -840,6 +843,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     expected_tags = check._config.tags + [
         'db:datadog_test-1',
         'table:ϑings',
+        'schema:dbo',
         'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:
@@ -916,19 +920,19 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert len(sqlserver_check.static_info_cache.keys()) == 6
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually clear static information cache
     sqlserver_check.static_info_cache.clear()
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert len(sqlserver_check.static_info_cache.keys()) == 6
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
     sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert len(sqlserver_check.static_info_cache.keys()) == 6
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'

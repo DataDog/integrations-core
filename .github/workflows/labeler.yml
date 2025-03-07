@@ -12,6 +12,9 @@ on:
 jobs:
   labeler:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
+    permissions:
+      pull-requests: write # Needed for labeler-reusable.yml
+      contents: read # Needed for labeler-reusable.yml
     uses: ./.github/workflows/labeler-reusable.yml
     secrets:
       app-id: "${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}"
