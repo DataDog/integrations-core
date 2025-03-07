@@ -394,7 +394,7 @@ class RequestsWrapper(object):
         new_options = self.populate_options(options)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.warning(u'An unverified HTTPS request is being made to %s', url)
+            self.logger.debug(u'An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
