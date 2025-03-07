@@ -43,7 +43,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
-    min_collection_interval: float = Field(..., ge=1.0, le=64800.0)
+    min_collection_interval: float = Field(..., ge=1.0, le=14400.0)
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 
