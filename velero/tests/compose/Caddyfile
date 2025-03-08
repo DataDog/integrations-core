@@ -1,0 +1,4 @@
+:8085 {
+  root * /metrics
+  file_server
+}
