@@ -26,6 +26,7 @@ KEYPAIR_ENV = {
 
 LOG_PATTERN = "Server listening on 0.0.0.0 port 22."
 PRIVATE_KEY_FILE = os.path.join(get_here(), 'private_key')
+PRIVATE_KEY_PASSPHRASE = 'testpassprase'
 
 
 @pytest.fixture(scope="session")
@@ -47,7 +48,7 @@ def dd_environment_keypair():
     ):
         instance = deepcopy(common.INSTANCE_INTEGRATION)
         instance['private_key_file'] = PRIVATE_KEY_FILE
-        instance['password'] = 'testpassprase'
+        instance['password'] = PRIVATE_KEY_PASSPHRASE
         yield instance
 
 
