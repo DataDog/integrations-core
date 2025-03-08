@@ -58,6 +58,16 @@ To configure this check for an Agent running on a host:
         ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
         #
         # send_ndm_metadata: false
+
+        # send_faultinsts - boolean - optional - default: false
+        # Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
+        #
+        # send_faultinsts: false
+
+        # send_faultdelegates - boolean - optional - default: false
+        # Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
+        #
+        # send_faultdelegates: false
    ```
    
    *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
