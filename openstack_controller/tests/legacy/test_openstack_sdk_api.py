@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-from openstack.exceptions import SDKException
 
 from datadog_checks.openstack_controller.legacy.api import OpenstackSDKApi
 from datadog_checks.openstack_controller.legacy.exceptions import (
@@ -311,7 +310,7 @@ class MockOpenstackConnection:
     def get_compute_limits(self, project_id):
         if project_id == u'680031a39ce040e1b81289ea8c73fb11':
             return EXAMPLE_COMPUTE_LIMITS_VALUE
-        raise SDKException()
+        raise Exception()
 
     def search_projects(self):
         return EXAMPLE_PROJECTS_VALUE
@@ -378,7 +377,7 @@ def test_get_project_limit():
     api.connection = MockOpenstackConnection()
 
     assert api.get_project_limits(u'680031a39ce040e1b81289ea8c73fb11') == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE
-    with pytest.raises(SDKException):
+    with pytest.raises(Exception):
         api.get_project_limits('invalid_id')
 
 

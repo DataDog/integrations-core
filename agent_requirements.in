@@ -23,7 +23,6 @@ lxml==5.1.1
 lz4==4.4.3
 mmh3==5.1.0
 oauthlib==3.2.2
-openstacksdk==4.3.0
 orjson==3.10.15
 packaging==24.2
 paramiko==3.5.1
