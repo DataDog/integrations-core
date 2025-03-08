@@ -1,0 +1,12 @@
+FROM golang:1.23
+
+WORKDIR /app
+
+# Copy all files
+COPY . ./
+
+# Build the server
+RUN go build 
+
+# Expose port 443
+EXPOSE 443

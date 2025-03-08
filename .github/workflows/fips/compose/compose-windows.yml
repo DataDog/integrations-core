@@ -1,0 +1,35 @@
+services:
+  agent:
+    image: $AGENT_IMAGE
+    pid: host
+    environment:
+      - DD_API_KEY=$DD_API_KEY
+      - DD_SITE=datad0g.com
+    volumes:
+      - \\.\pipe\docker_engine:\\.\pipe\docker_engine
+      - "./agent/conf.d:C:/ProgramData/Datadog/conf.d"
+      - "./agent/checks.d:C:/ProgramData/Datadog/checks.d"
+  server-fips:
+    build:
+      context: server
+      dockerfile: Dockerfile-win
+      args:
+        BUILD_TARGET: server.exe
+    command: ["C:/app/server.exe", "fips"]
+    healthcheck:
+      test: ["CMD", "powershell", "-Command", "if ((Test-NetConnection -ComputerName localhost -Port 443).TcpTestSucceeded) { exit 0 } else { exit 1 }"]
+      interval: 5s
+      timeout: 15s
+      retries: 3
+  server:
+    build:
+      context: server
+      dockerfile: Dockerfile-win
+      args:
+        BUILD_TARGET: server.exe
+    command: ["C:/app/server.exe", "non-fips"]
+    healthcheck:
+      test: ["CMD", "powershell", "-Command", "if ((Test-NetConnection -ComputerName localhost -Port 443).TcpTestSucceeded) { exit 0 } else { exit 1 }"]
+      interval: 5s
+      timeout: 15s
+      retries: 3
