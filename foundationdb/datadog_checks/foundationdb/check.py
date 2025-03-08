@@ -196,28 +196,37 @@ class FoundationdbCheck(AgentCheck):
         if "machines" in cluster:
             self.gauge("foundationdb.machines", len(cluster["machines"]))
         if "processes" in cluster:
-            self.gauge("foundationdb.processes", len(cluster["processes"]))
-
-            self.count(
-                "foundationdb.instances",
-                sum((len(p["roles"]) if "roles" in p else 0 for p in cluster["processes"].values())),
-            )
-
-            role_counts = {}
+            process_counts = {}
             for process_key in cluster["processes"]:
                 process = cluster["processes"][process_key]
                 self.report_process(process)
+
+                tags = []
+
+                if "class_type" in process:
+                    tags.append("fdb_process_class:" + process["class_type"])
+
                 if "roles" in process:
                     for role in process["roles"]:
                         if "role" in role:
-                            rolename = role["role"]
-                            if rolename in role_counts:
-                                role_counts[rolename] += 1
-                            else:
-                                role_counts[rolename] = 1
+                            tags.append("fdb_role:" + role["role"])
 
-            for role in role_counts:
-                self.gauge("foundationdb.processes_per_role." + role, role_counts[role])
+                tags.sort()
+
+                # Packing and unpacking tags into sorted, comma-separated strings is a little hacky, but allows us to
+                # keep a map of role sets to counts; lists/sets aren't hashable and won't work as dictionary keys.
+                tags_string = ",".join(tags)
+
+                if tags_string in process_counts:
+                    process_counts[tags_string] += 1
+                else:
+                    process_counts[tags_string] = 1
+
+            for tags_string in process_counts:
+                process_tags = tags_string.split(",")
+                self.gauge(
+                    "foundationdb.processes", process_counts[tags_string], process_tags if process_tags else None
+                )
 
         if "data" in cluster:
             data = cluster["data"]
