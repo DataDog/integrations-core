@@ -374,9 +374,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_ids(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
-        import json
-
-        print(json.dumps(actual_payload))
         assert deep_compare(actual_payload, expected_data_for_db[db_name])
 
 
