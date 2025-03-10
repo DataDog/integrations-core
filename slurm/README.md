@@ -8,6 +8,8 @@ Slurm (Simple Linux Utility for Resource Management) is an open-source workload 
 
 The check gathers metrics from `slurmctld` by executing and parsing the output of several command-line binaries, including [`sinfo`][8], [`squeue`][9], [`sacct`][10], [`sdiag`][11], and [`sshare`][12]. These commands provide detailed information on resource availability, job queues, accounting, diagnostics, and share usage in a Slurm-managed cluster.
 
+On worker nodes, a [scontrol][13]-reported metric can also be collected, including the PID(s) of the job—information that isn't available in slurmctld, along with other details.
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various Slurm binaries, monitoring Slurm in containerized environments is not recommended.
@@ -111,3 +113,4 @@ Need help? Contact [Datadog support][7].
 [10]: https://slurm.schedmd.com/sacct.html
 [11]: https://slurm.schedmd.com/sdiag.html
 [12]: https://slurm.schedmd.com/sshare.html
+[13]: https://slurm.schedmd.com/scontrol.html

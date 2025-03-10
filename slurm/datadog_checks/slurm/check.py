@@ -455,9 +455,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         lines = output.strip().splitlines()
         headers = lines[0].split()
 
+        # Cache for job details to avoid duplicate calls
+        job_details_cache = {}
+
         for line in lines[1:]:
             tags = [f"slurm_node_name:{slurm_node.strip()}"]
             fields = line.split()
+            job_id = None
 
             for header, value in zip(headers, fields):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
@@ -467,8 +471,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     job_id = value
 
             if job_id:
-                job_details = self._enrich_scontrol_tags(job_id)
-                tags.extend(job_details)
+                # Only fetch job details if we haven't seen this job ID before
+                if job_id not in job_details_cache:
+                    job_details_cache[job_id] = self._enrich_scontrol_tags(job_id)
+                tags.extend(job_details_cache[job_id])
 
             self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 

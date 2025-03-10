@@ -1258,5 +1258,20 @@ SCONTROL_MAP = {
                 "slurm_job_user:root",
             ],
         },
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3773",
+                "slurm_global_id:0",
+                "slurm_job_id:15",
+                "slurm_local_id:0",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job2",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
+            ],
+        },
     ]
 }
