@@ -473,6 +473,8 @@ def add_schema_test_databases(cursor):
     cursor.execute("CREATE DATABASE datadog_test_schemas;")
     cursor.execute("USE datadog_test_schemas;")
     cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
+    # needed to query INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS in mariadb 10.5 and above
+    cursor.execute("GRANT REFERENCES ON datadog_test_schemas.* TO 'dog'@'%';")
     cursor.execute(
         """CREATE TABLE cities (
            id INT NOT NULL DEFAULT 0,
