@@ -65,7 +65,6 @@ RDMA_COUNTERS = {
     "rx_icrc_encapsulated",
     "rx_read_requests",
     "rx_write_requests",
-    "#",
     "link_down_events_phy",
     "rx_buff_alloc_err",
     "rx_cqe_compress_blks",
@@ -80,9 +79,7 @@ RDMA_COUNTERS = {
     "rx_wqe_err",
     "tx_vport_unicast_bytes",
     "tx_vport_unicast_packets",
-}
-
-EFA_COUNTERS = {
+    # EFA Counters
     "tx_pkts",
     "tx_bytes",
     "send_wrs",
