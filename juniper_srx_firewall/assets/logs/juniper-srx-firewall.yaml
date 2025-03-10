@@ -237,12 +237,13 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `source-address`, `client-address`, `src-ip-str` to `network.client.ip`
+      name: Map `source-address`, `client-address`, `src-ip-str`, `b4-address` to `network.client.ip`
       enabled: true
       sources:
         - source-address
         - client-address
         - src-ip-str
+        - b4-address
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
@@ -469,6 +470,12 @@ pipeline:
             query: "@syslog.msgid:(FWAUTH_TELNET_USER_AUTH_FAIL OR
               FWAUTH_TELNET_USER_AUTH_ACCEPTED)"
           name: Telnet User Auth
+        - filter:
+            query: "@syslog.msgid:(WEB_AUTH_FAIL OR WEB_AUTH_SUCCESS)"
+          name: J-Web Auth
+        - filter:
+            query: "@syslog.msgid:SSHD_LOGIN_FAILED"
+          name: SSHD Auth
       target: category
     - name: Lookup for `protocol-id` to `protocol`
       enabled: true

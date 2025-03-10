@@ -167,7 +167,7 @@
                     {
                         "id": 68482487258244,
                         "definition": {
-                            "title": "Top 10 Infected Hosts by IP",
+                            "title": "Top Infected Hosts by IP",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -314,7 +314,7 @@
                     {
                         "id": 3560372487066734,
                         "definition": {
-                            "title": "Top 10 Users Associated with Infected Hosts",
+                            "title": "Top Users Associated with Infected Hosts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -443,7 +443,7 @@
                     {
                         "id": 1040182246504560,
                         "definition": {
-                            "title": "Top 10 Host Infection Reasons",
+                            "title": "Top Host Infection Reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -512,7 +512,7 @@
                     {
                         "id": 5088861108259758,
                         "definition": {
-                            "title": "Top 10 Malware Policies",
+                            "title": "Top Malware Policies",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -843,7 +843,7 @@
                     {
                         "id": 1650766393647094,
                         "definition": {
-                            "title": "Top 10 Affected Users",
+                            "title": "Top Affected Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -912,7 +912,7 @@
                     {
                         "id": 1399901978540598,
                         "definition": {
-                            "title": "Top 10 Source Addresses",
+                            "title": "Top Source Addresses",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1040,7 +1040,7 @@
                     {
                         "id": 3790687060477222,
                         "definition": {
-                            "title": "Top 10 Malware Hashes Detected",
+                            "title": "Top Malware Hashes Detected",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1109,7 +1109,7 @@
                     {
                         "id": 8483273025870466,
                         "definition": {
-                            "title": "Top 10 URLs with Malware Detection",
+                            "title": "Top URLs with Malware Detection",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1440,7 +1440,7 @@
                     {
                         "id": 3438086429925856,
                         "definition": {
-                            "title": "Top 10 Affected Users",
+                            "title": "Top Affected Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1509,7 +1509,7 @@
                     {
                         "id": 7507846602660436,
                         "definition": {
-                            "title": "Top 10 Source Addresses",
+                            "title": "Top Source Addresses",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1912,7 +1912,7 @@
                     {
                         "id": 6787709394378620,
                         "definition": {
-                            "title": "Top 10 Virus Names",
+                            "title": "Top Virus Names",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2187,7 +2187,7 @@
                     {
                         "id": 3841737703280906,
                         "definition": {
-                            "title": "Top 10 Affected Source Addresses with Port",
+                            "title": "Top Affected Source Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2266,7 +2266,7 @@
                     {
                         "id": 7320856085558036,
                         "definition": {
-                            "title": "Top 10 Affected Destination Addresses with Port",
+                            "title": "Top Affected Destination Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2345,7 +2345,7 @@
                     {
                         "id": 6810842277647048,
                         "definition": {
-                            "title": "Top 10 URLs with Virus Detection",
+                            "title": "Top URLs with Virus Detection",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2710,7 +2710,7 @@
                     {
                         "id": 2549273570563070,
                         "definition": {
-                            "title": "Top 10 Attack Name",
+                            "title": "Top Attack Name",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2848,7 +2848,7 @@
                     {
                         "id": 578481642909238,
                         "definition": {
-                            "title": "Top 10 Attacked Applications",
+                            "title": "Top Attacked Applications",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2916,7 +2916,7 @@
                     {
                         "id": 32838564119700,
                         "definition": {
-                            "title": "Top 10 Users",
+                            "title": "Top Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3122,7 +3122,7 @@
                     {
                         "id": 7520441658101780,
                         "definition": {
-                            "title": "Top 10 Source Addresses with Port",
+                            "title": "Top Source Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3201,7 +3201,7 @@
                     {
                         "id": 263552202769456,
                         "definition": {
-                            "title": "Top 10 Destination Addresses with Port",
+                            "title": "Top Destination Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3839,7 +3839,7 @@
                     {
                         "id": 851007433075946,
                         "definition": {
-                            "title": "Top 10 DoS Attacks",
+                            "title": "Top DoS Attacks",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4045,7 +4045,7 @@
                     {
                         "id": 2929319004441282,
                         "definition": {
-                            "title": "Top 10 Interfaces Receiving Attacks",
+                            "title": "Top Interfaces Receiving Attacks",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4114,7 +4114,7 @@
                     {
                         "id": 5319069619765548,
                         "definition": {
-                            "title": "Top 10 Source Zones",
+                            "title": "Top Source Zones",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4480,7 +4480,7 @@
                     {
                         "id": 6663522747274230,
                         "definition": {
-                            "title": "Top 10 Blocked Users",
+                            "title": "Top Blocked Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4686,7 +4686,7 @@
                     {
                         "id": 7230463361676282,
                         "definition": {
-                            "title": "Top 10 Blocked Files",
+                            "title": "Top Blocked Files",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4754,7 +4754,7 @@
                     {
                         "id": 4043754076572662,
                         "definition": {
-                            "title": "Top 10 Blocked Source Addresses",
+                            "title": "Top Blocked Source Addresses",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4823,7 +4823,7 @@
                     {
                         "id": 1259928239502718,
                         "definition": {
-                            "title": "Top 10 Blocked Destination Addresses",
+                            "title": "Top Blocked Destination Addresses",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -5092,7 +5092,7 @@
                     {
                         "id": 3919531592928180,
                         "definition": {
-                            "title": "Top 10 URLs",
+                            "title": "Top URLs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -5367,7 +5367,7 @@
                     {
                         "id": 7783431497936830,
                         "definition": {
-                            "title": "Top 10 Users",
+                            "title": "Top Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -5436,7 +5436,7 @@
                     {
                         "id": 2603605127328266,
                         "definition": {
-                            "title": "Top 10 Source Addresses with Port",
+                            "title": "Top Source Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -5515,7 +5515,7 @@
                     {
                         "id": 8422518359228038,
                         "definition": {
-                            "title": "Top 10 Destination Addresses with Port",
+                            "title": "Top Destination Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

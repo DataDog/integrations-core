@@ -279,7 +279,7 @@
                     {
                         "id": 8971065890448258,
                         "definition": {
-                            "title": "Top 10 Incoming Interfaces",
+                            "title": "Top Incoming Interfaces",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -350,7 +350,6 @@
                             "title": "Distribution by Protocol",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -417,7 +416,7 @@
                     {
                         "id": 8787701388169482,
                         "definition": {
-                            "title": "Top 10 Users Associated with Sessions",
+                            "title": "Top Users Associated with Sessions",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -486,7 +485,7 @@
                     {
                         "id": 2155922808325504,
                         "definition": {
-                            "title": "Top 10 Source Addresses with Port",
+                            "title": "Top Source Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -565,7 +564,7 @@
                     {
                         "id": 4076578552937540,
                         "definition": {
-                            "title": "Top 10 Destination Addresses with Port",
+                            "title": "Top Destination Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -713,7 +712,7 @@
                     {
                         "id": 5275632234101986,
                         "definition": {
-                            "title": "Top 10 Policies",
+                            "title": "Top Policies",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1174,7 +1173,7 @@
                     {
                         "id": 5902628133213262,
                         "definition": {
-                            "title": "Top 10 Session Closure Reasons",
+                            "title": "Top Session Closure Reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1255,6 +1254,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1685,7 +1685,7 @@
                     {
                         "id": 1250829825246620,
                         "definition": {
-                            "title": "Top 10 Applications",
+                            "title": "Top Applications",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1756,7 +1756,6 @@
                             "title": "Distribution by Protocol",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -1823,7 +1822,7 @@
                     {
                         "id": 8961151648963984,
                         "definition": {
-                            "title": "Top 10 Users Associated with Sessions",
+                            "title": "Top Users Associated with Sessions",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1892,7 +1891,7 @@
                     {
                         "id": 5488194333306468,
                         "definition": {
-                            "title": "Top 10 Source Addresses with Port",
+                            "title": "Top Source Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1971,7 +1970,7 @@
                     {
                         "id": 6681633212798854,
                         "definition": {
-                            "title": "Top 10 Destination Addresses with Port",
+                            "title": "Top Destination Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2060,7 +2059,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:APPTRACK_SESSION_CLOSE $Client-IP $Destination-IP"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:APPTRACK_SESSION_CREATE $Client-IP $Destination-IP"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2118,7 +2117,7 @@
                     {
                         "id": 8837849148012478,
                         "definition": {
-                            "title": "Top 10 Destination Interfaces",
+                            "title": "Top Destination Interfaces",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2579,7 +2578,7 @@
                     {
                         "id": 4713573891190028,
                         "definition": {
-                            "title": "Top 10 Session Closure Reasons",
+                            "title": "Top Session Closure Reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2660,6 +2659,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -3134,7 +3134,7 @@
                     {
                         "id": 3560372487066734,
                         "definition": {
-                            "title": "Top 10 Source Addresses with Port",
+                            "title": "Top Source Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3213,7 +3213,7 @@
                     {
                         "id": 4284411461867030,
                         "definition": {
-                            "title": "Top 10 Destination Addresses with Port",
+                            "title": "Top Destination Addresses with Port",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

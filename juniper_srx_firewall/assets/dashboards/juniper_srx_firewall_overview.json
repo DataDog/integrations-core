@@ -244,7 +244,7 @@
                     {
                         "id": 6227356413653500,
                         "definition": {
-                            "title": "Top 10 Event Types",
+                            "title": "Top Event Types",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -314,7 +314,7 @@
                     {
                         "id": 6458529377968386,
                         "definition": {
-                            "title": "Top 10 Host Names",
+                            "title": "Top Host Names",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

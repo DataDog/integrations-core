@@ -1,6 +1,7 @@
 {
     "title": "Juniper SRX Firewall - Authentication Logs",
     "description": "- This dashboard provides insights into authentication activities.",
+    "experience_type": "default",
     "widgets": [
         {
             "id": 3098264915522038,
@@ -67,7 +68,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -101,7 +102,7 @@
                             "x": 0,
                             "y": 0,
                             "width": 3,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -124,7 +125,6 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Failed Logins",
                                             "formula": "query1"
                                         }
                                     ],
@@ -133,7 +133,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -171,7 +171,7 @@
                             "x": 3,
                             "y": 0,
                             "width": 9,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -189,7 +189,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -221,9 +221,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 4,
+                            "y": 3,
                             "width": 3,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -246,7 +246,6 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Failed Logins",
                                             "formula": "query1"
                                         }
                                     ],
@@ -255,7 +254,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -292,15 +291,15 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 4,
+                            "y": 3,
                             "width": 9,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
                         "id": 68482487258244,
                         "definition": {
-                            "title": "Top 10 Users with Failed Logins",
+                            "title": "Top Users with Failed Logins",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -311,7 +310,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -361,7 +360,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 8,
+                            "y": 6,
                             "width": 4,
                             "height": 4
                         }
@@ -372,7 +371,6 @@
                             "title": "Distribution by Category",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -380,7 +378,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL OR REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -431,7 +429,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 8,
+                            "y": 6,
                             "width": 8,
                             "height": 4
                         }
@@ -439,7 +437,7 @@
                     {
                         "id": 3560372487066734,
                         "definition": {
-                            "title": "Top 10 IPs with Failed Logins",
+                            "title": "Top IPs with Failed Logins",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -450,7 +448,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -500,7 +498,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
+                            "y": 10,
                             "width": 4,
                             "height": 4
                         }
@@ -520,7 +518,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -568,7 +566,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 12,
+                            "y": 10,
                             "width": 8,
                             "height": 4
                         }
@@ -579,7 +577,6 @@
                             "title": "Top Reasons for JADE Auth Failure",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -638,7 +635,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 16,
+                            "y": 14,
                             "width": 4,
                             "height": 4
                         }
@@ -649,7 +646,6 @@
                             "title": "Top Reasons for VPN Auth Failure",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -708,7 +704,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 16,
+                            "y": 14,
                             "width": 4,
                             "height": 4
                         }
@@ -719,7 +715,6 @@
                             "title": "Top Hosts for VPN Auth Failure",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -728,7 +723,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -778,7 +773,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 16,
+                            "y": 14,
                             "width": 4,
                             "height": 4
                         }
@@ -795,7 +790,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL) $Client-IP $User-Name",
+                                        "query_string": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -809,23 +804,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "category",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "@usr.name",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@network.client.ip",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "error-message",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "hostname",
+                                            "field": "content",
                                             "width": "auto"
                                         }
                                     ]
@@ -835,7 +818,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 20,
+                            "y": 18,
                             "width": 12,
                             "height": 4
                         }
@@ -846,12 +829,13 @@
                             "title": "Successful Login Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name",
+                                        "query_string": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -865,15 +849,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "category",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "@usr.name",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@network.client.ip",
+                                            "field": "content",
                                             "width": "auto"
                                         }
                                     ]
@@ -883,7 +863,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 24,
+                            "y": 22,
                             "width": 12,
                             "height": 4
                         }
@@ -894,7 +874,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 29
+                "height": 27
             }
         }
     ],

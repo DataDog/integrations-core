@@ -16,7 +16,7 @@ Visualize detailed insights into these logs through the out-of-the-box dashboard
 
 To install the Juniper SRX Firewall integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.59.0.
+**Note**: This step is not necessary for Agent version >= 7.64.0.
 
 ```shell
 sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewall==1.0.0
@@ -55,30 +55,40 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
 
 1. Log in to your Juniper SRX Firewall CLI.
 2. To enter configuration mode, execute the following command:
-   ```
+   ```shell
    configure
    ```
-3. To send logs to a syslog server, execute the following commands:
+
+3. To send logs to the Datadog Agent, execute the following commands:
+   ```shell
+   set system syslog host <IP-ADDRESS> any any
+   set system syslog host <IP-ADDRESS> port <PORT>
+   set system syslog host <IP-ADDRESS> structured-data brief
    ```
-   set system syslog host <SYSLOG-SERVER-IP> any any
-   set system syslog host <SYSLOG-SERVER-IP> port <PORT>
-   set system syslog host <SYSLOG-SERVER-IP> structured-data brief
-   set system syslog time-format millisecond
-   set system syslog time-format year
+
+4. To check whether `Security Logging` is enabled or not, execute the following command:
+   ```shell
+   show security log mode
    ```
-4. If `Security Logging` is enabled, then execute the following commands:
-   ```
-   set security log mode stream
-   set security log utc-timestamp
+   If enabled, the output will display either `mode stream;` or `mode event-stream;`
+
+5. If `Security Logging` is enabled, then execute the following commands:
+   ```shell
    set security log stream <NAME> format sd-syslog
    set security log stream <NAME> category all
-   set security log stream <NAME> host <SYSLOG-SERVER-IP>
+   set security log stream <NAME> host <IP-ADDRESS>
    set security log stream <NAME> host port <PORT>
    set security log transport protocol udp
    ```
-5. To Apply the configuration, execute the following command:
+
+6. To apply the configuration, execute the following command:
    ```
    commit
+   ```
+
+7. To exit configuration mode, execute the following command:
+   ```
+   exit
    ```
 
 ### Validation
