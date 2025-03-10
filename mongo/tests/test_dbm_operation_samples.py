@@ -56,6 +56,88 @@ def test_mongo_operation_samples_standalone(
             assert activity == expected_activities[i]
 
 
+@mock_now(1715911398.1112723)
+@common.standalone
+def test_mongo_operation_samples_standalone_queryplanner(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['operation_samples'] = {
+        'enabled': True,
+        'run_sync': True,
+        'explain_verbosity': 'queryPlanner',
+    }
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    with mock_pymongo("standalone"):
+        aggregator.reset()
+        run_check_once(mongo_check, dd_run_check)
+
+    # we will not assert the metrics, as they are already tested in test_integration.py
+    # we will only assert the operation sample and activity events
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
+    plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
+
+    # assert samples
+    with open(os.path.join(HERE, "results", "operation-samples-standalone-queryplanner.json"), 'r') as f:
+        expected_samples = json.load(f)
+        assert len(plan_samples) == len(expected_samples)
+        for i, sample in enumerate(plan_samples):
+            assert sample == expected_samples[i]
+
+    # assert activities
+    with open(os.path.join(HERE, "results", "operation-activities-standalone.json"), 'r') as f:
+        expected_activities = json.load(f)
+        assert len(activity_samples) == len(expected_activities)
+        for i, activity in enumerate(activity_samples):
+            # do not assert timestamp
+            assert activity == expected_activities[i]
+
+
+@mock_now(1715911398.1112723)
+@common.standalone
+def test_mongo_operation_samples_standalone_disabled(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['operation_samples'] = {
+        'enabled': True,
+        'run_sync': True,
+        'explain_verbosity': 'disabled',
+    }
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    with mock_pymongo("standalone"):
+        aggregator.reset()
+        run_check_once(mongo_check, dd_run_check)
+
+    # we will not assert the metrics, as they are already tested in test_integration.py
+    # we will only assert the operation sample and activity events
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
+    plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
+
+    # assert samples
+    assert len(plan_samples) == 0
+
+    # assert activities
+    with open(os.path.join(HERE, "results", "operation-activities-standalone.json"), 'r') as f:
+        expected_activities = json.load(f)
+        assert len(activity_samples) == len(expected_activities)
+        for i, activity in enumerate(activity_samples):
+            # do not assert timestamp
+            assert activity == expected_activities[i]
+
+
 @mock_now(1715911398.11127223)
 @common.shard
 def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
@@ -76,6 +158,45 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
     with open(os.path.join(HERE, "results", "operation-samples-mongos.json"), 'r') as f:
+        expected_samples = json.load(f)
+        assert len(plan_samples) == len(expected_samples)
+        for i, sample in enumerate(plan_samples):
+            assert sample == expected_samples[i]
+
+    # assert activities
+    with open(os.path.join(HERE, "results", "operation-activities-mongos.json"), 'r') as f:
+        expected_activities = json.load(f)
+        assert len(activity_samples) == len(expected_activities)
+        for i, activity in enumerate(activity_samples):
+            assert activity == expected_activities[i]
+
+
+@mock_now(1715911398.11127223)
+@common.shard
+def test_mongo_operation_samples_mongos_queryplanner(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['operation_samples'] = {
+        'enabled': True,
+        'run_sync': True,
+        'explain_verbosity': 'queryPlanner',
+    }
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    aggregator.reset()
+    with mock_pymongo("mongos"):
+        run_check_once(mongo_check, dd_run_check)
+
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
+    plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
+
+    with open(os.path.join(HERE, "results", "operation-samples-mongos-queryplanner.json"), 'r') as f:
         expected_samples = json.load(f)
         assert len(plan_samples) == len(expected_samples)
         for i, sample in enumerate(plan_samples):

@@ -4,9 +4,6 @@
 
 from itertools import tee
 
-from prometheus_client.metrics_core import Metric
-from prometheus_client.parser import _parse_sample, _replace_help_escaping
-
 
 def text_fd_to_metric_families(fd):
     raw_lines, input_lines = tee(fd, 2)
@@ -32,6 +29,10 @@ def _parse_payload(fd):
 
     Yields Metric's.
     """
+    # See Performance Optimizations in this package's README.md.
+    from prometheus_client.metrics_core import Metric
+    from prometheus_client.parser import _parse_sample, _replace_help_escaping
+
     name = ''
     documentation = ''
     typ = 'untyped'
