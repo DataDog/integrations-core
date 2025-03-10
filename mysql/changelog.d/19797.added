@@ -1,0 +1,1 @@
+Collect MySQL foreign key delete_rule and update_rule from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS.
