@@ -104,12 +104,7 @@ FROM
 WHERE
     FK.parent_object_id IN ({})
 GROUP BY
-    FK.name,
-    FK.parent_object_id,
-    FK.object_id,
-    FK.referenced_object_id,
-    FK.delete_referential_action_desc,
-    FK.update_referential_action_desc;
+    FK.name, FK.parent_object_id, FK.referenced_object_id;
 """
 
 FOREIGN_KEY_QUERY_PRE_2017 = """
