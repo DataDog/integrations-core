@@ -508,7 +508,8 @@ def add_schema_test_databases(cursor):
         """CREATE TABLE landmarks (
            name VARCHAR(255),
            city_id INT DEFAULT 0,
-           CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));
+           CONSTRAINT FK_CityId FOREIGN KEY (city_id)
+           REFERENCES cities(id) ON DELETE SET NULL ON UPDATE RESTRICT);
         """
     )
 
@@ -527,7 +528,7 @@ def add_schema_test_databases(cursor):
             District VARCHAR(255),
             Review TEXT,
             CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
-            REFERENCES Restaurants(RestaurantName, District));
+            REFERENCES Restaurants(RestaurantName, District) ON DELETE CASCADE ON UPDATE NO ACTION);
         """
     )
     # Second DB
