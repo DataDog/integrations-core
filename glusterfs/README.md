@@ -21,13 +21,13 @@ No additional installation is needed on your server.
    ```yaml
    init_config:
 
-    ## @param gstatus_path - string - optional - default: /opt/datadog-agent/embedded/sbin/gstatus
+    ## @param gstatus_path - string - optional - default: /opt/datadog-agent/embedded/bin/gstatus
     ## Path to the gstatus command.
     ##
     ## A version of the gstatus is shipped with the Agent binary.
     ## If you are using a source install, specify the location of gstatus.
     #
-    # gstatus_path: /opt/datadog-agent/embedded/sbin/gstatus
+    # gstatus_path: /opt/datadog-agent/embedded/bin/gstatus
 
     instances:
       -
