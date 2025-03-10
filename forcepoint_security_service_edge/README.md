@@ -5,7 +5,7 @@
 
 This integration ingests the following logs:
 
-- **Cloud Logs (CloudSummary, CloudAudit)**: Logs related to scanning results of each file.
+- **Cloud Logs (CloudSummary, CloudAudit)**: Logs related to the current status of files in cloud applications and scan results for each file in the account.
 - **Access Logs**: Logs related to various application activities.
 - **Admin Logs**: Admin events performed within the admin portal.
 - **Health Logs (HealthProxy, HealthApi, HealthSystem)**: Logs related to system, API, and proxy health. 
