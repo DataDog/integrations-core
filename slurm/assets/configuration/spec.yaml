@@ -40,8 +40,9 @@ files:
         type: boolean
         example: True
     - name: collect_scontrol_stats
-      description: Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
-      node to collect the list of running jobs along with their PIDs.
+      description: |
+        Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
+        node to collect the list of running jobs along with their PIDs.
       value:
         type: boolean
         example: True
