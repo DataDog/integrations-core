@@ -22,7 +22,7 @@ def assert_all_metrics(aggregator):
     aggregator.assert_no_duplicate_metrics()
 
 
-def assert_collection(aggregator, tags, use_openmetrics, runs=1):
+def assert_collection(aggregator, tags, use_openmetrics, runs=1, e2e=False, has_leader=False):
     metrics = set(METRICS)
     metrics.update(METRICS_OPTIONAL)
     metrics.add('is_leader')
@@ -68,6 +68,7 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1):
                 metrics.discard(metric)
 
     missing_summaries = defaultdict(set)
+
     for metric in sorted(metrics):
         at_least = 1
         if metric.startswith(tuple(METRICS_OPTIONAL)):
@@ -85,7 +86,6 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1):
                 else:
                     raise
             else:
-                aggregator.assert_metric_has_tag_prefix(metric, 'is_leader:', at_least=at_least)
                 aggregator.assert_metric_has_tag_prefix(metric, 'vault_cluster:', at_least=at_least)
                 aggregator.assert_metric_has_tag_prefix(metric, 'vault_version:', at_least=at_least)
                 if not use_openmetrics:
@@ -94,6 +94,13 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1):
     for _, summaries in sorted(missing_summaries.items()):
         if len(summaries) > 2:
             raise AssertionError('Missing: {}'.format(' | '.join(sorted(summaries))))
+
+    if e2e:
+        if not has_leader:
+            aggregator.assert_metric('vault.has_leader', at_least=1)
+            aggregator.assert_metric_has_tag_prefix(metric, 'vault_leader:', at_least=1)
+        else:
+            aggregator.assert_metric('vault.has_leader', at_least=0)
 
     aggregator.assert_all_metrics_covered()
 
