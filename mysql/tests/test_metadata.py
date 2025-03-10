@@ -156,8 +156,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "referenced_table_schema": "datadog_test_schemas",
                         "referenced_table_name": "Restaurants",
                         "referenced_column_names": "District,RestaurantName",
-                        "update_action": "NO ACTION",
-                        "delete_action": "CASCADE",
+                        "update_action": None if is_maria_db else "NO ACTION",
+                        "delete_action": None if is_maria_db else "CASCADE",
                     }
                 ],
                 "indexes": [
@@ -460,8 +460,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "referenced_table_schema": "datadog_test_schemas",
                         "referenced_table_name": "cities",
                         "referenced_column_names": "id",
-                        "update_action": "RESTRICT",
-                        "delete_action": "SET NULL",
+                        "update_action": None if is_maria_db else "RESTRICT",
+                        "delete_action": None if is_maria_db else "SET NULL",
                     }
                 ],
                 "indexes": [
