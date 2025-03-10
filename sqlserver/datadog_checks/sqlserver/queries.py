@@ -90,25 +90,33 @@ GROUP BY
 
 FOREIGN_KEY_QUERY = """
 SELECT
-    FK.parent_object_id AS id,
+    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
     OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
-    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column
+    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
     JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
 WHERE
     FK.parent_object_id IN ({})
 GROUP BY
-    FK.name, FK.parent_object_id, FK.referenced_object_id;
+    FK.name,
+    FK.parent_object_id,
+    FK.object_id,
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc;
 """
 
 FOREIGN_KEY_QUERY_PRE_2017 = """
 SELECT
-    FK.parent_object_id AS id,
+    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
+    OBJECT_DEFINITION(FK.object_id) AS definition,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STUFF((
         SELECT ',' + COL_NAME(FKC.parent_object_id, FKC.parent_column_id)
@@ -120,7 +128,9 @@ SELECT
         SELECT ',' + COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id)
         FROM sys.foreign_key_columns AS FKC
         WHERE FKC.constraint_object_id = FK.object_id
-        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
 WHERE
@@ -129,7 +139,9 @@ GROUP BY
     FK.name,
     FK.parent_object_id,
     FK.object_id,
-    FK.referenced_object_id;
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc;
 """
 
 DEFAULT_DM_XE_TARGETS = "sys.dm_xe_session_targets"
