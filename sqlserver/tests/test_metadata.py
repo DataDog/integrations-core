@@ -239,6 +239,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'referencing_column': 'city_id',
                                 'referenced_table': 'cities',
                                 'referenced_column': 'id',
+                                "delete_action": "SET_NULL",
+                                "update_action": "NO_ACTION",
                             }
                         ],
                     },
@@ -276,6 +278,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'referencing_column': 'RestaurantName,District',
                                 'referenced_table': 'Restaurants',
                                 'referenced_column': 'RestaurantName,District',
+                                "delete_action": "CASCADE",
+                                "update_action": "SET_NULL",
                             }
                         ],
                     },
@@ -370,6 +374,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_ids(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
+        import json
+
+        print(json.dumps(actual_payload))
         assert deep_compare(actual_payload, expected_data_for_db[db_name])
 
 
