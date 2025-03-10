@@ -1,0 +1,1 @@
+Reduce log verbosity level for unverified HTTP requests. WARNING level spams a lot with no evidence that users pay attention. DEBUG will be useful for support cases.
