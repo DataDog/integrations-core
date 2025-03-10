@@ -1,43 +1,79 @@
-# Agent Check: ivanti-nzta
+# Ivanti nZTA
 
 ## Overview
 
-This check monitors [Ivanti Neurons for Zero Trust Access (nZTA)][1], which is is a SaaS-delivered zero trust network access solution designed to work with VPN or cloud-first organizations.
+[Ivanti nZTA][1] is a cloud-based SaaS solution offering zero-trust authentication and access control for application infrastructures. It enables administrators to define policies for secure user and device access. This ensures application visibility, access control, and robust security.
+
+This integration ingests the following logs:
+
+- **Analytics Logs**: This endpoint contains information about system activity through Admin Logs, Access Logs, and Event Logs.
+- **Alerts**: This endpoint contains information about alerts triggered by Ivanti nZTA, including security risks, and configuration changes.
+- **Application Access**: This endpoint contains information about application accessed by users.
+
+This integration collects logs from the sources listed above and sends them to Datadog for analysis with our Log Explorer and Cloud SIEM products
+
+- [Log Explorer][3]
+- [Cloud SIEM][4]
 
 ## Setup
 
-### Installation
+### Generate API credentials in Ivanti nZTA
 
-The ivanti-nzta check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+#### Create a new Admin User
 
-### Configuration
+1. Log in to your Ivanti nZTA platform.
+2. Go to **Secure Access** > **Manage Users**.
+3. Navigate to the **Authentication Servers** tab.
+4. Under **Admin Auth**, click **Create User** and enter the following details:
+   - **Full Name**: Enter a descriptive and identifiable name.
+   - **User Name**: Enter a unique username.
+   - **Password**: Enter a strong password.
+   - **Confirm Password**: Re-enter the password.
+5. Uncheck the **Temporary password** checkbox.
+6. Click **Create User**.
 
-!!! Add list of steps to set up this integration !!!
+**Note**: Use a newly created admin user solely for this integration, rather than the UI login, to ensure smooth execution.
 
-### Validation
+#### Identify the Host
 
-!!! Add steps to validate integration is functioning as expected !!!
+1. To identify the host of your Ivanti nZTA, check the Ivanti nZTA platform URL.
+   <br>**For example**: `example.pulsezta.net`
+
+### Connect your Ivanti nZTA Account to Datadog
+
+1. Add your Host, Username, and Password.
+
+   | Parameters | Description                                             |
+   | ---------- | ------------------------------------------------------- |
+   | Host       | The Host of your Ivanti nZTA platform.                  |
+   | Username   | The Tenant Admin Username of your Ivanti nZTA platform. |
+   | Password   | The Password of your Ivanti nZTA platform.              |
+
+2. Click **Save**.
 
 ## Data Collected
 
+### Logs
+
+The Ivanti nZTA integration collects and forwards analytics logs, alerts, and application access logs to Datadog.
+
 ### Metrics
 
-ivanti-nzta does not include any metrics.
+The Ivanti nZTA integration does not include any metrics.
 
 ### Service Checks
 
-ivanti-nzta does not include any service checks.
+The Ivanti nZTA integration does not include any service checks.
 
 ### Events
 
-ivanti-nzta does not include any events.
+The Ivanti nZTA integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://www.ivanti.com/products/ivanti-neurons-zero-trust-access
+[2]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/logs/explorer/
+[4]: https://www.datadoghq.com/product/cloud-siem/

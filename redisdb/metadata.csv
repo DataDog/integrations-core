@@ -32,14 +32,25 @@ redis.key.length,gauge,,,,"The number of elements in a given key, tagged by key,
 redis.keys,gauge,,key,,The total number of keys.,0,redis,keys,memory
 redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted,memory
 redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired,memory
+redis.mem.clients_normal,gauge,,byte,,The total size in bytes of all clients overheads.,-1,redis,mem clients normal,
+redis.mem.clients_slaves,gauge,,byte,,The total size in bytes of all replicas overheads.,-1,redis,mem clients slaves,
+redis.mem.dataset,gauge,,byte,,The size in bytes of the dataset.,-1,redis,mem dataset,
+redis.mem.fragmentation,gauge,,byte,,Delta between used_memory_rss and used_memory.,-1,redis,mem frag,
 redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio,memory
+redis.mem.functions,gauge,,byte,,Number of bytes overhead by Function scripts (part of used_memory). [v7+].,-1,redis,mem functions,
 redis.mem.lua,gauge,,byte,,Amount of memory used by the Lua engine.,-1,redis,mem lua,
 redis.mem.maxmemory,gauge,,byte,,Maximum amount of memory allocated to the Redisdb system.,-1,redis,mem maxmemory,
 redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures [v4+].,-1,redis,mem overhead,
 redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,mem peak,
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss,
+redis.mem.scripts,gauge,,byte,,redis.mem.scripts_eval + redis.mem.functions (part of used_memory). [v7+].,-1,redis,mem scripts,
+redis.mem.scripts_eval,gauge,,byte,,Number of bytes overhead by the EVAL scripts (part of used_memory). [v7+].,-1,redis,mem scripts eval,
 redis.mem.startup,gauge,,byte,,Amount of memory consumed by Redis at startup.,-1,redis,mem startup,
+redis.mem.total_replication_buffers,gauge,,byte,,Total memory consumed for replication buffers. [v7+].,-1,redis,mem total replication buffers,
 redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used,memory
+redis.mem.vm_eval,gauge,,byte,,Number of bytes used by the script VM engines for EVAL framework (not part of used_memory). [v7+].,-1,redis,mem vm eval,
+redis.mem.vm_functions,gauge,,byte,,Number of bytes used by the script VM engines for Functions framework (not part of used_memory). [v7+].,-1,redis,mem vm functions,
+redis.mem.vm_total,gauge,,byte,,redis.mem.vm_eval + redis.mem.vm_functions (not part of used_memory). [v7+].,-1,redis,mem vm total,
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients,cpu
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands,
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands,cpu

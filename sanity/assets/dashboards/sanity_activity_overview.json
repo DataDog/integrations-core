@@ -1,0 +1,4046 @@
+{
+  "title": "Sanity - Activity Overview",
+  "description": "This dashboard provides a comprehensive analysis of the content and project-related activities for your Sanity projects.",
+  "widgets": [
+    {
+      "id": 8471328527126146,
+      "definition": {
+        "type": "image",
+        "url": "https://camo.githubusercontent.com/c8b0163592ce794b9d9b10240a9ff190c41583db3c528127db1feeaac06da661/68747470733a2f2f63646e2e73616e6974792e696f2f696d616765732f33646f383277686d2f6e6578742f316466636539646465376136326363616138653833373732353461316539313966366330376164332d313238783132382e737667",
+        "url_dark_theme": "https://camo.githubusercontent.com/c8b0163592ce794b9d9b10240a9ff190c41583db3c528127db1feeaac06da661/68747470733a2f2f63646e2e73616e6974792e696f2f696d616765732f33646f383277686d2f6e6578742f316466636539646465376136326363616138653833373732353461316539313966366330376164332d313238783132382e737667",
+        "sizing": "fill",
+        "margin": "md",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 3724737678474680,
+      "definition": {
+        "title": "Monitor Summary",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 491133844377174,
+            "definition": {
+              "title": "Monitor Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:sanity)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 1514807046283536,
+      "definition": {
+        "type": "note",
+        "content": "[Sanity](https://www.sanity.io/) is a headless content management system (CMS) designed for building flexible, real-time websites and applications. It enables developers and content teams to efficiently manage structured content across multiple platforms.\n\nThis dashboard provides a comprehensive analysis of the content and project-related activities for your Sanity projects.\n\nFor more information, see the [Sanity Integration Documentation](https://docs.datadoghq.com/integrations/sanity/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+        "background_color": "orange",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "top",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 5702541320677230,
+      "definition": {
+        "title": "Document Activity Overview",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2592886551709396,
+            "definition": {
+              "title": "Total Documents Created",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.create -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8259021984254436,
+            "definition": {
+              "title": "Total Documents Updated",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.update -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 2990330420571362,
+            "definition": {
+              "title": "Total Documents Removed",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.delete -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5212677288775072,
+            "definition": {
+              "title": "Document Changes by Operation",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.* -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4634010603041944,
+            "definition": {
+              "title": "Document Changes by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.* -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@documentType",
+                          "limit": 50,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 50,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1730731495054336,
+            "definition": {
+              "title": "Document Changes by Dataset",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.* -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@datasetName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 4310476782606260,
+            "definition": {
+              "title": "Document Changes Overtime",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.* -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 7620916102291036,
+            "definition": {
+              "title": "Document Event Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sanity service:activity-logs @evt.name:document.* -@documentType:comment -@documentType:tasks.task $Project_ID $Dataset $Event",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@projectId",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@datasetName",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@evt.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@documentType",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@documentId",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 20
+      }
+    },
+    {
+      "id": 2172329336749986,
+      "definition": {
+        "title": "Task & Comment Activity Overview",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6706309506014030,
+            "definition": {
+              "title": "Total Tasks Created",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.create @documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2888422018000574,
+            "definition": {
+              "title": "Total Tasks Updated",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.update @documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 1780311858441874,
+            "definition": {
+              "title": "Total Tasks Deleted",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.delete @documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2128075097713710,
+            "definition": {
+              "title": "Total Open Tasks Deleted",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.delete @documentType:tasks.task @beforeValues.status:open $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 8102475461614688,
+            "definition": {
+              "title": "Tasks Created by Document Type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.create @documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@afterValues.target.documentType",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 8206863197651144,
+            "definition": {
+              "title": "Tasks Updated by Document Type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.update @documentType:tasks.task $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@afterValues.target.documentType",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 67626170540356,
+            "definition": {
+              "title": "Tasks Event Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sanity service:activity-logs @evt.name:* @documentType:tasks.task $Project_ID $Dataset $Event",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@projectId",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@evt.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@documentType",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@afterValues.title",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 7195459654798800,
+            "definition": {
+              "title": "Total Comments Created",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.create @documentType:comment $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7764902242250852,
+            "definition": {
+              "title": "Total Comments Updated",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.update @documentType:comment $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 13,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7087356227608632,
+            "definition": {
+              "title": "Total Comments Deleted",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.delete @documentType:comment $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 4532307185853418,
+            "definition": {
+              "title": "Total Comments Resolved",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.update @documentType:comment @afterValues.status:resolved $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#c9e5ff"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 13,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 3108174741777186,
+            "definition": {
+              "title": "Total Open Comments Deleted",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.delete @documentType:comment @beforeValues.status:open $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 5534598433911338,
+            "definition": {
+              "title": "Comments Created by Document Type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.create @documentType:comment $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@afterValues.target.documentType",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 16,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 1920676891676940,
+            "definition": {
+              "title": "Comments Updated by Document Type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:document.update @documentType:comment $Project_ID $Dataset $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@afterValues.target.documentType",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 16,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1094308253197962,
+            "definition": {
+              "title": "Comments Event Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sanity service:activity-logs @evt.name:* @documentType:comment $Project_ID $Dataset $Event",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@projectId",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@evt.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@documentType",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 20,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 26
+      }
+    },
+    {
+      "id": 3252702085520010,
+      "definition": {
+        "title": "Dataset Management Overview",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2035693250966978,
+            "definition": {
+              "title": "Dataset Events Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.datasets.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 3131474494573770,
+            "definition": {
+              "title": "Visibility Distribution of Datasets Created",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.datasets.create @metadata.aclMode:* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@metadata.aclMode",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 585262347492188,
+            "definition": {
+              "title": "Top Projects with Datasets Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.datasets.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@projectDisplayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3510986223361946,
+            "definition": {
+              "title": "Top Actors with Datasets Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.datasets.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3154877210070018,
+            "definition": {
+              "title": "Total Project Plans Created",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.plan.create $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#c9e5ff"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2058735498440436,
+            "definition": {
+              "title": "Total Project Plans Edited",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.plan.edit $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 9,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7945797244813960,
+            "definition": {
+              "title": "Request Log Files Downloaded",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.request-logs.file.downloaded $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 9,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 4709782345044730,
+            "definition": {
+              "title": "Request Log Files Requested",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.request-logs.file.requested $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#c9e5ff"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 9,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5134964385328342,
+            "definition": {
+              "title": "Most Frequently Edited Datasets",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.datasets.edit $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@datasetName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7540719645363036,
+            "definition": {
+              "title": "Top Actors with Request Log File Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.request-logs.file.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 12,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 52,
+        "width": 12,
+        "height": 17
+      }
+    },
+    {
+      "id": 2462706258326728,
+      "definition": {
+        "title": "Collaboration Events Overview",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4649153852588994,
+            "definition": {
+              "title": "Invitation Events Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.invitations.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4755738597623438,
+            "definition": {
+              "title": "Top Actors with Invitation Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.invitations.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2994780422202956,
+            "definition": {
+              "title": "Member Events Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.members.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6355494637224418,
+            "definition": {
+              "title": "Top Actors with Member Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.members.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7848729880832180,
+            "definition": {
+              "title": "Top Roles with Member Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.members.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@metadata.roleName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8442260827121346,
+            "definition": {
+              "title": "Top Projects with Member Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.members.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@projectDisplayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3969095484184822,
+            "definition": {
+              "title": "Member Events Overtime",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.members.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 17,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7705230969531838,
+      "definition": {
+        "title": "Access Control and Security Overview",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7995077477556714,
+            "definition": {
+              "title": "Total CORS Origins Created",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.corsOrigin.create $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 1831934699521912,
+            "definition": {
+              "title": "Total CORS Origins Deleted",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.corsOrigin.delete $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 6901965753244650,
+            "definition": {
+              "title": "Top Projects with CORS Origin Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.corsOrigin.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@projectDisplayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5946059186823478,
+            "definition": {
+              "title": "CORS Origin Events Overtime",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.corsOrigin.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 3590094181646842,
+            "definition": {
+              "title": "Resource Permission Events Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.permissionResource.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 8034532218265612,
+            "definition": {
+              "title": "Resource Permission Events Overtime",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.permissionResource.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 3309826480735432,
+            "definition": {
+              "title": "Top Updated Resources",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.permissionResource.update $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@metadata.title",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 6548909927593506,
+            "definition": {
+              "title": "Top Actors with Resource Permission Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.permissionResource.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 5,
+              "y": 16,
+              "width": 7,
+              "height": 5
+            }
+          },
+          {
+            "id": 7308074098015122,
+            "definition": {
+              "title": "Top Projects with Resource Permission Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.permissionResource.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@projectDisplayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 21,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 5642949836390122,
+            "definition": {
+              "title": "Token Events Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.token.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 5,
+              "y": 21,
+              "width": 7,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 27
+      }
+    },
+    {
+      "id": 3190991007347990,
+      "definition": {
+        "title": "System and Operational Events Overview",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3885108112188872,
+            "definition": {
+              "title": "External Studio Host Events Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.externalStudioHost.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7815248497703620,
+            "definition": {
+              "title": "Top Projects with External Studio Host Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.externalStudioHost.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@projectDisplayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7294839892528878,
+            "definition": {
+              "title": "External Studio Host Events Overtime",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:project.externalStudioHost.* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 3467299700162478,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#c9e5ff"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7162018899381804,
+            "definition": {
+              "title": "Top Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 8,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 6585985564694296,
+            "definition": {
+              "title": "Top Projects by Activity",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@projectDisplayName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 6394697436029944,
+            "definition": {
+              "title": "Top Users by Activity",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:sanity service:activity-logs @evt.name:* $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 11,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 1021863091184094,
+            "definition": {
+              "title": "Event List",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:sanity service:activity-logs $Project_Name $Project_ID $Dataset $Actor_Name $Actor_Email $Event",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@projectId",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@projectDisplayName",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@evt.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@usr.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@description",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 44,
+        "width": 12,
+        "height": 22
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Project_ID",
+      "prefix": "@projectId",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Project_Name",
+      "prefix": "@projectDisplayName",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Dataset",
+      "prefix": "@datasetName",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Actor_Name",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Actor_Email",
+      "prefix": "@usr.email",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Event",
+      "prefix": "@evt.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

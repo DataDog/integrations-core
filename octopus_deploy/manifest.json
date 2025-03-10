@@ -47,6 +47,9 @@
     },
     "monitors": {
       "Deployment Failed": "assets/monitors/deployment_failed.json"
+    },
+    "logs": {
+      "source": "octopus_deploy"
     }
   },
   "author": {
