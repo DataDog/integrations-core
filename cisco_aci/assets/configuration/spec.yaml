@@ -106,14 +106,14 @@ files:
         type: boolean
         example: False
         display_default: False
-    - name: send_faultinsts
+    - name: send_faultinst_faults
       description: |
         Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
       value:
         type: boolean
         example: False
         display_default: False
-    - name: send_faultdelegates
+    - name: send_faultdelegate_faults
       description: |
         Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
       value:

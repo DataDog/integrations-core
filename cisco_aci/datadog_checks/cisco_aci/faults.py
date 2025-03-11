@@ -24,26 +24,26 @@ class Faults:
         self.write_persistent_cache = check.write_persistent_cache
 
         # Config for submitting faultInst faults as logs
-        self.send_faultinsts = self.instance.get('send_faultinsts', False)
+        self.send_faultinst_faults = self.instance.get('send_faultinst_faults', False)
         # Config for submitting faultDelegate faults as logs
-        self.send_faultdelegates = self.instance.get('send_faultdelegates', False)
+        self.send_faultdelegate_faults = self.instance.get('send_faultdelegate_faults', False)
 
-    def faultinsts_enabled(self):
-        return self.send_faultinsts
+    def faultinst_faults_enabled(self):
+        return self.send_faultinst_faults
 
-    def faultdelegates_enabled(self):
-        return self.send_faultdelegates
+    def faultdelegate_faults_enabled(self):
+        return self.send_faultdelegate_faults
 
     def collect(self):
-        if self.faultinsts_enabled():
+        if self.faultinst_faults_enabled():
             data = self.read_persistent_cache("maxtimestamp_{}".format("faultInst"))
             maxtimestamp = from_json(data) if data else None
-            faults = self.api.get_faultinsts(maxtimestamp)
+            faults = self.api.get_faultinst_faults(maxtimestamp)
             self.submit_faults("faultInst", faults)
-        if self.faultdelegates_enabled():
+        if self.faultdelegate_faults_enabled():
             data = self.read_persistent_cache("maxtimestamp_{}".format("faultDelegate"))
             maxtimestamp = from_json(data) if data else None
-            faults = self.api.get_faultdelegates(maxtimestamp)
+            faults = self.api.get_faultdelegate_faults(maxtimestamp)
             self.submit_faults("faultDelegate", faults)
 
     def submit_faults(self, faultCategory, faults):
@@ -59,6 +59,12 @@ class Faults:
             else:
                 self.log.warn("fault does not contain %s: %s", faultCategory, fault)
                 continue
+
+            # Rename severity field because the backend seems to give precedence to severity over any status
+            # remapper when determining the actual status, and renaming the severity field in a pipeline
+            # processor doesn't work, possibly because of how JSON logs are preprocessed.
+            # (See https://docs.datadoghq.com/logs/log_configuration/pipelines/?tab=status#status-attribute).
+            payload["aciSeverity"] = payload.pop("severity")
 
             maxtimestamp = max(maxtimestamp, get_timestamp(datetime.datetime.fromisoformat(payload["lastTransition"])))
             self.send_log(payload)
