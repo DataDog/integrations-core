@@ -11,8 +11,8 @@ from .base import SqlserverDatabaseMetricsBase
 INDEX_USAGE_STATS_QUERY = {
     "name": "sys.dm_db_index_usage_stats",
     "query": """
-    SELECT 
-        DB_NAME(ixus.database_id) AS db, 
+    SELECT
+        DB_NAME(ixus.database_id) AS db,
         COALESCE(ind.name, 'HeapIndex_' + OBJECT_NAME(ind.object_id)) AS index_name,
         OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) AS "schema",
         OBJECT_NAME(ind.object_id) AS table_name,
@@ -22,11 +22,11 @@ INDEX_USAGE_STATS_QUERY = {
         ixus.user_updates as user_updates
     FROM sys.indexes ind
     JOIN sys.dm_db_index_usage_stats ixus
-        ON ixus.index_id = ind.index_id 
+        ON ixus.index_id = ind.index_id
         AND ixus.object_id = ind.object_id
         AND ixus.database_id = DB_ID()
-    JOIN sys.objects o 
-        ON ind.object_id = o.object_id 
+    JOIN sys.objects o
+        ON ind.object_id = o.object_id
         AND o.type = 'U'
 """,
     "columns": [
