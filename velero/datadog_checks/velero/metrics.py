@@ -2,35 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base.checks.openmetrics.v2.metrics import DEFAULT_GO_METRICS
+
 METRIC_MAP = {
-    'go_gc_duration_seconds': 'go.gc_duration_seconds',
-    'go_gc_duration_seconds_sum': 'go.gc_duration_seconds.sum',
-    'go_gc_duration_seconds_count': 'go.gc_duration_seconds',
-    'go_goroutines': 'go.goroutines',
+    **DEFAULT_GO_METRICS,
+    'go_gc_duration_seconds_quantile': 'go.gc.duration.seconds.quantile',
     'go_info': 'go.info',
-    'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'},
-    'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash_sys_bytes',
-    'go_memstats_frees': 'go.memstats.frees',
-    'go_memstats_gc_sys_bytes': 'go.memstats.gc_sys_bytes',
-    'go_memstats_heap_alloc_bytes': 'go.memstats.heap.alloc_bytes',
-    'go_memstats_heap_idle_bytes': 'go.memstats.heap.idle_bytes',
-    'go_memstats_heap_inuse_bytes': 'go.memstats.heap.inuse_bytes',
-    'go_memstats_heap_objects': 'go.memstats.heap.objects',
-    'go_memstats_heap_released_bytes': 'go.memstats.heap.released_bytes',
-    'go_memstats_heap_sys_bytes': 'go.memstats.heap.sys_bytes',
-    'go_memstats_last_gc_time_seconds': 'go.memstats.last_gc_time_seconds',
-    'go_memstats_lookups': 'go.memstats.lookups',
-    'go_memstats_mallocs': 'go.memstats.mallocs',
-    'go_memstats_mcache_inuse_bytes': 'go.memstats.mcache.inuse_bytes',
-    'go_memstats_mcache_sys_bytes': 'go.memstats.mcache.sys_bytes',
-    'go_memstats_mspan_inuse_bytes': 'go.memstats.mspan.inuse_bytes',
-    'go_memstats_mspan_sys_bytes': 'go.memstats.mspan.sys_bytes',
-    'go_memstats_next_gc_bytes': 'go.memstats.next_gc_bytes',
-    'go_memstats_other_sys_bytes': 'go.memstats.other_sys_bytes',
-    'go_memstats_stack_inuse_bytes': 'go.memstats.stack.inuse_bytes',
-    'go_memstats_stack_sys_bytes': 'go.memstats.stack.sys_bytes',
-    'go_memstats_sys_bytes': 'go.memstats.sys_bytes',
-    'go_threads': 'go.threads',
     'podVolume_data_download_cancel': 'podVolume.data.download.cancel',
     'podVolume_data_download_failure': 'podVolume.data.download.failure',
     'podVolume_data_download_success': 'podVolume.data.download.success',
@@ -41,20 +18,13 @@ METRIC_MAP = {
     'podVolume_pod_volume_backup_enqueue_count': 'podVolume.pod_volume.backup.enqueue',
     'podVolume_pod_volume_operation_latency_seconds': 'podVolume.pod_volume.operation_latency_seconds',
     'podVolume_pod_volume_operation_latency_seconds_gauge': 'podVolume.pod_volume.operation_latency_seconds.gauge',
-    'process_cpu_seconds': 'process.cpu_seconds',
-    'process_max_fds': 'process.max_fds',
-    'process_open_fds': 'process.open_fds',
-    'process_resident_memory_bytes': 'process.resident_memory_bytes',
-    'process_start_time_seconds': 'process.start_time_seconds',
-    'process_virtual_memory_bytes': 'process.virtual_memory.bytes',
-    'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
     'promhttp_metric_handler_requests_in_flight': 'promhttp_metric_handler_requests.in_flight',
     'promhttp_metric_handler_requests': 'promhttp_metric_handler_requests',
     'velero_backup_attempt': 'backup.attempt',
     'velero_backup_deletion_attempt': 'backup.deletion.attempt',
     'velero_backup_deletion_failure': 'backup.deletion.failure',
     'velero_backup_deletion_success': 'backup.deletion.success',
-    'velero_backup_duration_seconds': 'backup.duration_seconds',
+    'velero_backup_duration_seconds': 'backup.duration.seconds',
     'velero_backup_failure': 'backup.failure',
     'velero_backup_items_errors': 'backup.items.errors',
     'velero_backup_items_total': 'backup.items',
@@ -81,5 +51,5 @@ METRIC_MAP = {
 }
 
 RENAME_LABELS_MAP = {
-    'version': 'velero_version',
+    'version': 'go_version',
 }

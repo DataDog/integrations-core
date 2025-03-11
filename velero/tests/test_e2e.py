@@ -9,7 +9,7 @@ from .common import TEST_METRICS
 
 
 @pytest.mark.e2e
-def test_check_milvus_e2e(dd_agent_check, instance):
+def test_check_velero_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric, _ in TEST_METRICS.items():
