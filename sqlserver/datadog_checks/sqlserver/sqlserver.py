@@ -790,7 +790,6 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
             databases=db_names,
-            track_operation_time=True,
         )
 
     @property
