@@ -115,7 +115,6 @@ FOREIGN_KEY_QUERY_PRE_2017 = """
 SELECT
     FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
-    OBJECT_DEFINITION(FK.object_id) AS definition,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STUFF((
         SELECT ',' + COL_NAME(FKC.parent_object_id, FKC.parent_column_id)
