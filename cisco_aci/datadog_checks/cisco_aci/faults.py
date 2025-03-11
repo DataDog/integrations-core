@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime
 
-from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.serialization import from_json, to_json
+from datadog_checks.base.utils.time import get_timestamp
 
 
 class Faults:
@@ -57,7 +57,7 @@ class Faults:
                 payload = fault[faultCategory]["attributes"]
                 payload["aciFaultCategory"] = faultCategory
             else:
-                self.log.warn("fault does not contain %s: %s", faultCategory, fault)
+                self.log.warning("fault does not contain %s: %s", faultCategory, fault)
                 continue
 
             # Rename severity field because the backend seems to give precedence to severity over any status
