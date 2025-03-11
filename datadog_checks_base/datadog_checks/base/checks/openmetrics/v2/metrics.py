@@ -1,6 +1,8 @@
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'go.gc.duration.seconds',
+    'go_gc_duration_seconds_quantile': 'go.gc.duration.seconds.quantile',
     'go_goroutines': 'go.goroutines',
+    'go_info': 'go.info',
     'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'},
     'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash.sys_bytes',
     'go_memstats_frees': 'go.memstats.frees',
