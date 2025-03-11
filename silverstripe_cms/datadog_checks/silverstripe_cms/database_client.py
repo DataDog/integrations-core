@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pymysql
 import psycopg2
 import psycopg2.extras
+import pymysql
 
 from datadog_checks.base.errors import ConfigurationError
 

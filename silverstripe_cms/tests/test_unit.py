@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from unittest.mock import MagicMock, patch
+
 import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError  # noqa: F401
