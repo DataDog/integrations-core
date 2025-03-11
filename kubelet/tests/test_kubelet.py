@@ -162,6 +162,8 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.go_goroutines',
     'kubernetes.go_threads',
     'kubernetes.kubelet.container.log_filesystem.used_bytes',
+    'kubernetes.kubelet.image_pull.duration.count',
+    'kubernetes.kubelet.image_pull.duration.sum',
     'kubernetes.kubelet.cpu.usage',
     'kubernetes.kubelet.memory.usage',
     'kubernetes.kubelet.memory.rss',

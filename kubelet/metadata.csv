@@ -73,6 +73,8 @@ kubernetes.runtime.cpu.usage,gauge,,nanocore,,The number of cores used by the ru
 kubernetes.runtime.memory.usage,gauge,,byte,,Current runtime memory usage in bytes,-1,kubernetes,k8s.runtime.mem,
 kubernetes.runtime.memory.rss,gauge,,byte,,Size of runtime RSS in bytes,-1,kubernetes,k8s.runtime.mem.rss,
 kubernetes.kubelet.container.log_filesystem.used_bytes,gauge,,byte,,Bytes used by the container's logs on the filesystem (requires kubernetes 1.14+),0,kubernetes,k8s.kubelet.container.log_filesystem,
+kubernetes.kubelet.image_pull.duration.count,gauge,,,,The count of image pull duration in seconds (ALPHA in kubernetes v1.30),0,kubernetes,k8s.image_pull.dur.count,
+kubernetes.kubelet.image_pull.duration.sum,gauge,,second,,The sum of image pull duration in seconds (ALPHA in kubernetes v1.30),-1,kubernetes,k8s.image_pull.dur.sum,
 kubernetes.kubelet.pod.start.duration,gauge,,microsecond,,Duration in microseconds for a single pod to go from pending to running,0,kubernetes,k8s.kubelet.pod.start.duration,
 kubernetes.kubelet.pod.worker.duration,gauge,,microsecond,,"Duration in microseconds to sync a single pod. Broken down by operation type: create, update, or sync",0,kubernetes,k8s.kubelet.pod.worker.duration,
 kubernetes.kubelet.pod.worker.start.duration,gauge,,microsecond,,Duration in microseconds from seeing a pod to starting a worker,0,kubernetes,k8s.kubelet.pod.worker.start.duration,

@@ -1,0 +1,1 @@
+The kubelet check now collects metrics for the duration of image pull operations (in seconds) when available (requires Kubernetes 1.30+): `kubernetes.kubelet.image_pull.duration.sum` and `kubernetes.kubelet.image_pull.duration.count`.

@@ -102,6 +102,7 @@ DEFAULT_HISTOGRAMS = {
     'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
     'kubelet_pleg_relist_duration_seconds': 'kubelet.pleg.relist_duration',
     'kubelet_pleg_relist_interval_seconds': 'kubelet.pleg.relist_interval',
+    'kubelet_image_pull_duration_seconds': 'kubelet.image_pull.duration',
 }
 
 DEFAULT_SUMMARIES = {}
