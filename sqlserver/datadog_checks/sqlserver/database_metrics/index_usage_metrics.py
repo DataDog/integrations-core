@@ -100,6 +100,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
+        self.log.debug("Hello Austin!")
         for database in self.databases:
             executor = self.new_query_executor(
                 self.queries,
