@@ -11,23 +11,23 @@ from .base import SqlserverDatabaseMetricsBase
 INDEX_USAGE_STATS_QUERY = {
     "name": "sys.dm_db_index_usage_stats",
     "query": """
-    SELECT
-         DB_NAME(ixus.database_id) as db,
-         CASE
-            WHEN ind.name IS NULL THEN 'HeapIndex_' + OBJECT_NAME(ind.object_id)
-            ELSE ind.name
-         END AS index_name,
-         OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) as "schema",
-         OBJECT_NAME(ind.object_id) as table_name,
-        user_seeks,
-        user_scans,
-        user_lookups,
-        user_updates
+    SELECT 
+        DB_NAME(ixus.database_id) AS db, 
+        COALESCE(ind.name, 'HeapIndex_' + OBJECT_NAME(ind.object_id)) AS index_name,
+        OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) AS "schema",
+        OBJECT_NAME(ind.object_id) AS table_name,
+        ixus.user_seeks as user_seeks,
+        ixus.user_scans as user_scans,
+        ixus.user_lookups as user_lookups,
+        ixus.user_updates as user_updates
     FROM sys.indexes ind
-             INNER JOIN sys.dm_db_index_usage_stats ixus
-             ON ixus.index_id = ind.index_id AND ixus.object_id = ind.object_id
-    WHERE OBJECTPROPERTY(ind.object_id, 'IsUserTable') = 1 AND DB_NAME(ixus.database_id) = db_name()
-    GROUP BY ixus.database_id, ind.object_id, ind.name, user_seeks, user_scans, user_lookups, user_updates
+    JOIN sys.dm_db_index_usage_stats ixus
+        ON ixus.index_id = ind.index_id 
+        AND ixus.object_id = ind.object_id
+        AND ixus.database_id = DB_ID()
+    JOIN sys.objects o 
+        ON ind.object_id = o.object_id 
+        AND o.type = 'U'
 """,
     "columns": [
         {"name": "db", "type": "tag"},
@@ -100,7 +100,6 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
 
     def _build_query_executors(self):
         executors = []
-        self.log.debug("Hello Austin!")
         for database in self.databases:
             executor = self.new_query_executor(
                 self.queries,
