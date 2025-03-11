@@ -945,6 +945,7 @@ class PostgreSql(AgentCheck):
             event = {
                 "host": self.reported_hostname,
                 "port": self._config.port,
+                "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
