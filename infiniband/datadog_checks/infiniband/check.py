@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import glob
 import os
-
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck # noqa: F401
+from datadog_checks.base import AgentCheck  # noqa: F401
+
 from .metrics import IB_COUNTERS, RDMA_COUNTERS
+
 
 class InfinibandCheck(AgentCheck):
 
@@ -18,6 +19,15 @@ class InfinibandCheck(AgentCheck):
         super(InfinibandCheck, self).__init__(name, init_config, instances)
         self.tags = self.instance.get('tags', [])
         self.base_path = self.instance.get('infiniband_path', '/sys/class/infiniband')
+
+        # Allow for additional counters to be collected if configured
+        self.additional_counters = set(self.instance.get('additional_counters', []))
+        self.additional_hw_counters = set(self.instance.get('additional_hw_counters', []))
+
+        # Allow for specific counters to be excluded if configured
+        self.exclude_counters = set(self.instance.get('exclude_counters', []))
+        self.exclude_hw_counters = set(self.instance.get('exclude_hw_counters', []))
+
         # Test to see if the path exist. In containerized environments it's customary to mount it to /host
         if not os.path.exists(self.base_path):
             alternative_path = os.path.join('/host', self.base_path.lstrip('/'))
@@ -26,7 +36,6 @@ class InfinibandCheck(AgentCheck):
             else:
                 raise Exception(f"Path {self.base_path} and {alternative_path} does not exist")
 
-
     def check(self, _):
         for device in os.listdir(self.base_path):
             dev_path = os.path.join(self.base_path, device, "ports")
@@ -34,23 +43,41 @@ class InfinibandCheck(AgentCheck):
                 continue
 
             for port in os.listdir(dev_path):
-                port_path = os.path.join(dev_path, port)
+                self._collect_counters(device, port)
 
-                tags = self.tags + ["device:{}".format(device), "port:{}".format(port)]
+    def _collect_counters(self, device, port):
+        port_path = os.path.join(self.base_path, device, "ports", port)
+        tags = self.tags + [f"device:{device}", f"port:{port}"]
 
-                counters_path = os.path.join(port_path, "counters")
-                if os.path.isdir(counters_path):
-                    for file in glob.glob(f"{counters_path}/*"):
-                        filename = os.path.basename(file)
-                        if filename in IB_COUNTERS:
-                            with open(file, "r") as f:
-                                self.gauge(f"{filename}", int(f.read().strip()), tags=tags)
+        self._collect_counter_metrics(port_path, tags)
+        self._collect_hw_counter_metrics(port_path, tags)
 
-                hw_counters_path = os.path.join(port_path, "hw_counters")
-                if os.path.isdir(hw_counters_path):
-                    for file in glob.glob(f"{hw_counters_path}/*"):
-                        filename = os.path.basename(file)
-                        if filename in RDMA_COUNTERS:
-                            metric_name = f"rdma.{filename}"
-                            with open(file, "r") as f:
-                                self.gauge(metric_name, int(f.read().strip()), tags=tags)
+    def _collect_counter_metrics(self, port_path, tags):
+        counters_path = os.path.join(port_path, "counters")
+        if not os.path.isdir(counters_path):
+            return
+
+        for file in glob.glob(f"{counters_path}/*"):
+            filename = os.path.basename(file)
+            if (
+                filename in IB_COUNTERS or filename in self.additional_counters
+            ) and filename not in self.exclude_counters:
+                self._submit_counter_metric(file, filename, tags)
+
+    def _collect_hw_counter_metrics(self, port_path, tags):
+        hw_counters_path = os.path.join(port_path, "hw_counters")
+        if not os.path.isdir(hw_counters_path):
+            return
+
+        for file in glob.glob(f"{hw_counters_path}/*"):
+            filename = os.path.basename(file)
+            if (
+                filename in RDMA_COUNTERS or filename in self.additional_hw_counters
+            ) and filename not in self.exclude_hw_counters:
+                self._submit_counter_metric(file, f"rdma.{filename}", tags)
+
+    def _submit_counter_metric(self, file_path, metric_name, tags):
+        with open(file_path, "r") as f:
+            value = int(f.read().strip())
+            self.gauge(metric_name, value, tags)
+            self.monotonic_count(f"{metric_name}.count", value, tags)

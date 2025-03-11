@@ -1,4 +1,4 @@
-IB_COUNTERS= {
+IB_COUNTERS = {
     "VL15_dropped",
     "link_downed",
     "link_error_recovery",
@@ -53,8 +53,6 @@ RDMA_COUNTERS = {
     "rnr_nak_retry_err",
     "roce_adp_retrans",
     "roce_adp_retrans_to",
-    "roce_adp_retrans_to",
-    "roce_slow_restart",
     "roce_slow_restart",
     "roce_slow_restart_cnps",
     "roce_slow_restart_trans",
