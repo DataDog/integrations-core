@@ -47,7 +47,7 @@ class Faults:
             self.submit_faults("faultDelegate", faults)
 
     def submit_faults(self, faultCategory, faults):
-        if (len(faults) == 0):
+        if len(faults) == 0:
             return
 
         maxtimestamp = 0.0
