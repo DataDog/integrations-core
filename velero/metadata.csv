@@ -24,7 +24,6 @@ velero.go.gc.duration.seconds.count,count,,,,Count aggregation of garbage collec
 velero.go.gc.duration.seconds.quantile,gauge,,,,Quantile of the pause duration of garbage collection cycles.,0,velero,,,
 velero.go.gc.duration.seconds.sum,count,,,,Cumulative sum of the pause duration of garbage collection cycles.,0,velero,,,
 velero.go.goroutines,gauge,,,,Number of goroutines that currently exist.,0,velero,,,
-velero.go.info,gauge,,,,Information about the Go environment.,0,velero,,,
 velero.go.memstats.alloc_bytes,gauge,,,,Number of bytes allocated and still in use.,0,velero,,,
 velero.go.memstats.alloc_bytes.count,count,,,,"Total number of bytes allocated, even if freed.",0,velero,,,
 velero.go.memstats.buck_hash.sys_bytes,gauge,,,,Number of bytes used by the profiling bucket hash table.,0,velero,,,

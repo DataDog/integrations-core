@@ -26,7 +26,6 @@ TEST_METRICS = {
     'velero.go.gc.duration.seconds.sum': 'monotonic_count',
     'velero.go.gc.duration.seconds.count': 'monotonic_count',
     'velero.go.goroutines': 'gauge',
-    'velero.go.info': 'gauge',
     'velero.go.memstats.alloc_bytes': 'gauge',
     'velero.go.memstats.alloc_bytes.count': 'monotonic_count',
     'velero.go.memstats.buck_hash.sys_bytes': 'gauge',

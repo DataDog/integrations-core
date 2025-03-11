@@ -6,8 +6,6 @@ from datadog_checks.base.checks.openmetrics.v2.metrics import DEFAULT_GO_METRICS
 
 METRIC_MAP = {
     **DEFAULT_GO_METRICS,
-    'go_gc_duration_seconds_quantile': 'go.gc.duration.seconds.quantile',
-    'go_info': 'go.info',
     'podVolume_data_download_cancel': 'podVolume.data.download.cancel',
     'podVolume_data_download_failure': 'podVolume.data.download.failure',
     'podVolume_data_download_success': 'podVolume.data.download.success',
