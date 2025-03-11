@@ -33,8 +33,6 @@ AUTH_SOURCE_TYPE = INTEGRATION_PREFIX + ".silverstipe_cms_authentication"
 
 # Silverstripe CMS Database Constants
 MYSQL = "MySQL"
-MYSQL_DB_URL_PREFIX = "mysql+pymysql"
-POSTGRES_DB_URL_PREFIX = "postgresql"
 DB_CONNECTION_TIMEOUT_IN_SECONDS = 10
 
 # Tables

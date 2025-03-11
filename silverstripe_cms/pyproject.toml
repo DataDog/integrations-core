@@ -30,14 +30,16 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.0.0",
-    "sqlalchemy>=2.0.36"
 ]
 dynamic = [
     "version",
 ]
 
 [project.optional-dependencies]
-deps = []
+deps = [
+    "psycopg2-binary==2.9.9",
+    "PyMySQL==1.1.1"
+]
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

@@ -51,17 +51,7 @@ The Silverstripe CMS integration is included in the [Datadog Agent package][1]. 
            min_collection_interval: 300
      ```
 
-3. Install the package for the third-party Python dependency `sqlalchemy`:
-   - Linux:
-     ```sh
-     sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install "sqlalchemy>=2.0.36"
-     ```
-   - Windows:
-     ```sh
-     "%programfiles%\Datadog\Datadog Agent\embedded3\python.exe" -m pip install "sqlalchemy>=2.0.36"
-     ```
-
-4. [Restart the Agent][3].
+3. [Restart the Agent][3].
 
 ### Validation
 

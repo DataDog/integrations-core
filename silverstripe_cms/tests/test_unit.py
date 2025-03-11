@@ -2,11 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any
 from unittest.mock import MagicMock, patch
-
 import pytest
-from sqlalchemy.engine.cursor import CursorResult
 
 from datadog_checks.base import AgentCheck, ConfigurationError  # noqa: F401
 from datadog_checks.silverstripe_cms import SilverstripeCMSCheck, constants
@@ -132,12 +129,11 @@ def test_ingest_query_result(mock_gauge, instance):
     check.validate_configurations()
     check.initialize_db_client()
 
-    mock_cursor = MagicMock(spec=CursorResult[Any])
-    mock_cursor.keys.return_value = ("ClassName", "RowCount")
+    mock_cursor = MagicMock()
     mock_cursor.__iter__.return_value = [
-        ("SilverStripe\\ErrorPage\\ErrorPage", 2),
-        ("SilverStripe\\CMS\\Model\\RedirectorPage", 3),
-        ("SilverStripe\\CMS\\Model\\VirtualPage", 10),
+        {"ClassName": "SilverStripe\\ErrorPage\\ErrorPage", "RowCount": 2},
+        {"ClassName": "SilverStripe\\CMS\\Model\\RedirectorPage", "RowCount": 3},
+        {"ClassName": "SilverStripe\\CMS\\Model\\VirtualPage", "RowCount": 10},
     ]
 
     check.ingest_query_result(mock_cursor, "pages_live.count")
@@ -151,30 +147,6 @@ def test_extract_metric_tags(instance):
     mock_row_data = {"ClassName": "SilverStripe\\ErrorPage\\ErrorPage", "RowCount": 2, "ID": 1, "FirstName": "john"}
     result = check.get_metric_tags(mock_row_data)
     assert result == ["page_type:error_page", "id:1", "firstname:john"]
-
-
-@pytest.mark.unit
-def test_get_connection_url_for_mysql(instance):
-    check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
-    check.database_type = "MySQL"
-    check.initialize_db_client()
-
-    assert check.db_client.db_connection_url == (
-        f"{constants.MYSQL_DB_URL_PREFIX}://{instance.get('SILVERSTRIPE_DATABASE_USERNAME')}:{instance['SILVERSTRIPE_DATABASE_PASSWORD']}@"
-        f"{instance['SILVERSTRIPE_DATABASE_SERVER_IP']}:{instance['SILVERSTRIPE_DATABASE_PORT']}/{instance['SILVERSTRIPE_DATABASE_NAME']}"
-    )
-
-
-@pytest.mark.unit
-def test_get_connection_url_for_postgres(instance):
-    check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
-    check.database_type = "PostgreSQL"
-    check.initialize_db_client()
-
-    assert check.db_client.db_connection_url == (
-        f"{constants.POSTGRES_DB_URL_PREFIX}://{instance.get('SILVERSTRIPE_DATABASE_USERNAME')}:{instance['SILVERSTRIPE_DATABASE_PASSWORD']}@"
-        f"{instance['SILVERSTRIPE_DATABASE_SERVER_IP']}:{instance['SILVERSTRIPE_DATABASE_PORT']}/{instance['SILVERSTRIPE_DATABASE_NAME']}"
-    )
 
 
 @pytest.mark.unit

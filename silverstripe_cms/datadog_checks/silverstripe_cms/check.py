@@ -4,9 +4,6 @@
 
 import re
 import time
-from typing import Any
-
-from sqlalchemy.engine.cursor import CursorResult
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import (
@@ -198,16 +195,14 @@ class SilverstripeCMSCheck(AgentCheck):
         message = f"End of the data collection/ingestion. Time taken: {elapsed_time:.3f} seconds."
         self.log.info(constants.LOG_TEMPLATE.format(host=self.database_server_ip, message=message))
 
-    def ingest_query_result(self, query_result: CursorResult[Any], metric_name: str) -> None:
+    def ingest_query_result(self, query_result: list, metric_name: str) -> None:
         """Extracts the query result to make it ready for ingestion as metrics."""
         try:
             common_tags = [f"silverstripe_host:{self.database_server_ip}"] + (
                 self.custom_tags if self.custom_tags else []
             )
-            column_names = query_result.keys()
-            for row in query_result:
-                row_data = dict(zip(column_names, row, strict=False))
-                tags = self.get_metric_tags(row_data)
+            for row_data in query_result:
+                tags = self.get_metric_tags(dict(row_data))
                 if tags:
                     self.gauge(metric_name, row_data["RowCount"], tags=tags + common_tags)
         except Exception as err:

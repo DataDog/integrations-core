@@ -31,9 +31,6 @@ RUN apt-get update && \
 # Prevent services from starting automatically
 RUN echo exit 0 > /usr/sbin/policy-rc.d
 
-# Install SQLAlchemy using pip as dd-agent user
-RUN python3 -m pip install "sqlalchemy>=2.0.36"
-
 # Configure MySQL
 RUN service mysql start && \
     mysql -e "CREATE DATABASE silverstripe_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" && \
