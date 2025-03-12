@@ -28,6 +28,9 @@ class InfinibandCheck(AgentCheck):
         self.exclude_counters = set(self.instance.get('exclude_counters', []))
         self.exclude_hw_counters = set(self.instance.get('exclude_hw_counters', []))
 
+        # Allow for specific devices to be excluded if configured
+        self.exclude_devices = set(self.instance.get('exclude_devices', []))
+
         # Test to see if the path exist. In containerized environments it's customary to mount it to /host
         if not os.path.exists(self.base_path):
             alternative_path = os.path.join('/host', self.base_path.lstrip('/'))
@@ -38,8 +41,14 @@ class InfinibandCheck(AgentCheck):
 
     def check(self, _):
         for device in os.listdir(self.base_path):
+            # Skip excluded devices
+            if device in self.exclude_devices:
+                self.log.debug("Skipping device %s as it is in the exclude list" % device)
+                continue
+                
             dev_path = os.path.join(self.base_path, device, "ports")
             if not os.path.isdir(dev_path):
+                self.log.debug("Skipping device %s as it does not have a ports directory" % device)
                 continue
 
             for port in os.listdir(dev_path):
@@ -47,7 +56,7 @@ class InfinibandCheck(AgentCheck):
 
     def _collect_counters(self, device, port):
         port_path = os.path.join(self.base_path, device, "ports", port)
-        tags = self.tags + [f"device:{device}", f"port:{port}"]
+        tags = self.tags + ["device:" + device, "port:" + port]
 
         self._collect_counter_metrics(port_path, tags)
         self._collect_hw_counter_metrics(port_path, tags)
@@ -55,6 +64,7 @@ class InfinibandCheck(AgentCheck):
     def _collect_counter_metrics(self, port_path, tags):
         counters_path = os.path.join(port_path, "counters")
         if not os.path.isdir(counters_path):
+            self.log.debug("Skipping device %s as counters directory does not exist" % counters_path)
             return
 
         for file in glob.glob(f"{counters_path}/*"):
@@ -67,6 +77,7 @@ class InfinibandCheck(AgentCheck):
     def _collect_hw_counter_metrics(self, port_path, tags):
         hw_counters_path = os.path.join(port_path, "hw_counters")
         if not os.path.isdir(hw_counters_path):
+            self.log.debug("Skipping device %s as hw_counters directory does not exist" % hw_counters_path)
             return
 
         for file in glob.glob(f"{hw_counters_path}/*"):
@@ -80,4 +91,5 @@ class InfinibandCheck(AgentCheck):
         with open(file_path, "r") as f:
             value = int(f.read().strip())
             self.gauge(metric_name, value, tags)
+            # Submit a monotonic counter for the total number of events to allow for rate calculations
             self.monotonic_count(f"{metric_name}.count", value, tags)
