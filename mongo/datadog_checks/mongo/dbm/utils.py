@@ -6,18 +6,19 @@
 from typing import Optional, Tuple
 
 from bson import json_util, regex
+from pymongo.errors import ExecutionTimeout, NetworkTimeout
 
+from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
+from datadog_checks.mongo.common import MONGODB_SYSTEM_DATABASES
 
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-
-MONGODB_SYSTEM_DATABASES = frozenset(["admin", "config", "local"])
 
 # exclude keys in sampled operation that cause issues with the explain command
 EXPLAIN_COMMAND_EXCLUDE_KEYS = frozenset(
@@ -54,6 +55,8 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "explain",
         "profile",  # command to get profile level
         "listCollections",
+        "listDatabases",
+        'dbStats',
     ]
 )
 
@@ -65,6 +68,7 @@ UNEXPLAINABLE_PIPELINE_STAGES = frozenset(
         "$listSearchIndexes",
         "$sample",
         "$shardedDataDistribution",
+        "$mergeCursors",
     ]
 )
 
@@ -83,6 +87,8 @@ EXPLAIN_PLAN_KEYS_TO_REMOVE = frozenset(
         "$gleStats",
     ]
 )
+
+log = get_check_logger()
 
 
 def format_key_name(formatter, metric_dict: dict) -> dict:
@@ -106,7 +112,10 @@ def should_explain_operation(
     command: dict,
     explain_plan_rate_limiter: RateLimitingTTLCache,
     explain_plan_cache_key: Tuple[str, str],
+    verbosity: str = 'executionStats',
 ) -> bool:
+    if verbosity == "disabled":
+        return False
     if not op or op == "none":
         # Skip operations that are not queries
         return False
@@ -143,19 +152,42 @@ def should_explain_operation(
     return True
 
 
-def get_explain_plan(api_client, op: Optional[str], command: dict, dbname: str):
+def get_explain_plan(
+    api_client, command: dict, dbname: str, op_duration: int, cursor_timeout: int, verbosity: str = 'executionStats'
+) -> dict:
+    if verbosity != "queryPlanner" and op_duration >= cursor_timeout:
+        # If the operation duration exceeds the cursor timeout,
+        # explain with non-queryPlanner verbosity will likely timeout
+        # so we log a warning and fallback to queryPlanner
+        log.warning(
+            "Operation took %s seconds to execute, which exceeds the cursor timeout of %s seconds. "
+            "Falling back to queryPlanner verbosity for the explain command.",
+            op_duration,
+            cursor_timeout,
+        )
+        verbosity = "queryPlanner"
     dbname = command.pop("$db", dbname)
     try:
         for key in EXPLAIN_COMMAND_EXCLUDE_KEYS:
             command.pop(key, None)
-        explain_plan = api_client[dbname].command("explain", command, verbosity="executionStats")
-        return format_explain_plan(explain_plan)
+        try:
+            explain_plan = api_client.explain_command(dbname, command, verbosity)
+            return format_explain_plan(explain_plan)
+        except (ExecutionTimeout, NetworkTimeout) as e:
+            # If the operation times out, we try one more time with a different verbosity
+            if verbosity != "queryPlanner":
+                log.warning("Explaining command timed out with verbosity %s, retrying with queryPlanner", verbosity)
+                verbosity = "queryPlanner"
+                explain_plan = api_client.explain_command(dbname, command, verbosity)
+                return format_explain_plan(explain_plan)
+            raise e
     except Exception as e:
         return {
             "collection_errors": [
                 {
                     "code": str(type(e).__name__),
                     "message": str(e),
+                    "strategy": verbosity,
                 }
             ],
         }
