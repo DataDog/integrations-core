@@ -18,7 +18,7 @@ files:
           - name: exclude_devices
             description: |
               A list of devices to exclude from the check. Devices are located in the infiniband directory. 
-              The default is /sys/class/infiniband.
+              The devices are located default is /sys/class/infiniband.
             value:
               example:
                 - "mlx5_0"
@@ -30,7 +30,7 @@ files:
           - name: additional_counters
             description: |
               A list of additional counters to collect. The counter names are the files in which the counter 
-              values are stored.
+              values are stored. These are located inside /sys/class/infiniband/devices/<device>/ports/<port>/counters.
             value:
               example:
                 - "additional_counter"
@@ -41,7 +41,8 @@ files:
           - name: additional_hw_counters
             description: |
               A list of additional hardware counters to collect. The counter names are the files in which the 
-              counter values are stored.
+              counter values are stored. These are located inside 
+              /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
             value:
               example:
                 - "additional_hw_counter"

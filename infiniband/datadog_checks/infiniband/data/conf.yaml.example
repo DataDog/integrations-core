@@ -21,7 +21,7 @@ instances:
 
     ## @param exclude_devices - list of strings - optional
     ## A list of devices to exclude from the check. Devices are located in the infiniband directory. 
-    ## The default is /sys/class/infiniband.
+    ## The devices are located default is /sys/class/infiniband.
     #
     # exclude_devices:
     #   - mlx5_0
@@ -30,7 +30,7 @@ instances:
 
     ## @param additional_counters - list of strings - optional
     ## A list of additional counters to collect. The counter names are the files in which the counter 
-    ## values are stored.
+    ## values are stored. These are located inside /sys/class/infiniband/devices/<device>/ports/<port>/counters.
     #
     # additional_counters:
     #   - additional_counter
@@ -38,7 +38,8 @@ instances:
 
     ## @param additional_hw_counters - list of strings - optional
     ## A list of additional hardware counters to collect. The counter names are the files in which the 
-    ## counter values are stored.
+    ## counter values are stored. These are located inside 
+    ## /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
     #
     # additional_hw_counters:
     #   - additional_hw_counter
