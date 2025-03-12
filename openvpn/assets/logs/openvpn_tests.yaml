@@ -189,7 +189,6 @@ tests:
       [Errno 113] No route to host (facility=\\'initialize [10.10.10.10]\\')\",
       \\'auth method\\': \\'ldap\\'}'"
     result:
-  result:
       custom:
         auth_method: "ldap"
         log_type: "Web login authentication failed"
