@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from copy import deepcopy
+
 from datadog_checks.avi_vantage import AviVantageCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -16,6 +18,20 @@ def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    instance = deepcopy(unit_instance)
+    instance["tenant"]= "admin"
+    check = AviVantageCheck('avi_vantage', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
+    for metric in get_expected_metrics("metrics?tenant=admin.json"):
+        aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 
 @pytest.mark.integration

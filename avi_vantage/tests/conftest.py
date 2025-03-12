@@ -12,6 +12,8 @@ from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.http import MockResponse
 
+from urllib.parse import urlparse, parse_qs
+
 HERE = get_here()
 
 
@@ -32,9 +34,13 @@ def dd_environment(integration_instance):
 
 @pytest.fixture
 def get_expected_metrics():
-    def _get_metrics(endpoint=None):
-        with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
-            expected_metrics = json.load(f)
+    def _get_metrics(metrics_file=None, endpoint=None):
+        if metrics_file:
+            with open(os.path.join(HERE, 'compose', 'fixtures', metrics_file)) as f:
+                expected_metrics = json.load(f)
+        else:
+            with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
+                expected_metrics = json.load(f)
 
         if endpoint is None:
             return expected_metrics
@@ -56,7 +62,14 @@ def mock_client():
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
 
         def get(url: AnyStr, *_: Any, **__: Any):
-            resource = url.split('/')[-1]
+
+            parsed = urlparse(url)
+            resource = [part for part in parsed.path.split("/") if len(part) > 0][-1]
+            query_params = parsed.query
+            
+            if query_params:
+                return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics?{query_params}'))
+
             return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics'))
 
         req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
