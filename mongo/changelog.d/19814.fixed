@@ -1,1 +1,0 @@
-Revert "bump pymongo to 4.11 (#19610)". This brings pymongo back to v4.8.
