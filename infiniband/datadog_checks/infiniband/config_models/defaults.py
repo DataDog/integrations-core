@@ -8,8 +8,16 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_disable_generic_tags():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
+
+
+def instance_infiniband_path():
+    return '/sys/class/infiniband'
 
 
 def instance_min_collection_interval():

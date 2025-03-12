@@ -14,6 +14,50 @@ init_config:
 instances:
 
   -
+    ## @param infiniband_path - string - optional - default: /sys/class/infiniband
+    ## The path to the infiniband directory.
+    #
+    # infiniband_path: /sys/class/infiniband
+
+    ## @param exclude_devices - list of strings - optional
+    ## A list of devices to exclude from the check. Devices are located in the infiniband directory. 
+    ## The default is /sys/class/infiniband.
+    #
+    # exclude_devices:
+    #   - mlx5_0
+    #   - efa0
+    #   - ib1
+
+    ## @param additional_counters - list of strings - optional
+    ## A list of additional counters to collect. The counter names are the files in which the counter 
+    ## values are stored.
+    #
+    # additional_counters:
+    #   - additional_counter
+    #   - rx_mpwqe_frag
+
+    ## @param additional_hw_counters - list of strings - optional
+    ## A list of additional hardware counters to collect. The counter names are the files in which the 
+    ## counter values are stored.
+    #
+    # additional_hw_counters:
+    #   - additional_hw_counter
+    #   - rx_mpwqe_frag
+
+    ## @param exclude_counters - list of strings - optional
+    ## A list of counters to exclude from the check.
+    #
+    # exclude_counters:
+    #   - duplicate_request
+    #   - lifespan
+
+    ## @param exclude_hw_counters - list of strings - optional
+    ## A list of hardware counters to exclude from the check.
+    #
+    # exclude_hw_counters:
+    #   - VL15_dropped
+    #   - link_downed
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -42,3 +86,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
