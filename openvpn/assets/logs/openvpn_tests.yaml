@@ -1,0 +1,45 @@
+id: openvpn
+tests:
+  - sample: "<14>Feb 24 05:11:20 openvpnas2 openvpnas: [-] [OVPN 2] OUT: '2025-02-24
+      05:11:20 10.10.10.10:50540 [openvpn] Peer Connection Initiated with
+      [AF_INET]10.10.10.10:50546 (via [AF_INET]198.51.100.20%ens32)'"
+    result: null
+  - sample: "<14>Feb 24 05:11:20 openvpnas2 openvpnas: [-] AUTH SUCCESS {'status':
+      0, 'user': 'openvpn', 'reason': 'local auth succeeded', 'auth method':
+      'local', 'proplist': {'prop_autogenerate': 'true', 'conn_group': 'test1',
+      'prop_superuser': 'true', 'prop_autologin': 'false', 'prop_deny': 'false',
+      'type': 'user_compile', 'pvt_password_digest': '[redacted]',
+      'user_auth_type': 'local', 'pvt_google_auth_secret': '[redacted]',
+      'pvt_google_auth_secret_locked': 'false'}, 'common_name': 'openvpn',
+      'serial': '5735787958742102040', 'serial_list': []}
+      cli='win'/'3.8connect1'/'OCWindows_3.4.0-3121'"
+    result: null
+  - sample: "<14>Feb 24 05:11:13 openvpnas2 openvpnas: [-] VPN Auth Failed: 'local
+      auth failed: password verification failed' [None]"
+    result: null
+  - sample: "<14>Feb 24 05:12:14 openvpnas2 openvpnas: [-] [WEB] OUT:
+      \"2025-02-24T05:12:14+0000 [stdout#info] Web login authentication failed:
+      {'status': 1, 'user': 'openvpn', 'reason': 'local auth failed: password
+      verification failed', 'auth method': 'local'}\""
+    result: null
+  - sample: "<14>Feb 24 04:50:22 openvpnas2 openvpnas: [-] [OVPN 2] OUT: '2025-02-24
+      04:50:22 openvpn/10.10.10.10:51820 MULTI: primary virtual IP for
+      openvpn/10.10.10.10:51820: 10.10.10.10'"
+    result: null
+  - sample: "<14>Feb 24 08:43:52 openvpnas2 openvpnas: [-] AUTH ERROR: DENY: user in
+      deny list. user=test5"
+    result: null
+  - sample: "<14>Feb 24 08:41:52 openvpnas2 openvpnas: [-] AUTH ERROR: local auth
+      failed: no stored password digest found in authcred attributes. user=test"
+    result: null
+  - sample: "<14>Feb 24 05:11:19 openvpnas2 openvpnas: [-] [OVPN 2] OUT: '2025-02-24
+      05:11:19 172.20.4.202:58075 SIGTERM[soft,delayed-exit] received,
+      client-instance exiting'"
+    result: null
+  - sample: "<14>Mar 11 12:59:46 openvpnas2 openvpnas: [-] [WEB] OUT:
+      '2025-03-11T12:59:46+0000 [stdout#info] Web login authentication failed:
+      {\\'status\\': 2, \\'user\\': \\'abc\\', \\'reason\\': \"Cannot connect to
+      LDAP server ldap://10.10.10.10: socket connection error while opening:
+      [Errno 113] No route to host (facility=\\'initialize [10.10.10.10]\\')\",
+      \\'auth method\\': \\'ldap\\'}'"
+    result: null
