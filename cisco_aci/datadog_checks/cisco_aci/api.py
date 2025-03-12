@@ -347,7 +347,7 @@ class Api:
     def get_faultdelegate_faults(self, afterTimestamp):
         path = "/api/node/class/faultDelegate.json"
         if afterTimestamp is not None:
-            path += "?query-target-filter=and(gt(faultInst.lastTransition,\"{}\"))".format(afterTimestamp)
+            path += "?query-target-filter=and(gt(faultDelegate.lastTransition,\"{}\"))".format(afterTimestamp)
         response = self.make_request(path)
         return self._parse_response(response)
 
