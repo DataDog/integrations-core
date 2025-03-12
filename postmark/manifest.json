@@ -12,13 +12,13 @@
     "title": "Postmark",
     "media": [
       {
-        "caption": "Postmark - Message Streams Activity",
-        "image_url": "images/postmark_message_streams_activity_1.png",
+        "caption": "Postmark - Overview",
+        "image_url": "images/postmark_overview_1.png",
         "media_type": "image"
       },
       {
-        "caption": "Postmark - Message Streams Activity",
-        "image_url": "images/postmark_message_streams_activity_2.png",
+        "caption": "Postmark - Overview",
+        "image_url": "images/postmark_overview_2.png",
         "media_type": "image"
       }
     ],
@@ -41,7 +41,7 @@
       }
     },
     "dashboards": {
-      "Postmark - Message Streams Activity" : "assets/dashboards/postmark_message_streams_activity.json"
+      "Postmark - Overview" : "assets/dashboards/postmark_overview.json"
     },
     "monitors": {
       "High block rate by message stream" : "assets/monitors/postmark_high_block_rate_by_message_stream.json",
