@@ -32,6 +32,19 @@ def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+@pytest.mark.unit
+def test_check_with_multiple_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    instance = deepcopy(unit_instance)
+    instance["tenant"]= "admin,tenant_a,tenant_b"
+    check = AviVantageCheck('avi_vantage', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
+    for metric in get_expected_metrics("metrics?tenant=admin,tenant_a,tenant_b.json"):
+        aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
 
 
 @pytest.mark.integration
