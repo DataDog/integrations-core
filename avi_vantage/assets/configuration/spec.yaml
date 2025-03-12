@@ -31,6 +31,14 @@ files:
         items:
           type: string
           enum: *avi_entities
+    - name: tenant
+      required: false
+      description: |
+        A comma-separated list of tenant names, by default set to admin.
+      value:
+        type: string
+        example: admin,tenant_1,tenant_2
+        display_default: ""
     - template: instances/openmetrics
       overrides:
         persist_connections.hidden: true
