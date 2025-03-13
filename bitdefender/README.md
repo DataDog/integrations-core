@@ -32,7 +32,7 @@ The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The i
    - Manage Users
    - Manage Company
    - View and analyze data
-2. Click **User Role**, then click **My Account**.
+2. Click **User menu**, then click **My Account**.
 3. Navigate to the **API keys** section.
 4. Click **Add**. The API Key Configuration window opens.
 5. Provide the following information:
