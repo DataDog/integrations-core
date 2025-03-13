@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
 from copy import deepcopy
+from urllib.parse import urlencode
 
 from datadog_checks.avi_vantage import metrics
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import CheckException
-
-from urllib.parse import urlencode
 
 from .config_models import ConfigMixin
 
@@ -49,13 +48,11 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             resource_metrics = RESOURCE_METRICS[entity]
             instance_copy = deepcopy(self.instance)
-            
+
             # GET /api/analytics/prometheus-metrics/{entity_type}/?{query_params}"
             endpoint = self.base_url + "/api/analytics/prometheus-metrics/" + entity
             if self.config.tenant:
-                query_params = {
-                    "tenant": self.config.tenant
-                }
+                query_params = {"tenant": self.config.tenant}
                 encoded_params = urlencode(query_params)
                 endpoint += f"/?{encoded_params}"
 

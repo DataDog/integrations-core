@@ -4,6 +4,7 @@
 import json
 import os
 from typing import Any, AnyStr
+from urllib.parse import urlparse
 
 import mock
 import pytest
@@ -11,8 +12,6 @@ import pytest
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.http import MockResponse
-
-from urllib.parse import urlparse, parse_qs
 
 HERE = get_here()
 
@@ -66,9 +65,11 @@ def mock_client():
             parsed = urlparse(url)
             resource = [part for part in parsed.path.split("/") if len(part) > 0][-1]
             query_params = parsed.query
-            
+
             if query_params:
-                return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics?{query_params}'))
+                return MockResponse(
+                    file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics?{query_params}')
+                )
 
             return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics'))
 

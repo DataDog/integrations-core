@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from copy import deepcopy
+
+import pytest
 
 from datadog_checks.avi_vantage import AviVantageCheck
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -19,10 +19,11 @@ def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+
 @pytest.mark.unit
 def test_check_with_empty_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
-    instance["tenant"]= ""
+    instance["tenant"] = ""
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -35,7 +36,7 @@ def test_check_with_empty_tenant(mock_client, get_expected_metrics, aggregator, 
 @pytest.mark.unit
 def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
-    instance["tenant"]= "admin"
+    instance["tenant"] = "admin"
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -44,10 +45,11 @@ def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+
 @pytest.mark.unit
 def test_check_with_multiple_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
-    instance["tenant"]= "admin,tenant_a,tenant_b"
+    instance["tenant"] = "admin,tenant_a,tenant_b"
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -55,8 +57,6 @@ def test_check_with_multiple_tenant(mock_client, get_expected_metrics, aggregato
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
 
 
 @pytest.mark.integration
