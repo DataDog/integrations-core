@@ -117,7 +117,7 @@ Make sure that traffic is bypassed from the configured port if the firewall is e
 
 If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
 
-On systems using Syslog, if the Agent listens for Cisco Secure Firewall logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
+On systems using Syslog, if the Agent listens for events on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
 This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
 

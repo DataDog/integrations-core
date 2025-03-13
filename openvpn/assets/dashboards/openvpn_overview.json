@@ -1784,6 +1784,7 @@
                             "title": "Client VPN Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1799,7 +1800,11 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "@timestamp",
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
                                             "width": "auto"
                                         },
                                         {
@@ -2205,6 +2210,7 @@
                             "title": "Web Portal Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2220,7 +2226,11 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "@timestamp",
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
                                             "width": "auto"
                                         },
                                         {
