@@ -955,6 +955,10 @@ class AgentCheck(object):
         # type: (str, ServiceCheckStatus, Sequence[str], str, str, bool) -> None
         """Send the status of a service.
 
+        !!! warning "Soft Deprecation"
+            When building new checks avoid submitting service checks.
+            **Checks that already submit service checks will continue to do so.**
+
         Parameters:
             name (str):
                 the name of the service check
