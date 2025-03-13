@@ -31,7 +31,7 @@ gpu.nvlink.errors.ecc,count,,,,NVLink ECC error counter total for all links,0,gp
 gpu.nvlink.errors.recovery,count,,,,NVLink recovery error counter total for all links,0,gpu,nvlink.errors.recovery,,
 gpu.nvlink.errors.replay,count,,,,NVLink replay error counter total for all links,0,gpu,nvlink.errors.replay,,
 gpu.nvlink.nvswitch_connected,gauge,,,,Number of NVLinks connected to the NVSwitch,0,gpu,nvlink.nvswitch_connected,,
-gpu.nvlink.speed,gauge,,megabyte,second,common speed of all NVLINK links,0,gpu,nvlink.speed,,
+gpu.nvlink.speed,gauge,,megabit,second,common speed of all NVLINK links,0,gpu,nvlink.speed,,
 gpu.nvlink.throughput.data.rx,gauge,,kilobyte,second,RX data throughput of all NVLINK links,0,gpu,nvlink.throughput.data.rx,,
 gpu.nvlink.throughput.data.tx,gauge,,kilobyte,second,TX data throughput of all NVLINK links,0,gpu,nvlink.throughput.data.tx,,
 gpu.nvlink.throughput.raw.rx,gauge,,kilobyte,second,RX raw throughput of all NVLINK links,0,gpu,nvlink.throughput.raw.rx,,
