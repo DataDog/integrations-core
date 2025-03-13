@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.5.1 / 2025-03-12
+
+***Fixed***:
+
+* Revert "bump pymongo to 4.11 (#19610)". This brings pymongo back to v4.8. ([#19814](https://github.com/DataDog/integrations-core/pull/19814))
+
 ## 8.5.0 / 2025-02-20
 
 ***Added***:
