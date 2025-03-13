@@ -18,6 +18,7 @@ on:
   pull_request:
     paths:
     - datadog_checks_base/datadog_checks/**
+    - datadog_checks_base/pyproject.toml
   schedule:
     - cron: '0 0,8,16 * * *'
 
