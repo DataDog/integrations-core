@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import OpenMetricsBaseCheckV2  # noqa: F401
-from datadog_checks.velero.metrics import METRIC_MAP, RENAME_LABELS_MAP
+from datadog_checks.velero.metrics import METRIC_MAP
 
 
 class VeleroCheck(OpenMetricsBaseCheckV2):
@@ -18,5 +18,4 @@ class VeleroCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
-            'rename_labels': RENAME_LABELS_MAP,
         }

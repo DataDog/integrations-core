@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.checks.openmetrics.v2.metrics import DEFAULT_GO_METRICS
-
 METRIC_MAP = {
-    **DEFAULT_GO_METRICS,
     'podVolume_data_download_cancel': 'pod_volume.data.download.cancel',
     'podVolume_data_download_failure': 'pod_volume.data.download.failure',
     'podVolume_data_download_success': 'pod_volume.data.download.success',
@@ -16,8 +13,6 @@ METRIC_MAP = {
     'podVolume_pod_volume_backup_enqueue_count': 'pod_volume.backup.enqueue',
     'podVolume_pod_volume_operation_latency_seconds': 'pod_volume.operation_latency.seconds',
     'podVolume_pod_volume_operation_latency_seconds_gauge': 'pod_volume.operation_latency.seconds.gauge',
-    'promhttp_metric_handler_requests_in_flight': 'promhttp.metric_handler_requests.in_flight',
-    'promhttp_metric_handler_requests': 'promhttp.metric_handler_requests',
     'velero_backup_attempt': 'backup.attempt',
     'velero_backup_deletion_attempt': 'backup.deletion.attempt',
     'velero_backup_deletion_failure': 'backup.deletion.failure',
@@ -46,8 +41,4 @@ METRIC_MAP = {
     'velero_volume_snapshot_attempt': 'volume_snapshot.attempt',
     'velero_volume_snapshot_failure': 'volume_snapshot.failure',
     'velero_volume_snapshot_success': 'volume_snapshot.success',
-}
-
-RENAME_LABELS_MAP = {
-    'version': 'go_version',
 }
