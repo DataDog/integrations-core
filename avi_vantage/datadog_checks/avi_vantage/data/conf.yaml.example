@@ -61,6 +61,11 @@ instances:
     #   - serviceengine
     #   - virtualservice
 
+    ## @param tenant - string - optional - default: 
+    ## A comma-separated list of tenant names, by default set to admin.
+    #
+    # tenant: admin,tenant_1,tenant_2
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
