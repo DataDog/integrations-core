@@ -8,13 +8,15 @@ import pytest
 from datadog_checks.avi_vantage import AviVantageCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from .conftest import NO_TENANT_METRICS_FOLDER, ADMIN_TENANT_METRICS_FOLDER, MULTIPLE_TENANTS_METRICS_FOLDER
+
 
 @pytest.mark.unit
 def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     check = AviVantageCheck('avi_vantage', {}, [unit_instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
-    for metric in get_expected_metrics():
+    for metric in get_expected_metrics(NO_TENANT_METRICS_FOLDER):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -27,7 +29,7 @@ def test_check_with_empty_tenant(mock_client, get_expected_metrics, aggregator, 
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
-    for metric in get_expected_metrics():
+    for metric in get_expected_metrics(NO_TENANT_METRICS_FOLDER):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -40,7 +42,7 @@ def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, 
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
-    for metric in get_expected_metrics("metrics_admin_tenant.json"):
+    for metric in get_expected_metrics(ADMIN_TENANT_METRICS_FOLDER):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -53,7 +55,7 @@ def test_check_with_multiple_tenant(mock_client, get_expected_metrics, aggregato
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
-    for metric in get_expected_metrics("metrics_multiple_tenants.json"):
+    for metric in get_expected_metrics(MULTIPLE_TENANTS_METRICS_FOLDER):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -67,7 +69,7 @@ def test_integration(
     check.check_id = 'test:123'
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
-    for metric in get_expected_metrics(endpoint='http://localhost:5000/'):
+    for metric in get_expected_metrics(NO_TENANT_METRICS_FOLDER, endpoint='http://localhost:5000/'):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -86,7 +88,7 @@ def test_e2e(dd_agent_check, integration_instance, get_expected_metrics):
     aggregator = dd_agent_check(integration_instance)
 
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
-    for metric in get_expected_metrics(endpoint='http://localhost:5000/'):
+    for metric in get_expected_metrics(NO_TENANT_METRICS_FOLDER, endpoint='http://localhost:5000/'):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
 
     aggregator.assert_all_metrics_covered()

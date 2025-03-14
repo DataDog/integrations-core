@@ -15,6 +15,9 @@ from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
+NO_TENANT_METRICS_FOLDER="no_tenant"
+ADMIN_TENANT_METRICS_FOLDER="admin_tenant"
+MULTIPLE_TENANTS_METRICS_FOLDER="multiple_tenants"
 
 @pytest.fixture(scope='session')
 def dd_environment(integration_instance):
@@ -33,13 +36,10 @@ def dd_environment(integration_instance):
 
 @pytest.fixture
 def get_expected_metrics():
-    def _get_metrics(metrics_file=None, endpoint=None):
-        if metrics_file:
-            with open(os.path.join(HERE, 'compose', 'fixtures', metrics_file)) as f:
-                expected_metrics = json.load(f)
-        else:
-            with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
-                expected_metrics = json.load(f)
+    def _get_metrics(metrics_folder, endpoint=None):
+        with open(os.path.join(HERE, 'compose', 'fixtures', metrics_folder, "metrics.json")) as f:
+            expected_metrics = json.load(f)
+
 
         if endpoint is None:
             return expected_metrics
@@ -66,12 +66,17 @@ def mock_client():
             resource = [part for part in parsed.path.split("/") if len(part) > 0][-1]
             query_params = parsed.query
 
+            path = {}
+
+            path["tenant=admin"] = ADMIN_TENANT_METRICS_FOLDER
+            path["tenant=admin%2Ctenant_a%2Ctenant_b"] = MULTIPLE_TENANTS_METRICS_FOLDER
+
             if query_params:
                 return MockResponse(
-                    file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics?{query_params}')
+                    file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
                 )
 
-            return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics'))
+            return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics'))
 
         req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
         yield
