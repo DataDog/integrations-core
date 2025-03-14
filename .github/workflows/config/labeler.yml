@@ -437,6 +437,8 @@ integration/openstack:
 - openstack/**/*
 integration/openstack_controller:
 - openstack_controller/**/*
+integration/openvpn:
+- openvpn/**/*
 integration/oracle:
 - oracle/**/*
 integration/orca_security:
