@@ -55,7 +55,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/snowflake",
+    "/datadog_checks",
 ]
 dev-mode-dirs = [
     ".",

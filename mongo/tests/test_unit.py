@@ -56,8 +56,8 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_service_is_available(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
@@ -78,8 +78,8 @@ def test_emits_ok_service_check_when_service_is_available(
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_each_run_when_service_is_available(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
@@ -101,8 +101,8 @@ def test_emits_ok_service_check_each_run_when_service_is_available(
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_version_metadata(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
@@ -134,8 +134,8 @@ def test_version_metadata(
         {'msg': 'isdbgrid'},  # isMaster
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -162,8 +162,8 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
         {'configsvr': True, 'set': 'replset', "myState": 1},  # replSetGetStatus
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -195,8 +195,8 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
         {'configsvr': True, 'set': 'replset', "myState": 3},  # replSetGetStatus
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_when_replicaset_state_recovering_then_database_names_not_called(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -680,8 +680,8 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         {},  # isMaster
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_for_documentdb_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -712,8 +712,8 @@ def test_emits_ok_service_check_for_documentdb_deployment(
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '7.0.0'})
-@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '7.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_for_mongodb_atlas_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):

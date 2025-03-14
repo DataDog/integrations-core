@@ -1,0 +1,1 @@
+Fix a bug where `tempdb` is wrongly excluded from database files metrics due to all instances inherited from `SqlserverDatabaseMetricsBase` share the same reference of auto-discovered databases.

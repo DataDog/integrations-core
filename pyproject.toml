@@ -64,6 +64,7 @@ exclude = [
 ]
 target-version = "py311"
 line-length = 120
+namespace-packages = ["datadog_checks"]
 
 [tool.ruff.lint]
 # Rules were ported over from the legacy flake8 settings for parity

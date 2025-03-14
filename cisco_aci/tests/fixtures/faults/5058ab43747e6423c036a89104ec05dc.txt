@@ -1,0 +1,34 @@
+{
+  "totalCount": "1",
+  "imdata": [
+    {
+      "faultInst": {
+        "attributes": {
+          "ack": "no",
+          "alert": "no",
+          "cause": "threshold-crossed",
+          "changeSet": "errorRate:11",
+          "childAction": "",
+          "code": "F96976",
+          "created": "2025-03-12T05:01:08.717+00:00",
+          "delegated": "no",
+          "descr": "TCA: Egress Error Drop Packets rate(eqptEgrDropPkts5min:errorRate) value 11 raised above threshold 10",
+          "dn": "topology/pod-1/node-102/sys/phys-[eth1/1]/fault-F96976",
+          "domain": "infra",
+          "highestSeverity": "warning",
+          "lastTransition": "2025-03-12T21:56:45.365+00:00",
+          "lc": "raised",
+          "occur": "53",
+          "origSeverity": "warning",
+          "prevSeverity": "cleared",
+          "rule": "tca-eqpt-egr-drop-pkts5min-error-rate",
+          "severity": "warning",
+          "status": "",
+          "subject": "counter",
+          "title": "",
+          "type": "operational"
+        }
+      }
+    }
+  ]
+}

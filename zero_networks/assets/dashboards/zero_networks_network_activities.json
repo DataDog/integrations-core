@@ -1,6 +1,7 @@
 {
     "title": "Zero Networks - Network Activities",
     "description": "This Dashboard provides insights into network activities logs generated on Zero Networks Platform.",
+    "experience_type": "default",
     "widgets": [
         {
             "id": 7048682808416574,
@@ -990,11 +991,6 @@
                             "requests": [
                                 {
                                     "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -1026,6 +1022,11 @@
                                     "style": {
                                         "palette": "datadog16"
                                     },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 10,
                                         "order_by": [
@@ -1282,11 +1283,6 @@
                             "requests": [
                                 {
                                     "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -1318,6 +1314,11 @@
                                     "style": {
                                         "palette": "datadog16"
                                     },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 10,
                                         "order_by": [
@@ -2071,6 +2072,7 @@
                             "title": "Top Destination Processes",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2079,7 +2081,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol"
+                                                "query": "source:zero-networks service:network-activities $User $IP $Traffic-Type $State $Protocol -@record.dst.processName:\"\""
                                             },
                                             "indexes": [
                                                 "*"
@@ -3109,19 +3111,19 @@
         },
         {
             "name": "Traffic-Type",
-            "prefix": "@trafficType",
+            "prefix": "@fields_mapping.trafficType",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "State",
-            "prefix": "@state",
+            "prefix": "@fields_mapping.state",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Protocol",
-            "prefix": "@protocol",
+            "prefix": "@fields_mapping.protocol",
             "available_values": [],
             "default": "*"
         }
