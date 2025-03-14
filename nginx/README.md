@@ -268,7 +268,7 @@ To collect metrics, set the following parameters and values in an [Autodiscovery
 | -------------------- | -------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `["nginx"]`                                                                |
 | `<INIT_CONFIG>`      | `[{}]`                                                                     |
-| `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:18080/nginx_status"}]`             |
+| `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:81/nginx_status"}]`             |
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
