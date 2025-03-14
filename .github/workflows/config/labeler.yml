@@ -517,6 +517,8 @@ integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
+integration/silverstripe_cms:
+- silverstripe_cms/**/*
 integration/singlestore:
 - singlestore/**/*
 integration/slurm:
