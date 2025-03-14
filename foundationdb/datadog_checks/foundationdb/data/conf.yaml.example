@@ -22,6 +22,17 @@ instances:
     #
     # cluster_file: /var/lib/foundationdb/fdb.cluster
 
+    ## @param copy_cluster_file - boolean - optional - default: false
+    ## Whether to make a writable copy of the given `cluster_file` before
+    ## passing it to the FoundationDB client. FoundationDB clients generally
+    ## need to be able to write to cluster files in the event of cluster
+    ## topology changes. This option can be useful in environments where
+    ## making a writable file available to the FoundationDB integration is
+    ## difficult (i.e. mounting a `ConfigMap` in a Kubernetes deployment).
+    ## This option has no effect if `cluster_file` is not specified.
+    #
+    # copy_cluster_file: false
+
     ## @param tls_certificate_file - string - optional
     ## Path to the file from which the local certificates can be loaded
     #

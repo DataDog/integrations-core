@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import shutil
+import tempfile
 
 import fdb
 
@@ -31,7 +33,13 @@ class FoundationdbCheck(AgentCheck):
             fdb.options.set_tls_verify_peers(self.instance.get('tls_verify_peers').encode('latin-1'))
 
         if 'cluster_file' in self.instance:
-            self._db = fdb.open(cluster_file=self.instance.get('cluster_file'))
+            cluster_file = self.instance.get('cluster_file')
+
+            if self.instance.get('copy_cluster_file'):
+                _, cluster_file = tempfile.mkstemp(suffix=".cluster")
+                shutil.copyfile(self.instance.get('cluster_file'), cluster_file)
+
+            self._db = fdb.open(cluster_file=cluster_file)
         else:
             self._db = fdb.open()
 
