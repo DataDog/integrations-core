@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.avi_vantage import AviVantageCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .conftest import NO_TENANT_METRICS_FOLDER, ADMIN_TENANT_METRICS_FOLDER, MULTIPLE_TENANTS_METRICS_FOLDER
+from .conftest import ADMIN_TENANT_METRICS_FOLDER, MULTIPLE_TENANTS_METRICS_FOLDER, NO_TENANT_METRICS_FOLDER
 
 
 @pytest.mark.unit

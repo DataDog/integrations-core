@@ -15,9 +15,10 @@ from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
-NO_TENANT_METRICS_FOLDER="no_tenant"
-ADMIN_TENANT_METRICS_FOLDER="admin_tenant"
-MULTIPLE_TENANTS_METRICS_FOLDER="multiple_tenants"
+NO_TENANT_METRICS_FOLDER = "no_tenant"
+ADMIN_TENANT_METRICS_FOLDER = "admin_tenant"
+MULTIPLE_TENANTS_METRICS_FOLDER = "multiple_tenants"
+
 
 @pytest.fixture(scope='session')
 def dd_environment(integration_instance):
@@ -39,7 +40,6 @@ def get_expected_metrics():
     def _get_metrics(metrics_folder, endpoint=None):
         with open(os.path.join(HERE, 'compose', 'fixtures', metrics_folder, "metrics.json")) as f:
             expected_metrics = json.load(f)
-
 
         if endpoint is None:
             return expected_metrics
@@ -76,7 +76,9 @@ def mock_client():
                     file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
                 )
 
-            return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics'))
+            return MockResponse(
+                file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
+            )
 
         req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
         yield
