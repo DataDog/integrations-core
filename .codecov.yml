@@ -674,6 +674,10 @@ coverage:
         target: 75
         flags:
         - vault
+      Velero:
+        target: 75
+        flags:
+        - velero
       Vertica:
         target: 75
         flags:
@@ -1622,6 +1626,11 @@ flags:
     paths:
     - vault/datadog_checks/vault
     - vault/tests
+  velero:
+    carryforward: true
+    paths:
+    - velero/datadog_checks/velero
+    - velero/tests
   vertica:
     carryforward: true
     paths:
