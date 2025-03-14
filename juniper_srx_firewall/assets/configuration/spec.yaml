@@ -1,0 +1,10 @@
+name: Juniper SRX Firewall
+files:
+- name: juniper_srx_firewall.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <port>
+      source: juniper-srx-firewall
+      service: juniper-srx-firewall
