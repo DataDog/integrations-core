@@ -4,7 +4,8 @@
 import calendar
 from datetime import datetime, timedelta
 
-from uptime import uptime
+import psutil
+from dateutil.tz import UTC
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
@@ -92,8 +93,9 @@ class Win32EventLogWMI(WinWMICheck):
         # Store the last timestamp by instance
         if instance_key not in self.last_ts:
             # If system boot was within 600s of dd agent start then use boottime as last_ts
-            if uptime() <= 600:
-                self.last_ts[instance_key] = datetime.utcnow() - timedelta(seconds=uptime())
+            uptime = datetime.now(UTC) - datetime.fromtimestamp(psutil.boot_time(), UTC)
+            if uptime.total_seconds() <= 600:
+                self.last_ts[instance_key] = datetime.utcnow() - uptime
             else:
                 self.last_ts[instance_key] = datetime.utcnow()
             return
