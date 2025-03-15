@@ -29,19 +29,6 @@ install the toolkit locally and play with it:
 pip install datadog-checks-base
 ```
 
-## Performance Optimizations
-
-We strive to balance lean resource usage with a "batteries included" user experience.
-This is why we import some of our dependencies inside functions that use them instead of the more conventional import section at the top of the file.
-
-Below are some examples for how much we shave off the Python heap for a given dependency:
-
-- `requests==2.32.3`: 3.6MB
-- `RequestWrapper` class (`datadog_checks_base==37.7.0`): 2.9MB
-- `prometheus-client==0.21.1`: around 1MB
-
-This translates into even bigger savings when we run in the Agent, something close to 50MB.
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
