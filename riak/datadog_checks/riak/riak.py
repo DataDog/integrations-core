@@ -2,10 +2,9 @@
 # (C) Stefan Mees <stefan.mees@wooga.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import unicodedata
 from copy import copy
-
-import simplejson as json
 
 from datadog_checks.base import AgentCheck
 

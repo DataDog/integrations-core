@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import json
 import os
 import re
-
-import simplejson as json
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative

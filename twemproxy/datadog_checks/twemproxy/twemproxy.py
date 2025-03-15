@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2016-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import socket
-
-import simplejson as json
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 

@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import json
 import logging
 import os
 
 import mock
 import pytest
 import requests
-import simplejson as json
 
 from datadog_checks.openstack_controller.legacy.api import ApiFactory, Authenticator, Credential, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import (
