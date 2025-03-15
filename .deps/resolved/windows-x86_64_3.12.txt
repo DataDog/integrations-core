@@ -18,7 +18,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-win_amd64.whl#sha256=0409917be29f5ad80a6772712fce954b5e81450555636e8523290ee9740a2dbb
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143924-py3-none-win_amd64.whl#sha256=02165c52665dfa139b6606bd802b996c51bcbc8c89f3c79801833d53e838d735
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250314140938-cp312-cp312-win_amd64.whl#sha256=ebf21200a8e228481849601b74ea3d9ef7e74e97e7ba91298a2923744f7af823
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250315181425-cp312-cp312-win_amd64.whl#sha256=04880e9805927d7d38f836d5e5a060764c3d08475a7b7d9df69f83c153422b15
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-44.0.1-cp39-abi3-win_amd64.whl#sha256=e403f7f766ded778ecdb790da786b418a9f2394f36e8cc8b796cc056ab05f44f
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.6-cp312-cp312-win_amd64.whl#sha256=bb183a535e5b24828a45901babd9fd15a1350c9d5096de5ba463287d0c8c64d1
@@ -49,7 +49,7 @@ lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-5.1.1-cp312-c
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.4.3-cp312-cp312-win_amd64.whl#sha256=b1d179bdefd9ddb8d11d7de7825e73fb957511b722a8cb484e417885c210e68c
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-5.1.0-cp312-cp312-win_amd64.whl#sha256=aa75981fcdf3f21759d94f2c81b6a6e04a49dfbcdad88b152ba49b8e20544776
 msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.32.0-py3-none-any.whl#sha256=9dbac5384a10bbbf4dae5c7ea0d707d14e087b92c5aa4954b3feaa2d1aa0bcb7
-msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensions/msal_extensions-1.3.0-py3-none-any.whl#sha256=105328ddcbdd342016c9949d8f89e3917554740c8ab26669c0fa0e069e730a0e
+msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensions/msal_extensions-1.3.1-py3-none-any.whl#sha256=96d3de4d034504e969ac5e85bae8106c8373b5c6568e4c8fa7af2eca9dbe6bca
 oauthlib @ https://agent-int-packages.datadoghq.com/external/oauthlib/oauthlib-3.2.2-py3-none-any.whl#sha256=8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca
 openstacksdk @ https://agent-int-packages.datadoghq.com/external/openstacksdk/openstacksdk-4.3.0-py3-none-any.whl#sha256=157b2731b5e3b76db803be3e6ee511815a77d83e7d34da0acbf2248114bdc3be
 opentelemetry-api @ https://agent-int-packages.datadoghq.com/external/opentelemetry-api/opentelemetry_api-1.31.0-py3-none-any.whl#sha256=145b72c6c16977c005c568ec32f4946054ab793d8474a17fd884b0397582c5f2
