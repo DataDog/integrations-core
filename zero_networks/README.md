@@ -28,10 +28,10 @@ This integration collects the listed logs and channels them into Datadog for ana
 
 1. Add your Zero Networks credentials.
 
-    | Parameters                            | Description                                                  |
-    | ------------------------------------- | ------------------------------------------------------------ |
-    | Domain Name                           | The Domain Name from Zero Networks portal URL                 |
-    | API Key                               | The Personal API key of Zero Networks                         |
+    | Parameters      | Description                                                  |
+    | ----------------| ------------------------------------------------------------ |
+    | Subdomain       | The subdomain from Zero Networks portal URL. For example, ```https://<sub_domain>.zeronetworks.com```.|
+    | API Key         | The Personal API key of Zero Networks.                       |
 
 2. Click **Save**.
 
