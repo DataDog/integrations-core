@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from openstack.config import loader
+try:
+    from openstack.config import loader
+except ImportError:
+    pass
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.models.types import copy_raw
