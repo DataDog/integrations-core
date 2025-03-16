@@ -57,11 +57,6 @@ else:
 
 init_logging()
 
-if datadog_agent.get_config('disable_unsafe_yaml'):
-    from ..ddyaml import monkey_patch_pyyaml
-
-    monkey_patch_pyyaml()
-
 if datadog_agent.get_config('integration_tracing'):
     from ddtrace import patch
 
@@ -385,17 +380,6 @@ class AgentCheck(object):
             return self.DEFAULT_METRIC_LIMIT
 
         return limit
-
-    @staticmethod
-    def load_config(yaml_str):
-        # type: (str) -> Any
-        """
-        Convenience wrapper to ease programmatic use of this class from the C API.
-        """
-        # See Performance Optimizations in this package's README.md.
-        import yaml
-
-        return yaml.safe_load(yaml_str)
 
     @property
     def http(self) -> RequestsWrapper:
@@ -1485,3 +1469,23 @@ class AgentCheck(object):
 
         for m in metrics:
             self.gauge(m.name, m.value, tags=tags, raw=True)
+
+    @staticmethod
+    def load_config(yaml_str: str) -> Any:
+        """
+        Convenience wrapper to ease programmatic use of this class from the C API.
+        """
+        import subprocess
+        import sys
+
+        process = subprocess.Popen(
+            [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout, stderr = process.communicate(yaml_str.encode())
+        if process.returncode != 0:
+            raise ValueError(f'Failed to load config: {stderr.decode()}')
+
+        return eval(stdout.strip().decode())
