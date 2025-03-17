@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-
 import os
 import subprocess
 from json.decoder import JSONDecodeError
