@@ -175,6 +175,8 @@ integration/dcgm:
 - dcgm/**/*
 integration/delinea_privilege_manager:
 - delinea_privilege_manager/**/*
+integration/delinea_secret_server:
+- delinea_secret_server/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
