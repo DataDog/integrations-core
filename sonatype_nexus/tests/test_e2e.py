@@ -7,6 +7,7 @@ from .common import get_nexus_password
 
 
 @pytest.mark.e2e
+@pytest.mark.usefixtures("dd_environment")
 def test_e2e(dd_agent_check, instance, aggregator):
     instance["password"] = get_nexus_password()
     aggregator = dd_agent_check(instance, rate=True)
