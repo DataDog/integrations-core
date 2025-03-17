@@ -1,6 +1,6 @@
 {
     "title": "Juniper SRX Firewall - Session Logs",
-    "description": "- This dashboard provides insights into network and session activities.",
+    "description": "- This dashboard provides an overview of network traffic and session activities, including initiated and denied sessions, application traffic, and dropped packets.",
     "widgets": [
         {
             "id": 3098264915522038,

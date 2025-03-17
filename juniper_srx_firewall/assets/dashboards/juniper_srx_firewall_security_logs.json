@@ -1,6 +1,6 @@
 {
     "title": "Juniper SRX Firewall - Security Logs",
-    "description": "- This dashboard provides visibility into security threats, attack attempts, and content filtering for proactive threat management.",
+    "description": "- This dashboard provides visibility into security threats, including malware detections, intrusion attempts, DoS attacks, and content filtering activities. It helps monitor blocked and permitted transactions for proactive threat management.",
     "widgets": [
         {
             "id": 3098264915522038,

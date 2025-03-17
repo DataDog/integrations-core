@@ -1,6 +1,6 @@
 {
     "title": "Juniper SRX Firewall - Authentication Logs",
-    "description": "- This dashboard provides insights into authentication activities.",
+    "description": "- This dashboard provides an overview of authentication activity, tracking successful and failed login attempts. It highlights authentication trends, top failing users and IPs, geo-location data, and failure reasons to enhance security monitoring and threat detection.",
     "experience_type": "default",
     "widgets": [
         {

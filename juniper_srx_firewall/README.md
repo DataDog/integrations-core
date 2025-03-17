@@ -1,20 +1,20 @@
 ## Overview
 
-[Juniper SRX Firewall][3] protects your network edge, data center network, and cloud applications. It offers accurately predicting intrusions, malware, and other threats.
+[Juniper SRX Firewall][3] secures your network edge, data center, and cloud applications by detecting and mitigating intrusions, malware, and other threats.
 
-This integration parses the following types of logs:
+This integration parses the following log types:
 
-- **Session Logs** : Logs provide information about network traffic and session activities in the Juniper SRX Firewall, offering details on initiated and denied sessions, application-related traffic, and dropped packets.
-- **Security Logs** : Logs provide information about security events on the Juniper SRX Firewall, offering details on malware detections, intrusion attempts, DoS attacks, and content filtering activities.
-- **Authentication Logs** : Logs provide information about authentication activities on the Juniper SRX Firewall, capturing details of successful and failed login attempts.
+- **Session Logs** : Track network traffic and session activities, including initiated and denied sessions, application-related traffic, and dropped packets.
+- **Security Logs** : Monitor security events such as malware detections, intrusion attempts, DoS attacks, and content filtering activities.
+- **Authentication Logs** : Capture authentication activities, including successful and failed login attempts.
 
-Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
+Get detailed visibility into these logs with out-of-the-box dashboards, and strengthen security with prebuilt Cloud SIEM detection rules for proactive threat monitoring and response.
 
 ## Setup
 
 ### Installation
 
-To install the Juniper SRX Firewall integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
+To install the Juniper SRX Firewall integration, run the following Agent installation command in your terminal. For more information, see the [Integration Management][4] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.64.0.
 
@@ -26,15 +26,13 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
 
 #### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+1. Log collection is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
    ```yaml
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `juniper_srx_firewall.d/conf.yaml` file to start collecting your logs.
-
-   See the sample [juniper_srx_firewall.d/conf.yaml][6] for available configuration options.
+2. Add the following configuration block to your `juniper_srx_firewall.d/conf.yaml` file to start collecting logs. See the sample [juniper_srx_firewall.d/conf.yaml][6] for available configuration options.
 
    ```yaml
    logs:
@@ -46,15 +44,16 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
 
    **Note**:
 
-   - `PORT`: Port should be similar to the port provided in **Configure syslog message forwarding from Juniper SRX Firewall** section.
-   - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
+   - `PORT`: Use the same port configured for [syslog message forwarding](#configure-syslog-message-forwarding-from-juniper-srx-firewall).
+   - Do not change the `service` and `source` values, as they are integral to proper log pipeline processing.
 
 3. [Restart the Agent][2].
 
 #### Configure syslog message forwarding from Juniper SRX Firewall
 
-1. Log in to your Juniper SRX Firewall CLI.
-2. To enter configuration mode, execute the following command:
+1. Log in to the Juniper SRX Firewall CLI.
+
+2. Enter configuration mode:
    ```shell
    configure
    ```
@@ -65,14 +64,17 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
    set system syslog host <IP-ADDRESS> port <PORT>
    set system syslog host <IP-ADDRESS> structured-data brief
    ```
+   **Note**:
+   - Replace `<IP-ADDRESS>` with the Datadog Agent's IP address.
+   - Replace `<PORT>` with the UDP port that Datadog will listen on (default: 514)
 
-4. To check whether `Security Logging` is enabled or not, execute the following command:
+4. Verify if `Security Logging` is enabled:
    ```shell
    show security log mode
    ```
    If enabled, the output will display either `mode stream;` or `mode event-stream;`
 
-5. If `Security Logging` is enabled, then execute the following commands:
+5. If `Security Logging` is enabled, configure log streaming:
    ```shell
    set security log stream <NAME> format sd-syslog
    set security log stream <NAME> category all
@@ -81,19 +83,15 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
    set security log transport protocol udp
    ```
 
-6. To apply the configuration, execute the following command:
+6. Apply and exit the configuration:
    ```
    commit
-   ```
-
-7. To exit configuration mode, execute the following command:
-   ```
    exit
    ```
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `juniper_srx_firewall` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `juniper_srx_firewall` under the **Checks** section.
 
 ## Data Collected
 
@@ -117,7 +115,7 @@ The Juniper SRX Firewall integration does not include any service checks.
 
 ## Troubleshooting
 
-**Permission denied while port binding:**
+### Permission denied while port binding
 
 If you see a **Permission denied** error while port binding in the Agent logs:
 
@@ -143,16 +141,20 @@ If you see a **Permission denied** error while port binding in the Agent logs:
 
 3. [Restart the Agent][2].
 
-**Data is not being collected:**
+### Data is not being collected
 
-Ensure traffic is bypassed from the configured port if the firewall is enabled.
+Ensure firewall settings allow traffic through the configured port.
 
-**Port already in use:**
+### Port already in use
 
-If you see the **Port <PORT_NUMBER> Already in Use** error, see the following instructions. The following example is for port 514:
+On systems running Syslog, the Agent may fail to bind to port 514 and display the following error: 
+   
+   `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`
 
-- On systems using Syslog, if the Agent listens for events on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`. This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
-  - Disable Syslog.
+This error occurs because Syslog uses port 514 by default. 
+
+To resolve:
+  - Disable Syslog, OR
   - Configure the Agent to listen on a different, available port.
 
 For further assistance, contact [Datadog support][1].

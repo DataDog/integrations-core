@@ -1,6 +1,6 @@
 {
     "title": "Juniper SRX Firewall - Overview",
-    "description": "- This dashboard provides centralized visibility into security logs, event trends, and network activity for efficient monitoring and management.",
+    "description": "- This dashboard provides centralized visibility into security logs, event trends, and network activity, enabling efficient monitoring and management.",
     "experience_type": "default",
     "widgets": [
         {
