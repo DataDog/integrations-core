@@ -5,14 +5,14 @@ import time
 
 import requests
 
+from json import JSONDecodeError
+
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
 
 from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
 from .errors import ApiUnreachable
 from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
-
-from json import JSONDecodeError
 
 
 class Vault(OpenMetricsBaseCheck):

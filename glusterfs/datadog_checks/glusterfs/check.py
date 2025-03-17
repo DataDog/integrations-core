@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 
-from json.decoder import JSONDecodeError
-
 import os
 import subprocess
+from json.decoder import JSONDecodeError
 from typing import Dict, List  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
