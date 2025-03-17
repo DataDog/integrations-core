@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nexus:
     image: sonatype/nexus3
