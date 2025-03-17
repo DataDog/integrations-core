@@ -41,7 +41,7 @@ def test_mongo_operation_samples_standalone(
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
     # assert samples
-    with open(os.path.join(HERE, "results", "operation-samples-standalone.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-samples-standalone-queryplanner.json"), 'r') as f:
         expected_samples = json.load(f)
         assert len(plan_samples) == len(expected_samples)
         for i, sample in enumerate(plan_samples):
@@ -58,14 +58,14 @@ def test_mongo_operation_samples_standalone(
 
 @mock_now(1715911398.1112723)
 @common.standalone
-def test_mongo_operation_samples_standalone_queryplanner(
+def test_mongo_operation_samples_standalone_executionstats(
     aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
 ):
     instance_integration_cluster_autodiscovery['dbm'] = True
     instance_integration_cluster_autodiscovery['operation_samples'] = {
         'enabled': True,
         'run_sync': True,
-        'explain_verbosity': 'queryPlanner',
+        'explain_verbosity': 'executionStats',
     }
     instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
@@ -84,7 +84,7 @@ def test_mongo_operation_samples_standalone_queryplanner(
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
     # assert samples
-    with open(os.path.join(HERE, "results", "operation-samples-standalone-queryplanner.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-samples-standalone-executionstats.json"), 'r') as f:
         expected_samples = json.load(f)
         assert len(plan_samples) == len(expected_samples)
         for i, sample in enumerate(plan_samples):
@@ -157,7 +157,7 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
     activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    with open(os.path.join(HERE, "results", "operation-samples-mongos.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-samples-mongos-queryplanner.json"), 'r') as f:
         expected_samples = json.load(f)
         assert len(plan_samples) == len(expected_samples)
         for i, sample in enumerate(plan_samples):
@@ -173,14 +173,14 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
 
 @mock_now(1715911398.11127223)
 @common.shard
-def test_mongo_operation_samples_mongos_queryplanner(
+def test_mongo_operation_samples_mongos_executionstats(
     aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
 ):
     instance_integration_cluster_autodiscovery['dbm'] = True
     instance_integration_cluster_autodiscovery['operation_samples'] = {
         'enabled': True,
         'run_sync': True,
-        'explain_verbosity': 'queryPlanner',
+        'explain_verbosity': 'executionStats',
     }
     instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
@@ -196,7 +196,7 @@ def test_mongo_operation_samples_mongos_queryplanner(
     activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    with open(os.path.join(HERE, "results", "operation-samples-mongos-queryplanner.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-samples-mongos-executionstats.json"), 'r') as f:
         expected_samples = json.load(f)
         assert len(plan_samples) == len(expected_samples)
         for i, sample in enumerate(plan_samples):
