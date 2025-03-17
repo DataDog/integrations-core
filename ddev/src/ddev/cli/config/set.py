@@ -2,15 +2,40 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Any, cast
 
 import click
+
+from ddev.cli.application import Application
+from ddev.config.model import ConfigurationError, RootConfig
+from ddev.utils.fs import Path
+
+
+def config_file_to_read(app: Application, local: bool) -> Path:
+    config_to_read = app.config_file.local_path if local else app.config_file.global_path
+    if local and not config_to_read.exists():
+        config_to_read.write_text('')
+    return config_to_read
+
+
+def validate_final_config(app: Application, local: bool, config: dict[str, Any]):
+    # If we are setting values on the local file, we need to merge with the global file
+    # for validation
+    if local:
+        config = cast(RootConfig, app.config_file.combined_model).raw_data | config
+    try:
+        RootConfig(config).parse_fields()
+    except ConfigurationError as e:
+        app.display_error(str(e))
+        app.abort()
 
 
 @click.command('set', short_help='Assign values to config file entries')
 @click.argument('key')
 @click.argument('value', required=False)
+@click.option('--local', is_flag=True, help='Set the value in the local config file (.ddev.toml)')
 @click.pass_obj
-def set_value(app, key, value):
+def set_value(app: Application, key: str, value: str | None, local: bool):
     """
     Assign values to config file entries. If the value is omitted,
     you will be prompted, with the input hidden if it is sensitive.
@@ -19,17 +44,17 @@ def set_value(app, key, value):
 
     import tomlkit
 
-    from ddev.config.model import ConfigurationError, RootConfig
     from ddev.config.utils import SCRUBBED_GLOBS, create_toml_document, save_toml_document, scrub_config
 
     scrubbing = any(fnmatch(key, glob) for glob in SCRUBBED_GLOBS)
     if value is None:
-        value = click.prompt(f'Value for `{key}`', hide_input=scrubbing)
+        value = cast(str, click.prompt(f'Value for `{key}`', hide_input=scrubbing))
 
     if (fnmatch(key, 'repos.*') or fnmatch(key, 'repos.*.path')) and not value.startswith('~'):
         value = os.path.abspath(value)
 
-    user_config = new_config = tomlkit.parse(app.config_file.read())
+    config_to_read = config_file_to_read(app, local)
+    user_config = new_config = tomlkit.parse(config_to_read.read_text())
 
     data = [value]
     data.extend(reversed(key.split('.')))
@@ -37,7 +62,8 @@ def set_value(app, key, value):
     value = data.pop()
 
     # Use a separate mapping to show only what has changed in the end
-    branch_config_root = branch_config = {}
+    branch_config_root: dict[str, Any] = {}
+    branch_config: dict[str, Any] = branch_config_root
 
     # Consider dots as keys
     while data:
@@ -75,13 +101,9 @@ def set_value(app, key, value):
             else:
                 del table_body[-2]
 
-    try:
-        RootConfig(user_config).parse_fields()
-    except ConfigurationError as e:
-        app.display_error(str(e))
-        app.abort()
+    validate_final_config(app, local, user_config)
 
-    save_toml_document(user_config, app.config_file.path)
+    save_toml_document(user_config, config_to_read)
     if scrubbing:
         scrub_config(branch_config_root)
 
