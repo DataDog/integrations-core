@@ -6,6 +6,8 @@ Amazon Managed Streaming for Apache Kafka (MSK) is a fully managed service that 
 
 You can collect metrics from this integration in two ways-with the [Datadog Agent](#setup) or with a [Crawler][18] that collects metrics from CloudWatch. 
 
+To get more out of your MSK integration, including visualizing your pipelines and tracking lag through the pipeline to root out bottlenecks, consider [Data Streams Monitoring][20].
+
 ## Setup
 
 The Agent check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.
@@ -84,3 +86,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/getting_started/tagging/
 [18]: https://docs.datadoghq.com/integrations/amazon_msk
 [19]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[20]: https://docs.datadoghq.com/data_streams/
