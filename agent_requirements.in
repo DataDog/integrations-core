@@ -1,23 +1,24 @@
 aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin'
 aws-requests-auth==0.4.3
-azure-identity==1.19.0
-beautifulsoup4==4.12.3
+azure-identity==1.20.0
+beautifulsoup4==4.13.3
 binary==1.0.1
-boto3==1.36.16
-botocore==1.36.16
-cachetools==5.5.1
+boto3==1.36.26
+botocore==1.36.26
+cachetools==5.5.2
 clickhouse-cityhash==1.0.2.4
 clickhouse-driver==0.2.9
 cm-client==45.0.4
 confluent-kafka==2.8.0
-cryptography==43.0.1
+cryptography==44.0.1
 ddtrace==2.10.6
 dnspython==2.7.0
 foundationdb==6.3.24
 hazelcast-python-client==5.5.0
 in-toto==2.0.0
 jellyfish==1.1.3
-kubernetes==32.0.0
+kubernetes==32.0.1
+lazy-loader==0.4
 ldap3==2.9.1
 lxml==5.1.1
 lz4==4.4.3
@@ -36,11 +37,11 @@ pyasn1==0.4.8
 pycryptodomex==3.21.0
 pydantic==2.10.6
 pyjwt==2.10.1
-pymongo[srv]==4.11; python_version >= '3.9'
+pymongo[srv]==4.8.0; python_version >= '3.9'
 pymqi==1.12.11; sys_platform != 'darwin' or platform_machine != 'arm64'
 pymysql==1.1.1
 pyodbc==5.2.0; sys_platform != 'darwin' or platform_machine != 'arm64'
-pyopenssl==24.2.1
+pyopenssl==24.3.0
 pysmi==1.2.1
 pysnmp-mibs==0.1.6
 pysnmp==5.1.0
@@ -62,7 +63,7 @@ rethinkdb==2.4.10.post1
 securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.4
 service-identity[idna]==24.2.0
-simplejson==3.19.3
+simplejson==3.20.1
 snowflake-connector-python==3.13.2
 supervisor==4.2.5
 tuf==4.0.0

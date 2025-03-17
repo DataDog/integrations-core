@@ -48,7 +48,6 @@ from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.diagnose import Diagnosis
 from ..utils.fips import enable_fips
-from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
@@ -396,6 +395,9 @@ class AgentCheck(object):
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
+        # See Performance Optimizations in this package's README.md.
+        from ..utils.http import RequestsWrapper
+
         if not hasattr(self, '_http'):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
@@ -952,6 +954,10 @@ class AgentCheck(object):
     def service_check(self, name, status, tags=None, hostname=None, message=None, raw=False):
         # type: (str, ServiceCheckStatus, Sequence[str], str, str, bool) -> None
         """Send the status of a service.
+
+        !!! warning "Soft Deprecation"
+            When building new checks avoid submitting service checks.
+            **Checks that already submit service checks will continue to do so.**
 
         Parameters:
             name (str):
