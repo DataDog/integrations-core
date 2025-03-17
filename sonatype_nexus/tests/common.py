@@ -8,21 +8,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE = os.path.join(HERE, 'compose')
 
 try:
-    container_id = subprocess.check_output(
-        "docker ps --filter 'ancestor=sonatype/nexus3' --format '{{.ID}}'", 
-        shell=True
-    ).decode().strip()
-    
+    container_id = (
+        subprocess.check_output("docker ps --filter 'ancestor=sonatype/nexus3' --format '{{.ID}}'", shell=True)
+        .decode()
+        .strip()
+    )
+
     if not container_id:
         print("Error: No running Nexus container found.")
         exit(1)
-        
+
     password_file = "/opt/sonatype/sonatype-work/nexus3/admin.password"
-    password = subprocess.check_output(
-        f"docker exec {container_id} sh -c 'cat {password_file}'",
-        shell=True
-    ).decode().strip()
-    
+    password = (
+        subprocess.check_output(f"docker exec {container_id} sh -c 'cat {password_file}'", shell=True).decode().strip()
+    )
+
 except subprocess.CalledProcessError:
     print("Error executing Docker commands")
     exit(1)
