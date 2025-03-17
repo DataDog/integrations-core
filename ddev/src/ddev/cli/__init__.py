@@ -94,9 +94,9 @@ def ddev(
 
     if config_file:
         app.config_file.path = Path(config_file).resolve()
-        if not app.config_file.path.is_file():
+        if not app.config_file.global_path.is_file():
             app.abort(f'The selected config file `{str(app.config_file.path)}` does not exist.')
-    elif not app.config_file.path.is_file():
+    elif not app.config_file.global_path.is_file():
         if app.verbose:
             app.display_waiting('No config file found, creating one with default settings now...')
 
@@ -106,8 +106,14 @@ def ddev(
                 app.display_success('Success! Please see `ddev config`.')
         except OSError:  # no cov
             app.abort(
-                f'Unable to create config file located at `{str(app.config_file.path)}`. Please check your permissions.'
+                f'Unable to create config file located at `{str(app.config_file.global_path)}`.'
+                'Please check your permissions.'
             )
+
+    if app.verbose:
+        if app.config_file.overrides_available():
+            app.display_info('Local override config file found. Values from this file will override global values.')
+
     if org is not None:
         app.config.org = org
 

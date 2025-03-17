@@ -3,13 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
+from ddev.cli.application import Application
+
 
 @click.command(short_help='Show the contents of the config file')
 @click.option('--all', '-a', 'all_keys', is_flag=True, help='Do not scrub secret fields')
 @click.pass_obj
-def show(app, all_keys):
+def show(app: Application, all_keys: bool):
     """Show the contents of the config file."""
-    if not app.config_file.path.is_file():  # no cov
+    if not app.config_file.global_path.is_file():  # no cov
         app.display_critical('No config file found! Please try `ddev config restore`.')
     else:
         from rich.syntax import Syntax

@@ -9,7 +9,7 @@ from typing import cast
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
-from ddev.config.file import ConfigFile, RootConfig
+from ddev.config.file import CombinedConfigFile, RootConfig
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
@@ -22,7 +22,7 @@ class Application(Terminal):
         self.platform = Platform(self.output)
         self.__exit_func = exit_func
 
-        self.config_file = ConfigFile()
+        self.config_file = CombinedConfigFile()
         self.quiet = self.verbosity < VerbosityLevels.INFO
         self.verbose = self.verbosity > VerbosityLevels.INFO
 
@@ -35,7 +35,7 @@ class Application(Terminal):
 
     @property
     def config(self) -> RootConfig:
-        return self.config_file.model
+        return self.config_file.combined_model
 
     @property
     def repo(self) -> Repository:
