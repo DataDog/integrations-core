@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from json import JSONDecodeError
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
