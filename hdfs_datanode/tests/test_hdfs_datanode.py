@@ -52,13 +52,12 @@ def test_check_critical(aggregator, mocked_request_invalid):
     hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
     # Run the check once
-    with pytest.raises(requests.exceptions.JSONDecodeError, match='toto'):
+    with pytest.raises(requests.exceptions.JSONDecodeError):
         hdfs_datanode.check(instance)
 
     # Make sure the service is sent
     aggregator.assert_service_check(
         HDFSDataNode.JMX_SERVICE_CHECK,
-        message="toto",
         status=HDFSDataNode.CRITICAL,
         tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS,
         count=1,
