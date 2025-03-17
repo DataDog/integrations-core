@@ -4,6 +4,7 @@
 import pytest
 from .common import get_nexus_password
 
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance, aggregator):
     instance["password"] = get_nexus_password()

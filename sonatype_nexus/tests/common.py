@@ -8,6 +8,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE = os.path.join(HERE, 'compose')
 
+
 def get_nexus_password():
     try:
         container_id = (
@@ -22,13 +23,16 @@ def get_nexus_password():
 
         password_file = "/opt/sonatype/sonatype-work/nexus3/admin.password"
         password = (
-            subprocess.check_output(f"docker exec {container_id} sh -c 'cat {password_file}'", shell=True).decode().strip()
+            subprocess.check_output(f"docker exec {container_id} sh -c 'cat {password_file}'", shell=True)
+            .decode()
+            .strip()
         )
 
     except subprocess.CalledProcessError:
         print("Error executing Docker commands")
         exit(1)
     return password
+
 
 INSTANCE = {
     "username": "admin",
