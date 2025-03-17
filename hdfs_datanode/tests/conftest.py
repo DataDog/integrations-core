@@ -42,6 +42,12 @@ def mocked_request():
 
 
 @pytest.fixture
+def mocked_request_invalid():
+    with patch('requests.get', new=requests_get_mock_invalid):
+        yield
+
+
+@pytest.fixture
 def mocked_metadata_request():
     with patch('requests.get', new=requests_metadata_mock):
         yield
@@ -55,6 +61,10 @@ def mocked_auth_request():
 
 def requests_get_mock(*args, **kwargs):
     return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_datanode_jmx.json'))
+
+
+def requests_get_mock_invalid(*args, **kwargs):
+    return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_datanode_jmx_invalid.json'))
 
 
 def requests_metadata_mock(*args, **kwargs):

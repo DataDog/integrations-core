@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+import requests
 
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
@@ -39,6 +40,29 @@ def test_check(aggregator, mocked_request):
 
     for metric, value in HDFS_DATANODE_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1)
+
+
+def test_check_critical(aggregator, mocked_request_invalid):
+    """
+    Test that we get all the metrics we're supposed to get
+    Note: We don't do aggregator.assert_all_metrics_covered() because depending on timing, some other metrics may appear
+    """
+
+    instance = HDFS_DATANODE_CONFIG['instances'][0]
+    hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
+
+    # Run the check once
+    with pytest.raises(requests.exceptions.JSONDecodeError, match='toto'):
+        hdfs_datanode.check(instance)
+
+    # Make sure the service is sent
+    aggregator.assert_service_check(
+        HDFSDataNode.JMX_SERVICE_CHECK,
+        message="toto",
+        status=HDFSDataNode.CRITICAL,
+        tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS,
+        count=1,
+    )
 
 
 def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_agent):
