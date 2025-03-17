@@ -3,10 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 
-try:
-    from json.decoder import JSONDecodeError
-except ImportError:
-    from simplejson import JSONDecodeError
+from json.decoder import JSONDecodeError
 
 import os
 import subprocess
