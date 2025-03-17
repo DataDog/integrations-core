@@ -4,7 +4,6 @@
 import os
 
 from datadog_checks.dev import run_command
-
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
