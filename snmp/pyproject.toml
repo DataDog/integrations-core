@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 deps = [
     "ply==3.11",
     "pyasn1==0.4.8",
-    "pycryptodomex==3.21.0",
+    "pycryptodomex==3.22.0",
     "pysmi==1.2.1",
     "pysnmp-mibs==0.1.6",
     "pysnmp==5.1.0",
