@@ -181,7 +181,7 @@ class MongoConfig(object):
             'enabled': enabled,
             'collection_interval': self._operation_samples_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
-            'explain_verbosity': self._operation_samples_config.get('explain_verbosity', 'executionStats'),
+            'explain_verbosity': self._operation_samples_config.get('explain_verbosity', 'queryPlanner'),
             'explained_operations_cache_maxsize': int(
                 self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -201,7 +201,7 @@ class MongoConfig(object):
             'collection_interval': self._slow_operations_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
             'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
-            'explain_verbosity': self._slow_operations_config.get('explain_verbosity', 'executionStats'),
+            'explain_verbosity': self._slow_operations_config.get('explain_verbosity', 'queryPlanner'),
             'explained_operations_cache_maxsize': int(
                 self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
             ),
