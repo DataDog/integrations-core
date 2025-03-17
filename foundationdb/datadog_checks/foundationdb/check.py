@@ -200,36 +200,27 @@ class FoundationdbCheck(AgentCheck):
 
         cluster = status["cluster"]
         if "machines" in cluster:
-            included_machines = 0
-            excluded_machines = 0
+            machines = cluster["machines"]
 
-            for machine_key in cluster["machines"]:
-                machine = cluster["machines"][machine_key]
-
-                if machine["excluded"]:
-                    excluded_machines += 1
-                else:
-                    included_machines += 1
-
-            self.gauge("machines", included_machines, ["excluded:false"])
-            self.gauge("machines", excluded_machines, ["excluded:true"])
+            self.gauge("machines", len(machines))
+            self.gauge("excluded_machines", sum([1 for machine_key in machines if machines[machine_key]["excluded"]]))
         if "processes" in cluster:
+            processes = cluster["processes"]
+
+            self.gauge("processes", len(processes))
+            self.gauge(
+                "excluded_processes", sum([1 for process_key in processes if processes[process_key]["excluded"]])
+            )
+
             self.count(
                 "instances",
-                sum((len(p["roles"]) if "roles" in p else 0 for p in cluster["processes"].values())),
+                sum((len(p["roles"]) if "roles" in p else 0 for p in processes.values())),
             )
 
             role_counts = {}
-            included_processes = 0
-            excluded_processes = 0
 
-            for process_key in cluster["processes"]:
-                process = cluster["processes"][process_key]
-
-                if process["excluded"]:
-                    excluded_processes += 1
-                else:
-                    included_processes += 1
+            for process_key in processes:
+                process = processes[process_key]
 
                 self.report_process(process)
                 if "roles" in process:
@@ -240,9 +231,6 @@ class FoundationdbCheck(AgentCheck):
                                 role_counts[rolename] += 1
                             else:
                                 role_counts[rolename] = 1
-
-            self.gauge("processes", included_processes, ["excluded:false"])
-            self.gauge("processes", excluded_processes, ["excluded:true"])
 
             for role in role_counts:
                 self.gauge("processes_per_role." + role, role_counts[role])

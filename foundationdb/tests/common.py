@@ -66,6 +66,8 @@ METRICS = [
     "foundationdb.clients.connected",
     "foundationdb.cluster_generation",
     "foundationdb.coordinators",
+    "foundationdb.excluded_machines",
+    "foundationdb.excluded_processes",
     "foundationdb.fault_tolerance.max_zone_failures_without_losing_availability",
     "foundationdb.fault_tolerance.max_zone_failures_without_losing_data",
     "foundationdb.latency_probe.batch_priority_transaction_start_seconds",
