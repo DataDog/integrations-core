@@ -76,7 +76,7 @@ def dd_environment():
             with ExitStack() as stack:
                 ip_ports = [
                     stack.enter_context(port_forward(kubeconfig, 'velero', PORT, ressource, name))
-                    for ressource, name in [('deployment', 'velero'), ('daemonset', 'node-agent')]
+                    for ressource, name in [('service', 'velero'), ('daemonset', 'node-agent')]
                 ]
 
         instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1])
