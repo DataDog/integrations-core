@@ -21,7 +21,6 @@ class SonatypeNexusCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-
         self._username = (self.instance.get("username") or "").strip()
         self._password = (self.instance.get("password") or "").strip()
         self._server_url = self.instance.get("server_url")
@@ -46,15 +45,13 @@ class SonatypeNexusCheck(AgentCheck):
             self.log.error("Can't decode API response to json, Error: %s", str(ex))
             return {"message": "Can't decode API response to json", "error": str(ex)}
         for key, metric_name in constants.STATUS_METRICS_MAP.items():
-            try:
+            if key in response_json:
                 self.gauge(
                     metric_name,
                     int(response_json[key]["healthy"]),
                     [f"sonatype_host:{self.extract_ip_from_url()}"] + (self.custom_tags if self.custom_tags else []),
                     hostname=None,
                 )
-            except KeyError as key:
-                raise KeyError(f"Expected key, '{key}' is not present in API response.") from None
 
     def generate_and_yield_analytics_metrics(self):
         url = f"{self._server_url}{ANALYTICS_ENDPOINT}"
@@ -76,6 +73,7 @@ class SonatypeNexusCheck(AgentCheck):
     def process_metrics(self, metric_key, response_json) -> dict:
         if metric_key in response_json:
             return response_json[metric_key]
+        return {}
 
     def create_metric_for_configs(self, metric_data: dict, metric_name: str):
         base_tags = [f"sonatype_host:{self.extract_ip_from_url()}"] + (self.custom_tags if self.custom_tags else [])

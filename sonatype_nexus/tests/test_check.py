@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base.stubs import aggregator as __aggregator
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
@@ -18,8 +17,7 @@ def mock_http_response(mocker):
     )
 
 
-@pytest.mark.e2e
-def test_successful_metrics_collection(dd_run_check, mock_http_response):
+def test_successful_metrics_collection(dd_run_check, mock_http_response, aggregator):
     status_metrics_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
 
     mock_http_response(
@@ -37,14 +35,14 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response):
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     dd_run_check(check)
 
-    __aggregator.assert_all_metrics_covered()
-    __aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match="\nmin_collection_interval\n  Field required",
+        match="\nusername\n  Field required",
     ):
         check = SonatypeNexusCheck("sonatype_nexus", {}, [{}])
         dd_run_check(check)
