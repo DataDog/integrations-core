@@ -10,7 +10,9 @@ COMPOSE = os.path.join(HERE, 'compose')
 
 
 def get_nexus_password():
-    container_id = run_command("docker ps --filter 'ancestor=sonatype/nexus3' --format '{{.ID}}'", capture=True).stdout.strip()
+    container_id = run_command(
+        "docker ps --filter 'ancestor=sonatype/nexus3' --format '{{.ID}}'", capture=True
+    ).stdout.strip()
 
     if not container_id:
         print("Error: No running Nexus container found.")

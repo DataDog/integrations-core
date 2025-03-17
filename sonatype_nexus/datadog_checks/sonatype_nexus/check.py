@@ -21,7 +21,6 @@ class SonatypeNexusCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-        print("password",self.instance.get("password"))
         self._username = (self.instance.get("username") or "").strip()
         self._password = (self.instance.get("password") or "").strip()
         self._server_url = self.instance.get("server_url")
