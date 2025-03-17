@@ -79,9 +79,9 @@ def dd_environment():
                     for ressource, name in [('service', 'velero'), ('daemonset', 'node-agent')]
                 ]
 
-        instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1])
+            instances = get_instances(ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1])
 
-        yield instances
+            yield instances
 
 
 @pytest.fixture
