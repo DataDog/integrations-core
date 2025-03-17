@@ -15,7 +15,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
 
 To install the OpenVPN integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][5] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.63.0.
+**Note**: This step is not necessary for Agent version >= 7.65.0.
 
 Linux command:
 
