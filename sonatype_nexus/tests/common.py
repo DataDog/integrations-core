@@ -12,7 +12,7 @@ COMPOSE = os.path.join(HERE, 'compose')
 
 def get_nexus_password(max_retries=5, retry_interval=10):
     try:
-        run_command("docker run -d -p 8081:8081 --name sonatype_nexus_1 sonatype/nexus3")
+        run_command("docker run -d -p 8081:8081 --name sonatype_nexus_2 sonatype/nexus3")
     except Exception as e:
         print(f"Note: {e}")
 
