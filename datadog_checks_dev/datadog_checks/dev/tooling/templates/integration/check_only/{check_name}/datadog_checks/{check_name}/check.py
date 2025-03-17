@@ -65,9 +65,4 @@ class {check_class}(AgentCheck):
         # You can define a dictionary in the __init__ method.
         # self.write_persistent_cache("key", "value")
         # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
         pass
