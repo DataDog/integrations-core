@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
     )
     additional_counters: Optional[tuple[str, ...]] = None
     additional_hw_counters: Optional[tuple[str, ...]] = None
+    collection_type: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     exclude_counters: Optional[tuple[str, ...]] = None
