@@ -1852,6 +1852,56 @@
                 "width": 8,
                 "height": 13
             }
+        },
+        {
+            "id": 1439774421918952,
+            "definition": {
+                "title": "Number of workload metrics for local autoscaling recommendations",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:datadog.cluster_agent.autoscaling.workload.store_load_entities{$cluster, $namespace} by {deployment,loadname}",
+                                "aggregator": "max"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "trend",
+                                "cell_display_mode_options": {
+                                    "trend_type": "area",
+                                    "y_scale": "shared"
+                                },
+                                "alias": "Number of Entities",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 3
+            }
         }
     ],
     "template_variables": [
