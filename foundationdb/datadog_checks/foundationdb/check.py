@@ -24,6 +24,8 @@ class FoundationdbCheck(AgentCheck):
             return self._db
 
         # TLS options. Each option has a different function name, so we cannot be smart with it without ugly code
+        if 'tls_ca_file' in self.instance:
+            fdb.options.set_tls_ca_path(self.instance.get('tls_ca_file'))
         if 'tls_certificate_file' in self.instance:
             fdb.options.set_tls_cert_path(self.instance.get('tls_certificate_file'))
         if 'tls_key_file' in self.instance:
