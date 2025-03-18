@@ -50,7 +50,6 @@ class OpenMetricsScraper:
         """
         The base class for any scraper overrides.
         """
-
         self.config = config
 
         # Save a reference to the check instance
@@ -393,7 +392,6 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
-
         try:
             with self.get_connection() as connection:
                 # Media type will be used to select parser dynamically

@@ -23,7 +23,8 @@ The PingOne integration seamlessly collects the data of PingOne audit logs using
 7. Select the **Roles** tab of the application flyout.
 8. Click the **Grant Roles** button.
 9. Under **Available responsibilities**, in the **Environment Admin section**, select the environments to grant access to, then click **Save**.
-10. Select the **Configuration** tab of the application flyout to get **Client ID**, **Client Secret** and **Environment ID**.
+10. Select the **Configuration** tab and click **Edit**, Change the **Token Endpoint Authentication Method** to **Client Secret Post**, then click **Save**.
+11. Select the **Configuration** tab of the application flyout to get **Client ID**, **Client Secret** and **Environment ID**.
 
 ### Connect your PingOne account to Datadog
 
