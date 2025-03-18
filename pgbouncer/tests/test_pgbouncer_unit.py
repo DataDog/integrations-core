@@ -88,3 +88,22 @@ def test_connection_lifecycle_with_caching(instance):
         assert mock_connect.call_count == 1
         assert mock_connection.close.call_count == 0
         assert check.connection is not None
+
+
+@pytest.mark.unit
+def test_connection_cleanup_on_isolation_level_error(instance):
+    """
+    This test ensures that connection resources are properly cleaned up when setting the isolation level fails.
+    """
+    mock_connection = MagicMock()
+    mock_connection.close = MagicMock()
+    mock_connection.set_isolation_level.side_effect = Exception("Failed to set isolation level")
+    
+    with patch('psycopg2.connect', return_value=mock_connection):
+        check = PgBouncer('pgbouncer', {}, [instance])
+        with pytest.raises(Exception):
+            check._get_connection(use_cached=False)
+        
+        # Verify connection was closed and not stored
+        assert mock_connection.close.call_count == 1
+        assert check.connection is None
