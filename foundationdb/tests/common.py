@@ -189,6 +189,7 @@ METRICS = [
     "foundationdb.process.role.read_latency_statistics.p90",
     "foundationdb.process.role.read_latency_statistics.p99",
     "foundationdb.process.role.queue_length",
+    "foundationdb.processes_per_role",
     "foundationdb.processes_per_role.cluster_controller",
     "foundationdb.processes_per_role.coordinator",
     "foundationdb.processes_per_role.data_distributor",
