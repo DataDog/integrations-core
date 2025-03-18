@@ -30,9 +30,6 @@ def test_connection_cleanup_on_error(instance, use_cached):
     """
     This test ensures that connection resources are properly cleaned up when a connection fails to establish.
     """
-    mock_connection = MagicMock()
-    mock_connection.close = MagicMock()
-
     with patch('psycopg2.connect', side_effect=Exception("Connection failed")):
         check = PgBouncer('pgbouncer', {}, [instance])
         with pytest.raises(Exception):
@@ -48,7 +45,6 @@ def test_connection_lifecycle_without_caching(instance):
     This test verifies the complete lifecycle of a connection when caching is disabled (use_cached=False).
     """
     mock_connection = MagicMock()
-    mock_connection.close = MagicMock()
     mock_connection.notices = []
     mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
 
@@ -73,7 +69,6 @@ def test_connection_lifecycle_with_caching(instance):
     properly managed.
     """
     mock_connection = MagicMock()
-    mock_connection.close = MagicMock()
     mock_connection.notices = []
     mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
 
@@ -97,7 +92,6 @@ def test_connection_cleanup_on_isolation_level_error(instance, use_cached):
     This test ensures that connection resources are properly cleaned up when setting the isolation level fails.
     """
     mock_connection = MagicMock()
-    mock_connection.close = MagicMock()
     mock_connection.set_isolation_level.side_effect = Exception("Failed to set isolation level")
 
     with patch('psycopg2.connect', return_value=mock_connection):
