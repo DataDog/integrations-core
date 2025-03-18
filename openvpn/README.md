@@ -7,13 +7,13 @@ This integration enriches and ingests the following events:
 - **Authentication Events**: Represents user login attempts, including successful and failed authentications.
 - **Connection Events**: Represents instances when a client establishes or disconnects a VPN session.
 
-This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into authentication and connection events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+This integration seamlessly collects all of the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The OpenVPN integration provides insight into authentication and connection events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
 ### Installation
 
-To install the OpenVPN integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][5] documentation.
+To install the OpenVPN integration, run the following Agent installation command and the steps below for log collection. For more information, see the [Integration Management][5] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.65.0.
 
@@ -27,7 +27,7 @@ Linux command:
 
 #### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable log collection in your `datadog.yaml`:
 
     ```yaml
     logs_enabled: true
@@ -85,7 +85,7 @@ The OpenVPN integration does not include any service checks.
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
-   1. Binding to a port number under 1024 requires elevated permissions. Grant access to the port using the `setcap` command:
+   1. Binding to a port number under 1024 requires elevated permissions.
 
       - Grant access to the port using the `setcap` command:
 
@@ -99,7 +99,7 @@ If you see a **Permission denied** error while port binding in the Agent logs, s
          sudo getcap /opt/datadog-agent/bin/agent/agent
          ```
 
-         With the expected output:
+         Example of the expected output:
 
          ```shell
          /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
@@ -119,14 +119,14 @@ If you see the **Port <PORT-NO\> Already in Use** error, see the following instr
 
 On systems using Syslog, if the Agent listens for events on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
-This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
+This error occurs because Syslog listens on port 514 by default. To resolve it, use one of the following steps:
 
 - Disable Syslog.
 - Configure the Agent to listen on a different, available port.
 
 **Troubleshooting OpenVPN Logs Not Appearing in Datadog**
 
-If you're facing issues with OpenVPN logs not appearing in Datadog, even after following all the setup steps, there's one more step you can try: **rebooting your system**.
+If OpenVPN logs are not appearing in Datadog after setup, try rebooting your system as an additional step.
 
 - Run the following command to reboot your system safely:
    ```shell
