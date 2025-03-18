@@ -34,7 +34,7 @@ def test_check_with_default_tenants(mock_client, get_expected_metrics, aggregato
 
 
 @pytest.mark.unit
-def test_check_with_empty_tenants(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+def test_check_with_empty_tenant_name(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
     instance["tenants"] = [""]
     check = AviVantageCheck('avi_vantage', {}, [instance])

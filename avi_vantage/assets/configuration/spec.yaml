@@ -34,13 +34,13 @@ files:
     - name: tenants
       required: false
       description: |
-        A list of tenant names, if empty, defaults to the admin tenant.
+        A list of tenant names to collect metrics for. If empty, it defaults to the admin tenant.
       value:
         type: array
         items:
           type: string
         example: [admin, tenant_a, tenant_b]
-        display_default: [""]
+        display_default: []
     - template: instances/openmetrics
       overrides:
         persist_connections.hidden: true

@@ -61,8 +61,8 @@ instances:
     #   - serviceengine
     #   - virtualservice
 
-    ## @param tenants - list of strings - optional - default: ['']
-    ## A list of tenant names, if empty, defaults to the admin tenant.
+    ## @param tenants - list of strings - optional - default: []
+    ## A list of tenant names to collect metrics for. If empty, it defaults to the admin tenant.
     #
     # tenants:
     #   - admin

@@ -109,7 +109,7 @@ def instance_telemetry():
 
 
 def instance_tenants():
-    return ['']
+    return []
 
 
 def instance_timeout():
