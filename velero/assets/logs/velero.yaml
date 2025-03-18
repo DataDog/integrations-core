@@ -1,0 +1,57 @@
+id: velero
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: velero
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Velero
+  enabled: true
+  filter:
+    query: service:velero
+  processors:
+    - type: grok-parser
+      name: Primary parser
+      enabled: true
+      source: message
+      samples:
+        - time="2025-03-14T16:28:19Z" level=info msg="Listing items"
+          backup=velero/nginx-backup group=velero.io/v2alpha1
+          logSource="pkg/backup/item_collector.go:524" namespace=
+          resource=datadownloads
+        - >
+          time="2025-03-01T18:41:30Z" level=error msg="error encountered while
+          scanning stdout" backupLocation=velero/default
+          cmd=/plugins/velero-plugin-for-gcp controller=backup-sync error="read
+          |0: file already closed"
+          logSource="pkg/plugin/clientmgmt/process/logrus_adapter.go:90"
+        - 'time="2025-03-03T10:46:27Z" level=warning msg="Namespace
+          nginx-example, resource restore warning: could not restore, ConfigMap
+          \"kube-root-ca.crt\" already exists. Warning: the in-cluster version
+          is different than the backed-up version"
+          logSource="pkg/controller/restore_controller.go:611"
+          restore=velero/nginx-backup-20250303114623'
+      grok:
+        supportRules: |-
+          time time=%{date("\"YYYY-MM-DD'T'HH:mm:ss'Z'\""):timestamp}
+          level level=%{word:level}
+          msg msg=%{regex("\"?(?:[^\\\"]|\\\")*\"(?= [A-Za-su-z]+=)"):msg}
+        matchRules: rule1 %{time} %{level} %{msg} %{data::keyvalue("="," \",:*/")}
+    - type: date-remapper
+      name: Use `timestamp` as date
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Use `level` as status
+      enabled: true
+      sources:
+        - level
+    - type: message-remapper
+      name: Use 'msg' as message
+      enabled: true
+      sources:
+        - msg
