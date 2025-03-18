@@ -20,12 +20,9 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     check = VeleroCheck('velero', {}, [instance])
     dd_run_check(check)
 
-    for metric, metric_type in TEST_METRICS.items():
+    for metric, metric_type in (TEST_METRICS | OPTIONAL_METRICS).items():
         aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
         aggregator.assert_metric_has_tag(metric, 'test:tag')
-
-    for metric, metric_type in OPTIONAL_METRICS.items():
-        aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type], at_least=0)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

@@ -57,12 +57,15 @@ TEST_METRICS = {
     'velero.volume_snapshot.success.count': 'monotonic_count',
 }
 
-OPTIONAL_METRICS = {
+OPTIONAL_METRICS = {  # These metrics require a backup attempt to appear
     'velero.backup.duration.seconds.bucket': 'monotonic_count',
     'velero.backup.duration.seconds.sum': 'monotonic_count',
     'velero.backup.duration.seconds.count': 'monotonic_count',
     'velero.backup.last_successful_timestamp': 'gauge',
     'velero.backup.tarball_size_bytes': 'gauge',
+}
+
+ADDITIONAL_METRICS = {  # These metrics did not appear in any of the test payloads
     'velero.pod_volume.operation_latency_seconds.bucket': 'histogram',
     'velero.pod_volume.operation_latency_seconds.count': 'count',
     'velero.pod_volume.operation_latency_seconds.gauge': 'gauge',
