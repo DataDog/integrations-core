@@ -7,6 +7,7 @@ import time
 
 from datadog_checks.dev import run_command
 
+
 def get_nexus_password(max_retries=5, retry_interval=10):
     try:
         run_command("docker run -d -p 8081:8081 --name sonatype_nexus_3 sonatype/nexus3")
