@@ -49,6 +49,12 @@ def mocked_request():
 
 
 @pytest.fixture
+def mocked_request_critical():
+    with patch("requests.get", new=requests_get_mock_critical):
+        yield
+
+
+@pytest.fixture
 def mocked_auth_request():
     with patch("requests.get", new=requests_auth_mock):
         yield
@@ -61,6 +67,10 @@ def requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem.json'))
     elif url == NAME_SYSTEM_METADATA_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_info.json'))
+
+
+def requests_get_mock_critical(url, *args, **kwargs):
+    return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_critical.json'))
 
 
 def requests_auth_mock(*args, **kwargs):
