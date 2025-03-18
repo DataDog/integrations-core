@@ -31,14 +31,16 @@ files:
         items:
           type: string
           enum: *avi_entities
-    - name: tenant
+    - name: tenants
       required: false
       description: |
-        A comma-separated list of tenant names, by default set to admin.
+        A list of tenant names, if empty, defaults to the admin tenant.
       value:
-        type: string
-        example: admin,tenant_1,tenant_2
-        display_default: ""
+        type: array
+        items:
+          type: string
+        example: [admin, tenant_a, tenant_b]
+        display_default: [""]
     - template: instances/openmetrics
       overrides:
         persist_connections.hidden: true

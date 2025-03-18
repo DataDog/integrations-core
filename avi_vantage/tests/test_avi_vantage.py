@@ -25,7 +25,7 @@ def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_
 @pytest.mark.unit
 def test_check_with_empty_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
-    instance["tenant"] = ""
+    instance["tenants"] = [""]
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -38,7 +38,7 @@ def test_check_with_empty_tenant(mock_client, get_expected_metrics, aggregator, 
 @pytest.mark.unit
 def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
-    instance["tenant"] = "admin"
+    instance["tenants"] = ["admin"]
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -51,7 +51,7 @@ def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, 
 @pytest.mark.unit
 def test_check_with_multiple_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
-    instance["tenant"] = "admin,tenant_a,tenant_b"
+    instance["tenants"] = ["admin", "tenant_a", "tenant_b"]
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)

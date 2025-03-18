@@ -30,7 +30,9 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         # Required for storing the auth cookie
         self.instance['persist_connections'] = True
         self._base_url = None
-        self._tenant = None
+        self.tenant = None
+        if self.instance.get("tenants"):
+            self.tenant = ",".join(self.instance.get("tenants"))
 
     @property
     def base_url(self):
@@ -51,8 +53,8 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
             # GET /api/analytics/prometheus-metrics/{entity_type}/?{query_params}"
             endpoint = self.base_url + "/api/analytics/prometheus-metrics/" + entity
-            if self.config.tenant:
-                query_params = {"tenant": self.config.tenant}
+            if self.tenant:
+                query_params = {"tenant": self.tenant}
                 encoded_params = urlencode(query_params)
                 endpoint += f"/?{encoded_params}"
 

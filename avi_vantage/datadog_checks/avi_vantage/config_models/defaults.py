@@ -108,8 +108,8 @@ def instance_telemetry():
     return False
 
 
-def instance_tenant():
-    return ''
+def instance_tenants():
+    return ['']
 
 
 def instance_timeout():
