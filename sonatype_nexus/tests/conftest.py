@@ -20,8 +20,7 @@ def dd_environment():
         build=True,
         sleep=30,
     ):
-        instance = INSTANCE.copy()
-        yield instance
+        yield deepcopy(INSTANCE)
 
 
 @pytest.fixture
