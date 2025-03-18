@@ -32,6 +32,7 @@ def test_check_with_default_tenants(mock_client, get_expected_metrics, aggregato
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+
 @pytest.mark.unit
 def test_check_with_empty_tenants(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
