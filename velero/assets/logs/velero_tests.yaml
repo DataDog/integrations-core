@@ -1,4 +1,4 @@
-id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+id: velero
 tests:
   - sample: time="2025-03-14T16:28:19Z" level=info msg="Listing items"
       backup=velero/nginx-backup group=velero.io/v2alpha1
