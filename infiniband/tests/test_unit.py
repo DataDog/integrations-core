@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import mock
+import pytest
 
 from datadog_checks.infiniband import InfinibandCheck
 
@@ -156,10 +156,9 @@ def test_device_without_ports_directory(aggregator, instance, caplog, mock_fs):
     with mock.patch('os.path.isdir') as mock_isdir:
 
         mock_isdir.side_effect = lambda path: False if path.endswith('ports') else True
-        
+
         check = InfinibandCheck('infiniband', {}, [instance])
         check.check({})
-
 
         assert "Skipping device mlx5_0 as it does not have a ports directory" in caplog.text
 
@@ -169,16 +168,16 @@ def test_device_without_ports_directory(aggregator, instance, caplog, mock_fs):
 def test_device_without_counters_directory(aggregator, instance, caplog, mock_fs):
     """Test device that doesn't have a counters directory"""
     with mock.patch('os.path.isdir') as mock_isdir:
+
         def mock_isdir_fn(path):
             if path.endswith('counters'):
                 return False
             return True
 
         mock_isdir.side_effect = mock_isdir_fn
-        
+
         check = InfinibandCheck('infiniband', {}, [instance])
         check.check({})
-
 
         assert "Skipping device" in caplog.text
         assert "as counters directory does not exist" in caplog.text
@@ -187,16 +186,16 @@ def test_device_without_counters_directory(aggregator, instance, caplog, mock_fs
 def test_device_without_hw_counters_directory(aggregator, instance, caplog, mock_fs):
     """Test device that doesn't have a hw_counters directory"""
     with mock.patch('os.path.isdir') as mock_isdir:
+
         def mock_isdir_fn(path):
             if path.endswith('hw_counters'):
                 return False
             return True
 
         mock_isdir.side_effect = mock_isdir_fn
-        
+
         check = InfinibandCheck('infiniband', {}, [instance])
         check.check({})
-
 
         assert "Skipping device" in caplog.text
         assert "as hw_counters directory does not exist" in caplog.text
@@ -207,6 +206,6 @@ def test_alternative_path(aggregator, instance, mock_fs):
     with mock.patch('os.path.exists') as mock_exists:
 
         mock_exists.side_effect = lambda x: not x.startswith('/sys')
-        
+
         check = InfinibandCheck('infiniband', {}, [instance])
         assert check.base_path.startswith('/host')
