@@ -24,6 +24,7 @@ on:
 jobs:
   compute-matrix:
     uses: ./.github/workflows/compute-matrix.yml
+    if: github.event_name != 'merge_group'
     with:
       repo: "${{ inputs.repo }}"
 
