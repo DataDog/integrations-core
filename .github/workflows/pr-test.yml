@@ -24,6 +24,9 @@ on:
 jobs:
   compute-matrix:
     uses: ./.github/workflows/compute-matrix.yml
+    # this job always fails in the merge queue due to lack of
+    # github.event.pull_request.head.sha and github.event.pull_request.base.sha,
+    # and we don't run tests in the merge queue now so it's not needed
     if: github.event_name != 'merge_group'
     with:
       repo: "${{ inputs.repo }}"
