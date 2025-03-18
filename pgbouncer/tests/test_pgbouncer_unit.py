@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
@@ -31,12 +32,12 @@ def test_connection_cleanup_on_error(instance, use_cached):
     """
     mock_connection = MagicMock()
     mock_connection.close = MagicMock()
-    
+
     with patch('psycopg2.connect', side_effect=Exception("Connection failed")):
         check = PgBouncer('pgbouncer', {}, [instance])
         with pytest.raises(Exception):
             check._get_connection(use_cached=use_cached)
-        
+
         # Verify no connection was stored
         assert check.connection is None
 
@@ -52,14 +53,14 @@ def test_connection_lifecycle_without_caching(instance):
     mock_connection.close = MagicMock()
     mock_connection.notices = []
     mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
-    
+
     with patch('psycopg2.connect', return_value=mock_connection) as mock_connect:
         instance['use_cached'] = False
         check = PgBouncer('pgbouncer', {}, [instance])
-        
+
         # Run the check
         check.check(instance)
-        
+
         # Verify exactly one connection was created and closed
         assert mock_connect.call_count == 1
         assert mock_connection.close.call_count == 1
@@ -77,14 +78,14 @@ def test_connection_lifecycle_with_caching(instance):
     mock_connection.close = MagicMock()
     mock_connection.notices = []
     mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
-    
+
     with patch('psycopg2.connect', return_value=mock_connection) as mock_connect:
         instance['use_cached'] = True
         check = PgBouncer('pgbouncer', {}, [instance])
-        
+
         # Run the check
         check.check(instance)
-        
+
         # Verify exactly one connection was created and kept open
         assert mock_connect.call_count == 1
         assert mock_connection.close.call_count == 0
@@ -100,12 +101,12 @@ def test_connection_cleanup_on_isolation_level_error(instance, use_cached):
     mock_connection = MagicMock()
     mock_connection.close = MagicMock()
     mock_connection.set_isolation_level.side_effect = Exception("Failed to set isolation level")
-    
+
     with patch('psycopg2.connect', return_value=mock_connection):
         check = PgBouncer('pgbouncer', {}, [instance])
         with pytest.raises(Exception):
             check._get_connection(use_cached=use_cached)
-        
+
         # Verify connection was closed and not stored
         assert mock_connection.close.call_count == 1
         assert check.connection is None

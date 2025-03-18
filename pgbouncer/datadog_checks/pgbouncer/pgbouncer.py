@@ -231,7 +231,7 @@ class PgBouncer(AgentCheck):
         if not self.connection:
             self.log.warning("Cannot get version: no active connection")
             return None
-            
+
         regex = r'\d+\.\d+\.\d+'
         with self.connection.cursor(cursor_factory=pgextras.DictCursor) as cursor:
             cursor.execute('SHOW VERSION;')
