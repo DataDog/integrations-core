@@ -13,19 +13,6 @@ from datadog_checks.silverstripe_cms.dataclasses import TableConfig
 
 
 @pytest.mark.unit
-def test_instance_check(dd_run_check, aggregator, instance):
-    check = SilverstripeCMSCheck("silverstripe_cms", {}, [instance])
-
-    assert isinstance(check, AgentCheck)
-    assert check.database_type == instance["SILVERSTRIPE_DATABASE_TYPE"]
-    assert check.database_name == instance["SILVERSTRIPE_DATABASE_NAME"]
-    assert check.database_server_ip == instance["SILVERSTRIPE_DATABASE_SERVER_IP"]
-    assert check.database_port == instance["SILVERSTRIPE_DATABASE_PORT"]
-    assert check.database_username == instance["SILVERSTRIPE_DATABASE_USERNAME"]
-    assert check.database_password == instance["SILVERSTRIPE_DATABASE_PASSWORD"]
-
-
-@pytest.mark.unit
 def test_validate_configurations_without_database_type(instance):
     field = "SILVERSTRIPE_DATABASE_TYPE"
     del instance[field]

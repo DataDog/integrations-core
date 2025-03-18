@@ -15,21 +15,6 @@
         "caption": "Silverstripe CMS - Overview",
         "image_url": "images/silverstripe_cms_overview.png",
         "media_type": "image"
-      },
-      {
-        "caption": "Silverstripe CMS - Overview - Overall Content Analytics",
-        "image_url": "images/silverstripe_cms_overview_overall_content_analytics.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Silverstripe CMS - Overview - Published Content Analytics",
-        "image_url": "images/silverstripe_cms_overview_published_content_analytics.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Silverstripe CMS - Overview - Login Attempt Analytics",
-        "image_url": "images/silverstripe_cms_overview_login_attempt_analytics.png",
-        "media_type": "image"
       }
     ],
     "classifier_tags": [

@@ -103,11 +103,6 @@
                             "title": "Total Pages",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -117,7 +112,7 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.pages.count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "conditional_formats": [
@@ -135,73 +130,19 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 0
                         },
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 2,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6295246931070478,
-                        "definition": {
-                            "title": "Pages by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages.count{$Silverstripe_Host} by {page_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "inline"
-                            }
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 4,
+                            "width": 3,
                             "height": 4
                         }
                     },
                     {
                         "id": 2521889300371148,
                         "definition": {
-                            "title": "Page Types Over Time",
+                            "title": "Page Types over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -213,25 +154,20 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Count",
-                                            "formula": "default_zero(query1)"
+                                            "formula": "round(default_zero(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages.count{$Silverstripe_Host} by {page_type}"
+                                            "query": "avg:silverstripe_cms.pages.count{$Silverstripe_Host} by {page_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -246,9 +182,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 3,
                             "y": 0,
-                            "width": 6,
+                            "width": 9,
                             "height": 4
                         }
                     },
@@ -258,11 +194,6 @@
                             "title": "Pages with Broken Content",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -272,7 +203,7 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.pages.broken_content{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "conditional_formats": [
@@ -290,7 +221,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 0
                         },
                         "layout": {
                             "x": 0,
@@ -300,71 +231,9 @@
                         }
                     },
                     {
-                        "id": 490179713183654,
-                        "definition": {
-                            "title": "Broken Content Pages by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages.broken_content{$Silverstripe_Host} by {page_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "white_on_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
-                            }
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 4,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
                         "id": 3347570001452628,
                         "definition": {
-                            "title": "Broken Page Types Over Time",
+                            "title": "Broken Page Types over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -376,25 +245,20 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Count",
-                                            "formula": "default_zero(query1)"
+                                            "formula": "round(default_zero(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages.broken_content{$Silverstripe_Host} by {page_type}"
+                                            "query": "avg:silverstripe_cms.pages.broken_content{$Silverstripe_Host} by {page_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -409,9 +273,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 3,
                             "y": 4,
-                            "width": 6,
+                            "width": 9,
                             "height": 4
                         }
                     },
@@ -421,11 +285,6 @@
                             "title": "Pages with Broken Link",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -435,7 +294,7 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.pages.broken_link_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "conditional_formats": [
@@ -453,7 +312,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 0
                         },
                         "layout": {
                             "x": 0,
@@ -468,11 +327,6 @@
                             "title": "Pages with Broken File",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -482,7 +336,7 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.pages.broken_file_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "conditional_formats": [
@@ -500,7 +354,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 0
                         },
                         "layout": {
                             "x": 0,
@@ -510,110 +364,9 @@
                         }
                     },
                     {
-                        "id": 3592181291045370,
+                        "id": 1619757323734082,
                         "definition": {
-                            "title": "Total Files",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files.count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "green_on_white"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 8,
-                            "width": 2,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 422000269256528,
-                        "definition": {
-                            "title": "Files by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files.count{$Silverstripe_Host} by {file_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 8,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6941670351211388,
-                        "definition": {
-                            "title": "File Types Over Time",
+                            "title": "Page Types with Broken Links over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -625,25 +378,69 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Count",
-                                            "formula": "default_zero(query1)"
+                                            "formula": "round(default_zero(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files.count{$Silverstripe_Host} by {file_type}"
+                                            "query": "avg:silverstripe_cms.pages.broken_link_count{$Silverstripe_Host} by {page_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7763112282547468,
+                        "definition": {
+                            "title": "Page Types with Broken Files over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.pages.broken_file_count{$Silverstripe_Host} by {page_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -661,6 +458,97 @@
                             "x": 6,
                             "y": 8,
                             "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3592181291045370,
+                        "definition": {
+                            "title": "Total Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.files.count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6941670351211388,
+                        "definition": {
+                            "title": "File Types over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.files.count{$Silverstripe_Host} by {file_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 12,
+                            "width": 9,
                             "height": 4
                         }
                     },
@@ -670,11 +558,6 @@
                             "title": "Public Files",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -684,7 +567,7 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.files.public_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "conditional_formats": [
@@ -702,73 +585,19 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 0
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
-                            "width": 2,
+                            "y": 16,
+                            "width": 3,
                             "height": 2
-                        }
-                    },
-                    {
-                        "id": 5677515758212662,
-                        "definition": {
-                            "title": "Public Files by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files.public_count{$Silverstripe_Host} by {file_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 12,
-                            "width": 4,
-                            "height": 4
                         }
                     },
                     {
                         "id": 7050425909271132,
                         "definition": {
-                            "title": "Public File Types Over Time",
+                            "title": "Public File Types over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -780,25 +609,20 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Count",
-                                            "formula": "default_zero(query1)"
+                                            "formula": "round(default_zero(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files.public_count{$Silverstripe_Host} by {file_type}"
+                                            "query": "avg:silverstripe_cms.files.public_count{$Silverstripe_Host} by {file_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -813,9 +637,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 12,
-                            "width": 6,
+                            "x": 3,
+                            "y": 16,
+                            "width": 9,
                             "height": 4
                         }
                     },
@@ -825,11 +649,6 @@
                             "title": "Public Files %",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -839,797 +658,13 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.files.public_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         },
                                         {
                                             "name": "query2",
                                             "data_source": "metrics",
                                             "query": "sum:silverstripe_cms.files.count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "(default_zero(query1) * 100) / default_zero(query2)",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 14,
-                            "width": 2,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 12,
-                "height": 17
-            }
-        },
-        {
-            "id": 4848399987895206,
-            "definition": {
-                "title": "Published Content Analytics",
-                "background_color": "gray",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 4138140456433176,
-                        "definition": {
-                            "title": "Total Published Pages",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">=",
-                                            "value": 0,
-                                            "palette": "green_on_white"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 2,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3381943415114598,
-                        "definition": {
-                            "title": "Published Pages by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.count{$Silverstripe_Host} by {page_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "inline"
-                            }
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7511897902841770,
-                        "definition": {
-                            "title": "Published Page Types Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.count{$Silverstripe_Host} by {page_type}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "datadog16",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8019642228610996,
-                        "definition": {
-                            "title": "Published Pages with Broken Content",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.broken_content{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "red_on_white"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 5473359596829710,
-                        "definition": {
-                            "title": "Removed Published Pages",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.deleted_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 4,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4863776750485412,
-                        "definition": {
-                            "title": "Published Broken Page Types Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.broken_content{$Silverstripe_Host} by {page_type}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "datadog16",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 4,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3523811620129442,
-                        "definition": {
-                            "title": "Published Pages with Broken Link",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.broken_link_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3334515213857730,
-                        "definition": {
-                            "title": "Published Pages with Broken File",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.pages_live.broken_file_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 6,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 2615508020160984,
-                        "definition": {
-                            "title": "Total Published Files",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "green_on_white"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 8,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4769618739780972,
-                        "definition": {
-                            "title": "Published Files by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host} by {file_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 8,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3520919121091578,
-                        "definition": {
-                            "title": "Published File Types Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host} by {file_type}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "datadog16",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 8,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4300376263637304,
-                        "definition": {
-                            "title": "Published Public Files",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.public_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 12,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4269265590161042,
-                        "definition": {
-                            "title": "Published Public Files by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.public_count{$Silverstripe_Host} by {file_type}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 12,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3685506735207080,
-                        "definition": {
-                            "title": "Published Public File Types Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.public_count{$Silverstripe_Host} by {file_type}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "datadog16",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 12,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8611693378856580,
-                        "definition": {
-                            "title": "Published Public Files %",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.public_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "conditional_formats": [
@@ -1657,7 +692,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 14,
+                            "y": 18,
                             "width": 3,
                             "height": 2
                         }
@@ -1666,9 +701,669 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 5,
                 "width": 12,
-                "height": 17,
+                "height": 1
+            }
+        },
+        {
+            "id": 4848399987895206,
+            "definition": {
+                "title": "Published Content Analytics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4138140456433176,
+                        "definition": {
+                            "title": "Total Published Pages",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.pages_live.count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7511897902841770,
+                        "definition": {
+                            "title": "Published Page Types over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.pages_live.count{$Silverstripe_Host} by {page_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8019642228610996,
+                        "definition": {
+                            "title": "Published Pages with Broken Content",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.pages_live.broken_content{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "red_on_white"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5473359596829710,
+                        "definition": {
+                            "title": "Removed Published Pages",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.pages_live.deleted_count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "yellow_on_white"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4863776750485412,
+                        "definition": {
+                            "title": "Published Broken Page Types over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.pages_live.broken_content{$Silverstripe_Host} by {page_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3334515213857730,
+                        "definition": {
+                            "title": "Published Pages with Broken File",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.pages_live.broken_file_count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3523811620129442,
+                        "definition": {
+                            "title": "Published Pages with Broken Link",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.pages_live.broken_link_count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 6,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6922236295224382,
+                        "definition": {
+                            "title": "Published Page Types with Broken Links over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.pages_live.broken_link_count{$Silverstripe_Host} by {page_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1336549835329800,
+                        "definition": {
+                            "title": "Published Page Types with Broken Files over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.pages_live.broken_file_count{$Silverstripe_Host} by {page_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2615508020160984,
+                        "definition": {
+                            "title": "Total Published Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3520919121091578,
+                        "definition": {
+                            "title": "Published File Types over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.files_live.count{$Silverstripe_Host} by {file_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 12,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4300376263637304,
+                        "definition": {
+                            "title": "Published Public Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.files_live.public_count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "yellow_on_white"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8611693378856580,
+                        "definition": {
+                            "title": "Published Public Files %",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.files_live.public_count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:silverstripe_cms.files_live.count{$Silverstripe_Host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "(default_zero(query1) * 100) / default_zero(query2)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 16,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3685506735207080,
+                        "definition": {
+                            "title": "Published Public File Types over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "round(default_zero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:silverstripe_cms.files_live.public_count{$Silverstripe_Host} by {file_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 1,
                 "is_column_break": true
             }
         },
@@ -1687,11 +1382,6 @@
                             "title": "Failed Login",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1701,7 +1391,7 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:silverstripe_cms.failed_login_count{$Silverstripe_Host}",
-                                            "aggregator": "last"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
@@ -1729,72 +1419,14 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 2,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8392993350573942,
-                        "definition": {
-                            "title": "Failed Login Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "hour",
-                                "value": 4
-                            },
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:silverstripe_cms.failed_login_count{$Silverstripe_Host} by {firstname,ip}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "conditional_formats": [
-                                                {
-                                                    "comparator": ">",
-                                                    "value": 0,
-                                                    "palette": "red_on_white"
-                                                }
-                                            ],
-                                            "cell_display_mode": "bar",
-                                            "alias": "Login Attempts",
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 4,
+                            "width": 3,
                             "height": 4
                         }
                     },
                     {
                         "id": 5710137611365122,
                         "definition": {
-                            "title": "Failed Login Over Time",
+                            "title": "Failed Login over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1806,29 +1438,20 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {
-                                "type": "live",
-                                "unit": "month",
-                                "value": 1
-                            },
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Failed Login",
-                                            "style": {
-                                                "palette": "warm",
-                                                "palette_index": 6
-                                            },
-                                            "formula": "default_zero(query1)"
+                                            "formula": "round(default_zero(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:silverstripe_cms.failed_login_count{$Silverstripe_Host}"
+                                            "query": "avg:silverstripe_cms.failed_login_count{$Silverstripe_Host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1843,9 +1466,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 3,
                             "y": 0,
-                            "width": 6,
+                            "width": 9,
                             "height": 4
                         }
                     }
@@ -1853,9 +1476,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 39,
+                "y": 7,
                 "width": 12,
-                "height": 5
+                "height": 1
             }
         }
     ],
