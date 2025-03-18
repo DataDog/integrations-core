@@ -40,7 +40,7 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_custom_validation(dd_run_check):
+def test_incorrect_openmetrics_endpoint(dd_run_check):
     endpoint = 'velero:2112/metrics'
     with pytest.raises(
         Exception,
