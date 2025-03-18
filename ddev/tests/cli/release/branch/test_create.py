@@ -29,7 +29,7 @@ def test_create_branch(ddev, mocker):
     assert run_mock.call_args_list == [
         mocker.call('checkout', 'master'),
         mocker.call('pull', 'origin', 'master'),
-        mocker.call('checkout', '-b', '5.5.x'),
+        mocker.call('checkout', '-B', '5.5.x'),
         mocker.call('push', 'origin', '5.5.x'),
     ]
 

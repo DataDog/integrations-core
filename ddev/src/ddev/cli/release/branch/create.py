@@ -41,7 +41,7 @@ def create(app: Application, branch_name):
     app.display_success("Done.")
 
     app.display_waiting(f"Creating the release branch `{branch_name}`...")
-    app.repo.git.run('checkout', '-b', branch_name)
+    app.repo.git.run('checkout', '-B', branch_name)
     app.display_success("Done.")
 
     app.display_waiting(f"Pushing the release branch `{branch_name}`...")

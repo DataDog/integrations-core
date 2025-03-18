@@ -279,6 +279,8 @@ class Schemas(DBMAsyncJob):
                         "referencing_column": str
                         "referenced_table": str
                         "referenced_column": str
+                        "delete_action": str
+                        "update_action": str
                 partitions: partition dict
                     partition
                     key/value:
@@ -365,6 +367,8 @@ class Schemas(DBMAsyncJob):
                     "referencing_column": str
                     "referenced_table": str
                     "referenced_column": str
+                    "delete_action": str
+                    "update_action": str
             partitions: partition dict
                 partition
                 key/value:
@@ -443,7 +447,7 @@ class Schemas(DBMAsyncJob):
             foreign_key_query = FOREIGN_KEY_QUERY_PRE_2017
         rows = execute_query(foreign_key_query.format(table_ids), cursor)
         for row in rows:
-            table_id = row.pop("id", None)
+            table_id = row.pop("table_id", None)
             table_id_str = str(table_id)
             table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
             table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)

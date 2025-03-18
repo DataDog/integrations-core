@@ -80,6 +80,8 @@ class MetricsCollectionInterval(BaseModel):
     )
     collection: Optional[int] = None
     collections_indexes_stats: Optional[int] = None
+    db_stats: Optional[int] = None
+    session_stats: Optional[int] = None
     sharded_data_distribution: Optional[int] = None
 
 
@@ -90,6 +92,7 @@ class OperationSamples(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
 
 
 class Schemas(BaseModel):
@@ -112,6 +115,7 @@ class SlowOperations(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
     max_operations: Optional[float] = None
 
 
@@ -150,6 +154,7 @@ class InstanceConfig(BaseModel):
     server: Optional[str] = None
     service: Optional[str] = None
     slow_operations: Optional[SlowOperations] = None
+    system_database_stats: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None

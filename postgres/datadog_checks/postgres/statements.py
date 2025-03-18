@@ -81,6 +81,12 @@ PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
 
 PG_STAT_STATEMENTS_TIMING_COLUMNS = frozenset(
     {
+        'shared_blk_read_time',
+        'shared_blk_write_time',
+    }
+)
+PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17 = frozenset(
+    {
         'blk_read_time',
         'blk_write_time',
     }
@@ -114,6 +120,7 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = (
         }
     )
     | PG_STAT_STATEMENTS_TIMING_COLUMNS
+    | PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
 )
 
 PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
@@ -350,6 +357,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
+                desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
 
             pg_stat_statements_max_setting = self._check.pg_settings.get("pg_stat_statements.max")
             pg_stat_statements_max = int(
