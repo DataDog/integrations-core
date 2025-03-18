@@ -23,7 +23,17 @@ def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_
 
 
 @pytest.mark.unit
-def test_check_with_empty_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+def test_check_with_default_tenants(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    check = AviVantageCheck('avi_vantage', {}, [unit_instance])
+    dd_run_check(check)
+    aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
+    for metric in get_expected_metrics(NO_TENANT_METRICS_FOLDER):
+        aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+@pytest.mark.unit
+def test_check_with_empty_tenants(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
     instance = deepcopy(unit_instance)
     instance["tenants"] = [""]
     check = AviVantageCheck('avi_vantage', {}, [instance])
