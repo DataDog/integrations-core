@@ -92,6 +92,9 @@ class FoundationdbCheck(AgentCheck):
             return
         tags = ["fdb_process:" + process["address"]]
 
+        if "class_type" in process:
+            tags += ["fdb_class:" + process["class_type"]]
+
         if "cpu" in process:
             self.maybe_gauge("process.cpu.usage_cores", process["cpu"], "usage_cores", tags)
         if "disk" in process:
@@ -109,6 +112,7 @@ class FoundationdbCheck(AgentCheck):
             memory = process["memory"]
             self.maybe_gauge("process.memory.available_bytes", memory, "available_bytes", tags)
             self.maybe_gauge("process.memory.limit_bytes", memory, "limit_bytes", tags)
+            self.maybe_gauge("process.memory.rss_bytes", memory, "rss_bytes", tags)
             self.maybe_gauge("process.memory.unused_allocated_memory", memory, "unused_allocated_memory", tags)
             self.maybe_gauge("process.memory.used_bytes", memory, "used_bytes", tags)
         if "network" in process:
@@ -122,6 +126,7 @@ class FoundationdbCheck(AgentCheck):
             self.maybe_hz_counter("process.network.tls_policy_failures", network, "tls_policy_failures", tags)
 
         if "roles" in process:
+            self.gauge("process.role.count", len(process["roles"]), tags)
             for role in process["roles"]:
                 self.report_role(role, tags)
 
@@ -253,6 +258,26 @@ class FoundationdbCheck(AgentCheck):
                 self.maybe_gauge("data.moving_data.in_flight_bytes", data["moving_data"], "in_flight_bytes")
                 self.maybe_gauge("data.moving_data.in_queue_bytes", data["moving_data"], "in_queue_bytes")
                 self.maybe_gauge("data.moving_data.total_written_bytes", data["moving_data"], "total_written_bytes")
+
+        if "layers" in cluster and cluster["layers"] is not None:
+            layers = cluster["layers"]
+            if "backup" in layers and layers["backup"] is not None:
+                backup = layers["backup"]
+                if "tags" in backup and backup["tags"] is not None:
+                    for k, v in backup["tags"].items():
+                        self.gauge("backup." + k + ".running", v["running_backup"])
+                        self.gauge("backup." + k + ".restorable", v["running_backup_is_restorable"])
+                        if "last_restorable_seconds_behind" in v:
+                            self.gauge("backup." + k + ".seconds_behind", v["last_restorable_seconds_behind"])
+
+            if "dr_backup" in layers and layers["dr_backup"] is not None:
+                dr_backup = layers["dr_backup"]
+                if "tags" in dr_backup and dr_backup["tags"] is not None:
+                    for k, v in dr_backup["tags"].items():
+                        self.gauge("dr." + k + ".paused", dr_backup["paused"])
+                        self.gauge("dr." + k + ".running", v["running_backup"])
+                        self.gauge("dr." + k + ".restorable", v["running_backup_is_restorable"])
+                        self.gauge("dr." + k + ".seconds_behind", v["seconds_behind"])
 
         if "datacenter_lag" in cluster:
             self.gauge("datacenter_lag.seconds", cluster["datacenter_lag"]["seconds"])
