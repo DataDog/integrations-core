@@ -41,6 +41,7 @@ jobs:
       # Generic version of the following:
       # https://gist.github.com/bnb/9de89a07278e9f57cd058a535ab89a9b?permalink_comment_id=4417593#gistcomment-4417593
       run: |-
+        echo "TEST"
         # Fetch commits to a depth so that head and base reach their merge base.
         comparison=$(gh api\
           repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }})
