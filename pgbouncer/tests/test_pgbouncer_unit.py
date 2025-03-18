@@ -24,7 +24,8 @@ def test_config_missing_user(instance):
 
 
 @pytest.mark.unit
-def test_connection_cleanup_on_error(instance):
+@pytest.mark.parametrize('use_cached', [True, False])
+def test_connection_cleanup_on_error(instance, use_cached):
     """
     This test ensures that connection resources are properly cleaned up when a connection fails to establish.
     """
@@ -34,7 +35,7 @@ def test_connection_cleanup_on_error(instance):
     with patch('psycopg2.connect', side_effect=Exception("Connection failed")):
         check = PgBouncer('pgbouncer', {}, [instance])
         with pytest.raises(Exception):
-            check._get_connection(use_cached=False)
+            check._get_connection(use_cached=use_cached)
         
         # Verify no connection was stored
         assert check.connection is None
@@ -91,7 +92,8 @@ def test_connection_lifecycle_with_caching(instance):
 
 
 @pytest.mark.unit
-def test_connection_cleanup_on_isolation_level_error(instance):
+@pytest.mark.parametrize('use_cached', [True, False])
+def test_connection_cleanup_on_isolation_level_error(instance, use_cached):
     """
     This test ensures that connection resources are properly cleaned up when setting the isolation level fails.
     """
@@ -102,7 +104,7 @@ def test_connection_cleanup_on_isolation_level_error(instance):
     with patch('psycopg2.connect', return_value=mock_connection):
         check = PgBouncer('pgbouncer', {}, [instance])
         with pytest.raises(Exception):
-            check._get_connection(use_cached=False)
+            check._get_connection(use_cached=use_cached)
         
         # Verify connection was closed and not stored
         assert mock_connection.close.call_count == 1
