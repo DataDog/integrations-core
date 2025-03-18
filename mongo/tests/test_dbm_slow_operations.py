@@ -40,7 +40,7 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
         expected_slow_operation_payload = json.load(f)
         assert slow_operation_payload == expected_slow_operation_payload
 
-    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone-queryplanner.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
 
@@ -61,7 +61,7 @@ def test_mongo_slow_operations_standalone_queryplanner(
     instance_integration_cluster_autodiscovery['slow_operations'] = {
         'enabled': True,
         'run_sync': True,
-        'explain_verbosity': 'queryPlanner',
+        'explain_verbosity': 'executionStats',
     }
     instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
     instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
@@ -82,7 +82,7 @@ def test_mongo_slow_operations_standalone_queryplanner(
         expected_slow_operation_payload = json.load(f)
         assert slow_operation_payload == expected_slow_operation_payload
 
-    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone-queryplanner.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-standalone-executionstats.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
 
@@ -154,7 +154,7 @@ def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster_a
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos-queryplanner.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
 
@@ -173,7 +173,7 @@ def test_mongo_slow_operations_mongos_queryplanner(
     instance_integration_cluster_autodiscovery['slow_operations'] = {
         'enabled': True,
         'run_sync': True,
-        'explain_verbosity': 'queryPlanner',
+        'explain_verbosity': 'executionStats',
     }
     instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
     instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
@@ -190,7 +190,7 @@ def test_mongo_slow_operations_mongos_queryplanner(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos-queryplanner.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos-executionstats.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
 
