@@ -46,8 +46,6 @@ def test_connection_cleanup_on_error(instance, use_cached):
 def test_connection_lifecycle_without_caching(instance):
     """
     This test verifies the complete lifecycle of a connection when caching is disabled (use_cached=False).
-    The test confirms that connections are properly initialized for metrics collection and fully cleaned up,
-    preventing connection leaks.
     """
     mock_connection = MagicMock()
     mock_connection.close = MagicMock()
