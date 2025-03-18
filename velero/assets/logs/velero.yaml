@@ -38,8 +38,7 @@ pipeline:
         supportRules: |-
           time time=%{date("\"YYYY-MM-DD'T'HH:mm:ss'Z'\""):timestamp}
           level level=%{word:level}
-          msg msg=%{regex("\"?(?:[^\\\"]|\\\")*\"(?= [A-Za-su-z]+=)"):msg}
-        matchRules: rule1 %{time} %{level} %{msg} %{data::keyvalue("="," \",:*/")}
+        matchRules: rule1 %{time} %{level} %{data::keyvalue("="," \",:*/")}
     - type: date-remapper
       name: Use `timestamp` as date
       enabled: true
