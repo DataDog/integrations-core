@@ -186,7 +186,9 @@ def batch_payloads(namespace, devices, interfaces, links, collect_ts):
     """
     Batch payloads into NetworkDevicesMetadata objects
     """
-    network_devices_metadata = NetworkDevicesMetadata(integration="cisco-aci", namespace=namespace, collect_timestamp=collect_ts)
+    network_devices_metadata = NetworkDevicesMetadata(
+        integration="cisco-aci", namespace=namespace, collect_timestamp=collect_ts
+    )
     for device in devices:
         current_payload, new_payload = append_to_payload(device, network_devices_metadata, namespace, collect_ts)
         if new_payload:
