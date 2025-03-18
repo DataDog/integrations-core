@@ -208,8 +208,8 @@ def test_amazon_docdb_cloud_metadata(instance_integration_cluster, aws_cloud_met
         pytest.param(
             {},
             {
-                'collection': 15,
-                'collections_indexes_stats': 15,
+                'collection': 300,
+                'collections_indexes_stats': 300,
                 'sharded_data_distribution': 300,
                 'db_stats': 15,
                 'session_stats': 15,
@@ -240,7 +240,7 @@ def test_amazon_docdb_cloud_metadata(instance_integration_cluster, aws_cloud_met
             },
             {
                 'collection': 60,
-                'collections_indexes_stats': 15,
+                'collections_indexes_stats': 300,
                 'sharded_data_distribution': 300,
                 'db_stats': 30,
                 'session_stats': 15,

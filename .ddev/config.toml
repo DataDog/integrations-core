@@ -96,8 +96,6 @@ semver = ['BSD-3-Clause']
 simplejson = ['MIT']
 # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
 supervisor = ['BSD-3-Clause-Modification']
-# https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
-uptime = ['BSD-2-Clause']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'

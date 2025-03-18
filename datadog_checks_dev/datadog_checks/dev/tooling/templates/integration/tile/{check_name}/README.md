@@ -29,10 +29,6 @@ Include a high level overview of what this integration does:
 
 {integration_name} does not include any metrics.
 
-### Service Checks
-
-{integration_name} does not include any service checks.
-
 ### Events
 
 {integration_name} does not include any events.
