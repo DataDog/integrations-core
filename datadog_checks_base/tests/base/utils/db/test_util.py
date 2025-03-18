@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host,
     tracked_query,
 )
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.format import json
 
 
 @pytest.mark.parametrize(
@@ -129,7 +129,7 @@ class DBExceptionForTests(BaseException):
     "obfuscator_return_value,expected_value",
     [
         (
-            json.dumps(
+            json.encode(
                 {
                     'query': 'SELECT * FROM datadog',
                     'metadata': {'tables_csv': 'datadog,', 'commands': ['SELECT'], 'comments': None},
@@ -150,7 +150,7 @@ class DBExceptionForTests(BaseException):
             },
         ),
         (
-            json.dumps(
+            json.encode(
                 {
                     'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
                     'metadata': {
@@ -170,7 +170,7 @@ class DBExceptionForTests(BaseException):
             },
         ),
         (
-            json.dumps(
+            json.encode(
                 {
                     'query': 'COMMIT',
                     'metadata': {'tables_csv': '', 'commands': ['COMMIT'], 'comments': None},
@@ -229,7 +229,7 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
 )
 def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
     def _mock_obfuscate_sql(query, options=None):
-        return json.dumps({'query': query, 'metadata': {}})
+        return json.encode({'query': query, 'metadata': {}})
 
     # Check that it can handle null characters
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -374,7 +374,7 @@ def test_dbm_async_job_inactive_stop(aggregator):
 )
 def test_default_json_event_encoding(input):
     # assert that the default json event encoding can handle all defined types without raising TypeError
-    assert json.dumps(input, default=default_json_event_encoding)
+    assert json.encode(input, default=default_json_event_encoding)
 
 
 def test_tracked_query(aggregator):
