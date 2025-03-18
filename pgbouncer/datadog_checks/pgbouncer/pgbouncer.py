@@ -164,11 +164,17 @@ class PgBouncer(AgentCheck):
         use_cached = use_cached if use_cached is not None else self.use_cached
         if self.connection and use_cached:
             return self.connection
+        connection = None
         try:
             connect_kwargs = self._get_connect_kwargs()
             connection = pg.connect(**connect_kwargs)
             connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         except Exception:
+            if connection:
+                try:
+                    connection.close()
+                except Exception:
+                    self.log.debug("Error closing connection after failed creation", exc_info=True)
             redacted_url = self._get_redacted_dsn()
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
@@ -190,16 +196,30 @@ class PgBouncer(AgentCheck):
         return self.database_url
 
     def check(self, instance):
+        db = None
         try:
             db = self._get_connection()
             self._collect_stats(db)
+            self._set_metadata()
         except ShouldRestartException:
             self.log.info("Resetting the connection")
+            if db:
+                try:
+                    db.close()
+                except Exception:
+                    self.log.debug("Error closing connection before reset", exc_info=True)
             db = self._get_connection(use_cached=False)
             self._collect_stats(db)
+            self._set_metadata()
+        finally:
+            if db and not self.use_cached:
+                try:
+                    db.close()
+                except Exception:
+                    self.log.debug("Error closing connection in check", exc_info=True)
+                self.connection = None
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags())
-        self._set_metadata()
 
     def _set_metadata(self):
         if self.is_metadata_collection_enabled():
@@ -208,12 +228,15 @@ class PgBouncer(AgentCheck):
                 self.set_metadata('version', pgbouncer_version)
 
     def get_version(self):
-        db = self._get_connection()
+        if not self.connection:
+            self.log.warning("Cannot get version: no active connection")
+            return None
+            
         regex = r'\d+\.\d+\.\d+'
-        with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+        with self.connection.cursor(cursor_factory=pgextras.DictCursor) as cursor:
             cursor.execute('SHOW VERSION;')
-            if db.notices:
-                data = db.notices[0]
+            if self.connection.notices:
+                data = self.connection.notices[0]
             else:
                 data = cursor.fetchone()[0]
             res = re.findall(regex, data)
