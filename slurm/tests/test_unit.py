@@ -177,6 +177,7 @@ def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance, caplog
     assert result == []
     assert "Error fetching squeue details for job 123: Test exception" in caplog.text
 
+
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, instance, caplog):
     instance['collect_scontrol_stats'] = True
