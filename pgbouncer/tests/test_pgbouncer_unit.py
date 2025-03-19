@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
+from unittest.mock import ANY
 
 
 @pytest.mark.unit
@@ -213,8 +214,13 @@ def test_connection_lifecycle_pg_error_twice(instance, use_cached):
                 assert mock_connect.call_count == 2
                 mock_conn1.close.assert_called_once()
                 mock_conn2.close.assert_called_once()
-                # The service check should not be called since both connections failed
-                service_check_patch.assert_not_called()
+                # The final service check should be sent with status CRITICAL
+                service_check_patch.assert_called_with(
+                    PgBouncer.SERVICE_CHECK_NAME,
+                    AgentCheck.CRITICAL,
+                    tags=check._get_service_checks_tags(),
+                    message=ANY
+                )
 
 
 @pytest.mark.unit

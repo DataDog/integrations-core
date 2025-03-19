@@ -215,7 +215,12 @@ class PgBouncer(AgentCheck):
             if allow_reconnect:
                 self._try_collect_data(allow_reconnect=False)
             else:
-                self.log.error("Error persists after connection reset")
+                redacted_url = self._get_redacted_dsn()
+                message = u'Connection error while collecting data from: {}'.format(redacted_url)
+                self.log.error(message)
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message
+                )
                 raise
 
     def check(self, instance):
