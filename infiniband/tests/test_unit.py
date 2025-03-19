@@ -16,7 +16,7 @@ from .common import (
 
 def _assert_metrics(aggregator, metrics, metric_prefix, tags, count=1, m_type='gauge'):
     for counter, value in metrics.items():
-        if m_type == 'gauge' or m_type == 'both':
+        if m_type in {'gauge', 'both'}:
             aggregator.assert_metric(
                 f'{metric_prefix}.{counter}',
                 metric_type=aggregator.GAUGE,
@@ -25,7 +25,7 @@ def _assert_metrics(aggregator, metrics, metric_prefix, tags, count=1, m_type='g
                 count=count,
             )
 
-        if m_type == 'monotonic_count' or m_type == 'both':
+        if m_type in {'monotonic_count', 'both'}:
             aggregator.assert_metric(
                 f'{metric_prefix}.{counter}.count',
                 metric_type=aggregator.MONOTONIC_COUNT,

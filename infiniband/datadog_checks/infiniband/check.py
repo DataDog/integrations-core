@@ -96,8 +96,8 @@ class InfinibandCheck(AgentCheck):
         with open(file_path, "r") as f:
             value = int(f.read().strip())
 
-            if self.collection_type in ['gauge', 'both']:
+            if self.collection_type in {'gauge', 'both'}:
                 self.gauge(metric_name, value, tags)
 
-            if self.collection_type in ['monotonic_count', 'both']:
+            if self.collection_type in {'monotonic_count', 'both'}:
                 self.monotonic_count(f"{metric_name}.count", value, tags)
