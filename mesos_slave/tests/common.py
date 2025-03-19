@@ -10,6 +10,8 @@ from datadog_checks.dev.utils import running_on_windows_ci
 
 not_windows_ci = pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 
+# TODO remove: trigger CI
+
 HERE = get_here()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 CHECK_NAME = 'mesos_slave'
