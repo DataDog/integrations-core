@@ -61,13 +61,13 @@ def _get_file_content(filename):
 
 @pytest.fixture
 def mock_fs():
-    # Set up the mock file system. 
-    # The mock_ib_dir function is used to mock the existence of the infiniband directory. 
-    # The mock_ib_sub_dir function is used to mock the existence of the subdirectories (device, ports, counters, 
-    # hw_counters). 
+    # Set up the mock file system.
+    # The mock_ib_dir function is used to mock the existence of the infiniband directory.
+    # The mock_ib_sub_dir function is used to mock the existence of the subdirectories (device, ports, counters,
+    # hw_counters).
     # The mock_counter_dir function is used to mock the contents of the subdirectories i.e. mock that the counter files
     # inside of counter and hw_counters exist.
-    # The mock_glob function is used to mock the glob pattern function. 
+    # The mock_glob function is used to mock the glob pattern function.
     # The mock_open function is used to mock the open function and return the mock file content.
     with mock.patch('os.path.exists') as mock_ib_dir, mock.patch('os.path.isdir') as mock_ib_sub_dir, mock.patch(
         'os.listdir'

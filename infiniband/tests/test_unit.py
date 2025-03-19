@@ -143,10 +143,10 @@ def test_device_without_ports_directory(aggregator, instance, caplog, mock_fs):
         ('counters', 'as counters directory does not exist'),
         ('hw_counters', 'as hw_counters directory does not exist'),
     ],
-    ids = [
+    ids=[
         'counters directory does not exist',
         'hw_counters directory does not exist',
-    ]
+    ],
 )
 def test_device_without_directories(aggregator, instance, caplog, mock_fs, directory_type, expected_message):
     # Test device without counters or hw_counters directories
