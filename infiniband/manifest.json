@@ -14,9 +14,9 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Category::Network",
-      "Offering::Infrastructure",
-      "Queried Data Type::Metric",
-      "Submitted Data Type::Metric"
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
