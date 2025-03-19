@@ -45,7 +45,6 @@ Linux command:
       ```
 
       **Note**:
-      - `PORT`: Port should be similar to the port provided in **Configure syslog message forwarding from Delinea Secret Server** section.
       - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][1].

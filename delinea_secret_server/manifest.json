@@ -12,8 +12,22 @@
     "title": "Delinea Secret Server",
     "media": [
       {
-        "caption": "Delinea Secret Server - Overview",
-        "image_url": "images/delinea_secret_server_overview.png",
+        "caption": "Delinea Secret Server - Overview 1",
+        "image_url": "images/delinea_secret_server_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Delinea Secret Server - Overview 2",
+        "image_url": "images/delinea_secret_server_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Delinea Secret Server - Overview 3",
+        "image_url": "images/delinea_secret_server_overview_3.png",
+        "media_type": "image"
+      },{
+        "caption": "Delinea Secret Server - Overview 4",
+        "image_url": "images/delinea_secret_server_overview_4.png",
         "media_type": "image"
       }
     ],
