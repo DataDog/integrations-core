@@ -204,7 +204,7 @@ class PgBouncer(AgentCheck):
             finally:
                 self.connection = None
 
-    def _try_collect_data(self, retry=True):
+    def _try_collect_data(self, allow_reconnect=True):
         try:
             self._ensure_connection()
             self._collect_stats(self.connection)
@@ -212,8 +212,8 @@ class PgBouncer(AgentCheck):
         except ShouldReconnectException:
             self.log.info("Resetting the connection")
             self._close_connection()
-            if retry:
-                self._try_collect_data(retry=False)
+            if allow_reconnect:
+                self._try_collect_data(allow_reconnect=False)
             else:
                 self.log.error("Error persists after connection reset")
                 raise
