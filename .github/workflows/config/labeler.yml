@@ -295,16 +295,18 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
-integration/intercom:
-- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
+integration/infiniband:
+- infiniband/**/*
+integration/intercom:
+- intercom/**/*
 integration/istio:
 - istio/**/*
-integration/ivanti_nzta:
-- ivanti_nzta/**/*
 integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
+integration/ivanti_nzta:
+- ivanti_nzta/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -463,10 +465,10 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
-integration/plivo:
-- plivo/**/*
 integration/plaid:
 - plaid/**/*
+integration/plivo:
+- plivo/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
