@@ -97,12 +97,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.cpu.usage.total{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.usage.total{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.cpu.limits{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.limits{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -156,7 +156,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.tx_bytes{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.tx_bytes{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -178,7 +178,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.rx_bytes{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.rx_bytes{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -329,12 +329,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.usage{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.memory.limits{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.limits{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -388,7 +388,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.containers.restarts{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.containers.restarts{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -519,12 +519,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.cpu.usage.total{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.usage.total{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.cpu.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.limits{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -578,7 +578,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.tx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.tx_bytes{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -600,7 +600,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.rx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.rx_bytes{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -797,12 +797,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.usage{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.memory.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.limits{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -855,7 +855,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.containers.restarts{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.containers.restarts{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
