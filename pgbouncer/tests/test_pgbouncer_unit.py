@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import psycopg2 as pg
 import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
-from unittest.mock import ANY
 
 
 @pytest.mark.unit
@@ -219,7 +218,7 @@ def test_connection_lifecycle_pg_error_twice(instance, use_cached):
                     PgBouncer.SERVICE_CHECK_NAME,
                     AgentCheck.CRITICAL,
                     tags=check._get_service_checks_tags(),
-                    message=ANY
+                    message=ANY,
                 )
 
 
