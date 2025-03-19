@@ -56,6 +56,7 @@ PIPELINES_METRICS = [
     "taskrun_duration.bucket",
     "taskrun_duration.count",
     "taskrun_duration.sum",
+    "taskruns_pod_latency",
     "workqueue.longest_running_processor.bucket",
     "workqueue.longest_running_processor.count",
     "workqueue.longest_running_processor.sum",
@@ -66,12 +67,14 @@ PIPELINES_METRICS = [
 assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
 
 PIPELINES_OPTIONAL_METRICS = [
-    "pipelines_controller.taskruns_pod_latency",
     "pipelinerun.taskrun.duration.bucket",
     "pipelinerun.taskrun.duration.count",
     "pipelinerun.taskrun.duration.sum",
+    "taskruns_pod_latency",
 ]
 assert PIPELINES_OPTIONAL_METRICS == sorted(PIPELINES_OPTIONAL_METRICS)
+
+PIPELINES_E2E_METRICS = set(PIPELINES_METRICS) - set(PIPELINES_OPTIONAL_METRICS)
 
 TRIGGERS_METRICS = [
     "client.latency.bucket",
