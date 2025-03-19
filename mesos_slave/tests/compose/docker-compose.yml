@@ -25,4 +25,4 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper
-    privileged: true
+    privileged: true  # Added as a fix for Ubuntu-22.04 CI runners, we do not know why it works
