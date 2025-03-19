@@ -1,0 +1,12 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+# If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
+# Also bump the LIBRDKAFKA_VERSION version in this file
+post-install-commands = [
+  "python -m pip install -y celery",
+  "python -m pip install -y flower",
+]
+
+[[envs.default.matrix]]
+python = ["3.12"]
