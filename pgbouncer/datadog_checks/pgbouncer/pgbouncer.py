@@ -182,7 +182,7 @@ class PgBouncer(AgentCheck):
             raise
 
     def _ensure_connection(self):
-        """Get and memoize connections to instances"""
+        """Create a connection the the instance if it doesn't exist."""
         if not self.connection:
             self.connection = self._new_connection()
 
