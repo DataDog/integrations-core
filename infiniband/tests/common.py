@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 MOCK_IB_COUNTER_DATA = {
     'port_rcv_data': '1000',
     'port_xmit_data': '2000',
