@@ -434,6 +434,16 @@ vonage/*.md                                                        @DataDog/saas
 vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/asana/                                                             @DataDog/saas-integrations
+/asana/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/asana/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/asana/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/tanium/                                                            @DataDog/saas-integrations
+/tanium/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/tanium/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/tanium/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 plaid/                                                              @DataDog/saas-integrations
 plaid/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 plaid/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
@@ -479,6 +489,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/gpu/                                                                @DataDog/ebpf-platform
+/gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
+/gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
@@ -496,4 +510,4 @@ docs/developer/process/integration-release.md                         @DataDog/a
 
 # LEAVE THE FOLLOWING LOG OWNERSHIP LAST IN THE FILE
 # Make sure logs team is the full owner for all logs related files
-**/assets/logs/                          @DataDog/logs-backend @DataDog/logs-core @DataDog/siem-logs-reviewers
+**/assets/logs/                                                       @DataDog/logs-integrations-reviewers @DataDog/logs-backend @DataDog/logs-core @DataDog/siem-logs-reviewers

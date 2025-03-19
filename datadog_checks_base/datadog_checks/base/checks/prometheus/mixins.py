@@ -569,7 +569,7 @@ class PrometheusScraperMixin(object):
             and not handler.ignore_tls_warning
             and not is_affirmative(handler.options.get('ssl_verify', True))
         ):
-            self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
+            self.log.debug(u'An unverified HTTPS request is being made to %s', endpoint)
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)
