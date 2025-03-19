@@ -480,7 +480,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _enrich_scontrol_tags(self, job_id):
         # Tries to enrich the scontrol job with additional details from squeue.
-        # breakpoint()
         try:
             cmd = self.get_slurm_command('squeue', ["-j", job_id, "-ho", "%u %T %j"])
             res, err, code = get_subprocess_output(cmd)
