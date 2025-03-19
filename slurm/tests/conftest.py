@@ -27,6 +27,6 @@ def instance():
 
 
 @pytest.fixture
-def caplog():
-    with caplog.at_level(logging.DEBUG):
-        yield caplog
+def caplog(caplog):
+    caplog.set_level(logging.DEBUG)
+    return caplog
