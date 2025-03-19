@@ -4,9 +4,9 @@
 
 This integration parses the following log types:
 
-- **Session Logs** : Track network traffic and session activities, including initiated and denied sessions, application-related traffic, and dropped packets.
-- **Security Logs** : Monitor security events such as malware detections, intrusion attempts, DoS attacks, and content filtering activities.
-- **Authentication Logs** : Capture authentication activities, including successful and failed login attempts.
+- **Session Logs**: Track network traffic and session activities, including initiated and denied sessions, application-related traffic, and dropped packets.
+- **Security Logs**: Monitor security events such as malware detections, intrusion attempts, DoS attacks, and content filtering activities.
+- **Authentication Logs**: Capture authentication activities, including successful and failed login attempts.
 
 Get detailed visibility into these logs with out-of-the-box dashboards, and strengthen security with prebuilt Cloud SIEM detection rules for proactive threat monitoring and response.
 
@@ -24,7 +24,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
 
 ### Configuration
 
-#### Log collection
+#### Configure log collection
 
 1. Log collection is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
@@ -32,7 +32,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
    logs_enabled: true
    ```
 
-2. Add the following configuration block to your `juniper_srx_firewall.d/conf.yaml` file to start collecting logs. See the sample [juniper_srx_firewall.d/conf.yaml][6] for available configuration options.
+2. Add the following configuration block to your `juniper_srx_firewall.d/conf.yaml` file to start collecting logs. See the [sample `conf.yaml`][6] for available configuration options.
 
    ```yaml
    logs:
@@ -44,7 +44,6 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
 
    **Note**:
 
-   - `PORT`: Use the same port configured for [syslog message forwarding](#configure-syslog-message-forwarding-from-juniper-srx-firewall).
    - Do not change the `service` and `source` values, as they are integral to proper log pipeline processing.
 
 3. [Restart the Agent][2].
@@ -66,7 +65,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
    ```
    **Note**:
    - Replace `<IP-ADDRESS>` with the Datadog Agent's IP address.
-   - Replace `<PORT>` with the UDP port that Datadog will listen on (default: 514)
+   - Replace `<PORT>` with the same port configured in the [Log Collection](#configure-log-collection).
 
 4. Verify if `Security Logging` is enabled:
    ```shell
@@ -149,7 +148,7 @@ Ensure firewall settings allow traffic through the configured port.
 
 On systems running Syslog, the Agent may fail to bind to port 514 and display the following error: 
    
-   `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`
+    Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use
 
 This error occurs because Syslog uses port 514 by default. 
 
