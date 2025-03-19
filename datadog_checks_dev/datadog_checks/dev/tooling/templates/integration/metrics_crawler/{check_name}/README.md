@@ -24,10 +24,6 @@ This check monitors [{integration_name}][1].
 
 {integration_name} does not include any metrics.
 
-### Service Checks
-
-{integration_name} does not include any service checks.
-
 ### Events
 
 {integration_name} does not include any events.
