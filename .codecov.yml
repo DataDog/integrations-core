@@ -566,6 +566,10 @@ coverage:
         target: 75
         flags:
         - silk
+      Silverstripe_CMS:
+        target: 75
+        flags:
+        - silverstripe_cms
       SingleStore:
         target: 75
         flags:
@@ -582,6 +586,10 @@ coverage:
         target: 75
         flags:
         - sonarqube
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       Spark:
         target: 75
         flags:
@@ -1467,6 +1475,11 @@ flags:
     paths:
     - silk/datadog_checks/silk
     - silk/tests
+  silverstripe_cms:
+    carryforward: true
+    paths:
+    - silverstripe_cms/datadog_checks/silverstripe_cms
+    - silverstripe_cms/tests
   singlestore:
     carryforward: true
     paths:
@@ -1492,6 +1505,11 @@ flags:
     paths:
     - sonarqube/datadog_checks/sonarqube
     - sonarqube/tests
+  sonatype_nexus:
+    carryforward: true
+    paths:
+    - sonatype_nexus/datadog_checks/sonatype_nexus
+    - sonatype_nexus/tests
   spark:
     carryforward: true
     paths:
