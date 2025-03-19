@@ -71,6 +71,7 @@ files:
               items:
                 type: string
           - name: collection_type
+            hidden: true
             description: |
               The type of collection to use. Available options are `gauge`, `monotonic_count`, and `both`.
             value:

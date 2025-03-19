@@ -44,6 +44,8 @@ class InfinibandCheck(AgentCheck):
             else:
                 raise Exception(f"Path {self.base_path} and {alternative_path} does not exist")
 
+        self.log.info("Using InfiniBand path: %s", self.base_path)
+
     def check(self, _):
         for device in os.listdir(self.base_path):
             # Skip excluded devices

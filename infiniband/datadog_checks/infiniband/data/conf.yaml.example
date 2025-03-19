@@ -59,11 +59,6 @@ instances:
     #   - VL15_dropped
     #   - link_downed
 
-    ## @param collection_type - string - optional - default: gauge
-    ## The type of collection to use. Available options are `gauge`, `monotonic_count`, and `both`.
-    #
-    # collection_type: gauge
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
