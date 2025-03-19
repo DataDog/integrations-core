@@ -12,6 +12,7 @@ from datadog_checks.slurm.constants import SACCT_PARAMS
 from .common import (
     DEFAULT_SINFO_PATH,
     SACCT_MAP,
+    SCONTROL_MAP,
     SDIAG_MAP,
     SINFO_1_F,
     SINFO_1_T,
@@ -77,8 +78,9 @@ def test_acct_command_params(instance):
         (SACCT_MAP, 'sacct'),
         (SSHARE_MAP, 'sshare'),
         (SDIAG_MAP, 'sdiag'),
+        (SCONTROL_MAP, 'scontrol'),
     ],
-    ids=['sinfo with full params', 'squeue output', 'sacct output', 'sshare output', 'sdiag output'],
+    ids=['sinfo with full params', 'squeue output', 'sacct output', 'sshare output', 'sdiag output', 'scontrol output'],
 )
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregator, expected_metrics, binary):
@@ -89,19 +91,32 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
     """
 
     instance[f'collect_{binary}_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
 
     # Metadata collection happens before the main collection so I'm mocking a failed call for it.
     mock_output_main = (mock_output(f'{binary}.txt'), "", 0)
-
     if binary == 'sinfo':
         # sinfo has 3 subprocess calls. It collects metadata, partition and node data. So I'm mocking all of them.
         mock_output_metadata = ("", "", 1)
         mock_output_partition = (mock_output('sinfo_partition.txt'), "", 0)
         mock_get_subprocess_output.side_effect = [mock_output_metadata, mock_output_partition, mock_output_main]
+    elif binary == 'scontrol':
+        base_cmd = ['/usr/bin/scontrol']
+        assert check.scontrol_cmd[:-1] == base_cmd
+        mock_output_node = ("c1", "", 0)
+        mock_output_squeue = (mock_output('scontrol_squeue.txt'), "", 0)
+        mock_output_squeue2 = (mock_output('scontrol_squeue2.txt'), "", 0)
+        # The below essentially mocks the return of all the function calls in the scontrol method. The first call mocks
+        # the mocks the scontrol command output. The second mocks the hostname check. The third mocks the
+        # squeue command output when the 2 lines of scontrol are iterated over for metric submission.
+        mock_get_subprocess_output.side_effect = [
+            mock_output_main,
+            mock_output_node,
+            mock_output_squeue,
+            mock_output_squeue2,
+        ]
     else:
         mock_get_subprocess_output.side_effect = [mock_output_main]
-
-    check = SlurmCheck('slurm', {}, [instance])
 
     check.check(None)
     if binary == 'sacct':
@@ -142,3 +157,38 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
         'version.raw': raw_version,
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance, caplog):
+    # Test enrich_scontrol_tags error
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+
+    # Test error case in squeue command
+    mock_get_subprocess_output.return_value = (None, "Squeue command failed", 1)
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
+    assert "Error fetching squeue details for job 123: Squeue command failed" in caplog.text
+
+    # Test exception case
+    mock_get_subprocess_output.side_effect = Exception("Test exception")
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
+    assert "Error fetching squeue details for job 123: Test exception" in caplog.text
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, instance, caplog):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+
+    # Test case where squeue returns more than 3 parts
+    mock_get_subprocess_output.return_value = ("root RUNNING test_job extra_field", "", 0)
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
+
+    # Test case where squeue returns 2 parts
+    mock_get_subprocess_output.return_value = ("root RUNNING", "", 0)
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
