@@ -176,6 +176,7 @@ datadog-snmp==9.2.0
 datadog-snowflake==7.4.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.2.0
+datadog-sonatype-nexus==1.0.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.0.0
 datadog-spark==6.2.0
 datadog-sqlserver==21.2.0
