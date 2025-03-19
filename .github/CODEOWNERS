@@ -459,6 +459,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/silverstripe_cms/                                                  @DataDog/agent-integrations
+/silverstripe_cms/*.md                                              @DataDog/agent-integrations @DataDog/documentation
+/silverstripe_cms/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
+/silverstripe_cms/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /avast/                                                             @DataDog/saas-integrations
 /avast/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
 /avast/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation

@@ -566,6 +566,10 @@ coverage:
         target: 75
         flags:
         - silk
+      Silverstripe_CMS:
+        target: 75
+        flags:
+        - silverstripe_cms
       SingleStore:
         target: 75
         flags:
@@ -1471,6 +1475,11 @@ flags:
     paths:
     - silk/datadog_checks/silk
     - silk/tests
+  silverstripe_cms:
+    carryforward: true
+    paths:
+    - silverstripe_cms/datadog_checks/silverstripe_cms
+    - silverstripe_cms/tests
   singlestore:
     carryforward: true
     paths:
