@@ -22,7 +22,7 @@ You can then access an out-of-the-box [Google Compute Engine dashboard][6] that 
 
 ### Set up the Kubernetes integration
 
-To further monitor you GKE cluster install the Datadog Agent utilizing the Datadog Helm Chart or Datadog Operator. Once deployed the Datadog Agent and Datadog Cluster Agent will monitor your cluster and the workloads on it.
+To further monitor your GKE cluster, install the Datadog Agent using the Datadog Helm Chart or Datadog Operator. Once deployed, the Datadog Agent and Datadog Cluster Agent monitor your cluster and the workloads on it.
 
 GKE supports two [main modes of operation][15] that can change the level of flexibility, responsibility, and control that you have over your cluster. These different modes change how you deploy the Datadog components.
 
@@ -43,7 +43,7 @@ Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes clus
 
 #### Autopilot
 
-Autopilot requires a more distinct setup for the Kubernetes installation compared to the standard installation. This type of cluster requires using the Datadog Helm Chart. See the configuration in the GKE [Autopilot section][14] of the Kubernetes distributions page for the required changes to your Helm configuration.
+Autopilot requires a more distinct setup for the Kubernetes installation compared to the standard installation. This type of cluster requires using the Datadog Helm chart. See the configuration in the GKE [Autopilot section][14] of the Kubernetes distributions page for the required changes to your Helm configuration.
 
 After that you will deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster with the Helm [installation of the Datadog Agent on Kubernetes][16] with this Autopilot based configuration.
 
