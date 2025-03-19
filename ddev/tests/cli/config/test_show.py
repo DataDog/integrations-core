@@ -135,6 +135,7 @@ def test_reveal(ddev, config_file, helpers):
 def test_show_with_local_overrides(ddev, config_file, helpers):
     # Ensure we keep the config simple
     config_file.restore()
+    config_file.model.github = {'user': '', 'token': ''}
     config_file.save()
 
     # Create local config with overrides
@@ -212,6 +213,7 @@ def test_show_with_local_overrides(ddev, config_file, helpers):
 def test_show_with_local_overrides_reveal(ddev, config_file, helpers):
     # Set up global config
     config_file.restore()
+    config_file.model.github = {'user': '', 'token': ''}
     config_file.save()
 
     # Create local config with overrides
