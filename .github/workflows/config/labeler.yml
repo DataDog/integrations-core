@@ -519,6 +519,8 @@ integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
+integration/silverstripe_cms:
+- silverstripe_cms/**/*
 integration/singlestore:
 - singlestore/**/*
 integration/slurm:
@@ -555,6 +557,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonatype_nexus:
+- sonatype_nexus/**/*
 integration/sonicwall_firewall:
 - sonicwall_firewall/**/*
 integration/sophos_central_cloud:
@@ -643,6 +647,8 @@ integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/velero:
+- velero/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:
