@@ -387,6 +387,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_sysmon:
+- microsoft_sysmon/**/*
 integration/milvus:
 - milvus/**/*
 integration/mimecast:
