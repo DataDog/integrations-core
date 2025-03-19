@@ -486,11 +486,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             if code == 0 and res.strip():
                 output_line = res.strip()
-                parts = output_line.split(maxsplit=2)
+                parts = output_line.split()
 
                 if len(parts) == 3:
                     user, state, job_name = parts
                     return [f"slurm_job_user:{user}", f"slurm_job_state:{state}", f"slurm_job_name:{job_name}"]
+                else:
+                    self.log.debug("Unexpected number of parts in squeue output for job %s: %s", job_id, output_line)
             else:
                 self.log.debug("Error fetching squeue details for job %s: %s", job_id, err)
         except Exception as e:

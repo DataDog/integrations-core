@@ -174,3 +174,18 @@ def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance):
     mock_get_subprocess_output.side_effect = Exception("Test exception")
     result = check._enrich_scontrol_tags("123")
     assert result == []
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, instance):
+    """Test _enrich_scontrol_tags when squeue returns unexpected number of parts."""
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+
+    mock_get_subprocess_output.return_value = ("root RUNNING test_job extra_field", "", 0)
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
+
+    mock_get_subprocess_output.return_value = ("root RUNNING", "", 0)
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
