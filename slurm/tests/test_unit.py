@@ -157,3 +157,20 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
         'version.raw': raw_version,
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance):
+    # Test enrich_scontrol_tags error
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+
+    # Test error case in squeue command
+    mock_get_subprocess_output.return_value = (None, "Squeue command failed", 1)
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
+
+    # Test exception case
+    mock_get_subprocess_output.side_effect = Exception("Test exception")
+    result = check._enrich_scontrol_tags("123")
+    assert result == []
