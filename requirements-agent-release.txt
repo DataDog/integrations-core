@@ -161,7 +161,7 @@ datadog-pulsar==3.2.0
 datadog-quarkus==1.1.0
 datadog-rabbitmq==7.1.0
 datadog-ray==2.2.0
-datadog-redisdb==7.1.0
+datadog-redisdb==7.2.0
 datadog-rethinkdb==5.1.0
 datadog-riak==5.1.0
 datadog-riakcs==4.2.0
