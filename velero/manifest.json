@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the performance and usage of yout Velero deployments.",
+    "description": "Monitor the performance and usage of your Velero deployments.",
     "title": "Velero",
     "media": [],
     "classifier_tags": [
