@@ -1488,4 +1488,9 @@ class AgentCheck(object):
         if process.returncode != 0:
             raise ValueError(f'Failed to load config: {stderr.decode()}')
 
-        return eval(stdout.strip().decode())
+        decoded = stdout.strip().decode()
+        try:
+            return eval(decoded)
+        # a single, literal unquoted string
+        except Exception:
+            return decoded
