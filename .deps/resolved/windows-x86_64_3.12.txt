@@ -19,7 +19,7 @@ clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhou
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143924-py3-none-win_amd64.whl#sha256=02165c52665dfa139b6606bd802b996c51bcbc8c89f3c79801833d53e838d735
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250312172326-cp312-cp312-win_amd64.whl#sha256=21338b1b9a3e714573704a13de05c64baa5b820ecc1adfc7e33c4bf49e1b1124
-cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-43.0.1-20250225134242-cp37-abi3-win_amd64.whl#sha256=78c52201e5ef30761d336316ed8415b345701113d096d9d8684c14283cba6aed
+cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.1-cp39-abi3-win_amd64.whl#sha256=d75601ad10b059ec832e78823b348bfa1a59f6b8d545db3a24fd44362a1564cb
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.6-cp312-cp312-win_amd64.whl#sha256=bb183a535e5b24828a45901babd9fd15a1350c9d5096de5ba463287d0c8c64d1
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
