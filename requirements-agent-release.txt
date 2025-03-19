@@ -131,7 +131,7 @@ datadog-milvus==1.2.0
 datadog-mongo==9.0.0
 datadog-mysql==14.7.0
 datadog-nagios==3.0.0
-datadog-network==5.1.0
+datadog-network==5.2.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==4.1.0
 datadog-nginx==8.1.0
