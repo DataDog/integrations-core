@@ -160,7 +160,7 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
-def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance):
+def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance, caplog):
     # Test enrich_scontrol_tags error
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
@@ -169,23 +169,25 @@ def test_enrich_scontrol_tags_error(mock_get_subprocess_output, instance):
     mock_get_subprocess_output.return_value = (None, "Squeue command failed", 1)
     result = check._enrich_scontrol_tags("123")
     assert result == []
+    assert "Error fetching squeue details for job 123: Squeue command failed" in caplog.text
 
     # Test exception case
     mock_get_subprocess_output.side_effect = Exception("Test exception")
     result = check._enrich_scontrol_tags("123")
     assert result == []
-
+    assert "Error fetching squeue details for job 123: Test exception" in caplog.text
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
-def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, instance):
-    """Test _enrich_scontrol_tags when squeue returns unexpected number of parts."""
+def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, instance, caplog):
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
 
+    # Test case where squeue returns more than 3 parts
     mock_get_subprocess_output.return_value = ("root RUNNING test_job extra_field", "", 0)
     result = check._enrich_scontrol_tags("123")
     assert result == []
 
+    # Test case where squeue returns 2 parts
     mock_get_subprocess_output.return_value = ("root RUNNING", "", 0)
     result = check._enrich_scontrol_tags("123")
     assert result == []
