@@ -348,6 +348,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /snowflake/pyproject.toml                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
+/sonatype_nexus/                                                     @DataDog/agent-integrations
+/sonatype_nexus/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
+/sonatype_nexus/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
+/sonatype_nexus/metadata.csv                                         @DataDog/agent-integrations @DataDog/documentation 
+
 /sonicwall_firewall/                                                  @DataDog/saas-integrations
 /sonicwall_firewall/*.md                                              @DataDog/saas-integrations @DataDog/documentation
 /sonicwall_firewall/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation

@@ -553,6 +553,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonatype_nexus:
+- sonatype_nexus/**/*
 integration/sonicwall_firewall:
 - sonicwall_firewall/**/*
 integration/sophos_central_cloud:
