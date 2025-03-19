@@ -297,6 +297,8 @@ integration/impala:
 - impala/**/*
 integration/incident_io:
 - incident_io/**/*
+integration/infiniband:
+- infiniband/**/*
 integration/intercom:
 - intercom/**/*
 integration/istio:
