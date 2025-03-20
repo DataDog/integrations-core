@@ -1475,22 +1475,6 @@ class AgentCheck(object):
         """
         Convenience wrapper to ease programmatic use of this class from the C API.
         """
-        import subprocess
-        import sys
+        import yaml
 
-        process = subprocess.Popen(
-            [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        stdout, stderr = process.communicate(yaml_str.encode())
-        if process.returncode != 0:
-            raise ValueError(f'Failed to load config: {stderr.decode()}')
-
-        decoded = stdout.strip().decode()
-        try:
-            return eval(decoded)
-        # a single, literal unquoted string
-        except Exception:
-            return decoded
+        return yaml.safe_load(yaml_str)
