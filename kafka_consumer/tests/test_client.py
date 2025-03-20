@@ -10,6 +10,5 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 def test_client_returns_expected_consumer_group_state(aggregator, check, kafka_instance, dd_run_check):
     check = check(kafka_instance)
-    group_id, state = check.client.describe_consumer_groups('my_consumer')
-    assert group_id == 'my_consumer'
+    state = check.client.describe_consumer_group('my_consumer')
     assert state in POSSIBLE_CONSUMER_GROUP_STATES

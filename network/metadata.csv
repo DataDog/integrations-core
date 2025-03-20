@@ -9,6 +9,7 @@ system.net.iface.mtu,gauge,,unit,,The Maximum Transmission Unit (MTU) of the net
 system.net.iface.tx_queue_len,gauge,,unit,,The length of the transmit queue of the network interface (Linux only).,0,system,iface tx queue,
 system.net.iface.num_tx_queues,gauge,,unit,,The number of transmit queue of a network interface (Linux only).,0,system,iface tx num queue,
 system.net.iface.num_rx_queues,gauge,,unit,,The number of receive queue of a network interface (Linux only).,0,system,iface rx num queue,
+system.net.iface.up,gauge,,,,Indicates whether the network interface is up (Linux only).,0,system,iface up,
 system.net.bytes_rcvd,gauge,,byte,second,The number of bytes received on a device per second.,0,system,bytes rcvd,
 system.net.bytes_sent,gauge,,byte,second,The number of bytes sent from a device per second.,0,system,bytes sent,
 system.net.conntrack.acct,gauge,,unit,,Boolean to enable connection tracking flow accounting. 64-bit byte and packet counters per flow are added.,0,system,acct,
