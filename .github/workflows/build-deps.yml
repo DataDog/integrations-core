@@ -54,274 +54,262 @@ jobs:
           cd .builders
           pytest -vvv
 
-  debug:
-    name: Figure out actual values for variables on workflow_dispatch
-    # (github.event_name == 'workflow_dispatch' && (github.ref == github.event.repository.default_branch || startsWith(github.ref, '7.')))
-    runs-on: ubuntu-22.04
+  build:
+    name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+        - os: ubuntu-22.04-arm
+          image: linux-aarch64
+        - os: ubuntu-22.04
+          image: linux-x86_64
+        - os: windows-2022
+          image: windows-x86_64
+
+    permissions:
+      packages: write
+
+    env:
+      OUT_DIR: output/${{ matrix.job.image }}
+      BUILDER_IMAGE: ghcr.io/datadog/agent-int-builder:${{ matrix.job.image }}
+      DOCKER: docker
+
     steps:
-      - run: |
-          echo github.event_name = ${{ github.event_name }}
-          echo github.ref = ${{ github.ref }}
-          echo github.ref_name = ${{ github.ref_name }}
-          echo github.event.repository.default_branch = ${{ github.event.repository.default_branch }}
-          echo github.event.ref = ${{ github.event.ref }}
+    - name: Checkout code
+      if: github.event_name != 'pull_request'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
 
-  # build:
-  #   name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
-  #   runs-on: ${{ matrix.job.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       job:
-  #       - os: ubuntu-22.04-arm
-  #         image: linux-aarch64
-  #       - os: ubuntu-22.04
-  #         image: linux-x86_64
-  #       - os: windows-2022
-  #         image: windows-x86_64
+    # On pull requests, ensure that changed files are determined before checking out the code so
+    # that we use the GitHub API, otherwise we would have to fetch the entire history (depth: 0)
+    - name: Check for builder changes (pull request)
+      id: changed-files-pr
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: "${{ github.token }}"
+      run: |
+        PR_NUMBER="${{ github.event.pull_request.number }}"
+        REPO="${{ github.repository }}"
 
-  #   permissions:
-  #     packages: write
+        BUILDERS_CHANGED=$(gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" | \
+          jq -r 'map(.filename) | map(select(startswith(".builders/"))) | length > 0')
 
-  #   env:
-  #     OUT_DIR: output/${{ matrix.job.image }}
-  #     BUILDER_IMAGE: ghcr.io/datadog/agent-int-builder:${{ matrix.job.image }}
-  #     DOCKER: docker
+        echo "builders_any_changed=$BUILDERS_CHANGED" >> $GITHUB_OUTPUT
 
-  #   steps:
-  #   - name: Checkout code
-  #     if: github.event_name != 'pull_request'
-  #     uses: actions/checkout@v4
-  #     with:
-  #       fetch-depth: 2
+    # For push events, we still need to check changes but will rely on minimal checkout
+    - name: Check for builder changes (push)
+      id: changed-files-push
+      if: github.event_name != 'pull_request'
+      run: |
+        CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+        echo "builders_any_changed=$(echo "$CHANGED_FILES" | grep -q "^\.builders/" && echo "true" || echo "false")" >> $GITHUB_OUTPUT
 
-  #   # On pull requests, ensure that changed files are determined before checking out the code so
-  #   # that we use the GitHub API, otherwise we would have to fetch the entire history (depth: 0)
-  #   - name: Check for builder changes (pull request)
-  #     id: changed-files-pr
-  #     if: github.event_name == 'pull_request'
-  #     env:
-  #       GH_TOKEN: "${{ github.token }}"
-  #     run: |
-  #       PR_NUMBER="${{ github.event.pull_request.number }}"
-  #       REPO="${{ github.repository }}"
+    # Combine outputs for subsequent steps
+    - name: Combine changed files outputs
+      id: changed-files
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "builders_any_changed=${{ steps.changed-files-pr.outputs.builders_any_changed }}" >> $GITHUB_OUTPUT
+        else
+          echo "builders_any_changed=${{ steps.changed-files-push.outputs.builders_any_changed }}" >> $GITHUB_OUTPUT
+        fi
 
-  #       BUILDERS_CHANGED=$(gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" | \
-  #         jq -r 'map(.filename) | map(select(startswith(".builders/"))) | length > 0')
+    - name: Checkout code
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v4
 
-  #       echo "builders_any_changed=$BUILDERS_CHANGED" >> $GITHUB_OUTPUT
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
 
-  #   # For push events, we still need to check changes but will rely on minimal checkout
-  #   - name: Check for builder changes (push)
-  #     id: changed-files-push
-  #     if: github.event_name != 'pull_request'
-  #     run: |
-  #       CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-  #       echo "builders_any_changed=$(echo "$CHANGED_FILES" | grep -q "^\.builders/" && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+    - name: Install management dependencies
+      run: |
+        pip install -r .builders/deps/host_dependencies.txt
 
-  #   # Combine outputs for subsequent steps
-  #   - name: Combine changed files outputs
-  #     id: changed-files
-  #     run: |
-  #       if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-  #         echo "builders_any_changed=${{ steps.changed-files-pr.outputs.builders_any_changed }}" >> $GITHUB_OUTPUT
-  #       else
-  #         echo "builders_any_changed=${{ steps.changed-files-push.outputs.builders_any_changed }}" >> $GITHUB_OUTPUT
-  #       fi
+    - name: Log in to GitHub Packages
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-  #   - name: Checkout code
-  #     if: github.event_name == 'pull_request'
-  #     uses: actions/checkout@v4
+    - name: Build image and wheels
+      if: steps.changed-files.outputs.builders_any_changed == 'true'
+      run: |-
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
 
-  #   - name: Set up Python ${{ env.PYTHON_VERSION }}
-  #     uses: actions/setup-python@v5
-  #     with:
-  #       python-version: ${{ env.PYTHON_VERSION }}
+    - name: Pull image and build wheels
+      if: steps.changed-files.outputs.builders_any_changed != 'true'
+      run: |-
+        digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
 
-  #   - name: Install management dependencies
-  #     run: |
-  #       pip install -r .builders/deps/host_dependencies.txt
+    - name: Publish image
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
-  #   - name: Log in to GitHub Packages
-  #     uses: docker/login-action@v3
-  #     with:
-  #       registry: ghcr.io
-  #       username: ${{ github.actor }}
-  #       password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Save new image digest
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      run: >-
+        ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
+        | cut -d '@' -f 2
+        > ${{ env.OUT_DIR }}/image_digest
 
-  #   - name: Build image and wheels
-  #     if: steps.changed-files.outputs.builders_any_changed == 'true'
-  #     run: |-
-  #       python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+    - name: Persist current image digest
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed != 'true'
+      run: >-
+        jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
+        > ${{ env.OUT_DIR }}/image_digest
 
-  #   - name: Pull image and build wheels
-  #     if: steps.changed-files.outputs.builders_any_changed != 'true'
-  #     run: |-
-  #       digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
-  #       python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: target-${{ matrix.job.image }}
+        path: output
 
-  #   - name: Publish image
-  #     if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
-  #     run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
+  build-macos:
+    name: Target macOS
+    runs-on: macos-13
 
-  #   - name: Save new image digest
-  #     if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
-  #     run: >-
-  #       ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
-  #       | cut -d '@' -f 2
-  #       > ${{ env.OUT_DIR }}/image_digest
+    env:
+      TARGET_NAME: macos-x86_64
+      OUT_DIR: output/macos-x86_64
+      DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
 
-  #   - name: Persist current image digest
-  #     if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed != 'true'
-  #     run: >-
-  #       jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
-  #       > ${{ env.OUT_DIR }}/image_digest
+    permissions:
+      packages: write
 
-  #   - name: Upload artifacts
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: target-${{ matrix.job.image }}
-  #       path: output
+    steps:
+    - name: Set up environment
+      run: |-
+        # We remove everything that comes pre-installed via Homebrew to avoid depending on or shipping stuff that
+        # comes in the runner through Homebrew to better control what might get shipped in the wheels via `delocate`
+        brew remove --force --ignore-dependencies $(brew list --formula)
+        brew install coreutils
 
-  # build-macos:
-  #   name: Target macOS
-  #   runs-on: macos-13
+    - name: Set up Python
+      env:
+        # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
+        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.9/python-3.12.9-macos11.pkg"
+      run: |-
+        curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
+        sudo installer -pkg python3.pkg -target /
 
-  #   env:
-  #     TARGET_NAME: macos-x86_64
-  #     OUT_DIR: output/macos-x86_64
-  #     DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  #   permissions:
-  #     packages: write
+    - name: Install management dependencies
+      run: |
+        ${DD_PYTHON3} -m pip install -r .builders/deps/host_dependencies.txt
+        ${DD_PYTHON3} -m pip install --no-warn-script-location -r ".builders/images/runner_dependencies.txt"
 
-  #   steps:
-  #   - name: Set up environment
-  #     run: |-
-  #       # We remove everything that comes pre-installed via Homebrew to avoid depending on or shipping stuff that
-  #       # comes in the runner through Homebrew to better control what might get shipped in the wheels via `delocate`
-  #       brew remove --force --ignore-dependencies $(brew list --formula)
-  #       brew install coreutils
+    - name: Cache builder root
+      id: cache-builder-root
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/builder_root
+        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/build-deps.yml') }}
 
-  #   - name: Set up Python
-  #     env:
-  #       # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
-  #       PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.9/python-3.12.9-macos11.pkg"
-  #     run: |-
-  #       curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
-  #       sudo installer -pkg python3.pkg -target /
+    - name: Run the build
+      env:
+        # This sets the minimum macOS version compatible for all built artifacts
+        MACOSX_DEPLOYMENT_TARGET: "10.12"
+        CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
+      run: |-
+        # If we hit the cache, we can skip the builder setup
+        if [[ ${CACHE_HIT} == "true" ]]; then
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+        else
+          mkdir ~/builder_root
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
+        fi
 
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: target-macos
+        path: output
 
-  #   - name: Install management dependencies
-  #     run: |
-  #       ${DD_PYTHON3} -m pip install -r .builders/deps/host_dependencies.txt
-  #       ${DD_PYTHON3} -m pip install --no-warn-script-location -r ".builders/images/runner_dependencies.txt"
+  publish:
+    name: Publish artifacts
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref == github.event.repository.default_branch || startsWith(github.ref, '7.')))
+    needs:
+    - build
+    - build-macos
+    runs-on: ubuntu-latest
 
-  #   - name: Cache builder root
-  #     id: cache-builder-root
-  #     uses: actions/cache@v4
-  #     with:
-  #       path: |
-  #         ~/builder_root
-  #       key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/build-deps.yml') }}
+    permissions:
+      contents: read
+      id-token: write
 
-  #   - name: Run the build
-  #     env:
-  #       # This sets the minimum macOS version compatible for all built artifacts
-  #       MACOSX_DEPLOYMENT_TARGET: "10.12"
-  #       CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
-  #     run: |-
-  #       # If we hit the cache, we can skip the builder setup
-  #       if [[ ${CACHE_HIT} == "true" ]]; then
-  #         ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
-  #       else
-  #         mkdir ~/builder_root
-  #         ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
-  #       fi
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: "${{ github.head_ref }}"
 
-  #   - name: Upload artifacts
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: target-macos
-  #       path: output
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
 
-  # publish:
-  #   name: Publish artifacts
-  #   if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref == github.event.repository.default_branch || startsWith(github.ref, '7.')))
-  #   needs:
-  #   - build
-  #   - build-macos
-  #   runs-on: ubuntu-latest
+    - name: Install management dependencies
+      run: pip install -r .builders/deps/host_dependencies.txt
 
-  #   permissions:
-  #     contents: read
-  #     id-token: write
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: targets
+        pattern: target-*
+        merge-multiple: true
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #     with:
-  #       ref: "${{ github.head_ref }}"
+    - name: Get credentials
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        project_id: datadog-agent-int-build
+        workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
-  #   - name: Set up Python ${{ env.PYTHON_VERSION }}
-  #     uses: actions/setup-python@v5
-  #     with:
-  #       python-version: ${{ env.PYTHON_VERSION }}
+    - name: Upload wheels
+      run: python .builders/upload.py targets
 
-  #   - name: Install management dependencies
-  #     run: pip install -r .builders/deps/host_dependencies.txt
+    - name: Lock files
+      run: python .builders/lock.py targets
 
-  #   - name: Download artifacts
-  #     uses: actions/download-artifact@v4
-  #     with:
-  #       path: targets
-  #       pattern: target-*
-  #       merge-multiple: true
+    - name: Clean up repository
+      run: |-
+        rm ${{ steps.auth.outputs.credentials_file_path }}
+        rm -rf targets
 
-  #   - name: Get credentials
-  #     id: auth
-  #     uses: google-github-actions/auth@v2
-  #     with:
-  #       project_id: datadog-agent-int-build
-  #       workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
+    - name: Create token
+      uses: actions/create-github-app-token@v1
+      id: token-generator
+      with:
+        app-id: ${{ vars.DD_GITHUB_TOKEN_GENERATOR_APP_ID }}
+        private-key: ${{ secrets.DD_GITHUB_TOKEN_GENERATOR_PRIVATE_KEY }}
+        repositories: integrations-core
 
-  #   - name: Upload wheels
-  #     run: python .builders/upload.py targets
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ steps.token-generator.outputs.token }}
+        title: Update dependency resolution
+        commit-message: Update dependency resolution
+        branch: bot/update-dependency-resolution
+        branch-suffix: timestamp
+        delete-branch: true
+        labels: bot,qa/skip-qa
+        body: |-
+          ### Motivation
 
-  #   - name: Lock files
-  #     run: python .builders/lock.py targets
+          Direct dependencies were updated in ${{ github.sha }}.
 
-  #   - name: Clean up repository
-  #     run: |-
-  #       rm ${{ steps.auth.outputs.credentials_file_path }}
-  #       rm -rf targets
+          ### Additional Notes
 
-  #   - name: Create token
-  #     uses: actions/create-github-app-token@v1
-  #     id: token-generator
-  #     with:
-  #       app-id: ${{ vars.DD_GITHUB_TOKEN_GENERATOR_APP_ID }}
-  #       private-key: ${{ secrets.DD_GITHUB_TOKEN_GENERATOR_PRIVATE_KEY }}
-  #       repositories: integrations-core
-
-  #   - name: Create pull request
-  #     uses: peter-evans/create-pull-request@v5
-  #     with:
-  #       token: ${{ steps.token-generator.outputs.token }}
-  #       title: Update dependency resolution
-  #       commit-message: Update dependency resolution
-  #       branch: bot/update-dependency-resolution
-  #       branch-suffix: timestamp
-  #       delete-branch: true
-  #       labels: bot,qa/skip-qa
-  #       body: |-
-  #         ### Motivation
-
-  #         Direct dependencies were updated in ${{ github.sha }}.
-
-  #         ### Additional Notes
-
-  #         This PR was automatically generated by the following workflow:
-  #         ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          This PR was automatically generated by the following workflow:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
