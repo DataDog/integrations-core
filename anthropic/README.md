@@ -20,7 +20,7 @@ Datadog's **LLM Observability** enables end-to-end monitoring of your LLM applic
 ## Prerequisites
 
 - An **Anthropic account** with access to model deployments.
-- A **valid Anthropic API key** with admin **write permissions** for model capabilities.
+- A **valid Anthropic API key** with **write permissions** for model capabilities.
 
 ## Setup Instructions
 
