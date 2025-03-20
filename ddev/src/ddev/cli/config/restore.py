@@ -16,7 +16,7 @@ def restore(app: 'Application'):
     app.config_file.restore()
     app.display_success('Settings were successfully restored.')
     if app.config_file.overrides_available():
-        delete_overrides = click.confirm("Local overrides '.ddev.toml' has been found. Do you want to delete it? (y/N)")
+        delete_overrides = click.confirm("Local overrides '.ddev.toml' has been found. Do you want to delete it?")
         if delete_overrides:
             app.config_file.local_path.unlink()
             app.display_success('Local overrides deleted.')

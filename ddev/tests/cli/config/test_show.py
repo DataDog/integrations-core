@@ -215,3 +215,28 @@ def test_show_with_local_overrides(ddev, config_file, helpers, command, expected
         helpers.dedent(expected_with_local_overrides), config_file
     )
     assert result.output == expected_output
+
+
+def test_verbose_output_without_local_file(ddev):
+    """Test that verbose output does not show local override message when no local file exists."""
+    result = ddev("-v", "config", "show")
+    assert result.exit_code == 0
+    assert "Local override config file found" not in result.output
+
+
+def test_verbose_output_with_local_file(ddev, config_file, helpers):
+    """Test that verbose output shows local override message when local file exists."""
+    local_config = helpers.dedent(
+        """
+        [orgs.default]
+        api_key = "local_foo"
+        """
+    )
+    config_file.local_path.write_text(local_config)
+
+    result = ddev("-v", "config", "show")
+    assert result.exit_code == 0
+    assert "Local override config file found" in result.output
+
+    # Clean up
+    config_file.local_path.unlink()
