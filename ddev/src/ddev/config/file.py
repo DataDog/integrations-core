@@ -59,6 +59,14 @@ def deep_merge_with_list_handling(a: dict, b: dict) -> dict:
     return result
 
 
+def build_line_index_with_multiple_entries(content: str) -> dict[str, list[int]]:
+    index: dict[str, list[int]] = {}
+    for line_number, line in enumerate(content.splitlines(), start=1):
+        stripped_line = line.strip()
+        index.setdefault(stripped_line, []).append(line_number)
+    return index
+
+
 @dataclass
 class ProcessedConfigs:
     combined_lines: list[str]
@@ -129,8 +137,8 @@ class CombinedConfigFile:
             global_content = self.global_content
             local_content = self.local_content
 
-        global_index = {line.strip(): line_number for line_number, line in enumerate(global_content.splitlines())}
-        local_index = {line.strip(): line_number for line_number, line in enumerate(local_content.splitlines())}
+        global_index = build_line_index_with_multiple_entries(global_content)
+        local_index = build_line_index_with_multiple_entries(local_content)
 
         # If we have no local content, there is no need to build the line sources
         if not local_content:
@@ -150,14 +158,24 @@ class CombinedConfigFile:
             if not stripped_line:  # Skip empty lines
                 continue
 
-            # Check if this line exists in local config
-            if stripped_line in local_index:
-                line_sources[line_number] = f"{self.local_path.name}:{local_index[stripped_line]}"
-            # If not found in local, it must be from global
-            elif stripped_line in global_index:
-                line_sources[line_number] = f"{self.global_path.name}:{global_index[stripped_line]}"
-            else:
-                # If it is not in global there has been some unexpected error when parsing the configs
+            try:
+                # Check if this line exists in local config
+                if stripped_line in local_index:
+                    line_sources[line_number] = f"{self.local_path.name}:{local_index[stripped_line].pop(0)}"
+                # If not found in local, it must be from global
+                elif stripped_line in global_index:
+                    line_sources[line_number] = f"{self.global_path.name}:{global_index[stripped_line].pop(0)}"
+                else:
+                    # If it is not in global there has been some unexpected error when parsing the configs
+                    return ProcessedConfigs(
+                        combined_lines=combined_lines,
+                        line_sources=None,
+                        combined_content=combined_content,
+                        global_content=global_content,
+                        local_content=local_content,
+                    )
+            except KeyError:
+                # Pop will throw key error if there are no more elements in the list
                 return ProcessedConfigs(
                     combined_lines=combined_lines,
                     line_sources=None,
