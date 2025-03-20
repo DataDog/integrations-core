@@ -68,14 +68,10 @@ def group_modules(modules, platform, version):
 
 
 def get_compressed_files(app):
-    #print("Getting compressed integrations")
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(app)
     included_folder = "datadog_checks/"
-
-    # script_path = 
-    #REPO_PATH = os.path.abspath(os.path.join(os.path.abspath(__file__), "../../../../../../")) 
 
     file_data = []
     for root, _, files in os.walk(REPO_PATH):
@@ -88,7 +84,6 @@ def get_compressed_files(app):
             # Filter files 
             if is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
                 try:
-                    # Compress the file
                     compressor = zlib.compressobj()
                     compressed_size = 0
 
@@ -115,10 +110,7 @@ def get_compressed_files(app):
     
 
 def get_compressed_dependencies(app,platform, version):
-    #print("Getting compressed dependencies")
-
-    #script_path = os.path.abspath(__file__)
-    #REPO_PATH = os.path.abspath(os.path.join(script_path, "../../../../../../"))
+    
     resolved_path = os.path.join(REPO_PATH, ".deps/resolved")
 
     if not os.path.exists(resolved_path) or not os.path.isdir(resolved_path):
@@ -188,9 +180,7 @@ def is_valid_integration(path, included_folder, ignored_files, git_ignore):
         return True
 
 
-def get_gitignore_files(app):
-    #script_path = os.path.abspath(__file__)
-    #repo_root = os.path.abspath(os.path.join(script_path, "../../../../../../")) 
+def get_gitignore_files(app): 
     gitignore_path = os.path.join(REPO_PATH, ".gitignore")
     if not os.path.exists(gitignore_path):
         app.display_error(f"Error: .gitignore file not found at {gitignore_path}")
