@@ -26,7 +26,7 @@ Datadog's **LLM Observability** enables end-to-end monitoring of your LLM applic
 
 ### 1. Generate an Anthropic API Key
 
-1. Login to your [Anthropic Dashboard][10].
+1. Login to your [Anthropic Dashboard][3].
 2. Navigate to **API Keys** under your profile.
 3. Click the **Create Key** button.
    - For **LLM Observability**, ensure that the API key has **write** permission for **model capabilities** to allow Datadog to invoke models in your Anthropic account.
@@ -34,7 +34,7 @@ Datadog's **LLM Observability** enables end-to-end monitoring of your LLM applic
 
 ### 2. Configure Datadog's Anthropic Integration
 
-1. Navigate to the configuration tab inside Datadog [Anthropic integration tile][11].
+1. Navigate to the configuration tab inside Datadog Anthropic integration tile.
 2. Enter an **account name** and **paste the Anthropic API key** in the **account configuration** in Datadog.
 3. To enable LLM Evaluations:
    - Go to **LLM Observability > Settings**.
@@ -47,9 +47,7 @@ Datadog's **LLM Observability** enables end-to-end monitoring of your LLM applic
 
 ## Additional Resources
 
-- [Anthropic API Documentation](https://docs.anthropic.com/)
-- [Datadog Anthropic Integration Docs](https://docs.datadoghq.com/integrations/anthropic/)
-- [Generating an API Token](https://docs.anthropic.com/)
+- [Anthropic API Documentation][4]
 
 By following these steps, you can integrate **Anthropic LLM Evaluations** into **Datadog**, enabling better observability and monitoring for your LLM applications.
 
@@ -172,3 +170,5 @@ Need help? Contact [Datadog support][2].
 
 [1]: https://docs.datadoghq.com/integrations/anthropic/
 [2]: https://docs.datadoghq.com/help/
+[3]: https://console.anthropic.com/login?selectAccount=true&returnTo=%2Fdashboard%3F
+[4]: https://docs.anthropic.com/
