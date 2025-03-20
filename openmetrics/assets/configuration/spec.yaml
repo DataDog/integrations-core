@@ -17,6 +17,13 @@ files:
             tag_by_endpoint.example: false
             tag_by_endpoint.hidden: false
             tag_by_endpoint.enabled: true
+        - name: target_info_enabled
+          description: |
+            Whether to enable scraping for the OpenMetrics target_info metric type.When enabled,
+            this collects metadata about the target being scraped, such as instancelabels and other identifying details.
+          value:
+            example: false
+            type: boolean
         - template: instances/openmetrics_legacy_base
           hidden: true
           overrides:
