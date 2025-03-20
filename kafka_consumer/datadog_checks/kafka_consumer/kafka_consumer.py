@@ -293,12 +293,10 @@ class KafkaCheck(AgentCheck):
         self.log.debug('%s consumer offsets reported', reported_contexts)
 
     def get_consumer_group_state(self, consumer_group):
-        consumer_group_state = ""
-        # Get the consumer group state if present
-        group_id, consumer_group_state = self.client.describe_consumer_groups(consumer_group)
+        consumer_group_state = self.client.describe_consumer_group(consumer_group)
         self.log.debug(
-            "Consumer group: %s in state %s",
-            group_id,
+            "Consumer group: %s is in state %s",
+            consumer_group,
             consumer_group_state,
         )
         return consumer_group_state

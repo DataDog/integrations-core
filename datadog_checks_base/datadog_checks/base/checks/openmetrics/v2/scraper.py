@@ -9,12 +9,17 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+from requests.exceptions import ConnectionError
+
 from datadog_checks.base.agent import datadog_agent
 
 from ....config import is_affirmative
 from ....constants import ServiceCheck
 from ....errors import ConfigurationError
 from ....utils.functions import no_op, return_true
+from ....utils.http import RequestsWrapper
 from .first_scrape_handler import first_scrape_handler
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
@@ -45,9 +50,6 @@ class OpenMetricsScraper:
         """
         The base class for any scraper overrides.
         """
-        # See Performance Optimizations in this package's README.md.
-        from ....utils.http import RequestsWrapper
-
         self.config = config
 
         # Save a reference to the check instance
@@ -329,10 +331,6 @@ class OpenMetricsScraper:
 
     @property
     def parse_metric_families(self):
-        # See Performance Optimizations in this package's README.md.
-        from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
-        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-
         media_type = self._content_type.split(';')[0]
         # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
         # the format will be chosen based on the media type specified in the response's content-header.
@@ -393,9 +391,6 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
-        # See Performance Optimizations in this package's README.md.
-        from requests.exceptions import ConnectionError
-
         try:
             with self.get_connection() as connection:
                 # Media type will be used to select parser dynamically
