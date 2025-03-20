@@ -843,7 +843,6 @@ files:
             example: false
             display_default: false
     - name: collect_raw_query_statement
-      hidden: true
       description: |
         Configure the collection of raw query statements in query activity and execution plans.
         Raw query statements and execution plans may contain sensitive information in query text.

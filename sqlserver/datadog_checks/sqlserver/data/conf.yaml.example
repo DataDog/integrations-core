@@ -617,6 +617,21 @@ instances:
         #
         # keep_identifier_quotation: false
 
+    ## Configure the collection of raw query statements in query activity and execution plans.
+    ## Raw query statements and execution plans may contain sensitive information in query text.
+    ## Enabling this option will allow the collection and ingestion of raw query statements and
+    ## execution plans into Datadog. This option is disabled by default.
+    ## Note: Collection of raw query statements is currently in preview.
+    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
+    ## This option only applies when `dbm` is enabled.
+    #
+    # collect_raw_query_statement:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Set to `true` to collect the raw query statements.
+        #
+        # enabled: false
+
     ## @param command_timeout - integer - optional - default: 10
     ## Timeout in seconds for the connection and each command run
     #
