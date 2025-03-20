@@ -633,3 +633,9 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param target_info_enabled - boolean - optional - default: false
+    ## Whether to enable scraping for the OpenMetrics target_info metric type.When enabled,
+    ## this collects metadata about the target being scraped, such as instancelabels and other identifying details.
+    #
+    # target_info_enabled: false
