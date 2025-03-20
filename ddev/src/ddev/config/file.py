@@ -194,8 +194,6 @@ class ConfigFileWithOverrides:
 
     def _build_read_string(self, lines: list[str], line_sources: dict[int, str]) -> str:
         """Build the annotated output."""
-        import os
-
         max_line_length = max(len(line.strip()) for line in lines)
 
         annotated_lines = []
@@ -207,7 +205,7 @@ class ConfigFileWithOverrides:
             source = line_sources.get(line_number, self.global_path.name)
             annotated_lines.append(f"{line:<{max_line_length}}  # {source}")
 
-        return os.linesep.join(annotated_lines)
+        return "\n".join(annotated_lines)
 
     def _read(self, scrubbed: bool) -> str:
         result = self._process_combined_configs(scrubbed)
