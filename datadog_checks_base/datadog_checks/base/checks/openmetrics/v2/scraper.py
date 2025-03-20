@@ -55,7 +55,6 @@ class OpenMetricsScraper:
 
         # Parse the configuration
         self.endpoint = config['openmetrics_endpoint']
-        self.target_info = config.get('target_info', False)
 
         self.metric_transformer = MetricTransformer(self.check, config)
         self.label_aggregator = LabelAggregator(self.check, config)
@@ -237,7 +236,7 @@ class OpenMetricsScraper:
         runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
 
         # Determine which consume method to use based on target_info config
-        if self.target_info:
+        if self.label_aggregator.target_info_enabled:
             consume_method = self.consume_metrics_w_target_info
         else:
             consume_method = self.consume_metrics

@@ -9,13 +9,13 @@ from ....utils.functions import no_op
 class LabelAggregator:
     def __init__(self, check, config):
         share_labels = config.get('share_labels', {})
-        self.target_info = config.get('target_info', False)
+        self.target_info_enabled = config.get('target_info_enabled', False)
         self.target_info_labels = {}
 
         self._validate_type(share_labels, dict, "Setting `share_labels` must be a mapping")
-        self._validate_type(self.target_info, bool, "Setting `target_info` must be a boolean")
+        self._validate_type(self.target_info_enabled, bool, "Setting `target_info_enabled` must be a boolean")
 
-        if not share_labels and not self.target_info:
+        if not share_labels and not self.target_info_enabled:
             self.populate = no_op
             return
 
