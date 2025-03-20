@@ -50,7 +50,9 @@ deps = [
     "requests-unixsocket2==0.4.2",
     "requests==2.32.3",
     "simplejson==3.20.1",
-    "urllib3==2.3.0",
+    # urllib3 is a dependency of requests that we explicitly
+    # make use of in a few places 
+    "urllib3==2.3.0", 
     "wrapt==1.17.2",
 ]
 http = [
