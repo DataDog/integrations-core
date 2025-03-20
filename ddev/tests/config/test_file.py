@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ddev.config.file import CombinedConfigFile, deep_merge_with_list_handling
+from ddev.config.file import CombinedConfigFile, deep_merge_with_list_handling, build_line_index_with_multiple_entries
 
 
 def test_no_local_file(mocker, tmp_path: Path, config_file: CombinedConfigFile):
@@ -192,3 +192,84 @@ def test_deep_merge_with_list_handling_nested_immutability():
 
     assert dict_a["a"]["b"] == original_a_nested, "Nested list in dictionary a was modified"
     assert dict_b["a"]["b"] == original_b_nested, "Nested list in dictionary b was modified"
+
+
+def test_append_line_sources(helpers, config_file: CombinedConfigFile):
+    lines = ["repo = 'core'", "agent = 'dev'", "org = 'default'", "", "something: 'something'"]
+
+    lines_sources = {
+        0: "config.toml:1",
+        1: "config.toml:2",
+        2: "config.toml:3",
+        4: "config.toml:5",
+    }
+
+    expected = helpers.dedent(
+        """
+        repo = 'core'           # config.toml:1
+        agent = 'dev'           # config.toml:2
+        org = 'default'         # config.toml:3
+
+        something: 'something'  # config.toml:5"""
+    )
+
+    assert config_file._build_read_string(lines, lines_sources) == expected
+
+
+def test_append_line_sources_with_scaped_characters(helpers, config_file: CombinedConfigFile):
+    lines = ["repo = 'core'", "agent = 'dev'", "org = 'default'", "", "something: 'something\\else'"]
+
+    lines_sources = {
+        0: "config.toml:1",
+        1: "config.toml:2",
+        2: "config.toml:3",
+        4: "config.toml:5",
+    }
+
+    # Escaped characters count as 1, if the escaped character is in the longest line
+    # this will affect the padding of the line. This test is kept mainly for documentation
+    # as this is an edge case that is not expected to happen mostly with paths in Windows
+    expected = helpers.dedent(
+        """
+        repo = 'core'                # config.toml:1
+        agent = 'dev'                # config.toml:2
+        org = 'default'              # config.toml:3
+
+        something: 'something\\else'  # config.toml:5"""
+    )
+
+    assert config_file._build_read_string(lines, lines_sources) == expected
+
+
+def test_build_line_index_with_single_entry():
+    content = "line1\nline2\nline3"
+    index = build_line_index_with_multiple_entries(content)
+
+    assert index == {
+        "line1": [1],
+        "line2": [2],
+        "line3": [3]
+    }
+
+def test_build_line_index_with_multiple_entries():
+    content = "line1\nline1\nline2\nline1\nline3"
+    index = build_line_index_with_multiple_entries(content)
+
+    assert index == {
+        "line1": [1, 2, 4],
+        "line2": [3],
+        "line3": [5]
+    }
+
+def test_build_line_index_with_empty_lines():
+    content = "line1\n\nline2\n\nline3"
+    index = build_line_index_with_multiple_entries(content)
+
+    assert index == {
+        "line1": [1],
+        "": [2, 4],
+        "line2": [3],
+        "line3": [5]
+    }
+
+
