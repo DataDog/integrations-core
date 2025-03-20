@@ -132,10 +132,6 @@ def instance_tag_by_endpoint():
     return True
 
 
-def instance_target_info_enabled():
-    return False
-
-
 def instance_telemetry():
     return False
 
