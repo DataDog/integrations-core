@@ -7,5 +7,4 @@ version = ["1.7"]
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "MESOS_SLAVE_VERSION", value = "1.7.1", if = ["1.7"] },
-  { key = "ZOOKEEPER_VERSION", value = "3.8.4" },
 ]
