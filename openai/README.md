@@ -509,6 +509,5 @@ Additional helpful documentation, links, and articles:
 [14]: https://app.datadoghq.com/cost
 [15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
 [16]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
-
-- [17]: https://platform.openai.com/docs/
-- [18]: https://platform.openai.com/
+[17]: https://platform.openai.com/docs/
+[18]: https://platform.openai.com/
