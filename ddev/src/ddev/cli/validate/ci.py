@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-DEPRECATED_INTEGRATIONS = set(["mesos_slave"])
+DEPRECATED_INTEGRATIONS = set("mesos_slave")
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
