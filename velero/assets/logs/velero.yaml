@@ -11,7 +11,7 @@ pipeline:
   name: Velero
   enabled: true
   filter:
-    query: service:velero
+    query: source:velero
   processors:
     - type: grok-parser
       name: Primary parser
@@ -36,21 +36,21 @@ pipeline:
           restore=velero/nginx-backup-20250303114623'
       grok:
         supportRules: |-
-          time time=%{date("\"YYYY-MM-DD'T'HH:mm:ss'Z'\""):timestamp}
+          time time=%{date("\"yyyy-MM-dd'T'HH:mm:ss'Z'\""):timestamp}
           level level=%{word:level}
         matchRules: rule1 %{time} %{level} %{data::keyvalue("="," \",:*/")}
     - type: date-remapper
-      name: Use `timestamp` as date
+      name: Define `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
     - type: status-remapper
-      name: Use `level` as status
+      name: Define `level` as the official status of the log
       enabled: true
       sources:
         - level
     - type: message-remapper
-      name: Use 'msg' as message
+      name: Define `msg` as the official message of the log
       enabled: true
       sources:
         - msg
