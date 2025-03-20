@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from ddev.config.file import CombinedConfigFile
+from ddev.config.file import ConfigFileWithOverrides
 from ddev.utils.fs import Path
 
 CORE_PATH = Path("~") / "dd" / "integrations-core"
@@ -134,7 +134,7 @@ def test_default_scrubbed(ddev, helpers, command, expected):
     assert result.output.replace('\\\\', '\\') == helpers.dedent(expected)
 
 
-def build_expected_output_with_line_sources(expected: str, config_file: CombinedConfigFile) -> str:
+def build_expected_output_with_line_sources(expected: str, config_file: ConfigFileWithOverrides) -> str:
     expected_lines = expected.splitlines()
     line_sources = {
         0: 'config.toml:1',

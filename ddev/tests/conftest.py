@@ -16,7 +16,7 @@ from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
-from ddev.config.file import CombinedConfigFile
+from ddev.config.file import ConfigFileWithOverrides
 from ddev.e2e.constants import E2EEnvVars
 from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
@@ -112,7 +112,7 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path, monkeypatch, local_repo, mocker) -> CombinedConfigFile:
+def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOverrides:
     for env_var in (
         'FORCE_COLOR',
         'DD_ENV',
@@ -140,7 +140,7 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> CombinedConfigFile
         new_callable=PropertyMock,
         return_value=Path(tmp_path, '.ddev.toml'),
     )
-    config = CombinedConfigFile(path)
+    config = ConfigFileWithOverrides(path)
     config.reset()
 
     # Provide a real default for times when tests have no need to modify the repo

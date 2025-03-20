@@ -76,13 +76,13 @@ class ProcessedConfigs:
     local_content: str
 
 
-class CombinedConfigFile:
+class ConfigFileWithOverrides:
     """
     A ConfigFile that combines the global config with the local overrides.
     """
 
     def __init__(self, path: Path | None = None):
-        self.global_path = path or CombinedConfigFile.get_default_location()
+        self.global_path = path or ConfigFileWithOverrides.get_default_location()
         self.global_model: RootConfig = cast(RootConfig, UNINITIALIZED)
         self.global_content: str = ""
         self.local_model: RootConfig = cast(RootConfig, UNINITIALIZED)
