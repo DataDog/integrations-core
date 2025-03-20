@@ -220,6 +220,12 @@ instances:
     #
     # use_process_start_time: false
 
+    ## @param target_info_enabled - boolean - optional - default: false
+    ## Whether to enable scraping for the OpenMetrics target_info metric type. When enabled,
+    ## this collects metadata about the target being scraped, such as instance labels and other identifying details.
+    #
+    # target_info_enabled: false
+
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
