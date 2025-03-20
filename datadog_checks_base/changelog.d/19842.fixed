@@ -1,1 +1,0 @@
-Stop using the `uptime` library. It has alternatives that are more actively maintained. By removing the dependency we also reduce our disk usage footprint.
