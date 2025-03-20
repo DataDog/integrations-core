@@ -220,12 +220,6 @@ instances:
     #
     # use_process_start_time: false
 
-    ## @param target_info_enabled - boolean - optional - default: false
-    ## Whether to enable scraping for the OpenMetrics target_info metric type. When enabled,
-    ## this collects metadata about the target being scraped, such as instance labels and other identifying details.
-    #
-    # target_info_enabled: false
-
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
@@ -544,16 +538,6 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
-
-    ## @param tls_ciphers - list of strings - optional
-    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
-    ## `ALL` ciphers are used. For list of ciphers see: 
-    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
-    #
-    # tls_ciphers:
-    #   - TLS_AES_256_GCM_SHA384
-    #   - TLS_CHACHA20_POLY1305_SHA256
-    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
