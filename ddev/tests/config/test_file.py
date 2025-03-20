@@ -2,16 +2,20 @@ from pathlib import Path
 
 import pytest
 
-from ddev.config.file import CombinedConfigFile, deep_merge_with_list_handling, build_line_index_with_multiple_entries
+from ddev.config.file import (
+    ConfigFileWithOverrides,
+    build_line_index_with_multiple_entries,
+    deep_merge_with_list_handling,
+)
 
 
-def test_no_local_file(mocker, tmp_path: Path, config_file: CombinedConfigFile):
+def test_no_local_file(mocker, tmp_path: Path, config_file: ConfigFileWithOverrides):
     # Load the file
     config_file.load()
     assert config_file.combined_model.raw_data == config_file.global_model.raw_data
 
 
-def test_with_local_file(mocker, config_file: CombinedConfigFile, helpers):
+def test_with_local_file(mocker, config_file: ConfigFileWithOverrides, helpers):
     # Write a local toml to the local file. It includes a new repo and sets the value of repo to it.
     # This should be acceptable and pass validation
     with open(config_file.local_path, "w") as f:
@@ -194,7 +198,7 @@ def test_deep_merge_with_list_handling_nested_immutability():
     assert dict_b["a"]["b"] == original_b_nested, "Nested list in dictionary b was modified"
 
 
-def test_append_line_sources(helpers, config_file: CombinedConfigFile):
+def test_append_line_sources(helpers, config_file: ConfigFileWithOverrides):
     lines = ["repo = 'core'", "agent = 'dev'", "org = 'default'", "", "something: 'something'"]
 
     lines_sources = {
@@ -216,7 +220,7 @@ def test_append_line_sources(helpers, config_file: CombinedConfigFile):
     assert config_file._build_read_string(lines, lines_sources) == expected
 
 
-def test_append_line_sources_with_scaped_characters(helpers, config_file: CombinedConfigFile):
+def test_append_line_sources_with_scaped_characters(helpers, config_file: ConfigFileWithOverrides):
     lines = ["repo = 'core'", "agent = 'dev'", "org = 'default'", "", "something: 'something\\else'"]
 
     lines_sources = {
@@ -245,31 +249,18 @@ def test_build_line_index_with_single_entry():
     content = "line1\nline2\nline3"
     index = build_line_index_with_multiple_entries(content)
 
-    assert index == {
-        "line1": [1],
-        "line2": [2],
-        "line3": [3]
-    }
+    assert index == {"line1": [1], "line2": [2], "line3": [3]}
+
 
 def test_build_line_index_with_multiple_entries():
     content = "line1\nline1\nline2\nline1\nline3"
     index = build_line_index_with_multiple_entries(content)
 
-    assert index == {
-        "line1": [1, 2, 4],
-        "line2": [3],
-        "line3": [5]
-    }
+    assert index == {"line1": [1, 2, 4], "line2": [3], "line3": [5]}
+
 
 def test_build_line_index_with_empty_lines():
     content = "line1\n\nline2\n\nline3"
     index = build_line_index_with_multiple_entries(content)
 
-    assert index == {
-        "line1": [1],
-        "": [2, 4],
-        "line2": [3],
-        "line3": [5]
-    }
-
-
+    assert index == {"line1": [1], "": [2, 4], "line2": [3], "line3": [5]}

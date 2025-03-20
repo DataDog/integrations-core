@@ -1,11 +1,9 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import pytest
 
-from ddev.config.file import CombinedConfigFile
+from ddev.config.file import ConfigFileWithOverrides
 from ddev.utils.fs import Path
 
 CORE_PATH = Path("~") / "dd" / "integrations-core"
@@ -131,11 +129,13 @@ def test_default_scrubbed(ddev, helpers, command, expected):
     result = ddev(*command)
 
     assert result.exit_code == 0, result.output
-    assert result.output.replace('\\\\', '\\') == helpers.dedent(expected)
+    assert result.output == helpers.dedent(expected.replace('\\', '\\\\'))
 
 
-def build_expected_output_with_line_sources(expected: str, config_file: CombinedConfigFile) -> str:
-    expected_lines = expected.splitlines()
+def build_expected_output_with_line_sources(expected: str, config_file: ConfigFileWithOverrides) -> str:
+    # Need to replace backslashes for double ones as that is what will be used to measure line length
+    # when reading from a file.
+    expected_lines = expected.replace('\\', '\\\\').splitlines()
     line_sources = {
         0: 'config.toml:1',
         1: 'config.toml:2',
@@ -185,7 +185,7 @@ def build_expected_output_with_line_sources(expected: str, config_file: Combined
     }
 
     # Add a blank line at the end to match the expected output
-    return config_file._build_read_string(expected_lines, line_sources) + os.linesep
+    return config_file._build_read_string(expected_lines, line_sources) + "\n"
 
 
 @pytest.mark.parametrize(
@@ -214,4 +214,4 @@ def test_show_with_local_overrides(ddev, config_file, helpers, command, expected
     expected_output = build_expected_output_with_line_sources(
         helpers.dedent(expected_with_local_overrides), config_file
     )
-    assert result.output.replace('\\\\', '\\') == expected_output
+    assert result.output == expected_output
