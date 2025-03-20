@@ -1,0 +1,25 @@
+{
+	"id": 166818935,
+	"name": "[Velero] High backup failure rate",
+	"type": "query alert",
+	"query": "avg(last_2h):sum:velero.backup.failure.count{*}.as_rate() / (sum:velero.backup.attempt.count{*}.as_rate() + 1) > 0.2",
+	"message": "The Velero backup failure rate is high (>20% of attempts failing).\n\nThis could indicate issues with:\n* Storage configuration\n* Permissions\n* Resource availability\n* Network connectivity to storage\n\n{{#is_alert}}\nFailure rate: {{value}}\n{{/is_alert}}",
+	"tags": [
+		"integration:velero"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 0.2,
+			"warning": 0.1
+		},
+		"notify_audit": false,
+		"require_full_window": false,
+		"notify_no_data": true,
+		"no_data_timeframe": 480,
+		"renotify_interval": 240,
+		"include_tags": true,
+		"evaluation_delay": 900,
+		"escalation_message": ""
+	},
+	"priority": 2
+}

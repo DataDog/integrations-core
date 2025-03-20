@@ -1,0 +1,21 @@
+{
+    "name": "[Velero] No successful backups",
+    "type": "metric alert",
+    "query": "min(last_1h):max:velero.backup.last_successful_timestamp{*} < timeshift(max:velero.backup.last_successful_timestamp{*}, -3600)",
+    "message": "No successful Velero backups have completed in the last hour.\n\nThis could mean:\n* Scheduled backups are not running\n* All backup attempts are failing\n* The backup system is not functioning\n\n{{#is_alert}}\nLast successful backup: {{value}} (Unix timestamp)\n{{/is_alert}}\n\nVerify:\n1. Velero schedules are configured correctly\n2. Storage backend is accessible\n3. Velero pods are running\n4. Check Velero logs for errors\n\n@slack-datadog-velero-alerts",
+    "tags": [
+        "integration:velero",
+        "service:backup",
+        "team:infrastructure"
+    ],
+    "options": {
+        "notify_audit": true,
+        "require_full_window": false,
+        "notify_no_data": true,
+        "no_data_timeframe": 120,
+        "renotify_interval": 30,
+        "include_tags": true,
+        "evaluation_delay": 300
+    },
+    "priority": 1
+} 
