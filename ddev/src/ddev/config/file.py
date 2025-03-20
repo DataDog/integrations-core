@@ -176,7 +176,9 @@ class CombinedConfigFile:
 
     def _build_read_string(self, lines: list[str], line_sources: dict[int, str]) -> str:
         """Build the annotated output."""
-        max_line_length = max(len(line) for line in lines)
+        import os
+
+        max_line_length = max(len(line.strip()) for line in lines)
 
         annotated_lines = []
         for line_number, line in enumerate(lines):
@@ -185,10 +187,9 @@ class CombinedConfigFile:
                 continue
 
             source = line_sources.get(line_number, self.global_path.name)
-            padding = " " * (max_line_length - len(line))
-            annotated_lines.append(f"{line}{padding}   # {source}")
+            annotated_lines.append(f"{line:<{max_line_length}}  # {source}")
 
-        return "\n".join(annotated_lines)
+        return os.linesep.join(annotated_lines)
 
     def _read(self, scrubbed: bool) -> str:
         result = self._process_combined_configs(scrubbed)
