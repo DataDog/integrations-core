@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING
 
 import click
 
-DEPRECATED_INTEGRATIONS = set("mesos_slave")
-
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
@@ -67,8 +65,6 @@ def ci(app: Application, sync: bool):
 
     jobs = {}
     for data in construct_job_matrix(app.repo.path, get_all_targets(app.repo.path)):
-        if data["name"] in DEPRECATED_INTEGRATIONS:
-            continue
         python_restriction = data.get('python-support', '')
         config = {
             'job-name': data['name'],
