@@ -45,7 +45,7 @@ Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes clus
 
 Autopilot requires a more distinct setup for the Kubernetes installation compared to the standard installation. This type of cluster requires using the Datadog Helm chart.
 
-Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster with the Helm [installation of the Datadog Agent on Kubernetes][16]. When setting your Helm `datadog-values.yaml` configuration, see the [GKE Autopilot section on the Kubernetes Distributions][14] for the necessary configuration changes. Most notably setting `providers.gke.autopilot` to `true`.
+Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster with the Helm [installation of the Datadog Agent on Kubernetes][16]. When setting your Helm `datadog-values.yaml` configuration, see the [GKE Autopilot section on the Kubernetes Distributions][14] for the necessary configuration changes. Most notably, set `providers.gke.autopilot` to `true`.
 
 #### Admission Controller
  
