@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -6,7 +6,7 @@ import heapq
 import time
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
-from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple, TypedDict, TypeVar
+from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple, TypedDict
 
 
 class VerbosityScoreThreshold(NamedTuple):
@@ -400,12 +400,9 @@ class ExplainVerbosityProvider:
         return thresholds
 
 
-T = TypeVar('T')
-
-
 class AdaptiveExplainManager:
     """
-    Universal adaptive explain verbosity manager with multi-level verbosity support.
+    Adaptive explain verbosity manager with multi-level verbosity support.
 
     This class provides a flexible and configurable mechanism for managing the verbosity of
     database query explanations. It supports multiple verbosity levels and allows for dynamic
