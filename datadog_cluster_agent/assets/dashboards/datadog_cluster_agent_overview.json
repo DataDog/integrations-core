@@ -519,7 +519,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.cpu.usage.total{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.usage.total{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
