@@ -382,7 +382,6 @@ files:
                   type: number
                   example: 600
           - name: schemas_collection 
-            hidden: true
             description: |
               Configure collection of schemas (databases).
               Only tables and schemas for which the user has been granted SELECT privileges are collected.
