@@ -129,7 +129,7 @@ pipeline:
         supportRules: ""
         matchRules: syslog_header_rule <%{integer:syslog.priority}>%{integer}
           %{notSpace} %{hostname:syslog.hostname} %{notSpace} %{notSpace}
-          %{notSpace:syslog.msgid} %{data}
+          %{notSpace:syslog.msgid}%{data}
     - type: grok-parser
       name: Parse `time` to epoch time
       enabled: true
