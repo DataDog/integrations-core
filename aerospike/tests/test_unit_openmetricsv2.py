@@ -106,6 +106,4 @@ def _get_metadata_metrics_after_7():
         if metric_name.startswith("aerospike.aerospike_"):
             filtered_metrics[metric_name] = line
 
-    print("\t\t\t ==> len - filtered_metrics ", len(filtered_metrics))
-
     return filtered_metrics

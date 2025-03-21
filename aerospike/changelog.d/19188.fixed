@@ -1,4 +1,3 @@
-@ -0,0 +1,3 @@
 Sy/slurm user
 
 * Fixed existing Overview dashboard to include the new metrics pushed by the agent
