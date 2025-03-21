@@ -4,6 +4,7 @@ services:
   aerospike:
     container_name: aerospike
     image: aerospike/aerospike-server:${AEROSPIKE_VERSION}
+    platform: linux/amd64
     ports:
       - "3000:3000"
     volumes:
@@ -15,28 +16,6 @@ services:
       retries: 10
       start_period: 30s
 
-  aerospike-tools-asbench-batch:
-    image: aerospike/aerospike-tools
-    container_name: aerospike-tools-asbench-batch
-    depends_on:
-      aerospike:
-        condition: service_healthy
-    command: asbench -h aerospike -p 3000 -T 10 -t 10 -n test -s mysets -K 0 -k 900000 -o B80 -w RU,60 -z 64 -t 86400 -g 4000 --batch-size 100 --batch-read-size 100 --batch-write-size 30
-
-  aerospike-tools-asbench:
-    image: aerospike/aerospike-tools
-    container_name: aerospike-tools-asbench
-    depends_on: 
-       - aerospike-tools-asbench-batch
-    command: asbench -h aerospike -p 3000 -T 10 -t 10 -n test -s mysets -K 0 -k 900000 -o B80 -w RU,60 -z 64 -t 86400 -g 4000
-
-  aerospike-tools-asadm:
-    image: aerospike/aerospike-tools
-    container_name: aerospike-tools-sindex
-    depends_on: 
-      - aerospike-tools-asbench-batch
-    command: asadm -h aerospike --no-config-file --enable -e "manage sindex create numeric sindex1 ns test bin testbin"
-
   aerospike-prometheus-exporter:
     container_name: aerospike-prometheus-exporter
     image: aerospike/aerospike-prometheus-exporter:${AEROSPIKE_EXPORTER_VERSION}
@@ -47,4 +26,26 @@ services:
     environment:
       AS_HOST: aerospike
       AS_PORT: 3000
-      AGENT_LOG_LEVEL: trace
+
+  aerospike-tools-asbench-batch:
+    image: aerospike/aerospike-tools:5.2.0
+    container_name: aerospike-tools-asbench-batch
+    depends_on:
+      aerospike:
+        condition: service_healthy
+    command: asbenchmark -h aerospike -w RU,50 --batchSize 100 -t 500000
+
+  aerospike-tools-asbench:
+    image: aerospike/aerospike-tools:5.2.0
+    container_name: aerospike-tools-asbench
+    depends_on: 
+       - aerospike-tools-asbench-batch
+    command: asbenchmark -h aerospike -t 500000
+
+  aerospike-tools-asadm:
+    image: aerospike/aerospike-tools
+    container_name: aerospike-tools-sindex
+    depends_on: 
+      - aerospike-tools-asbench-batch
+    command: asadm -h aerospike --no-config-file --enable -e "manage sindex create numeric sindex1 ns test bin 0"
+

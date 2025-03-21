@@ -2,17 +2,92 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import time
+
 import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import EXPECTED_PROMETHEUS_METRICS
+from .common import (
+    AEROSPIKE_V7,
+    EXPECTED_PROMETHEUS_METRICS,
+    EXPECTED_PROMETHEUS_METRICS_5_6,
+    INDEXES_METRICS,
+    LATENCIES_METRICS,
+    LAZY_METRICS,
+    LEGACY_SET_METRICS,
+    NAMESPACE_METRICS,
+    SET_METRICS,
+    STATS_METRICS,
+    TPS_METRICS,
+    VERSION,
+)
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_check(aggregator, instance, dd_run_check):
+    version_parts = [int(p) for p in VERSION.split('.')]
+    # We apply these checks only if customer is running Aerospike Server version below 7.x
+    if version_parts[0] >= AEROSPIKE_V7:
+        return
+
+    check = AerospikeCheck('aerospike', {}, [instance])
+    # sleep to make sure client is available
+    time.sleep(30)
+    for _ in range(10):
+        dd_run_check(check)
+        time.sleep(1)
+    _test_check(aggregator)
+
+
+@pytest.mark.integration
+def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
+    check = AerospikeCheck('aerospike', {}, [instance])
+    check.check_id = 'test:123'
+
+    # sleep to make sure client is available
+    time.sleep(30)
+    for _ in range(10):
+        dd_run_check(check)
+        time.sleep(1)
+
+    raw_version = check.get_info("build")[0]
+    major, minor = raw_version.split('.')[:2]
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    version_parts = [int(p) for p in VERSION.split('.')]
+    # We apply these checks only if customer is running Aerospike Server version below 7.x
+    if version_parts[0] >= AEROSPIKE_V7:
+        return
+
+    aggregator = dd_agent_check(instance)
+
+    _test_check(aggregator)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.e2e
 def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
+    version_parts = [int(p) for p in VERSION.split('.')]
+    # We apply these checks only if customer is running Aerospike Server version below 7.x
+    if version_parts[0] >= AEROSPIKE_V7:
+        return
+
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
     tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
     tags = instance_openmetrics_v2.get('tags').append(tags)

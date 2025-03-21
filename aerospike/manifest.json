@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect cluster, namespaces, index statistics from the Aerospike database",
+    "description": "Collect cluster, namespaces, node, sindex, set, latency statistics from the Aerospike database",
     "title": "Aerospike",
     "media": [],
     "classifier_tags": [
@@ -58,12 +58,11 @@
       "Aerospike Set View": "assets/dashboards/set_view.json",
       "Aerospike Users View": "assets/dashboards/users_view.json",
       "Aerospike XDR View": "assets/dashboards/xdr_view.json",
-
-      "Aerospike All_Flash View": "assets/dashboards/usecases/all_flash.json",
+      "Aerospike All Flash View": "assets/dashboards/usecases/all_flash.json",
       "Aerospike Batch Transaction View": "assets/dashboards/usecases/batch_transactions_view.json",
-      "Aerospike Lru_Cache View": "assets/dashboards/usecases/lru_cache_view.json",
-      "Aerospike Rolling_Restarts View": "assets/dashboards/usecases/rolling_restarts.json",
-      "Aerospike Sindex_Summary View": "assets/dashboards/usecases/secondary_index_summary.json"
+      "Aerospike LRU Cache View": "assets/dashboards/usecases/lru_cache_view.json",
+      "Aerospike Rolling Restarts View": "assets/dashboards/usecases/rolling_restarts.json",
+      "Aerospike Sindex Summary View": "assets/dashboards/usecases/secondary_index_summary.json"      
     }
   }
 }
