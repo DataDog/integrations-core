@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 / 2025-03-21
+
+***Changed***:
+
+* Rename `velero.backup` and `velero.restore` metrics ([#19904](https://github.com/DataDog/integrations-core/pull/19904))
+
 ## 1.0.0 / 2025-03-19
 
 ***Added***:
