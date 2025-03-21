@@ -13,7 +13,7 @@ You can also create your own metrics using custom `find`, `count` and `aggregate
 
 Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides live and historical query snapshots, slow query metrics, database load, operation execution plans, and collections insights.
 
-**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
+**Note**: MongoDB v4.4+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
 ## Setup
 
@@ -539,7 +539,7 @@ Then, [instrument your application container][8] and set `DD_AGENT_HOST` to the 
 
 See [metadata.csv][22] for a list of metrics provided by this check.
 
-See the [MongoDB 3.0 Manual][23] for more detailed descriptions of some of these metrics.
+See the [MongoDB Manual][23] for more detailed descriptions of some of these metrics.
 
 #### Additional metrics
 
@@ -606,7 +606,7 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
 [21]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [22]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
-[23]: https://docs.mongodb.org/manual/reference/command/dbStats
+[23]: https://www.mongodb.com/docs/manual/reference/command/nav-diagnostic/
 [24]: https://github.com/DataDog/integrations-core/blob/master/mongo/assets/service_checks.json
 [25]: https://docs.datadoghq.com/help/
 [26]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
