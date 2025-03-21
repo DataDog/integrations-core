@@ -25,6 +25,7 @@ from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
+from ddev.cli.size import size
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
@@ -149,6 +150,7 @@ ddev.add_command(run)
 ddev.add_command(status)
 ddev.add_command(test)
 ddev.add_command(validate)
+ddev.add_command(size)
 
 __management_command = os.environ.get('PYAPP_COMMAND_NAME', '')
 if __management_command:
