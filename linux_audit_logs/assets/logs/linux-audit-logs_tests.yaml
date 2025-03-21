@@ -1,0 +1,25 @@
+id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+tests:
+  - sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980
+      uid=0 auid=0 ses=138
+      subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port
+      op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0
+      comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=?
+      addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
+    result: null
+  - sample: "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0
+      auid=4294967295 ses=4294967295
+      subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication
+      grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\"
+      exe=\"/usr/sbin/sshd\" hostname=172.20.4.65 addr=172.20.4.65 terminal=ssh
+      res=success'UID=\"root\" AUID=\"unset\""
+    result: null
+  - sample: 'type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0
+      old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux
+      res=1AUID="devuser"'
+    result: null
+  - sample: 'type=AVC msg=audit(1669185724.533:182): avc:  denied  { getattr }
+      for  pid=16660 comm="groupadd" name="/" dev="proc" ino=1
+      scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023
+      tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0'
+    result: null
