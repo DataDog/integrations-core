@@ -62,6 +62,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
     events = [
         {
             u'collect_timestamp': 0,
+            u'integration': 'snmp',
             u'devices': [
                 {
                     u'description': u'BIG-IP Virtual Edition : Linux '

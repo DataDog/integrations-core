@@ -57,11 +57,6 @@ else:
 
 init_logging()
 
-if datadog_agent.get_config('disable_unsafe_yaml'):
-    from ..ddyaml import monkey_patch_pyyaml
-
-    monkey_patch_pyyaml()
-
 if datadog_agent.get_config('integration_tracing'):
     from ddtrace import patch
 
@@ -345,6 +340,7 @@ class AgentCheck(object):
         limit = self._get_metric_limit(instance=instance)
 
         if limit > 0:
+            # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.limiter import Limiter
 
             return Limiter(name, 'metrics', limit, self.warning)
@@ -385,16 +381,6 @@ class AgentCheck(object):
 
         return limit
 
-    @staticmethod
-    def load_config(yaml_str):
-        # type: (str) -> Any
-        """
-        Convenience wrapper to ease programmatic use of this class from the C API.
-        """
-        import yaml
-
-        return yaml.safe_load(yaml_str)
-
     @property
     def http(self) -> RequestsWrapper:
         """
@@ -403,6 +389,7 @@ class AgentCheck(object):
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
+            # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.http import RequestsWrapper
 
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
@@ -445,6 +432,7 @@ class AgentCheck(object):
         A Diagnosis object to register explicit diagnostics and record diagnoses.
         """
         if not hasattr(self, '_diagnosis'):
+            # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.diagnose import Diagnosis
 
             self._diagnosis = Diagnosis(sanitize=self.sanitize)
@@ -460,6 +448,7 @@ class AgentCheck(object):
         Since: Agent 7.24
         """
         if not hasattr(self, '_tls_context_wrapper'):
+            # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.tls import TlsContextWrapper
 
             self._tls_context_wrapper = TlsContextWrapper(
@@ -480,6 +469,7 @@ class AgentCheck(object):
             if not self.check_id and AGENT_RUNNING:
                 raise RuntimeError('Attribute `check_id` must be set')
 
+            # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.metadata import MetadataManager
 
             self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
@@ -510,6 +500,7 @@ class AgentCheck(object):
         return False
 
     def log_typos_in_options(self, user_config, models_config, level):
+        # See Performance Optimizations in this package's README.md.
         from jellyfish import jaro_winkler_similarity
         from pydantic import BaseModel
 
@@ -617,6 +608,7 @@ class AgentCheck(object):
         Register a secret to be scrubbed by `.sanitize()`.
         """
         if not hasattr(self, '_sanitizer'):
+            # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.secrets import SecretsSanitizer
 
             # Configure lazily so that checks that don't use sanitization aren't affected.
@@ -1477,3 +1469,28 @@ class AgentCheck(object):
 
         for m in metrics:
             self.gauge(m.name, m.value, tags=tags, raw=True)
+
+    @staticmethod
+    def load_config(yaml_str: str) -> Any:
+        """
+        Convenience wrapper to ease programmatic use of this class from the C API.
+        """
+        import subprocess
+        import sys
+
+        process = subprocess.Popen(
+            [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout, stderr = process.communicate(yaml_str.encode())
+        if process.returncode != 0:
+            raise ValueError(f'Failed to load config: {stderr.decode()}')
+
+        decoded = stdout.strip().decode()
+        try:
+            return eval(decoded)
+        # a single, literal unquoted string
+        except Exception:
+            return decoded

@@ -1,0 +1,37 @@
+name: sonatype_nexus
+files:
+  - name: sonatype_nexus.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: username
+            required: true
+            description: "The username of your Sonatype Nexus account."
+            value:
+              type: string
+              example: test_username
+          - name: password
+            required: true
+            description: "The password of your Sonatype Nexus account."
+            value:
+              type: string
+              example: test_password
+          - name: server_url
+            required: true
+            description: "The Server URL of your Sonatype Nexus account."
+            value:
+              type: string
+              example: https://0.0.0.0:8081
+          - template: instances/default
+            overrides:
+              min_collection_interval.required: true
+              min_collection_interval.value.example: 600
+              min_collection_interval.value.minimum: 300
+              min_collection_interval.value.maximum: 64800
+              service.hidden: true
+              empty_default_hostname.hidden: true
+              metric_patterns.hidden: true

@@ -16,7 +16,7 @@
       "locked": false,
       "new_host_delay": 300,
       "notify_audit": true,
-      "notify_no_data": true,
+      "on_missing_data": "show_and_notify_no_data",
       "renotify_interval": 0,
       "require_full_window": false,
       "thresholds": {

@@ -30,7 +30,7 @@ from .headers import get_default_headers, update_headers
 from .network import CertAdapter, create_socket_connection
 from .time import get_timestamp
 
-# Import lazily to reduce memory footprint, and ease installation of optional dependencies for development
+# See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
 requests_ntlm = lazy_loader.load('requests_ntlm')
 requests_oauthlib = lazy_loader.load('requests_oauthlib')

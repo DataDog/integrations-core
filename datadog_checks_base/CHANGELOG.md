@@ -12,7 +12,7 @@
 
 * Use regex in service check message assertion ([#19736](https://github.com/DataDog/integrations-core/pull/19736))
 
-## 37.6.1 / 2025-02-20
+## 37.6.1 / 2025-02-20 / Agent 7.64.0
 
 ***Fixed***:
 
