@@ -101,6 +101,7 @@ class IBMMQConfig:
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
 
+        # Initialize timezone handling
         try:
             if self.qm_timezone != 'UTC':
                 self.qm_stats_tz = tz.gettz(self.qm_timezone)
@@ -115,6 +116,7 @@ class IBMMQConfig:
                 e,
             )
             self.qm_stats_tz = tz.UTC
+            self.qm_timezone = 'UTC'  # Ensure string version matches object version
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [

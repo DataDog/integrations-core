@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+from dateutil import tz
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -270,3 +271,27 @@ def test_queue_manager_process_direct_ssl(instance):
     instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
     config = IBMMQConfig(instance, {})
     assert config.try_basic_auth is False
+
+
+@pytest.mark.parametrize(
+    'timezone_config, expected_timezone, expected_stats_tz, expected_error',
+    [
+        pytest.param('UTC', 'UTC', tz.UTC, None, id='default-utc'),
+        pytest.param('America/New_York', 'America/New_York', tz.gettz('America/New_York'), None, id='valid-timezone'),
+        pytest.param('Europe/London', 'Europe/London', tz.gettz('Europe/London'), None, id='another-valid-timezone'),
+        pytest.param('Invalid/Timezone', 'UTC', tz.UTC, 'Invalid timezone', id='invalid-timezone'),
+    ],
+)
+def test_timezone_configuration(instance, timezone_config, expected_timezone, expected_stats_tz, expected_error):
+    from datadog_checks.ibm_mq.config import IBMMQConfig
+
+    instance['queue_manager_timezone'] = timezone_config
+    config = IBMMQConfig(instance, {})
+
+    assert config.qm_timezone == expected_timezone
+    assert config.qm_stats_tz == expected_stats_tz
+    if expected_error:
+        assert config.qm_timezone == 'UTC'
+        assert config.qm_stats_tz == tz.UTC
+    else:
+        assert config.qm_timezone == config.qm_stats_tz.zone
