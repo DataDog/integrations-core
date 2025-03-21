@@ -15,7 +15,7 @@ See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video
 
 ## Overview
 
-Datadog's **LLM Observability** enables end-to-end monitoring of your LLM application using **Anthropic** models. Follow the steps below to configure your Anthropic integration for **LLM Evaluations**.
+Datadog's LLM Observability enables end-to-end monitoring of your LLM application using Anthropic models. Follow the steps below to configure your Anthropic integration for LLM Evaluations.
 
 ## Prerequisites
 
