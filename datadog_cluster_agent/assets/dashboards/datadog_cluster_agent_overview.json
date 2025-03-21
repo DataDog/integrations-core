@@ -855,7 +855,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.containers.restarts{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.containers.restarts{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
