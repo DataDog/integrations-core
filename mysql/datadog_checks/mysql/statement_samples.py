@@ -659,7 +659,9 @@ class MySQLStatementSamples(DBMAsyncJob):
         error_state = self._use_schema(cursor, schema, explain_state_cache_key)
         if error_state:
             self._log.warning(
-                'Failed to collect execution plan. Check that the `explain_statement` function exists in the schema `%s`. See https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting/#explain-plan-fq-procedure-missing. error=%s: %s',
+                'Failed to collect execution plan. Check that the `explain_statement` function exists in the schema `%s`. '
+                'See https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting/#explain-plan-fq-procedure-missing. '
+                'error=%s: %s',
                 schema,
                 error_state,
                 obfuscated_statement,
