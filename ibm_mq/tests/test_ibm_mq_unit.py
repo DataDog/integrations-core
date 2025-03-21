@@ -289,9 +289,11 @@ def test_timezone_configuration(instance, timezone_config, expected_timezone, ex
     config = IBMMQConfig(instance, {})
 
     assert config.qm_timezone == expected_timezone
+
     assert config.qm_stats_tz == expected_stats_tz
+
     if expected_error:
         assert config.qm_timezone == 'UTC'
         assert config.qm_stats_tz == tz.UTC
     else:
-        assert config.qm_timezone == config.qm_stats_tz.zone
+        assert config.qm_timezone == timezone_config
