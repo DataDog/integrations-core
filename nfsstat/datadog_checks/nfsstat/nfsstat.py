@@ -38,10 +38,12 @@ class NfsStatCheck(AgentCheck):
         this_device = []
         custom_tags = instance.get("tags", [])
         stats = stat_out.splitlines()
+        disable_missing_mountpoints_warning = is_affirmative(instance.get('disable_missing_mountpoints_warning', False))
 
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
-                self.warning("No NFS mount points were found.")
+                if not disable_missing_mountpoints_warning:
+                    self.warning("No NFS mount points were found.")
             else:
                 self.log.debug("AutoFS enabled: no mount points currently.")
             return
