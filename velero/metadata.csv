@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-velero.backup,gauge,,,,Current number of existent backups,0,velero,,,
+velero.backup.amount,gauge,,,,Current number of existent backups,0,velero,,,
 velero.backup.attempt.count,count,,,,Total number of attempted backups,0,velero,,,
 velero.backup.deletion.attempt.count,count,,,,Total number of attempted backup deletions,0,velero,,,
 velero.backup.deletion.failure.count,count,,,,Total number of failed backup deletions,0,velero,,,
@@ -32,7 +32,7 @@ velero.pod_volume.operation_latency.seconds.bucket,count,,,,"Histogram bucket fo
 velero.pod_volume.operation_latency.seconds.count,count,,,,Count aggregation for time taken to complete pod volume operations,0,velero,,,
 velero.pod_volume.operation_latency.seconds.gauge,gauge,,,,"Gauge metric indicating time taken, in seconds, to perform pod volume operations",0,velero,,,
 velero.pod_volume.operation_latency.seconds.sum,count,,,,"Sum aggregation for time taken to complete pod volume operations, in seconds",0,velero,,,
-velero.restore,gauge,,,,Current number of existent restores,0,velero,,,
+velero.restore.amount,gauge,,,,Current number of existent restores,0,velero,,,
 velero.restore.attempt.count,count,,,,Total number of attempted restores,0,velero,,,
 velero.restore.failed.count,count,,,,Total number of failed restores,0,velero,,,
 velero.restore.partial_failure.count,count,,,,Total number of partially failed restores,0,velero,,,
