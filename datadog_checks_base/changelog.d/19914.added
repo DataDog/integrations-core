@@ -1,0 +1,1 @@
+Add AdaptiveExplainManager to dynamically adjust database query explain verbosity based on query importance and system overhead budget.
