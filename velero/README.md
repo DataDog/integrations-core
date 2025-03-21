@@ -16,7 +16,7 @@ No additional installation is needed on your server.
 #### Metrics
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx-->
+<!-- xxx tab "Host" xxx -->
 
 Follow the instructions below to install and configure this check for an Agent running on a host. 
 
@@ -25,7 +25,7 @@ Follow the instructions below to install and configure this check for an Agent r
 2. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Kubernetes" xxx-->
+<!-- xxx tab "Kubernetes" xxx -->
 
 See the [Autodiscovery Integration Templates][3] for guidance on configuring this integration in a containerized environment.
 
