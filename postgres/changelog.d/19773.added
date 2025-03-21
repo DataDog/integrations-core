@@ -1,1 +1,0 @@
-When Amazon adds Extended Support to older Postgres versions, they update the version string to a format we are currently unable to parse. This adds the ability to parse those versions. Here is an example announcement where they communicate such a version string: https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-rds-postgresql-minor-11-22-rds-20241121/

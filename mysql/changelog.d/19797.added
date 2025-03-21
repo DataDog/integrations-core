@@ -1,2 +1,0 @@
-Collect MySQL foreign key delete_rule and update_rule from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS.
-Note: On MariaDB 10.5+, REFERENCES privilege is required to access this information.
