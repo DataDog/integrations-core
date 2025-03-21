@@ -802,7 +802,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.memory.limits{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.limits{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
