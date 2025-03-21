@@ -49,7 +49,7 @@ Datadog's OpenAI integration allows you to collect **usage metrics**, **cost dat
 ### 3. Additional Notes
 
 - This integration **only collects** `openai.api.usage*` metrics.
-- If you enable **OpenAI in Cloud Cost Management**, you will also receive **cost metrics**.
+- If you enable Cloud Cost Management for OpenAI, you have access to cost metrics.
 - No additional permissions or setup are required for standard usage metrics.
 
 ## Additional Resources
