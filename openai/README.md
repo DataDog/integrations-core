@@ -21,28 +21,29 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ## Overview
 
-Datadog's OpenAI integration allows you to collect **usage metrics**, **cost data**, and **enable LLM Observability** to monitor your OpenAI models. Follow the steps below to generate an API key and configure the integration.
+Datadog's OpenAI integration allows you to collect usage metrics, cost data, and enables LLM Observability to monitor your OpenAI models. Follow the steps below to generate an OpenAI API key and configure the integration.
 
 ## Prerequisites
 
 - An **OpenAI account** with the admin write permissions
 - A **valid OpenAI API key** with appropriate access for **usage and cost metrics** or **LLM Observability**.
 
-## Setup Instructions
+## Setup
 
-### 1. Generate an OpenAI API Key
+### 1. Generate an OpenAI API key
 
 1. Login to your [OpenAI Account][10].
-2. Navigate to **View API keys** under **Account settings**.
+2. Navigate to **API keys** under **Organization settings**.
 3. Click **Create a new secret key**.
-   - For **LLM Observability**, ensure that the API key has **write** permission for **model capabilities** to invoke models in your LLM account.
+   - For LLM Observability, ensure that the API key has **write** permission for **model capabilities** to invoke models in your LLM account.
 4. Copy the created API Key to your clipboard.
 
-### 2. Configure Datadog's OpenAI Integration
+### 2. Configure Datadog's OpenAI integration
 
-1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
-2. Enter an **account name** and **paste the OpenAI API key** in the **account configuration** in Datadog.
-3. Depending on your use case:
+1. Navigate Datadog's [OpenAI integration tile][11] and open the **Configuration** tab.
+2. Click **Add Account**.
+3. Under **Account Name**, enter a name for your account. Under **API Key**, enter your OpenAI API key. Optionally, add a comma-separated list of tags for metrics associated with this account. 
+3. Under **Resources**, enable toggles depending on your use case:
    - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. See ([collected data][15]).
    - **LLM Observability**: If you want to evaluate your LLM applications, go to **LLM Observability > Settings** to create and run evaluations for your instrumented LLM application.
 

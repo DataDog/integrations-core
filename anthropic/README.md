@@ -24,32 +24,34 @@ Datadog's LLM Observability enables end-to-end monitoring of your LLM applicatio
 
 ## Setup
 
-### 1. Generate an Anthropic API Key
+### 1. Generate an Anthropic API key
 
 1. Login to your [Anthropic dashboard][3].
-2. Navigate to **API Keys** under your profile.
+2. Navigate to **API keys** under your profile.
 3. Click the **Create Key** button.
-   - For **LLM Observability**, ensure that the API key has **write** permission for **model capabilities** to allow Datadog to invoke models in your Anthropic account.
+   - For LLM Observability, ensure that the API key has **write** permission for **model capabilities**. This allows Datadog to invoke models in your Anthropic account.
 4. Copy the created API key to your clipboard.
 
-### 2. Configure Datadog's Anthropic Integration
+### 2. Configure Datadog's Anthropic integration
 
-1. Navigate to the configuration tab inside Datadog Anthropic integration tile.
-2. Enter an **account name** and **paste the Anthropic API key** in the **account configuration** in Datadog.
-3. To enable LLM Evaluations:
-   - Go to **LLM Observability > Settings > Evaluations**.
+1. Navigate to the configuration tab inside Datadog's Anthropic integration tile.
+2. On the **Configure** tab, click **Add New**.
+3. Under **Name**, enter a name for your account. Under **API key**, enter your Anthropic API key.
+4. Click the check mark to save.
+
+### 3. Enable LLM Evaluations
+1. Go to **LLM Observability > Settings > Evaluations**.
    - Select **Anthropic account** to evaluate and monitor your **LLM applications**.
 
-### 3. Additional Notes
+### Additional Notes
 
-- This integration allows **LLM Observability** to track **Anthropic model performance**.
-- **No additional permissions** are required beyond enabling write access for model capabilities.
+- This integration allows LLM Observability to track Anthropic model performance.
+- No additional permissions are required beyond enabling write access for model capabilities.
 
 ## Additional Resources
 
 - [Anthropic API Documentation][4]
 
-By following these steps, you can integrate **Anthropic LLM Evaluations** into **Datadog**, enabling better observability and monitoring for your LLM applications.
 
 ### LLM Observability: Get end-to-end visibility into your LLM application using Anthropic
 
