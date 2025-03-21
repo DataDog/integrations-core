@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.0 / 2025-03-19
+
+***Changed***:
+
+* Change MongoDB default explain verbosity from executionStats to queryPlanner (DBM only). ([#19855](https://github.com/DataDog/integrations-core/pull/19855))
+
+***Added***:
+
+* Added support for configuring explain verbosity mode in MongoDB integration via `operation_samples.explain_verbosity` and `slow_operations.explain_verbosity` options. ([#19232](https://github.com/DataDog/integrations-core/pull/19232))
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Added `system_database_stats` to control system database stats collection and `metrics_collection_interval.db_stats`, `metrics_collection_interval.session_stats` for customizable collection intervals. ([#19756](https://github.com/DataDog/integrations-core/pull/19756))
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798))
+* Increased default collection stats and collection index stats collect interval to 5 mins. ([#19856](https://github.com/DataDog/integrations-core/pull/19856))
+
+***Fixed***:
+
+* Revert "[mongo] add service tag to agent operations (#19456)" ([#19768](https://github.com/DataDog/integrations-core/pull/19768))
+
 ## 8.5.1 / 2025-03-12 / Agent 7.64.0
 
 ***Fixed***:
