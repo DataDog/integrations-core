@@ -658,8 +658,13 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._log.debug('explaining statement. schema=%s, statement="%s"', schema, obfuscated_statement)
         error_state = self._use_schema(cursor, schema, explain_state_cache_key)
         if error_state:
-            self._log.debug(
-                'Failed to collect execution plan because schema could not be accessed. schema=%s error=%s: %s',
+            self._log.warning(
+                'Failed to collect execution plan. '
+                'Check that the `explain_statement` function exists in the schema `%s`. '
+                'See '
+                'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting/'
+                '#explain-plan-fq-procedure-missing. '
+                'error=%s: %s',
                 schema,
                 error_state,
                 obfuscated_statement,
