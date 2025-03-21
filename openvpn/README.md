@@ -126,13 +126,16 @@ This error occurs because Syslog listens on port 514 by default. To resolve it, 
 
 **Troubleshooting OpenVPN Logs Not Appearing in Datadog**
 
-If OpenVPN logs are not appearing in Datadog after setup, try rebooting your system as an additional step.
+If OpenVPN logs are not appearing in Datadog after setup, try restarting **openvpnas** and **rsyslog** services.
 
-- Run the following command to reboot your system safely:
+- Run the following command to restart openvpnas service:
    ```shell
-   sudo reboot
+   service openvpnas restart
    ```
-- After the system restarts, monitor your Datadog dashboard to check if the logs are now visible.
+- Run the following command to restart rsyslog service:
+   ```shell
+   service rsyslog restart
+   ```
 
 For any further assistance, contact [Datadog support][3].
 
