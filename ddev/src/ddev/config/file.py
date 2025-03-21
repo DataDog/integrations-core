@@ -20,8 +20,9 @@ class ConfigFileError(Exception):
         super().__init__(message)
 
 
-def deep_merge_with_list_handling(a: dict, b: dict) -> dict:
-    """Merge two dictionaries, handling lists by concatenating them and recursively merging nested dictionaries.
+def deep_merge_with_list_handling(left: dict, right: dict) -> dict:
+    """Merge two dictionaries, by adding/replacing values from the right dictionary on to the left one
+    handling lists by concatenating them and recursively merging nested dictionaries.
 
     This function is optimized for TOML data structures, which only contain:
     - Simple immutable types (strings, numbers, booleans, dates)
@@ -34,8 +35,8 @@ def deep_merge_with_list_handling(a: dict, b: dict) -> dict:
         >>> deep_merge_with_list_handling(a, b)
         {"a": 1, "b": "x", "c": {"d": [1, 2, 3, 7, 8], "e": 5}, "f": [1, 2, 3, 6]}
     """
-    result = dict(a)  # Shallow copy is sufficient for the top level
-    for key, value in b.items():
+    result = dict(left)  # Shallow copy is sufficient for the top level
+    for key, value in right.items():
         if key in result:
             if isinstance(result[key], dict) and isinstance(value, dict):
                 # Recursively merge nested dictionaries

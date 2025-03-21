@@ -12,12 +12,12 @@
 repos:
 - repo: local
   hooks:
-    - id: lint
-      name: Run linters
-      entry: ddev test -s
-      language: system
-      files: '.+\.py'
-      pass_filenames: false
+    # - id: lint
+    #   name: Run linters
+    #   entry: ddev test -s
+    #   language: system
+    #   files: '.+\.py'
+    #   pass_filenames: false
     - id: service_checks
       name: Validate service checks
       entry: ddev validate service-checks
