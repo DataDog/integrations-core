@@ -46,7 +46,7 @@ Datadog's OpenAI integration allows you to collect **usage metrics**, **cost dat
    - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. See ([collected data][15]).
    - **LLM Observability**: If you want to evaluate your LLM applications, go to **LLM Observability > Settings** to create and run evaluations for your instrumented LLM application.
 
-### 3. Additional Notes
+### Additional Notes
 
 - This integration only collects `openai.api.usage*` metrics.
 - If you enable Cloud Cost Management for OpenAI, you have access to cost metrics.
