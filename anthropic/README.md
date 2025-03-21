@@ -26,7 +26,7 @@ Datadog's LLM Observability enables end-to-end monitoring of your LLM applicatio
 
 ### 1. Generate an Anthropic API Key
 
-1. Login to your [Anthropic Dashboard][3].
+1. Login to your [Anthropic dashboard][3].
 2. Navigate to **API Keys** under your profile.
 3. Click the **Create Key** button.
    - For **LLM Observability**, ensure that the API key has **write** permission for **model capabilities** to allow Datadog to invoke models in your Anthropic account.
