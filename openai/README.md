@@ -57,9 +57,6 @@ Datadog's OpenAI integration allows you to collect **usage metrics**, **cost dat
 - [OpenAI API Documentation][17]
 - [Generating an API Token][18]
 
-By following these steps, you can integrate **OpenAI's API metrics, cost tracking, and LLM Observability** with **Datadog** for improved monitoring and insights.
-
-This ensures that your OpenAI integration with Datadog is properly set up for **usage metrics, cost tracking, and LLM Observability**.
 
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
