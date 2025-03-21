@@ -1,4 +1,4 @@
-name: linux_audit_logs
+name: Linux Audit Logs
 files:
 - name: linux_audit_logs.yaml
   options:
