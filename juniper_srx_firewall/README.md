@@ -44,6 +44,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
 
    **Note**:
 
+   - `PORT`: Specify the UDP port that Datadog will listen on (default: 514).
    - Do not change the `service` and `source` values, as they are integral to proper log pipeline processing.
 
 3. [Restart the Agent][2].
@@ -65,7 +66,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
    ```
    **Note**:
    - Replace `<IP-ADDRESS>` with the Datadog Agent's IP address.
-   - Replace `<PORT>` with the same port configured in the [Log Collection](#configure-log-collection).
+   - Replace `<PORT>` with the same port configured in [Log Collection](#configure-log-collection).
 
 4. Verify if `Security Logging` is enabled:
    ```shell
