@@ -11,6 +11,8 @@ from datadog_checks.mesos_slave import MesosSlave
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
 
+# trigger ci
+
 
 def test_fixtures(check, instance, aggregator):
     check = check({}, instance)

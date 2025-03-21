@@ -37,9 +37,6 @@ exclude = true
 [overrides.ci.ibm_mq]
 platforms = ["linux", "windows"]
 
-[overrides.ci.mesos_slave]
-runners = { linux = ["ubuntu-20.04"] }
-
 [overrides.ci.network]
 platforms = ["linux", "windows"]
 
