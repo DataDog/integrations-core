@@ -548,7 +548,7 @@ instances:
     #   - TLS_AES_256_GCM_SHA384
     #   - TLS_CHACHA20_POLY1305_SHA256
     #   - TLS_AES_128_GCM_SHA256
-
+    
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
     ## You can use it for explicitly specifying the host header or adding headers for
@@ -643,3 +643,9 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param target_info_enabled - boolean - optional - default: false
+    ## Whether to enable scraping for the OpenMetrics target_info metric type.When enabled,
+    ## this collects metadata about the target being scraped, such as instancelabels and other identifying details.
+    #
+    # target_info_enabled: false
