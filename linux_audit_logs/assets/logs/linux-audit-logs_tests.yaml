@@ -1,25 +1,114 @@
-id: linux-audit-logs
+id: "linux-audit-logs"
 tests:
-  - sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980
-      uid=0 auid=0 ses=138
-      subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port
-      op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0
-      comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=?
-      addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
-    result: null
-  - sample: "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0
-      auid=4294967295 ses=4294967295
-      subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication
-      grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\"
-      exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh
-      res=success'UID=\"root\" AUID=\"unset\""
-    result: null
-  - sample: 'type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0
-      old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux
-      res=1AUID="devuser"'
-    result: null
-  - sample: 'type=AVC msg=audit(1669185724.533:182): avc:  denied  { getattr }
-      for  pid=16660 comm="groupadd" name="/" dev="proc" ino=1
-      scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023
-      tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0'
-    result: null
+ -
+  sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
+  result:
+    custom:
+      AUID: "root"
+      auid: 0
+      msg:
+        comm: "semanage"
+        exe: "/usr/libexec/platform-python3.6"
+        hostname: "?"
+        lport: 3307
+        op:
+         - "add"
+        proto: 6
+        res: "success"
+        resrc: "port"
+        tcontext: "system_u:object_r:mysqld_port_t:s0"
+        terminal: "?"
+      network:
+        client:
+          geoip:
+            invalidAddress: "?"
+          ip: "?"
+      pid: 381980
+      ses: 138
+      subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      timestamp: 1.736329118112E12
+      type: "USER_MAC_CONFIG_CHANGE"
+      usr:
+        id: 0
+        name: "root"
+    message: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1736329118112
+ -
+  sample: "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"unset\""
+  result:
+    custom:
+      AUID: "unset"
+      auid: 4294967295
+      msg:
+        acct: "devuser"
+        exe: "/usr/sbin/sshd"
+        grantors:
+         - "pam_usertype"
+         - "pam_localuser"
+         - "pam_unix"
+        hostname: "10.10.10.10"
+        op:
+         - "PAM:authentication"
+        res: "success"
+        terminal: "ssh"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      pid: 155615
+      ses: 4294967295
+      subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
+      timestamp: 1.740139921923E12
+      type: "USER_AUTH"
+      usr:
+        id: 0
+        name: "root"
+    message: "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"unset\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740139921923
+ -
+  sample: "type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
+  result:
+    custom:
+      enabled: 1
+      enforcing: 0
+      lsm: "selinux"
+      msg:
+        res: "success"
+      old-enabled: 1
+      old_enforcing: 1
+      res: 1
+      ses: 36
+      timestamp: 1.740386730535E12
+      type: "MAC_STATUS"
+      usr:
+        id: 1001
+        name: "devuser"
+    message: "type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740386730535
+ -
+  sample: "type=AVC msg=audit(1669185724.533:182): avc:  denied  { getattr } for  pid=16660 comm=\"groupadd\" name=\"/\" dev=\"proc\" ino=1 scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023 tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0"
+  result:
+    custom:
+      comm: "groupadd"
+      dev: "proc"
+      ino: 1
+      name: "/"
+      operation: "getattr"
+      outcome: "DENIED"
+      permissive: 0
+      pid: 16660
+      scontext: "unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023"
+      tclass: "filesystem"
+      tcontext: "system_u:object_r:proc_t:s0"
+      timestamp: 1.669185724533E12
+      type: "AVC"
+    message: "type=AVC msg=audit(1669185724.533:182): avc:  denied  { getattr } for  pid=16660 comm=\"groupadd\" name=\"/\" dev=\"proc\" ino=1 scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023 tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1669185724533
