@@ -797,7 +797,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage{kube_app_component:clusterchecks-agent AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
