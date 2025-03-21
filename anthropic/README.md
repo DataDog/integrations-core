@@ -40,8 +40,8 @@ Datadog's LLM Observability enables end-to-end monitoring of your LLM applicatio
 4. Click the check mark to save.
 
 ### 3. Enable LLM Evaluations
-1. Go to **LLM Observability > Settings > Evaluations**.
-   - Select **Anthropic account** to evaluate and monitor your **LLM applications**.
+1. Go to **LLM Observability > Settings > Integrations**.
+   - Select the **Anthropic account** that will be used evaluate and monitor your **LLM applications**.
 
 ### Additional Notes
 
