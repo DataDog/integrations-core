@@ -78,6 +78,9 @@ PLATFORMS = {
     'macos': __plat('macOS', 'macos-13'),
 }
 
+# The following integrations are no longer tested in CI
+DEPRECATED_INTEGRATIONS = {"mesos_slave"}
+
 
 @lru_cache(maxsize=None)
 def read_manifest(root: Path, target: str) -> dict:
@@ -172,6 +175,8 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
 def get_all_targets(root: Path) -> list[str]:
     targets = []
     for entry in root.iterdir():
+        if entry.name in DEPRECATED_INTEGRATIONS:
+            continue
         if (entry / 'hatch.toml').is_file() and (entry / 'tests').is_dir():
             targets.append(entry.name)
 
