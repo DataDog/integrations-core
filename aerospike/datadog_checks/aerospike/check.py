@@ -32,17 +32,19 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
 
     def _get_metrics_map(self):
         """
-        This method identified the aerospike server version by making a http call to the exporter,
+        identifies the aerospike server version by making a http call to the exporter,
         if aersopike server version is 7.0 or above, return the new metric_map_v7 defined in metrics.py
         """
 
         if self.build_version is None:
             self._fetch_build_info_from_metric()
-            version_parts = [int(p) for p in self.build_version.split('.')]
-            if self.build_version is None or version_parts[0] >= 7:
-                return METRIC_MAP_V7
+            
+        # build-version is identified from node_up metrics, which is available from aerospike server 4.x 
+        # dfault to 7 if no build version info is available, version number example: 7.1.0.2, 5.6.0.0
+        if self.build_version is not None and int(self.build_version.split('.')[0]) < 7:
+            return METRIC_MAP
 
-        return METRIC_MAP
+        return METRIC_MAP_V7
 
     def _fetch_build_info_from_metric(self):
         """
@@ -72,3 +74,5 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
             labels = {k.strip(): v.strip('"') for k, v in labels.items()}  # Remove quotes
 
             return labels["build"]
+        
+        return "7.2.0.0"
