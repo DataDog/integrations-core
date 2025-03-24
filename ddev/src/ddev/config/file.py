@@ -236,7 +236,7 @@ class ConfigFileWithOverrides:
     def model(self) -> RootConfig:
         return cast(RootConfig, self.global_model)
 
-    def save(self, content=None):
+    def save(self, content=None, with_local=False):
         import tomli_w
 
         if not content:
@@ -244,6 +244,9 @@ class ConfigFileWithOverrides:
 
         self.global_path.ensure_parent_dir_exists()
         self.global_path.write_atomic(content, "w", encoding="utf-8")
+
+        if with_local:
+            self.local_path.write_atomic(tomli_w.dumps(self.local_model.raw_data), "w", encoding="utf-8")
 
     def reset(self):
         global_config = RootConfig({})
@@ -262,9 +265,11 @@ class ConfigFileWithOverrides:
         content = tomli_w.dumps(self.global_model.raw_data)
         self.save(content)
 
-    def update(self):  # no cov
+    def update(self, with_local=False):  # no cov
         self.global_model.parse_fields()
-        self.save()
+        self.save(with_local=with_local)
+        # Reload to ensure the config is up to date
+        self.load()
 
     @classmethod
     def get_default_location(cls) -> Path:
