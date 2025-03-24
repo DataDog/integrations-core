@@ -8,7 +8,6 @@ from copy import deepcopy
 
 import dateutil.parser
 import pymongo
-import pymongo.synchronous
 from dateutil.tz import tzutc
 
 from datadog_checks.mongo.api import CRITICAL_FAILURE
@@ -164,7 +163,7 @@ class CustomQueriesCollector(MongoCollector):
             submit_method(metric_prefix, result['n'], tags)
             return
 
-        cursor = pymongo.synchronous.command_cursor.CommandCursor(
+        cursor = pymongo.command_cursor.CommandCursor(
             pymongo.collection.Collection(db, collection_name), result['cursor'], None
         )
         empty_result_set = True
