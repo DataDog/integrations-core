@@ -109,8 +109,9 @@ class IBMMQConfig:
                 if self.qm_stats_tz is None:
                     raise ValueError(f"'{self.qm_timezone}' is not a recognized timezone.")
             else:
+                #  Default to UTC if the timezone is not set or if use_qm_tz_for_metrics is False
                 self.qm_stats_tz = tz.UTC
-                self.qm_timezone = 'UTC'  # Ensure string representation is also UTC
+                self.qm_timezone = 'UTC'
         except ValueError as e:
             self.log.error(
                 "Invalid timezone: %s. Defaulting to UTC. Please specify a valid time zone in IANA/Olson format. %s",
