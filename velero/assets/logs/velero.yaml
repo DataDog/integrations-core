@@ -5,7 +5,31 @@ metric_id: velero
 # If for some reason id must be different than app_id, add the app_id in this field instead.
 # If id and app_id already match, this field can be left blank.
 backend_only: false
-facets: null
+facets:
+  - description: Name of the backup
+    facetType: list
+    groups:
+      - Backup
+    name: Backup
+    path: backup
+    source: log
+    type: string
+  - description: Backup location
+    facetType: list
+    groups:
+      - Backup
+    name: Backup Location
+    path: backupLocation
+    source: log
+    type: string
+  - description: Name of the restore
+    facetType: list
+    groups:
+      - Backup
+    name: Restore
+    path: restore
+    source: log
+    type: string
 pipeline:
   type: pipeline
   name: Velero
@@ -34,11 +58,25 @@ pipeline:
           is different than the backed-up version"
           logSource="pkg/controller/restore_controller.go:611"
           restore=velero/nginx-backup-20250303114623'
+        - 'time="2025-03-01T17:53:30Z" level=info msg="Starting EventSource"
+          controller=backup controllerGroup=velero.io controllerKind=Backup
+          logSource="/go/pkg/mod/github.com/bombsimon/logrusr/v3@v3.0.0/logrusr.go:108"
+          source="kind source: *v1.Backup"'
+        - '2025-03-18T10:32:47Z	INFO	Starting workers	{"controller":
+          "podvolumerestore", "controllerGroup": "velero.io", "controllerKind":
+          "PodVolumeRestore", "worker count": 1}'
       grok:
         supportRules: |-
-          time time=%{date("\"yyyy-MM-dd'T'HH:mm:ss'Z'\""):timestamp}
+          time time=%{date("\"YYYY-MM-DD'T'HH:mm:ss'Z'\""):timestamp}
           level level=%{word:level}
-        matchRules: rule1 %{time} %{level} %{data::keyvalue("="," \",:*/")}
+          msg msg=%{regex("\"?(?:[^\\\"]|\\\")*\"(?= [A-Za-su-z]+=)"):msg} 
+          component %{regex(".*(?=\\t)"):component}\s
+        matchRules: >-
+          main_rule %{time} %{level} %{data::keyvalue("="," \",:*/")}
+
+          node_agent_startup %{date("YYYY-MM-DD'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{regex(".*(?=\\t)"):operation}\s%{data:json}
+
+          node_agent_no_json %{date("YYYY-MM-DD'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{data:operation}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
