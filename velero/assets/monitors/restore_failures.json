@@ -7,7 +7,7 @@
 	"definition": {
 		"name": "[Velero] Restore operation failed",
 		"type": "query alert",
-		"query": "sum(last_15m):sum:velero.restore.failed.count{*}.as_rate() > 0",
+		"query": "change(sum(last_5m),last_1d):sum:velero.restore.failed.count{*}.as_rate() > 0",
 		"message": "At least one Velero restore operation has failed.\n\nRestore failures are critical as they indicate potential issues with:\n* Backup data integrity\n* Storage access permissions\n* Resource conflicts\n* Version compatibility\n\n{{#is_alert}}\nFailed restores: {{value}}\n{{/is_alert}}\n\nImmediate actions:\n1. Check Velero logs for specific error messages\n2. Verify backup data is accessible\n3. Ensure sufficient cluster resources\n4. Check for namespace conflicts",
 		"tags": [
 			"integration:velero"

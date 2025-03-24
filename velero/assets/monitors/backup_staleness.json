@@ -7,7 +7,7 @@
 	"definition": {
 	    "name": "[Velero] No successful backups",
 	    "type": "query alert",
-	    "query": "min(last_5m):max:velero.backup.last_successful_timestamp{*} - calendar_shift(max:velero.backup.last_successful_timestamp{*}, '-1d', 'UTC') == 0",
+		"query": "change(avg(last_5m),last_1d):avg:velero.backup.last_successful_timestamp{*} == 0",
 	    "message": "No successful Velero backups have completed in the last day.\n\nThis could mean:\n* Scheduled backups are not running\n* All backup attempts are failing\n* The backup system is not functioning\n\n{{#is_alert}}\nLast successful backup: {{value}} (Unix timestamp)\n{{/is_alert}}\n\nVerify:\n1. Velero schedules are configured correctly\n2. Storage backend is accessible\n3. Velero pods are running\n4. Check Velero logs for errors\n\n@slack-datadog-velero-alerts",
 	    "tags": [
 	    	"integration:velero"
