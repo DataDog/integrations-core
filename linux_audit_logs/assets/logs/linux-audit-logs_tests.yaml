@@ -112,3 +112,9 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1669185724533
+ -
+  sample: "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=? addr=? terminal=?'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
+  result: null
+ -
+  sample: "type=USER_ROLE_CHANGE msg=audit(1741000050.325:2606): pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='pam: default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"devuser\""
+  result: null
