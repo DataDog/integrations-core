@@ -1,0 +1,1 @@
+Allow ddev to override configuration values from a local .ddev.toml file if present to modify its behavior depending on the working directory
