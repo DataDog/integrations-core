@@ -201,6 +201,6 @@ CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[
 FROM
 sys.fn_xe_file_target_read_file
 ('system_health*.xel', null, null, null)
-WHERE object_name like 'xml_deadlock_report'
+WHERE object_name = 'xml_deadlock_report'
   and CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime')
     >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC');"""
