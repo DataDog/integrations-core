@@ -42,7 +42,7 @@ The Velero integration can collect logs from the Velero pods.
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
-Apply this if you want to collect logs from Velero containers on a host.
+To collect logs from Velero containers on a host:
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
@@ -50,7 +50,7 @@ Apply this if you want to collect logs from Velero containers on a host.
    logs_enabled: true
    ```
 
-2. Uncomment and edit the logs configuration block in your `velero.d/conf.yaml` file. Here's an example:
+2. Uncomment and edit the logs configuration block in your `velero.d/conf.yaml` file. For example:
 
    ```yaml
    logs:
@@ -62,11 +62,11 @@ Apply this if you want to collect logs from Velero containers on a host.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
-Apply this if you want to collect logs from a Velero Kubernetes deployment.
+To collect logs from a Velero Kubernetes deployment:
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
+1. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
-Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][11].
+2. Set Log Integrations as pod annotations. This can also be configured with a file, a ConfigMap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][11].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
