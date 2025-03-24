@@ -66,7 +66,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-juniper_srx_firewa
    ```
    **Note**:
    - Replace `<IP-ADDRESS>` with the Datadog Agent's IP address.
-   - Replace `<PORT>` with the same port configured in [Log Collection](#configure-log-collection).
+   - Replace `<PORT>` with the same port configured in [Log Collection][7].
 
 4. Verify if `Security Logging` is enabled:
    ```shell
@@ -165,3 +165,4 @@ For further assistance, contact [Datadog support][1].
 [4]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/juniper_srx_firewall/datadog_checks/juniper_srx_firewall/data/conf.yaml.example
+[7]: https://docs.datadoghq.com/integrations/juniper_srx_firewall/#configure-log-collection
