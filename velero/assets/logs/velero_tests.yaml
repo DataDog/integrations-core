@@ -14,10 +14,19 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1741969699000
--
+ -
   sample: "time=\"2025-03-03T10:46:27Z\" level=warning msg=\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap \\\"kube-root-ca.crt\\\" already exists. Warning: the in-cluster version is different than the backed-up version\" logSource=\"pkg/controller/restore_controller.go:611 restore=velero/nginx-backup-20250303114623"
-  result: null
--
+  result:
+    custom:
+      level: "warning"
+      restore: "velero/nginx-backup-20250303114623"
+      timestamp: 1740998787000
+    message: "\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740998787000
+ -
   sample: "time=\"2025-03-01T18:41:30Z\" level=error msg=\"error encountered while scanning stdout\" backupLocation=velero/default cmd=/plugins/velero-plugin-for-gcp controller=backup-sync error=\"read |0: file already closed\" logSource=\"pkg/plugin/clientmgmt/process/logrus_adapter.go:90\""
   result:
     custom:
@@ -27,7 +36,7 @@ tests:
       error: "read |0: file already closed"
       level: "error"
       logSource: "pkg/plugin/clientmgmt/process/logrus_adapter.go:90"
-    timestamp: 1740854490000
+      timestamp: 1740854490000
     message: "error encountered while scanning stdout"
     status: "error"
     tags:
