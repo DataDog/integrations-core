@@ -4,15 +4,15 @@
 
 This integration enriches and ingests the following logs:
 
-- **Secret Server Logs**: Represents an event in which a user performs an action (such as viewing, adding, or modifying) on a stored secret, folder, group, or user, providing details of the user's identity, the name of the item on which the action was performed, and the source of the action, etc.
+- **Secret Server Logs**: Represents an event where a user performs an action (such as viewing, adding, or modifying) on a stored secret, folder, group, or user. It provides details including the user's identity, the source of the action, and the  item the action was performed.
 
-This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into secret server logs through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+After it collects the logs, Delinea Secret Server channels them into Datadog for analysis. Using the built-in logs pipeline, these logs are parsed and enriched, allowing for effortless search and analysis. The integration provides insights into secret server logs through out-of-the-box dashboards and includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
 
 ## Setup
 
 ### Installation
 
-To install the Delinea Secret Server integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][5] documentation.
+To install the Delinea Secret Server integration, run the following Agent installation command and the following steps. For more information, see the [Integration Management][5] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.65.0.
 
@@ -26,7 +26,7 @@ Linux command:
 
 #### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file:
 
     ```yaml
     logs_enabled: true
@@ -34,9 +34,7 @@ Linux command:
 
 2. Add this configuration block to your `delinea_secret_server.d/conf.yaml` file to start collecting your Delinea Secret Server logs.
 
-    See the [sample delinea_secret_server.d/conf.yaml][7] for available configuration options. The appropriate protocol (either TCP or UDP) should be chosen based on the Delinea Secret Server syslog forwarding configuration.
-
-      ```yaml
+   ```yaml
       logs:
        - type: tcp/udp
          port: <PORT>
@@ -44,27 +42,29 @@ Linux command:
          service: delinea-secret-server
       ```
 
-      **Note**:
-      - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
+      For available configuration options, see the [sample delinea_secret_server.d/conf.yaml][7] . Choose the appropriate protocol (either TCP or UDP) based on your Delinea Secret Server syslog forwarding configuration.
+
+      **Note**: Do not change the service and source values, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][1].
 
 #### Configure syslog message forwarding from Delinea Secret Server
 
-1. Login to **Delinea Secret Server** platform.
+1. Log in to the **Delinea Secret Server** platform.
 2. Navigate to **Settings** > **All Settings**.
-3. Navigate to **Configuration** > **General** > **Application** and click **Edit** button.
-4. Check to **Enable Syslog/CEF Log Output**.
-5. Fill the following information:
+3. Navigate to **Configuration** > **General** > **Application**.
+4. Click **Edit**.
+5. Check to **Enable Syslog/CEF Log Output**.
+6. Fill out the following information:
 
     - **Syslog/CEF Server**: Enter Syslog/CEF Server Address.
     - **Syslog/CEF Port**: Enter Syslog/CEF Server Port.
-    - **Syslog/CEF Protocol**: Select Syslog/CEF Protocol to use when sending logs. Select TCP/UDP.
-    - **Syslog/CEF Time Zone**: Select Time Zone to use when sending Syslog/CEF Protocol log entries. Select UTC Time.
-    - **Syslog/CEF DateTime Format**: DateTime Format for Syslog/CEF Protocol log timestamps. Select ISO 8601.
-    - **Syslog/CEF Site**: This is the site that the CEF/Syslogs will run on.
+    - **Syslog/CEF Protocol**: Select TCP or UDP.
+    - **Syslog/CEF Time Zone**: Select UTC Time.
+    - **Syslog/CEF DateTime Format**: Select ISO 8601.
+    - **Syslog/CEF Site**: Select the site that the CEF/Syslogs will run on.
 
-6. Click the **Save** button.
+7. Click **Save**.
 
 ### Validation
 
@@ -92,7 +92,7 @@ The Delinea Secret Server integration does not include any service checks.
 
 ### Delinea Secret Server
 
-**Permission denied while port binding:**
+### Permission denied while port binding
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
@@ -120,17 +120,17 @@ If you see a **Permission denied** error while port binding in the Agent logs, s
 
    2. [Restart the Agent][1].
 
-**Data is not being collected:**
+### Data is not being collected
 
 Make sure that traffic is bypassed from the configured port if the firewall is enabled.
 
-**Port already in use:**
+### Port already in use
 
 If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
 
 On systems using Syslog, if the Agent listens for Delinea Secret Server logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
-This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
+By default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
 
 - Disable Syslog.
 - Configure the Agent to listen on a different, available port.
