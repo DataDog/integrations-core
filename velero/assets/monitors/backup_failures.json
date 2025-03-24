@@ -2,7 +2,7 @@
 	"version": 2,
 	"created_at": "2025-03-23",
 	"last_updated_at": "2025-03-23",
-	"title": "Velero high backup failure rate",
+	"title": "Backup failure rate higher than usual",
 	"description": "This monitor tracks the backup failure rate of Velero. A high failure rate can indicate issues with storage configuration, permissions, resource availability, or network connectivity to storage.",
 	"definition": {
 		"name": "[Velero] High backup failure rate",
