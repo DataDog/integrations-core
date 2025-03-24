@@ -8,14 +8,14 @@ tests:
       group: "velero.io/v2alpha1"
       level: "info"
       logSource: "pkg/backup/item_collector.go:524"
-      timestamp: 31508899000
+      timestamp: 1741969699000
     message: "Listing items"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 31508899000
+    timestamp: 1741969699000
 -
-  sample: "'time=\"2025-03-03T10:46:27Z\" level=warning msg=\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap \\\"kube-root-ca.crt\\\" already exists. Warning: the in-cluster version is different than the backed-up version\" logSource=\"pkg/controller/restore_controller.go:611 restore=velero/nginx-backup-20250303114623'"
+  sample: "time=\"2025-03-03T10:46:27Z\" level=warning msg=\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap \\\"kube-root-ca.crt\\\" already exists. Warning: the in-cluster version is different than the backed-up version\" logSource=\"pkg/controller/restore_controller.go:611 restore=velero/nginx-backup-20250303114623"
   result: null
 -
   sample: "time=\"2025-03-01T18:41:30Z\" level=error msg=\"error encountered while scanning stdout\" backupLocation=velero/default cmd=/plugins/velero-plugin-for-gcp controller=backup-sync error=\"read |0: file already closed\" logSource=\"pkg/plugin/clientmgmt/process/logrus_adapter.go:90\""
@@ -27,12 +27,12 @@ tests:
       error: "read |0: file already closed"
       level: "error"
       logSource: "pkg/plugin/clientmgmt/process/logrus_adapter.go:90"
-      timestamp: 31516890000
+    timestamp: 1740854490000
     message: "error encountered while scanning stdout"
     status: "error"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 31516890000
+    timestamp: 1740854490000
 -
   sample: "2025-03-18T10:32:55Z\tINFO\tStarting EventSource\t{\"controller\": \"podvolumebackup\", \"controllerGroup\": \"velero.io\", \"controllerKind\": \"PodVolumeBackup\", \"source\": \"kind source: *v1.PodVolumeBackup\"}"
   result:
@@ -40,12 +40,12 @@ tests:
       json: "{\"controller\": \"podvolumebackup\", \"controllerGroup\": \"velero.io\", \"controllerKind\": \"PodVolumeBackup\", \"source\": \"kind source: *v1.PodVolumeBackup\"}"
       level: "INFO"
       operation: "Starting EventSource"
-      timestamp: 31573975000
+      timestamp: 1742293975000
     message: "2025-03-18T10:32:55Z\tINFO\tStarting EventSource\t{\"controller\": \"podvolumebackup\", \"controllerGroup\": \"velero.io\", \"controllerKind\": \"PodVolumeBackup\", \"source\": \"kind source: *v1.PodVolumeBackup\"}"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 31573975000
+    timestamp: 1742293975000
 -
   sample: "2025-03-18T10:32:54Z\tINFO\tcontroller-runtime.metrics\tStarting metrics server"
   result:
@@ -53,9 +53,9 @@ tests:
       json: "Starting metrics server"
       level: "INFO"
       operation: "controller-runtime.metrics"
-      timestamp: 31573974000
+      timestamp: 1742293974000
     message: "2025-03-18T10:32:54Z\tINFO\tcontroller-runtime.metrics\tStarting metrics server"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 31573974000
+    timestamp: 1742293974000
