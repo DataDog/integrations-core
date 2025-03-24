@@ -103,8 +103,6 @@ class IBMMQConfig:
         self.use_qm_tz_for_metrics = is_affirmative(instance.get('use_qm_tz_for_metrics', False))  # type: bool
 
         # Initialize timezone handling
-        # - If use_qm_tz_for_metrics is True and a non-UTC timezone is provided, use that timezone object
-        # - Otherwise, use UTC (either string or object) to maintain backward compatibility
         try:
             if self.qm_timezone != 'UTC' and self.use_qm_tz_for_metrics:
                 self.qm_stats_tz = tz.gettz(self.qm_timezone)
