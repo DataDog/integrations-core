@@ -296,7 +296,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 8
             }
         },
         {
@@ -812,9 +812,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 11,
                 "width": 12,
-                "height": 1
+                "height": 10
             }
         },
         {
@@ -1392,9 +1392,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 21,
                 "width": 12,
-                "height": 1
+                "height": 15
             }
         },
         {
@@ -1751,9 +1751,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
+                "y": 36,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -2176,9 +2176,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 7,
+                "y": 48,
                 "width": 12,
-                "height": 1
+                "height": 11
             }
         },
         {
@@ -2247,7 +2247,7 @@
                     {
                         "id": 6467236775954528,
                         "definition": {
-                            "title": "Failed User Role Assignments",
+                            "title": "Failed Role Assignments",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2301,9 +2301,10 @@
                     {
                         "id": 8531043473933972,
                         "definition": {
-                            "title": "Top Users Modifying SELinux Roles by Result",
+                            "title": "Top Users with Most Role Assignment by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2312,7 +2313,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:linux-audit-logs service:linux-audit-logs @type:ROLE_ASSIGN $Host $User-Name -@msg.res:failure"
+                                                "query": "source:linux-audit-logs service:linux-audit-logs @type:ROLE_ASSIGN $Host $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2451,9 +2452,10 @@
                     {
                         "id": 7900224160659732,
                         "definition": {
-                            "title": "Top SELinux Users Role Updates by Result",
+                            "title": "Top SELinux Role Assigned by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2462,7 +2464,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:linux-audit-logs service:linux-audit-logs @type:ROLE_ASSIGN $Host $User-Name -@msg.res:failure"
+                                                "query": "source:linux-audit-logs service:linux-audit-logs @type:ROLE_ASSIGN $Host $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2531,9 +2533,10 @@
                     {
                         "id": 1955174758308308,
                         "definition": {
-                            "title": "Top SELinux Users Role Change Operations by Users",
+                            "title": "Top Role Assignment Operations by Users",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2542,7 +2545,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:linux-audit-logs service:linux-audit-logs @type:ROLE_ASSIGN $Host $User-Name -@msg.op:(\"seuser-sename,role,range\" OR \"seuser-role,range\")"
+                                                "query": "source:linux-audit-logs service:linux-audit-logs @type:ROLE_ASSIGN $Host $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2764,9 +2767,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 59,
                 "width": 12,
-                "height": 1
+                "height": 19
             }
         },
         {
@@ -2835,7 +2838,7 @@
                     {
                         "id": 1472036453444928,
                         "definition": {
-                            "title": "Failed User Role Removals",
+                            "title": "Failed Role Removals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2889,9 +2892,10 @@
                     {
                         "id": 1287282711581060,
                         "definition": {
-                            "title": "Top Users Removing SELinux Roles by Result",
+                            "title": "Top Users with Most Role Removal by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3039,9 +3043,10 @@
                     {
                         "id": 3350281438675200,
                         "definition": {
-                            "title": "Top SELinux Users with Most Role Removals by Result",
+                            "title": "Top SELinux Role Removal by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3272,9 +3277,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 78,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -3413,9 +3418,10 @@
                     {
                         "id": 6628211421634068,
                         "definition": {
-                            "title": "Top Users Modifying SELinux Roles by Result",
+                            "title": "Top Users Modifying Roles by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3493,9 +3499,10 @@
                     {
                         "id": 6140379858564092,
                         "definition": {
-                            "title": "Top Hostnames Modifying SELinux Roles by Result",
+                            "title": "Top Hostnames Modifying Role by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3573,9 +3580,10 @@
                     {
                         "id": 2128185497838946,
                         "definition": {
-                            "title": "Top IPs Modifying SELinux Roles by Result",
+                            "title": "Top IPs Modifying Roles by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3710,9 +3718,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 94,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -4069,7 +4077,7 @@
                     {
                         "id": 3268901126864250,
                         "definition": {
-                            "title": "Audit Configurations Chnages Log Details",
+                            "title": "Audit Configurations Changes Log Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -4126,9 +4134,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 106,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -4622,9 +4630,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 122,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -5036,9 +5044,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 138,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -5521,9 +5529,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 154,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -6018,9 +6026,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 170,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -6365,9 +6373,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 186,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -6435,9 +6443,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 17,
+                "y": 198,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
@@ -7053,9 +7061,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 203,
                 "width": 12,
-                "height": 1
+                "height": 17
             }
         }
     ],

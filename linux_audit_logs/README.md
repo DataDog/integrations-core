@@ -56,7 +56,7 @@ For Linux, run:
     sudo systemctl status auditd
     ```
 
-### Configure the Audit Daemon (`auditd`)
+#### Configure the Audit Daemon (`auditd`)
 
 1. Give the `dd-agent` user read permissions after rotation of audit log files:
     ```shell
@@ -94,7 +94,7 @@ The Linux Audit Logs integration does not include any metrics.
 
 3. Add this configuration block to your `linux_audit_logs.d/conf.yaml` file to start collecting Linux audit logs.
 
-   See the [sample linux_audit_logs.d/conf.yaml][7] for available configuration option.
+   See the [sample linux_audit_logs.d/conf.yaml][7] for available configuration options.
 
    ```yaml
    logs:
