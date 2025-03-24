@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.3.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+
+***Fixed***:
+
+* Gracefully handle unavailable apps and their aspects. Before we would throw an exception as soon as we encountered an error, which deprived us of a lot of available metrics. ([#19750](https://github.com/DataDog/integrations-core/pull/19750))
+
 ## 6.2.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
