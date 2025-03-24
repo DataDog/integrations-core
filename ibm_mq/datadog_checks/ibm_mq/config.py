@@ -100,10 +100,13 @@ class IBMMQConfig:
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
+        self.use_qm_tz_for_metrics = is_affirmative(instance.get('use_qm_tz_for_metrics', False))  # type: bool
 
         # Initialize timezone handling
+        # - If use_qm_tz_for_metrics is True and a non-UTC timezone is provided, use that timezone object
+        # - Otherwise, use UTC (either string or object) to maintain backward compatibility
         try:
-            if self.qm_timezone != 'UTC':
+            if self.qm_timezone != 'UTC' and self.use_qm_tz_for_metrics:
                 self.qm_stats_tz = tz.gettz(self.qm_timezone)
                 if self.qm_stats_tz is None:
                     raise ValueError(f"'{self.qm_timezone}' is not a recognized timezone.")
@@ -116,7 +119,7 @@ class IBMMQConfig:
                 e,
             )
             self.qm_stats_tz = tz.UTC
-            self.qm_timezone = 'UTC'  # Ensure string version matches object version
+            self.qm_timezone = 'UTC'
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [
