@@ -67,16 +67,16 @@ pipeline:
           "PodVolumeRestore", "worker count": 1}'
       grok:
         supportRules: |-
-          time time=%{date("\"yyyy-MM-DD'T'HH:mm:ss'Z'\""):timestamp}
+          time time=%{date("\"yyyy-MM-dd'T'HH:mm:ss'Z'\""):timestamp}
           level level=%{word:level}
           msg msg=%{regex("\"?(?:[^\\\"]|\\\")*\"(?= [A-Za-su-z]+=)"):msg} 
           component %{regex(".*(?=\\t)"):component}\s
         matchRules: >-
           main_rule %{time} %{level} %{data::keyvalue("="," \",:*/")}
 
-          node_agent_startup %{date("yyyy-MM-DD'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{regex(".*(?=\\t)"):operation}\s%{data:json}
+          node_agent_startup %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{regex(".*(?=\\t)"):operation}\s%{data:json}
 
-          node_agent_no_json %{date("yyyy-MM-DD'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{data:operation}
+          node_agent_no_json %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{data:operation}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
