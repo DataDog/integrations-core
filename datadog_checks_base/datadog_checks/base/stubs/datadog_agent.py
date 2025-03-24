@@ -29,7 +29,7 @@ class DatadogAgentStub(object):
         self._sent_telemetry = defaultdict(list)
 
     def get_default_config(self):
-        return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
+        return {'enable_metadata_collection': True}
 
     def reset(self):
         self._sent_logs.clear()
