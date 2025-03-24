@@ -281,7 +281,7 @@ def test_queue_manager_process_direct_ssl(instance):
         pytest.param(
             'America/New_York',
             'America/New_York',
-            tz.UTC,
+            tz.UTC,  # When use_qm_tz_for_metrics is False, always use UTC
             None,
             False,
             id='valid-timezone-string',
