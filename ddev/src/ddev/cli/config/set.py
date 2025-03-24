@@ -7,6 +7,7 @@ from typing import Any, cast
 import click
 
 from ddev.cli.application import Application
+from ddev.config.file import deep_merge_with_list_handling
 from ddev.config.model import ConfigurationError, RootConfig
 from ddev.utils.fs import Path
 
@@ -22,7 +23,7 @@ def validate_final_config(app: Application, local: bool, config: dict[str, Any])
     # If we are setting values on the local file, we need to merge with the global file
     # for validation
     if local:
-        config = cast(RootConfig, app.config_file.combined_model).raw_data | config
+        config = deep_merge_with_list_handling(cast(RootConfig, app.config_file.combined_model).raw_data, config)
     try:
         RootConfig(config).parse_fields()
     except ConfigurationError as e:

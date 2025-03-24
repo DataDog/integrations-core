@@ -19,6 +19,10 @@ def create_toml_document(config: dict) -> TOMLDocument:
     return tomlkit.item(config)
 
 
+def load_toml_data(path: Path) -> dict:
+    return tomlkit.loads(path.read_text())
+
+
 def scrub_config(config: dict):
     if 'token' in config.get('github', {}):
         config['github']['token'] = SCRUBBED_VALUE
