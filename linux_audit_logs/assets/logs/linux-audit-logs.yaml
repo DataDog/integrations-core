@@ -89,15 +89,14 @@ pipeline:
           operation="signal" class="signal" profile="/usr/sbin/nginx" pid=87437
           comm="start-stop-daem" requested_mask="receive" denied_mask="receive"
           signal=exists peer="unconfined"'
-        - "type=USER_AUTH msg=audit(1742208279.692:9814): pid=41848 uid=0
-          auid=1002 ses=913 subj=unconfined msg='op=PAM:authentication
-          grantors=pam_rootok acct=\"root\" exe=\"/usr/bin/su\" hostname=?
-          addr=? terminal=/dev/pts/1 res=success'\x1dUID=\"root\"
-          AUID=\"devuser\""
+        - "type=AVC msg=audit(1740736244.131:855): apparmor=\"DENIED\"
+          operation=\"open\" class=\"file\" profile=\"/root/sample2.sh\"
+          name=\"/etc/group\" pid=2895 comm=\"ls\" requested_mask=\"r\"
+          denied_mask=\"r\" fsuid=0 ouid=0\x1dFSUID=\"a\" OUID=\"root\""
       grok:
         supportRules: >-
-          extract_UID_or_OUID
-          (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}")
+          extract_UID_or_OUID_or_FSUID
+          (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}")
 
           extract_AUID AUID="%{regex("[^\"]*"):AUID}"
 
@@ -106,10 +105,76 @@ pipeline:
           _space %{regex("(\\s)*"):}
         matchRules: >-
           common_rule
-          %{log_prefix}%{_space}%{data::keyvalue("=",":?/,")}%{_space}(msg='%{data:msg:keyvalue("=",":?/,
-          ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID}|%{extract_AUID}%{_space}%{extract_UID_or_OUID}|%{extract_UID_or_OUID}%{_space}%{extract_AUID})%{data::keyvalue("=",":?/,")}
+          %{log_prefix}%{_space}%{data::keyvalue("=",":?/\"|*<>,")}%{_space}(msg='%{data:msg:keyvalue("=",":?/\"|*<>,
+          ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID_or_FSUID
+          }|%{extract_AUID}%{_space}%{extract_UID_or_OUID_or_FSUID
+          }|%{extract_UID_or_OUID_or_FSUID
+          }%{_space}%{extract_AUID})%{data::keyvalue("=",":?/\"|*<>,")}
 
-          rule_without_AUID_UID %{log_prefix}%{_space}(avc:%{_space}%{notSpace:outcome:uppercase}%{_space}\{%{_space}%{notSpace:operation}%{_space}\} for )?%{data::keyvalue("=",":?/,")}
+          rule_without_AUID_UID %{log_prefix}%{_space}(avc:%{_space}%{notSpace:outcome:uppercase}%{_space}\{%{_space}%{notSpace:operation}%{_space}\} for )?%{data::keyvalue("=",":?/\"|*<>,")}
+    - type: pipeline
+      name: Parsing User Selinux Err logs
+      enabled: true
+      filter:
+        query: "@type:USER_SELINUX_ERR"
+      processors:
+        - type: grok-parser
+          name: Parsing User Selinux Err logs
+          enabled: true
+          source: message
+          samples:
+            - "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0
+              auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0
+              msg='Regex version mismatch, expected: 10.37 2021-05-26 actual:
+              10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0
+              hostname=? addr=? terminal=?'\x1dUID=\"root\" AUID=\"unset\"
+              SAUID=\"root\""
+          grok:
+            supportRules: >-
+              extract_UID_or_OUID
+              (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}")
+
+              extract_AUID AUID="%{regex("[^\"]*"):AUID}"
+
+              log_prefix type=%{notSpace:type} msg=audit\(%{regex("[^:]*"):timestamp}:%{integer}\):
+
+              _space %{regex("(\\s)*"):}
+            matchRules: user_selinux_err_rule
+              %{log_prefix}%{_space}%{data::keyvalue("=",":?/\"|*<>,")}%{_space}(msg='(%{regex(".*(?=
+              exe)"):error})?%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,
+              ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID}|%{extract_AUID}%{_space}%{extract_UID_or_OUID}|%{extract_UID_or_OUID}%{_space}%{extract_AUID})%{data::keyvalue("=",":?/\"|*<>,")}
+    - type: pipeline
+      name: Parsing User Role Change  logs
+      enabled: true
+      filter:
+        query: "@type:USER_ROLE_CHANGE"
+      processors:
+        - type: grok-parser
+          name: Parsing User Role Change logs
+          enabled: true
+          source: message
+          samples:
+            - "type=USER_ROLE_CHANGE msg=audit(1741000050.325:2606): pid=60958
+              uid=0 auid=1001 ses=64
+              subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='pam:
+              default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c\
+              1023
+              selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.\
+              c1023 exe=\"/usr/sbin/sshd\" hostname=172.20.4.65 addr=172.20.4.65
+              terminal=ssh res=success'\x1dUID=\"root\" AUID=\"devuser\""
+          grok:
+            supportRules: >-
+              extract_UID_or_OUID
+              (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}")
+
+              extract_AUID AUID="%{regex("[^\"]*"):AUID}"
+
+              log_prefix type=%{notSpace:type} msg=audit\(%{regex("[^:]*"):timestamp}:%{integer}\):
+
+              _space %{regex("(\\s)*"):}
+            matchRules: user_role_change_rule
+              %{log_prefix}%{_space}%{data::keyvalue("=",":?/\"|*<>,")}%{_space}(msg='(%{regex("[^:]*"):})?:%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,
+              ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID}|%{extract_AUID}%{_space}%{extract_UID_or_OUID}|%{extract_UID_or_OUID}%{_space}%{extract_AUID})%{data::keyvalue("=",":?/\"|*<>,")}
     - type: grok-parser
       name: Convert `msg.grantors` attribute to array
       enabled: true
@@ -198,10 +263,11 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `uid` to `usr.id`
+      name: Map `uid`, `ouid` to `usr.id`
       enabled: true
       sources:
         - uid
+        - ouid
       sourceType: attribute
       target: usr.id
       targetType: attribute
@@ -236,6 +302,16 @@ pipeline:
             - apparmor
           sourceType: attribute
           target: outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `error` to `linux_audit_logs.error`
+          enabled: true
+          sources:
+            - error
+          sourceType: attribute
+          target: linux_audit_logs.error
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
