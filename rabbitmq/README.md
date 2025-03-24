@@ -10,7 +10,7 @@ This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 - Track node-based stats: waiting processes, used sockets, used file descriptors, and more.
 - Monitor vhosts for aliveness and number of connections.
 
-To get more out of your RabbitMQ integration, including visualizing your pipelines and tracking lag through the pipeline to root out bottlenecks, consider [Data Streams Monitoring][24].
+Consider [Data Streams Monitoring][24] to enhance your RabbitMQ integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
 ## Setup
 

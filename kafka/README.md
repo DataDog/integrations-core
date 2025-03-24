@@ -12,7 +12,7 @@ View Kafka broker metrics collected for a 360-view of the health and performance
 If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 - To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
-To get more out of your Kafka integration, including visualizing your pipelines and tracking lag through the pipeline to root out bottlenecks, consider [Data Streams Monitoring][24].
+Consider [Data Streams Monitoring][24] to enhance your Kafka integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
 ## Setup
 

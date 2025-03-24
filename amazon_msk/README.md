@@ -6,7 +6,7 @@ Amazon Managed Streaming for Apache Kafka (MSK) is a fully managed service that 
 
 You can collect metrics from this integration in two ways-with the [Datadog Agent](#setup) or with a [Crawler][18] that collects metrics from CloudWatch. 
 
-To get more out of your MSK integration, including visualizing your pipelines and tracking lag through the pipeline to root out bottlenecks, consider [Data Streams Monitoring][20].
+Consider [Data Streams Monitoring][20] to enhance your MSK integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
 ## Setup
 

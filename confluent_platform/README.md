@@ -14,7 +14,7 @@ This integration collects JMX metrics for the following components:
 - Streams
 - REST Proxy
 
-To get more out of your Confluent Platform integration, including visualizing your pipelines and tracking lag through the pipeline to root out bottlenecks, consider [Data Streams Monitoring][11].
+Consider [Data Streams Monitoring][11] to enhance your Confluent Platform integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
 ## Setup
 
