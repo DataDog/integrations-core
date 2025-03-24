@@ -240,12 +240,13 @@
                             "title": "Linux Audit Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:linux-audit-logs service:linux-audit-logs @type:USER_MAC_CONFIG_CHANGE $Host $User-Name",
+                                        "query_string": "source:linux-audit-logs service:linux-audit-logs $Host $User-Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -264,14 +265,6 @@
                                         },
                                         {
                                             "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "@usr.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "msg.res",
                                             "width": "auto"
                                         },
                                         {
@@ -2119,9 +2112,10 @@
                     {
                         "id": 234787565544632,
                         "definition": {
-                            "title": "MAC Policy Load  Log Details",
+                            "title": "MAC Policy Load Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2304,7 +2298,6 @@
                             "title": "Top Users with Most Role Assignment by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2455,7 +2448,6 @@
                             "title": "Top SELinux Role Assigned by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2536,7 +2528,6 @@
                             "title": "Top Role Assignment Operations by Users",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2895,7 +2886,6 @@
                             "title": "Top Users with Most Role Removal by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3046,7 +3036,6 @@
                             "title": "Top SELinux Role Removal by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3421,7 +3410,6 @@
                             "title": "Top Users Modifying Roles by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3502,7 +3490,6 @@
                             "title": "Top Hostnames Modifying Role by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -3583,7 +3570,6 @@
                             "title": "Top IPs Modifying Roles by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -4503,7 +4489,7 @@
                     {
                         "id": 92505689091756,
                         "definition": {
-                            "title": "Daemon Abort Events by Operation over Time",
+                            "title": "Daemon Abort Logs by Operation over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -4515,6 +4501,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -6760,9 +6747,10 @@
                     {
                         "id": 6232078745167378,
                         "definition": {
-                            "title": "Top Users Deleting  Groups by Result",
+                            "title": "Top Users Deleting Groups by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -6910,9 +6898,10 @@
                     {
                         "id": 3132014002644206,
                         "definition": {
-                            "title": "Top Users Deleting  existing Users by Result",
+                            "title": "Top Users Deleting existing Users by Result",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {

@@ -58,7 +58,7 @@ For Linux, run:
 
 #### Configure the Audit Daemon (`auditd`)
 
-1. Give the `dd-agent` user read permissions after rotation of audit log files:
+1. Give the `dd-agent` user read permission for rotated audit log files:
     ```shell
     sudo grep -q "^log_group=" /etc/audit/auditd.conf && sudo sed -i 's/^log_group=.*/log_group=dd-agent/' /etc/audit/auditd.conf || echo "log_group=dd-agent" | sudo tee -a /etc/audit/auditd.conf
     ```
