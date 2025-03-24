@@ -289,24 +289,25 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 8
+                "height": 1
             }
         },
         {
-            "id": 3656303563365718,
+            "id": 1347246703597736,
             "definition": {
                 "title": "Datadog Cloud SIEM",
+                "title_align": "center",
                 "background_color": "vivid_orange",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 5619546793017352,
+                        "id": 6192496274810238,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes logs to detect real-time threats happening in your Linux machine. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
-                            "background_color": "blue",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates Linux audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
@@ -323,25 +324,26 @@
                         }
                     },
                     {
-                        "id": 5570445235694034,
+                        "id": 6531001559119166,
                         "definition": {
                             "title": "CRITICALs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#630702",
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "default_zero(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -356,7 +358,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:critical $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:critical"
                                             }
                                         }
                                     ],
@@ -364,7 +366,6 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -375,25 +376,26 @@
                         }
                     },
                     {
-                        "id": 797906237002728,
+                        "id": 5130127546803114,
                         "definition": {
-                            "title": "MEDIUMs",
+                            "title": "HIGHs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#c83c3c",
-                                            "palette": "white_on_yellow",
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
                                             "value": 0
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "default_zero(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -408,7 +410,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:medium $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:high"
                                             }
                                         }
                                     ],
@@ -416,8 +418,10 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
                         },
                         "layout": {
                             "x": 2,
@@ -427,16 +431,17 @@
                         }
                     },
                     {
-                        "id": 1625439662723060,
+                        "id": 6250565335893012,
                         "definition": {
                             "title": "Critical Security Signals",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
-                                            "custom_bg_color": "#630702",
+                                            "custom_bg_color": "#bc303c",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
@@ -454,7 +459,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@workflow.rule.name",
-                                                    "limit": 25,
+                                                    "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -462,7 +467,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:critical $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:critical"
                                             }
                                         }
                                     ],
@@ -473,7 +478,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 25,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -482,12 +487,6 @@
                                             }
                                         ]
                                     }
-                                }
-                            ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
                                 }
                             ],
                             "style": {}
@@ -500,25 +499,26 @@
                         }
                     },
                     {
-                        "id": 3536180105153382,
+                        "id": 5700433613623494,
                         "definition": {
-                            "title": "HIGHs",
+                            "title": "MEDIUMs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#d33043",
-                                            "palette": "white_on_red",
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
                                             "value": 0
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "default_zero(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -533,7 +533,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:high $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:medium"
                                             }
                                         }
                                     ],
@@ -541,7 +541,6 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -552,25 +551,26 @@
                         }
                     },
                     {
-                        "id": 834907672827650,
+                        "id": 3148785793837270,
                         "definition": {
-                            "title": "INFOs",
+                            "title": "LOWs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#c9e5ff",
+                                            "comparator": ">",
+                                            "custom_bg_color": "#ffb52b",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "default_zero(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -585,7 +585,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:info $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:low"
                                             }
                                         }
                                     ],
@@ -593,7 +593,6 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -604,25 +603,26 @@
                         }
                     },
                     {
-                        "id": 2099576813511618,
+                        "id": 3739497637124294,
                         "definition": {
-                            "title": "LOWs",
+                            "title": "INFOs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#bc303c",
-                                            "palette": "black_on_light_yellow",
+                                            "comparator": ">",
+                                            "custom_bg_color": "#84c1e0",
+                                            "palette": "custom_bg",
                                             "value": 0
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "default_zero(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -637,7 +637,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:low $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:info"
                                             }
                                         }
                                     ],
@@ -645,7 +645,6 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -656,17 +655,18 @@
                         }
                     },
                     {
-                        "id": 4546333130626396,
+                        "id": 703117422456860,
                         "definition": {
                             "title": "High Security Signals",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">=",
+                                            "comparator": ">",
                                             "custom_bg_color": "#d33043",
-                                            "palette": "white_on_red",
+                                            "palette": "custom_bg",
                                             "value": 0
                                         }
                                     ],
@@ -683,7 +683,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@workflow.rule.name",
-                                                    "limit": 25,
+                                                    "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -691,7 +691,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:high $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:high"
                                             }
                                         }
                                     ],
@@ -702,7 +702,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 25,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -711,12 +711,6 @@
                                             }
                                         ]
                                     }
-                                }
-                            ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
                                 }
                             ],
                             "style": {}
@@ -729,16 +723,17 @@
                         }
                     },
                     {
-                        "id": 7119501471579024,
+                        "id": 3853751832874468,
                         "definition": {
                             "title": "Medium Security Signals",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
-                                            "custom_bg_color": "#f99d02",
+                                            "custom_bg_color": "#e5a21c",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
@@ -756,7 +751,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@workflow.rule.name",
-                                                    "limit": 25,
+                                                    "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -764,7 +759,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:medium $Host $User-Name"
+                                                "query": "source:linux-audit-logs status:medium"
                                             }
                                         }
                                     ],
@@ -775,7 +770,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 25,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -784,12 +779,6 @@
                                             }
                                         ]
                                     }
-                                }
-                            ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
                                 }
                             ],
                             "style": {}
@@ -805,7 +794,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 4,
                 "width": 12,
                 "height": 10
             }
@@ -1385,9 +1374,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 14,
                 "width": 12,
-                "height": 15
+                "height": 1
             }
         },
         {
@@ -1744,9 +1733,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 36,
+                "y": 15,
                 "width": 12,
-                "height": 12
+                "height": 1
             }
         },
         {
@@ -2170,9 +2159,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 48,
+                "y": 16,
                 "width": 12,
-                "height": 11
+                "height": 1
             }
         },
         {
@@ -2758,9 +2747,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 59,
+                "y": 17,
                 "width": 12,
-                "height": 19
+                "height": 1
             }
         },
         {
@@ -3266,9 +3255,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 78,
+                "y": 18,
                 "width": 12,
-                "height": 16
+                "height": 1
             }
         },
         {
@@ -3704,9 +3693,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 94,
+                "y": 19,
                 "width": 12,
-                "height": 12
+                "height": 1
             }
         },
         {
@@ -4120,9 +4109,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 106,
+                "y": 20,
                 "width": 12,
-                "height": 16
+                "height": 1
             }
         },
         {
@@ -4617,9 +4606,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 122,
+                "y": 21,
                 "width": 12,
-                "height": 16
+                "height": 1
             }
         },
         {
@@ -5031,9 +5020,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 138,
+                "y": 22,
                 "width": 12,
-                "height": 16
+                "height": 1
             }
         },
         {
@@ -5516,9 +5505,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 154,
+                "y": 23,
                 "width": 12,
-                "height": 16
+                "height": 1
             }
         },
         {
@@ -6013,9 +6002,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 170,
+                "y": 24,
                 "width": 12,
-                "height": 16
+                "height": 1
             }
         },
         {
@@ -6360,9 +6349,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 186,
+                "y": 25,
                 "width": 12,
-                "height": 12
+                "height": 1
             }
         },
         {
@@ -6430,9 +6419,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 198,
+                "y": 26,
                 "width": 12,
-                "height": 5
+                "height": 1
             }
         },
         {
@@ -7050,9 +7039,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 203,
+                "y": 27,
                 "width": 12,
-                "height": 17
+                "height": 1
             }
         }
     ],
