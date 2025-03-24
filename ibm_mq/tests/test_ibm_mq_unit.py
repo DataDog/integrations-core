@@ -281,7 +281,7 @@ def test_queue_manager_process_direct_ssl(instance):
         pytest.param(
             'America/New_York',
             'America/New_York',
-            tz.gettz('America/New_York'),
+            tz.UTC,
             None,
             False,
             id='valid-timezone-string',
@@ -290,7 +290,7 @@ def test_queue_manager_process_direct_ssl(instance):
             'America/New_York', 'America/New_York', tz.gettz('America/New_York'), None, True, id='valid-timezone-object'
         ),
         pytest.param(
-            'Europe/London', 'Europe/London', tz.gettz('Europe/London'), None, False, id='another-valid-timezone-string'
+            'Europe/London', 'Europe/London', tz.UTC, None, False, id='another-valid-timezone-string'
         ),
         pytest.param(
             'Europe/London', 'Europe/London', tz.gettz('Europe/London'), None, True, id='another-valid-timezone-object'
