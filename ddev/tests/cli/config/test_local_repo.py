@@ -7,6 +7,7 @@ from ddev.utils.toml import load_toml_data
 
 def test_create_new_local_config(ddev, config_file, helpers):
     result = ddev('config', 'local-repo')
+    local_path = str(config_file.local_path.parent).replace('\\', '\\\\')
 
     expected_output = helpers.dedent(
         f"""
@@ -15,7 +16,7 @@ def test_create_new_local_config(ddev, config_file, helpers):
         repo = "local"
 
         [repos]
-        local = "{config_file.local_path.parent}"
+        local = "{local_path}"
         """
     )
 
@@ -44,6 +45,7 @@ def test_update_existing_local_config(ddev, config_file, helpers):
     config_file.local_path.write_text(existing_config)
 
     result = ddev('config', 'local-repo')
+    local_path = str(config_file.local_path.parent).replace('\\', '\\\\')
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
@@ -57,7 +59,7 @@ def test_update_existing_local_config(ddev, config_file, helpers):
         api_key = "*****"
 
         [repos]
-        local = "{config_file.local_path.parent}"
+        local = "{local_path}"
         """
     )
 
