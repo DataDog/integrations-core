@@ -245,7 +245,7 @@ class ConfigFileWithOverrides:
         self.global_path.ensure_parent_dir_exists()
         self.global_path.write_atomic(content, "w", encoding="utf-8")
 
-        if with_local:
+        if self.local_model is not UNINITIALIZED:
             self.local_path.write_atomic(tomli_w.dumps(self.local_model.raw_data), "w", encoding="utf-8")
 
     def reset(self):
