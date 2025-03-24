@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 22.0.0 / 2025-03-19
+
+***Changed***:
+
+* Optimize sqlserver index usage stats query ([#19807](https://github.com/DataDog/integrations-core/pull/19807))
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Collect SQL Server foreign key delete & update actions. ([#19796](https://github.com/DataDog/integrations-core/pull/19796))
+
+***Fixed***:
+
+* Bump base check dependency to use new assert method functionality. ([#19763](https://github.com/DataDog/integrations-core/pull/19763))
+* Fix a bug where `tempdb` is wrongly excluded from database files metrics due to all instances inherited from `SqlserverDatabaseMetricsBase` share the same reference of auto-discovered databases. ([#19803](https://github.com/DataDog/integrations-core/pull/19803))
+
+## 21.2.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Add support for collecting raw query statements and explain plans when `collect_raw_query_statement.enabled` is true. ([#19421](https://github.com/DataDog/integrations-core/pull/19421))
+* Add `raw_signature` to raw query plan event payload. ([#19495](https://github.com/DataDog/integrations-core/pull/19495))
+* Add deadlock support for Azure DB ([#19577](https://github.com/DataDog/integrations-core/pull/19577))
+* Add SQLServer ServerName and InstanceName to tags ([#19600](https://github.com/DataDog/integrations-core/pull/19600))
+
 ## 21.1.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:

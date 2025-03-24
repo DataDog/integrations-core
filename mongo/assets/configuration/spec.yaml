@@ -213,6 +213,19 @@ files:
           value:
             type: number
             example: 10
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+            Use 'executionStats' to collect the execution details of the winning plan.
+            Use 'allPlansExecution' to include partial execution data captured during plan selection.
+            To disable explain plans completely, set this option to 'disabled'.
+
+            NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+            as it requires the execution of the query to collect additional execution and plan data.
+          value:
+            type: string
+            example: queryPlanner
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
       options:
@@ -235,6 +248,19 @@ files:
           value:
             type: number
             example: 1000
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+            Use 'executionStats' to collect the execution details of the winning plan.
+            Use 'allPlansExecution' to include partial execution data captured during plan selection.
+            To disable explain plans completely, set this option to 'disabled'.
+
+            NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+            as it requires the execution of the query to collect additional execution and plan data.
+          value:
+            type: string
+            example: queryPlanner
     - name: schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       options:
@@ -362,14 +388,14 @@ files:
             Only applicable when `collection` is added to `additional_metrics`.
           value:
             type: integer
-            example: 15
+            example: 300
         - name: collections_indexes_stats
           description: |
             The interval in seconds at which to collect collection indexes stats metrics.
             Only applicable when `collections_indexes_stats` is set to `true`.
           value:
             type: integer
-            example: 15
+            example: 300
         - name: sharded_data_distribution
           description: |
             The interval in seconds at which to collect sharded data distribution metrics.
@@ -377,6 +403,18 @@ files:
           value:
             type: integer
             example: 300
+        - name: db_stats
+          description: |
+            The interval in seconds at which to collect db stats metrics.
+          value:
+            type: integer
+            example: 15
+        - name: session_stats
+          description: |
+            The interval in seconds at which to collect session stats metrics.
+          value:
+            type: integer
+            example: 15
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
@@ -401,6 +439,15 @@ files:
       value:
         type: boolean
         example: false
+    - name: system_database_stats
+      description: |
+        Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+        (`admin`, `local`, and `config`).
+        By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+        Set to `false` to disable collection of stats for all system databases.
+      value:
+        type: boolean
+        example: true
     - name: add_node_tag_to_events
       description: |
         Adds the Mongo node to events as a tag rather than creating a seperate host for the event.

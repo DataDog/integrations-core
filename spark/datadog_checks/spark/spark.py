@@ -395,14 +395,19 @@ class SparkCheck(AgentCheck):
     def _describe_app(self, property, running_apps, addl_tags):
         """
         Get payloads that describe certain property of the running apps.
-
-        Examples of "aspects":
+        Examples of properties:
         - the app's jobs
         - the app's spark stages
         """
         for app_id, (app_name, tracking_url) in running_apps.items():
             base_url = self._get_request_url(tracking_url)
-            response = self._rest_request(base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, property)
+            try:
+                response = self._rest_request(
+                    base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, property
+                )
+            except HTTPError:
+                self.log.debug("Got an error collecting %s", property, exc_info=True)
+                continue
             try:
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
             except JSONDecodeError:
@@ -489,13 +494,9 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each application streaming statistics.
         """
-        try:
-            for stats, app_tags in self._describe_app('streaming/statistics', running_apps, addl_tags):
-                self.log.debug('streaming/statistics: %s', stats)
-                self._set_metrics_from_json(app_tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
-        except HTTPError as e:
-            self.log.debug("Got an error collecting streaming/statistics", e, exc_info=True)
-            pass
+        for stats, app_tags in self._describe_app('streaming/statistics', running_apps, addl_tags):
+            self.log.debug('streaming/statistics: %s', stats)
+            self._set_metrics_from_json(app_tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
 
     def _spark_structured_streams_metrics(self, running_apps, addl_tags):
         """

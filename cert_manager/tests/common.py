@@ -6,6 +6,7 @@ from datadog_checks.base.stubs import aggregator
 CERT_METRICS = {
     'cert_manager.certificate.ready_status': aggregator.GAUGE,
     'cert_manager.certificate.expiration_timestamp': aggregator.GAUGE,
+    'cert_manager.certificate.renewal_timestamp': aggregator.GAUGE,
 }
 
 ACME_METRICS = {

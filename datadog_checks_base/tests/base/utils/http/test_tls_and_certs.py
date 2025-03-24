@@ -76,10 +76,10 @@ class TestIgnoreTLSWarning:
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
         for _, level, message in caplog.record_tuples:
-            if level == logging.WARNING and message == expected_message:
+            if level == logging.DEBUG and message == expected_message:
                 break
         else:
-            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
     def test_default_no_ignore_http(self, caplog):
         instance = {}
@@ -113,10 +113,10 @@ class TestIgnoreTLSWarning:
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
         for _, level, message in caplog.record_tuples:
-            if level == logging.WARNING and message == expected_message:
+            if level == logging.DEBUG and message == expected_message:
                 break
         else:
-            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
     def test_ignore_session(self, caplog):
         instance = {'tls_ignore_warning': True, 'persist_connections': True}
@@ -152,10 +152,10 @@ class TestIgnoreTLSWarning:
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
         for _, level, message in caplog.record_tuples:
-            if level == logging.WARNING and message == expected_message:
+            if level == logging.DEBUG and message == expected_message:
                 break
         else:
-            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
     def test_instance_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
@@ -179,10 +179,10 @@ class TestIgnoreTLSWarning:
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
         for _, level, message in caplog.record_tuples:
-            if level == logging.WARNING and message == expected_message:
+            if level == logging.DEBUG and message == expected_message:
                 break
         else:
-            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
 
 class TestAIAChasing:

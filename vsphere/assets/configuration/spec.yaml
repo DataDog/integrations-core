@@ -148,6 +148,7 @@ files:
                   resources do not have realtime metrics
           Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
                   historical metrics
+          Note3: If no filters are set for a resource type, all resources of that resource type are collected.
 
         value:
           example:

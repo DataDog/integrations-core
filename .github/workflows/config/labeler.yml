@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bitdefender:
+- bitdefender/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
@@ -125,6 +127,8 @@ integration/cisco_secure_endpoint:
 - cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
+integration/cisco_secure_web_appliance:
+- cisco_secure_web_appliance/**/*
 integration/cisco_umbrella_dns:
 - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
@@ -207,6 +211,8 @@ integration/external_dns:
 - external_dns/**/*
 integration/extrahop:
 - extrahop/**/*
+integration/falco:
+- falco/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
@@ -241,6 +247,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/gpu:
+- gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
 integration/gunicorn:
@@ -287,16 +295,18 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
-integration/intercom:
-- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
+integration/infiniband:
+- infiniband/**/*
+integration/intercom:
+- intercom/**/*
 integration/istio:
 - istio/**/*
-integration/ivanti_nzta:
-- ivanti_nzta/**/*
 integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
+integration/ivanti_nzta:
+- ivanti_nzta/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -455,10 +465,10 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
-integration/plivo:
-- plivo/**/*
 integration/plaid:
 - plaid/**/*
+integration/plivo:
+- plivo/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
@@ -509,6 +519,8 @@ integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
+integration/silverstripe_cms:
+- silverstripe_cms/**/*
 integration/singlestore:
 - singlestore/**/*
 integration/slurm:
@@ -545,6 +557,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonatype_nexus:
+- sonatype_nexus/**/*
 integration/sonicwall_firewall:
 - sonicwall_firewall/**/*
 integration/sophos_central_cloud:
@@ -633,6 +647,8 @@ integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/velero:
+- velero/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:

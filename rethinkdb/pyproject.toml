@@ -54,7 +54,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/rethinkdb",
+    "/datadog_checks",
 ]
 dev-mode-dirs = [
     ".",

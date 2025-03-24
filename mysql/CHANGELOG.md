@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 14.7.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Collect MySQL foreign key delete_rule and update_rule from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS.
+  Note: On MariaDB 10.5+, REFERENCES privilege is required to access this information. ([#19797](https://github.com/DataDog/integrations-core/pull/19797))
+
+## 14.6.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Update mysql schema data model ([#19472](https://github.com/DataDog/integrations-core/pull/19472))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
 ## 14.5.1 / 2025-02-13 / Agent 7.63.0
 
 ***Fixed***:
