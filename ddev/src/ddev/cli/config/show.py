@@ -10,7 +10,12 @@ from ddev.cli.application import Application
 @click.option('--all', '-a', 'all_keys', is_flag=True, help='Do not scrub secret fields')
 @click.pass_obj
 def show(app: Application, all_keys: bool):
-    """Show the contents of the config file."""
+    """
+    Show the current configuration values for ddev.
+
+    If a `.ddev.toml` file exists in the current working directory, each configuration line will
+    show whether it was read from the global or local configuration file.
+    """
     if not app.config_file.global_path.is_file():  # no cov
         app.display_critical('No config file found! Please try `ddev config restore`.')
     else:
