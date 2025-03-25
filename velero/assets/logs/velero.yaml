@@ -65,8 +65,9 @@ pipeline:
         supportRules: |-
           time %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):timestamp}
           level level=%{word:level}
+          msg_string (?:\\.|[^\"\\])*
         matchRules: >-
-          main_rule time="%{time}" %{level} %{data::keyvalue("="," \",:*/")}
+          main_rule time="%{time}" %{level} msg="%{msg_string:msg}" %{data::keyvalue("="," \",:*/")}
 
           node_agent_rule %{time}\s%{word:level}\s(controller-runtime.metrics\t)?%{regex("[^\\t]+"):operation}(\s%{data:json})?
 
