@@ -135,7 +135,7 @@ class SqlserverMetadata(DBMAsyncJob):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 settings_rows = self._load_settings_rows(cursor)
                 event = {
-                    "host": self._check.resolved_hostname,
+                    "host": self._check.reported_hostname,
                     "agent_version": datadog_agent.get_version(),
                     "dbms": "sqlserver",
                     "kind": "sqlserver_configs",

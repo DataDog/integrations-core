@@ -120,6 +120,7 @@ class PostgreSql(AgentCheck):
         self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
+        self.add_core_tags()
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
@@ -169,9 +170,14 @@ class PostgreSql(AgentCheck):
         )
         return discovery
 
-    def set_resource_tags(self):
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
+    def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -196,10 +202,11 @@ class PostgreSql(AgentCheck):
                 self.tags.append(
                     "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
                 )
-        # finally, emit a `database_instance` resource for this instance
+        # finally, tag the `database_instance` resource for this instance
+        # metrics intake will use this tag to add all the tags for the instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 
@@ -209,7 +216,7 @@ class PostgreSql(AgentCheck):
             self,
             queries=queries,
             tags=self.tags_without_db,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=True,
         )
 
@@ -400,7 +407,7 @@ class PostgreSql(AgentCheck):
                 "wal_age",
                 wal_file_age,
                 tags=self.tags_without_db,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
             )
 
     def _get_local_wal_file_age(self):
@@ -455,6 +462,13 @@ class PostgreSql(AgentCheck):
         return self.is_aurora
 
     @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.empty_default_hostname:
+            return None
+        return self.resolved_hostname
+
+    @property
     def resolved_hostname(self):
         # type: () -> str
         if self._resolved_hostname is None:
@@ -463,6 +477,15 @@ class PostgreSql(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        # type: () -> str
+        config_identifier = self._config.database_identifier.get('identifier')
+        if config_identifier:
+            return config_identifier
+        include_port = self._config.database_identifier.get('include_port', False)
+        return "{}{}".format(self.resolved_hostname, "." + str(self._config.port) if include_port else "")
 
     def set_resolved_hostname_metadata(self):
         """
@@ -610,7 +633,7 @@ class PostgreSql(AgentCheck):
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
-                submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
+                submit_metric(self, name, value, tags=set(tags), hostname=self.reported_hostname)
 
                 # if relation-level metrics idx_scan or seq_scan, cache it
                 if name in ('index_scans', 'seq_scans'):
@@ -657,7 +680,7 @@ class PostgreSql(AgentCheck):
             f"dd.postgres.{scope_type}.time",
             elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             raw=True,
         )
         telemetry_metric = scope_type.replace("_", "", 1)  # remove the first underscore to match telemetry convention
@@ -687,7 +710,7 @@ class PostgreSql(AgentCheck):
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _emit_running_metric(self):
-        self.gauge("running", 1, tags=self.tags_without_db, hostname=self.resolved_hostname)
+        self.gauge("running", 1, tags=self.tags_without_db, hostname=self.reported_hostname)
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -747,7 +770,7 @@ class PostgreSql(AgentCheck):
                         "db.count",
                         results_len,
                         tags=self.tags_without_db,
-                        hostname=self.resolved_hostname,
+                        hostname=self.reported_hostname,
                     )
 
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -764,7 +787,7 @@ class PostgreSql(AgentCheck):
                         "checksums.enabled",
                         1,
                         tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
-                        hostname=self.resolved_hostname,
+                        hostname=self.reported_hostname,
                     )
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
@@ -888,7 +911,7 @@ class PostgreSql(AgentCheck):
                 "dd.postgres.error",
                 1,
                 tags=self.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
 
@@ -922,10 +945,11 @@ class PostgreSql(AgentCheck):
             self.warning(warning)
 
     def _send_database_instance_metadata(self):
-        if self.resolved_hostname not in self._database_instance_emitted:
+        if self.database_identifier not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
                 "port": self._config.port,
+                "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
@@ -941,7 +965,7 @@ class PostgreSql(AgentCheck):
                     "connection_host": self._config.host,
                 },
             }
-            self._database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def debug_stats_kwargs(self, tags=None):
@@ -1006,7 +1030,7 @@ class PostgreSql(AgentCheck):
                 AgentCheck.CRITICAL,
                 tags=tags,
                 message=message,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
             raise e
@@ -1015,7 +1039,7 @@ class PostgreSql(AgentCheck):
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=tags,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
         finally:

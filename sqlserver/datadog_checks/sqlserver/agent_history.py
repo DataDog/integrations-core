@@ -158,7 +158,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
     def _create_agent_jobs_history_event(self, history_rows):
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "agent_jobs",

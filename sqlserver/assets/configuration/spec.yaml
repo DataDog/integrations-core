@@ -71,6 +71,33 @@ files:
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
       value:
         type: string
+    - name: database_identifier
+      description: Controls how the database is identified. The default value is the hostname for the instance, which
+        respects the `reported_hostname` option.
+      options:
+        - name: include_port
+          value: boolean
+          description: |
+            Set to `true` to include the port in the database identifier. For example, for a server with host
+            `sqlserver.mycompany.com` and port `1433` will be identified as `sqlserver.mycompany.com:1433`.
+            
+            Use this option if runnining multiple instances on one host differentiated by ports. If both `include_port`
+            and `include_instance` are set to true the port will come first. If the instance name in the above example
+            is `users` then the database identifier will be `sqlserver.mycompany.com:1433\users`.
+          default: false
+        - name: include_instance
+          value: boolean
+          description: |
+            Set to `true` to include the instance name in the database identifier. For example, for a server with host
+            `sqlserver.mycompany.com` and instance name `users` will be identified as `sqlserver.mycompany.com\users`.
+            
+            Use this option if runnining multiple instances on one host and port differentiated by database instance.
+          default: false
+        - name: identifier
+          value: string
+          description: |
+            Override the default database identifier. Use this only for backwards compatibility with previous
+            usage of reported_hostname.
     - name: database_autodiscovery
       description: |
         Auto-discover and monitor databases. Supported for the metrics check.
@@ -707,6 +734,8 @@ files:
           description: |
             Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
             Only applicable when `deployment_type` is set to `sql_database`.
+
+            Deprecated.
           value:
             type: boolean
             example: false

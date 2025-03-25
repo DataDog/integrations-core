@@ -434,7 +434,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",
