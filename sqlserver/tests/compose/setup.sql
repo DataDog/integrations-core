@@ -99,6 +99,13 @@ GO
 CREATE DATABASE datadog_test_collation
     COLLATE Latin1_General_100_BIN2;
 GO
+CREATE TABLE datadog_test_collation.dbo.ϑings (id int DEFAULT 0, name varchar(255));
+INSERT INTO datadog_test_collation.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
+CREATE CLUSTERED INDEX thingsindex ON datadog_test_collation.dbo.ϑings (name);
+GO
+
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
