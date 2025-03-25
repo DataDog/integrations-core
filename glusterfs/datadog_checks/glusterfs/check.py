@@ -17,10 +17,11 @@ from datadog_checks.base.config import is_affirmative
 
 from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
+from .glusterlib.cluster import Cluster
+
+
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
-
-GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
 
 
 class GlusterfsCheck(AgentCheck):
@@ -34,54 +35,10 @@ class GlusterfsCheck(AgentCheck):
         # type: (str, Dict, List[Dict]) -> None
         super(GlusterfsCheck, self).__init__(name, init_config, instances)
         self._tags = self.instance.get('tags', [])
-
-        # Check if customer set gstatus path
-        if init_config.get('gstatus_path'):
-            self.gstatus_cmd = init_config.get('gstatus_path')
-        else:
-            if os.path.exists(GSTATUS_PATH):
-                self.gstatus_cmd = GSTATUS_PATH
-            else:
-                raise ConfigurationError(
-                    'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
-                )
-        self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
-    def get_gstatus_output(self, cmd):
-
-        res = subprocess.run(cmd.split(), capture_output=True, text=True)
-        return res.stdout, res.stderr, res.returncode
-
     def check(self, _):
-        if self.use_sudo:
-            cmd = f'sudo -ln {self.gstatus_cmd}'
-            stdout, stderr, returncode = self.get_gstatus_output(cmd)
-            if returncode != 0 or not stdout:
-                raise Exception('The dd-agent user does not have sudo access: {!r}'.format(stderr or stdout))
-            gluster_cmd = f'sudo {self.gstatus_cmd}'
-        else:
-            gluster_cmd = self.gstatus_cmd
-        # Ensures units are universally the same by specifying the --units flag
-        gluster_cmd += ' -a -o json -u g'
-        self.log.debug("gstatus command: %s", gluster_cmd)
-        try:
-            # In testing I saw that even though we request the json, sometimes there's a line that appears at the top
-            # and thus will break the json loading. A line like:
-            # 'Note: Unable to get self-heal status for one or more volumes \n'
-            stdout, stderr, returncode = self.get_gstatus_output(gluster_cmd)
-            if stdout.lstrip().startswith('{'):
-                json_data = stdout
-            else:
-                json_data = stdout.split('\n', 1)[-1]
-            gstatus = json.loads(json_data)
-        except JSONDecodeError as e:
-            self.log.warning("Unable to decode gstatus output: %s", str(e))
-            raise
-        except Exception as e:
-            self.log.warning("Encountered error trying to collect gluster status: %s", str(e))
-            raise
-
+        gstatus = json.loads(self.get_gstatus_data())
         if 'data' in gstatus:
             data = gstatus['data']
             self.submit_metrics(data, 'cluster', CLUSTER_STATS, self._tags)
@@ -103,7 +60,6 @@ class GlusterfsCheck(AgentCheck):
                     self.service_check(
                         self.CLUSTER_SC, AgentCheck.WARNING, tags=self._tags, message="Cluster status is %s" % status
                     )
-
         else:
             self.log.warning("No data from gstatus: %s", gstatus)
 
@@ -204,3 +160,39 @@ class GlusterfsCheck(AgentCheck):
             self.service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
         else:
             self.service_check(sc_name, AgentCheck.UNKNOWN, tags=tags, message=msg)
+
+
+    def get_gstatus_data(self):
+        options = type('', (), {})()
+        options.volumes = False
+        options.alldata = True
+        options.brickinfo = False
+        options.displayquota = False
+        options.displaysnap = False
+        options.units = "g"
+        options.output_mode = "json"
+
+        cluster = Cluster(options, None)
+        # check_version(cluster)
+        cluster.gather_data()
+
+        return self.return_json(cluster)
+
+    def return_json(self, data):
+        from datetime import datetime
+
+        # Build the cluster data for json
+        gstatus = {}
+        gstatus['cluster_status']  = data.cluster_status
+        gstatus['glfs_version']    = data.glusterfs_version
+        gstatus['node_count']      = data.nodes
+        gstatus['nodes_active']    = data.nodes_reachable
+        gstatus['volume_count']    = data.volume_count
+        gstatus['volumes_started'] = data.volumes_started
+        if data.volume_count:
+            gstatus['volume_summary'] = data.volume_data
+
+        return json.dumps({
+            "last_updated": str(datetime.now()),
+            "data": gstatus
+        })
