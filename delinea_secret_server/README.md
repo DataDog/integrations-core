@@ -42,7 +42,7 @@ Linux command:
          service: delinea-secret-server
       ```
 
-      For available configuration options, see the [sample delinea_secret_server.d/conf.yaml][7] . Choose the appropriate protocol (either TCP or UDP) based on your Delinea Secret Server syslog forwarding configuration.
+      For available configuration options, see the [sample delinea_secret_server.d/conf.yaml][7]. Choose the appropriate protocol (either TCP or UDP) based on your Delinea Secret Server syslog forwarding configuration.
 
       **Note**: Do not change the service and source values, as these parameters are integral to the pipeline's operation.
 
