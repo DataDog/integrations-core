@@ -59,9 +59,8 @@ tests:
   sample: "2025-03-18T10:32:54Z\tINFO\tcontroller-runtime.metrics\tStarting metrics server"
   result:
     custom:
-      json: "Starting metrics server"
       level: "INFO"
-      operation: "controller-runtime.metrics"
+      operation: "Starting metrics server"
       timestamp: 1742293974000
     message: "2025-03-18T10:32:54Z\tINFO\tcontroller-runtime.metrics\tStarting metrics server"
     status: "info"
