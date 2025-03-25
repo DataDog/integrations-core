@@ -68,7 +68,7 @@ pipeline:
         matchRules: >-
           main_rule time="%{time}" %{level} %{data::keyvalue("="," \",:*/")}
 
-          node_agent_rule %{time}\s%{word:level}\s(controller-runtime.metrics\t)?%{regex("[^\\t]+"):operation}\s%{data:json}
+          node_agent_rule %{time}\s%{word:level}\s(controller-runtime.metrics\t)?%{regex("[^\\t]+"):operation}(\s%{data:json})?
 
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
