@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.6.0 / 2025-03-25
+
+***Added***:
+
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798))
+
 ## 8.5.1 / 2025-03-12
 
 ***Fixed***:
