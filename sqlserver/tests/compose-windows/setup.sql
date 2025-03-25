@@ -106,6 +106,11 @@ CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON datadog_test_schemas_second.dbo.ϑings (name);
 GO
 
+-- Create an alternate collation database to test handling of case sensitivity
+CREATE DATABASE datadog_test_collation
+    COLLATE Latin1_General_100_BIN2;
+GO
+
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 -- the datadog user has only connect access but can't read any objects
