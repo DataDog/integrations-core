@@ -65,7 +65,6 @@ pipeline:
         supportRules: |-
           time time=%{date("\"yyyy-MM-dd'T'HH:mm:ss'Z'\""):timestamp}
           level level=%{word:level}
-          msg msg=%{regex("\"?(?:[^\\\"]|\\\")*\"(?= [A-Za-su-z]+=)"):msg} 
           component %{regex(".*(?=\\t)"):component}\s
         matchRules: >-
           main_rule %{time} %{level} %{data::keyvalue("="," \",:*/")}
