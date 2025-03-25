@@ -63,15 +63,13 @@ pipeline:
           "PodVolumeRestore", "worker count": 1}'
       grok:
         supportRules: |-
-          time time=%{date("\"yyyy-MM-dd'T'HH:mm:ss'Z'\""):timestamp}
+          time %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):timestamp}
           level level=%{word:level}
-          component %{regex(".*(?=\\t)"):component}\s
         matchRules: >-
-          main_rule %{time} %{level} %{data::keyvalue("="," \",:*/")}
+          main_rule time="%{time}" %{level} %{data::keyvalue("="," \",:*/")}
 
-          node_agent_startup %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{regex(".*(?=\\t)"):operation}\s%{data:json}
+          node_agent_rule %{time}\s%{word:level}\s(controller-runtime.metrics\t)?%{regex("[^\\t]+"):operation}\s%{data:json}
 
-          node_agent_no_json %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):timestamp}\s%{word:level}\s(%{component})?%{data:operation}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
