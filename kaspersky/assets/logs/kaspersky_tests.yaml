@@ -1,12 +1,189 @@
 id: kaspersky
 tests:
+  - sample: >
+      {
+          "timestamp": "2025-02-28T12:05:19.536Z",
+          "host": "test.edrlab.local",
+          "service": "kaspersky",
+          "message": "Event type: The application established a connection to a website with an untrusted certificate\\r\nComponent: Protection\\r\nServer address: outlookmobile-office365-tas.msedge.net\\r\nName: HxTsr.exe\\r\nApplication path: C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.22301.0_x64__8wekyb3d8bbwe\\r\nProcess ID: 12492\\r\nCertificate verification status: The certificate chain is incomplete.",
+          "hdn": "test",
+          "etdn": "The application established a connection to a website with an untrusted certificate",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 2,
+              "hostname": "test.edrlab.local",
+              "appname": "KES|11.0.0.0",
+              "msgid": "00000039",
+              "prival": 10,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-02-28T12:05:30.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "10.10.10.10",
+          "et": "00000039",
+          "tdn": "Protection"
+      }
+    result: null
+  - sample: >-
+      {
+          "timestamp": "2025-02-19T09:16:21.178Z",
+          "host": "test.edrlab.local",
+          "service": "kaspersky",
+          "message": "Event type: Self-Defense restricted access to the protected resource\\r\nName: WmiPrvSE.exe\\r\nApplication path: C:\\Windows\\System32\\wbem\\r\nProcess ID: 6436\\r\nFunction: Opening process\\r\nObject: C:\\Program Files (x86)\\Kaspersky Lab\\NetworkAgent\\klnagent.exe\\r\nUser: NT AUTHORITY\\SYSTEM (Not defined)\\r\nComponent: Protection",
+          "hdn": "test",
+          "etdn": "Self-Defense restricted access to the protected resource",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 6,
+              "hostname": "test.edrlab.local",
+              "appname": "KES|11.0.0.0",
+              "msgid": "000000d5",
+              "prival": 14,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-02-19T09:16:36.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "10.10.10.10",
+          "et": "000000d5",
+          "tdn": "Protection"
+      }
+    result: null
+  - sample: >-
+      {
+          "timestamp": "2025-02-28T09:06:26.246Z",
+          "host": "kaspersky.edrlab.local",
+          "service": "kaspersky",
+          "message": "New device \"test\" has been detected (Windows domain \"EDRLAB\").",
+          "p1": "test",
+          "p2": "EDRLAB",
+          "hdn": "KASPERSKY",
+          "etdn": "New device has been detected.",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 6,
+              "hostname": "kaspersky.edrlab.local",
+              "appname": "1093|1.0.0.0",
+              "msgid": "KLSRV_EVENT_HOSTS_NEW_DETECTED",
+              "prival": 14,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-02-28T09:06:56.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "127.0.0.1",
+          "et": "KLSRV_EVENT_HOSTS_NEW_DETECTED"
+      }
+    result: null
+  - sample: |-
+      {
+          "timestamp": "2025-02-17T13:04:50.919Z",
+          "host": "kaspersky.edrlab.local",
+          "service": "kaspersky",
+          "message": "Device \"test\" has not been visible for 7 day(s).",
+          "p1": "test",
+          "p2": "7",
+          "hdn": "KASPERSKY",
+          "etdn": "Inactive device.",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 4,
+              "hostname": "kaspersky.edrlab.local",
+              "appname": "1093|1.0.0.0",
+              "msgid": "KLSRV_EVENT_HOSTS_NOT_VISIBLE",
+              "prival": 12,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-02-17T13:05:03.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "127.0.0.1",
+          "et": "KLSRV_EVENT_HOSTS_NOT_VISIBLE"
+      }
+    result: null
+  - sample: >-
+      {
+          "timestamp": "2025-03-03T09:29:51.673Z",
+          "host": "kaspersky.edrlab.local",
+          "service": "kaspersky",
+          "message": "Status of device 'test' has changed to Critical: Databases are outdated.",
+          "p1": "Status of device 'test' has changed to Critical: Databases are outdated.",
+          "hdn": "KASPERSKY",
+          "etdn": "Device status is Critical.",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 2,
+              "hostname": "kaspersky.edrlab.local",
+              "appname": "1093|1.0.0.0",
+              "msgid": "KLSRV_HOST_STATUS_CRITICAL",
+              "prival": 10,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-03-03T09:30:10.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "127.0.0.1",
+          "et": "KLSRV_HOST_STATUS_CRITICAL"
+      }
+    result: null
+  - sample: >-
+      {
+          "timestamp": "2025-03-03T09:32:51.764Z",
+          "host": "test.edrlab.local",
+          "service": "kaspersky",
+          "message": "Event type: Task cannot be performed\\r\nName: avp.exe\\r\nApplication path: C:\\Program Files (x86)\\Kaspersky Lab\\KES.12.5.0\\r\nUser: EDRLAB\\test (Active user)\\r\nComponent: Adaptive Anomaly Control\\r\nResult description: Task cannot be started\\r\nObject type: Subsystem\\r\nObject name: Adaptive Anomaly Control\\r\nReason: eERROR\\r\nError: Component not supported by license",
+          "hdn": "test",
+          "etdn": "Task cannot be performed",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 3,
+              "hostname": "test.edrlab.local",
+              "appname": "KES|11.0.0.0",
+              "msgid": "000000d4",
+              "prival": 11,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-03-03T09:33:12.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "10.10.10.10",
+          "et": "000000d4",
+          "tdn": "Adaptive Anomaly Control"
+      }
+    result: null
+  - sample: >-
+      {
+          "timestamp": "2025-02-19T09:32:23.559Z",
+          "host": "test.edrlab.local",
+          "service": "kaspersky",
+          "message": "Event type: Application placed in the trusted group\\r\nName: makecab.exe\\r\nApplication path: C:\\Windows\\System32\\r\nProcess ID: 9992\\r\nUser: NT AUTHORITY\\SYSTEM (System user)\\r\nComponent: Host Intrusion Prevention\\r\nPrecision: Low\\r\nObject type: Group of applications\\r\nObject name: KLAppTrusted\\r\nReason: KSN",
+          "hdn": "test",
+          "etdn": "Application placed in the trusted group",
+          "gn": "Managed devices",
+          "syslog": {
+              "severity": 6,
+              "hostname": "test.edrlab.local",
+              "appname": "KES|11.0.0.0",
+              "msgid": "00000191",
+              "prival": 14,
+              "facility": 1,
+              "version": 1,
+              "timestamp": "2025-02-19T09:32:49.000Z"
+          },
+          "kscfqdn": "kaspersky.edrlab.local",
+          "hip": "10.10.10.10",
+          "et": "00000191",
+          "tdn": "Host Intrusion Prevention"
+      }
+    result: null
   - sample: >-
       {
           "timestamp": "2025-03-25T07:44:08.267Z",
           "host": "kaspersky.edrlab.local",
           "service": "kaspersky_1",
-          "message": "New device \"CREST\" has been detected (Windows domain \"EDRLAB\").",
-          "p1": "CREST",
+          "message": "New device \"test\" has been detected (Windows domain \"EDRLAB\").",
+          "p1": "test",
           "p2": "EDRLAB",
           "hdn": "Kaspersky_test",
           "etdn": "New device has been detected.",
