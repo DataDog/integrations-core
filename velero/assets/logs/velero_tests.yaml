@@ -19,9 +19,10 @@ tests:
   result:
     custom:
       level: "warning"
+      logSource: "\"pkg/controller/restore_controller.go:611"
       restore: "velero/nginx-backup-20250303114623"
       timestamp: 1740998787000
-    message: "\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap"  # TODO: parse this better
+    message: "Namespace nginx-example, resource restore warning: could not restore, ConfigMap \\\"kube-root-ca.crt\\\" already exists. Warning: the in-cluster version is different than the backed-up version"
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
