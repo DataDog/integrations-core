@@ -21,7 +21,7 @@ tests:
       level: "warning"
       restore: "velero/nginx-backup-20250303114623"
       timestamp: 1740998787000
-    message: "\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap"
+    message: "\"Namespace nginx-example, resource restore warning: could not restore, ConfigMap"  # TODO: parse this better
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
