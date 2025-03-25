@@ -18,6 +18,7 @@ from ddev.cli.docs import docs
 from ddev.cli.env import env
 from ddev.cli.meta import meta
 from ddev.cli.release import release
+from ddev.cli.size import size
 from ddev.cli.status import status
 from ddev.cli.test import test
 from ddev.cli.validate import validate
@@ -25,7 +26,6 @@ from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
-from ddev.cli.size import size
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
