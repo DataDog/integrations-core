@@ -1,1 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+celery.flower.events.total,count,,event,,Number of Celery events,0,celery,,false,
+celery.flower.events.created,gauge,,event,,Number of Celery events created,0,celery,,false,
+celery.flower.task.runtime.seconds,histogram,,second,,Task runtime duration,0,celery,,false,
+celery.flower.task.runtime.created,gauge,,second,,Task runtime creation timestamp,0,celery,,false,
+celery.flower.task.prefetch_time.seconds,gauge,,second,,Time tasks spend waiting at worker before execution,0,celery,,false,
+celery.flower.worker.prefetched_tasks,gauge,,task,,Number of tasks prefetched at a worker,0,celery,,false,
+celery.flower.worker.online,gauge,,,,"Worker online status (1 for online, 0 for offline)",1,celery,,false,
+celery.flower.worker.executing_tasks,gauge,,task,,Number of tasks currently executing at a worker,0,celery,,false,

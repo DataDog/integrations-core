@@ -8,11 +8,10 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
-    "title": "celery",
+    "description": "",
+    "title": "Celery",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",   
       "Category::Log Collection",
       "Category::Message Queues",
       "Offering::Integration",
@@ -26,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 41308776,
-      "source_type_name": "celery",
+      "source_type_name": "Celery",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -34,7 +33,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "celery.",
+        "prefix": "celery.flower.",
         "check": "",
         "metadata_path": "metadata.csv"
       },
