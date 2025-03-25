@@ -34,6 +34,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverServerStateMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
 )
+from datadog_checks.sqlserver.utils import Database
 
 from .common import (
     CHECK_NAME,
@@ -1491,3 +1492,35 @@ def test_sqlserver_database_metrics_defaults(
             databases=AUTODISCOVERY_DBS,
         )
         assert database_metrics.enabled == enabled
+
+
+@pytest.mark.unit
+def test_sqlserver_database_metrics_init(
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {
+            'enabled': True,
+            'enabled_tempdb': False,
+        },
+    }
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check.databases = {Database(db) for db in AUTODISCOVERY_DBS + ['tempdb']}
+    assert sqlserver_check.database_metrics is not None
+
+    index_usage_metrics = [
+        metric for metric in sqlserver_check.database_metrics if isinstance(metric, SqlserverIndexUsageMetrics)
+    ]
+    assert len(index_usage_metrics) == 1
+    assert index_usage_metrics[0].enabled is True
+    assert 'tempdb' not in index_usage_metrics[0].databases
+
+    database_file_metrics = [
+        metric for metric in sqlserver_check.database_metrics if isinstance(metric, SqlserverDatabaseFilesMetrics)
+    ]
+    assert len(database_file_metrics) == 1
+    assert database_file_metrics[0].enabled is True
+    assert 'tempdb' in database_file_metrics[0].databases

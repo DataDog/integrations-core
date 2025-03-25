@@ -302,6 +302,10 @@ coverage:
         target: 75
         flags:
         - impala
+      Infiniband:
+        target: 75
+        flags:
+        - infiniband
       Istio:
         target: 75
         flags:
@@ -566,6 +570,10 @@ coverage:
         target: 75
         flags:
         - silk
+      Silverstripe_CMS:
+        target: 75
+        flags:
+        - silverstripe_cms
       SingleStore:
         target: 75
         flags:
@@ -582,6 +590,10 @@ coverage:
         target: 75
         flags:
         - sonarqube
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       Spark:
         target: 75
         flags:
@@ -674,6 +686,10 @@ coverage:
         target: 75
         flags:
         - vault
+      Velero:
+        target: 75
+        flags:
+        - velero
       Vertica:
         target: 75
         flags:
@@ -1142,6 +1158,11 @@ flags:
     paths:
     - impala/datadog_checks/impala
     - impala/tests
+  infiniband:
+    carryforward: true
+    paths:
+    - infiniband/datadog_checks/infiniband
+    - infiniband/tests
   istio:
     carryforward: true
     paths:
@@ -1467,6 +1488,11 @@ flags:
     paths:
     - silk/datadog_checks/silk
     - silk/tests
+  silverstripe_cms:
+    carryforward: true
+    paths:
+    - silverstripe_cms/datadog_checks/silverstripe_cms
+    - silverstripe_cms/tests
   singlestore:
     carryforward: true
     paths:
@@ -1492,6 +1518,11 @@ flags:
     paths:
     - sonarqube/datadog_checks/sonarqube
     - sonarqube/tests
+  sonatype_nexus:
+    carryforward: true
+    paths:
+    - sonatype_nexus/datadog_checks/sonatype_nexus
+    - sonatype_nexus/tests
   spark:
     carryforward: true
     paths:
@@ -1622,6 +1653,11 @@ flags:
     paths:
     - vault/datadog_checks/vault
     - vault/tests
+  velero:
+    carryforward: true
+    paths:
+    - velero/datadog_checks/velero
+    - velero/tests
   vertica:
     carryforward: true
     paths:
