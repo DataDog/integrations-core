@@ -1,0 +1,65 @@
+id: kaspersky
+tests:
+  - sample: |-
+      Event type: Application placed in the trusted group\r
+      Name: makecab.exe\r
+      Application path: C:\Windows\System32\r
+      Process ID: 9992\r
+      User: NT AUTHORITY\SYSTEM (System user)\r
+      Component: Host Intrusion Prevention\r
+      Precision: Low\r
+      Object type: Group of applications\r
+      Object name: KLAppTrusted\r
+      Reason: KSN
+    result: null
+  - sample: |-
+      Event type: Task cannot be performed\r
+      Name: avp.exe\r
+      Application path: C:\Program Files (x86)\Kaspersky Lab\KES.12.5.0\r
+      User: EDRLAB\test (Active user)\r
+      Component: Mail Threat Protection\r
+      Result description: Task cannot be started\r
+      Object type: Subsystem\r
+      Object name: Mail Threat Protection\r
+      Reason: eERROR\r
+      Error: License is missing test
+    result: null
+  - sample: "Status of device 'test' has changed to Critical: Databases are outdated."
+    result: null
+  - sample: Device "test" has not been visible for 7 day(s).
+    result: null
+  - sample: New device "test" has been detected (Windows domain "EDRLAB").
+    result: null
+  - sample: >-
+      Event type: Self-Defense restricted access to the protected resource\r
+
+      Name: WmiPrvSE.exe\r
+
+      Application path: C:\Windows\System32\wbem\r
+
+      Process ID: 6436\r
+
+      Function: Opening process\r
+
+      Object: C:\\Program Files (x86)\\Kaspersky Lab\\NetworkAgent\\klnagent.exe\r
+
+      User: NT AUTHORITY\\SYSTEM (Not defined)\r
+
+      Component: Protection
+    result: null
+  - sample: >-
+      Event type: The application established a connection to a website with an
+      untrusted certificate\r
+
+      Component: Protection\r
+
+      Server address: outlookmobile-office365-tas.msedge.net\r
+
+      Name: HxTsr.exe\r
+
+      Application path: C:\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_16005.14326.22301.0_x64__8wekyb3d8bbwe\r
+
+      Process ID: 12492\r
+
+      Certificate verification status: The certificate chain is incomplete
+    result: null
