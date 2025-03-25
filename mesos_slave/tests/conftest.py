@@ -14,6 +14,7 @@ from .utils import read_fixture
 
 ########### !!! THIS INTEGRATION IS NO LONGER TESTED IN CI !!! #############
 
+
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
