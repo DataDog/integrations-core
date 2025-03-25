@@ -29,6 +29,14 @@ def mock_output(filename):
         return f.read().strip()
 
 
+"""
+These expected values below are really strict and are hardcoded. I opted for this approach because this whole check
+relies on the output and proper parsing of each field. I believe that the most accurate way was to ensure we know
+exactly what is being parsed out and what is being submitted to the agent.
+
+If the fixtures are ever updated, then these expected results below will need to be updated as well.
+"""
+
 SINFO_MAP = {
     'metrics': [
         {
@@ -1210,6 +1218,59 @@ SSHARE_MAP = {
                 'slurm_group_tres_mins:null',
                 'slurm_tres_run_mins:cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0',
                 'slurm_user:root',
+            ],
+        },
+    ]
+}
+
+SCONTROL_MAP = {
+    # PID      JOBID    STEPID   LOCALID GLOBALID
+    # 3771     14       batch    0       0
+    # 3772     14       batch    -       -
+    'metrics': [
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3771",
+                "slurm_global_id:0",
+                "slurm_job_id:14",
+                "slurm_local_id:0",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
+            ],
+        },
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3772",
+                "slurm_global_id:-",
+                "slurm_job_id:14",
+                "slurm_local_id:-",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
+            ],
+        },
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3773",
+                "slurm_global_id:0",
+                "slurm_job_id:15",
+                "slurm_local_id:0",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job2",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
             ],
         },
     ]

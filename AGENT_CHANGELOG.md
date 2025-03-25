@@ -1,3 +1,7 @@
+## Datadog Agent version [7.64.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7641)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.64.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7640)
 
 * Amazon Kafka [6.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
