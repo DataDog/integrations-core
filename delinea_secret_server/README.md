@@ -90,8 +90,6 @@ The Delinea Secret Server integration does not include any service checks.
 
 ## Troubleshooting
 
-### Delinea Secret Server
-
 ### Permission denied while port binding
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
