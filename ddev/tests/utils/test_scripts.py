@@ -9,7 +9,7 @@ def test_non_deprecated_integrations(monkeypatch, repository):
     """
     Test that non-deprecated integrations are included in the CI matrix.
     """
-    monkeypatch.setattr(ddev.utils.scripts.ci_matrix, "DEPRECATED_INTEGRATIONS", {})
+    monkeypatch.setattr(ddev.utils.scripts.ci_matrix, "UNTESTABLE_INTEGRATIONS", {})
     assert "tls" in get_all_targets(repository.path)
 
 
@@ -17,5 +17,5 @@ def test_deprecated_integrations(monkeypatch, repository):
     """
     Test that deprecated integrations are not included in the CI matrix.
     """
-    monkeypatch.setattr(ddev.utils.scripts.ci_matrix, "DEPRECATED_INTEGRATIONS", {"tls"})
+    monkeypatch.setattr(ddev.utils.scripts.ci_matrix, "UNTESTABLE_INTEGRATIONS", {"tls"})
     assert "tls" not in get_all_targets(repository.path)
