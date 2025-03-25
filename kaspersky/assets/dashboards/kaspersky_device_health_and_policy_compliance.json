@@ -1,6 +1,6 @@
 {
-    "title": "Kaspersky - Device Health and Policy Compliance Insight",
-    "description": "Kaspersky Device Health and Policy Compliance Insight dashboard provides comprehensive insights into device health and policy compliance related events generated from Kaspersky platform.",
+    "title": "Kaspersky - Device Health and Policy Compliance",
+    "description": "Kaspersky Device Health and Policy Compliance dashboard provides comprehensive insights into device health and policy compliance related events generated from Kaspersky platform.",
     "widgets": [
         {
             "id": 7345856142626192,
@@ -26,7 +26,7 @@
             "id": 8289108106357790,
             "definition": {
                 "type": "note",
-                "content": "**[Kaspersky](https://www.kaspersky.co.in/)** EDR is a cybersecurity solution that detects, analyzes, and responds to advanced threats across multiple endpoints, blocking attacks, extracting threat patterns, and preventing future incidents.\n\n**Kaspersky Device Health and Policy Compliance Insight** \ndashboard provides comprehensive insights into device health and policy compliance related events generated from Kaspersky platform.\n\nFor more information, see the [Kaspersky Integration Documentation](https://docs.datadoghq.com/integrations/kaspersky/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Kaspersky](https://www.kaspersky.co.in/)** is a cybersecurity solution that detects, analyzes, and responds to advanced threats across multiple endpoints, blocking attacks, extracting threat patterns, and preventing future incidents.\n\n**Kaspersky Device Health and Policy Compliance** \ndashboard provides comprehensive insights into device health and policy compliance related events generated from Kaspersky platform.\n\nFor more information, see the [Kaspersky Integration Documentation](https://docs.datadoghq.com/integrations/kaspersky/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -144,7 +144,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@device_name",
-                                                    "limit": 15,
+                                                    "limit": 25,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -176,7 +176,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 150,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -224,7 +224,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@managed_device_name",
-                                                    "limit": 1000,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -234,7 +234,7 @@
                                                 },
                                                 {
                                                     "facet": "@reason",
-                                                    "limit": 10,
+                                                    "limit": 25,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -271,7 +271,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 10000,
+                                        "count": 6250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -284,14 +284,14 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "# Events",
-                                            "formula": "query1",
                                             "conditional_formats": [
                                                 {
                                                     "comparator": ">=",
                                                     "value": 0,
                                                     "palette": "yellow_on_white"
                                                 }
-                                            ]
+                                            ],
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -327,7 +327,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@managed_device_name",
-                                                    "limit": 1000,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -337,7 +337,7 @@
                                                 },
                                                 {
                                                     "facet": "@reason",
-                                                    "limit": 10,
+                                                    "limit": 25,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -374,7 +374,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 10000,
+                                        "count": 6250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -387,14 +387,14 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "# Events",
-                                            "formula": "query1",
                                             "conditional_formats": [
                                                 {
                                                     "comparator": ">=",
                                                     "value": 0,
                                                     "palette": "yellow_on_white"
                                                 }
-                                            ]
+                                            ],
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -430,7 +430,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@managed_device_name",
-                                                    "limit": 10,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -458,7 +458,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -471,14 +471,14 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "# Events",
-                                            "formula": "query1",
                                             "conditional_formats": [
                                                 {
                                                     "comparator": ">=",
                                                     "value": 0,
                                                     "palette": "green_on_white"
                                                 }
-                                            ]
+                                            ],
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -514,7 +514,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@managed_device_name",
-                                                    "limit": 1000,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -543,7 +543,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 1000,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -693,7 +693,7 @@
             "id": 5223019595537282,
             "definition": {
                 "title": "Policy Compliance Events Overview",
-                "background_color": "vivid_purple",
+                "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -720,7 +720,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@device_name",
-                                                    "limit": 1000,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -748,7 +748,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 1000,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -797,7 +797,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@usr.name",
-                                                    "limit": 1000,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -825,7 +825,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 1000,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -874,7 +874,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@application_name",
-                                                    "limit": 1000,
+                                                    "limit": 500,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -884,7 +884,7 @@
                                                 },
                                                 {
                                                     "facet": "@application_path",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -921,7 +921,7 @@
                                         ]
                                     ],
                                     "sort": {
-                                        "count": 10000,
+                                        "count": 7500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1089,7 +1089,7 @@
             "id": 8149031985594638,
             "definition": {
                 "title": "System Error Events Overview",
-                "background_color": "vivid_pink",
+                "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1223,7 +1223,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "status:error $Managed_Device_Name $Device_Name"
+                                                "query": "source:kaspersky status:error $Managed_Device_Name $Device_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1387,7 +1387,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "status:error $Managed_Device_Name $Device_Name"
+                                                "query": "source:kaspersky status:error $Managed_Device_Name $Device_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1518,6 +1518,24 @@
                                                 },
                                                 "palette": "white_on_red"
                                             }
+                                        ],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is_not",
+                                                    "value": "*"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is_not",
+                                                    "value": "*"
+                                                },
+                                                "palette": "black_on_light_red"
+                                            }
                                         ]
                                     ],
                                     "sort": {
@@ -1539,7 +1557,7 @@
                                                 {
                                                     "comparator": ">=",
                                                     "value": 0,
-                                                    "palette": "white_on_red"
+                                                    "palette": "red_on_white"
                                                 }
                                             ]
                                         }
@@ -1567,9 +1585,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "query_string": "source:kaspersky status:error @event_type:KLSRV_RUNTIME_ERROR $Managed_Device_Name $Device_Name",
-                                        "indexes": [
-                                            "*"
-                                        ],
+                                        "indexes": [],
                                         "storage": "hot"
                                     },
                                     "columns": [

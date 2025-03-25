@@ -540,10 +540,10 @@ pipeline:
           grok:
             supportRules: extract_field_rule %{regex("([^\\r\\n]+)"):}
             matchRules: "parsing_rule Event type: %{extract_field_rule}\\\\r\\nComponent:
-              %{extract_field_rule:component}\\\\r\\nServer
-              address:%{extract_field_rule:server_address}\\\\r\\nName:%{extrac\
-              t_field_rule:application_name}\\\\r\\nApplication
-              path:%{extract_field_rule:applicaiton_path}\\\\r\\nProcess ID:
+              %{extract_field_rule:component}\\\\r\\nServer address:
+              %{extract_field_rule:server_address}\\\\r\\nName:
+              %{extract_field_rule:application_name}\\\\r\\nApplication path:
+              %{extract_field_rule:applicaiton_path}\\\\r\\nProcess ID:
               %{extract_field_rule:process_id}\\\\r\\nCertificate verification
               status: %{data:certificate_verification_status}"
     - type: geo-ip-parser

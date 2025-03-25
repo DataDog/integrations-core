@@ -26,7 +26,7 @@
             "id": 2432602057672718,
             "definition": {
                 "type": "note",
-                "content": "**[Kaspersky](https://www.kaspersky.co.in/)** EDR is a cybersecurity solution that detects, analyzes, and responds to advanced threats across multiple endpoints, blocking attacks, extracting threat patterns, and preventing future incidents.\n\n**Kaspersky Overview** dashboard provides insight into the overall events generated from Kaspersky platform.\n\nFor more information, see the [Kaspersky Integration Documentation](https://docs.datadoghq.com/integrations/kaspersky/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Kaspersky](https://www.kaspersky.co.in/)** is a cybersecurity solution that detects, analyzes, and responds to advanced threats across multiple endpoints, blocking attacks, extracting threat patterns, and preventing future incidents.\n\n**Kaspersky Overview** dashboard provides insight into the overall events generated from Kaspersky platform.\n\nFor more information, see the [Kaspersky Integration Documentation](https://docs.datadoghq.com/integrations/kaspersky/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -67,7 +67,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -132,7 +132,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -177,7 +177,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky status:critical $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky status:critical $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -229,7 +229,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky status:error $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky status:error $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -281,7 +281,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky status:warn $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky status:warn $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -333,7 +333,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky status:info $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky status:info $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -385,7 +385,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky @is_audit_event:True $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky @is_audit_event:True $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -436,7 +436,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -503,7 +503,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -572,7 +572,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -641,7 +641,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -710,7 +710,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name"
+                                                "query": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -776,7 +776,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status $User_Name",
+                                        "query_string": "source:kaspersky $Host_Name $Event_Type $Device_Name $Device_Group_Name $User_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -839,8 +839,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 23,
-                "is_column_break": true
+                "height": 23
             }
         },
         {
@@ -848,7 +847,7 @@
             "definition": {
                 "title": "Datadog Cloud SIEM",
                 "title_align": "center",
-                "background_color": "vivid_purple",
+                "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -858,7 +857,7 @@
                         "definition": {
                             "type": "note",
                             "content": "Datadog Cloud SIEM analyzes and correlates the Kaspersky logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security).",
-                            "background_color": "purple",
+                            "background_color": "green",
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
@@ -900,7 +899,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:kaspersky status:critical $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:critical"
                                             }
                                         }
                                     ],
@@ -950,7 +949,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:kaspersky status:high $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:high"
                                             }
                                         }
                                     ],
@@ -1009,7 +1008,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:kaspersky status:critical $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:critical"
                                             }
                                         }
                                     ],
@@ -1075,7 +1074,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:kaspersky status:medium $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:medium"
                                             }
                                         }
                                     ],
@@ -1126,7 +1125,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:kaspersky status:low $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:low"
                                             }
                                         }
                                     ],
@@ -1177,7 +1176,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:kaspersky status:info $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:info"
                                             }
                                         }
                                     ],
@@ -1236,7 +1235,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:kaspersky status:high $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:high"
                                             }
                                         }
                                     ],
@@ -1310,7 +1309,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:kaspersky status:medium $Host_Name $Event_Type $Device_Name $Device_Group_Name $Status"
+                                                "query": "source:kaspersky status:medium"
                                             }
                                         }
                                     ],
@@ -1365,17 +1364,6 @@
         }
     ],
     "template_variables": [
-        {
-            "name": "Status",
-            "prefix": "status",
-            "available_values": [
-                "critical",
-                "error",
-                "warn",
-                "info"
-            ],
-            "default": "*"
-        },
         {
             "name": "Event_Type",
             "prefix": "@event_type_description",
