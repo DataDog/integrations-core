@@ -46,6 +46,11 @@
       "process_signatures": [
         "velero"
       ]
+    },
+    "monitors": {
+      "Backup Failures": "assets/monitors/backup_failures.json",
+      "Restore Failures": "assets/monitors/restore_failures.json",
+      "Backup Staleness": "assets/monitors/backup_staleness.json"
     }
   },
   "author": {
