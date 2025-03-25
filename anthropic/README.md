@@ -39,9 +39,6 @@ Datadog's LLM Observability enables end-to-end monitoring of your LLM applicatio
 3. Under **Name**, enter a name for your account. Under **API key**, enter your Anthropic API key.
 4. Click the check mark to save.
 
-### 3. Enable LLM Evaluations
-1. Go to **LLM Observability > Settings > Integrations**.
-   - Select the **Anthropic account** that will be used evaluate and monitor your **LLM applications**.
 
 ### Additional Notes
 
