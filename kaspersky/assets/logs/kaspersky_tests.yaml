@@ -11,6 +11,7 @@ tests:
       Object type: Group of applications\r
       Object name: KLAppTrusted\r
       Reason: KSN
+    event_type: 00000191
     result: null
   - sample: |-
       Event type: Task cannot be performed\r
@@ -23,12 +24,16 @@ tests:
       Object name: Mail Threat Protection\r
       Reason: eERROR\r
       Error: License is missing test
+    event_type: 000000d4
     result: null
   - sample: "Status of device 'test' has changed to Critical: Databases are outdated."
+    event_type: KLSRV_HOST_STATUS_CRITICAL
     result: null
   - sample: Device "test" has not been visible for 7 day(s).
+    event_type: KLSRV_EVENT_HOSTS_NOT_VISIBLE
     result: null
   - sample: New device "test" has been detected (Windows domain "EDRLAB").
+    event_type: KLSRV_EVENT_HOSTS_NEW_DETECTED
     result: null
   - sample: >-
       Event type: Self-Defense restricted access to the protected resource\r
@@ -46,6 +51,7 @@ tests:
       User: NT AUTHORITY\\SYSTEM (Not defined)\r
 
       Component: Protection
+    event_type: 000000d5
     result: null
   - sample: >-
       Event type: The application established a connection to a website with an
@@ -62,4 +68,5 @@ tests:
       Process ID: 12492\r
 
       Certificate verification status: The certificate chain is incomplete
+    event_type: 00000039
     result: null
