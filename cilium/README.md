@@ -184,4 +184,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
 [12]: https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
-[13]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[13]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

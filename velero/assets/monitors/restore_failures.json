@@ -1,0 +1,31 @@
+{
+	"version": 2,
+	"created_at": "2025-03-23",
+	"last_updated_at": "2025-03-23", 
+	"title": "Restore operation failed",
+	"description": "This monitor tracks restore operation failures in Velero. Failed restores indicate potential issues with backup data integrity, storage access, resource conflicts, or version compatibility that need immediate investigation.",
+	"definition": {
+		"name": "[Velero] Restore operation failed",
+		"type": "query alert",
+		"query": "change(sum(last_5m),last_1d):sum:velero.restore.failed.count{*}.as_rate() > 0",
+		"message": "At least one Velero restore operation has failed.\n\nRestore failures are critical as they indicate potential issues with:\n* Backup data integrity\n* Storage access permissions\n* Resource conflicts\n* Version compatibility\n\n{{#is_alert}}\nFailed restores: {{value}}\n{{/is_alert}}\n\nImmediate actions:\n1. Check Velero logs for specific error messages\n2. Verify backup data is accessible\n3. Ensure sufficient cluster resources\n4. Check for namespace conflicts",
+		"tags": [
+			"integration:velero"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"notify_no_data": true,
+			"include_tags": true,
+			"evaluation_delay": 300,
+			"no_data_timeframe": 30
+		},
+		"priority": 1
+	},
+	"tags": [
+		"integration:velero"
+	]
+}

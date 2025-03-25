@@ -1,0 +1,1 @@
+The `pyyaml` library is no longer globally patched to force the use of safe_* methods

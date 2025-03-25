@@ -61,6 +61,14 @@ instances:
     #   - serviceengine
     #   - virtualservice
 
+    ## @param tenants - list of strings - optional - default: []
+    ## A list of tenant names to collect metrics for. If empty, it defaults to the admin tenant.
+    #
+    # tenants:
+    #   - admin
+    #   - tenant_a
+    #   - tenant_b
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
