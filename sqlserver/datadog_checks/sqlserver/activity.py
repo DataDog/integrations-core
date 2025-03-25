@@ -19,7 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments, extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -175,6 +175,13 @@ class SqlserverActivity(DBMAsyncJob):
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
+        self._obfuscator_options_for_tail_text = {
+            # only need the trailing comments from the tail text
+            # no need to obfuscate the tail text
+            'dbms': 'mssql',
+            'obfuscation_mode': 'normalize_only',
+            'collect_procedures': True,
+        }
         collection_interval = float(
             self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -368,10 +375,13 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(
                 row['statement_text'], self._config.obfuscator_options, replace_null_character=True
             )
-            # sqlserver doesn't have a boolean data type so convert integer to boolean
-            comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+            metadata = statement['metadata']
+            comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(metadata)
             if 'tail_text' in row:
-                appended_comments, _ = extract_sql_comments(row['tail_text'])
+                tail_statement = obfuscate_sql_with_metadata(
+                    row['tail_text'], self._obfuscator_options_for_tail_text, replace_null_character=True
+                )
+                appended_comments = tail_statement['metadata'].get('comments', [])
                 if appended_comments:
                     comments = list(set(comments + appended_comments))
             if row['is_proc'] and 'text' in row:
@@ -389,7 +399,6 @@ class SqlserverActivity(DBMAsyncJob):
                     else:
                         self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
             obfuscated_statement = statement['query']
-            metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = comments

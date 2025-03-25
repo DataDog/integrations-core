@@ -336,7 +336,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(
                     row['statement_text'], self._config.obfuscator_options, replace_null_character=True
                 )
-                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+                metadata = statement['metadata']
+                print(metadata)
+                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(metadata)
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
@@ -399,7 +401,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
 
-            metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
 
