@@ -54,7 +54,7 @@ Linux command:
 2. Navigate to **Settings** > **All Settings**.
 3. Navigate to **Configuration** > **General** > **Application**.
 4. Click **Edit**.
-5. Check to **Enable Syslog/CEF Log Output**.
+5. Check **Enable Syslog/CEF Log Output**.
 6. Fill out the following information:
 
     - **Syslog/CEF Server**: Enter Syslog/CEF Server Address.
