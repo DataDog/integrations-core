@@ -21,7 +21,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ## Overview
 
-Datadog's OpenAI integration allows you to collect usage metrics, cost data, and enables LLM Observability to monitor your OpenAI models. Follow the steps below to generate an OpenAI API key and configure the integration.
+Datadog's OpenAI integration allows you to collect usage metrics, cost data, and enables [LLM Observability][19] to monitor your OpenAI models. Follow the steps below to generate an OpenAI API key and configure the integration.
 
 ## Prerequisites
 
@@ -509,3 +509,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
 [17]: https://platform.openai.com/docs/
 [18]: https://platform.openai.com/
+[19]: https://www.datadoghq.com/product/llm-observability/
