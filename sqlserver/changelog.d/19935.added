@@ -1,0 +1,1 @@
+Removed `extract_sql_comments` after SQL statement obfuscation and normalization. SQL comments and procedure name are now retrieved from obfuscator metadata.
