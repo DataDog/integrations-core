@@ -52,11 +52,15 @@ files:
       value:
         type: string
     - name: database_identifier
-      description: Controls how the database is identified. The default value is the hostname for the instance, which
-        respects the `reported_hostname` option.
+      description: |
+        Controls how the database is identified. The default value is the hostname for the instance, 
+        which respects the `reported_hostname` option.
       options:
         - name: include_port
-          value: boolean
+          value:
+            type: boolean
+            display_default: false
+            example: false
           description: |
             Set to `true` to include the port in the database identifier. For example, for a server with host
             `postgres.mycompany.com` and port `5432` will be identified as `postgres.mycompany.com:5432`.
@@ -64,7 +68,8 @@ files:
             Use this option if runnining multiple instances on one host.
           default: false
         - name: identifier
-          value: string
+          value: 
+            type: string
           description: |
             Override the default database identifier. Use this only for backwards compatibility with previous
             usage of reported_hostname.
