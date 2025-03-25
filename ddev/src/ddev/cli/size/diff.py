@@ -5,9 +5,20 @@
 import os
 import sys
 from pathlib import Path
+
 import click
 import requests
-from .common import is_correct_dependency, is_valid_integration, group_modules, print_csv, print_table, get_gitignore_files, get_dependencies, compress
+
+from .common import (
+    compress,
+    get_dependencies,
+    get_gitignore_files,
+    group_modules,
+    is_correct_dependency,
+    is_valid_integration,
+    print_csv,
+    print_table,
+)
 from .GitRepo import GitRepo
 
 VALID_PLATFORMS = ["linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"]
@@ -40,10 +51,10 @@ def diff_mode(app, before, after, platform, version, compressed, csv, i):
             gitRepo.checkout_commit(after)
             files_a = get_compressed_files(app, repo)
             dependencies_a = get_compressed_dependencies(app, repo, platform, version)
-            
-        integrations = get_diff(files_b, files_a, 'Integration') 
-        dependencies = get_diff(dependencies_b, dependencies_a, 'Dependency') 
-        
+
+        integrations = get_diff(files_b, files_a, 'Integration')
+        dependencies = get_diff(dependencies_b, dependencies_a, 'Dependency')
+
         grouped_modules = group_modules(integrations + dependencies, platform, version)
         grouped_modules.sort(key=lambda x: x['Size (Bytes)'], reverse=True)
         for module in grouped_modules:
@@ -56,8 +67,6 @@ def diff_mode(app, before, after, platform, version, compressed, csv, i):
             print_table(app, grouped_modules, platform, version)
 
 
-
-        
 def get_diff(size_before, size_after, type):
     all_paths = set(size_before.keys()) | set(size_after.keys())
     diff_files = []
@@ -66,7 +75,7 @@ def get_diff(size_before, size_after, type):
         size_b = size_before.get(path, 0)
         size_a = size_after.get(path, 0)
         size_delta = size_a - size_b
-        module = Path(path).parts[0] 
+        module = Path(path).parts[0]
         if size_delta != 0:
             if size_b == 0:
                 diff_files.append(
@@ -74,16 +83,16 @@ def get_diff(size_before, size_after, type):
                         'File Path': path,
                         'Type': type,
                         'Name': module + " (NEW)",
-                        'Size (Bytes)': size_delta, 
+                        'Size (Bytes)': size_delta,
                     }
-            )
+                )
             elif size_a == 0:
                 diff_files.append(
                     {
                         'File Path': path,
                         'Type': type,
                         'Name': module + " (DELETED)",
-                        'Size (Bytes)': size_delta, 
+                        'Size (Bytes)': size_delta,
                     }
                 )
             else:
@@ -96,8 +105,8 @@ def get_diff(size_before, size_after, type):
                     }
                 )
 
-    
     return diff_files
+
 
 def get_compressed_files(app, repo_path):
 
@@ -118,6 +127,7 @@ def get_compressed_files(app, repo_path):
                 compressed_size = compress(app, file_path, relative_path)
                 file_data[relative_path] = compressed_size
     return file_data
+
 
 def get_compressed_dependencies(app, repo_path, platform, version):
 
@@ -148,4 +158,3 @@ def get_dependencies_sizes(app, deps, download_urls):
             file_data[dep] = int(size)
 
     return file_data
-

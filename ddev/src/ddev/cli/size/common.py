@@ -1,15 +1,17 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import sys
-import re
-import requests
 import os
+import re
+import sys
 import zlib
 
-#utilities
+import requests
 
-#mirar si existe
+# utilities
+
+
+# mirar si existe
 def convert_size(size_bytes):
     # Transforms bytes into a human-friendly format (KB, MB, GB)
     for unit in [' B', ' KB', ' MB', ' GB']:
@@ -39,27 +41,31 @@ def is_valid_integration(path, included_folder, ignored_files, git_ignore):
 def is_correct_dependency(platform, version, name):
     return platform in name and version in name
 
+
 def print_csv(app, i, modules):
     headers = modules[0].keys()
     if i == 0:
-        app.display(",".join(headers))  
+        app.display(",".join(headers))
 
     for row in modules:
         app.display(",".join(format(str(row[h])) for h in headers))
+
 
 def format(s):
     if "," in s:
         return '"' + s + '"'
     else:
         return s
-    
+
+
 def print_table(app, modules, platform, version):
     modules_table = {col: {} for col in modules[0].keys()}
     for i, row in enumerate(modules):
         for key, value in row.items():
             modules_table[key][i] = str(value)
     app.display_table(platform + " " + version, modules_table)
-    
+
+
 def get_dependencies_sizes(app, deps, download_urls):
     file_data = []
     for dep, url in zip(deps, download_urls, strict=False):
@@ -72,6 +78,7 @@ def get_dependencies_sizes(app, deps, download_urls):
             file_data.append({"File Path": dep, "Type": "Dependency", "Name": dep, "Size (Bytes)": int(size)})
 
     return file_data
+
 
 def get_dependencies(app, file_path):
     download_urls = []
@@ -100,15 +107,16 @@ def group_modules(modules, platform, version):
 
     return [
         {
-            'Name': name ,
-            'Type': type ,
-            'Size (Bytes)': size ,
+            'Name': name,
+            'Type': type,
+            'Size (Bytes)': size,
             'Size': convert_size(size),
-            'Platform': platform ,
-            'Version': version ,
+            'Platform': platform,
+            'Version': version,
         }
         for (name, type), size in grouped_aux.items()
     ]
+
 
 def get_gitignore_files(app, repo_path):
     gitignore_path = os.path.join(repo_path, ".gitignore")
@@ -127,6 +135,7 @@ def get_gitignore_files(app, repo_path):
         app.display_error(f"Error reading .gitignore file: {e}")
         sys.exit(1)
 
+
 def compress(app, file_path, relative_path):
     compressor = zlib.compressobj()
     compressed_size = 0
@@ -137,7 +146,7 @@ def compress(app, file_path, relative_path):
                 compressed_chunk = compressor.compress(chunk)
                 compressed_size += len(compressed_chunk)
 
-            compressed_size += len(compressor.flush()) 
+            compressed_size += len(compressor.flush())
         return compressed_size
     except Exception as e:
         app.display_error(f"Error processing {relative_path}: {e}")

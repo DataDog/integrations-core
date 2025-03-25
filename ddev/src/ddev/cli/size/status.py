@@ -3,14 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import re
 import sys
-import zlib
 from pathlib import Path
 
 import click
 
-from .common import convert_size, get_dependencies_sizes, is_correct_dependency, is_valid_integration, group_modules, print_csv, print_table, get_gitignore_files, get_dependencies, compress
+from .common import (
+    compress,
+    get_dependencies,
+    get_dependencies_sizes,
+    get_gitignore_files,
+    group_modules,
+    is_correct_dependency,
+    is_valid_integration,
+    print_csv,
+    print_table,
+)
 
 VALID_PLATFORMS = ["linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"]
 VALID_PYTHON_VERSIONS = ["3.12"]
@@ -44,8 +52,6 @@ def status_mode(app, platform, version, compressed, csv, i):
             print_table(app, grouped_modules, platform, version)
 
 
-
-
 def get_compressed_files(app):
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
@@ -75,7 +81,6 @@ def get_compressed_files(app):
     return file_data
 
 
-
 def get_compressed_dependencies(app, platform, version):
 
     resolved_path = os.path.join(REPO_PATH, ".deps/resolved")
@@ -90,8 +95,3 @@ def get_compressed_dependencies(app, platform, version):
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             deps, download_urls = get_dependencies(app, file_path)
             return get_dependencies_sizes(app, deps, download_urls)
-
-
-
-
-

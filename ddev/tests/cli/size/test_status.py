@@ -5,10 +5,10 @@
 from unittest.mock import MagicMock, mock_open, patch
 
 from ddev.cli.size.status import (
-    get_compressed_files,
     get_compressed_dependencies,
-   
+    get_compressed_files,
 )
+
 
 def test_get_compressed_files():
     mock_app = MagicMock()
@@ -20,15 +20,20 @@ def test_get_compressed_files():
     ]
 
     def fake_compress(app, file_path, relative_path):
-        return 1000  
+        return 1000
 
     fake_gitignore = {"ignored.py"}
 
-    with patch("os.walk", return_value=mock_files), \
-         patch("os.path.relpath", side_effect=lambda path, _: path.replace("root/", "")), \
-         patch("ddev.cli.size.status.get_gitignore_files", return_value=fake_gitignore), \
-         patch("ddev.cli.size.status.is_valid_integration", side_effect=lambda path, folder, ignored, git_ignore: path.startswith("integration")), \
-         patch("ddev.cli.size.status.compress", side_effect=fake_compress):
+    with (
+        patch("os.walk", return_value=mock_files),
+        patch("os.path.relpath", side_effect=lambda path, _: path.replace("root/", "")),
+        patch("ddev.cli.size.status.get_gitignore_files", return_value=fake_gitignore),
+        patch(
+            "ddev.cli.size.status.is_valid_integration",
+            side_effect=lambda path, folder, ignored, git_ignore: path.startswith("integration"),
+        ),
+        patch("ddev.cli.size.status.compress", side_effect=fake_compress),
+    ):
 
         result = get_compressed_files(mock_app)
 
@@ -108,6 +113,7 @@ def test_status_wrong_platform(ddev):
 def test_status_wrong_version(ddev):
     result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '2.10', '--compressed')
     assert result.exit_code != 0
+
 
 def test_status_wrong_plat_and_version(ddev):
     result = ddev('size', 'status', '--platform', 'linux', '--python', '2.10', '--compressed')

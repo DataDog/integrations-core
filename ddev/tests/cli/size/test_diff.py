@@ -4,12 +4,8 @@
 
 from unittest.mock import MagicMock, mock_open, patch
 
-from ddev.cli.size.diff import (
-    get_compressed_files,
-    get_compressed_dependencies,
-    get_diff
-   
-)
+from ddev.cli.size.diff import get_compressed_dependencies, get_compressed_files, get_diff
+
 
 def test_get_compressed_files():
     mock_app = MagicMock()
@@ -26,24 +22,29 @@ def test_get_compressed_files():
 
     fake_gitignore = {"ignored.py"}
 
-    with patch("os.walk", return_value=mock_files), \
-         patch("os.path.relpath", side_effect=lambda path, _: path.replace("root/", "")), \
-         patch("os.path.exists", return_value=True), \
-         patch("builtins.open", mock_open(read_data="__pycache__/\n*.log\n")),\
-         patch("ddev.cli.size.diff.get_gitignore_files", return_value=fake_gitignore), \
-         patch("ddev.cli.size.diff.is_valid_integration", side_effect=lambda path, folder, ignored, git_ignore: path.startswith("integration")), \
-         patch("ddev.cli.size.diff.compress", side_effect=fake_compress):
+    with (
+        patch("os.walk", return_value=mock_files),
+        patch("os.path.relpath", side_effect=lambda path, _: path.replace("root/", "")),
+        patch("os.path.exists", return_value=True),
+        patch("builtins.open", mock_open(read_data="__pycache__/\n*.log\n")),
+        patch("ddev.cli.size.diff.get_gitignore_files", return_value=fake_gitignore),
+        patch(
+            "ddev.cli.size.diff.is_valid_integration",
+            side_effect=lambda path, folder, ignored, git_ignore: path.startswith("integration"),
+        ),
+        patch("ddev.cli.size.diff.compress", side_effect=fake_compress),
+    ):
 
         result = get_compressed_files(mock_app, mock_repo_path)
 
     expected = {
         "integration/datadog_checks/file1.py": 1000,
         "integration/datadog_checks/file2.py": 1000,
-        "integration_b/datadog_checks/file3.py": 1000
+        "integration_b/datadog_checks/file3.py": 1000,
     }
 
-
     assert result == expected
+
 
 def test_get_compressed_dependencies(terminal):
     platform = "windows-x86_64"
@@ -67,12 +68,12 @@ def test_get_compressed_dependencies(terminal):
         patch("requests.head", return_value=mock_response),
     ):
 
-        file_data = get_compressed_dependencies(terminal,mock_repo_path, platform, version)
+        file_data = get_compressed_dependencies(terminal, mock_repo_path, platform, version)
 
     assert file_data == {
         "dependency1": 12345,
         "dependency2": 12345,
-    } 
+    }
 
     def test_get_diff():
         size_before = {
@@ -83,7 +84,7 @@ def test_get_compressed_dependencies(terminal):
         size_after = {
             "integration/foo.py": 1200,  # modified
             "integration/bar.py": 2000,  # unchanged
-            "integration/new.py": 800,   # new
+            "integration/new.py": 800,  # new
         }
 
         expected = [
@@ -104,9 +105,8 @@ def test_get_compressed_dependencies(terminal):
                 "Type": "Integration",
                 "Name": "integration (NEW)",
                 "Size (Bytes)": 800,
-            }
+            },
         ]
 
         result = get_diff(size_before, size_after, "Integration")
         assert sorted(result, key=lambda x: x["File Path"]) == sorted(expected, key=lambda x: x["File Path"])
-

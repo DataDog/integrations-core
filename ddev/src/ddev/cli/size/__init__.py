@@ -4,8 +4,9 @@
 
 import click
 
-from ddev.cli.size.status import status
 from ddev.cli.size.diff import diff
+from ddev.cli.size.status import status
+
 
 @click.group(short_help='Get the size of integrations and dependencies by platform and python version')
 def size():

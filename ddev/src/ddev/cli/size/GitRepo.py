@@ -1,7 +1,8 @@
 import os
 import shutil
-import tempfile
 import subprocess
+import tempfile
+
 
 class GitRepo:
     def __init__(self, url):
@@ -20,7 +21,6 @@ class GitRepo:
     def checkout_commit(self, commit):
         self._run(f"git fetch --depth 1 origin {commit}")
         self._run(f"git checkout {commit}")
-
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         if self.repo_dir and os.path.exists(self.repo_dir):

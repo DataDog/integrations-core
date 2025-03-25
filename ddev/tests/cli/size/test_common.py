@@ -1,17 +1,15 @@
-import os
 from unittest.mock import MagicMock, mock_open, patch
 
-from ddev.cli.application import Application
 from ddev.cli.size.status import (
-    convert_size,
-    print_csv,
     compress,
+    convert_size,
     get_dependencies,
     get_dependencies_sizes,
     get_gitignore_files,
     group_modules,
     is_correct_dependency,
     is_valid_integration,
+    print_csv,
 )
 
 
@@ -101,6 +99,7 @@ def test_group_modules():
 
     assert group_modules(modules, platform, version) == expected_output
 
+
 def test_get_gitignore_files(terminal):
     mock_gitignore = "__pycache__/\n*.log\n"  # Sample .gitignore file
     repo_path = "/fake/repo"
@@ -108,6 +107,7 @@ def test_get_gitignore_files(terminal):
         with patch("os.path.exists", return_value=True):
             ignored_patterns = get_gitignore_files(terminal, repo_path)
     assert ignored_patterns == ["__pycache__/", "*.log"]
+
 
 def test_compress():
     mock_app = MagicMock()
@@ -121,6 +121,7 @@ def test_compress():
     assert isinstance(compressed_size, int)
     assert compressed_size > 0
     assert compressed_size < original_size
+
 
 def test_print_csv():
     mock_app = MagicMock()
