@@ -32,7 +32,7 @@ setup = ["single"]
 #[[envs.default.matrix]]
 #python = ["3.9"]
 #os = ["linux"]
-#driver = ["odbc"]
+#driver = ["odbc", "FreeTDS"]
 #version = ["2019", "2022"]
 #case = ["high-cardinality"]
 
@@ -65,6 +65,7 @@ matrix.version.env-vars = [
 ]
 matrix.driver.env-vars = [
   { key = "WINDOWS_SQLSERVER_DRIVER", platform = ["windows"] },
+  { key = "LINUX_SQLSERVER_DRIVER", platform = ["linux"] },
 ]
 matrix.tz.env-vars = [
   { key = "TZ", value = "America/New_York", if = ["newyork"] },
