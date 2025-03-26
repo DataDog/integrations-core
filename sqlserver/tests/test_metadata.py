@@ -326,7 +326,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
-    exp_datadog_test_collation = deepcopy(exp_datadog_test)
+    exp_datadog_test_collation = deepcopy(exp_datadog_test_schemas)
     exp_datadog_test_collation['name'] = 'datadog_test_collation'
     exp_datadog_test_collation['collation'] = 'Latin1_General_100_BIN2'
 
