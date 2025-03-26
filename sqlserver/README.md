@@ -69,7 +69,9 @@ To configure this check for an Agent running on a host:
      - host: "<SQL_HOST>,<SQL_PORT>"
        username: datadog
        password: "<YOUR_PASSWORD>"
-       connector: odbc # alternative is 'adodbapi'
+       connector: adodbapi # alternative is 'odbc'
+       # be mindful of driver being used in case using odbc
+       # see https://docs.datadoghq.com/database_monitoring/setup_sql_server/selfhosted/?tab=sqlserver2014#odbc
        driver: SQL Server
    ```
 
