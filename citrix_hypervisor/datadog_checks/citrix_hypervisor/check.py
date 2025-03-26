@@ -4,8 +4,6 @@
 from typing import Any, Dict, List  # noqa: F401
 from xmlrpc.client import ServerProxy
 
-import yaml
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .metrics import build_metric
@@ -47,12 +45,11 @@ class CitrixHypervisorCheck(AgentCheck):
             'host': 'true',
             'json': 'true',
         }
+        # by default, returns json response
         r = self.http.get(self._base_url + '/rrd_updates', params=params)
         r.raise_for_status()
-        # Response is not formatted for simplejson, it's missing double quotes " around the field names
-        # Explicitly use the python safe loader, the C binding is failing
-        # See https://github.com/yaml/pyyaml/issues/443
-        data = yaml.load(r.content, Loader=yaml.SafeLoader)
+
+        data = r.json()
 
         if data['meta'].get('end') is not None:
             self._last_timestamp = int(data['meta']['end'])
