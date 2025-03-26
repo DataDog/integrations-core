@@ -240,7 +240,6 @@
                             "title": "Linux Audit Log Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -289,7 +288,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 8
             }
         },
         {
@@ -329,7 +328,6 @@
                             "title": "CRITICALs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -358,7 +356,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:critical"
+                                                "query": "source:linux-audit-logs status:critical $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -381,7 +379,6 @@
                             "title": "HIGHs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -410,7 +407,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:high"
+                                                "query": "source:linux-audit-logs status:high $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -434,7 +431,6 @@
                         "id": 6250565335893012,
                         "definition": {
                             "title": "Critical Security Signals",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -467,7 +463,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:critical"
+                                                "query": "source:linux-audit-logs status:critical $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -504,7 +500,6 @@
                             "title": "MEDIUMs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -533,7 +528,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:medium"
+                                                "query": "source:linux-audit-logs status:medium $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -556,7 +551,6 @@
                             "title": "LOWs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -585,7 +579,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:low"
+                                                "query": "source:linux-audit-logs status:low $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -608,7 +602,6 @@
                             "title": "INFOs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -637,7 +630,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:info"
+                                                "query": "source:linux-audit-logs status:info $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -658,7 +651,6 @@
                         "id": 703117422456860,
                         "definition": {
                             "title": "High Security Signals",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -691,7 +683,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:high"
+                                                "query": "source:linux-audit-logs status:high $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -726,7 +718,6 @@
                         "id": 3853751832874468,
                         "definition": {
                             "title": "Medium Security Signals",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -759,7 +750,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:linux-audit-logs status:medium"
+                                                "query": "source:linux-audit-logs status:medium $Host $User-Name"
                                             }
                                         }
                                     ],
@@ -794,7 +785,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 11,
                 "width": 12,
                 "height": 10
             }
@@ -1374,9 +1365,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 21,
                 "width": 12,
-                "height": 1
+                "height": 15
             }
         },
         {
@@ -1733,9 +1724,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 36,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -2104,7 +2095,6 @@
                             "title": "MAC Policy Load Log Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2159,9 +2149,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 48,
                 "width": 12,
-                "height": 1
+                "height": 11
             }
         },
         {
@@ -2747,9 +2737,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 17,
+                "y": 59,
                 "width": 12,
-                "height": 1
+                "height": 19
             }
         },
         {
@@ -3255,9 +3245,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 78,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -3693,9 +3683,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 94,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -4109,9 +4099,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 106,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -4490,7 +4480,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -4606,9 +4595,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 122,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -5020,9 +5009,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 138,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -5505,9 +5494,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 154,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -6002,9 +5991,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 24,
+                "y": 170,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -6349,9 +6338,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 186,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -6419,9 +6408,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 26,
+                "y": 198,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
@@ -6739,7 +6728,6 @@
                             "title": "Top Users Deleting Groups by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -6890,7 +6878,6 @@
                             "title": "Top Users Deleting existing Users by Result",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -7039,9 +7026,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 27,
+                "y": 203,
                 "width": 12,
-                "height": 1
+                "height": 17
             }
         }
     ],
