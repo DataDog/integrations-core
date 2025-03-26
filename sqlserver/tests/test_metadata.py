@@ -383,10 +383,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_ids(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
-        logging.warning("db_name %s", db_name)
-        logging.warning("actual_payload %s", expected_data_for_db.keys())
-        if db_name not in expected_data_for_db:
-            logging.warning("db_name %s not found in expected_data_for_db %s", db_name, expected_data_for_db.keys())
         assert deep_compare(actual_payload, expected_data_for_db[db_name])
 
 
