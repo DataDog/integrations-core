@@ -1,4 +1,4 @@
-name: Infiniband
+name: InfiniBand
 files:
   - name: infiniband.yaml
     example_name: conf.yaml.example

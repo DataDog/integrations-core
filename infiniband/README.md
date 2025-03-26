@@ -1,12 +1,12 @@
-# Agent Check: Infiniband
+# Agent Check: InfiniBand
 
 ## Overview
 
-This check monitors [Infiniband][1] through the Datadog Agent. 
+This check monitors [InfiniBand][1] through the Datadog Agent. 
 
-This integration monitors data transfers by collecting counters and RDMA hardware counters from the Infiniband subsystem. It tracks performance metrics through the Linux kernel's Infiniband interface, which provides metric counters even when using alternative transports like RDMA over Converged Ethernet (RoCE).
+This integration monitors data transfers by collecting counters and RDMA hardware counters from the InfiniBand subsystem. It tracks performance metrics through the Linux kernel's InfiniBand interface, which provides metric counters even when using alternative transports like RDMA over Converged Ethernet (RoCE).
 
-Get visibility into your high-performance networking infrastructure to help identify bottlenecks and performance issues in data-intensive workloads. By monitoring both standard Infiniband counters and RDMA hardware counters, you'll get comprehensive insights into network throughput, errors, and packet statistics across your devices and ports.
+Get visibility into your high-performance networking infrastructure to help identify bottlenecks and performance issues in data-intensive workloads. By monitoring both standard InfiniBand counters and RDMA hardware counters, you'll get comprehensive insights into network throughput, errors, and packet statistics across your devices and ports.
 
 Key metrics collected include port counters like bytes/packets transmitted and received, error counts, and RDMA hardware-specific metrics - giving operators the data needed to ensure optimal performance of their high-speed networking infrastructure.
 
@@ -16,7 +16,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Infiniband check is included in the [Datadog Agent][2] package.
+The InfiniBand check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -37,11 +37,11 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Infiniband integration does not include any events.
+The InfiniBand integration does not include any events.
 
 ### Service Checks
 
-The Infiniband integration does not include any service checks.
+The InfiniBand integration does not include any service checks.
 
 ## Troubleshooting
 

@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect and graph InfiniBand performance and statistics",
-    "title": "Infiniband",
+    "title": "InfiniBand",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
