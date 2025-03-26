@@ -2838,7 +2838,6 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
     aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
 
 
-
 def test_historical_property_metrics_empty_hostname(
     aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex, caplog
 ):
