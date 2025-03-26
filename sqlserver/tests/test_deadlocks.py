@@ -88,7 +88,7 @@ def _get_conn_for_user(instance_docker, user, password="Password12!"):
 def _run_first_deadlock_query(conn, event1, event2):
     exception_text = ""
     try:
-        conn.cursor().execute("BEGIN TRAN foo;")
+        conn.cursor().execute("BEGIN TRANSACTION foo;")
         conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 1;")
         event1.set()
         event2.wait()
@@ -105,7 +105,7 @@ def _run_second_deadlock_query(conn, event1, event2):
     exception_text = ""
     try:
         event1.wait()
-        conn.cursor().execute("BEGIN TRAN bar;")
+        conn.cursor().execute("BEGIN TRANSACTION bar;")
         conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 2;")
         event2.set()
         conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;")
