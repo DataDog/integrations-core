@@ -157,6 +157,8 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
     agent_requirements_file = root / AGENT_REQUIREMENTS_FILE
     targets = []
     for directory_name, files in changed_directories.items():
+        if directory_name in UNTESTABLE_INTEGRATIONS:
+            continue
         directory = root / directory_name
         if not ((directory / 'hatch.toml').is_file() and (directory / 'tests').is_dir()):
             continue
