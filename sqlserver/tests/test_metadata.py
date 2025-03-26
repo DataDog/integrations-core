@@ -338,7 +338,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     expected_data_for_db = {
         'datadog_test_schemas_second': exp_datadog_test,
         'datadog_test_schemas': exp_datadog_test_schemas,
-        'exp_datadog_test_collation': exp_datadog_test_collation,
+        'datadog_test_collation': exp_datadog_test_collation,
     }
 
     dbm_instance['database_autodiscovery'] = True
