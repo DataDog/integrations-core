@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
+import copy
 import logging
 
-import copy
 import pytest
 from mock import MagicMock, mock, patch
 from pyVmomi import vim, vmodl
