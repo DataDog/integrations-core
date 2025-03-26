@@ -97,7 +97,7 @@ def _run_first_deadlock_query(conn, event1, event2):
         # Exception is expected due to a deadlock
         exception_text = str(e)
         pass
-    conn.commit()
+    # conn.commit()
     return exception_text
 
 
@@ -113,7 +113,7 @@ def _run_second_deadlock_query(conn, event1, event2):
         # Exception is expected due to a deadlock
         exception_text = str(e)
         pass
-    conn.commit()
+    # conn.commit()
     return exception_text
 
 
