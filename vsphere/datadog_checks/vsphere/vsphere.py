@@ -1039,7 +1039,7 @@ class VSphereCheck(AgentCheck):
         # type: (...) -> None
         resource_metric_suffix = MOR_TYPE_AS_STRING[resource_type]
         mor_name = to_string(mor_props.get('name', 'unknown'))
-        hostname = mor_props.get('hostname', 'unknown')
+        hostname = mor_props.get('hostname')
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:
