@@ -8,6 +8,7 @@ import re
 import time
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -175,13 +176,15 @@ class SqlserverActivity(DBMAsyncJob):
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
-        self._obfuscator_options_for_tail_text = {
-            # only need the trailing comments from the tail text
-            # no need to obfuscate the tail text
-            'dbms': 'mssql',
-            'obfuscation_mode': 'normalize_only',
-            'collect_procedures': True,
-        }
+        self._obfuscator_options_for_tail_text = to_native_string(
+            json.dumps(
+                {
+                    'dbms': 'mssql',
+                    'obfuscation_mode': 'normalize_only',  # only need the trailing comments from the tail text
+                    'collect_procedures': True,
+                }
+            )
+        )
         collection_interval = float(
             self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
