@@ -385,7 +385,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_indexes_columns(actual_payload)
         logging.warning(f"db_name {db_name}")
         logging.warning(f"actual_payload {expected_data_for_db.keys()}")
-        if db_name not in expected_data_for_db:            
+        if db_name not in expected_data_for_db:
             logging.warning(f"db_name {db_name} not found in expected_data_for_db {expected_data_for_db.keys()}")
         assert deep_compare(actual_payload, expected_data_for_db[db_name])
 
