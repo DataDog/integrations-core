@@ -843,13 +843,16 @@ files:
             example: false
             display_default: false
     - name: collect_raw_query_statement
-      hidden: true
       description: |
         Configure the collection of raw query statements in query activity and execution plans.
-        Raw query statements and execution plans may contain sensitive information in query text.
-        Enabling this option will allow the collection and ingestion of raw query statements and
-        execution plans into Datadog. This option is disabled by default.
-        Note: This option only applies when `dbm` is enabled.
+        Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+        or personally identifiable information in query text.
+        Enabling this option will allow the collection and ingestion of raw query statements and 
+        execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+        This option is disabled by default.
+        Note: Collection of raw query statements is currently in preview.
+        If you are interested in participating, please reach out to your Datadog Customer Success Manager.
+        This option only applies when dbm is enabled.
       options:
         - name: enabled
           description: |
