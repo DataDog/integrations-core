@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
-import copy
 import logging
 
 import pytest
@@ -2839,15 +2838,13 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
 
 
 def test_historical_property_metrics_empty_hostname(
-    aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex, caplog
+    aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex
 ):
-    instance = copy.deepcopy(historical_instance)
-    instance['collect_property_metrics'] = True
+    historical_instance['collect_property_metrics'] = True
 
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
 
-    caplog.set_level(logging.DEBUG)
-    check = VSphereCheck('vsphere', {}, [instance])
+    check = VSphereCheck('vsphere', {}, [historical_instance])
     dd_run_check(check)
 
     # assert historical metrics sent with empty hostname
