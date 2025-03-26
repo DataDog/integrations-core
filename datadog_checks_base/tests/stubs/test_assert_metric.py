@@ -13,6 +13,5 @@ class TestAssertMetric:
         check.gauge('test.metric', 1, hostname=None)
         check.gauge('test.metric_host', 1, hostname='hello')
 
-
         aggregator.assert_metric('test.metric', 1, hostname='')
         aggregator.assert_metric('test.metric_host', 1, hostname='hello')
