@@ -2851,7 +2851,7 @@ def test_historical_property_metrics_empty_hostname(
     dd_run_check(check)
 
     # assert historical metrics sent with empty hostname
-    # ultimately these will be submitted with the agent hostname, but that logic is
+    # these can be submitted with the agent hostname if empty_default_hostname is False, but that logic is
     # in the agent code https://github.com/DataDog/datadog-agent/blob/7.65.x/pkg/aggregator/sender.go#L209-L211
     aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.enabled', hostname='')
     aggregator.assert_metric('vsphere.datastore.summary.capacity', hostname='')
