@@ -86,26 +86,12 @@ GO
 CREATE DATABASE datadog_test_schemas_second;
 GO
 USE datadog_test_schemas_second;
--- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
--- correctly support unicode throughout the integration.
-CREATE TABLE datadog_test_schemas_second.dbo.ϑings (id int DEFAULT 0, name varchar(255));
-INSERT INTO datadog_test_schemas_second.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
-CREATE USER bob FOR LOGIN bob;
-CREATE USER fred FOR LOGIN fred;
-CREATE CLUSTERED INDEX thingsindex ON datadog_test_schemas_second.dbo.ϑings (name);
-GO
 
 -- Create an alternate collation database to test handling of case sensitivity
 CREATE DATABASE datadog_test_collation
     COLLATE Latin1_General_100_BIN2;
 GO
 USE datadog_test_collation;
-CREATE TABLE datadog_test_collation.dbo.ϑings (id int DEFAULT 0, name varchar(255));
-INSERT INTO datadog_test_collation.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
-CREATE USER bob FOR LOGIN bob;
-CREATE USER fred FOR LOGIN fred;
-CREATE CLUSTERED INDEX thingsindex ON datadog_test_collation.dbo.ϑings (name);
-GO
 
 CREATE SCHEMA test_schema;
 GO
