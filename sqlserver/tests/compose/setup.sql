@@ -86,12 +86,14 @@ GO
 CREATE DATABASE datadog_test_schemas_second;
 GO
 USE datadog_test_schemas_second;
+GO
 
 -- Create an alternate collation database to test handling of case sensitivity
 CREATE DATABASE datadog_test_collation
     COLLATE Latin1_General_100_BIN2;
 GO
 USE datadog_test_collation;
+GO
 
 CREATE SCHEMA test_schema;
 GO

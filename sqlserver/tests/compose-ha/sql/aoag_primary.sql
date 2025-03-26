@@ -121,6 +121,7 @@ CREATE DATABASE datadog_test_collation
     COLLATE Latin1_General_100_BIN2;
 GO
 USE datadog_test_collation;
+GO
 
 CREATE SCHEMA test_schema;
 GO
