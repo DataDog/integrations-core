@@ -62,9 +62,6 @@ def instance_session_default():
     if not windows_sqlserver_driver or windows_sqlserver_driver == 'odbc':
         instance['connection_string'] = 'TrustServerCertificate=yes'
         return instance
-    linux_sqlserver_driver = os.environ.get('LINUX_SQLSERVER_DRIVER', None)
-    if linux_sqlserver_driver == 'FreeTDS':
-        instance['driver'] = 'FreeTDS'
     instance['adoprovider'] = windows_sqlserver_driver
     instance['connector'] = 'adodbapi'
     return instance

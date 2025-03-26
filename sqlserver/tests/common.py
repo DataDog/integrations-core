@@ -40,7 +40,10 @@ def get_local_driver():
     elif ON_WINDOWS:
         return '{ODBC Driver 18 for SQL Server}'
     else:
-        return '{ODBC Driver 18 for SQL Server}'
+        driver = os.environ.get('LINUX_SQLSERVER_DRIVER')
+        if driver == 'odbc':
+            return '{ODBC Driver 18 for SQL Server}'
+        return f'{driver}'
 
 
 HOST = get_docker_hostname()
