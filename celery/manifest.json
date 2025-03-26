@@ -42,10 +42,8 @@
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
-    "monitors": {},
-    "saved_views": {}
+        "Celery Overview": "assets/dashboards/celery_overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
