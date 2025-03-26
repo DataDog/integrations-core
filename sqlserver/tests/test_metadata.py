@@ -326,13 +326,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
-    exp_datadog_test_collation = {
-        'id': 'normalized_value',
-        'name': 'exp_datadog_test_collation',
-        "collation": "Latin1_General_100_BIN2",
-        'owner': 'dbo',
-        'schemas': [],
-    }
+    exp_datadog_test_collation = copy.deepcopy(exp_datadog_test)
+    exp_datadog_test_collation['name'] = 'datadog_test_collation'
+    exp_datadog_test_collation['collation'] = 'Latin1_General_100_BIN2'
+
     if running_on_windows_ci():
         exp_datadog_test['owner'] = 'None'
         exp_datadog_test_schemas['owner'] = 'None'
