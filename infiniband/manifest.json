@@ -23,7 +23,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 40961727,
-      "source_type_name": "InfiniBand",
+      "source_type_name": "Infiniband",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
