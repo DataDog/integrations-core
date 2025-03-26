@@ -45,7 +45,7 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 3. Under **Account Name**, enter a name for your account. Under **API Key**, enter your OpenAI API key. Optionally, add a comma-separated list of tags for metrics associated with this account. 
 3. Under **Resources**, enable toggles depending on your use case:
    - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. See ([collected data][15]).
-   - **LLM Observability**: When enabled, navigate to **LLM Observability > Settings** to create and run evaluations for the configured account.
+   - **Use this API key to evaluate your LLM applications**: If enabled, evaluations are run through this API key in LLM Observability.
 
 ### Additional Notes
 
