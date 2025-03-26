@@ -459,8 +459,8 @@ See the [APM PHP library documentation][17] for all the available configuration 
 
 To validate that the APM PHP library can communicate with your Agent, examine the phpinfo output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
 
-[16]: https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
-[17]: https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
+[16]:https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
+[17]:https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
