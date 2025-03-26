@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import subprocess
+
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
 from . import Network
 from .const import BSD_TCP_METRICS
@@ -13,6 +14,10 @@ class BSDNetwork(Network):
     def __init__(self, name, init_config, instances):
         super(BSDNetwork, self).__init__(name, init_config, instances)
         self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
+
+    def _get_subprocess_output(self, cmd):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
 
     def check(self, _):
         netstat_flags = ['-i', '-b']
@@ -24,7 +29,7 @@ class BSDNetwork(Network):
             netstat_flags.append('-W')
 
         try:
-            output, _, _ = get_subprocess_output(["netstat"] + netstat_flags, self.log)
+            output, _, _ = self._get_subprocess_output(["netstat"] + netstat_flags)
             lines = output.splitlines()
             # Name  Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
             # lo0   16384 <Link#1>                        318258     0  428252203   318258     0  428252203     0
@@ -86,11 +91,11 @@ class BSDNetwork(Network):
                         'packets_out.error': self.parse_int(x[-3]),
                     }
                     self.submit_devicemetrics(iface, metrics, custom_tags)
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.exception("Error collecting connection stats.")
 
         try:
-            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-p" "tcp"], self.log)
+            netstat, _, _ = self._get_subprocess_output(["netstat", "-s", "-p" "tcp"])
             # 3651535 packets sent
             #         972097 data packets (615753248 bytes)
             #         5009 data packets (2832232 bytes) retransmitted
@@ -110,7 +115,7 @@ class BSDNetwork(Network):
             #         ...
 
             self.submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
-        except SubprocessOutputEmptyError:
+        except subprocess.CalledProcessError:
             self.log.exception("Error collecting TCP stats.")
 
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
@@ -120,8 +125,8 @@ class BSDNetwork(Network):
         if self.is_collect_cx_state_runnable(net_proc_base_location):
             try:
                 self.log.debug("Using `netstat` to collect connection state")
-                output_tcp, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)
-                output_udp, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"], self.log)
+                output_tcp, _, _ = self._get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"])
+                output_udp, _, _ = self._get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"])
                 lines = output_tcp.splitlines() + output_udp.splitlines()
                 # Active Internet connections (w/o servers)
                 # Proto Recv-Q Send-Q Local Address           Foreign Address         State
@@ -136,5 +141,5 @@ class BSDNetwork(Network):
                 metrics = self.parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in metrics.items():
                     self.gauge(metric, value, tags=custom_tags)
-            except SubprocessOutputEmptyError:
+            except subprocess.CalledProcessError:
                 self.log.exception("Error collecting connection states.")
