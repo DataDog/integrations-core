@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import logging
 import re
-from copy import copy
+from copy import copy, deepcopy
 
 import pytest
 
@@ -326,7 +326,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
-    exp_datadog_test_collation = copy.deepcopy(exp_datadog_test)
+    exp_datadog_test_collation = deepcopy(exp_datadog_test)
     exp_datadog_test_collation['name'] = 'datadog_test_collation'
     exp_datadog_test_collation['collation'] = 'Latin1_General_100_BIN2'
 
