@@ -15,12 +15,12 @@ instances:
 
   -
     ## @param infiniband_path - string - optional - default: /sys/class/infiniband
-    ## The path to the infiniband directory.
+    ## The path to the InfiniBand directory.
     #
     # infiniband_path: /sys/class/infiniband
 
     ## @param exclude_devices - list of strings - optional
-    ## A list of devices to exclude from the check. Devices are located in the infiniband directory. 
+    ## A list of devices to exclude from the check. Devices are located in the InfiniBand directory. 
     ## The devices are located default is /sys/class/infiniband.
     #
     # exclude_devices:
