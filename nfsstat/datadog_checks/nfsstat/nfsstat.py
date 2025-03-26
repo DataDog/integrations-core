@@ -31,6 +31,7 @@ class NfsStatCheck(AgentCheck):
                     '(through nfs-utils) or set the path to the installed version'
                 )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
+        self.disable_missing_mountpoints_warning = is_affirmative(self.instance.get('disable_missing_mountpoints_warning', False))
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
@@ -38,11 +39,10 @@ class NfsStatCheck(AgentCheck):
         this_device = []
         custom_tags = instance.get("tags", [])
         stats = stat_out.splitlines()
-        disable_missing_mountpoints_warning = is_affirmative(instance.get('disable_missing_mountpoints_warning', False))
 
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
-                if not disable_missing_mountpoints_warning:
+                if not self.disable_missing_mountpoints_warning:
                     self.warning("No NFS mount points were found.")
             else:
                 self.log.debug("AutoFS enabled: no mount points currently.")
