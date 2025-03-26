@@ -20,7 +20,6 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
@@ -71,6 +70,8 @@ SELECT
         WHEN LEN(qt.text) > {proc_char_limit} THEN RIGHT(qt.text, {tail_text_size})
     ELSE ''
     END AS tail_text,
+    OBJECT_SCHEMA_NAME(qt.objectid, sess.database_id) as schema_name,
+    OBJECT_NAME(qt.objectid, sess.database_id) as procedure_name,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -111,6 +112,8 @@ SELECT
     sess.status as session_status,
     lqt.text as statement_text,
     SUBSTRING(lqt.text, 1, {proc_char_limit}) as text,
+    OBJECT_SCHEMA_NAME(lqt.objectid, sess.database_id) as schema_name,
+    OBJECT_NAME(lqt.objectid, sess.database_id) as procedure_name,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -378,21 +381,17 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(
                 row['statement_text'], self._config.obfuscator_options, replace_null_character=True
             )
-            metadata = statement['metadata']
-            comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(metadata)
-            if 'tail_text' in row:
-                tail_statement = obfuscate_sql_with_metadata(
-                    row['tail_text'], self._obfuscator_options_for_tail_text, replace_null_character=True
-                )
-                appended_comments = tail_statement['metadata'].get('comments', [])
-                if appended_comments:
-                    comments = list(set(comments + appended_comments))
-            if row['is_proc'] and 'text' in row:
+            comments = statement['metadata'].get('comments', [])
+            row['is_proc'] = bool(row.get('procedure_name'))
+            if row['is_proc'] and row.get('text'):
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
                     row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+                    procedure_comments = procedure_statement['metadata'].get('comments', [])
+                    if procedure_comments:
+                        comments = list(set(comments + procedure_comments))
                 except Exception as e:
                     row['procedure_signature'] = '__procedure_obfuscation_error__'
                     # if we fail to obfuscate the procedure text,
@@ -401,14 +400,23 @@ class SqlserverActivity(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
+            if 'tail_text' in row:
+                tail_statement = obfuscate_sql_with_metadata(
+                    row['tail_text'], self._obfuscator_options_for_tail_text, replace_null_character=True
+                )
+                appended_comments = tail_statement['metadata'].get('comments', [])
+                if appended_comments:
+                    comments = list(set(comments + appended_comments))
             obfuscated_statement = statement['query']
+            metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = comments
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
-            if procedure_name:
-                row['procedure_name'] = procedure_name
+            if row.get('procedure_name') and row.get('schema_name'):
+                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}"
         except Exception as e:
+            print(e)
             if self._config.log_unobfuscated_queries:
                 self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
             else:

@@ -489,69 +489,234 @@ def test_split_sqlserver_host(instance_host, split_host, split_port):
 
 
 @pytest.mark.parametrize(
-    "metadata,expected_comments,is_proc,expected_name",
+    "query,expected_comments,is_proc,expected_name",
     [
         [
-            {},
+            None,
             [],
             False,
             None,
         ],
         [
-            {"comments": []},
+            "",
             [],
             False,
             None,
         ],
         [
-            {"comments": ["/*justonecomment*/"]},
+            "/*",
+            [],
+            False,
+            None,
+        ],
+        [
+            "--",
+            [],
+            False,
+            None,
+        ],
+        [
+            "/*justonecomment*/",
             ["/*justonecomment*/"],
             False,
             None,
         ],
         [
-            {"comments": ["/* a comment */", "-- Single comment"]},
+            """\
+            /* a comment */
+            -- Single comment
+            """,
             ["/* a comment */", "-- Single comment"],
             False,
             None,
         ],
         [
-            {"comments": ["/*tag=foo*/"], "procedures": ["foo"]},
+            "/*tag=foo*/ SELECT * FROM foo;",
             ["/*tag=foo*/"],
-            True,
-            "foo",
+            False,
+            None,
         ],
         [
-            {"comments": ["/*tag=foo*/", "/*other=tag,incomment=yes*/"]},
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo;",
             ["/*tag=foo*/", "/*other=tag,incomment=yes*/"],
             False,
             None,
         ],
         [
-            {"comments": ["-- My Comment"], "procedures": ["bobProcedure"]},
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo /*lastword=yes*/",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/", "/*lastword=yes*/"],
+            False,
+            None,
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
             ["-- My Comment"],
             True,
             "bobProcedure",
         ],
         [
-            {"comments": ["-- My procedure"], "procedures": ["bobProcedure"]},
+            """\
+            -- My procedure
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
             ["-- My procedure"],
             True,
             "bobProcedure",
         ],
         [
-            {
-                "comments": ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"],
-                "procedures": ["bobProcedure"],
-            },
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- In the middle"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- this procedure does foo
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- this procedure does foo"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
             ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            -- My procedure
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with procedure foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My procedure", "-- In the middle", "/*mixed with procedure foo*/", "-- And at the end"],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            comment
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line comment */",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            for procedure foo
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line for procedure foo */",
+                "-- And at the end",
+            ],
+            True,
+            "bobProcedure",
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-commet
+            tag=foo,blah=tag
+            */
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-commet tag=foo,blah=tag */",
+                "-- In the middle",
+                "/*mixed with mult-line foo*/",
+                "-- And at the end",
+            ],
             True,
             "bobProcedure",
         ],
     ],
 )
-def test_extract_sql_comments_and_procedure_name(metadata, expected_comments, is_proc, expected_name):
-    comments, p, name = extract_sql_comments_and_procedure_name(metadata)
+def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_proc, expected_name):
+    comments, p, name = extract_sql_comments_and_procedure_name(query)
     assert comments == expected_comments
     assert p == is_proc
     assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name

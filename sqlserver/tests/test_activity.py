@@ -62,7 +62,7 @@ def dbm_instance(instance_docker):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc,comments,procedure_name,collect_raw_query_statement,expected_raw_statement",
+    "database,query,match_pattern,is_proc,comments,collect_raw_query_statement,expected_raw_statement",
     [
         [
             "datadog_test-1",
@@ -70,7 +70,6 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings",
             False,
             ["/*test=foo*/"],
-            None,
             False,
             None,
         ],
@@ -80,7 +79,6 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings",
             True,
             [],
-            "bobProc",
             False,
             None,
         ],
@@ -90,7 +88,6 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM \[ϑings\] WHERE \[name\]=\@1",
             False,
             [],
-            None,
             False,
             None,
         ],
@@ -100,7 +97,6 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings WHERE name like \@Name",
             True,
             [],
-            "fredProcParams",
             False,
             None,
         ],
@@ -118,7 +114,6 @@ def test_collect_load_activity(
     match_pattern,
     is_proc,
     comments,
-    procedure_name,
     collect_raw_query_statement,
     expected_raw_statement,
 ):
@@ -149,7 +144,6 @@ def test_collect_load_activity(
                     'tables_csv': 'ϑings',
                     'commands': ['SELECT'],
                     'comments': comments,
-                    'procedures': [procedure_name] if procedure_name else [],
                 },
             }
         )
@@ -654,7 +648,6 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
             'tables_csv': 'ϑings',
             'commands': ['SELECT'],
             'comments': [large_comment],
-            'procedures': ['dbo.sp_test'],
         }
         rows = [
             {
@@ -663,6 +656,8 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
                 "statement_text": statement_text,
                 "text": procedure_text,
                 "query_start": new_time(),
+                "procedure_name": "sp_test",
+                "schema_name": "dbo",
             },
         ]
         # the first call to obfuscate query text will succeed
@@ -710,7 +705,6 @@ def test_activity_stored_procedure_characters_limit(
                     'tables_csv': 'ϑings',
                     'commands': ['SELECT'],
                     'comments': [],
-                    'procedures': ['procedureWithLargeCommment'],
                 },
             }
         )
@@ -770,7 +764,7 @@ def test_activity_stored_procedure_characters_limit(
                 matching_activity.append(activity)
     assert len(matching_activity) == 1
     assert matching_activity[0]['is_proc'] is True
-    assert matching_activity[0]['procedure_name'].lower() == "procedurewithlargecommment"
+    assert matching_activity[0]['procedure_name'].lower() == "dbo.procedurewithlargecommment"
     assert matching_activity[0]['text'] == "SELECT * FROM ϑings"
     # this is a hacky way of asserting that the procedure signature is present
     # when stored_procedure_characters_limit is set to a large value
