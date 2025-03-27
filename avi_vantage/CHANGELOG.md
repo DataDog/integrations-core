@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.2.0 / 2025-01-16
+## 5.3.0 / 2025-03-19
+
+***Added***:
+
+* Add support for specifying tenants in avi_vantage ([#19825](https://github.com/DataDog/integrations-core/pull/19825))
+
+## 5.2.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
 

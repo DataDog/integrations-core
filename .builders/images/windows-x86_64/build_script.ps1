@@ -24,9 +24,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-# We set the desired tag to the latest release tag to ensure that we are building with the latest stable version.
-# The desired tag should be updated periodically or when critical fixes or features are released.
-$desired_tag = "2024.12.16"
+$desired_commit = "master" # Set the commit to master so we don't have to update manually
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
@@ -34,7 +32,7 @@ if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
 }
 
 Set-Location $vcpkg_dir
-git checkout $desired_tag
+git checkout $desired_commit
 
 Write-Host "Bootstrapping vcpkg..."
 .\bootstrap-vcpkg.bat

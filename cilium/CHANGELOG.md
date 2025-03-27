@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.1.0 / 2025-01-16
+## 5.2.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Added Cilium 1.16 metrics ([#19520](https://github.com/DataDog/integrations-core/pull/19520))
+
+## 5.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
 

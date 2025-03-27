@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a905fbe6-135f-4189-b027-4bdc58e51e29",
   "app_id": "duckdb",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -35,9 +35,6 @@
         "prefix": "duckdb.",
         "check": "duckdb.memory_limit",
         "metadata_path": "metadata.csv"
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
         "duckdb"

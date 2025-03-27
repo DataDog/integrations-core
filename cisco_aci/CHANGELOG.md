@@ -2,7 +2,15 @@
 
 <!-- towncrier release notes start -->
 
-## 4.3.0 / 2025-01-16
+## 4.4.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Add failover support with Agent High Availability feature. ([#19776](https://github.com/DataDog/integrations-core/pull/19776))
+* Collect Cisco ACI faults as logs. ([#19836](https://github.com/DataDog/integrations-core/pull/19836))
+
+## 4.3.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
 

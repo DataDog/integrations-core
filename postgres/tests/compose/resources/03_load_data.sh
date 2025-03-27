@@ -4,7 +4,9 @@ set -e
 # Create extensions for settings testing
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE EXTENSION IF NOT EXISTS pg_trgm;
-    CREATE EXTENSION IF NOT EXISTS hstore;
+    -- Create an extension in a non-standard schema to test that behavior
+    CREATE SCHEMA hstore;
+    CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA hstore;
     CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 EOSQL

@@ -8,7 +8,7 @@
     "id": 159196278,
     "name": "High gRPC error percentage",
     "type": "query alert",
-    "query": "avg(last_5m):(sum:temporal_cloud.cloud_metrics.v0_frontend_service_error_increase1m{*} by {temporal_namespace,operation}.as_rate() / sum:temporal_cloud.cloud_metrics.v0_frontend_service_request_increase1m{*} by {temporal_namespace,operation}.as_rate()) * 100 > 10",
+    "query": "avg(last_5m):(sum:temporal.cloud.v0_frontend_service_error{*} by {temporal_namespace,operation}.as_rate() / sum:temporal.cloud.v0_frontend_service_request{*} by {temporal_namespace,operation}.as_rate()) * 100 > 10",
     "message": "{{#is_warning}}\nThe gRPC error percentage for Temporal Cloud operation: **{{operation.name}}** in namespace: **{{temporal_namespace.name}}** has exceeded the warning threshold.\nCurrent error percentage: **{{value}}%**\nThreshold: {{warn_threshold}}%\n{{/is_warning}}\n\n{{#is_alert}}\nThe gRPC error percentage for Temporal Cloud operation: **{{operation.name}}** in namespace: **{{temporal_namespace.name}}** has exceeded the alert threshold.\nCurrent error percentage: **{{value}}%**\nThreshold: {{threshold}}%\n{{/is_alert}}\n\n@example@example.com",
     "tags": [
       "integration:temporal-cloud"

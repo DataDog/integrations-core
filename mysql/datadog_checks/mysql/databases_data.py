@@ -225,6 +225,8 @@ class DatabasesData:
                             - referenced_table_schema (str): The schema of the referenced table.
                             - referenced_table_name (str): The name of the referenced table.
                             - referenced_column_names (str): The column names in the referenced table.
+                            - update_action (str): The update rule for the foreign key.
+                            - delete_action (str): The delete rule for the foreign key.
                     - partitions (list): A list of partition dictionaries.
                         - partition (dict): A dictionary representing a partition.
                             - name (str): The name of the partition.

@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 8.2.0 / 2025-01-25
+## 8.3.1 / 2025-03-19
+
+***Fixed***:
+
+* Remove unused code. ([#19701](https://github.com/DataDog/integrations-core/pull/19701))
+
+## 8.3.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 8.2.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
 

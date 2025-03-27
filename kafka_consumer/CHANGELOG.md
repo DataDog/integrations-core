@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.1 / 2025-03-06
+
+***Fixed***:
+
+* Collect consumer state tag as string name instead of int value. ([#19744](https://github.com/DataDog/integrations-core/pull/19744))
+
+## 6.5.0 / 2025-02-13 / Agent 7.63.0
+
+***Added***:
+
+* Bump OpenSSL in confluent-kafka to 3.4.1 on Windows. ([#19608](https://github.com/DataDog/integrations-core/pull/19608))
+
+## 6.4.0 / 2025-02-12
+
+***Added***:
+
+* Bump the OpenSSL version in confluent-kakfa to 3.3.3 on Linux and MacOS. ([#19591](https://github.com/DataDog/integrations-core/pull/19591))
+
 ## 6.3.0 / 2025-01-25
 
 ***Added***:

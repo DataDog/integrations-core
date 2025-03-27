@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.1.1 / 2025-01-29
+## 8.1.2 / 2025-03-19
+
+***Fixed***:
+
+* Close connections on exceptions, and, when connection caching is disabled, after each check iteration. ([#19839](https://github.com/DataDog/integrations-core/pull/19839))
+
+## 8.1.1 / 2025-01-29 / Agent 7.63.0
 
 ***Fixed***:
 

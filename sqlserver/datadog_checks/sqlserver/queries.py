@@ -32,7 +32,7 @@ COLUMN_QUERY = """
 SELECT
     column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position
 FROM
-    information_schema.columns
+    INFORMATION_SCHEMA.COLUMNS
 WHERE
     table_name IN ({}) and table_schema='{}';
 """
@@ -90,24 +90,30 @@ GROUP BY
 
 FOREIGN_KEY_QUERY = """
 SELECT
-    FK.parent_object_id AS id,
+    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
     OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
-    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column
+    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
     JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
 WHERE
     FK.parent_object_id IN ({})
 GROUP BY
-    FK.name, FK.parent_object_id, FK.referenced_object_id;
+    FK.name,
+    FK.parent_object_id,
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc;
 """
 
 FOREIGN_KEY_QUERY_PRE_2017 = """
 SELECT
-    FK.parent_object_id AS id,
+    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STUFF((
@@ -120,7 +126,9 @@ SELECT
         SELECT ',' + COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id)
         FROM sys.foreign_key_columns AS FKC
         WHERE FKC.constraint_object_id = FK.object_id
-        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
 WHERE
@@ -128,33 +136,53 @@ WHERE
 GROUP BY
     FK.name,
     FK.parent_object_id,
-    FK.object_id,
-    FK.referenced_object_id;
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc;
 """
 
+DEFAULT_DM_XE_TARGETS = "sys.dm_xe_session_targets"
+DEFAULT_DM_XE_SESSIONS = "sys.dm_xe_sessions"
 XE_SESSION_DATADOG = "datadog"
 XE_SESSION_SYSTEM = "system_health"
-XE_SESSIONS_QUERY = f"""
+
+
+def get_xe_sessions_query(dm_xe_targets=DEFAULT_DM_XE_TARGETS, dm_xe_sessions=DEFAULT_DM_XE_SESSIONS):
+    return f"""
 SELECT
     s.name AS session_name, t.target_name AS target_name
 FROM
-    sys.dm_xe_sessions s
+    {dm_xe_sessions} s
 JOIN
-    sys.dm_xe_session_targets t
+    {dm_xe_targets} t
     ON s.address = t.event_session_address
 WHERE
     s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
 """
 
+
 DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
 
 
-def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER):
+def get_deadlocks_query(
+    convert_xml_to_str=False,
+    xe_session_name=XE_SESSION_DATADOG,
+    xe_target_name=XE_RING_BUFFER,
+    dm_xe_targets=DEFAULT_DM_XE_TARGETS,
+    dm_xe_sessions=DEFAULT_DM_XE_SESSIONS,
+    level="",
+):
     """
     Construct the query to fetch deadlocks from the system_health extended event session
-    :param convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
-        that can't convert XML to str
+    :params:
+        convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
+            that can't convert XML to str
+        xe_session_name: The name of the extended event session to query
+        xe_target_name: The name of the extended event target to query
+        dm_xe_targets: The name of the DMV to query for extended event targets
+        dm_xe_sessions: The name of the DMV to query for extended event sessions
+        level: 'database_' for Azure database, '' for all other versions
     :return: The query to fetch deadlocks
     """
     xml_expression = "xdr.query('.')"
@@ -165,12 +193,12 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DAT
         return f"""SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}],
             {xml_expression} AS [{DEADLOCK_XML_ALIAS}]
     FROM (SELECT CAST([target_data] AS XML) AS Target_Data
-                FROM sys.dm_xe_session_targets AS xt
-                INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
+                FROM {dm_xe_targets} AS xt
+                INNER JOIN {dm_xe_sessions} AS xs ON xs.address = xt.event_session_address
                 WHERE xs.name = N'{xe_session_name}'
                 AND xt.target_name = N'{XE_RING_BUFFER}'
         ) AS XML_Data
-    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
+    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="{level}xml_deadlock_report"]') AS XEventData(xdr)
     WHERE xdr.value('@timestamp', 'datetime')
         >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC')
     ;"""
@@ -182,6 +210,6 @@ CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[
 FROM
 sys.fn_xe_file_target_read_file
 ('system_health*.xel', null, null, null)
-WHERE object_name like 'xml_deadlock_report'
+WHERE object_name = 'xml_deadlock_report'
   and CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime')
     >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC');"""

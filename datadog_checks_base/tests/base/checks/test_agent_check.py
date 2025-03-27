@@ -6,6 +6,7 @@
 import json
 import logging
 import os
+import re
 from typing import Any  # noqa: F401
 
 import mock
@@ -41,7 +42,12 @@ def test_check_version():
 
 
 def test_load_config():
-    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
+    assert AgentCheck.load_config('raw_foo: bar') == {'raw_foo': 'bar'}
+    assert AgentCheck.load_config('invalid:mapping') == 'invalid:mapping'
+    assert AgentCheck.load_config('') is None
+
+    with pytest.raises(ValueError, match='Failed to load config: '):
+        AgentCheck.load_config(':')
 
 
 def test_persistent_cache(datadog_agent):
@@ -111,7 +117,7 @@ class TestSecretsSanitization:
         secret = 'p@$$w0rd'
         check = AgentCheck()
         check.register_secret(secret)
-        sanitized = check.sanitize(secret)
+        sanitized = re.escape(check.sanitize(secret))
 
         check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
 

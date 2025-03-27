@@ -12,6 +12,8 @@ View Kafka broker metrics collected for a 360-view of the health and performance
 If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 - To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+Consider [Data Streams Monitoring][24] to enhance your Kafka integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
+
 ## Setup
 
 ### Installation
@@ -173,4 +175,5 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
+[24]: https://docs.datadoghq.com/data_streams/
 [25]: https://app.datadoghq.com/data-streams
