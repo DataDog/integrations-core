@@ -2,13 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from unittest.mock import MagicMock, mock_open, patch
-
+from unittest.mock import MagicMock, mock_open, patch, Mock
+import pytest
 from ddev.cli.size.diff import get_compressed_dependencies, get_compressed_files, get_diff
 
 
 def test_get_compressed_files():
-    mock_app = MagicMock()
     mock_repo_path = "root"
 
     mock_files = [
@@ -17,7 +16,7 @@ def test_get_compressed_files():
         ("root", [], ["ignored.py"]),
     ]
 
-    def fake_compress(app, file_path, relative_path):
+    def fake_compress(file_path):
         return 1000
 
     fake_gitignore = {"ignored.py"}
@@ -35,7 +34,7 @@ def test_get_compressed_files():
         patch("ddev.cli.size.diff.compress", side_effect=fake_compress),
     ):
 
-        result = get_compressed_files(mock_app, mock_repo_path)
+        result = get_compressed_files(mock_repo_path)
 
     expected = {
         "integration/datadog_checks/file1.py": 1000,
@@ -68,45 +67,170 @@ def test_get_compressed_dependencies(terminal):
         patch("requests.head", return_value=mock_response),
     ):
 
-        file_data = get_compressed_dependencies(terminal, mock_repo_path, platform, version)
+        file_data = get_compressed_dependencies(mock_repo_path, platform, version)
 
     assert file_data == {
         "dependency1": 12345,
         "dependency2": 12345,
     }
 
-    def test_get_diff():
-        size_before = {
-            "integration/foo.py": 1000,
-            "integration/bar.py": 2000,
-            "integration/deleted.py": 1500,
-        }
-        size_after = {
-            "integration/foo.py": 1200,  # modified
-            "integration/bar.py": 2000,  # unchanged
-            "integration/new.py": 800,  # new
-        }
 
-        expected = [
-            {
-                "File Path": "integration/foo.py",
-                "Type": "Integration",
-                "Name": "integration",
-                "Size (Bytes)": 200,
-            },
-            {
-                "File Path": "integration/deleted.py",
-                "Type": "Integration",
-                "Name": "integration (DELETED)",
-                "Size (Bytes)": -1500,
-            },
-            {
-                "File Path": "integration/new.py",
-                "Type": "Integration",
-                "Name": "integration (NEW)",
-                "Size (Bytes)": 800,
-            },
-        ]
+def test_get_diff():
+    size_before = {
+        "integration/foo.py": 1000,
+        "integration/bar.py": 2000,
+        "integration/deleted.py": 1500,
+    }
+    size_after = {
+        "integration/foo.py": 1200,  # modified
+        "integration/bar.py": 2000,  # unchanged
+        "integration/new.py": 800,  # new
+    }
 
-        result = get_diff(size_before, size_after, "Integration")
-        assert sorted(result, key=lambda x: x["File Path"]) == sorted(expected, key=lambda x: x["File Path"])
+    expected = [
+        {
+            "File Path": "integration/foo.py",
+            "Type": "Integration",
+            "Name": "integration",
+            "Size (Bytes)": 200,
+        },
+        {
+            "File Path": "integration/deleted.py",
+            "Type": "Integration",
+            "Name": "integration (DELETED)",
+            "Size (Bytes)": -1500,
+        },
+        {
+            "File Path": "integration/new.py",
+            "Type": "Integration",
+            "Name": "integration (NEW)",
+            "Size (Bytes)": 800,
+        },
+    ]
+
+    result = get_diff(size_before, size_after, "Integration")
+    assert sorted(result, key=lambda x: x["File Path"]) == sorted(expected, key=lambda x: x["File Path"])
+
+
+@pytest.fixture
+def mock_size_diff_dependencies():
+    mock_git_repo = MagicMock()
+    mock_git_repo.repo_dir = "/tmp/fake_repo"
+
+    def get_compressed_files_side_effect(_):
+        get_compressed_files_side_effect.counter += 1
+        if get_compressed_files_side_effect.counter % 2 == 1:
+            return {"path1.py": 1000}  # before
+        else:
+            return {"path1.py": 1200, "path2.py": 500}  # after
+
+    get_compressed_files_side_effect.counter = 0
+
+    def get_compressed_dependencies_side_effect(_, __, ___):
+        get_compressed_dependencies_side_effect.counter += 1
+        if get_compressed_dependencies_side_effect.counter % 2 == 1:
+            return {"dep1.whl": 2000}  # before
+        else:
+            return {"dep1.whl": 2500, "dep2.whl": 1000}  # after
+
+    get_compressed_dependencies_side_effect.counter = 0
+
+    with (
+        patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=mock_git_repo),
+        patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.diff.GitRepo.checkout_commit"),
+        patch("tempfile.mkdtemp", return_value="/tmp/fake_repo"),
+        patch("ddev.cli.size.diff.get_compressed_files", side_effect=get_compressed_files_side_effect),
+        patch("ddev.cli.size.diff.get_compressed_dependencies", side_effect=get_compressed_dependencies_side_effect),
+        patch("ddev.cli.size.common.group_modules", side_effect=lambda m, *_: m),
+        patch("ddev.cli.size.common.print_csv"),
+        patch("ddev.cli.size.common.print_table"),
+    ):
+        yield
+
+
+def test_diff_no_args(ddev, mock_size_diff_dependencies):
+    result = ddev('size', 'diff', 'commit1', 'commit2', '--compressed')
+    print("Exit code:", result.exit_code)
+    print("Output:\n", result.output)
+    print("Exception:", result.exception)
+    assert result.exit_code == 0
+
+
+def test_diff_with_platform_and_version(ddev, mock_size_diff_dependencies):
+    result = ddev(
+        'size', 'diff', 'commit1', 'commit2', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed'
+    )
+    assert result.exit_code == 0
+
+
+def test_diff_csv(ddev, mock_size_diff_dependencies):
+    result = ddev(
+        'size', 'diff', 'commit1', 'commit2', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed', '--csv'
+    )
+    assert result.exit_code == 0
+
+
+
+
+from unittest.mock import patch, MagicMock
+
+def test_diff_no_differences(ddev):
+    fake_repo = MagicMock()
+    
+    with (
+        patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),
+        patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
+        patch.object(fake_repo, "checkout_commit"),  
+        patch("tempfile.mkdtemp", return_value="/tmp/fake_repo"),
+        patch(
+            "ddev.cli.size.diff.get_compressed_files",
+            return_value={
+                "path1.py": 1000,
+                "path2.py": 500,
+            },
+        ),
+        patch(
+            "ddev.cli.size.diff.get_compressed_dependencies",
+            return_value={
+                "dep1.whl": 2000,
+                "dep2.whl": 1000,
+            },
+        ),
+        patch("ddev.cli.size.common.group_modules", side_effect=lambda m, *_: m),
+    ):
+        result = ddev(
+            'size', 'diff', 'commit1', 'commit2', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed'
+        )
+        print(result.output)
+        print(result.exit_code)
+
+    assert result.exit_code == 0
+
+
+
+def test_diff_invalid_platform(ddev):
+    result = ddev(
+        'size', 'diff', 'commit1', 'commit2', '--platform', 'linux', '--python', '3.12', '--compressed'  # inválido
+    )
+    assert result.exit_code != 0
+
+
+def test_diff_invalid_version(ddev):
+    result = ddev(
+        'size',
+        'diff',
+        'commit1',
+        'commit2',
+        '--platform',
+        'linux-aarch64',
+        '--python',
+        '2.10',  # inválido
+        '--compressed',
+    )
+    assert result.exit_code != 0
+
+
+def test_diff_invalid_platform_and_version(ddev):
+    result = ddev('size', 'diff', 'commit1', 'commit2', '--platform', 'linux', '--python', '2.10', '--compressed')
+    assert result.exit_code != 0

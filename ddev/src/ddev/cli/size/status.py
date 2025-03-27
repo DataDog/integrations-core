@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import sys
 from pathlib import Path
 
 import click
@@ -32,16 +31,19 @@ REPO_PATH = Path(__file__).resolve().parents[5]
 @click.option('--csv', is_flag=True, help="Output in CSV format")
 @click.pass_obj
 def status(app, platform, version, compressed, csv):
-    platforms = VALID_PLATFORMS if platform is None else [platform]
-    versions = VALID_PYTHON_VERSIONS if version is None else [version]
+    try:
+        platforms = VALID_PLATFORMS if platform is None else [platform]
+        versions = VALID_PYTHON_VERSIONS if version is None else [version]
 
-    for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-        status_mode(app, plat, ver, compressed, csv, i)
+        for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
+            status_mode(app, plat, ver, compressed, csv, i)
+    except Exception as e:
+        app.abort(str(e))
 
 
 def status_mode(app, platform, version, compressed, csv, i):
     if compressed:
-        modules = get_compressed_files(app) + get_compressed_dependencies(app, platform, version)
+        modules = get_compressed_files() + get_compressed_dependencies(platform, version)
 
         grouped_modules = group_modules(modules, platform, version)
         grouped_modules.sort(key=lambda x: x['Size (Bytes)'], reverse=True)
@@ -52,10 +54,10 @@ def status_mode(app, platform, version, compressed, csv, i):
             print_table(app, grouped_modules, platform, version)
 
 
-def get_compressed_files(app):
+def get_compressed_files():
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(app, REPO_PATH)
+    git_ignore = get_gitignore_files(REPO_PATH)
     included_folder = "datadog_checks/"
 
     file_data = []
@@ -68,7 +70,7 @@ def get_compressed_files(app):
 
             # Filter files
             if is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
-                compressed_size = compress(app, file_path, relative_path)
+                compressed_size = compress(file_path)
                 integration = relative_path.split(os.sep)[0]
                 file_data.append(
                     {
@@ -81,17 +83,11 @@ def get_compressed_files(app):
     return file_data
 
 
-def get_compressed_dependencies(app, platform, version):
+def get_compressed_dependencies(platform, version):
 
     resolved_path = os.path.join(REPO_PATH, ".deps/resolved")
-
-    if not os.path.exists(resolved_path) or not os.path.isdir(resolved_path):
-        app.display_error(f"Error: Directory not found {resolved_path}")
-        sys.exit(1)
-
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)
-
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls = get_dependencies(app, file_path)
-            return get_dependencies_sizes(app, deps, download_urls)
+            deps, download_urls = get_dependencies(file_path)
+            return get_dependencies_sizes(deps, download_urls)

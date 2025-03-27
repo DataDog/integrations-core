@@ -4,6 +4,8 @@
 
 from unittest.mock import MagicMock, mock_open, patch
 
+import pytest
+
 from ddev.cli.size.status import (
     get_compressed_dependencies,
     get_compressed_files,
@@ -11,15 +13,13 @@ from ddev.cli.size.status import (
 
 
 def test_get_compressed_files():
-    mock_app = MagicMock()
-
     mock_files = [
         ("root/integration/datadog_checks", [], ["file1.py", "file2.py"]),
         ("root/integration_b/datadog_checks", [], ["file3.py"]),
         ("root", [], ["ignored.py"]),
     ]
 
-    def fake_compress(app, file_path, relative_path):
+    def fake_compress(file_path):
         return 1000
 
     fake_gitignore = {"ignored.py"}
@@ -35,7 +35,7 @@ def test_get_compressed_files():
         patch("ddev.cli.size.status.compress", side_effect=fake_compress),
     ):
 
-        result = get_compressed_files(mock_app)
+        result = get_compressed_files()
 
     expected = [
         {
@@ -61,7 +61,7 @@ def test_get_compressed_files():
     assert result == expected
 
 
-def test_get_compressed_dependencies(terminal):
+def test_get_compressed_dependencies():
     platform = "windows-x86_64"
     version = "3.12"
 
@@ -82,7 +82,7 @@ def test_get_compressed_dependencies(terminal):
         patch("requests.head", return_value=mock_response),
     ):
 
-        file_data = get_compressed_dependencies(terminal, platform, version)
+        file_data = get_compressed_dependencies(platform, version)
 
     assert file_data == [
         {"File Path": "dependency1", "Type": "Dependency", "Name": "dependency1", "Size (Bytes)": 12345},
@@ -90,17 +90,45 @@ def test_get_compressed_dependencies(terminal):
     ]
 
 
-def test_status_no_args(ddev):
+@pytest.fixture()
+def mock_size_status():
+    with (
+        patch("ddev.cli.size.status.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.status.compress", return_value=1234),
+        patch("ddev.cli.size.status.get_dependencies", return_value=(["dep1"], {"dep1": "https://example.com/dep1"})),
+        patch(
+            "ddev.cli.size.status.get_dependencies_sizes",
+            return_value=[
+                {"File Path": "dep1.whl", "Type": "Dependency", "Name": "dep1", "Size (Bytes)": 5678},
+            ],
+        ),
+        patch("ddev.cli.size.status.is_valid_integration", return_value=True),
+        patch("ddev.cli.size.status.is_correct_dependency", return_value=True),
+        patch("ddev.cli.size.status.print_csv"),
+        patch("ddev.cli.size.status.print_table"),
+        patch(
+            "os.walk",
+            return_value=[
+                ("datadog_checks/my_check", [], ["__init__.py"]),
+            ],
+        ),
+        patch("os.listdir", return_value=["fake_dep.whl"]),
+        patch("os.path.isfile", return_value=True),
+    ):
+        yield
+
+
+def test_status_no_args(ddev, mock_size_status):
     result = ddev('size', 'status', '--compressed')
     assert result.exit_code == 0
 
 
-def test_status(ddev):
+def test_status(ddev, mock_size_status):
     result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed')
     assert result.exit_code == 0
 
 
-def test_status_csv(ddev):
+def test_status_csv(ddev, mock_size_status):
     result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed', '--csv')
     assert result.exit_code == 0
 

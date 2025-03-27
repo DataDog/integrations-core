@@ -3,12 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-import sys
 import zlib
 
 import requests
-
-# utilities
 
 
 # mirar si existe
@@ -43,7 +40,7 @@ def is_correct_dependency(platform, version, name):
 
 
 def print_csv(app, i, modules):
-    headers = modules[0].keys()
+    headers = [k for k in modules[0].keys() if k != 'Size']
     if i == 0:
         app.display(",".join(headers))
 
@@ -59,41 +56,37 @@ def format(s):
 
 
 def print_table(app, modules, platform, version):
-    modules_table = {col: {} for col in modules[0].keys()}
+    modules_table = {col: {} for col in modules[0].keys() if col != 'Size (Bytes)'}
     for i, row in enumerate(modules):
         for key, value in row.items():
-            modules_table[key][i] = str(value)
+            if key in modules_table:
+                modules_table[key][i] = str(value)
     app.display_table(platform + " " + version, modules_table)
 
 
-def get_dependencies_sizes(app, deps, download_urls):
+def get_dependencies_sizes(deps, download_urls):
     file_data = []
     for dep, url in zip(deps, download_urls, strict=False):
         dep_response = requests.head(url)
-        if dep_response.status_code != 200:
-            app.display_error(f"Error {dep_response.status_code}: Unable to fetch the dependencies file")
-            sys.exit(1)
-        else:
-            size = dep_response.headers.get("Content-Length", None)
-            file_data.append({"File Path": dep, "Type": "Dependency", "Name": dep, "Size (Bytes)": int(size)})
+        dep_response.raise_for_status()
+        size = dep_response.headers.get("Content-Length", None)
+        file_data.append({"File Path": dep, "Type": "Dependency", "Name": dep, "Size (Bytes)": int(size)})
 
     return file_data
 
 
-def get_dependencies(app, file_path):
+def get_dependencies(file_path):
     download_urls = []
     deps = []
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            file_content = file.read()
-            for line in file_content.splitlines():
-                match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
-                if match:
-                    deps.append(match.group(1))
-                    download_urls.append(match.group(2))
-    except Exception as e:
-        app.display_error(f"Error reading file {file_path}: {e}")
-        sys.exit(1)
+    with open(file_path, "r", encoding="utf-8") as file:
+        file_content = file.read()
+        for line in file_content.splitlines():
+            match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
+            if match:
+                deps.append(match.group(1))
+                download_urls.append(match.group(2))
+            else:
+                raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
 
     return deps, download_urls
 
@@ -118,36 +111,28 @@ def group_modules(modules, platform, version):
     ]
 
 
-def get_gitignore_files(app, repo_path):
+def get_gitignore_files(repo_path):
     gitignore_path = os.path.join(repo_path, ".gitignore")
-    if not os.path.exists(gitignore_path):
-        app.display_error(f"Error: .gitignore file not found at {gitignore_path}")
-        sys.exit(1)
-
-    try:
-        with open(gitignore_path, "r", encoding="utf-8") as file:
-            gitignore_content = file.read()
-            ignored_patterns = [
-                line.strip() for line in gitignore_content.splitlines() if line.strip() and not line.startswith("#")
-            ]
-            return ignored_patterns
-    except Exception as e:
-        app.display_error(f"Error reading .gitignore file: {e}")
-        sys.exit(1)
+    with open(gitignore_path, "r", encoding="utf-8") as file:
+        gitignore_content = file.read()
+        ignored_patterns = [
+            line.strip() for line in gitignore_content.splitlines() if line.strip() and not line.startswith("#")
+        ]
+        return ignored_patterns
 
 
-def compress(app, file_path, relative_path):
+def compress(file_path):
     compressor = zlib.compressobj()
     compressed_size = 0
-    try:
-        # original_size = os.path.getsize(file_path)
-        with open(file_path, "rb") as f:
-            while chunk := f.read(8192):  # Read in 8KB chunks
-                compressed_chunk = compressor.compress(chunk)
-                compressed_size += len(compressed_chunk)
+    # original_size = os.path.getsize(file_path)
+    with open(file_path, "rb") as f:
+        while chunk := f.read(8192):  # Read in 8KB chunks
+            compressed_chunk = compressor.compress(chunk)
+            compressed_size += len(compressed_chunk)
+        compressed_size += len(compressor.flush())
+    return compressed_size
 
-            compressed_size += len(compressor.flush())
-        return compressed_size
-    except Exception as e:
-        app.display_error(f"Error processing {relative_path}: {e}")
-        sys.exit(1)
+
+class WrongDependencyFormat(Exception):
+    def __init__(self, mensaje):
+        super().__init__(mensaje)
