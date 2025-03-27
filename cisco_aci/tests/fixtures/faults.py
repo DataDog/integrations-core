@@ -1,0 +1,118 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+EXPECTED_FAULT_LOGS = [
+    {
+        "cisco_aci": {
+            "ack": "no",
+            "alert": "no",
+            "cause": "threshold-crossed",
+            "changeSet": "crcLast:0",
+            "childAction": "",
+            "code": "F381328",
+            "created": "2025-03-12T05:00:05.650+00:00",
+            "delegated": "no",
+            "descr": "TCA: CRC Align Errors current value(eqptIngrErrPkts5min:crcLast) value 0% fell below threshold 1%",  # noqa: E501
+            "dn": "topology/pod-1/node-102/sys/phys-[eth1/1]/fault-F381328",
+            "domain": "infra",
+            "highestSeverity": "warning",
+            "lastTransition": "2025-03-12T21:56:45.365+00:00",
+            "lc": "retaining",
+            "occur": "892",
+            "origSeverity": "warning",
+            "prevSeverity": "warning",
+            "rule": "tca-eqpt-ingr-err-pkts5min-crc-last",
+            "severity": "cleared",
+            "status": "",
+            "subject": "counter",
+            "title": "",
+            "type": "operational",
+            "faultCategory": "faultInst",
+        },
+        "ddtags": "project:cisco_aci",
+    },
+    {
+        "cisco_aci": {
+            "ack": "no",
+            "affected": "resPolCont/rtdOutCont/rtdOutDef-[uni/tn-Legado/out-PANDORA_to_NELS.l3out]/node-101/stpathatt-[N5KFRE-VPC]/nwissues",  # noqa: E501
+            "cause": "configuration-failed",
+            "changeSet": "configQual:invalid-path, configSt:failed-to-apply, debugMessage:invalid-path: Interface does not exist;, temporaryError:no",  # noqa: E501
+            "childAction": "",
+            "code": "F0467",
+            "created": "2025-03-12T14:50:49.955+00:00",
+            "descr": "Fault delegate: Configuration failed for uni/tn-Legado/out-PANDORA_to_NELS.l3out node 101 N5KFRE-VPC due to Invalid Path Configuration, debug message: invalid-path: Interface does not exist;",  # noqa: E501
+            "dn": "uni/tn-Legado/out-PANDORA_to_NELS.l3out/fd-[resPolCont/rtdOutCont/rtdOutDef-[uni/tn-Legado/out-PANDORA_to_NELS.l3out]/node-101/stpathatt-[N5KFRE-VPC]/nwissues]-fault-F0467",  # noqa: E501
+            "domain": "tenant",
+            "highestSeverity": "minor",
+            "lastTransition": "2025-03-12T14:53:06.041+00:00",
+            "lc": "raised",
+            "occur": "1",
+            "origSeverity": "minor",
+            "prevSeverity": "minor",
+            "rule": "fv-nw-issues-config-failed",
+            "severity": "minor",
+            "status": "",
+            "subject": "management",
+            "type": "config",
+            "faultCategory": "faultDelegate",
+        },
+        "ddtags": "project:cisco_aci",
+    },
+    {
+        "cisco_aci": {
+            "ack": "no",
+            "alert": "no",
+            "cause": "threshold-crossed",
+            "changeSet": "errorRate:11",
+            "childAction": "",
+            "code": "F96976",
+            "created": "2025-03-12T05:01:08.717+00:00",
+            "delegated": "no",
+            "descr": "TCA: Egress Error Drop Packets rate(eqptEgrDropPkts5min:errorRate) value 11 raised above threshold 10",  # noqa: E501
+            "dn": "topology/pod-1/node-102/sys/phys-[eth1/1]/fault-F96976",
+            "domain": "infra",
+            "highestSeverity": "warning",
+            "lastTransition": "2025-03-12T21:56:45.365+00:00",
+            "lc": "raised",
+            "occur": "53",
+            "origSeverity": "warning",
+            "prevSeverity": "cleared",
+            "rule": "tca-eqpt-egr-drop-pkts5min-error-rate",
+            "severity": "warning",
+            "status": "",
+            "subject": "counter",
+            "title": "",
+            "type": "operational",
+            "faultCategory": "faultInst",
+        },
+        "ddtags": "project:cisco_aci",
+    },
+    {
+        "cisco_aci": {
+            "ack": "no",
+            "affected": "uni/epp/fv-[uni/tn-Tenant888/ap-app_demo_ap/epg-dev_epg]/node-1101/polDelSt",
+            "cause": "configuration-failed",
+            "changeSet": "deploymentState:not-registered-for-atg",
+            "childAction": "",
+            "code": "F1298",
+            "created": "2025-03-12T09:39:32.189+00:00",
+            "descr": "Fault delegate: For tenant Tenant888, application profile app_demo_ap, deployment of application EPG dev_epg failed on node 1101. Reason Node Cannot Deploy EPG",  # noqa: E501
+            "dn": "uni/tn-Tenant888/ap-app_demo_ap/epg-dev_epg/fd-[uni/epp/fv-[uni/tn-Tenant888/ap-app_demo_ap/epg-dev_epg]/node-1101/polDelSt]-fault-F1298",  # noqa: E501
+            "domain": "tenant",
+            "highestSeverity": "minor",
+            "lastTransition": "2025-03-12T14:53:06.041+00:00",
+            "lc": "raised",
+            "occur": "1",
+            "origSeverity": "minor",
+            "prevSeverity": "minor",
+            "rule": "fv-pol-delivery-status-configuration-failed",
+            "severity": "minor",
+            "status": "",
+            "subject": "epg",
+            "type": "config",
+            "faultCategory": "faultDelegate",
+        },
+        "ddtags": "project:cisco_aci",
+    },
+]

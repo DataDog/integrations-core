@@ -6,12 +6,13 @@
 import json
 import logging
 import os
+import re
 from typing import Any  # noqa: F401
 
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
 
 from .utils import BaseModelTest
@@ -41,7 +42,12 @@ def test_check_version():
 
 
 def test_load_config():
-    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
+    assert AgentCheck.load_config('raw_foo: bar') == {'raw_foo': 'bar'}
+    assert AgentCheck.load_config('invalid:mapping') == 'invalid:mapping'
+    assert AgentCheck.load_config('') is None
+
+    with pytest.raises(ValueError, match='Failed to load config: '):
+        AgentCheck.load_config(':')
 
 
 def test_persistent_cache(datadog_agent):
@@ -111,7 +117,7 @@ class TestSecretsSanitization:
         secret = 'p@$$w0rd'
         check = AgentCheck()
         check.register_secret(secret)
-        sanitized = check.sanitize(secret)
+        sanitized = re.escape(check.sanitize(secret))
 
         check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
 
@@ -1310,23 +1316,3 @@ def test_env_var_logic_preset():
         AgentCheck()
         assert os.getenv('OPENSSL_CONF', None) == preset_conf
         assert os.getenv('OPENSSL_MODULES', None) == preset_modules
-
-
-def test_ha_enabled_and_unsupported():
-    class TestNonHACheck(AgentCheck):
-        HA_SUPPORTED = False
-
-    TestNonHACheck('test', {}, [{}])
-    with pytest.raises(ConfigurationError):
-        TestNonHACheck('test', {'ha_enabled': True}, [{}])
-    with pytest.raises(ConfigurationError):
-        TestNonHACheck('test', {}, [{'ha_enabled': True}])
-
-
-def test_ha_enabled_and_supported():
-    class TestHACheck(AgentCheck):
-        HA_SUPPORTED = True
-
-    TestHACheck('test', {}, [{}])
-    TestHACheck('test', {'ha_enabled': True}, [{}])
-    TestHACheck('test', {}, [{'ha_enabled': True}])

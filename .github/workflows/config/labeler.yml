@@ -1,13 +1,10 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
+  # We apply no-changelog label for PRs that release integrations by bumping __about__.py.
 - any:
   - requirements-agent-release.txt
   - '**/__about__.py'
-- all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
 ddev:
 - ddev/**/*
 dependencies:
@@ -89,6 +86,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bitdefender:
+- bitdefender/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
@@ -293,16 +292,18 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
-integration/intercom:
-- intercom/**/*
 integration/incident_io:
 - incident_io/**/*
+integration/infiniband:
+- infiniband/**/*
+integration/intercom:
+- intercom/**/*
 integration/istio:
 - istio/**/*
-integration/ivanti_nzta:
-- ivanti_nzta/**/*
 integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
+integration/ivanti_nzta:
+- ivanti_nzta/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -461,10 +462,10 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
-integration/plivo:
-- plivo/**/*
 integration/plaid:
 - plaid/**/*
+integration/plivo:
+- plivo/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
@@ -515,6 +516,8 @@ integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
+integration/silverstripe_cms:
+- silverstripe_cms/**/*
 integration/singlestore:
 - singlestore/**/*
 integration/slurm:
@@ -551,6 +554,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonatype_nexus:
+- sonatype_nexus/**/*
 integration/sonicwall_firewall:
 - sonicwall_firewall/**/*
 integration/sophos_central_cloud:
@@ -639,6 +644,8 @@ integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/velero:
+- velero/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:

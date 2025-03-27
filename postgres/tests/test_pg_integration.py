@@ -1080,7 +1080,8 @@ def assert_state_clean(check):
 
 def assert_state_set(check):
     assert check.metrics_cache.instance_metrics
-    assert check.metrics_cache.bgw_metrics
+    if float(POSTGRES_VERSION) < 17.0:
+        assert check.metrics_cache.bgw_metrics
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics

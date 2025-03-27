@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 22.7.0 / 2025-03-19
+
+***Added***:
+
+* Add support for Postgres 17 ([#19625](https://github.com/DataDog/integrations-core/pull/19625))
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* When Amazon adds Extended Support to older Postgres versions, they update the version string to a format we are currently unable to parse. This adds the ability to parse those versions. Here is an example announcement where they communicate such a version string: https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-rds-postgresql-minor-11-22-rds-20241121/ ([#19773](https://github.com/DataDog/integrations-core/pull/19773))
+
+***Fixed***:
+
+* Omit .* regex filter to avoid unnecessary work in query ([#19470](https://github.com/DataDog/integrations-core/pull/19470))
+* When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces. ([#19694](https://github.com/DataDog/integrations-core/pull/19694))
+
+## 22.6.0 / 2025-02-20
+
+***Added***:
+
+* Add support for collecting raw query statements and explain plans when `collect_raw_query_statement.enabled` is true. ([#19493](https://github.com/DataDog/integrations-core/pull/19493))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+***Fixed***:
+
+* Split Postgres query metrics payload to conform to max payload size and enable larger query metrics collection ([#19582](https://github.com/DataDog/integrations-core/pull/19582))
+* Fix exception handling for auto discovered databases ([#19586](https://github.com/DataDog/integrations-core/pull/19586))
+
 ## 22.5.1 / 2025-01-29 / Agent 7.63.0
 
 ***Fixed***:

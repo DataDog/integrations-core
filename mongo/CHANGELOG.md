@@ -2,6 +2,48 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.0 / 2025-03-19
+
+***Changed***:
+
+* Change MongoDB default explain verbosity from executionStats to queryPlanner (DBM only). ([#19855](https://github.com/DataDog/integrations-core/pull/19855))
+
+***Added***:
+
+* Added support for configuring explain verbosity mode in MongoDB integration via `operation_samples.explain_verbosity` and `slow_operations.explain_verbosity` options. ([#19232](https://github.com/DataDog/integrations-core/pull/19232))
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Added `system_database_stats` to control system database stats collection and `metrics_collection_interval.db_stats`, `metrics_collection_interval.session_stats` for customizable collection intervals. ([#19756](https://github.com/DataDog/integrations-core/pull/19756))
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798))
+* Increased default collection stats and collection index stats collect interval to 5 mins. ([#19856](https://github.com/DataDog/integrations-core/pull/19856))
+
+***Fixed***:
+
+* Revert "[mongo] add service tag to agent operations (#19456)" ([#19768](https://github.com/DataDog/integrations-core/pull/19768))
+
+## 8.6.0 / 2025-03-25
+
+***Added***:
+
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798)) This release is for the 7.64.x Agent series.
+
+## 8.5.1 / 2025-03-12 / Agent 7.64.0
+
+***Fixed***:
+
+* Revert "bump pymongo to 4.11 (#19610)". This brings pymongo back to v4.8. ([#19814](https://github.com/DataDog/integrations-core/pull/19814))
+
+## 8.5.0 / 2025-02-20
+
+***Added***:
+
+* Collect `lsid` and `transaction` details from `$currentOp` for MongoDB activity sampling. ([#19553](https://github.com/DataDog/integrations-core/pull/19553))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+* Bump `pymongo` to 4.11. ([#19610](https://github.com/DataDog/integrations-core/pull/19610))
+
+***Fixed***:
+
+* Skip host info system metrics collection on arbiter node due to `HostInfo` command cannot not be ran on arbiter without admin access. ([#19571](https://github.com/DataDog/integrations-core/pull/19571))
+
 ## 8.4.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
@@ -223,8 +265,8 @@
 * Add cursor object to sampled activities and explain plan payload. cursor contains the cursor information for idleCursor and getmore operations. ([#17840](https://github.com/DataDog/integrations-core/pull/17840))
 * Add tag `clustername` to mongo metrics. This tag is set only when `cluster_name` is provided in the integration configuration. ([#17876](https://github.com/DataDog/integrations-core/pull/17876))
 * Update mongo conf.yaml.example to include DBM for MongoDB config options. The new config options includes `dbm`, `cluster_name`, `operation_samples.enabled` & `operation_samples.collection_interval`. ([#17940](https://github.com/DataDog/integrations-core/pull/17940))
-* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance. 
-  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery. 
+* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance.
+  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery.
   When enabled, the integration will automatically discover the databases available in the monitored mongodb instance and refresh the list of databases every 10 minutes.
   Use `database_autodiscovery.include` and `database_autodiscovery.exclude` to filter the list of databases to monitor. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
 * Added new collection latency and query execution stats metrics.

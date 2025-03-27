@@ -20,7 +20,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
 from ..common import to_native_string
@@ -193,7 +193,7 @@ def get_agent_host_tags():
     if not host_tags:
         return result
     try:
-        tags_dict = json.loads(host_tags) or {}
+        tags_dict = json.decode(host_tags) or {}
         for key, value in tags_dict.items():
             if isinstance(value, list):
                 result.extend(value)
@@ -250,7 +250,7 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     if not statement.startswith('{'):
         return {'query': statement, 'metadata': {}}
 
-    statement_with_metadata = json.loads(statement)
+    statement_with_metadata = json.decode(statement)
     metadata = statement_with_metadata.get('metadata', {})
     tables = metadata.pop('tables_csv', None)
     tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
