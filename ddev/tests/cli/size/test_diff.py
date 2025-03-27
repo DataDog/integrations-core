@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from unittest.mock import MagicMock, mock_open, patch, Mock
+from unittest.mock import MagicMock, mock_open, patch
+
 import pytest
+
 from ddev.cli.size.diff import get_compressed_dependencies, get_compressed_files, get_diff
 
 
@@ -173,15 +175,13 @@ def test_diff_csv(ddev, mock_size_diff_dependencies):
 
 
 
-from unittest.mock import patch, MagicMock
-
 def test_diff_no_differences(ddev):
     fake_repo = MagicMock()
-    
+
     with (
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
-        patch.object(fake_repo, "checkout_commit"),  
+        patch.object(fake_repo, "checkout_commit"),
         patch("tempfile.mkdtemp", return_value="/tmp/fake_repo"),
         patch(
             "ddev.cli.size.diff.get_compressed_files",
@@ -206,7 +206,6 @@ def test_diff_no_differences(ddev):
         print(result.exit_code)
 
     assert result.exit_code == 0
-
 
 
 def test_diff_invalid_platform(ddev):
