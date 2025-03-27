@@ -5,8 +5,8 @@
 # Metric map
 METRIC_MAP = {
     # Flower event metrics
-    'flower_events_total': 'events.total',
     'flower_events_created': 'events.created',
+    'flower_events': 'events',
     
     # Task metrics
     'flower_task_runtime_seconds': 'task.runtime.seconds',

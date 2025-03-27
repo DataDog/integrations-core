@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
 
@@ -19,18 +22,15 @@ MOCKED_INSTANCE = {
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-STANDALONE_TEST_METRICS = {
-    # Flower event metrics
-    'flower_events_total': 'events.total',
-    'flower_events_created': 'events.created',
-    
-    # Task metrics
-    'flower_task_runtime_seconds': 'task.runtime.seconds',
-    'flower_task_runtime_seconds_created': 'task.runtime.created',
-    'flower_task_prefetch_time_seconds': 'task.prefetch_time.seconds',
-    
-    # Worker metrics
-    'flower_worker_prefetched_tasks': 'worker.prefetched_tasks',
-    'flower_worker_online': 'worker.online',
-    'flower_worker_number_of_currently_executing_tasks': 'worker.executing_tasks',
-}
+METRICS = [
+    'celery.flower.events.count',
+    'celery.flower.events.created',
+    'celery.flower.task.prefetch_time.seconds',
+    'celery.flower.task.runtime.created',
+    'celery.flower.task.runtime.seconds.bucket',
+    'celery.flower.task.runtime.seconds.count',
+    'celery.flower.task.runtime.seconds.sum',
+    'celery.flower.worker.executing_tasks',
+    'celery.flower.worker.online',
+    'celery.flower.worker.prefetched_tasks',
+]
