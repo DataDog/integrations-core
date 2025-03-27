@@ -95,6 +95,7 @@ select = [
   "G",
   "W",
   "I",
+  "TID",
 ]
 ignore = [
   # From legacy flake8 settings
@@ -116,7 +117,7 @@ unfixable = [
 known-first-party = ["ddev"]
 
 [tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports
