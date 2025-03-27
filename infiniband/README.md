@@ -23,7 +23,7 @@ No additional installation is needed on your server.
 
 1. To start collecting your InfiniBand performance data, create and edit the `infiniband.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample infiniband.d/conf.yaml][4] for all available configuration options.
 
-2. This check works with minimal configuration. Optional parameters are provided to better control where the Agent looks for data and what data to collect if the default behaviors are not desired. Options include configuring the directory where counters reside, excluding specific devices/ports, and skipping or adding counters for collection.
+2. This check works with minimal configuration. Configure optional parameters, which are provided to better control where the Agent looks for data and what data to collect if the default behaviors are not desired. Options include configuring the directory where counters reside, excluding specific devices/ports, and skipping or adding counters for collection.
 ```yaml
 init_config:
 instances:
