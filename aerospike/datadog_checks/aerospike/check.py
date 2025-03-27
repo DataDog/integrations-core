@@ -38,8 +38,8 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
 
         if self.build_version is None:
             self._fetch_build_info_from_metric()
-            
-        # build-version is identified from node_up metrics, which is available from aerospike server 4.x 
+
+        # build-version is identified from node_up metrics, which is available from aerospike server 4.x
         # dfault to 7 if no build version info is available, version number example: 7.1.0.2, 5.6.0.0
         if self.build_version is not None and int(self.build_version.split('.')[0]) < 7:
             return METRIC_MAP
@@ -74,5 +74,5 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
             labels = {k.strip(): v.strip('"') for k, v in labels.items()}  # Remove quotes
 
             return labels["build"]
-        
+
         return "7.2.0.0"
