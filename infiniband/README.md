@@ -21,9 +21,60 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `infiniband.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your infiniband performance data. See the [sample infiniband.d/conf.yaml][4] for all available configuration options.
+1. Create and edit the `infiniband.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your infiniband performance data. See the [sample infiniband.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][5].
+2. This check works with minimal configuration. Optional parameters are provided to better control where the Agent looks for data and what data to collect if the default behaviors are not desired. Options include configuring the directory where counters reside, excluding specific devices/ports, and skipping or adding counters for collection.
+```yaml
+init_config:
+instances:
+  -
+    ## @param infiniband_path - string - optional - default: /sys/class/infiniband
+    ## The path to the infiniband directory.
+    #
+    # infiniband_path: /sys/class/infiniband
+
+    ## @param exclude_devices - list of strings - optional
+    ## A list of devices to exclude from the check. Devices are located in the infiniband directory. 
+    ## The devices are located default is /sys/class/infiniband.
+    #
+    # exclude_devices:
+    #   - mlx5_0
+    #   - efa0
+    #   - ib1
+
+    ## @param additional_counters - list of strings - optional
+    ## A list of additional counters to collect. The counter names are the files in which the counter 
+    ## values are stored. These are located inside /sys/class/infiniband/devices/<device>/ports/<port>/counters.
+    #
+    # additional_counters:
+    #   - additional_counter
+    #   - rx_mpwqe_frag
+
+    ## @param additional_hw_counters - list of strings - optional
+    ## A list of additional hardware counters to collect. The counter names are the files in which the 
+    ## counter values are stored. These are located inside 
+    ## /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
+    #
+    # additional_hw_counters:
+    #   - additional_hw_counter
+    #   - rx_mpwqe_frag
+
+    ## @param exclude_counters - list of strings - optional
+    ## A list of counters to exclude from the check.
+    #
+    # exclude_counters:
+    #   - duplicate_request
+    #   - lifespan
+
+    ## @param exclude_hw_counters - list of strings - optional
+    ## A list of hardware counters to exclude from the check.
+    #
+    # exclude_hw_counters:
+    #   - VL15_dropped
+    #   - link_downed
+```
+
+3. [Restart the Agent][5].
 
 ### Validation
 
