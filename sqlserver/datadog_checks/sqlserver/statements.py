@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name, is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 try:
     import datadog_agent
@@ -361,11 +361,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             procedure_signature = None
             procedure_content = None
             row['is_proc'] = bool(row.get('procedure_name'))
-            if self.disable_secondary_tags:
-                # Extract procedure name and comments from the statement text
-                # because we don't aggegate on dbid when disable_secondary_tags is enabled
-                _, row['is_proc'], row['procedure_name'] = extract_sql_comments_and_procedure_name(row['text'])
-            if row['is_proc'] and row['text']:
+            if (row['is_proc'] and row['text']) or self.disable_secondary_tags:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
@@ -375,6 +371,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     procedure_comments = procedure_statement['metadata'].get('comments', [])
                     if procedure_comments:
                         comments = list(set(comments + procedure_comments))
+                    if self.disable_secondary_tags and not row.get('procedure_name'):
+                        print('get procedure name from statement text')
+                        # Extract procedure name from the statement text when disable_secondary_tags is enabled
+                        procedures = procedure_statement['metadata'].get('procedures')
+                        if procedures:
+                            row['procedure_name'] = procedures[0].lower()
+                            row['is_proc'] = True
                 except Exception as e:
                     procedure_signature = '__procedure_obfuscation_error__'
                     procedure_content = '__procedure_obfuscation_error__'
@@ -401,7 +404,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 row['procedure_signature'] = procedure_signature
 
             if row.get('procedure_name') and row.get('schema_name'):
-                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}"
+                # convert to lowercase for backward compatibility
+                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
 
             row['dd_comments'] = comments
             row['text'] = obfuscated_statement

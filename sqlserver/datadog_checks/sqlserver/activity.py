@@ -414,7 +414,7 @@ class SqlserverActivity(DBMAsyncJob):
             row['dd_comments'] = comments
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             if row.get('procedure_name') and row.get('schema_name'):
-                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}"
+                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
         except Exception as e:
             print(e)
             if self._config.log_unobfuscated_queries:
