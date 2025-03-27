@@ -1,13 +1,10 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
+  # We apply no-changelog label for PRs that release integrations by bumping __about__.py.
 - any:
   - requirements-agent-release.txt
   - '**/__about__.py'
-- all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
 ddev:
 - ddev/**/*
 dependencies:
