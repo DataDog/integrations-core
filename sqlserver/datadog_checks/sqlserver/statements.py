@@ -372,7 +372,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     if procedure_comments:
                         comments = list(set(comments + procedure_comments))
                     if self.disable_secondary_tags and not row.get('procedure_name'):
-                        print('get procedure name from statement text')
                         # Extract procedure name from the statement text when disable_secondary_tags is enabled
                         procedures = procedure_statement['metadata'].get('procedures')
                         if procedures:
