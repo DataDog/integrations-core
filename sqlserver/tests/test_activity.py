@@ -88,8 +88,8 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM \[ϑings\] WHERE \[name\]=\@1",
             False,
             [],
-            False,
-            None,
+            True,
+            "SELECT * FROM ϑings WHERE name = 'test'",
         ],
         [
             "datadog_test-1",
@@ -97,8 +97,8 @@ def dbm_instance(instance_docker):
             r"SELECT \* FROM ϑings WHERE name like \@Name",
             True,
             [],
-            False,
-            None,
+            True,
+            "EXEC fredProcParams @Name = 'test'",
         ],
     ],
 )
