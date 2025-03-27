@@ -41,7 +41,7 @@ def get_local_driver():
         return '{ODBC Driver 18 for SQL Server}'
     else:
         driver = os.environ.get('LINUX_SQLSERVER_DRIVER')
-        if driver == 'odbc':
+        if not driver or driver == 'odbc':
             return '{ODBC Driver 18 for SQL Server}'
         return f'{driver}'
 
