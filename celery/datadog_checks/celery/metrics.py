@@ -7,12 +7,10 @@ METRIC_MAP = {
     # Flower event metrics
     'flower_events_created': 'events.created',
     'flower_events': 'events',
-    
     # Task metrics
     'flower_task_runtime_seconds': 'task.runtime.seconds',
     'flower_task_runtime_seconds_created': 'task.runtime.created',
     'flower_task_prefetch_time_seconds': 'task.prefetch_time.seconds',
-    
     # Worker metrics
     'flower_worker_prefetched_tasks': 'worker.prefetched_tasks',
     'flower_worker_online': 'worker.online',

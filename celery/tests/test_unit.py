@@ -8,10 +8,9 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.celery import CeleryCheck
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import get_fixture_path, METRICS
+from .common import METRICS, get_fixture_path
 
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):

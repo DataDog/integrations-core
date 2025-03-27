@@ -1,7 +1,7 @@
 from celery import Celery
-from celery.schedules import crontab
 
 app = Celery('tasks', broker='redis://default:devops-best-friend@docker-redis-standalone-1:6379')
+
 
 @app.task(bind=True)
 def add(self, x: int, y: int) -> int:

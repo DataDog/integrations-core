@@ -6,6 +6,7 @@ from typing import Any  # noqa: F401
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.celery.metrics import METRIC_MAP
 
+
 class CeleryCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'celery.flower'
@@ -19,4 +20,3 @@ class CeleryCheck(OpenMetricsBaseCheckV2):
         return {
             'metrics': [METRIC_MAP],
         }
-    
