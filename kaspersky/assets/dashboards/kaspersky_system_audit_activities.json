@@ -244,12 +244,13 @@
                                 "group_by": [
                                     {
                                         "facet": "@device_name",
-                                        "limit": 10,
+                                        "limit": 15,
                                         "sort": {
                                             "aggregation": "count",
                                             "order": "desc",
                                             "metric": "count"
-                                        }
+                                        },
+                                        "should_exclude_missing": true
                                     }
                                 ],
                                 "compute": {
@@ -272,7 +273,7 @@
                             }
                         ],
                         "sort": {
-                            "count": 10,
+                            "count": 15,
                             "order_by": [
                                 {
                                     "type": "formula",
