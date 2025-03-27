@@ -349,6 +349,19 @@ files:
           - xdr_write_success
           - xdr_write_timeout
 
+          ## ==============================================================================
+          ## Datacenter (XDR) specific metrics recorded per datacenter
+          ## ------------------------------------------------------------------------------
+
+          ## inline comments indicate moved/renamed metrics starting with ASD 3.9+
+          - dc_remote_ship_ok
+          - dc_rec_ship_attempts        # renamed dc_ship_attempt
+          - dc_delete_ship_attempts    # renamed dc_ship_delete_success
+          - dc_ship_attempt
+          - dc_ship_delete_success
+          - dc_ship_destination_error
+          - dc_ship_source_error
+          - dc_ship_success
   - template: instances
     options:
     - template: instances/openmetrics
