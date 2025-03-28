@@ -7,8 +7,8 @@ from typing import Any, Callable, Dict, List, Set  # noqa: F401
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.types import ServiceCheck  # noqa: F401
 from datadog_checks.ibm_mq import metrics
-from datadog_checks.ibm_mq.metrics import GAUGE
 from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
+from datadog_checks.ibm_mq.metrics import GAUGE
 
 try:
     import pymqi

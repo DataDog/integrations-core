@@ -70,6 +70,13 @@ namespace-packages = ["datadog_checks"]
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
 select = [
+  "B",
+  "C",
+  "E",
+  "F",
+  "G",
+  "W",
+  "I",
   "TID",
 ]
 ignore = [

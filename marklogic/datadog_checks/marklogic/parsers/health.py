@@ -4,7 +4,6 @@
 from typing import Any, Dict  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-
 from datadog_checks.marklogic.constants import STATE_HEALTH_MAPPER
 
 
