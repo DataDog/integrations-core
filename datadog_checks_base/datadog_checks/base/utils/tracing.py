@@ -102,7 +102,7 @@ def traced_warning(f, tracer):
         return f
 
 
-def generate_tracer_context(f, tracer):
+def configure_tracer(tracer):
     """
     Generate a tracer context for the given function with configurable sampling rate.
     If not set or invalid, defaults to 0 (no sampling).
@@ -176,7 +176,7 @@ def traced_class(cls):
                     setattr(cls, attr, traced_warning(attribute, tracer))
                 else:
                     if attr == 'run' or attr == 'check':
-                        generate_tracer_context(attribute, tracer)
+                        configure_tracer(tracer)
                     setattr(cls, attr, tracing_method(attribute, tracer))
             return cls
 
