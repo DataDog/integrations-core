@@ -1,0 +1,106 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 438.0
+python_gc_objects_collected_total{generation="1"} 96.0
+python_gc_objects_collected_total{generation="2"} 44.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 192.0
+python_gc_collections_total{generation="1"} 17.0
+python_gc_collections_total{generation="2"} 1.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="12",patchlevel="9",version="3.12.9"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 7.50231552e+08
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 6.012928e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.7423696216e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 25.51
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 46.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP flower_events_total Number of events
+# TYPE flower_events_total counter
+flower_events_total{task="tasks.add",type="task-received",worker="celery@b418c0493d46"} 1141.0
+flower_events_total{task="tasks.add",type="task-started",worker="celery@b418c0493d46"} 1141.0
+flower_events_total{task="tasks.multiply",type="task-received",worker="celery@b418c0493d46"} 1141.0
+flower_events_total{task="tasks.add",type="task-succeeded",worker="celery@b418c0493d46"} 1141.0
+flower_events_total{task="tasks.multiply",type="task-started",worker="celery@b418c0493d46"} 1141.0
+flower_events_total{task="tasks.multiply",type="task-succeeded",worker="celery@b418c0493d46"} 1141.0
+# HELP flower_events_created Number of events
+# TYPE flower_events_created gauge
+flower_events_created{task="tasks.add",type="task-received",worker="celery@b418c0493d46"} 1.742369632864349e+09
+flower_events_created{task="tasks.add",type="task-started",worker="celery@b418c0493d46"} 1.7423696328688602e+09
+flower_events_created{task="tasks.multiply",type="task-received",worker="celery@b418c0493d46"} 1.7423696328690126e+09
+flower_events_created{task="tasks.add",type="task-succeeded",worker="celery@b418c0493d46"} 1.742369632871363e+09
+flower_events_created{task="tasks.multiply",type="task-started",worker="celery@b418c0493d46"} 1.7423696328732128e+09
+flower_events_created{task="tasks.multiply",type="task-succeeded",worker="celery@b418c0493d46"} 1.742369632875232e+09
+# HELP flower_task_runtime_seconds Task runtime
+# TYPE flower_task_runtime_seconds histogram
+flower_task_runtime_seconds_bucket{le="0.005",task="tasks.add",worker="celery@b418c0493d46"} 1140.0
+flower_task_runtime_seconds_bucket{le="0.01",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.025",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.05",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.075",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.1",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.25",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.5",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.75",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="1.0",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="2.5",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="5.0",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="7.5",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="10.0",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="+Inf",task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_count{task="tasks.add",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_sum{task="tasks.add",worker="celery@b418c0493d46"} 0.3499873769469559
+flower_task_runtime_seconds_bucket{le="0.005",task="tasks.multiply",worker="celery@b418c0493d46"} 1140.0
+flower_task_runtime_seconds_bucket{le="0.01",task="tasks.multiply",worker="celery@b418c0493d46"} 1140.0
+flower_task_runtime_seconds_bucket{le="0.025",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.05",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.075",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.1",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.25",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.5",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="0.75",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="1.0",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="2.5",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="5.0",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="7.5",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="10.0",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_bucket{le="+Inf",task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_count{task="tasks.multiply",worker="celery@b418c0493d46"} 1141.0
+flower_task_runtime_seconds_sum{task="tasks.multiply",worker="celery@b418c0493d46"} 0.21184332855045795
+# HELP flower_task_runtime_seconds_created Task runtime
+# TYPE flower_task_runtime_seconds_created gauge
+flower_task_runtime_seconds_created{task="tasks.add",worker="celery@b418c0493d46"} 1.7423696328714476e+09
+flower_task_runtime_seconds_created{task="tasks.multiply",worker="celery@b418c0493d46"} 1.7423696328752818e+09
+# HELP flower_task_prefetch_time_seconds The time the task spent waiting at the celery worker to be executed.
+# TYPE flower_task_prefetch_time_seconds gauge
+flower_task_prefetch_time_seconds{task="tasks.add",worker="celery@b418c0493d46"} 0.0
+flower_task_prefetch_time_seconds{task="tasks.multiply",worker="celery@b418c0493d46"} 0.0
+# HELP flower_worker_prefetched_tasks Number of tasks of given type prefetched at a worker
+# TYPE flower_worker_prefetched_tasks gauge
+flower_worker_prefetched_tasks{task="tasks.add",worker="celery@b418c0493d46"} 0.0
+flower_worker_prefetched_tasks{task="tasks.multiply",worker="celery@b418c0493d46"} 0.0
+# HELP flower_worker_online Worker online status
+# TYPE flower_worker_online gauge
+flower_worker_online{worker="celery@b418c0493d46"} 1.0
+# HELP flower_worker_number_of_currently_executing_tasks Number of tasks currently executing at a worker
+# TYPE flower_worker_number_of_currently_executing_tasks gauge
+flower_worker_number_of_currently_executing_tasks{worker="celery@b418c0493d46"} 0.0
