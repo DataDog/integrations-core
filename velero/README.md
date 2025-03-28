@@ -13,8 +13,10 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Metrics
+
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx-->
+<!-- xxx tab "Host" xxx -->
 
 Follow the instructions below to install and configure this check for an Agent running on a host. 
 
@@ -23,12 +25,48 @@ Follow the instructions below to install and configure this check for an Agent r
 2. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Kubernetes" xxx-->
+<!-- xxx tab "Kubernetes" xxx -->
 
 See the [Autodiscovery Integration Templates][3] for guidance on configuring this integration in a containerized environment.
 
 Note that two types of pods need to be queried for all metrics to be collected: `velero` and `node-agent`
 Therefore, make sure to update the annotations of the `velero` deployment as well as the `node-agent` daemonset.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+#### Logs
+
+The Velero integration can collect logs from the Velero pods.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+To collect logs from Velero containers on a host:
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `velero.d/conf.yaml` file. For example:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: velero
+       service: velero
+   ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+To collect logs from a Velero Kubernetes deployment:
+
+1. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
+
+2. Set Log Integrations as pod annotations. This can also be configured with a file, a ConfigMap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][11].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -81,3 +119,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/velero/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
