@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.utils import extract_sql_comments, extract_sql_com
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6

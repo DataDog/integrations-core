@@ -54,7 +54,7 @@ from datadog_checks.sqlserver.utils import Database, construct_use_statement, pa
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
 from datadog_checks.sqlserver.__about__ import __version__

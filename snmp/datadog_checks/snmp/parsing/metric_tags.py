@@ -9,9 +9,9 @@ from typing import Dict, List, NamedTuple, TypedDict
 
 from datadog_checks.base import ConfigurationError
 
-from ..models import OID
-from ..pysnmp_types import ObjectIdentity
-from ..resolver import OIDResolver  # noqa: F401
+from datadog_checks.snmp.models import OID
+from datadog_checks.snmp.pysnmp_types import ObjectIdentity
+from datadog_checks.snmp.resolver import OIDResolver  # noqa: F401
 from .parsed_metrics import ParsedMatchMetricTag, ParsedMetricTag, ParsedSimpleMetricTag
 
 SymbolTag = NamedTuple('SymbolTag', [('parsed_metric_tag', ParsedMetricTag), ('symbol', str)])

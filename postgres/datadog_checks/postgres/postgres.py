@@ -78,7 +78,7 @@ from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionU
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
 

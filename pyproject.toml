@@ -70,13 +70,7 @@ namespace-packages = ["datadog_checks"]
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
 select = [
-  "B",
-  "C",
-  "E",
-  "F",
-  "G",
-  "W",
-  "I",
+  "TID",
 ]
 ignore = [
   # From legacy flake8 settings
@@ -101,7 +95,7 @@ unfixable = [
 known-first-party = ["{template_config['package_name']}"]
 
 [tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports

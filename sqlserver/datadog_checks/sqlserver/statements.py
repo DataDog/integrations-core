@@ -28,7 +28,7 @@ from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_na
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 

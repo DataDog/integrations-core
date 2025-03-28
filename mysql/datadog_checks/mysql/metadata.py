@@ -15,7 +15,7 @@ from .util import connect_with_autocommit
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
