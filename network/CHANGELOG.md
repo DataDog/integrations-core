@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.2.0 / 2025-03-19
+
+***Added***:
+
+* Add new system.net.iface.up metric ([#19853](https://github.com/DataDog/integrations-core/pull/19853))
+
 ## 5.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:

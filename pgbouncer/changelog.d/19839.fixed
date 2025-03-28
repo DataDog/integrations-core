@@ -1,1 +1,0 @@
-Close connections on exceptions, and, when connection caching is disabled, after each check iteration.

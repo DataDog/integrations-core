@@ -1,1 +1,0 @@
-Add lazy import mechanism using the [lazy-loader](https://github.com/scientific-python/lazy-loader) library. This allows us to continue exposing a nice API (simple, short imports) for customers without the baseline memory overhead of importing everything all the time.
