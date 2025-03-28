@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 22.0.1 / 2025-03-28
+
+***Fixed***:
+
+* Fix SQL Server integration when database is using case sensitive collation ([#19930](https://github.com/DataDog/integrations-core/pull/19930))
+* Fixed support for FreeTDS driver ([#19931](https://github.com/DataDog/integrations-core/pull/19931))
+
 ## 22.0.0 / 2025-03-19
 
 ***Changed***:
