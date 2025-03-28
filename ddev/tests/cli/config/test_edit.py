@@ -7,3 +7,11 @@ def test_call(ddev, config_file, mocker):
 
     assert result.exit_code == 0, result.output
     mock.assert_called_once_with(filename=str(config_file.path))
+
+
+def test_call_local(ddev, config_file, mocker):
+    mock = mocker.patch('click.edit')
+    result = ddev('config', 'edit', '--local')
+
+    assert result.exit_code == 0, result.output
+    mock.assert_called_once_with(filename=str(config_file.local_path))
