@@ -7,5 +7,5 @@ files:
     - type: windows_event
       channel_path: "Microsoft-Windows-Sysmon/Operational"
       source: microsoft-sysmon
-      service: system-activity-logs
+      service: microsoft-sysmon
       sourcecategory: windowsevent

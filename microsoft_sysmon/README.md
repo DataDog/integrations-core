@@ -4,7 +4,7 @@
 
 [Microsoft Sysmon][4] is a Windows system service and device driver that provides detailed logging of system activity, including process creation, network connections, file modifications, and registry changes.
 
-This integration enriches and ingests the [Sysmon event logs][5]. Use pre-built dashboard to get a high-level view of Sysmon events helping security teams monitor system activity, detect anomalies, and identify potential threats.
+This integration enriches and ingests the [Sysmon event logs][5]. Use pre-built dashboard to get a high-level view of Sysmon events helping security teams monitor system activity.
 
 ## Setup
 
@@ -12,7 +12,7 @@ This integration enriches and ingests the [Sysmon event logs][5]. Use pre-built 
 
 To install the Microsoft Sysmon integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][6] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.52.0.
+**Note**: This step is not necessary for Agent version >= 7.66.0.
 
 Run powershell.exe as admin and execute following command:
   ```powershell
@@ -20,6 +20,27 @@ Run powershell.exe as admin and execute following command:
   ```
 
 ### Configuration
+
+#### Configure Log Collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Add this configuration block to your `microsoft_sysmon.d/conf.yaml` file to start collecting your Microsoft Sysmon logs:
+
+    ```yaml
+      logs:
+      - type: windows_event
+        channel_path: "Microsoft-Windows-Sysmon/Operational"
+        source: microsoft-sysmon
+        service: microsoft-sysmon
+        sourcecategory: windowsevent
+    ```
+
+3. [Restart the Agent][3].
 
 #### Configure Sysmon
 
@@ -52,27 +73,6 @@ Enabling too many event types can result in excessive data ingestion. Only criti
 These events should be selectively enabled for critical system directories, processes, and users to avoid unnecessary log noise.
 
 For more details on configuration, please refer to the [Sysmon docs][7].
-
-#### Configure Log Collection
-
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
-
-    ```yaml
-      logs_enabled: true
-    ```
-
-2. Add this configuration block to your `microsoft_sysmon.d/conf.yaml` file to start collecting your Microsoft Sysmon logs:
-
-    ```yaml
-      logs:
-      - type: windows_event
-        channel_path: "Microsoft-Windows-Sysmon/Operational"
-        source: microsoft-sysmon
-        service: system-activity-logs
-        sourcecategory: windowsevent
-    ```
-
-3. [Restart the Agent][3].
 
 ### Validation
 
@@ -109,7 +109,7 @@ Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/configuration/agent-commands/#restart-the-agent
 [4]: https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
 [5]: https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon#events
 [6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=windowspowershell#install
