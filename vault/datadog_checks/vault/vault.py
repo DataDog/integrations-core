@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+from json import JSONDecodeError
 
 import requests
 
@@ -11,11 +12,6 @@ from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
 from .errors import ApiUnreachable
 from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
-
-try:
-    from json import JSONDecodeError
-except ImportError:
-    from simplejson import JSONDecodeError
 
 
 class Vault(OpenMetricsBaseCheck):

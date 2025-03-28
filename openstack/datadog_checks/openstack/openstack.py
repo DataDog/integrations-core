@@ -4,6 +4,7 @@
 from __future__ import division
 
 import copy
+import json
 import random
 import re
 import time
@@ -11,7 +12,6 @@ from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
 import requests
-import simplejson as json
 
 from datadog_checks.base import AgentCheck, is_affirmative
 

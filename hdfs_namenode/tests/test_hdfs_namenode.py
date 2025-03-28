@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+import requests
 
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
@@ -43,6 +44,19 @@ def test_check(aggregator, dd_run_check, mocked_request):
         aggregator.assert_metric(metric, value=value, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=2)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_check_critical(aggregator, mocked_request_critical):
+    instance = HDFS_NAMENODE_CONFIG['instances'][0]
+    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
+
+    # Run the check once
+    with pytest.raises(requests.exceptions.JSONDecodeError):
+        hdfs_namenode.check(instance)
+
+    aggregator.assert_service_check(
+        HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.CRITICAL, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
+    )
 
 
 def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
