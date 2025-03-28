@@ -1,0 +1,10 @@
+name: Kaspersky
+files:
+- name: kaspersky.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp
+      port: <PORT>
+      service: kaspersky
+      source: kaspersky
