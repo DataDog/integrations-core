@@ -5,8 +5,7 @@ from pymqi.CMQC import MQCA_Q_NAME, MQIA_DEFINITION_TYPE, MQIA_Q_TYPE
 from pymqi.CMQCFC import MQGACF_Q_STATISTICS_DATA
 
 from datadog_checks.ibm_mq.stats.base_stats import BaseStats
-
-from ..utils import sanitize_strings
+from datadog_checks.ibm_mq.utils import sanitize_strings
 
 try:
     import pymqi
