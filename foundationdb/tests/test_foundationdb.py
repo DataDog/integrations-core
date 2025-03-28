@@ -33,6 +33,11 @@ def test_full(aggregator, instance):
 
         for metric in METRICS:
             aggregator.assert_metric(metric)
+
+            if metric.startswith("foundationdb.process."):
+                aggregator.assert_metric_has_tag_prefix(metric, "fdb_process_class")
+                aggregator.assert_metric_has_tag_prefix(metric, "fdb_role")
+
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
         aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
