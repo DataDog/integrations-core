@@ -1,0 +1,1 @@
+Introduce a `foundationdb.processes_per_role` gauge tagged by process role/class
