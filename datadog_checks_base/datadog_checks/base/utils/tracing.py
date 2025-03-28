@@ -45,11 +45,14 @@ def _get_integration_name(function_name, self, *args, **kwargs):
     return integration_name if integration_name else "UNKNOWN_INTEGRATION"
 
 
-def tracing_method(f, tracer):
+def tracing_method(f, tracer, is_entry_point):
     if inspect.signature(f).parameters.get('self'):
 
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
+            if is_entry_point:
+                configure_tracer(tracer)
+
             integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
             with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
                 span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
@@ -59,6 +62,9 @@ def tracing_method(f, tracer):
 
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
+            if is_entry_point:
+                configure_tracer(tracer)
+
             integration_name = _get_integration_name(f.__name__, None, *args, **kwargs)
             with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
                 span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
@@ -172,12 +178,12 @@ def traced_class(cls):
                 if not integration_tracing_exhaustive and attr not in AGENT_CHECK_DEFAULT_TRACED_METHODS:
                     continue
 
+                is_entry_point = attr == 'run' or attr == 'check'
+
                 if attr == 'warning':
                     setattr(cls, attr, traced_warning(attribute, tracer))
                 else:
-                    if attr == 'run' or attr == 'check':
-                        configure_tracer(tracer)
-                    setattr(cls, attr, tracing_method(attribute, tracer))
+                    setattr(cls, attr, tracing_method(attribute, tracer, is_entry_point))
             return cls
 
         return decorate(cls)
