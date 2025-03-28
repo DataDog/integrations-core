@@ -147,6 +147,7 @@ def tracing_enabled():
 
     return integration_tracing, integration_tracing_exhaustive
 
+
 def traced_class(cls):
     """
     Decorator that adds tracing to all methods of a class.
