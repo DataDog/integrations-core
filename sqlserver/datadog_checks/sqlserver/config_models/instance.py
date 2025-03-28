@@ -281,6 +281,7 @@ class ObfuscatorOptions(BaseModel):
     collect_commands: Optional[bool] = None
     collect_comments: Optional[bool] = None
     collect_metadata: Optional[bool] = None
+    collect_procedures: Optional[bool] = None
     collect_tables: Optional[bool] = None
     keep_boolean: Optional[bool] = None
     keep_identifier_quotation: Optional[bool] = None
