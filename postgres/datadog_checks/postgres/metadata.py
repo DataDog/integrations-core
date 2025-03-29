@@ -278,7 +278,8 @@ class PostgresMetadata(DBMAsyncJob):
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
             "dbms": "postgres",
             "kind": "pg_settings",
@@ -314,7 +315,8 @@ class PostgresMetadata(DBMAsyncJob):
             # We emit an event for each batch of tables to reduce total data in memory
             # and keep event size reasonable
             base_event = {
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
                 "kind": "pg_databases",
@@ -378,14 +380,14 @@ class PostgresMetadata(DBMAsyncJob):
                 "dd.postgres.schema.time",
                 elapsed_ms,
                 tags=self._check.tags + ["status:" + status],
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 "dd.postgres.schema.tables_count",
                 total_tables,
                 tags=self._check.tags + ["status:" + status],
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
             datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")

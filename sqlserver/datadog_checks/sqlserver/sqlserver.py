@@ -15,8 +15,10 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
-    resolve_db_host,
     tracked_query,
+)
+from datadog_checks.base.utils.db.utils import (
+    resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -68,7 +70,6 @@ from datadog_checks.sqlserver.const import (
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
-    ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     INSTANCE_METRICS_NEWER_2016,
@@ -127,6 +128,7 @@ class SQLServer(AgentCheck):
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self.tags = self._config.tags
+        self.add_core_tags()
 
         self.databases = set()
         self.autodiscovery_query = None
@@ -197,16 +199,18 @@ class SQLServer(AgentCheck):
             self,
             queries=queries,
             tags=tags,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=track_operation_time,
         )
 
-    def set_resolved_hostname_metadata(self):
-        self.set_metadata("resolved_hostname", self.resolved_hostname)
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
     def set_resource_tags(self):
-        self.tags.append("database_hostname:{}".format(self.database_hostname))
-
         if self._config.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -243,58 +247,63 @@ class SQLServer(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self._resolved_hostname,
+                self.database_identifier,
             )
         )
 
-    def set_resolved_hostname(self):
-        # load static information cache
+    @property
+    def host_and_port(self):
+        return split_sqlserver_host_port(self.instance.get("host"))
+
+    @property
+    def host(self):
+        return self.host_and_port[0]
+
+    @property
+    def port(self):
+        return self.host_and_port[1]
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self.host)
+
+    @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.empty_default_hostname:
+            return None
+        return self.resolved_hostname
+
+    @property
+    def resolved_hostname(self):
+        # type: () -> str
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
             else:
-                host, _ = split_sqlserver_host_port(self.instance.get("host"))
-                self._resolved_hostname = resolve_db_host(host)
-                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-                if engine_edition == ENGINE_EDITION_SQL_DATABASE:
-                    configured_database = self.instance.get("database", None)
-                    if not configured_database:
-                        configured_database = "master"
-                        self.warning(
-                            "Missing 'database' in instance configuration."
-                            "For Azure SQL Database a non-master application database must be specified."
-                        )
-                    elif configured_database == "master":
-                        self.warning(
-                            "Wrong 'database' configured."
-                            "For Azure SQL Database a non-master application database must be specified."
-                        )
-                    azure_server_suffix = ".database.windows.net"
-                    if host.endswith(azure_server_suffix):
-                        host = host[: -len(azure_server_suffix)]
-                    # for Azure SQL Database, each database on a given "server" has isolated compute resources,
-                    # meaning that the agent is only able to see query activity for the specific database it's
-                    # connected to. For this reason, each Azure SQL database is modeled as an independent host.
-                    azure = self._config.cloud_metadata.get("azure")
-                    if azure and azure.get("aggregate_sql_databases"):
-                        # If the aggregate_sql_databases option is enabled, the agent will group all Azure SQL
-                        # databases and report them as a single database instance.
-                        self._resolved_hostname = host
-                    else:
-                        self._resolved_hostname = "{}/{}".format(host, configured_database)
-        # set resource tags to properly tag with updated hostname
-        self.set_resource_tags()
+                self._resolved_hostname = self.resolve_db_host()
+        return self._resolved_hostname
 
     @property
-    def resolved_hostname(self):
-        return self._resolved_hostname
+    def database_identifier(self):
+        # type: () -> str
+        config_identifier = self._config.database_identifier.get('identifier')
+        if config_identifier:
+            return config_identifier
+        include_port = self._config.database_identifier.get('include_port', False)
+        include_instance = self._config.database_identifier.get('include_instance', False)
+
+        return "{}{}{}".format(
+            self.resolved_hostname,
+            ":" + self.port if include_port else "",
+            "\\" + self.instance.get("database") if include_instance else "",
+        )
 
     @property
     def database_hostname(self):
         # type: () -> str
         if self._database_hostname is None:
             host, _ = split_sqlserver_host_port(self.instance.get("host"))
-            self._database_hostname = resolve_db_host(host)
+            self._database_hostname = self.resolve_db_host(host)
         return self._database_hostname
 
     def load_static_information(self):
@@ -762,7 +771,7 @@ class SQLServer(AgentCheck):
             if self._query_manager is None:
                 # use QueryManager to process custom queries
                 self._query_manager = QueryManager(
-                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+                    self, self.execute_query_raw, tags=self.tags, hostname=self.reported_hostname
                 )
                 self._query_manager.compile_queries()
             self._send_database_instance_metadata()
@@ -995,9 +1004,10 @@ class SQLServer(AgentCheck):
         return should_run
 
     def _send_database_instance_metadata(self):
-        if self.resolved_hostname not in self._database_instance_emitted:
+        if self.database_identifier not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
+                "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
@@ -1016,5 +1026,5 @@ class SQLServer(AgentCheck):
                     "connection_host": self._config.connection_host,
                 },
             }
-            self._database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
