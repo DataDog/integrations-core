@@ -131,7 +131,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
    ```
    For more information how these secrets are used, see the [Cluster Agent Setup][35].
 
-**Note**: Secret name `datadog-secret` is not configurable.
+**Note**: You cannot change the name of the secret containing the Datadog API key and Cluster Agent token. It must be `datadog-secret` for the Agent in the sidecar to connect to Datadog.
 
 ###### Setup
 
