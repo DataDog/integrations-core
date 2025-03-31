@@ -196,7 +196,7 @@ def build_expected_output_with_line_sources(expected: str, config_file: ConfigFi
     ],
     ids=["scrubbed", "non_scrubbed"],
 )
-def test_show_with_local_overrides(ddev, config_file, helpers, command, expected):
+def test_show_with_local_overrides(ddev, config_file, helpers, command, expected, overrides_config):
     # Create local config with overrides
     local_config = helpers.dedent(
         """
@@ -205,7 +205,7 @@ def test_show_with_local_overrides(ddev, config_file, helpers, command, expected
         """
     )
 
-    config_file.overrides_path.write_text(local_config)
+    overrides_config.write_text(local_config)
 
     result = ddev(*command)
 
@@ -224,7 +224,7 @@ def test_verbose_output_without_local_file(ddev):
     assert "Local override config file found" not in result.output
 
 
-def test_verbose_output_with_local_file(ddev, config_file, helpers):
+def test_verbose_output_with_local_file(ddev, config_file, helpers, overrides_config):
     """Test that verbose output shows local override message when local file exists."""
     local_config = helpers.dedent(
         """
@@ -232,11 +232,8 @@ def test_verbose_output_with_local_file(ddev, config_file, helpers):
         api_key = "local_foo"
         """
     )
-    config_file.overrides_path.write_text(local_config)
+    overrides_config.write_text(local_config)
 
     result = ddev("-v", "config", "show")
     assert result.exit_code == 0
     assert "Local override config file found" in result.output
-
-    # Clean up
-    config_file.overrides_path.unlink()

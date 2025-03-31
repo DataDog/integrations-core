@@ -104,7 +104,7 @@ class ConfigFileWithOverrides:
         current_dir = Path.cwd()
 
         # Keep searching while the file doesn't exist in the current directory
-        while not (current_dir / ".ddev.toml").exists():
+        while not (current_dir / ".ddev.toml").is_file():
             # Check if moving to the parent *would* change the directory.
             # If current_dir.parent is the same as current_dir, we've reached the top (root).
             # This ensures we handle windows and UNC paths correctly.

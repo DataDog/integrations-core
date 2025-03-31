@@ -7,7 +7,6 @@ import os
 import random
 from contextlib import ExitStack
 from typing import Generator
-from unittest.mock import PropertyMock
 
 import pytest
 import vcr
@@ -135,11 +134,6 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     path = Path(tmp_path, 'config.toml')
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
 
-    mocker.patch(
-        'ddev.config.file.ConfigFileWithOverrides.overrides_path',
-        new_callable=PropertyMock,
-        return_value=Path(tmp_path, '.ddev.toml'),
-    )
     config = ConfigFileWithOverrides(path)
     config.reset()
 
@@ -148,6 +142,14 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     config.save()
 
     return config
+
+
+@pytest.fixture
+def overrides_config(temp_dir) -> Generator[Path]:
+    """Creates a temporary overrides config file in the temp current directory."""
+    with temp_dir.as_cwd():
+        (temp_dir / ".ddev.toml").touch()
+        yield temp_dir / ".ddev.toml"
 
 
 @pytest.fixture
