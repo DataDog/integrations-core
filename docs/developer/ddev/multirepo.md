@@ -79,4 +79,20 @@ The presence of a `.ddev.toml` file influences how certain `ddev` config command
 
     ```
 
+*   **`ddev config restore`**: Restores the global configuration file to its default settings. If a `.ddev.toml` file with local overrides exists, it prompts whether to delete it.
+
+    *Example (no overrides):*
+    ```bash
+    $ ddev config restore
+    Settings were successfully restored.
+    ```
+
+    *Example (with overrides):*
+    ```bash
+    $ ddev config restore
+    Settings were successfully restored.
+    Overrides file found in '/path/to/.ddev.toml'. Do you want to delete it? [y/N]: y
+    Overrides deleted.
+    ```
+
 By leveraging `.ddev.toml` files, you can maintain distinct configurations for different projects or worktrees seamlessly, improving your workflow when switching contexts.
