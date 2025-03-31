@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
+from collections import Counter
 from dataclasses import dataclass
 from typing import cast
 
@@ -74,48 +76,79 @@ class ProcessedConfigs:
     line_sources: dict[int, str] | None
     combined_content: str
     global_content: str
-    local_content: str
+    overrides_content: str
 
 
 class ConfigFileWithOverrides:
     """
-    A ConfigFile that combines the global config with the local overrides.
+    A ConfigFile that combines the global config with overrides provided by
+    the .ddev.toml file in the working directory or any parent directory.
     """
 
     def __init__(self, path: Path | None = None):
         self.global_path = path or ConfigFileWithOverrides.get_default_location()
         self.global_model: RootConfig = cast(RootConfig, UNINITIALIZED)
         self.global_content: str = ""
-        self.local_model: RootConfig = cast(RootConfig, UNINITIALIZED)
-        self.local_content: str = ""
+        self.overrides_model: RootConfig = cast(RootConfig, UNINITIALIZED)
+        self.overrides_content: str = ""
         self.combined_model: RootConfig = cast(RootConfig, UNINITIALIZED)
         self.combined_content: str = ""
+        self._overrides_path: Path | None = None
 
     @property
-    def local_path(self) -> Path:
-        return LOCAL_OVERRIDES_PATH
+    def overrides_path(self) -> Path:
+        """Path of the .ddev.toml file. Either in the working directory or any parent directory."""
+        if self._overrides_path is not None:
+            return self._overrides_path
+
+        current_dir = Path.cwd()
+        root_dir = Path(current_dir.root)
+        while not (current_dir / ".ddev.toml").exists():
+            current_dir = current_dir.parent
+            if current_dir == root_dir:
+                self._overrides_path = root_dir
+                return self._overrides_path
+
+        self._overrides_path = current_dir / ".ddev.toml"
+        return self._overrides_path
+
+    @overrides_path.setter
+    def overrides_path(self, value: Path):
+        self._overrides_path = value
 
     def overrides_available(self) -> bool:
-        return self.local_path.is_file()
+        return self.overrides_path.is_file()
+
+    @property
+    def pretty_overrides_path(self) -> Path:
+        """Overrides path shown either as relative or absolute path, depending on the length."""
+        relative_overrides_path = os.path.relpath(self.overrides_path, Path.cwd())
+        parents_apart = Counter(relative_overrides_path.split(os.path.sep))
+        if parents_apart['..'] > 1:
+            # Show the absolute path if the relative path is too long
+            return self.overrides_path
+        else:
+            # Show relative path when it is easier to understand
+            return Path(relative_overrides_path)
 
     def load(self):
         self.global_content = self.global_path.read_text()
         self.global_model = RootConfig(load_toml_data(self.global_content))
 
-        if not self.overrides_available() or (local_content := self.local_path.read_text()).strip() == "":
+        if not self.overrides_available() or (overrides_content := self.overrides_path.read_text()).strip() == "":
             self.combined_model = self.global_model
             self.combined_content = dumps_toml_data(self.combined_model.raw_data)
-            self.local_content = ""
-            self.local_model = RootConfig({})
+            self.overrides_content = ""
+            self.overrides_model = RootConfig({})
             return
 
-        self.local_content = local_content
-        self.local_model = RootConfig(load_toml_data(self.local_content))
+        self.overrides_content = overrides_content
+        self.overrides_model = RootConfig(load_toml_data(self.overrides_content))
 
         self.combined_model = RootConfig(
             deep_merge_with_list_handling(
                 cast(RootConfig, self.global_model).raw_data,
-                self.local_model.raw_data,
+                self.overrides_model.raw_data,
             )
         )
         self.combined_content = dumps_toml_data(self.combined_model.raw_data)
@@ -130,25 +163,25 @@ class ConfigFileWithOverrides:
             combined_lines = combined_content.splitlines()
             scrub_config(cast(RootConfig, self.global_model).raw_data)
             global_content = dumps_toml_data(cast(RootConfig, self.global_model).raw_data)
-            scrub_config(cast(RootConfig, self.local_model).raw_data)
-            local_content = dumps_toml_data(cast(RootConfig, self.local_model).raw_data)
+            scrub_config(cast(RootConfig, self.overrides_model).raw_data)
+            overrides_content = dumps_toml_data(cast(RootConfig, self.overrides_model).raw_data)
         else:
             combined_lines = self.combined_content.splitlines()
             combined_content = self.combined_content
             global_content = self.global_content
-            local_content = self.local_content
+            overrides_content = self.overrides_content
 
         global_index = build_line_index_with_multiple_entries(global_content)
-        local_index = build_line_index_with_multiple_entries(local_content)
+        overrides_index = build_line_index_with_multiple_entries(overrides_content)
 
-        # If we have no local content, there is no need to build the line sources
-        if not local_content:
+        # If we have no overrides content, there is no need to build the line sources
+        if not overrides_content:
             return ProcessedConfigs(
                 combined_lines=combined_lines,
                 line_sources=None,
                 combined_content=combined_content,
                 global_content=global_content,
-                local_content=local_content,
+                overrides_content=overrides_content,
             )
 
         line_sources = {}
@@ -160,12 +193,12 @@ class ConfigFileWithOverrides:
                 continue
 
             try:
-                # Check if this line exists in local config
-                if stripped_line in local_index:
-                    line_sources[line_number] = f"{self.local_path.name}:{local_index[stripped_line].pop(0)}"
-                # If not found in local, it must be from global
+                # Check if this line exists in the overrides config
+                if stripped_line in overrides_index:
+                    line_sources[line_number] = f"Overrides:{overrides_index[stripped_line].pop(0)}"
+                # If not found in overrides, it must be from global
                 elif stripped_line in global_index:
-                    line_sources[line_number] = f"{self.global_path.name}:{global_index[stripped_line].pop(0)}"
+                    line_sources[line_number] = f"GlobalConfig:{global_index[stripped_line].pop(0)}"
                 else:
                     # If it is not in global there has been some unexpected error when parsing the configs
                     return ProcessedConfigs(
@@ -173,7 +206,7 @@ class ConfigFileWithOverrides:
                         line_sources=None,
                         combined_content=combined_content,
                         global_content=global_content,
-                        local_content=local_content,
+                        overrides_content=overrides_content,
                     )
             except KeyError:
                 # Pop will throw key error if there are no more elements in the list
@@ -182,7 +215,7 @@ class ConfigFileWithOverrides:
                     line_sources=None,
                     combined_content=combined_content,
                     global_content=global_content,
-                    local_content=local_content,
+                    overrides_content=overrides_content,
                 )
 
         return ProcessedConfigs(
@@ -190,7 +223,7 @@ class ConfigFileWithOverrides:
             line_sources=line_sources,
             combined_content=combined_content,
             global_content=global_content,
-            local_content=local_content,
+            overrides_content=overrides_content,
         )
 
     def _build_read_string(self, lines: list[str], line_sources: dict[int, str]) -> str:
@@ -236,7 +269,7 @@ class ConfigFileWithOverrides:
     def model(self) -> RootConfig:
         return cast(RootConfig, self.global_model)
 
-    def save(self, content=None, with_local=False):
+    def save(self, content=None):
         import tomli_w
 
         if not content:
@@ -245,8 +278,8 @@ class ConfigFileWithOverrides:
         self.global_path.ensure_parent_dir_exists()
         self.global_path.write_atomic(content, "w", encoding="utf-8")
 
-        if self.local_model is not UNINITIALIZED:
-            self.local_path.write_atomic(tomli_w.dumps(self.local_model.raw_data), "w", encoding="utf-8")
+        if self.overrides_model is not UNINITIALIZED:
+            self.overrides_path.write_atomic(tomli_w.dumps(self.overrides_model.raw_data), "w", encoding="utf-8")
 
     def reset(self):
         global_config = RootConfig({})
@@ -255,8 +288,8 @@ class ConfigFileWithOverrides:
         combined_config.parse_fields()
         self.global_model = global_config
         self.combined_model = combined_config
-        self.local_model = cast(RootConfig, UNINITIALIZED)
-        self.local_content = ""
+        self.overrides_model = cast(RootConfig, UNINITIALIZED)
+        self.overrides_content = ""
 
     def restore(self):
         import tomli_w
@@ -265,9 +298,9 @@ class ConfigFileWithOverrides:
         content = tomli_w.dumps(self.global_model.raw_data)
         self.save(content)
 
-    def update(self, with_local=False):  # no cov
+    def update(self):  # no cov
         self.global_model.parse_fields()
-        self.save(with_local=with_local)
+        self.save()
         # Reload to ensure the config is up to date
         self.load()
 
@@ -275,4 +308,4 @@ class ConfigFileWithOverrides:
     def get_default_location(cls) -> Path:
         from platformdirs import user_data_dir
 
-        return Path(user_data_dir('dd-checks-dev', appauthor=False)) / 'config.toml'
+        return Path(user_data_dir("dd-checks-dev", appauthor=False)) / "config.toml"

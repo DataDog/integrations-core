@@ -136,7 +136,7 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
 
     mocker.patch(
-        'ddev.config.file.ConfigFileWithOverrides.local_path',
+        'ddev.config.file.ConfigFileWithOverrides.overrides_path',
         new_callable=PropertyMock,
         return_value=Path(tmp_path, '.ddev.toml'),
     )

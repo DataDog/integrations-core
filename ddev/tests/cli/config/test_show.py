@@ -137,51 +137,51 @@ def build_expected_output_with_line_sources(expected: str, config_file: ConfigFi
     # when reading from a file.
     expected_lines = expected.replace('\\', '\\\\').splitlines()
     line_sources = {
-        0: 'config.toml:1',
-        1: 'config.toml:2',
-        2: 'config.toml:3',
+        0: 'GlobalConfig:1',
+        1: 'GlobalConfig:2',
+        2: 'GlobalConfig:3',
         # Blank line
-        4: 'config.toml:5',
-        5: 'config.toml:6',
-        6: 'config.toml:7',
-        7: 'config.toml:8',
-        8: 'config.toml:9',
+        4: 'GlobalConfig:5',
+        5: 'GlobalConfig:6',
+        6: 'GlobalConfig:7',
+        7: 'GlobalConfig:8',
+        8: 'GlobalConfig:9',
         # Blank line
-        10: 'config.toml:11',
-        11: 'config.toml:12',
-        12: 'config.toml:13',
+        10: 'GlobalConfig:11',
+        11: 'GlobalConfig:12',
+        12: 'GlobalConfig:13',
         # Blank line
-        14: 'config.toml:15',
-        15: 'config.toml:16',
-        16: 'config.toml:17',
+        14: 'GlobalConfig:15',
+        15: 'GlobalConfig:16',
+        16: 'GlobalConfig:17',
         # Blank line
-        18: '.ddev.toml:1',
-        19: '.ddev.toml:2',
-        20: 'config.toml:21',
-        21: 'config.toml:22',
-        22: 'config.toml:23',
-        23: 'config.toml:24',
+        18: 'Overrides:1',
+        19: 'Overrides:2',
+        20: 'GlobalConfig:21',
+        21: 'GlobalConfig:22',
+        22: 'GlobalConfig:23',
+        23: 'GlobalConfig:24',
         # Blank line
-        25: 'config.toml:26',
-        26: 'config.toml:27',
-        27: 'config.toml:28',
+        25: 'GlobalConfig:26',
+        26: 'GlobalConfig:27',
+        27: 'GlobalConfig:28',
         # Blank line
-        29: 'config.toml:30',
-        30: 'config.toml:31',
-        31: 'config.toml:32',
+        29: 'GlobalConfig:30',
+        30: 'GlobalConfig:31',
+        31: 'GlobalConfig:32',
         # Blank line
-        33: 'config.toml:34',
-        34: 'config.toml:35',
-        35: 'config.toml:36',
+        33: 'GlobalConfig:34',
+        34: 'GlobalConfig:35',
+        35: 'GlobalConfig:36',
         # Blank line
-        37: 'config.toml:38',
-        38: 'config.toml:39',
-        39: 'config.toml:40',
-        40: 'config.toml:41',
-        41: 'config.toml:42',
-        42: 'config.toml:43',
-        43: 'config.toml:44',
-        44: 'config.toml:45',
+        37: 'GlobalConfig:38',
+        38: 'GlobalConfig:39',
+        39: 'GlobalConfig:40',
+        40: 'GlobalConfig:41',
+        41: 'GlobalConfig:42',
+        42: 'GlobalConfig:43',
+        43: 'GlobalConfig:44',
+        44: 'GlobalConfig:45',
     }
 
     # Add a blank line at the end to match the expected output
@@ -205,7 +205,7 @@ def test_show_with_local_overrides(ddev, config_file, helpers, command, expected
         """
     )
 
-    config_file.local_path.write_text(local_config)
+    config_file.overrides_path.write_text(local_config)
 
     result = ddev(*command)
 
@@ -232,11 +232,11 @@ def test_verbose_output_with_local_file(ddev, config_file, helpers):
         api_key = "local_foo"
         """
     )
-    config_file.local_path.write_text(local_config)
+    config_file.overrides_path.write_text(local_config)
 
     result = ddev("-v", "config", "show")
     assert result.exit_code == 0
     assert "Local override config file found" in result.output
 
     # Clean up
-    config_file.local_path.unlink()
+    config_file.overrides_path.unlink()

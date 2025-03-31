@@ -9,9 +9,12 @@ def test_call(ddev, config_file, mocker):
     mock.assert_called_once_with(filename=str(config_file.path))
 
 
-def test_call_local(ddev, config_file, mocker):
+def test_call_overrides(ddev, config_file, mocker):
     mock = mocker.patch('click.edit')
-    result = ddev('config', 'edit', '--local')
+    # Ensure overrides path exist
+    config_file.overrides_path.touch()
+
+    result = ddev('config', 'edit', '--overrides')
 
     assert result.exit_code == 0, result.output
-    mock.assert_called_once_with(filename=str(config_file.local_path))
+    mock.assert_called_once_with(filename=str(config_file.overrides_path))

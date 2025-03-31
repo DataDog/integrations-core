@@ -36,19 +36,19 @@ def test_delete_local_overrides_yes(ddev, config_file, helpers):
         api_key = "local_foo"
         """
     )
-    config_file.local_path.write_text(local_config)
+    config_file.overrides_path.write_text(local_config)
 
     result = ddev('config', 'restore', input='y')
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
-        """
+        f"""
         Settings were successfully restored.
-        Local overrides '.ddev.toml' has been found. Do you want to delete it? [y/N]: y
-        Local overrides deleted.
+        Overrides file found in '{config_file.overrides_path}'. Do you want to delete it? [y/N]: y
+        Overrides deleted.
         """
     )
-    assert not config_file.local_path.exists()
+    assert not config_file.overrides_path.exists()
 
 
 def test_delete_local_overrides_no(ddev, config_file, helpers):
@@ -59,15 +59,15 @@ def test_delete_local_overrides_no(ddev, config_file, helpers):
         api_key = "local_foo"
         """
     )
-    config_file.local_path.write_text(local_config)
+    config_file.overrides_path.write_text(local_config)
 
     result = ddev('config', 'restore', input='n')
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
-        """
+        f"""
         Settings were successfully restored.
-        Local overrides '.ddev.toml' has been found. Do you want to delete it? [y/N]: n
+        Overrides file found in '{config_file.overrides_path}'. Do you want to delete it? [y/N]: n
         """
     )
-    assert config_file.local_path.exists()
+    assert config_file.overrides_path.exists()

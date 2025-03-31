@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path as PathLibPath
 
 import pytest
 
@@ -7,6 +7,7 @@ from ddev.config.file import (
     build_line_index_with_multiple_entries,
     deep_merge_with_list_handling,
 )
+from ddev.utils.fs import Path
 
 
 def test_no_local_file(mocker, tmp_path: Path, config_file: ConfigFileWithOverrides):
@@ -18,7 +19,7 @@ def test_no_local_file(mocker, tmp_path: Path, config_file: ConfigFileWithOverri
 def test_with_local_file(mocker, config_file: ConfigFileWithOverrides, helpers):
     # Write a local toml to the local file. It includes a new repo and sets the value of repo to it.
     # This should be acceptable and pass validation
-    with open(config_file.local_path, "w") as f:
+    with open(config_file.overrides_path, "w") as f:
         f.write(
             helpers.dedent(
                 """
@@ -39,7 +40,7 @@ def test_with_local_file(mocker, config_file: ConfigFileWithOverrides, helpers):
 
     assert config_file.combined_model.github.user == "test_user_12345"
     assert config_file.combined_model.github.token == "test_token_12345"
-    assert config_file.combined_model.repos['local'] == "local_repo"
+    assert config_file.combined_model.repos["local"] == "local_repo"
     assert config_file.combined_model.repo.name == "local"
     assert config_file.combined_model.repo.path == "local_repo"
     # Still keeps other repos from global
@@ -48,6 +49,109 @@ def test_with_local_file(mocker, config_file: ConfigFileWithOverrides, helpers):
     # Verify other config values remain unchanged
     assert config_file.combined_model.agent.name == config_file.global_model.agent.name
     assert config_file.combined_model.org.name == config_file.global_model.org.name
+
+
+def test_with_local_file_in_parent_dir(tmp_path: PathLibPath, helpers, monkeypatch):
+    """Test that .ddev.toml is loaded from a parent directory."""
+    tmp_path = Path(tmp_path)
+    sub_dir = tmp_path / "subdir"
+    sub_dir.mkdir()
+
+    # Define config file paths in the parent directory (tmp_path)
+    global_config_path = tmp_path / "config.toml"
+    override_config_path = tmp_path / ".ddev.toml"
+
+    # Write base global config
+    global_config_path.write_text(
+        helpers.dedent(
+            """
+            [github]
+            user = "global_user"
+
+            [repos]
+            core = "/path/to/core"
+            """
+        )
+    )
+
+    # Write override config
+    override_config_path.write_text(
+        helpers.dedent(
+            """
+            repo = "local"
+
+            [github]
+            user = "override_user"
+            token = "override_token"
+
+            [repos]
+            local = "local_repo"
+            """
+        )
+    )
+
+    # Change directory into the subdirectory
+    with monkeypatch.context() as m:
+        m.chdir(sub_dir)
+
+        # Instantiate ConfigFileWithOverrides directly, pointing to the global config
+        # We don't use the fixture because it mocks overrides_path
+        config_file = ConfigFileWithOverrides(global_config_path)
+
+        # Load the configuration
+        config_file.load()
+
+        # Assert that the override file was found in the parent directory
+        assert config_file.overrides_path == override_config_path
+        assert config_file.overrides_available()
+
+        # Assert override values are loaded
+        assert config_file.combined_model.github.user == "override_user"
+        assert config_file.combined_model.github.token == "override_token"
+        assert config_file.combined_model.repo.name == "local"
+        assert config_file.combined_model.repo.path == "local_repo"
+
+        # Assert global values are still present where not overridden
+        assert config_file.global_model.github.user == "global_user"
+        assert config_file.combined_model.repos["core"] == "/path/to/core"
+        assert config_file.combined_model.repos["local"] == "local_repo"
+
+
+def test_pretty_overrides_path_relative(tmp_path: PathLibPath, monkeypatch):
+    """Test that the relative path is shown when the override file is close."""
+    project_dir = Path(tmp_path) / "project"
+    project_dir.mkdir()
+    # Override file is one level up
+    override_path = Path(tmp_path) / ".ddev.toml"
+    override_path.touch()
+
+    config_file = ConfigFileWithOverrides()
+    config_file.overrides_path = override_path
+
+    with monkeypatch.context() as m:
+        m.chdir(project_dir)
+        # Expected relative path from project_dir to override_path
+        expected_relative_override = Path("..") / ".ddev.toml"
+        assert config_file.pretty_overrides_path == expected_relative_override
+
+
+def test_pretty_overrides_path_absolute(tmp_path: PathLibPath, monkeypatch):
+    """Test that the absolute path is shown when the override file is far."""
+    # Config file is deep inside
+    project_dir = Path(tmp_path) / "very" / "deep" / "project"
+    project_dir.mkdir(parents=True)
+
+    # Override file is several levels up
+    override_path = Path(tmp_path) / ".ddev.toml"
+    override_path.touch()
+
+    config_file = ConfigFileWithOverrides()
+    config_file.overrides_path = override_path
+
+    with monkeypatch.context() as m:
+        m.chdir(project_dir)
+        # Expected absolute path
+        assert config_file.pretty_overrides_path == override_path
 
 
 @pytest.mark.parametrize(
