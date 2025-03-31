@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-celery.flower.events.count,count,,event,,The count of Celery events from the last submissions.,0,celery,,,
+celery.flower.events.count,count,,event,,The count of Celery events from the last submission.,0,celery,,,
 celery.flower.events.created,gauge,,event,,The number of Celery events created.,0,celery,,,
 celery.flower.task.prefetch_time.seconds,gauge,,second,,Time tasks spend waiting at worker before execution.,0,celery,,,
 celery.flower.task.runtime.created,gauge,,second,,Task runtime creation timestamp.,0,celery,,,
