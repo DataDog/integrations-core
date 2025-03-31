@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 37.9.0 / 2025-03-27
+
+***Security***:
+
+* The `pyyaml` library is no longer globally patched to force the use of safe_* methods ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
+
+***Added***:
+
+* Remove unnecessary `pyyaml` usage ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
+
 ## 37.8.0 / 2025-03-19
 
 ***Added***:
