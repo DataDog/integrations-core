@@ -7,11 +7,11 @@ from ddev.utils.toml import load_toml_data
 
 def test_create_new_local_config(ddev, config_file, helpers):
     result = ddev('config', 'local-repo')
-    local_path = str(config_file.local_path.parent).replace('\\', '\\\\')
+    local_path = str(config_file.overrides_path.parent).replace('\\', '\\\\')
 
     expected_output = helpers.dedent(
         f"""
-        Local repo configuration added in {config_file.local_path}
+        Local repo configuration added in {config_file.pretty_overrides_path}
         Local config content:
         repo = "local"
 
@@ -24,9 +24,9 @@ def test_create_new_local_config(ddev, config_file, helpers):
     assert result.output == expected_output
 
     # Verify the config was actually created
-    assert config_file.local_path.exists()
-    local_config = RootConfig(load_toml_data(config_file.local_path.read_text()))
-    assert local_config.raw_data['repos']['local'] == str(config_file.local_path.parent)
+    assert config_file.overrides_path.exists()
+    local_config = RootConfig(load_toml_data(config_file.overrides_path.read_text()))
+    assert local_config.raw_data['repos']['local'] == str(config_file.overrides_path.parent)
     assert local_config.raw_data['repo'] == 'local'
 
 
@@ -42,16 +42,16 @@ def test_update_existing_local_config(ddev, config_file, helpers):
         local = "/old/path"
         """
     )
-    config_file.local_path.write_text(existing_config)
+    config_file.overrides_path.write_text(existing_config)
 
     result = ddev('config', 'local-repo')
-    local_path = str(config_file.local_path.parent).replace('\\', '\\\\')
+    local_path = str(config_file.overrides_path.parent).replace('\\', '\\\\')
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
         Local config file already exists. Updating...
-        Local repo configuration added in {config_file.local_path}
+        Local repo configuration added in {config_file.pretty_overrides_path}
         Local config content:
         repo = "local"
 
@@ -64,7 +64,7 @@ def test_update_existing_local_config(ddev, config_file, helpers):
     )
 
     # Verify the config was updated correctly
-    local_config = RootConfig(load_toml_data(config_file.local_path.read_text()))
-    assert local_config.raw_data['repos']['local'] == str(config_file.local_path.parent)
+    local_config = RootConfig(load_toml_data(config_file.overrides_path.read_text()))
+    assert local_config.raw_data['repos']['local'] == str(config_file.overrides_path.parent)
     assert local_config.raw_data['repo'] == 'local'
     assert local_config.raw_data['orgs']['default']['api_key'] == 'test_key'

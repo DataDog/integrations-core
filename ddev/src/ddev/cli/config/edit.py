@@ -10,9 +10,12 @@ if TYPE_CHECKING:
 
 
 @click.command(short_help='Edit the config file with your default editor')
-@click.option('--local', is_flag=True, help='Edit the local config file (.ddev.toml)')
+@click.option('--overrides', is_flag=True, help='Edit the local config file (.ddev.toml)')
 @click.pass_obj
-def edit(app: 'Application', local: bool):
+def edit(app: 'Application', overrides: bool):
     """Edit the config file with your default editor."""
-    file_to_edit = app.config_file.local_path if local else app.config_file.path
+    if overrides and not app.config_file.overrides_available():
+        app.abort('No local config file found.')
+
+    file_to_edit = app.config_file.overrides_path if overrides else app.config_file.path
     click.edit(filename=str(file_to_edit))

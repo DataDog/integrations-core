@@ -135,7 +135,10 @@ def test_resolve_repo_path(ddev, config_file, helpers, temp_dir):
 
 
 def test_local_standard(ddev, config_file, helpers):
-    result = ddev('config', 'set', '--local', 'repo', 'marketplace')
+    # Create local config file
+    config_file.overrides_path.touch()
+
+    result = ddev('config', 'set', '--overrides', 'repo', 'marketplace')
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
@@ -147,37 +150,43 @@ def test_local_standard(ddev, config_file, helpers):
 
     # Verify it was written to the local config file
     config_file.load()
-    assert config_file.local_path.exists()
-    assert config_file.local_model.repo.name == 'marketplace'
+    assert config_file.overrides_path.exists()
+    assert config_file.overrides_model.repo.name == 'marketplace'
     # Global config should remain unchanged
     assert config_file.global_model.repo.name != 'marketplace'
 
 
-def test_local_validates_combined_config(ddev, config_file, helpers):
+def test_local_validates_combined_config(ddev, config_file):
     # First set an invalid type in global config
     config_file.global_model.raw_data['agents'] = 'invalid'
     config_file.save()
 
+    # Create local config file
+    config_file.overrides_path.touch()
+
     # Try to set a valid config in local file
-    result = ddev('config', 'set', '--local', 'repo', 'marketplace')
+    result = ddev('config', 'set', '--overrides', 'repo', 'marketplace')
 
     # Should fail because the combined config is invalid
     assert result.exit_code == 1
     assert 'Error parsing config' in result.output
 
 
-def test_global_standard(ddev, config_file, helpers):
+def test_global_standard(ddev, config_file):
+    # Create local config file
+    config_file.overrides_path.touch()
+
     # First set a value in local config
-    result = ddev('config', 'set', 'repo', 'extras', '--local')
-    assert result.exit_code == 0
+    result = ddev('config', 'set', 'repo', 'extras', '--overrides')
+    assert result.exit_code == 0, result.output
 
     # Then set a different value in global config
     result = ddev('config', 'set', 'repo', 'marketplace')
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
 
     config_file.load()
     # Local config should keep its value
-    assert config_file.local_model.repo.name == 'extras'
+    assert config_file.overrides_model.repo.name == 'extras'
     # Global config should have the new value
     assert config_file.global_model.repo.name == 'marketplace'
     # Combined config should use local value

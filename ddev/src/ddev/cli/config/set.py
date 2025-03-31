@@ -12,17 +12,32 @@ from ddev.config.model import ConfigurationError, RootConfig
 from ddev.utils.fs import Path
 
 
-def config_file_to_read(app: Application, local: bool) -> Path:
-    config_to_read = app.config_file.local_path if local else app.config_file.global_path
-    if local and not config_to_read.exists():
-        config_to_read.write_text('')
+def config_file_to_read(app: Application, overrides: bool) -> Path:
+    # If the overrides file exists, we will read from it
+    if overrides and app.config_file.overrides_available():
+        config_to_read = app.config_file.overrides_path
+    elif overrides:
+        # If the overrides file does not exist, we will create it
+        app.config_file.overrides_path = Path.cwd() / ".ddev.toml"
+        should_create = click.confirm("No overrides file found, would you like to create one in the current directory?")
+        if should_create:
+            app.config_file.overrides_path.write_text("")
+        else:
+            app.abort(
+                "No overrides file found and no permission to create one. "
+                "Run `ddev config set` to set values in the global config file."
+            )
+    else:
+        config_to_read = app.config_file.global_path
+    if overrides and not config_to_read.exists():
+        config_to_read.write_text("")
     return config_to_read
 
 
-def validate_final_config(app: Application, local: bool, config: dict[str, Any]):
-    # If we are setting values on the local file, we need to merge with the global file
+def validate_final_config(app: Application, overrides: bool, config: dict[str, Any]):
+    # If we are setting values on the overrides file, we need to merge with the global file
     # for validation
-    if local:
+    if overrides:
         config = deep_merge_with_list_handling(cast(RootConfig, app.config_file.combined_model).raw_data, config)
     try:
         RootConfig(config).parse_fields()
@@ -34,9 +49,9 @@ def validate_final_config(app: Application, local: bool, config: dict[str, Any])
 @click.command('set', short_help='Assign values to config file entries')
 @click.argument('key')
 @click.argument('value', required=False)
-@click.option('--local', is_flag=True, help='Set the value in the local config file (.ddev.toml)')
+@click.option('--overrides', is_flag=True, help='Set the value in the local config file (.ddev.toml)')
 @click.pass_obj
-def set_value(app: Application, key: str, value: str | None, local: bool):
+def set_value(app: Application, key: str, value: str | None, overrides: bool):
     """
     Assign values to config file entries. If the value is omitted,
     you will be prompted, with the input hidden if it is sensitive.
@@ -54,7 +69,7 @@ def set_value(app: Application, key: str, value: str | None, local: bool):
     if (fnmatch(key, 'repos.*') or fnmatch(key, 'repos.*.path')) and not value.startswith('~'):
         value = os.path.abspath(value)
 
-    config_to_read = config_file_to_read(app, local)
+    config_to_read = config_file_to_read(app, overrides)
     user_config = new_config = tomlkit.parse(config_to_read.read_text())
 
     data = [value]
@@ -102,7 +117,7 @@ def set_value(app: Application, key: str, value: str | None, local: bool):
             else:
                 del table_body[-2]
 
-    validate_final_config(app, local, user_config)
+    validate_final_config(app, overrides, user_config)
 
     save_toml_document(user_config, config_to_read)
     if scrubbing:
