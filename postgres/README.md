@@ -172,8 +172,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. See the PostgreSQL documentation on[Error Reporting and Logging][7] for more information.
 
 1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`. For regular log results, including statement outputs, uncomment the following parameters in the log section:
