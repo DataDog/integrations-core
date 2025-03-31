@@ -1,6 +1,6 @@
 # Working with multiple repositories and configurations
 
-`ddev` utilizes a central configuration file typically located in your user configuration directory. However, managing configurations across different projects (like `integrations-core`, `integrations-extras`, or Agent repositories) or even different [worktrees](https://git-scm.com/docs/git-worktree) within the same repository can sometimes require specific settings, especially for the `repo` variable.
+The `ddev` CLI utilizes a central configuration file typically located in your user configuration directory. However, managing configurations across different projects (like `integrations-core`, `integrations-extras`, or Agent repositories) or even different [worktrees](https://git-scm.com/docs/git-worktree) within the same repository can sometimes require specific settings, especially for the `repo` variable.
 
 To simplify this, `ddev` supports local configuration overrides using a `.ddev.toml` file.
 
