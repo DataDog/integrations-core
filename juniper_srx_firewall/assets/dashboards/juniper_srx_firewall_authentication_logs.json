@@ -723,7 +723,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR REMOTE_ACCESS_VPN_AUTH_FAIL) $Client-IP $User-Name"
                                             },
                                             "indexes": [
                                                 "*"
