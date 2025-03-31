@@ -10,8 +10,9 @@ ddev config find
 ```
 
 !!! info "Local overrides"
-    When running `ddev`, if the current working directory contains a `.ddev.toml` file, any options defined in this file will override those in the global
+    When running `ddev`, if the current working directory (or a parent directory) contains a `.ddev.toml` file, any options defined in this file will override those in the global
     configuration file. This allows easy configuration sets depending on the working directory `ddev` is run from.
+    See the [Multi-repo/Worktrees](multirepo.md) documentation for more details on how overrides work and affect commands.
 
 ## Repository
 
@@ -33,8 +34,9 @@ no matter what directory you are in. If the selected path does not exist, then t
 By default, `repo` is set to `core`.
 
 !!! info "Local repository"
-    Using the configuraiton overrides you can set `ddev` to use as repo your current working directory by running `ddev config local-repo`.
+    Using the configuration overrides you can set `ddev` to use your current working directory as the active repository by running `ddev config local-repo`.
     This creates (or updates) a `.ddev.toml` file in your working directory with a `local` repository set to this path.
+    Refer to the [Multi-repo/Worktrees](multirepo.md) documentation for examples and more context on managing local overrides.
 
 ## Agent
 
