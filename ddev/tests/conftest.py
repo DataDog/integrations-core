@@ -7,7 +7,6 @@ import os
 import random
 from contextlib import ExitStack
 from typing import Generator
-from unittest.mock import PropertyMock
 
 import pytest
 import vcr
@@ -135,12 +134,8 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     path = Path(tmp_path, 'config.toml')
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
 
-    mocker.patch(
-        'ddev.config.file.ConfigFileWithOverrides.overrides_path',
-        new_callable=PropertyMock,
-        return_value=Path(tmp_path, '.ddev.toml'),
-    )
     config = ConfigFileWithOverrides(path)
+    config.overrides_path = Path(tmp_path, '.ddev.toml')
     config.reset()
 
     # Provide a real default for times when tests have no need to modify the repo

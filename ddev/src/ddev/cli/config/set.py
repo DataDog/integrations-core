@@ -18,7 +18,7 @@ def config_file_to_read(app: Application, overrides: bool) -> Path:
         config_to_read = app.config_file.overrides_path
     elif overrides:
         # If the overrides file does not exist, we will create it
-        app.config_file.overrides_path = Path.cwd() / ".ddev.toml"
+        app.config_file.overrides_path = config_to_read = Path.cwd() / ".ddev.toml"
         should_create = click.confirm("No overrides file found, would you like to create one in the current directory?")
         if should_create:
             app.config_file.overrides_path.write_text("")
@@ -29,8 +29,7 @@ def config_file_to_read(app: Application, overrides: bool) -> Path:
             )
     else:
         config_to_read = app.config_file.global_path
-    if overrides and not config_to_read.exists():
-        config_to_read.write_text("")
+
     return config_to_read
 
 
