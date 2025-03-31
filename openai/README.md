@@ -9,21 +9,55 @@ Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatb
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics and APM.
 
 ## Setup
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
 **Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
 
 ### Installation
-**Note**: This setup method only collects `openai.api.usage*` metrics, and if you enable OpenAI in Cloud Cost Management, you will also get cost metrics, no additional permissions or setup required. Use the agent setup below for additional metrics.
+
+# Configuring OpenAI Integration for Datadog
+
+## Overview
+
+Datadog's OpenAI integration allows you to collect usage metrics, cost data, and enables [LLM Observability][19] to monitor your OpenAI models. Follow the steps below to generate an OpenAI API key and configure the integration.
+
+## Prerequisites
+
+- An **OpenAI account** with the admin write permissions
+- A **valid OpenAI API key** with appropriate access for **usage and cost metrics** or **LLM Observability**.
+
+## Setup
+
+### 1. Generate an OpenAI API key
 
 1. Login to your [OpenAI Account][10].
-2. Navigate to **View API Keys** under account settings.
-3. Click the **Create a new secret key** button.
+2. Navigate to **API keys** under **Organization settings**.
+3. Click **Create a new secret key**.
+   - For LLM Observability, ensure that the API key has **write** permission for **model capabilities** to invoke models in your LLM account.
 4. Copy the created API Key to your clipboard.
-5. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
-6. Enter an account name and OpenAI API key copied above in the accounts configuration.
-7. If you use [Cloud Cost Management][14] and enable collecting cost data, it will be visible in Cloud Cost Management within 24 hours. ([collected data][15])
+
+### 2. Configure Datadog's OpenAI integration
+
+1. Navigate Datadog's [OpenAI integration tile][11] and open the **Configuration** tab.
+2. Click **Add Account**.
+3. Under **Account Name**, enter a name for your account. Under **API Key**, enter your OpenAI API key. Optionally, add a comma-separated list of tags for metrics associated with this account. 
+3. Under **Resources**, enable toggles depending on your use case:
+   - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. See ([collected data][15]).
+   - **Use this API key to evaluate your LLM applications**: If enabled, evaluations are run through this API key in LLM Observability.
+
+### Additional Notes
+
+- This integration only collects `openai.api.usage*` metrics.
+- If you enable Cloud Cost Management for OpenAI, you have access to cost metrics.
+- No additional permissions or setup are required for standard usage metrics.
+
+## Additional Resources
+
+- [OpenAI API Documentation][17]
+- [Generating an API Token][18]
+
 
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
@@ -37,9 +71,11 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 ### Installation
 
 #### LLM Observability: Get end-to-end visibility into your LLM application's calls to OpenAI
+
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 ##### If you do not have the Datadog Agent:
+
 1. Install the `ddtrace` package:
 
    ```shell
@@ -53,6 +89,7 @@ You can enable LLM Observability in different environments. Follow the appropria
    ```
 
 ##### If you already have the Datadog Agent installed:
+
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, use the following command with Docker:
 
    ```shell
@@ -85,6 +122,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
 ##### If you are running LLM Observability in a serverless environment (AWS Lambda):
+
 1. Install the **Datadog-Python** and **Datadog-Extension** Lambda layers as part of your AWS Lambda setup.
 2. Enable LLM Observability by setting the following environment variables:
 
@@ -93,34 +131,39 @@ You can enable LLM Observability in different environments. Follow the appropria
    ```
 
 **Note**: In serverless environments, Datadog automatically flushes spans when the Lambda function finishes running.
+
 ##### Automatic OpenAI tracing
+
 LLM Observability provides automatic tracing for OpenAI's completion and chat completion methods without requiring manual instrumentation.
 
 The SDK will automatically trace the following OpenAI methods:
+
 - `OpenAI().completions.create()`, `OpenAI().chat.completions.create()`
 - For async calls: `AsyncOpenAI().completions.create()`, `AsyncOpenAI().chat.completions.create()`
 
 No additional setup is required to capture latency, input/output messages, and token usage for these traced calls.
 
 ##### Validation
+
 Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `ddtrace` integration:
 
-   ```shell
-   ddtrace-run --info
-   ```
+```shell
+ddtrace-run --info
+```
 
 Look for the following message to confirm the setup:
 
-   ```shell
-   Agent error: None
-   ```
+```shell
+Agent error: None
+```
 
 ##### Debugging
+
 If you encounter issues during setup, enable debug logging by passing the `--debug` flag:
 
-   ```shell
-   ddtrace-run --debug
-   ```
+```shell
+ddtrace-run --debug
+```
 
 This will display detailed information about any errors or issues with tracing.
 
@@ -174,30 +217,29 @@ See the [APM Python library documentation][3] for all the available configuratio
 
 Validate that the APM Python library can communicate with your Agent using:
 
-   ```shell
-   ddtrace-run --info
-   ```
+```shell
+ddtrace-run --info
+```
 
 You should see the following output:
 
-   ```
-       Agent error: None
-   ```
+```
+    Agent error: None
+```
 
 ##### Debug Logging
 
 Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
 
-   ```shell
-   ddtrace-run --debug
-   ```
+```shell
+ddtrace-run --debug
+```
 
 This displays any errors sending data:
 
-   ```
-   ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-   ```
-
+```
+ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
+```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
@@ -207,9 +249,11 @@ This displays any errors sending data:
 ### Installation
 
 #### LLM Observability: Get end-to-end visibility into your LLM application's calls to OpenAI
+
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 ##### If you do not have the Datadog Agent:
+
 1. Install the `dd-trace` package:
 
    ```shell
@@ -223,6 +267,7 @@ You can enable LLM Observability in different environments. Follow the appropria
    ```
 
 ##### If you already have the Datadog Agent installed:
+
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, use the following command with Docker:
 
    ```shell
@@ -255,6 +300,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
 ##### If you are running LLM Observability in a serverless environment (AWS Lambda):
+
 1. Enable LLM Observability by setting the following environment variables:
 
    ```shell
@@ -271,7 +317,7 @@ You can enable LLM Observability in different environments. Follow the appropria
        mlApp: <YOUR_ML_APP>,
      }
    }).llmobs; // with DD_API_KEY and DD_SITE being set at the environment level
-   
+
    async function handler (event, context) {
      ...
      llmobs.flush()
@@ -280,14 +326,17 @@ You can enable LLM Observability in different environments. Follow the appropria
    ```
 
 ##### Automatic OpenAI tracing
+
 LLM Observability provides automatic tracing for OpenAI's completion, chat completion, and embedding methods without requiring manual instrumentation.
 
 The SDK will automatically trace the following OpenAI methods:
+
 - `client.completions.create()`, `client.chat.completions.create()`, `client.embeddings.create()` (where client is an instance of `OpenAI`)
 
 No additional setup is required to capture latency, input/output messages, and token usage for these traced calls.
 
 ##### Debugging
+
 If you encounter issues during setup, enable debug logging by setting `DD_TRACE_DEBUG=1`
 
 This will display detailed information about any errors or issues with tracing.
@@ -337,25 +386,25 @@ See the [APM Node.js library documentation][9] for all the available configurati
 
 Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field and a correlating value of `openai.request`. See below for a truncated example of this output:
 
-   ```json
-   {
-     "name": "openai.request",
-     "resource": "listModels",
-     "meta": {
-       "component": "openai",
-       "span.kind": "client",
-       "openai.api_base": "https://api.openai.com/v1",
-       "openai.request.endpoint": "/v1/models",
-       "openai.request.method": "GET",
-       "language": "javascript"
-     },
-     "metrics": {
-       "openai.response.count": 106
-     },
-     "service": "my-service",
-     "type": "openai"
-   }
-   ```
+```json
+{
+  "name": "openai.request",
+  "resource": "listModels",
+  "meta": {
+    "component": "openai",
+    "span.kind": "client",
+    "openai.api_base": "https://api.openai.com/v1",
+    "openai.request.endpoint": "/v1/models",
+    "openai.request.method": "GET",
+    "language": "javascript"
+  },
+  "metrics": {
+    "openai.response.count": 106
+  },
+  "service": "my-service",
+  "type": "openai"
+}
+```
 
 [8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
 [9]: https://github.com/DataDog/dd-trace-js
@@ -458,3 +507,6 @@ Additional helpful documentation, links, and articles:
 [14]: https://app.datadoghq.com/cost
 [15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
 [16]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
+[17]: https://platform.openai.com/docs/
+[18]: https://platform.openai.com/
+[19]: https://www.datadoghq.com/product/llm-observability/

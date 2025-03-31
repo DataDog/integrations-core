@@ -190,6 +190,13 @@ instances:
     #
     # queue_manager_timezone: Etc/UTC
 
+    ## @param use_qm_tz_for_metrics - boolean - optional - default: false
+    ## Use the `queue_manager_timezone` parameter to collect metrics. Metrics can be skipped sometimes if the 
+    ## timezone is not in UTC. The queried data that the agent retrieves is timezone naive and is expected to 
+    ## be in UTC. Use this setting if the queue manager has a different timezone setting.
+    #
+    # use_qm_tz_for_metrics: false
+
     ## @param timeout - integer - optional - default: 5
     ## The number of seconds to wait for IBM MQ to respond.
     #

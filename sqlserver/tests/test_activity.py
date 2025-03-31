@@ -62,7 +62,7 @@ def dbm_instance(instance_docker):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc,expected_comments,collect_raw_query_statement,expected_raw_statement",
+    "database,query,match_pattern,is_proc,comments,collect_raw_query_statement,expected_raw_statement",
     [
         [
             "datadog_test-1",
@@ -107,12 +107,13 @@ def test_collect_load_activity(
     instance_docker,
     dd_run_check,
     dbm_instance,
+    datadog_agent,
     use_autocommit,
     database,
     query,
     match_pattern,
     is_proc,
-    expected_comments,
+    comments,
     collect_raw_query_statement,
     expected_raw_statement,
 ):
@@ -135,33 +136,48 @@ def test_collect_load_activity(
         cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
 
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': comments,
+                },
+            }
+        )
+
+    def _run_query_with_mock_obfuscator(c, q):
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = _obfuscate_sql
+            run_test_query(c, q)
+
     # run the test query once before the blocking test to ensure that if it's
     # a procedure then it is populated in the sys.dm_exec_procedure_stats table
     # the first time a procedure is run we won't know it's a procedure because
     # it won't appear in that stats table
-    run_test_query(fred_conn, query)
+    _run_query_with_mock_obfuscator(fred_conn, query)
 
     # bob's query blocks until the tx is completed
-    run_test_query(bob_conn, blocking_query)
+    _run_query_with_mock_obfuscator(bob_conn, blocking_query)
 
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
     executor = concurrent.futures.ThreadPoolExecutor(1)
-    f_q = executor.submit(run_test_query, fred_conn, query)
+    f_q = executor.submit(_run_query_with_mock_obfuscator, fred_conn, query)
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
-    # both queries were kicked off, so run the check
     dd_run_check(check)
     # commit and close bob's transaction
     bob_conn.commit()
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
     # clean up fred's connection
     # and shutdown executor
@@ -200,7 +216,7 @@ def test_collect_load_activity(
     assert blocked_row['now'], "missing current timestamp"
     assert blocked_row['last_request_start_time'], "missing last_request_start_time"
     assert blocked_row['now'], "missing current time"
-    assert blocked_row['dd_comments'] == expected_comments, "missing expected comments"
+    assert blocked_row['dd_comments'] == comments, "missing expected comments"
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
@@ -453,7 +469,6 @@ def test_activity_metadata(
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
     dd_run_check(check)
@@ -462,7 +477,6 @@ def test_activity_metadata(
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
 
     fred_conn.close()
@@ -630,7 +644,11 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
         large_comment = "/* " + "a" * 5000 + " */"
         statement_text = "SELECT * FROM ϑings"
         procedure_text = f"CREATE PROCEDURE dbo.sp_test {large_comment} AS BEGIN {statement_text} END;"
-        metadata = {'tables_csv': 'ϑings', 'commands': ['SELECT'], 'comments': [large_comment]}
+        metadata = {
+            'tables_csv': 'ϑings',
+            'commands': ['SELECT'],
+            'comments': [large_comment],
+        }
         rows = [
             {
                 "user_name": "newbob",
@@ -638,6 +656,8 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
                 "statement_text": statement_text,
                 "text": procedure_text,
                 "query_start": new_time(),
+                "procedure_name": "sp_test",
+                "schema_name": "dbo",
             },
         ]
         # the first call to obfuscate query text will succeed
@@ -678,7 +698,16 @@ def test_activity_stored_procedure_characters_limit(
     def _obfuscate_sql(sql_query, options=None):
         if "PROCEDURE procedureWithLargeCommment" in sql_query and len(sql_query) >= stored_procedure_characters_limit:
             raise Exception("failed to obfuscate")
-        return json.dumps({'query': sql_query, 'metadata': {}})
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': [],
+                },
+            }
+        )
 
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=True)
@@ -701,7 +730,6 @@ def test_activity_stored_procedure_characters_limit(
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -713,7 +741,6 @@ def test_activity_stored_procedure_characters_limit(
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
     # clean up fred's connection
     # and shutdown executor
@@ -737,7 +764,7 @@ def test_activity_stored_procedure_characters_limit(
                 matching_activity.append(activity)
     assert len(matching_activity) == 1
     assert matching_activity[0]['is_proc'] is True
-    assert matching_activity[0]['procedure_name'].lower() == "procedurewithlargecommment"
+    assert matching_activity[0]['procedure_name'].lower() == "dbo.procedurewithlargecommment"
     assert matching_activity[0]['text'] == "SELECT * FROM ϑings"
     # this is a hacky way of asserting that the procedure signature is present
     # when stored_procedure_characters_limit is set to a large value
