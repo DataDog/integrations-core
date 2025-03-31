@@ -102,13 +102,20 @@ class ConfigFileWithOverrides:
             return self._overrides_path
 
         current_dir = Path.cwd()
-        root_dir = Path(current_dir.root)
+
+        # Keep searching while the file doesn't exist in the current directory
         while not (current_dir / ".ddev.toml").exists():
-            current_dir = current_dir.parent
-            if current_dir == root_dir:
-                self._overrides_path = root_dir
+            # Check if moving to the parent *would* change the directory.
+            # If current_dir.parent is the same as current_dir, we've reached the top (root).
+            # This ensures we handle windows and UNC paths correctly.
+            if current_dir.parent == current_dir:
+                self._overrides_path = current_dir
                 return self._overrides_path
 
+            # Move to the parent directory for the next iteration
+            current_dir = current_dir.parent
+
+        # If the loop terminates, it means the file *was* found in the current `current_dir`
         self._overrides_path = current_dir / ".ddev.toml"
         return self._overrides_path
 
@@ -124,7 +131,7 @@ class ConfigFileWithOverrides:
         """Overrides path shown either as relative or absolute path, depending on the length."""
         relative_overrides_path = os.path.relpath(self.overrides_path, Path.cwd())
         parents_apart = Counter(relative_overrides_path.split(os.path.sep))
-        if parents_apart['..'] > 1:
+        if parents_apart[".."] > 1:
             # Show the absolute path if the relative path is too long
             return self.overrides_path
         else:
