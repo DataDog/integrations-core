@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # Add a comment to the file
-# Another Change
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
