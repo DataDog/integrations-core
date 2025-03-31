@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Monitor the health and performance of Celery workers.",
     "title": "Celery",
     "media": [],
     "classifier_tags": [
