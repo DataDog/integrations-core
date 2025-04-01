@@ -135,7 +135,6 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
 
     config = ConfigFileWithOverrides(path)
-    config.overrides_path = Path(tmp_path, '.ddev.toml')
     config.reset()
 
     # Provide a real default for times when tests have no need to modify the repo
@@ -143,6 +142,14 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
     config.save()
 
     return config
+
+
+@pytest.fixture
+def overrides_config(temp_dir) -> Generator[Path]:
+    """Creates a temporary overrides config file in the temp current directory."""
+    with temp_dir.as_cwd():
+        (temp_dir / ".ddev.toml").touch()
+        yield temp_dir / ".ddev.toml"
 
 
 @pytest.fixture
