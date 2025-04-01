@@ -1509,8 +1509,8 @@ def test_statement_run_explain_errors(
     [
         (
             "select * from pg_settings where name = $1",
-            DBExplainError.explained_with_prepared_statement,
-            None,
+            DBExplainError.indeterminate_datatype,
+            'indeterminate_datatype',
         ),
     ],
 )
