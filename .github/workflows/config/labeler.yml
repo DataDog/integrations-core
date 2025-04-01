@@ -1,13 +1,10 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
+  # We apply no-changelog label for PRs that release integrations by bumping __about__.py.
 - any:
   - requirements-agent-release.txt
   - '**/__about__.py'
-- all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
 ddev:
 - ddev/**/*
 dependencies:
@@ -299,6 +296,8 @@ integration/impala:
 - impala/**/*
 integration/incident_io:
 - incident_io/**/*
+integration/infiniband:
+- infiniband/**/*
 integration/intercom:
 - intercom/**/*
 integration/istio:
@@ -519,6 +518,8 @@ integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
+integration/silverstripe_cms:
+- silverstripe_cms/**/*
 integration/singlestore:
 - singlestore/**/*
 integration/slurm:
@@ -555,6 +556,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonatype_nexus:
+- sonatype_nexus/**/*
 integration/sonicwall_firewall:
 - sonicwall_firewall/**/*
 integration/sophos_central_cloud:
@@ -643,6 +646,8 @@ integration/varnish:
 - varnish/**/*
 integration/vault:
 - vault/**/*
+integration/velero:
+- velero/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:
