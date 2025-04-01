@@ -1,3 +1,5 @@
+# Agent Integration: OpenVPN
+
 ## Overview
 
 [OpenVPN][4] is a free, open-source protocol that creates secure connections between devices over the internet. It's used to create virtual private networks (VPNs).

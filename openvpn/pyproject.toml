@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-openvpn"
-description = "The openvpn check"
+description = "The OpenVPN check"
 readme = "README.md"
 license = "BSD-3-Clause"
 keywords = [
@@ -24,7 +24,7 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [

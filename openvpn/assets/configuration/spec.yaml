@@ -1,4 +1,4 @@
-name: openvpn
+name: OpenVPN
 files:
 - name: openvpn.yaml
   options:

@@ -31,7 +31,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 40374141,
-      "source_type_name": "openvpn",
+      "source_type_name": "OpenVPN",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
