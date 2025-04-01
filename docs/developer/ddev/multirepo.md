@@ -16,17 +16,29 @@ When you run a `ddev` command, it searches for a `.ddev.toml` file in the curren
 
 ## Command Behavior with Overrides
 
-The presence of a `.ddev.toml` file influences how certain `ddev` config commands behave. Assume the global config has `repo = "core"` and `org = "default"`, and a local `.ddev.toml` has `repo = "local-override"` and `github.user = "test-user"`.
+The presence of a `.ddev.toml` file influences how certain `ddev` config commands behave. Assume the global config has `repo = "core"` and `org = "default"`, and a local `.ddev.toml` has `repo = "extras"` and `github.user = "test-user"`.
 
 *   **`ddev config show`**: Displays the merged configuration, annotating each setting with its source (`GlobalConfig:<line>` or `Overrides:<line>`).
 
     *Example:*
-    ```bash
-    $ ddev config show
-    repo = "local-override"       # Overrides:1
-    org = "default"               # GlobalConfig:3
-    [github]                      # Overrides:2
-    user = "test-user"            # Overrides:3
+    ```toml
+    repo = "extras"                       # Overrides:1
+    agent = "dev"                         # GlobalConfig:2
+    org = "default"                       # GlobalConfig:3
+
+    [repos]                               # GlobalConfig:5
+    core = "~/dd/integrations-core"       # GlobalConfig:6
+    extras = "~/dd/integrations-extras"   # GlobalConfig:7
+    marketplace = "~/dd/marketplace"      # GlobalConfig:8
+    agent = "~/dd/datadog-agent"          # GlobalConfig:9
+
+    ...
+
+    [github]                              # Overrides:3
+    user = "test-user"                    # Overrides:4
+    token = "*****"                       # GlobalConfig:28
+
+    ...
     ```
 
 *   **`ddev config set <KEY> <VALUE> [--overrides]`**: Use the `--overrides` flag to modify or add a setting in the `.ddev.toml` file. Without the flag, it modifies the global `config.toml`. If `--overrides` is used and no `.ddev.toml` exists in the current directory, `ddev` prompts for creation.
