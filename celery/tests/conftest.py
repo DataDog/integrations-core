@@ -23,12 +23,8 @@ def dd_environment():
         conditions=[
             CheckDockerLogs('docker-redis-standalone-1', 'Ready to accept connections tcp'),
         ],
-        env_vars={
-            'DD_LOGS_ENABLED': 'true',
-            'DD_CONTAINER_COLLECT_ALL': 'true',
-        },
     ):
-        yield {'instances': [common.MOCKED_INSTANCE]}
+        yield common.MOCKED_INSTANCE, common.E2E_METADATA
 
 
 @pytest.fixture(scope='session')
