@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
-from datadog_checks.dev.testing import requires_windows, requires_linux
+from datadog_checks.dev.testing import requires_linux, requires_windows
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics, mock_context_manager
 from datadog_checks.disk import Disk
 from datadog_checks.disk.disk import IGNORE_CASE
@@ -223,7 +223,7 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@requires_linux # Only linux cares about upper/lower case for paths.
+@requires_linux  # Only linux cares about upper/lower case for paths.
 @pytest.mark.parametrize(
     'lc_device_tag, expected_dev_path',
     [
