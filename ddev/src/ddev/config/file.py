@@ -13,8 +13,8 @@ from ddev.config.utils import scrub_config
 from ddev.utils.fs import Path
 from ddev.utils.toml import dumps_toml_data, load_toml_data
 
-LOCAL_OVERRIDES_PATH = Path.cwd() / ".ddev.toml"
 UNINITIALIZED = object()
+DDEV_TOML = ".ddev.toml"
 
 
 class ConfigFileError(Exception):
@@ -102,21 +102,28 @@ class ConfigFileWithOverrides:
             return self._overrides_path
 
         current_dir = Path.cwd()
+        last_valid_dir = current_dir
 
         # Keep searching while the file doesn't exist in the current directory
-        while not (current_dir / ".ddev.toml").is_file():
-            # Check if moving to the parent *would* change the directory.
-            # If current_dir.parent is the same as current_dir, we've reached the top (root).
-            # This ensures we handle windows and UNC paths correctly.
-            if current_dir.parent == current_dir:
-                self._overrides_path = current_dir
-                return self._overrides_path
+        try:
+            while not (current_dir / DDEV_TOML).is_file():
+                # Check if moving to the parent *would* change the directory.
+                # If current_dir.parent is the same as current_dir, we've reached the top (root).
+                # This ensures we handle windows and UNC paths correctly.
+                if current_dir.parent == current_dir:
+                    self._overrides_path = current_dir
+                    return self._overrides_path
 
-            # Move to the parent directory for the next iteration
-            current_dir = current_dir.parent
+                # Move to the parent directory for the next iteration
+                current_dir, last_valid_dir = current_dir.parent, current_dir
+        except PermissionError:
+            # If we don't have permission to access the directory, return the current directory
+            # With no file as the overrides path
+            self._overrides_path = last_valid_dir
+            return self._overrides_path
 
         # If the loop terminates, it means the file *was* found in the current `current_dir`
-        self._overrides_path = current_dir / ".ddev.toml"
+        self._overrides_path = current_dir / DDEV_TOML
         return self._overrides_path
 
     @overrides_path.setter

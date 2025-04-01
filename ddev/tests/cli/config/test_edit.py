@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from ddev.config.file import DDEV_TOML
+
+
 def test_call(ddev, config_file, mocker):
     mock = mocker.patch("click.edit")
     result = ddev("config", "edit")
@@ -13,7 +16,7 @@ def test_call_overrides(ddev, config_file, mocker, temp_dir, overrides_config):
     mock = mocker.patch("click.edit")
 
     # Ensure overrides path exist
-    (temp_dir / ".ddev.toml").touch()
+    (temp_dir / DDEV_TOML).touch()
 
     result = ddev("config", "edit", "--overrides")
 

@@ -7,7 +7,7 @@ from typing import Any, cast
 import click
 
 from ddev.cli.application import Application
-from ddev.config.file import deep_merge_with_list_handling
+from ddev.config.file import DDEV_TOML, deep_merge_with_list_handling
 from ddev.config.model import ConfigurationError, RootConfig
 from ddev.utils.fs import Path
 
@@ -18,7 +18,7 @@ def config_file_to_read(app: Application, overrides: bool) -> Path:
         config_to_read = app.config_file.overrides_path
     elif overrides:
         # If the overrides file does not exist, we will create it
-        app.config_file.overrides_path = config_to_read = Path.cwd() / ".ddev.toml"
+        app.config_file.overrides_path = config_to_read = Path.cwd() / DDEV_TOML
         should_create = click.confirm("No overrides file found, would you like to create one in the current directory?")
         if should_create:
             app.config_file.overrides_path.write_text("")
