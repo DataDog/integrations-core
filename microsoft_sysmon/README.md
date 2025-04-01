@@ -4,7 +4,7 @@
 
 [Microsoft Sysmon][4] is a Windows system service and device driver that provides detailed logging of system activity, including process creation, network connections, file modifications, and registry changes.
 
-This integration enriches and ingests the [Sysmon event logs][5]. Use pre-built dashboard to get a high-level view of Sysmon events helping security teams monitor system activity.
+This integration enriches and ingests the [Sysmon event logs][5]. Use the pre-built dashboard to get a high-level view of the Sysmon events helping security teams monitor system activity.
 
 ## Setup
 
