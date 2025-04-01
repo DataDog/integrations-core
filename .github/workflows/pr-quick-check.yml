@@ -63,7 +63,7 @@ jobs:
         ${{ github.event.pull_request.base.repo.private && '--private' || '' }}
         --repo "${{ inputs.repo }}"
 
-    - uses: dorny/paths-filter@v2
+    - uses: dorny/paths-filter@v3
       id: changes
       with:
         filters: |
