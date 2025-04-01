@@ -340,7 +340,7 @@ class SQLServer(AgentCheck):
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_SERVERNAME not in self.static_info_cache:
-                        cursor.execute("select ServerProperty('ServerName')")
+                        cursor.execute("select CAST(ServerProperty('ServerName') AS VARCHAR) AS ServerName")
                         result = cursor.fetchone()
                         if result:
                             full_servername = result[0]
