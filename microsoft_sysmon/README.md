@@ -14,7 +14,7 @@ To install the Microsoft Sysmon integration, run the following Agent installatio
 
 **Note**: This step is not necessary for Agent version >= 7.66.0.
 
-Run powershell.exe as admin and execute following command:
+Run powershell.exe as admin and execute the following command:
   ```powershell
   & "$env:ProgramFiles\Datadog\Datadog Agent\bin\agent.exe" integration install datadog-microsoft_sysmon==1.0.0
   ```
