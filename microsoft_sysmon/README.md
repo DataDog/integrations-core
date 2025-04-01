@@ -46,7 +46,7 @@ Run powershell.exe as admin and execute the following command:
 
 Follow these steps to install Sysmon:
 1. Download the zip file from the [Sysmon download page][4]. Extract its zip file content.
-2. Create an XML file for configuring Sysmon. For example, if you want to monitor processes created by apps from AppData folders, the configuration file will look like content shown below, you can add more event filters under the `EventFiltering` XML tag for other events in the same way.
+2. Create an XML file for configuring Sysmon. For example, if you want to monitor processes created by apps from AppData folders, the configuration file will look like content shown below. You can add more event filters under the `EventFiltering` XML tag for other events in the same way.
 
   ```xml
     <Sysmon schemaversion="4.90">
