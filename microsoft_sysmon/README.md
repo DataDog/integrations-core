@@ -69,7 +69,7 @@ Follow these steps to install Sysmon:
 - Control which events to monitor
 - Filter events based on processes, paths, etc.
 
-Enabling too many event types can result in excessive data ingestion. Only critical security events should be enabled based on threat model and monitoring needs.
+Enabling too many event types can result in excessive data ingestion. Only critical security events should be enabled based on the threat model and monitoring needs.
 These events should be selectively enabled for critical system directories, processes, and users to avoid unnecessary log noise.
 
 For more details on configuration, please refer to the [Sysmon docs][7].
