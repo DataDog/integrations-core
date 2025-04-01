@@ -15,7 +15,7 @@ from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
-from ddev.config.file import ConfigFileWithOverrides
+from ddev.config.file import DDEV_TOML, ConfigFileWithOverrides
 from ddev.e2e.constants import E2EEnvVars
 from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
@@ -148,8 +148,8 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
 def overrides_config(temp_dir) -> Generator[Path]:
     """Creates a temporary overrides config file in the temp current directory."""
     with temp_dir.as_cwd():
-        (temp_dir / ".ddev.toml").touch()
-        yield temp_dir / ".ddev.toml"
+        (temp_dir / DDEV_TOML).touch()
+        yield temp_dir / DDEV_TOML
 
 
 @pytest.fixture

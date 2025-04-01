@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from ddev.config.file import DDEV_TOML
 from ddev.utils.fs import Path
 
 
@@ -192,7 +193,7 @@ def test_global_standard(ddev, config_file, overrides_config):
 
 def test_overrides_creates_file(ddev, config_file, helpers, temp_dir):
     with temp_dir.as_cwd():
-        overrides_config = Path.cwd() / ".ddev.toml"
+        overrides_config = Path.cwd() / DDEV_TOML
         result = ddev("config", "set", "--overrides", "repo", "marketplace", input="y")
 
     assert result.exit_code == 0, result.output

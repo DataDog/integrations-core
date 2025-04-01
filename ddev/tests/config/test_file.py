@@ -3,6 +3,7 @@ from pathlib import Path as PathLibPath
 import pytest
 
 from ddev.config.file import (
+    DDEV_TOML,
     ConfigFileWithOverrides,
     build_line_index_with_multiple_entries,
     deep_merge_with_list_handling,
@@ -58,7 +59,7 @@ def test_with_local_file_in_parent_dir(tmp_path: PathLibPath, helpers, monkeypat
 
     # Define config file paths in the parent directory (tmp_path)
     global_config_path = tmp_path / "config.toml"
-    override_config_path = tmp_path / ".ddev.toml"
+    override_config_path = tmp_path / DDEV_TOML
 
     # Write base global config
     global_config_path.write_text(
@@ -121,7 +122,7 @@ def test_pretty_overrides_path_relative(tmp_path: PathLibPath, monkeypatch):
     project_dir = Path(tmp_path) / "project"
     project_dir.mkdir()
     # Override file is one level up
-    override_path = Path(tmp_path) / ".ddev.toml"
+    override_path = Path(tmp_path) / DDEV_TOML
     override_path.touch()
 
     config_file = ConfigFileWithOverrides()
@@ -130,7 +131,7 @@ def test_pretty_overrides_path_relative(tmp_path: PathLibPath, monkeypatch):
     with monkeypatch.context() as m:
         m.chdir(project_dir)
         # Expected relative path from project_dir to override_path
-        expected_relative_override = Path("..") / ".ddev.toml"
+        expected_relative_override = Path("..") / DDEV_TOML
         assert config_file.pretty_overrides_path == expected_relative_override
 
 
@@ -141,7 +142,7 @@ def test_pretty_overrides_path_absolute(tmp_path: PathLibPath, monkeypatch):
     project_dir.mkdir(parents=True)
 
     # Override file is several levels up
-    override_path = Path(tmp_path) / ".ddev.toml"
+    override_path = Path(tmp_path) / DDEV_TOML
     override_path.touch()
 
     config_file = ConfigFileWithOverrides()
@@ -367,3 +368,40 @@ def test_build_line_index_with_empty_lines():
     index = build_line_index_with_multiple_entries(content)
 
     assert index == {"line1": [1], "": [2, 4], "line2": [3], "line3": [5]}
+
+
+def test_overrides_path_permission_error(tmp_path: PathLibPath, monkeypatch):
+    """Test that overrides_path handles PermissionError correctly using monkeypatch."""
+    # Structure: /tmp/.../allowed_dir/permission_denied/current_dir
+    allowed_dir = Path(tmp_path) / "allowed_dir"
+    permission_denied_dir = allowed_dir / "permission_denied"
+    parent_dir = permission_denied_dir / "parent_dir"
+    current_dir = parent_dir / "current_dir"
+    current_dir.mkdir(parents=True)
+
+    # Paths needed for mocking
+    ddev_toml_in_permission_denied = permission_denied_dir / DDEV_TOML
+
+    # Store original methods
+    original_is_file = Path.is_file
+
+    def mock_is_file(self: Path):
+        if self == ddev_toml_in_permission_denied:
+            raise PermissionError("Test permission denied")
+        # Allow other is_file calls to proceed if needed, though test setup minimizes this.
+        return original_is_file(self)
+
+    # Instantiate config file (global path doesn't matter)
+    config_file = ConfigFileWithOverrides(Path("nonexistent_global.toml"))
+
+    # Apply mocks using monkeypatch
+    monkeypatch.setattr(Path, "is_file", mock_is_file)
+
+    with monkeypatch.context() as m:
+        m.chdir(current_dir)
+        # Access the property - this should trigger the logic and the PermissionError
+        # The property should catch the error and return the path that caused it
+        result_path = config_file.overrides_path
+
+        # Assert that the returned path is the one where PermissionError occurred
+        assert result_path == parent_dir

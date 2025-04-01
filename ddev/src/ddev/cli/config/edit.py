@@ -5,12 +5,14 @@ from typing import TYPE_CHECKING
 
 import click
 
+from ddev.config.file import DDEV_TOML
+
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
 @click.command(short_help='Edit the config file with your default editor')
-@click.option('--overrides', is_flag=True, help='Edit the local config file (.ddev.toml)')
+@click.option('--overrides', is_flag=True, help=f'Edit the local config file ({DDEV_TOML})')
 @click.pass_obj
 def edit(app: 'Application', overrides: bool):
     """Edit the config file with your default editor."""
