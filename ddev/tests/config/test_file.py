@@ -10,19 +10,18 @@ from ddev.config.file import (
 from ddev.utils.fs import Path
 
 
-def test_no_local_file(mocker, tmp_path: Path, config_file: ConfigFileWithOverrides):
+def test_no_local_file(config_file: ConfigFileWithOverrides):
     # Load the file
     config_file.load()
     assert config_file.combined_model.raw_data == config_file.global_model.raw_data
 
 
-def test_with_local_file(mocker, config_file: ConfigFileWithOverrides, helpers):
+def test_with_local_file(config_file: ConfigFileWithOverrides, helpers, overrides_config: Path):
     # Write a local toml to the local file. It includes a new repo and sets the value of repo to it.
     # This should be acceptable and pass validation
-    with open(config_file.overrides_path, "w") as f:
-        f.write(
-            helpers.dedent(
-                """
+    overrides_config.write_text(
+        helpers.dedent(
+            """
             repo = "local"
 
             [github]
@@ -32,8 +31,8 @@ def test_with_local_file(mocker, config_file: ConfigFileWithOverrides, helpers):
             [repos]
             local = "local_repo"
             """
-            )
         )
+    )
 
     # Load the file
     config_file.load()
