@@ -1,0 +1,83 @@
+{
+    "failed": [
+        {
+            "id": "789",
+            "content": {
+                "timestamp": "2025-03-27T12:15:14Z",
+                "tags": [
+                    "service:mac-audit-logs",
+                    "source:mac-audit-logs",
+                    "source_host:127.0.0.1"
+                ],
+                "host": "MacBook-Air.local",
+                "service": "mac-audit-logs",
+                "attributes": {
+                    "usr": {
+                        "name": "root"
+                    },
+                    "record": {
+                        "path": [
+                            "/etc/localtime",
+                            "/private/etc/localtime"
+                        ],
+                        "event": "AUE_READLINK"
+                    },
+                    "timestamp": 1743077714000
+                }
+            }
+        },
+        {
+            "id": "456",
+            "content": {
+                "timestamp": "2025-03-27T12:15:19Z",
+                "tags": [
+                    "service:mac-audit-logs",
+                    "source:mac-audit-logs",
+                    "source_host:127.0.0.1"
+                ],
+                "host": "MacBook-Air.local",
+                "service": "mac-audit-logs",
+                "attributes": {
+                    "usr": {
+                        "name": "_nsresponder"
+                    },
+                    "record": {
+                        "event": "AUE_CLOSE"
+                    },
+                    "timestamp": 1743077719000
+                }
+            }
+        }
+
+    ],
+    "passed": [
+        {
+            "id": "123",
+            "content": {
+                "timestamp": "2025-03-27T12:15:11Z",
+                "tags": [
+                    "service:mac-audit-logs",
+                    "source:mac-audit-logs",
+                    "source_host:127.0.0.1"
+                ],
+                "host": "MacBook-Air.local",
+                "service": "mac-audit-logs",
+                "attributes": {
+                    "usr": {
+                        "name": "root"
+                    },
+                    "record": {
+                        "path": [
+                            "/opt/datadog-agent/run/registry.json.tmp2833815749",
+                            "/opt/datadog-agent/run/registry.json.tmp2833815749",
+                            "/opt/datadog-agent/run/registry.json",
+                            "/opt/datadog-agent/run/registry.json"
+                        ],
+                        "event": "AUE_RENAME"
+                    },
+                    "timestamp": 1743077711000
+                }
+            }
+        }
+    ]
+}

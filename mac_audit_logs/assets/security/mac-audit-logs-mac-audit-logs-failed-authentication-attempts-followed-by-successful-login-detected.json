@@ -1,0 +1,51 @@
+{
+    "name": "Mac audit logs failed authentication attempts followed by successful login detected",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "tactic:TA0006-credential-access",
+        "technique:T1110-brute-force",
+        "source:mac-audit-logs",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "failed_auth_attempts",
+            "query": "source:mac-audit-logs service:mac-audit-logs @event-category:\"Authentication and Authorization\" @result:failure",
+            "groupByFields": [
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        },
+        {
+            "name": "successful_login",
+            "query": "source:mac-audit-logs service:mac-audit-logs @event-category:\"Authentication and Authorization\" @result:success",
+            "groupByFields": [
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "failed_auth_attempts > 5 THEN successful_login > 0",
+            "name": "",
+            "status": "medium",
+            "notifications": []
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+name: Mac Audit Logs
+files:
+- name: mac_audit_logs.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: MONITOR
+      required: true
+      description: "Flag indicating Mac audit log collection status. Set to true to enable collection."
+      value:
+        type: boolean
+        example: true
+    - name: IP
+      required: false
+      description: "IP for sending audit logs."
+      value:
+        type: string
+        example: <IP>
+    - name: PORT
+      required: true
+      description: "Port for sending audit logs. Ensure it matches the value in logs > port."
+      value:
+        type: string
+        example: <PORT>
+    - template: instances/default
+      overrides:
+        min_collection_interval.required: true
+        min_collection_interval.value.example: 15
+        min_collection_interval.value.minimum: 1
+        min_collection_interval.value.maximum: 64800
+        service.hidden: true
+        empty_default_hostname.hidden: true
+        metric_patterns.hidden: true
+  - template: logs
+    example:
+    - type: udp
+      port: <PORT>
+      service: mac-audit-logs
+      source: mac-audit-logs

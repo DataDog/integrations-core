@@ -1,0 +1,40 @@
+{
+    "name": "Mac audit logs blocked network traffic detected",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "source:mac-audit-logs",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "blocked_network_traffic",
+            "query": "source:mac-audit-logs service:mac-audit-logs @event-category:Network @action:blocked",
+            "groupByFields": [
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "blocked_network_traffic > 0",
+            "name": "",
+            "status": "medium",
+            "notifications": []
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+{
+    "name": "Mac audit logs bulk file created",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "technique:T1565-data-manipulation",
+        "tactic:TA0040-impact",
+        "source:mac-audit-logs",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "file_create",
+            "query": "source:mac-audit-logs service:mac-audit-logs @record.event:(AUE_CREAT OR AUE_LINK OR AUE_MKNOD OR AUE_SYMLINK OR AUE_RENAME OR AUE_MKDIR OR AUE_OPEN_RC OR AUE_OPEN_RTC OR AUE_OPEN_WC OR AUE_OPEN_WTC OR AUE_OPEN_RWC OR AUE_OPEN_RWTC OR AUE_CORE OR AUE_XMKNOD OR AUE_OPENAT_RC OR AUE_OPENAT_RTC OR AUE_OPENAT_WC OR AUE_OPENAT_WTC OR AUE_OPENAT_RWC OR AUE_OPENAT_RWTC OR AUE_RENAMEAT OR AUE_DARWIN_MKFIFO OR AUE_MKFIFO OR AUE_LINKAT OR AUE_MKDIRAT OR AUE_MKFIFOAT OR AUE_MKNODAT OR AUE_SYMLINKAT OR AUE_MKDIR_EXTENDED OR AUE_MKFIFO_EXTENDED OR AUE_OPEN_EXTENDED_RC OR AUE_OPEN_EXTENDED_RTC OR AUE_OPEN_EXTENDED_WC OR AUE_OPEN_EXTENDED_WTC OR AUE_OPEN_EXTENDED_RWC OR AUE_OPEN_EXTENDED_RWTC)",
+            "groupByFields": [
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "file_create > 10",
+            "name": "",
+            "status": "medium",
+            "notifications": []
+        }
+    ]
+}

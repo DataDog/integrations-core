@@ -1,0 +1,74 @@
+{
+    "failed": [
+        {
+            "id": "789",
+            "content": {
+                "timestamp": "2025-03-27T12:15:14Z",
+                "tags": [
+                    "service:mac-audit-logs",
+                    "source:mac-audit-logs",
+                    "source_host:127.0.0.1"
+                ],
+                "host": "MacBook-Air.local",
+                "service": "mac-audit-logs",
+                "attributes": {
+                    "usr": {
+                        "name": "root"
+                    },
+                    "record": {
+                        "path": [
+                            "/etc/localtime",
+                            "/private/etc/localtime"
+                        ],
+                        "event": "AUE_READLINK"
+                    },
+                    "timestamp": 1743077714000
+                }
+            }
+        },
+        {
+            "id": "erc",
+            "content": {
+                "timestamp": "2025-04-02T11:49:25.776Z",
+                "tags": [
+                    "service:mac-audit-logs",
+                    "source:mac-audit-logs",
+                    "source_host:127.0.0.1"
+                ],
+                "host": "MacBook-Air.local",
+                "service": "mac-audit-logs",
+                "attributes": {
+                    "result": "success",
+                    "event-category": "Authentication and Authorization",
+                    "usr": {
+                        "name": "it"
+                    },
+                    "timestamp": 1743177147000
+                }
+            }
+        }
+    ],
+    "passed": [
+        {
+            "id": "uxo",
+            "content": {
+                "timestamp": "2025-04-02T11:49:15.771Z",
+                "tags": [
+                    "service:mac-audit-logs",
+                    "source:mac-audit-logs",
+                    "source_host:127.0.0.1"
+                ],
+                "host": "MacBook-Air.local",
+                "service": "mac-audit-logs",
+                "attributes": {
+                    "result": "failure",
+                    "event-category": "Authentication and Authorization",
+                    "usr": {
+                        "name": "it"
+                    },
+                    "timestamp": 1743177147000
+                }
+            }
+        }
+    ]
+}

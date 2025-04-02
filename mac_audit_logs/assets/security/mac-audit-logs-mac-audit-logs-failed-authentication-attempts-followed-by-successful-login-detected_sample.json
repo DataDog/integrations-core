@@ -1,0 +1,121 @@
+[
+    {
+        "result": "failure",
+        "reason": "Unauthorized-",
+        "event-category": "Authentication and Authorization",
+        "usr": {
+            "name": "it"
+        },
+        "record": {
+            "subject": {
+                "uid": "root",
+                "audit-uid": "it",
+                "gid": "staff",
+                "rgid": "staff",
+                "pid": "85671",
+                "tid": "1074205 10.0.0.0",
+                "sid": "100078"
+            },
+            "identity": {
+                "signing-id": "com.apple.opendirectoryd",
+                "signing-id-truncated": "no",
+                "signer-type": "1",
+                "team-id": "",
+                "team-id-truncated": "no",
+                "cdhash": "0x4a21fjeui328f7dea2909b5d490d45dbd6d61ed7"
+            },
+            "modifier": "0",
+            "msec": " + 772 msec",
+            "time": "Fri Mar 28 15:52:27 2025",
+            "text": "Verify password for record type Users 'it' node '/Local/Default'",
+            "event": "AUE_auth_user",
+            "version": "11",
+            "return": {
+                "errval": "failure : Unauthorized-",
+                "retval": "0"
+            }
+        },
+        "device-id": "72891650",
+        "network": {
+            "ip": {
+                "attributes": [
+                    {
+                        "ip": "10.0.0.0",
+                        "source": [
+                            "@network.client.ip",
+                            "@record.subject.tid"
+                        ]
+                    }
+                ],
+                "list": [
+                    "10.0.0.0"
+                ]
+            },
+            "client": {
+                "geoip": {},
+                "ip": "10.0.0.0",
+                "is_private_network_ip": true
+            }
+        },
+        "timestamp": 1743177147000
+    },
+    {
+        "result": "success",
+        "event-category": "Authentication and Authorization",
+        "usr": {
+            "name": "it"
+        },
+        "record": {
+            "subject": {
+                "uid": "root",
+                "audit-uid": "it",
+                "gid": "staff",
+                "rgid": "staff",
+                "pid": "85671",
+                "tid": "1074205 10.0.0.0",
+                "sid": "100078"
+            },
+            "identity": {
+                "signing-id": "com.apple.opendirectoryd",
+                "signing-id-truncated": "no",
+                "signer-type": "1",
+                "team-id": "",
+                "team-id-truncated": "no",
+                "cdhash": "0x4a21fjeui328f7dea2909b5d490d45dbd6d61ed7"
+            },
+            "modifier": "0",
+            "msec": " + 772 msec",
+            "time": "Fri Mar 28 15:52:27 2025",
+            "text": "Verify password for record type Users 'it' node '/Local/Default'",
+            "event": "AUE_auth_user",
+            "version": "11",
+            "return": {
+                "errval": "success",
+                "retval": "0"
+            }
+        },
+        "device-id": "72891650",
+        "network": {
+            "ip": {
+                "attributes": [
+                    {
+                        "ip": "10.0.0.0",
+                        "source": [
+                            "@network.client.ip",
+                            "@record.subject.tid"
+                        ]
+                    }
+                ],
+                "list": [
+                    "10.0.0.0"
+                ]
+            },
+            "client": {
+                "geoip": {},
+                "ip": "10.0.0.0",
+                "is_private_network_ip": true
+            }
+        },
+        "timestamp": 1743177147000
+    }
+]
