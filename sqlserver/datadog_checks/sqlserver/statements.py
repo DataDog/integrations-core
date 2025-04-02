@@ -23,7 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name, is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 try:
     import datadog_agent
@@ -103,6 +103,8 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
+    OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
+    OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
     s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
@@ -336,7 +338,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(
                     row['statement_text'], self._config.obfuscator_options, replace_null_character=True
                 )
-                comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
+                metadata = statement['metadata']
+                comments = metadata.get('comments', [])
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
@@ -346,7 +349,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 self._check.count(
                     "dd.sqlserver.statements.error",
                     1,
-                    **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
+                    **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))]),
                 )
                 # If we can't obfuscate the query, give up.
                 continue
@@ -357,13 +360,23 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
             procedure_signature = None
             procedure_content = None
-            if row['is_proc']:
+            row['is_proc'] = bool(row.get('procedure_name'))
+            if (row['is_proc'] and row['text']) or self.disable_secondary_tags:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
                     procedure_content = procedure_statement['query']
                     procedure_signature = compute_sql_signature(procedure_statement['query'])
+                    procedure_comments = procedure_statement['metadata'].get('comments', [])
+                    if procedure_comments:
+                        comments = list(set(comments + procedure_comments))
+                    if self.disable_secondary_tags and not row.get('procedure_name'):
+                        # Extract procedure name from the statement text when disable_secondary_tags is enabled
+                        procedures = procedure_statement['metadata'].get('procedures')
+                        if procedures:
+                            row['procedure_name'] = procedures[0].lower()
+                            row['is_proc'] = True
                 except Exception as e:
                     procedure_signature = '__procedure_obfuscation_error__'
                     procedure_content = '__procedure_obfuscation_error__'
@@ -378,7 +391,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
-                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))])
+                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))]),
                     )
                     # If we can't obfuscate the stored procedure, we don't need to give up for this row,
                     # we just won't have the association with the stored procedure in the metrics payload
@@ -389,8 +402,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if procedure_signature:
                 row['procedure_signature'] = procedure_signature
 
-            if procedure_name:
-                row['procedure_name'] = procedure_name
+            if row.get('procedure_name') and row.get('schema_name'):
+                # convert to lowercase for backward compatibility
+                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
 
             row['dd_comments'] = comments
             row['text'] = obfuscated_statement
@@ -399,12 +413,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
 
-            metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
-
-            if not comments:
-                row['dd_comments'] = metadata.get('comments', None)
 
             normalized_rows.append(row)
         return normalized_rows
@@ -480,12 +490,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._check.gauge(
             "dd.sqlserver.statements.seen_plans_cache.len",
             len(self._seen_plans_ratelimiter),
-            **self._check.debug_stats_kwargs()
+            **self._check.debug_stats_kwargs(),
         )
         self._check.gauge(
             "dd.sqlserver.statements.fqt_cache.len",
             len(self._full_statement_text_cache),
-            **self._check.debug_stats_kwargs()
+            **self._check.debug_stats_kwargs(),
         )
 
     def _rows_to_fqt_events(self, rows):
@@ -571,7 +581,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
-                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
+                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
                 tags = list(self.tags)
 
@@ -609,7 +619,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),
                         "procedure_name": row.get('procedure_name', None),
-                        "statement": row[text_key],
+                        "statement": row.get(text_key),
                         "metadata": {
                             "tables": row['dd_tables'],
                             "commands": row['dd_commands'],
