@@ -832,7 +832,7 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
-            if 'aws' in self.cloud_metadata:
+            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
                 # if we are running on AWS, check if IAM auth is enabled
                 aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
                 if aws_managed_authentication['enabled']:
