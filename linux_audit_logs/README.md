@@ -2,9 +2,20 @@
 
 [Linux Audit Logs][3] record detailed information about system events, user activities, and security-related actions. They are essential for monitoring system integrity, detecting unauthorized access, and ensuring compliance with security policies and regulations.
 
-This integration provides enrichment and visualization for Mandatory Access Control (MAC) Configurations, MAC Status, MAC Policy, Role Assignments, Role Remove, User Role Change, Audit Configurations Change, Audit Daemon Abort, Audit Daemon Configurations, User Authentications, User Account Credential Modification, User and Group Management, User SELinux Error, Access Vector Cache (AVC) log types across RedHat, Ubuntu, and CentOS Linux OS.
+This integration provides enrichment and visualization for various log types, including:
+- **Mandatory Access Control (MAC)** configurations and status  
+- **MAC policies**
+- **Role** assignments, removals, and user role changes  
+- **Audit** configuration changes and audit daemon events (such as aborts, configuration changes)  
+- **User authentication** events  
+- **User account** credential modifications  
+- **User and group** management activities  
+- **SELinux user** errors  
+- **Access Vector Cache (AVC)** logs  
 
-This integration collects linux audit logs and sends them to Datadog for analysis, providing visual insights through out-of-the-box dashboards and Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
+It supports these logs across **Red Hat**, **Ubuntu**, and **CentOS** Linux operating systems.
+
+This integration collects Linux audit logs and sends them to Datadog for analysis. It provides visual insights through out-of-the-box dashboards and the Log Explorer, and helps monitor and respond to security threats using ready-to-use Cloud SIEM detection rules.
 
 * [Log Explorer][4]
 * [Cloud SIEM][5]
@@ -13,7 +24,7 @@ This integration collects linux audit logs and sends them to Datadog for analysi
 
 ### Installation
 
-To install the Linux Audit Logs integration, run the following Agent installation command and follow the steps below. For more information, see the [Integration Management][6] documentation.
+To install the Linux Audit Logs integration, run the following Agent installation command. For more information, see [Integration Management][6].
 
 **Note**: This step is not necessary for Agent versions >= 7.66.0
 
