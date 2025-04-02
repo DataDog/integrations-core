@@ -1,4 +1,4 @@
-name: Mac Audit Logs
+name: mac_audit_logs
 files:
 - name: mac_audit_logs.yaml
   options:

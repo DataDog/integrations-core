@@ -2434,10 +2434,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jc1b3d1e:
+  j31dd961:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Mac Audit Logs
+      job-name: mac_audit_logs
       target: mac_audit_logs
       platform: linux
       runner: '["ubuntu-22.04"]'

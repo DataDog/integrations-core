@@ -398,10 +398,6 @@ coverage:
         target: 75
         flags:
         - linux_proc_extras
-      Mac_Audit_Logs:
-        target: 75
-        flags:
-        - mac_audit_logs
       MapR:
         target: 75
         flags:
@@ -754,6 +750,10 @@ coverage:
         target: 75
         flags:
         - kyverno
+      mac_audit_logs:
+        target: 75
+        flags:
+        - mac_audit_logs
       nvidia_nim:
         target: 75
         flags:
