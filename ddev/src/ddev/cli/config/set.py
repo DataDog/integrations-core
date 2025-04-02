@@ -1,19 +1,22 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-from typing import Any, cast
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
-from ddev.cli.application import Application
-from ddev.config.file import DDEV_TOML, deep_merge_with_list_handling
-from ddev.config.model import ConfigurationError, RootConfig
 from ddev.utils.fs import Path
+
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
 
 
 def config_file_to_read(app: Application, overrides: bool) -> Path:
     # If the overrides file exists, we will read from it
+    from ddev.config.file import DDEV_TOML
+
     if overrides and app.config_file.overrides_available():
         config_to_read = app.config_file.overrides_path
     elif overrides:
@@ -36,6 +39,9 @@ def config_file_to_read(app: Application, overrides: bool) -> Path:
 def validate_final_config(app: Application, overrides: bool, config: dict[str, Any]):
     # If we are setting values on the overrides file, we need to merge with the global file
     # for validation
+    from ddev.config.file import deep_merge_with_list_handling
+    from ddev.config.model import ConfigurationError, RootConfig
+
     if overrides:
         config = deep_merge_with_list_handling(cast(RootConfig, app.config_file.combined_model).raw_data, config)
     try:
@@ -55,6 +61,7 @@ def set_value(app: Application, key: str, value: str | None, overrides: bool):
     Assign values to config file entries. If the value is omitted,
     you will be prompted, with the input hidden if it is sensitive.
     """
+    import os
     from fnmatch import fnmatch
 
     import tomlkit

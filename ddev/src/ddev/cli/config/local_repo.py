@@ -1,12 +1,11 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import click
-from rich.syntax import Syntax
-
-from ddev.config.file import DDEV_TOML, RootConfig, deep_merge_with_list_handling
-from ddev.config.utils import scrub_config
-from ddev.utils.fs import Path
-from ddev.utils.toml import dumps_toml_data
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -14,10 +13,17 @@ if TYPE_CHECKING:
 
 @click.command()
 @click.pass_obj
-def local_repo(app: "Application"):
+def local_repo(app: Application):
     """
     Creates a local .ddev.toml file in the current directory with a local repo configuration.
     """
+    from rich.syntax import Syntax
+
+    from ddev.config.file import DDEV_TOML, RootConfig, deep_merge_with_list_handling
+    from ddev.config.utils import scrub_config
+    from ddev.utils.fs import Path
+    from ddev.utils.toml import dumps_toml_data
+
     app.config_file.overrides_path = Path.cwd() / DDEV_TOML
     local_repo_config = {
         'repos': {'local': str(app.config_file.overrides_path.resolve().parent)},
