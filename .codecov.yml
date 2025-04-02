@@ -398,6 +398,10 @@ coverage:
         target: 75
         flags:
         - linux_proc_extras
+      Mac_Audit_Logs:
+        target: 75
+        flags:
+        - mac_audit_logs
       MapR:
         target: 75
         flags:
@@ -594,10 +598,6 @@ coverage:
         target: 75
         flags:
         - sonarqube
-      sonatype_nexus:
-        target: 75
-        flags:
-        - sonatype_nexus
       Spark:
         target: 75
         flags:
@@ -758,6 +758,10 @@ coverage:
         target: 75
         flags:
         - nvidia_nim
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       tibco_ems:
         target: 75
         flags:
@@ -1287,6 +1291,11 @@ flags:
     paths:
     - linux_proc_extras/datadog_checks/linux_proc_extras
     - linux_proc_extras/tests
+  mac_audit_logs:
+    carryforward: true
+    paths:
+    - mac_audit_logs/datadog_checks/mac_audit_logs
+    - mac_audit_logs/tests
   mapr:
     carryforward: true
     paths:
