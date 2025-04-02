@@ -77,11 +77,14 @@ class DBExplainError(Enum):
     # the statement was explained with the prepared statement workaround
     explained_with_prepared_statement = 'explained_with_prepared_statement'
 
-    # the statement was tried to be explained with the prepared statement workaround but failedd
+    # the statement was tried to be explained with the prepared statement workaround but failed
     failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
 
     # the statement was tried to be explained with the prepared statement workaround but no plan was returned
     no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+    # PostgreSQL cannot determine the data type of a parameter in the query
+    indeterminate_datatype = 'indeterminate_datatype'
 
 
 class DatabaseHealthCheckError(Exception):

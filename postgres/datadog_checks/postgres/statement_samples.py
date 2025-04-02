@@ -772,7 +772,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return cached_error_response
 
         try:
-            # if the statement is a parameteredzied query, then we can't explain it directly
+            # if the statement is a parameterized query, then we can't explain it directly
             # we should directly jump into self._explain_parameterized_queries.explain_statement
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
@@ -796,6 +796,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
+            return error_response
+        except psycopg2.errors.IndeterminateDatatype as e:
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
+            error_response = None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.indeterminate_datatype, e)
             return error_response
         except psycopg2.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
