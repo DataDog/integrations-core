@@ -1,9 +1,14 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import click
 
-from ddev.cli.application import Application
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
 
 
 @click.command(short_help='Show the contents of the config file')
