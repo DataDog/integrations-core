@@ -287,7 +287,7 @@ class PostgresMetadata(DBMAsyncJob):
             "dbms_version": payload_pg_version(self._check.version),
             "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             "metadata": self._pg_settings_cached,
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
@@ -323,7 +323,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "collection_interval": self.schemas_collection_interval,
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self._check.cloud_metadata,
             }
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future

@@ -283,7 +283,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
-                'cloud_metadata': self._config.cloud_metadata,
+                'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
                 'ddagenthostname': self._check.agent_hostname,

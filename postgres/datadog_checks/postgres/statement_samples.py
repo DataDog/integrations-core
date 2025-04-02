@@ -866,7 +866,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self._check.cloud_metadata,
                 'service': self._config.service,
                 "network": {
                     "client": {
@@ -957,7 +957,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             'service': self._config.service,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
