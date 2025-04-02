@@ -1,6 +1,6 @@
 {
     "title": "Check Point Harmony Email & Collaboration - Overview",
-    "description": "This dashboard provides information about DLP, phishing, spam, malware, shadow IT, anomaly events generated on Check Point Harmony Email & Collaboration.",
+    "description": "This dashboard offers a comprehensive summary of security events in Check Point Harmony Email & Collaboration, providing insights into event trends, severity levels, and threat detection. It helps monitor threats across SaaS applications and security actions for enhanced protection.",
     "widgets": [
         {
             "id": 5183346169083596,
@@ -25,11 +25,11 @@
             "id": 6596204143857430,
             "definition": {
                 "type": "note",
-                "content": "[Check Point Harmony Email & Collaboration](https://www.checkpoint.com/harmony/email-security/) is a security solution that protects cloud-based email and collaboration platforms from cyber threats like malware, phishing, and data loss.\n\nThis dashboard offers a comprehensive summary of security events in Check Point Harmony Email & Collaboration, providing insights into event trends, severity levels, and threat detection. It helps monitor threats across SaaS applications and security actions for enhanced protection.\n\nFor more information, see the [Check Point Harmony Email & Collaboration Documentation](https://docs.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "[Check Point Harmony Email & Collaboration](https://www.checkpoint.com/harmony/email-security/) is a security solution that protects cloud-based email and collaboration platforms from cyber threats like malware, phishing, and data loss.\n\n**Overview** dashboard offers a comprehensive summary of security events in Check Point Harmony Email & Collaboration, providing insights into event trends, severity levels, and threat detection. It helps monitor threats across SaaS applications and security actions for enhanced protection.\n\nFor more information, see the [Check Point Harmony Email & Collaboration Documentation](https://docs.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "pink",
                 "font_size": "14",
                 "text_align": "left",
-                "vertical_align": "top",
+                "vertical_align": "center",
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "left",
@@ -118,6 +118,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -147,7 +148,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "status",
+                                                    "facet": "@severity",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "cardinality",
@@ -181,8 +182,10 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "semantic",
+                                        "palette": "red",
                                         "order_by": "values",
+                                        "color_order": "monotonic",
+                                        "order_reverse": true,
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -203,6 +206,7 @@
                             "title": "Events by Severity",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -218,7 +222,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "status",
+                                                    "facet": "@severity",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "cardinality",
@@ -273,7 +277,6 @@
                             "title": "Events by SaaS Application",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -842,7 +845,7 @@
                     {
                         "id": 6865166632477888,
                         "definition": {
-                            "title": "Distribution by Anomaly Types",
+                            "title": "Top Anomaly Types",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1053,10 +1056,9 @@
                     {
                         "id": 836128090835026,
                         "definition": {
-                            "title": "Overall Log Details",
+                            "title": "Overall Event Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1149,7 +1151,6 @@
                             "title": "CRITICALs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1178,7 +1179,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1202,7 +1203,6 @@
                             "title": "HIGHs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1231,7 +1231,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1253,7 +1253,6 @@
                         "id": 2986240816855206,
                         "definition": {
                             "title": "Critical Security Signals",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1286,7 +1285,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1324,7 +1323,6 @@
                             "title": "MEDIUMs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1353,7 +1351,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1377,7 +1375,6 @@
                             "title": "LOWs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1406,7 +1403,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:low $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:low $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1430,7 +1427,6 @@
                             "title": "INFOs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1459,7 +1455,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:info $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:info $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1481,7 +1477,6 @@
                         "id": 8695006629365940,
                         "definition": {
                             "title": "High Security Signals",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1514,7 +1509,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
@@ -1550,7 +1545,6 @@
                         "id": 1483149536537376,
                         "definition": {
                             "title": "Medium Security Signals",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1583,7 +1577,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium $Customer-Domain"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium $Category $SaaS-Application $Customer-Domain $Severity"
                                             }
                                         }
                                     ],
