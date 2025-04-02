@@ -118,7 +118,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -206,7 +205,6 @@
                             "title": "Events by Severity",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -1179,7 +1177,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical"
                                             }
                                         }
                                     ],
@@ -1231,7 +1229,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high"
                                             }
                                         }
                                     ],
@@ -1285,7 +1283,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:critical"
                                             }
                                         }
                                     ],
@@ -1351,7 +1349,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium"
                                             }
                                         }
                                     ],
@@ -1403,7 +1401,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:low $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:low"
                                             }
                                         }
                                     ],
@@ -1455,7 +1453,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:info $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:info"
                                             }
                                         }
                                     ],
@@ -1509,7 +1507,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:high"
                                             }
                                         }
                                     ],
@@ -1577,7 +1575,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium $Category $SaaS-Application $Customer-Domain $Severity"
+                                                "query": "source:checkpoint-harmony-email-and-collaboration status:medium"
                                             }
                                         }
                                     ],
