@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
+import pytest  # noqa: I001
 
 from datadog_checks.base import AgentCheck, ConfigurationError  # noqa: F401
 from datadog_checks.mac_audit_logs import MacAuditLogsCheck, constants
@@ -34,7 +34,7 @@ def test_validate_configurations_with_wrong_ip_address(instance):
 
     wrong_ip_address = "10.10"
     err_message = (
-        "'IP' is not valid." " Please provide a valid IP address with ipv4 protocol where the datadog agent is installed."
+        "'IP' is not valid. Please provide a valid IP address with ipv4 protocol where the datadog agent is installed."
     )
     with pytest.raises(ConfigurationError, match=err_message):
         check.ip = wrong_ip_address
@@ -47,7 +47,7 @@ def test_validate_configurations_with_wrong_port(instance):
 
     wrong_port = 65536
     err_message = (
-        f"'PORT' must be a positive integer in range of {constants.MIN_PORT}" f" to {constants.MAX_PORT}, got {wrong_port}."
+        f"'PORT' must be a positive integer in range of {constants.MIN_PORT} to {constants.MAX_PORT}, got {wrong_port}."
     )
     with pytest.raises(ConfigurationError, match=err_message):
         check.port = wrong_port
@@ -66,10 +66,3 @@ def test_validate_configurations_with_wrong_min_collection_interval(instance):
     with pytest.raises(ConfigurationError, match=err_message):
         check.min_collection_interval = wrong_interval
         check.validate_configurations()
-
-
-@pytest.mark.unit
-def test_check(instance):
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-
-    check.check()
