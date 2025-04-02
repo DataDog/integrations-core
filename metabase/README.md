@@ -35,7 +35,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ### Get self-hosted instance domain of Metabase (required for self-hosted instances only)
 
-**Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS.
+**Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS only.
 1. Log into your Metabase instance as an administrator.
 2. Go to **Settings > Admin Settings > General**.
 3. Under **Site URL**, copy the domain from the URL. E.g. If the URL looks like `https://example.com`, then copy `example.com`.
@@ -47,7 +47,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
     |--------------------|--------------------|
     |Metabase instance type|The hosting type of your Metabase instance, i.e. `cloud` or `self-hosted`. Default is `cloud`.|
     |Metabase DNS alias|The DNS alias of your Metabase cloud instance (required for cloud instances only). Should be minimum 3 characters long (small case letters, dashes and numbers only).|
-    |Metabase self-hosted instance domain|The domain of your self-hosted Metabase instance (required for self-hosted instances only). Must be publicly accessible via HTTPS (e.g., example.com).|
+    |Metabase self-hosted instance domain|The domain of your self-hosted Metabase instance (required for self-hosted instances only). Must be publicly accessible via HTTPS only (e.g., example.com).|
     |Metabase API key|The API key used to authenticate the API requests.|
 
 2. Click the Save button to save your settings.
