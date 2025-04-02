@@ -121,7 +121,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 * Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
 * Bind above RBAC to application pod by setting Service Account name.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
+* Create a Kubernetes secret `datadog-secret` containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
    kubectl create secret generic datadog-secret -n datadog-agent \
@@ -130,6 +130,8 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    ```
    For more information how these secrets are used, see the [Cluster Agent Setup][35].
+
+**Note**: You cannot change the name of the secret containing the Datadog API key and Cluster Agent token. It must be `datadog-secret` for the Agent in the sidecar to connect to Datadog.
 
 ###### Setup
 
@@ -293,7 +295,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 * Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
 * Bind above RBAC to application pod by setting Service Account name.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
+* Create a Kubernetes secret `datadog-secret` containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
    kubectl create secret generic datadog-secret -n datadog-agent \
@@ -302,6 +304,8 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    ```
    For more information how these secrets are used, see the [Cluster Agent Setup][35].
+
+**Note**: You cannot change the name of the secret containing the Datadog API key and Cluster Agent token. It must be `datadog-secret` for the Agent in the sidecar to connect to Datadog.
 
 ###### Setup
 

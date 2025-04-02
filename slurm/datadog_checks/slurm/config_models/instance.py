@@ -36,11 +36,13 @@ class InstanceConfig(BaseModel):
     )
     collect_gpu_stats: Optional[bool] = None
     collect_sacct_stats: Optional[bool] = None
+    collect_scontrol_stats: Optional[bool] = None
     collect_sdiag_stats: Optional[bool] = None
     collect_sinfo_stats: Optional[bool] = None
     collect_squeue_stats: Optional[bool] = None
     collect_sshare_stats: Optional[bool] = None
     debug_sacct_stats: Optional[bool] = None
+    debug_scontrol_stats: Optional[bool] = None
     debug_sdiag_stats: Optional[bool] = None
     debug_sinfo_stats: Optional[bool] = None
     debug_squeue_stats: Optional[bool] = None
@@ -50,6 +52,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     sacct_path: Optional[str] = None
+    scontrol_path: Optional[str] = None
     sdiag_path: Optional[str] = None
     service: Optional[str] = None
     sinfo_collection_level: Optional[int] = None

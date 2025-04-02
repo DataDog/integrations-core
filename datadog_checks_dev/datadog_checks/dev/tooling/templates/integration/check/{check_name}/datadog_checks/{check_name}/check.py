@@ -10,7 +10,7 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 
 class {check_class}(AgentCheck):
 
-    # This will be the prefix of every metric and service check the integration sends
+    # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = '{check_name}'
 
     def __init__(self, name, init_config, instances):
@@ -43,35 +43,14 @@ class {check_class}(AgentCheck):
         #     response.raise_for_status()
         #     response_json = response.json()
 
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {{}}, {{}}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {{}}, {{}}".format(self.url, e),
-        #     )
-        #     raise
+        # except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
+        #     self.log.debug("Could not connect", exc_info=True)
 
         # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {{}}, {{}}".format(self.url, e),
-        #     )
-        #     raise
+        #    self.log.debug("Could not parse JSON", exc_info=True)
 
         # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
+        #    self.log.debug("Unexpected value", exc_info=True)
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).
@@ -86,11 +65,4 @@ class {check_class}(AgentCheck):
         # You can define a dictionary in the __init__ method.
         # self.write_persistent_cache("key", "value")
         # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        pass
