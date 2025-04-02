@@ -104,6 +104,8 @@ integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
+integration/celery:
+- celery/**/*
 integration/ceph:
 - ceph/**/*
 integration/cert_manager:
