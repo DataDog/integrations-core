@@ -88,6 +88,10 @@ class ExplainParameterizedQueries:
         query_signature = compute_sql_signature(obfuscated_statement)
         try:
             self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        except psycopg2.errors.IndeterminateDatatype as e:
+            return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+        except psycopg2.errors.UndefinedFunction as e:
+            return None, DBExplainError.undefined_function, '{}'.format(type(e))
         except Exception as e:
             # if we fail to create a prepared statement, we cannot explain the query
             return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
