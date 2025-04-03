@@ -11,7 +11,8 @@
 		"query": "avg(last_5m):avg:appgate.apn_disk_partition_statistic{path:/mnt/data, measure:percent ,func:*ctr*} by {collective_name,site_name,appliance_name,func} > 90",
 		"message": "Appliance: {{appliance_name.name}}",
 		"tags": [
-			"agisdp_monitor_function:ctr"
+			"agisdp_monitor_function:ctr",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

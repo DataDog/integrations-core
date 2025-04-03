@@ -11,7 +11,8 @@
 		"query": "avg(last_1d):anomalies(avg:appgate.ctr_database_replication_slot_replay_lag{*} by {collective_name,site_name,appliance_name,func}, 'basic', 2, direction='both', interval=300, alert_window='last_1h', count_default_zero='true') >= 1",
 		"message": "Appliance: {{appliance_name.name}}",
 		"tags": [
-			"agisdp_monitor_function:ctr"
+			"agisdp_monitor_function:ctr",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

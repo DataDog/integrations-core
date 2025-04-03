@@ -11,7 +11,8 @@
 		"query": "avg(last_5m):avg:appgate.apn_cpu_usage_percent{*} by {collective_name,site_name,appliance_name,func} > 90",
 		"message": "Appliance: {{appliance_name.name}}",
 		"tags": [
-			"agisdp_monitor"
+			"agisdp_monitor",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

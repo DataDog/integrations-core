@@ -11,7 +11,8 @@
 		"query": "min(last_5m):max:appgate.apn_function_status{*} by {collective_name,site_name,appliance_name,func,name} > 2",
 		"message": "Appliance: {{appliance_name.name}} \nFunction: {{function.name}}\nAn appliance function is unhealthy\nPlease check the status message in the Admin UI",
 		"tags": [
-			"agisdp_monitor_function:apn"
+			"agisdp_monitor_function:apn",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

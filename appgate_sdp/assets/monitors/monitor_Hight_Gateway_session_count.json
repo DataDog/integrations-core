@@ -10,7 +10,9 @@
 		"type": "query alert",
 		"query": "avg(last_5m):avg:appgate.gw_vpn_sessions{*} by {collective_name,site_name,appliance_name,func} > 8000",
 		"message": "Appliance: {{appliance_name.name}}",
-		"tags": [],
+		"tags": [
+			"integration:appgate_sdp"
+		],
 		"options": {
 			"thresholds": {
 				"critical": 8000,

@@ -10,7 +10,9 @@
 		"type": "query alert",
 		"query": "min(last_5m):min:appgate.apn_certificate_days_remaining{name:appliance_certificate} by {collective_name,site_name,appliance_name,func} < 15",
 		"message": "Appliance: {{appliance_name.name}}",
-		"tags": [],
+		"tags": [
+			"integration:appgate_sdp"
+		],
 		"options": {
 			"thresholds": {
 				"critical": 15,

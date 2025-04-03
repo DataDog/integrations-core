@@ -11,7 +11,8 @@
 		"query": "min(last_5m):min:appgate.ctr_database_replication{*} by {collective_name,site_name,appliance_name,func} < 1",
 		"message": "Database not replicating on controller {{appliance_name.name}}",
 		"tags": [
-			"agisdp_monitor_function:ctr"
+			"agisdp_monitor_function:ctr",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

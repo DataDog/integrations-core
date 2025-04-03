@@ -11,7 +11,8 @@
 		"query": "min(last_5m):max:appgate.apn_function_suspended{*} by {collective_name,site_name,appliance_name,func,name} > 2",
 		"message": "Appliance: {{appliance_name.name}} \nThe appliance has suspended new connections due to load",
 		"tags": [
-			"performance"
+			"performance",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

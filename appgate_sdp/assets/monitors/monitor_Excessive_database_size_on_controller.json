@@ -11,7 +11,8 @@
 		"query": "avg(last_5m):avg:appgate.ctr_database_size{*} by {collective_name,site_name,appliance_name,func} > 80000000",
 		"message": "Appliance: {{appliance_name.name}}",
 		"tags": [
-			"agisdp_monitor_function:ctr"
+			"agisdp_monitor_function:ctr",
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

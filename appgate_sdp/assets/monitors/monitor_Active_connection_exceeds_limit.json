@@ -12,7 +12,8 @@
 		"message": "Appliance: {{appliance_name.name}} \nThe appliance has a high amount of connections",
 		"tags": [
 			"func:apn",
-			"service:appgate"
+			"service:appgate",
+            "integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {

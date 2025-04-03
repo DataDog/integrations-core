@@ -12,6 +12,7 @@
 		"message": "Appliance: {{appliance_name.name}} \nAn attempt has been made to access maintenance terminal",
 		"tags": [
 			"agisdp_monitor"
+			"integration:appgate_sdp"
 		],
 		"options": {
 			"thresholds": {
