@@ -36,7 +36,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 ### Get self-hosted instance domain of Metabase (required for self-hosted instances only)
 
 **Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS only.
-1. Log into your Metabase instance as an administrator.
+1. Log in to your Metabase instance as an administrator.
 2. Go to **Settings > Admin Settings > General**.
 3. Under **Site URL**, copy the domain from the URL. E.g. If the URL looks like `https://example.com`, then copy `example.com`.
 
