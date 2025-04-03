@@ -74,6 +74,10 @@ class DBExplainError(Enum):
     # search path may be different when the client executed a query from where we executed it.
     undefined_table = 'undefined_table'
 
+    # we cannot create a prepared statement because this function is undefined with the given parameters
+    # this is likely because of an obfuscated parameter
+    undefined_function = 'undefined_function'
+
     # the statement was explained with the prepared statement workaround
     explained_with_prepared_statement = 'explained_with_prepared_statement'
 
