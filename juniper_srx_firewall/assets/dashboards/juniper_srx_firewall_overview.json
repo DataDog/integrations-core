@@ -495,7 +495,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:critical $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:critical"
                                             }
                                         }
                                     ],
@@ -547,7 +547,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:high $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:high"
                                             }
                                         }
                                     ],
@@ -604,7 +604,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:critical $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:critical"
                                             }
                                         }
                                     ],
@@ -670,7 +670,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:medium $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:medium"
                                             }
                                         }
                                     ],
@@ -722,7 +722,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:low $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:low"
                                             }
                                         }
                                     ],
@@ -774,7 +774,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:info $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:info"
                                             }
                                         }
                                     ],
@@ -828,7 +828,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:high $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:high"
                                             }
                                         }
                                     ],
@@ -896,7 +896,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:medium $Event-Type $Juniper-SRX-Device $Severity"
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall status:medium"
                                             }
                                         }
                                     ],
