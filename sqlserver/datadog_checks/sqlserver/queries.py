@@ -32,7 +32,7 @@ COLUMN_QUERY = """
 SELECT
     column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position
 FROM
-    information_schema.columns
+    INFORMATION_SCHEMA.COLUMNS
 WHERE
     table_name IN ({}) and table_schema='{}';
 """
