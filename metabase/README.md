@@ -38,7 +38,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 **Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS only.
 1. Log in to your Metabase instance as an administrator.
 2. Go to **Settings > Admin Settings > General**.
-3. Under **Site URL**, copy the domain from the URL. E.g. If the URL looks like `https://example.com`, then copy `example.com`.
+3. Under **Site URL**, copy the domain portion of the URL. For example, if the URL is `https://example.com`, copy `example.com`.
 
 ### Connect your Metabase account to Datadog
 
