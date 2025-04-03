@@ -23,7 +23,7 @@ from .util import DatabaseConfigurationError, connect_with_autocommit, get_trunc
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 
 ACTIVITY_QUERY = """\
