@@ -42,7 +42,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ### Connect your Metabase account to Datadog
 
-1. Add your Metabase instance type, Metabase DNS alias or Metabase self-hosted instance domain and Metabase API key    
+1. Add your Metabase instance type, DNS alias or self-hosted domain, and API key.
     |Parameters|Description|
     |--------------------|--------------------|
     |Metabase instance type|The hosting type of your Metabase instance, i.e. `cloud` or `self-hosted`. Default is `cloud`.|
