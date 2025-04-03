@@ -45,7 +45,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 1. Add your Metabase instance type, DNS alias or self-hosted domain, and API key.
     |Parameters|Description|
     |--------------------|--------------------|
-    |Metabase instance type|The hosting type of your Metabase instance, i.e. `cloud` or `self-hosted`. Default is `cloud`.|
+    |Metabase instance type|The hosting type of your Metabase instance. Valid values are `cloud` or `self-hosted`. Default is `cloud`.|
     |Metabase DNS alias|The DNS alias of your Metabase cloud instance (required for cloud instances only). Must be at least three characters long and contain only lowercase letters, dashes, and numbers.|
     |Metabase self-hosted instance domain|The domain of your self-hosted Metabase instance (required for self-hosted instances only). Must be publicly accessible via HTTPS only (e.g., example.com).|
     |Metabase API key|The API key used to authenticate the API requests.|
