@@ -16,17 +16,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 
 E2E_METADATA = {
-    'start_commands': [
-        'apt-get update',
+    "start_commands": [
+        "apt-get update",
         'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io',
     ],
-    'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock'],
+    "docker_volumes": ["/var/run/docker.sock:/var/run/docker.sock"],
 }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dd_environment():
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+    compose_file = os.path.join(HERE, "docker", "docker-compose.yaml")
     with docker_run(
         compose_file=compose_file,
         conditions=[WaitFor(create_volume)],
@@ -47,11 +47,11 @@ def config():
 
 @pytest.fixture()
 def mock_gstatus_data():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gstatus.txt')
+    f_name = os.path.join(os.path.dirname(__file__), "fixtures", "gstatus.txt")
     with open(f_name) as f:
         data = f.read()
 
-    with mock.patch('datadog_checks.glusterfs.check.GlusterfsCheck.get_gstatus_data', return_value=data):
+    with mock.patch("datadog_checks.glusterfs.check.GlusterfsCheck.get_gstatus_data", return_value=data):
         yield
 
 
