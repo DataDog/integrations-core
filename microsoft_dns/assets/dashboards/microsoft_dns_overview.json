@@ -99,7 +99,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:microsoft-dns status:critical $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:critical"
                       }
                     }
                   ],
@@ -149,7 +149,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:microsoft-dns status:high $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:high"
                       }
                     }
                   ],
@@ -208,7 +208,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:microsoft-dns status:critical $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:critical"
                       }
                     }
                   ],
@@ -274,7 +274,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:microsoft-dns status:medium $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:medium"
                       }
                     }
                   ],
@@ -325,7 +325,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:microsoft-dns status:low $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:low"
                       }
                     }
                   ],
@@ -376,7 +376,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:microsoft-dns status:info $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:info"
                       }
                     }
                   ],
@@ -435,7 +435,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:microsoft-dns status:high $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:high"
                       }
                     }
                   ],
@@ -509,7 +509,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:microsoft-dns status:medium $Computer_Name $Zone $Title $Event_ID"
+                        "query": "source:microsoft-dns status:medium"
                       }
                     }
                   ],
@@ -629,7 +629,6 @@
               "title": "Top 10 Event Types",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -769,7 +768,6 @@
               "title": "Event Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -818,7 +816,7 @@
         "x": 0,
         "y": 14,
         "width": 12,
-        "height": 13
+        "height": 1
       }
     },
     {
@@ -1100,7 +1098,6 @@
               "title": "Top 10 Most Frequently Created DNS Record Types",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -1171,7 +1168,6 @@
               "title": "Top 10 Most Frequently Deleted Record Types",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -1800,10 +1796,9 @@
           {
             "id": 1940479648900138,
             "definition": {
-              "title": "Zone Operations over Time",
+              "title": "Zone Operation Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1854,9 +1849,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 27,
+        "y": 15,
         "width": 12,
-        "height": 45
+        "height": 1
       }
     },
     {
@@ -1994,7 +1989,6 @@
               "title": "Top Zones by Dynamic Updates",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -2132,7 +2126,6 @@
               "title": "Top Clients Performed Dynamic Updates",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -2275,7 +2268,6 @@
               "title": "Dynamic Update Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -2326,7 +2318,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 72,
+        "y": 16,
         "width": 12,
         "height": 23
       }
@@ -2827,7 +2819,6 @@
               "title": "Server Operation Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -2874,7 +2865,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 95,
+        "y": 39,
         "width": 12,
         "height": 21
       }
@@ -3695,7 +3686,6 @@
               "title": "DNSSEC Operation Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -3742,7 +3732,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 116,
+        "y": 60,
         "width": 12,
         "height": 32
       }
@@ -3831,7 +3821,6 @@
               "title": "Details of Added Client Subnet Records",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -3884,7 +3873,6 @@
               "title": "Details of Deleted Client Subnet Records",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -3933,7 +3921,6 @@
               "title": "Details of Updated Client Subnet Records",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -3986,7 +3973,6 @@
               "title": "Policy Operations Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -4033,7 +4019,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 148,
+        "y": 92,
         "width": 12,
         "height": 22
       }
@@ -4155,7 +4141,6 @@
               "title": "Configuration Changes Events",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -4301,7 +4286,6 @@
               "title": "Configuration Changes Details",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -4348,7 +4332,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 170,
+        "y": 114,
         "width": 12,
         "height": 13
       }
@@ -4606,7 +4590,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 183,
+        "y": 127,
         "width": 12,
         "height": 9
       }
