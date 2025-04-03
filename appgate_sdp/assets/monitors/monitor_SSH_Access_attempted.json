@@ -11,7 +11,7 @@
 		"query": "sum(last_5m):sum:appgate.apn_audit_events.count{type:ssh_access_*} by {type,appliance_name,func,site_name,collective_name}.as_count() > 0",
 		"message": "Appliance: {{appliance_name.name}} \nAn attempt has been made to access maintenance terminal",
 		"tags": [
-			"agisdp_monitor"
+			"agisdp_monitor",
 			"integration:appgate_sdp"
 		],
 		"options": {

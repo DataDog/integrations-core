@@ -1,6 +1,6 @@
 {   "author_name": "Datadog",
     "title": "Appgate (AGI) ZTNA/SDP",
-    "description": "Appgate (AGI) Zero Trust Network Access and Software Defined Perimeter\n\nDashboard for monitoring of essential metrics and monitors to aid in operations management",
+    "description": "Appgate (AGI) Zero Trust Network Access and Software Defined Perimeter\n\nDashboard for monitoring essential metrics and alerts to support operations management",
     "widgets": [
         {
             "id": 5710787937461844,
