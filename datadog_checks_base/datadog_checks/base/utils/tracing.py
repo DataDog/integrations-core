@@ -123,6 +123,7 @@ def configure_tracer(tracer, self_check):
         dd_parent_id = self_check.instance.get("dd_parent_span_id")
         if dd_trace_id and dd_parent_id:
             from ddtrace.tracer.context import Context
+
             apm_tracing_enabled = True
             context_provider = Context(
                 trace_id=dd_trace_id,
