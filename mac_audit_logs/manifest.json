@@ -45,7 +45,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 42802902,
-      "source_type_name": "MAC Audit Logs",
+      "source_type_name": "Mac Audit Logs",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

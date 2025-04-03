@@ -398,7 +398,7 @@ coverage:
         target: 75
         flags:
         - linux_proc_extras
-      MAC_Audit_Logs:
+      Mac_Audit_Logs:
         target: 75
         flags:
         - mac_audit_logs
