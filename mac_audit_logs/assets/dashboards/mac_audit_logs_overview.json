@@ -354,7 +354,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:critical $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:critical"
                                             }
                                         }
                                     ],
@@ -405,7 +405,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:high $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:high"
                                             }
                                         }
                                     ],
@@ -461,7 +461,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:critical $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:critical"
                                             }
                                         }
                                     ],
@@ -526,7 +526,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:medium $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:medium"
                                             }
                                         }
                                     ],
@@ -577,7 +577,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:low $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:low"
                                             }
                                         }
                                     ],
@@ -628,7 +628,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:info $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:info"
                                             }
                                         }
                                     ],
@@ -681,7 +681,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:high $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:high"
                                             }
                                         }
                                     ],
@@ -748,7 +748,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:mac-audit-logs status:medium $User-Name $Application"
+                                                "query": "source:mac-audit-logs status:medium"
                                             }
                                         }
                                     ],

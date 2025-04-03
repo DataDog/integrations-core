@@ -391,7 +391,9 @@ pipeline:
               AUE_STATVFS OR AUE_STAT_EXTENDED OR AUE_SYMLINK OR AUE_SYMLINKAT
               OR AUE_TRUNCATE OR AUE_UNDELETE OR AUE_UNLINK OR AUE_UNLINKAT OR
               AUE_USELIB OR AUE_UTIME OR AUE_UTIMES OR AUE_XMKNOD OR AUE_XSTAT
-              OR AUE_revoke_obj)"
+              OR AUE_revoke_obj OR AUE_CLOSE OR AUE_REVOKE OR AUE_MUNMAP OR
+              AUE_DARWIN_REVOKE OR AUE_OPENBSM_REVOKE OR AUE_CLOSEFROM OR
+              AUE_CLOSERANGE)"
           name: File Access
       target: event-category
     - type: pipeline
