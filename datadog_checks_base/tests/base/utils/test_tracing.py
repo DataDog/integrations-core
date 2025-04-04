@@ -103,10 +103,11 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, dd_tr
         def mock_activate(context):
             def mock_current_trace_context():
                 return context
+
             tracer.current_trace_context.side_effect = mock_current_trace_context
-            
+
         tracer.context_provider.activate.side_effect = mock_activate
-        
+
         with traced_mock_classes():
             check = DummyCheck('dummy', {}, [instance])
             check.run()
@@ -132,7 +133,11 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, dd_tr
             assert context.span_id == dd_parent_id
 
         # Check that the tracer is configured with the correct enabled value
-        tracing = integration_tracing or integration_tracing_exhaustive or (dd_trace_id is not None and dd_parent_id is not None)
+        tracing = (
+            integration_tracing
+            or integration_tracing_exhaustive
+            or (dd_trace_id is not None and dd_parent_id is not None)
+        )
         assert tracer.configure.call_args[1]['enabled'] is tracing
 
         exhaustive_only_methods = {'__init__', 'dummy_method'}
