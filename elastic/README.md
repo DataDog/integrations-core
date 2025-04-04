@@ -423,6 +423,7 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
 - `slm_stats` sends **elasticsearch.slm.\*** metrics
+- `cat_allocation_stats` sends **elasticsearch.disk.\*** metrics
 
 ### Metrics
 

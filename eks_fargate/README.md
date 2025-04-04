@@ -26,7 +26,7 @@ If you don't specify through [AWS Fargate Profile][5] that your pods should run 
 
 ### Installation
 
-To get the best observability coverage monitoring workloads in AWS EKS Fargate, install the Datadog integrations for:
+To get the best observability coverage monitoring workloads in Amazon EKS Fargate, install the Datadog integrations for:
 
 - [Kubernetes][9]
 - [AWS][10]
@@ -43,17 +43,17 @@ If the Agent is running as a sidecar, it can communicate only with containers on
 
 ### Configuration
 
-To collect data from your applications running in AWS EKS Fargate over a Fargate node, follow these setup steps:
+To collect data from your applications running in Amazon EKS Fargate over a Fargate node, follow these setup steps:
 
-- [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
+- [Set up Amazon EKS Fargate RBAC rules](#amazon-eks-fargate-rbac).
 - [Deploy the Agent as a sidecar](#running-the-agent-as-a-sidecar).
 - Set up Datadog [metrics](#metrics-collection), [logs](#log-collection), [events](#events-collection), and [traces](#traces-collection) collection.
 
 To have EKS Fargate containers in the Datadog Live Container View, enable `shareProcessNamespace` on your pod spec. See [Process Collection](#process-collection).
 
-#### AWS EKS Fargate RBAC
+#### Amazon EKS Fargate RBAC
 
-Use the following Agent RBAC when deploying the Agent as a sidecar in AWS EKS Fargate:
+Use the following Agent RBAC when deploying the Agent as a sidecar in Amazon EKS Fargate:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -119,7 +119,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 **Prerequisites**
 
-* Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
+* Set up RBAC in the application namespace(s). See the [Amazon EKS Fargate RBAC](#amazon-eks-fargate-rbac) section on this page.
 * Bind above RBAC to application pod by setting Service Account name.
 * Create a Kubernetes secret `datadog-secret` containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
@@ -293,7 +293,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 **Prerequisites**
 
-* Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
+* Set up RBAC in the application namespace(s). See the [Amazon EKS Fargate RBAC](#amazon-eks-fargate-rbac) section on this page.
 * Bind above RBAC to application pod by setting Service Account name.
 * Create a Kubernetes secret `datadog-secret` containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
@@ -797,7 +797,7 @@ spec:
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
+To collect events from your Amazon EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
