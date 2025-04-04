@@ -301,10 +301,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /metabase/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /metabase/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/microsoft_sysmon/                                                  @DataDog/saas-integrations
-/microsoft_sysmon/*.md                                              @DataDog/saas-integrations @DataDog/documentation
-/microsoft_sysmon/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
-/microsoft_sysmon/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+/microsoft_sysmon/                                                  @DataDog/agent-integrations
+/microsoft_sysmon/*.md                                              @DataDog/agent-integrations @DataDog/documentation
+/microsoft_sysmon/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
+/microsoft_sysmon/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
 /mimecast/                                                          @DataDog/saas-integrations
 /mimecast/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
