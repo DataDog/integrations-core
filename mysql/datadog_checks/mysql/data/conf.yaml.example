@@ -537,6 +537,11 @@ instances:
         #
         # enabled: true
 
+        ## @param limit - integer - optional - default: 1000
+        ## Set the maximum number of indexes to collect. Defaults to 1000.
+        #
+        # limit: 1000
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration
