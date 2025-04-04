@@ -205,7 +205,7 @@ class MySQLActivity(DBMAsyncJob):
     def _should_collect_blocking_sessions(self):
         # type: () -> bool
         # TODO: add the configuration to enable/disable blocking sessions collection
-        return self._db_version == MySQLVersion.VERSION_80
+        return self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb
 
     def _get_activity_query(self):
         # type: () -> str
