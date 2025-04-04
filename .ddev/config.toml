@@ -37,9 +37,6 @@ exclude = true
 [overrides.ci.ibm_mq]
 platforms = ["linux", "windows"]
 
-[overrides.ci.mesos_slave]
-runners = { linux = ["ubuntu-20.04"] }
-
 [overrides.ci.network]
 platforms = ["linux", "windows"]
 
@@ -96,8 +93,6 @@ semver = ['BSD-3-Clause']
 simplejson = ['MIT']
 # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
 supervisor = ['BSD-3-Clause-Modification']
-# https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
-uptime = ['BSD-2-Clause']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'

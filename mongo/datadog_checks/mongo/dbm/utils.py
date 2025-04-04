@@ -57,6 +57,8 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "listCollections",
         "listDatabases",
         'dbStats',
+        'createIndexes',
+        'shardCollection',
     ]
 )
 
@@ -112,7 +114,7 @@ def should_explain_operation(
     command: dict,
     explain_plan_rate_limiter: RateLimitingTTLCache,
     explain_plan_cache_key: Tuple[str, str],
-    verbosity: str = 'executionStats',
+    verbosity: str = 'queryPlanner',
 ) -> bool:
     if verbosity == "disabled":
         return False
@@ -153,7 +155,7 @@ def should_explain_operation(
 
 
 def get_explain_plan(
-    api_client, command: dict, dbname: str, op_duration: int, cursor_timeout: int, verbosity: str = 'executionStats'
+    api_client, command: dict, dbname: str, op_duration: int, cursor_timeout: int, verbosity: str = 'queryPlanner'
 ) -> dict:
     if verbosity != "queryPlanner" and op_duration >= cursor_timeout:
         # If the operation duration exceeds the cursor timeout,

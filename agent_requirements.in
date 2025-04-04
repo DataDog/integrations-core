@@ -11,7 +11,7 @@ clickhouse-driver==0.2.9
 cm-client==45.0.4
 confluent-kafka==2.8.0
 cryptography==44.0.1
-ddtrace==2.10.6
+ddtrace==2.21.4
 dnspython==2.7.0
 foundationdb==6.3.24
 hazelcast-python-client==5.5.0
@@ -67,6 +67,5 @@ simplejson==3.20.1
 snowflake-connector-python==3.13.2
 supervisor==4.2.5
 tuf==4.0.0
-uptime==3.0.1
 vertica-python==1.4.0
 wrapt==1.17.2

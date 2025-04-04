@@ -348,6 +348,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /snowflake/pyproject.toml                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/agent-integrations
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
+/sonatype_nexus/                                                     @DataDog/agent-integrations
+/sonatype_nexus/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
+/sonatype_nexus/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
+/sonatype_nexus/metadata.csv                                         @DataDog/agent-integrations @DataDog/documentation 
+
 /sonicwall_firewall/                                                  @DataDog/saas-integrations
 /sonicwall_firewall/*.md                                              @DataDog/saas-integrations @DataDog/documentation
 /sonicwall_firewall/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
@@ -429,6 +434,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /hubspot_content_hub/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
 /hubspot_content_hub/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/forcepoint_secure_web_gateway/                                     @DataDog/saas-integrations
+/forcepoint_secure_web_gateway/*.md                                 @DataDog/saas-integrations @DataDog/documentation
+/forcepoint_secure_web_gateway/manifest.json                        @DataDog/saas-integrations @DataDog/documentation
+/forcepoint_secure_web_gateway/assets/logs/                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 vonage/                                                            @DataDog/saas-integrations
 vonage/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
@@ -453,6 +463,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/silverstripe_cms/                                                  @DataDog/agent-integrations
+/silverstripe_cms/*.md                                              @DataDog/agent-integrations @DataDog/documentation
+/silverstripe_cms/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
+/silverstripe_cms/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 
 /avast/                                                             @DataDog/saas-integrations
 /avast/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
@@ -510,4 +525,5 @@ docs/developer/process/integration-release.md                         @DataDog/a
 
 # LEAVE THE FOLLOWING LOG OWNERSHIP LAST IN THE FILE
 # Make sure logs team is the full owner for all logs related files
-**/assets/logs/                                                       @DataDog/logs-integrations-reviewers @DataDog/logs-backend @DataDog/logs-core @DataDog/siem-logs-reviewers
+**/assets/logs/                                                       @DataDog/logs-integrations-reviewers @DataDog/logs-backend
+
