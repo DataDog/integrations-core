@@ -57,7 +57,8 @@ SELECT
     waits_a.object_name,
     waits_a.index_name,
     waits_a.object_type,
-    waits_a.source  
+    waits_a.source
+    {blocking_column}
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
@@ -83,6 +84,8 @@ WHERE
     -- SQL text associated with it.
     AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
 """
+
+BLOCKING_COLUMN = ",blocking_thread.processlist_id AS blocking_pid"
 
 BLOCKING_JOINS = """\
     LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
@@ -192,10 +195,12 @@ class MySQLActivity(DBMAsyncJob):
 
     def _get_activity_query(self):
         # type: () -> str   
+        blocking_column = ""
         blocking_joins = ""
         if self._should_collect_blocking_sessions():
+            blocking_column = BLOCKING_COLUMN
             blocking_joins = BLOCKING_JOINS
-        return ACTIVITY_QUERY.format(blocking_joins=blocking_joins)
+        return ACTIVITY_QUERY.format(blocking_column=blocking_column, blocking_joins=blocking_joins)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
