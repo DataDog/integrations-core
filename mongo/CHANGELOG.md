@@ -20,7 +20,7 @@
 
 * Revert "[mongo] add service tag to agent operations (#19456)" ([#19768](https://github.com/DataDog/integrations-core/pull/19768))
 
-## 8.6.0 / 2025-03-25
+## 8.6.0 / 2025-03-25 / Agent 7.64.2
 
 ***Added***:
 
