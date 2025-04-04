@@ -72,12 +72,7 @@ WHERE
     AND (
         -- Include non-idle sessions
         (thread_a.processlist_command != 'Sleep')
-        OR
-        -- Include idle sessions that are blocking others
-        thread_a.thread_id IN (
-            SELECT blocking_thread_id 
-            FROM performance_schema.data_lock_waits
-        )
+        {idle_blockers_subquery}
     )
     AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
     AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
@@ -100,6 +95,15 @@ BLOCKING_COLUMN = ",blocking_thread.processlist_id AS blocking_pid"
 BLOCKING_JOINS = """\
     LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
     LEFT JOIN performance_schema.threads AS blocking_thread ON lock_waits.blocking_thread_id = blocking_thread.thread_id
+"""
+
+IDLE_BLOCKERS_SUBQUERY = """\
+        OR
+        -- Include idle sessions that are blocking others
+        thread_a.thread_id IN (
+            SELECT blocking_thread_id 
+            FROM performance_schema.data_lock_waits
+        )
 """
 
 class MySQLVersion(Enum):
@@ -208,10 +212,16 @@ class MySQLActivity(DBMAsyncJob):
         # TODO: cache the query
         blocking_column = ""
         blocking_joins = ""
+        idle_blockers_subquery = ""
         if self._should_collect_blocking_sessions():
             blocking_column = BLOCKING_COLUMN
             blocking_joins = BLOCKING_JOINS
-        return ACTIVITY_QUERY.format(blocking_column=blocking_column, blocking_joins=blocking_joins)
+            idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY
+        return ACTIVITY_QUERY.format(
+            blocking_column=blocking_column,
+            blocking_joins=blocking_joins,
+            idle_blockers_subquery=idle_blockers_subquery,
+        )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
