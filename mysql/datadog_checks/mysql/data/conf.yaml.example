@@ -538,7 +538,8 @@ instances:
         # enabled: true
 
         ## @param limit - integer - optional - default: 1000
-        ## Set the maximum number of indexes to collect. Defaults to 1000.
+        ## Set the maximum number of unique (by combination of database, table, and index name)
+        ## indexes to collect. Defaults to 1000.
         #
         # limit: 1000
 

@@ -569,7 +569,8 @@ files:
                   example: 300
               - name: limit
                 description: |
-                  Set the maximum number of indexes to collect. Defaults to 1000.
+                  Set the maximum number of unique (by combination of database, table, and index name)
+                  indexes to collect. Defaults to 1000.
                 value:
                   type: integer
                   example: 1000
