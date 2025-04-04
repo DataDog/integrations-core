@@ -74,6 +74,7 @@ class IndexMetrics(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
