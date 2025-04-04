@@ -101,10 +101,11 @@ IDLE_BLOCKERS_SUBQUERY = """\
         OR
         -- Include idle sessions that are blocking others
         thread_a.thread_id IN (
-            SELECT blocking_thread_id 
+            SELECT blocking_thread_id
             FROM performance_schema.data_lock_waits
         )
 """
+
 
 class MySQLVersion(Enum):
     # 8.0
@@ -228,7 +229,7 @@ class MySQLActivity(DBMAsyncJob):
         # type: (pymysql.cursor) -> List[Dict[str]]
         query = self._get_activity_query()
         self._log.debug("Running activity query [%s]", query)
-        cursor.execute(query) 
+        cursor.execute(query)
         return cursor.fetchall()
 
     def _normalize_rows(self, rows):
