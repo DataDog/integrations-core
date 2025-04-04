@@ -1,0 +1,32 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description
+kuma.api_server.http.requests_inflight,gauge,,request,,Number of inflight HTTP requests
+kuma.api_server.http.request_duration.seconds,summary,,second,,Latency of HTTP requests
+kuma.api_server.http.response_size.bytes,summary,,byte,,Size of HTTP responses
+kuma.certwatcher.read_certificate.errors_total,counter,,error,,Total number of certificate read errors
+kuma.certwatcher.read_certificate.total,counter,,read,,Total number of certificate reads
+kuma.component.catalog_writer,summary,,interval,,Summary of Inter CP Catalog Writer interval
+kuma.component.heartbeat,summary,,interval,,Summary of Inter CP Heartbeat interval
+kuma.component.hostname_generator,summary,,interval,,Summary of hostname generator interval
+kuma.component.ms_status_updater,summary,,interval,,Summary of Inter CP Heartbeat component interval
+kuma.component.mzms_status_updater,summary,,interval,,Summary of MeshMultizoneService Updater component
+kuma.component.store_counter,summary,,interval,,Summary of Store Counter component interval
+kuma.component.sub_finalizer,summary,,interval,,Summary of Subscription finalizer component interval
+kuma.component.vip_allocator,summary,,duration,,Summary of VIP allocation duration
+kuma.component.zone_available_services,summary,,interval,,Summary of available services tracker interval
+kuma.controller_runtime.active_workers,gauge,,worker,,Number of currently used workers per controller
+kuma.controller_runtime.max_concurrent_reconciles,gauge,,reconcile,,Max concurrent reconciles per controller
+kuma.controller_runtime.reconcile_errors_total,counter,,error,,Total number of reconciliation errors per controller
+kuma.controller_runtime.reconcile_panics_total,counter,,panic,,Total number of reconciliation panics per controller
+kuma.controller_runtime.terminal_reconcile_errors_total,counter,,error,,Total terminal reconciliation errors per controller
+kuma.controller_runtime.reconcile_time.seconds,summary,,second,,Length of time per reconciliation per controller
+kuma.controller_runtime.webhook_latency.seconds,summary,,second,,Latency of processing admission requests
+kuma.controller_runtime.webhook_requests.total,counter,,request,,Total number of admission requests by HTTP status code
+kuma.go.goroutines,gauge,,goroutine,,Number of goroutines currently existing
+kuma.go.threads,gauge,,thread,,Number of OS threads created
+kuma.leader.status,gauge,,status,,Indicates if this instance is leader
+kuma.leader_election.master_status,gauge,,status,,Indicates if the system is master of the relevant lease
+kuma.process.cpu.seconds_total,counter,,second,,Total user and system CPU time spent in seconds
+kuma.process.resident_memory.bytes,gauge,,byte,,Resident memory size in bytes
+kuma.process.virtual_memory.bytes,gauge,,byte,,Virtual memory size in bytes
+kuma.process.virtual_memory.max_bytes,gauge,,byte,,Maximum amount of virtual memory available in bytes
+kuma.store.operations,summary,,operation,,Summary of Store operations
