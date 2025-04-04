@@ -82,7 +82,7 @@ WHERE
     ) OR waits_a.event_id is NULL)
     -- We ignore rows without SQL text because there will be rows for background operations that do not have
     -- SQL text associated with it.
-    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
+    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != ''
 """
 
 BLOCKING_COLUMN = ",blocking_thread.processlist_id AS blocking_pid"
@@ -194,7 +194,8 @@ class MySQLActivity(DBMAsyncJob):
         return self._db_version == MySQLVersion.VERSION_80
 
     def _get_activity_query(self):
-        # type: () -> str   
+        # type: () -> str
+        # TODO: cache the query
         blocking_column = ""
         blocking_joins = ""
         if self._should_collect_blocking_sessions():
