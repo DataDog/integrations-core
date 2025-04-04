@@ -1005,21 +1005,3 @@ def test_normalize_queries(dbm_instance):
             'lock_time': 18298000,
         }
     ]
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "timer_end,now,uptime,expected_timestamp",
-    [
-        pytest.param(3019558487284095384, 1708025457, 100, 1711044915487, id="picoseconds not overflow"),
-        pytest.param(3019558487284095384, 1708025457, 21466230, 1708025529560, id="picoseconds overflow"),
-    ],
-)
-def test_statement_samples_calculate_timer_end(dbm_instance, timer_end, now, uptime, expected_timestamp):
-    check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    row = {
-        'timer_end': timer_end,
-        'now': now,
-        'uptime': uptime,
-    }
-    assert check._statement_samples._calculate_timer_end(row) == expected_timestamp

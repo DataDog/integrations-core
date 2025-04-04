@@ -62,7 +62,6 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     # used for signature
     'digest_text',
     'uptime',
-    'now',
     'timer_end',
     'max_timer_wait_ns',
     'timer_start',
@@ -80,8 +79,6 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         digest,
         digest_text,
         timer_start,
-        @uptime as uptime,
-        unix_timestamp() as now,
         timer_end,
         timer_wait / 1000 AS timer_wait_ns,
         lock_time / 1000 AS lock_time_ns,
@@ -110,16 +107,6 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         AND digest_text is NOT NULL
         AND digest_text NOT LIKE 'EXPLAIN %%'
         ORDER BY timer_wait DESC
-""",
-).strip()
-
-UPTIME_SUBQUERY = re.sub(
-    r'\s+',
-    ' ',
-    """
-    (SELECT VARIABLE_VALUE
-    FROM {global_status_table}
-    WHERE VARIABLE_NAME='UPTIME')
 """,
 ).strip()
 
@@ -337,10 +324,6 @@ class MySQLStatementSamples(DBMAsyncJob):
     def _get_new_events_statements_current(self):
         start = time.time()
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            self._cursor_run(
-                cursor,
-                "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
-            )
             self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY)
             rows = cursor.fetchall()
             tags = (
@@ -441,7 +424,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
-                "timestamp": self._calculate_timer_end(row),
+                "timestamp": time.time() * 1000,
                 "dbm_type": "plan",
                 "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
@@ -824,20 +807,3 @@ class MySQLStatementSamples(DBMAsyncJob):
     @staticmethod
     def _can_explain(obfuscated_statement):
         return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
-
-    @staticmethod
-    def _calculate_timer_end(row):
-        """
-        Calculate the timer_end_time_s from the timer_end, now and uptime fields
-        """
-        # timer_end is in picoseconds and uptime is in seconds
-        # timer_end can overflow, so we need to calcuate how many times it overflowed
-        timer_end = row['timer_end']
-        now = row['now']
-        uptime = int(row['uptime'])
-
-        bigint_max_in_seconds = BIGINT_MAX * 1e-12
-        # when timer_end is greater than bigint_max_in_seconds, we need to add the difference to the uptime
-        seconds_to_add = uptime // bigint_max_in_seconds * bigint_max_in_seconds
-        timer_end_time_s = now - uptime + seconds_to_add + timer_end * 1e-12
-        return int(timer_end_time_s * 1000)
