@@ -57,18 +57,28 @@ SELECT
     waits_a.object_name,
     waits_a.index_name,
     waits_a.object_type,
-    waits_a.source
-    {blocking_column}
+    waits_a.source,
+    blocking_thread.processlist_id AS blocking_pid
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
-    {blocking_joins}
+    LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON lock_waits.requesting_thread_id = thread_a.thread_id
+    LEFT JOIN performance_schema.threads AS blocking_thread ON blocking_thread.thread_id = lock_waits.blocking_thread_id
 WHERE
     thread_a.processlist_state IS NOT NULL
-    AND thread_a.processlist_command != 'Sleep'
     AND thread_a.processlist_id != CONNECTION_ID()
     AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
+    AND (
+        -- Include non-idle sessions
+        (thread_a.processlist_command != 'Sleep')
+        OR
+        -- Include idle sessions that are blocking others
+        thread_a.thread_id IN (
+            SELECT blocking_thread_id 
+            FROM performance_schema.data_lock_waits
+        )
+    )
     AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
     AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
     -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
@@ -82,7 +92,7 @@ WHERE
     ) OR waits_a.event_id is NULL)
     -- We ignore rows without SQL text because there will be rows for background operations that do not have
     -- SQL text associated with it.
-    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != ''
+    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
 """
 
 BLOCKING_COLUMN = ",blocking_thread.processlist_id AS blocking_pid"
