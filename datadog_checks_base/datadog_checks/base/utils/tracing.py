@@ -119,10 +119,17 @@ def configure_tracer(tracer, self_check):
             apm_tracing_enabled = True
 
         # If the check has a dd_trace_id and dd_parent_id, we can use it to create a trace root
-        dd_trace_id = self_check.instance.get("dd_trace_id")
-        dd_parent_id = self_check.instance.get("dd_parent_span_id")
+        dd_parent_id = None
+        dd_trace_id = None
+        if hasattr(self_check, "instance") and self_check.instance:
+            dd_trace_id = self_check.instance.get("dd_trace_id", None)
+            dd_parent_id = self_check.instance.get("dd_parent_span_id", None)
+        elif hasattr(self_check, "instances") and self_check.instances and len(self_check.instances) > 0:
+            dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
+            dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
+
         if dd_trace_id and dd_parent_id:
-            from ddtrace.tracer.context import Context
+            from ddtrace.context import Context
 
             apm_tracing_enabled = True
             context_provider = Context(
@@ -130,7 +137,7 @@ def configure_tracer(tracer, self_check):
                 span_id=dd_parent_id,
             )
     except (ValueError, TypeError, AttributeError, ImportError):
-        pass
+        raise
 
     try:
         # Update the tracer configuration to make sure we trace only if we really need to
@@ -138,7 +145,10 @@ def configure_tracer(tracer, self_check):
             appsec_enabled=False,
             enabled=apm_tracing_enabled,
         )
-        if context_provider:
+
+        # If the current trace context is not set or is set to an empty trace_id, activate the context provider
+        current_context = tracer.current_trace_context()
+        if (current_context is None or (current_context is not None and len(current_context.trace_id) == 0)) and context_provider:
             tracer.context_provider.activate(context_provider)
     except Exception:
         pass
