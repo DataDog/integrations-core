@@ -4,7 +4,7 @@
 
 This check monitors Wireless LAN (WLAN) networks based on the [IEEE 802.11][1] standards, commonly referred to as Wi-Fi.
 
-It collects key Wi-Fi metrics, including Access Point (AP) information such as [SSID][2] and [BSSID][3] (as tags), signal quality telemetry like [RSSI][4] and [Noise][5], transmission rate, and transitions count (e.g., [Roaming][6] and [Swapping][7]between APs). These metrics help proactively identify overall wireless network issues, such as overloaded access points, as well as retrospective troubleshooting of poor network performance on individual hosts.
+It collects key Wi-Fi metrics, including Access Point (AP) information such as [SSID][2] and [BSSID][3] (as tags), signal quality telemetry like [RSSI][4] and [Noise][5], transmission rate, and transitions count (e.g., [Roaming][6] and [Swapping][7] between APs). These metrics help proactively identify overall wireless network issues, such as overloaded access points, as well as retrospective troubleshooting of poor network performance on individual hosts.
 
 ## Setup
 
