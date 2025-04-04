@@ -57,11 +57,12 @@ SELECT
     waits_a.object_name,
     waits_a.index_name,
     waits_a.object_type,
-    waits_a.source
+    waits_a.source  
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
+    {blocking_joins}
 WHERE
     thread_a.processlist_state IS NOT NULL
     AND thread_a.processlist_command != 'Sleep'
@@ -83,6 +84,10 @@ WHERE
     AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
 """
 
+BLOCKING_JOINS = """\
+    LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
+    LEFT JOIN performance_schema.threads AS blocking_thread ON lock_waits.blocking_thread_id = blocking_thread.thread_id
+"""
 
 class MySQLVersion(Enum):
     # 8.0
@@ -180,11 +185,24 @@ class MySQLActivity(DBMAsyncJob):
                 tags=tags + self._check._get_debug_tags(),
             )
 
+    def _should_collect_blocking_sessions(self):
+        # type: () -> bool
+        # TODO: add the configuration to enable/disable blocking sessions collection
+        return self._db_version == MySQLVersion.VERSION_80
+
+    def _get_activity_query(self):
+        # type: () -> str   
+        blocking_joins = ""
+        if self._should_collect_blocking_sessions():
+            blocking_joins = BLOCKING_JOINS
+        return ACTIVITY_QUERY.format(blocking_joins=blocking_joins)
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
-        self._log.debug("Running activity query [%s]", ACTIVITY_QUERY)
-        cursor.execute(ACTIVITY_QUERY)
+        query = self._get_activity_query()
+        self._log.debug("Running activity query [%s]", query)
+        cursor.execute(query) 
         return cursor.fetchall()
 
     def _normalize_rows(self, rows):
