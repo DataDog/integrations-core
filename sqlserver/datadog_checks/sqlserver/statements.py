@@ -509,7 +509,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 tags += ["db:{}".format(row['database_name'])]
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
@@ -599,7 +599,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 obfuscated_plan_event = {
-                    "host": self._check.resolved_hostname,
+                    "host": self._check.reported_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
