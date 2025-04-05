@@ -252,6 +252,8 @@ Although the integration works on Linux and Windows, some metrics are OS depende
 
 For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
 
+**Note**: See the [full configuration section][] of Datadog's unified
+
 #### DogStatsD
 
 Metrics are collected with [DogStatsD][13] through UDP port 8125.
@@ -969,6 +971,8 @@ To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `far
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task or job. The list of tags automatically attached depends on the Agent's [cardinality configuration][33].
 
+**Note**: Set the `env` and `service` tags in your task definition to get the full benefits of Datadog's unified service tagging. See the [full configuration section][64] of the unified service tagging documentation for instructions.
+
   | Tag                           | Cardinality  | Source               |
   |-------------------------------|--------------|----------------------|
   | `container_name`              | High         | ECS API              |
@@ -1080,3 +1084,4 @@ Need help? Contact [Datadog support][18].
 [61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
 [62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
 [63]: https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/
+[64]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=ecs#full-configuration
