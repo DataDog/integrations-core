@@ -15,7 +15,7 @@ from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
-from ddev.config.file import ConfigFile
+from ddev.config.file import DDEV_TOML, ConfigFileWithOverrides
 from ddev.e2e.constants import E2EEnvVars
 from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
@@ -111,7 +111,7 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
+def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOverrides:
     for env_var in (
         'FORCE_COLOR',
         'DD_ENV',
@@ -134,14 +134,22 @@ def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
     path = Path(tmp_path, 'config.toml')
     monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
 
-    config = ConfigFile(path)
+    config = ConfigFileWithOverrides(path)
     config.reset()
 
     # Provide a real default for times when tests have no need to modify the repo
-    config.model.repos['core'] = str(local_repo)
+    config.global_model.repos['core'] = str(local_repo)
     config.save()
 
     return config
+
+
+@pytest.fixture
+def overrides_config(temp_dir) -> Generator[Path]:
+    """Creates a temporary overrides config file in the temp current directory."""
+    with temp_dir.as_cwd():
+        (temp_dir / DDEV_TOML).touch()
+        yield temp_dir / DDEV_TOML
 
 
 @pytest.fixture
