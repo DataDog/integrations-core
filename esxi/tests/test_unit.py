@@ -1271,3 +1271,16 @@ def test_cant_get_version(vcsim_instance, dd_run_check, caplog, service_instance
     )
     aggregator.assert_metric('esxi.host.can_connect', 0, count=1)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_esxi_custom_tags(vcsim_instance, dd_run_check, aggregator, caplog):
+    vcsim_instance['tags'] = ['test:tag']
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    base_tags = ["esxi_url:127.0.0.1:8989", "test:tag"]
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
