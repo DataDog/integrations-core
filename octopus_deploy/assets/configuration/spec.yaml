@@ -276,3 +276,7 @@ files:
     - type: integration
       source: octopus_deploy
       service: <SERVICE_NAME>
+    - type: file
+      source: octopus_deploy
+      path: /OctopusServer/Server/Logs/OctopusServer.txt
+      service: <SERVICE_NAME>
