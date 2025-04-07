@@ -98,6 +98,7 @@
               "title": "Last backup status",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -110,7 +111,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.backup.last_status{$cluster-location,$cluster-name,$cluster-uid,$endpoint}",
+                      "query": "min:velero.backup.last_status{$cluster-location,$cluster-name,$cluster-uid,$host}",
                       "aggregator": "last"
                     }
                   ],
@@ -133,7 +134,7 @@
               "precision": 2,
               "timeseries_background": {
                 "yaxis": {},
-                "type": "bars"
+                "type": "area"
               }
             },
             "layout": {
@@ -149,6 +150,7 @@
               "title": "Number of backups",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -161,7 +163,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:velero.backup.amount{$cluster-location,$cluster-name,$cluster-uid,$endpoint}",
+                      "query": "sum:velero.backup.amount{$cluster-location,$cluster-name,$cluster-uid,$host}",
                       "aggregator": "last"
                     }
                   ],
@@ -178,7 +180,7 @@
               "autoscale": true,
               "precision": 2,
               "timeseries_background": {
-                "type": "area"
+                "type": "bars"
               }
             },
             "layout": {
@@ -237,7 +239,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:velero.backup.items.errors{$cluster-location,$cluster-name,$cluster-uid,$endpoint}",
+                      "query": "avg:velero.backup.items.errors{$cluster-location,$cluster-name,$cluster-uid,$host}",
                       "aggregator": "last"
                     }
                   ],
@@ -276,25 +278,26 @@
               "title": "Items backed up",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
                           "unit_name": "item"
                         }
-                      }
+                      },
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:velero.backup.items{$cluster-location,$cluster-name,$cluster-uid,$endpoint}",
+                      "query": "sum:velero.backup.items{$cluster-location,$cluster-name,$cluster-uid,$host}",
                       "aggregator": "last"
                     }
                   ],
@@ -357,7 +360,7 @@
           {
             "id": 11,
             "definition": {
-              "title": "Backup success/failure",
+              "title": "Creation success/failure",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -369,6 +372,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -376,16 +380,14 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     }
@@ -394,12 +396,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.backup.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.backup.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.backup.failure.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.backup.failure.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -423,7 +425,7 @@
           {
             "id": 7813834185296242,
             "definition": {
-              "title": "Backup deletion success/failure",
+              "title": "Deletion success/failure",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -435,6 +437,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -442,16 +445,14 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     }
@@ -460,12 +461,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.backup.deletion.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.backup.deletion.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.backup.deletion.failure.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.backup.deletion.failure.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -489,7 +490,7 @@
           {
             "id": 13,
             "definition": {
-              "title": "Backup Duration",
+              "title": "Duration",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -501,6 +502,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -512,6 +514,9 @@
                           "unit_name": "second"
                         }
                       },
+                      "style": {
+                        "palette": "dog_classic"
+                      },
                       "formula": "query1"
                     }
                   ],
@@ -519,7 +524,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:velero.backup.duration.seconds.sum{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "avg:velero.backup.duration.seconds.sum{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -543,7 +548,7 @@
           {
             "id": 12,
             "definition": {
-              "title": "Backup size",
+              "title": "Size",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -555,6 +560,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -573,7 +579,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.backup.tarball_size_bytes{$cluster-location,$cluster-name,$cluster-uid,$endpoint}"
+                      "query": "sum:velero.backup.tarball_size_bytes{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -637,7 +643,7 @@
           {
             "id": 8,
             "definition": {
-              "title": "Restore success count",
+              "title": "Success count",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -652,7 +658,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.restore.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()",
+                      "query": "sum:velero.restore.success.count{$cluster-location,$cluster-name,$cluster-uid,$host}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -676,7 +682,7 @@
           {
             "id": 16,
             "definition": {
-              "title": "Restore success/failure",
+              "title": "Success/Failure",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -688,6 +694,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -695,16 +702,14 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     }
@@ -713,12 +718,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.restore.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.restore.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.restore.failed.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.restore.failed.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -757,7 +762,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:velero.restore.amount{$cluster-location,$cluster-name,$cluster-uid,$endpoint}",
+                      "query": "avg:velero.restore.amount{$cluster-location,$cluster-name,$cluster-uid,$host}",
                       "aggregator": "last"
                     }
                   ],
@@ -832,6 +837,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -839,16 +845,14 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     }
@@ -857,12 +861,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.volume_snapshot.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.volume_snapshot.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.volume_snapshot.failure.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.volume_snapshot.failure.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -906,16 +910,14 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     }
@@ -924,12 +926,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.csi_snapshot.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.csi_snapshot.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.csi_snapshot.failure.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.csi_snapshot.failure.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1012,24 +1014,21 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     },
                     {
                       "alias": "Cancel",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 0
+                        "palette": "orange"
                       },
                       "formula": "query3"
                     }
@@ -1038,17 +1037,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.pod_volume.data.upload.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.pod_volume.data.upload.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.pod_volume.data.upload.failure.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.pod_volume.data.upload.failure.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:velero.pod_volume.data.upload.cancel.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.pod_volume.data.upload.cancel.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1092,24 +1091,21 @@
                     {
                       "alias": "Success",
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 0
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Failure",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 6
+                        "palette": "red"
                       },
                       "formula": "query2"
                     },
                     {
                       "alias": "Cancel",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 0
+                        "palette": "orange"
                       },
                       "formula": "query3"
                     }
@@ -1118,17 +1114,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:velero.pod_volume.data.download.success.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.pod_volume.data.download.success.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:velero.pod_volume.data.download.failure.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.pod_volume.data.download.failure.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:velero.pod_volume.data.download.cancel.count{$cluster-location,$cluster-name,$cluster-uid,$endpoint}.as_count()"
+                      "query": "sum:velero.pod_volume.data.download.cancel.count{$cluster-location,$cluster-name,$cluster-uid,$host} by {cluster-location,cluster-name,cluster-uid,host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1216,7 +1212,7 @@
                       "name": "a",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:velero status:error $cluster-location $cluster-name $cluster-uid $endpoint"
+                        "query": "source:velero status:error $cluster-location $cluster-name $cluster-uid $host"
                       },
                       "indexes": [
                         "*"
@@ -1279,7 +1275,7 @@
                   ],
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:velero $cluster-location $cluster-name $cluster-uid $endpoint",
+                    "query_string": "source:velero $cluster-location $cluster-name $cluster-uid $host",
                     "indexes": [],
                     "storage": "hot"
                   }
@@ -1324,8 +1320,8 @@
       "default": "*"
     },
     {
-      "name": "endpoint",
-      "prefix": "endpoint",
+      "name": "host",
+      "prefix": "host",
       "available_values": [],
       "default": "*"
     }
