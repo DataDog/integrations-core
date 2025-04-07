@@ -95,23 +95,66 @@ pipeline:
           denied_mask=\"r\" fsuid=0 ouid=0\x1dFSUID=\"a\" OUID=\"root\""
       grok:
         supportRules: >-
-          extract_UID_or_OUID_or_FSUID
-          (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}")
+          log_prefix
+          type=%{notSpace:type}%{_space}msg=audit\(%{number:timestamp}\:%{number:event_id}\)
+
+          unicode_char %{regex("[\\p{C}]")}
+
+          _space \s*
+        matchRules: >-
+          rule
+          %{log_prefix}%{_space}:%{_space}%{data:pre_msg_kv}%{_space}msg=%{singleQuotedString:msg_raw}(%{unicode_char})?%{data:post_msg_kv}
+
+          rule_without_msg %{log_prefix}%{_space}:%{_space}%{data:pre_msg_kv}%{unicode_char}%{data:post_msg_kv}
+
+          rule_without_msg_and_unicode_char %{log_prefix}%{_space}:%{_space}%{data:post_msg_kv}
+    - type: grok-parser
+      name: Parsing `pre_msg_kv` attribute
+      enabled: true
+      source: pre_msg_kv
+      samples:
+        - pid=381980 uid=0 auid=0 ses=138
+          subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+        - pid=12243 uid=0 auid=1001 ses=535 subj=unconfined
+        - apparmor="ALLOWED"
+      grok:
+        supportRules: ""
+        matchRules: parse_pre_msg_kv_rule %{data::keyvalue("=",":?/\"|*<>,")}
+    - type: grok-parser
+      name: Parsing `msg_raw` attribute
+      enabled: true
+      source: msg_raw
+      samples:
+        - "'resrc=port op=add lport=3307 proto=6
+          tcontext=system_u:object_r:mysqld_port_t:s0 comm=\\\"semanage\\\"
+          exe=\\\"/usr/libexec/platform-python3.6\\\" hostname=? addr=?
+          terminal=? res=success'"
+      grok:
+        supportRules: ""
+        matchRules: parse_msg_raw_rule %{data:msg:keyvalue("=",":?/\"|*<>, ")}
+    - type: grok-parser
+      name: Parsing `post_msg_kv` attribute
+      enabled: true
+      source: post_msg_kv
+      samples:
+        - bool=virt_use_nfs val=1 old_val=0 auid=1000 res=1AUID="serviceuser"
+        - AUID="serviceuser"
+        - apparmor="DENIED" operation="capable" class="cap" profile="rsyslogd"
+          pid=838 comm="rsyslogd" capability=12  capname="net_admin"
+      grok:
+        supportRules: >-
+          extract_kv_pair %{data::keyvalue("=",":?/\"|*<>, ")}
+
+          extract_UID_or_OUID_or_FSUID (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}")
 
           extract_AUID AUID="%{regex("[^\"]*"):AUID}"
 
-          log_prefix type=%{notSpace:type} msg=audit\(%{regex("[^:]*"):timestamp}:%{integer}\):
-
-          _space %{regex("(\\s)*"):}
+          _space \s*
         matchRules: >-
-          common_rule
-          %{log_prefix}%{_space}%{data::keyvalue("=",":?/\"|*<>,")}%{_space}(msg='%{data:msg:keyvalue("=",":?/\"|*<>,
-          ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID_or_FSUID
-          }|%{extract_AUID}%{_space}%{extract_UID_or_OUID_or_FSUID
-          }|%{extract_UID_or_OUID_or_FSUID
-          }%{_space}%{extract_AUID})%{data::keyvalue("=",":?/\"|*<>,")}
+          parse_post_msg_kv_rule
+          %{extract_kv_pair}%{_space}(%{extract_AUID}%{_space}|%{extract_UID_or_OUID_or_FSUID}%{_space})+
 
-          rule_without_AUID_UID %{log_prefix}%{_space}(avc:%{_space}%{notSpace:outcome:uppercase}%{_space}\{%{_space}%{notSpace:operation}%{_space}\} for )?%{data::keyvalue("=",":?/\"|*<>,")}
+          parse_post_msg_kv_without_id_fields_rule %{extract_kv_pair}
     - type: pipeline
       name: Parsing User Selinux Err logs
       enabled: true
@@ -121,28 +164,15 @@ pipeline:
         - type: grok-parser
           name: Parsing User Selinux Err logs
           enabled: true
-          source: message
+          source: msg_raw
           samples:
-            - "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0
-              auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0
-              msg='Regex version mismatch, expected: 10.37 2021-05-26 actual:
-              10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0
-              hostname=? addr=? terminal=?'\x1dUID=\"root\" AUID=\"unset\"
-              SAUID=\"root\""
+            - "'Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40
+              2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=?
+              addr=? terminal=?'\x1d"
           grok:
-            supportRules: >-
-              extract_UID_or_OUID
-              (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}")
-
-              extract_AUID AUID="%{regex("[^\"]*"):AUID}"
-
-              log_prefix type=%{notSpace:type} msg=audit\(%{regex("[^:]*"):timestamp}:%{integer}\):
-
-              _space %{regex("(\\s)*"):}
-            matchRules: user_selinux_err_rule
-              %{log_prefix}%{_space}%{data::keyvalue("=",":?/\"|*<>,")}%{_space}(msg='(%{regex(".*(?=
-              exe)"):error})?%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,
-              ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID}|%{extract_AUID}%{_space}%{extract_UID_or_OUID}|%{extract_UID_or_OUID}%{_space}%{extract_AUID})%{data::keyvalue("=",":?/\"|*<>,")}
+            supportRules: _space \s*
+            matchRules: user_selinux_err_rule '(%{regex(".*(?=
+              exe)"):error})?%{_space}%{data:msg:keyvalue("=",":?/\"|*<>, ")}'
     - type: pipeline
       name: Parsing User Role Change  logs
       enabled: true
@@ -152,29 +182,43 @@ pipeline:
         - type: grok-parser
           name: Parsing User Role Change logs
           enabled: true
-          source: message
+          source: msg_raw
           samples:
-            - "type=USER_ROLE_CHANGE msg=audit(1741000050.325:2606): pid=60958
-              uid=0 auid=1001 ses=64
-              subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='pam:
+            - "'pam:
               default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c\
               1023
               selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.\
               c1023 exe=\"/usr/sbin/sshd\" hostname=172.20.4.65 addr=172.20.4.65
-              terminal=ssh res=success'\x1dUID=\"root\" AUID=\"devuser\""
+              terminal=ssh res=success'"
           grok:
-            supportRules: >-
-              extract_UID_or_OUID
-              (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}")
-
-              extract_AUID AUID="%{regex("[^\"]*"):AUID}"
-
-              log_prefix type=%{notSpace:type} msg=audit\(%{regex("[^:]*"):timestamp}:%{integer}\):
-
-              _space %{regex("(\\s)*"):}
+            supportRules: _space \s*
             matchRules: user_role_change_rule
-              %{log_prefix}%{_space}%{data::keyvalue("=",":?/\"|*<>,")}%{_space}(msg='(%{regex("[^:]*"):})?:%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,
-              ")}')?%{_space}(%{regex("[\\p{C}]")})?(%{extract_AUID}|%{extract_UID_or_OUID}|%{extract_AUID}%{_space}%{extract_UID_or_OUID}|%{extract_UID_or_OUID}%{_space}%{extract_AUID})%{data::keyvalue("=",":?/\"|*<>,")}
+              '(%{regex("[^:]*"):})?:%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,
+              ")}'
+    - type: pipeline
+      name: Parsing AVC  logs
+      enabled: true
+      filter:
+        query: "@type:AVC"
+      processors:
+        - type: grok-parser
+          name: Parsing AVC logs
+          enabled: true
+          source: post_msg_kv
+          samples:
+            - 'avc:  denied  { getattr } for  pid=16660 comm="groupadd" name="/"
+              dev="proc" ino=1
+              scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023
+              tcontext=system_u:object_r:proc_t:s0 tclass=filesystem
+              permissive=0'
+            - apparmor="DENIED" operation="capable" class="cap"
+              profile="rsyslogd" pid=838 comm="rsyslogd"
+              capability=12  capname="net_admin"
+          grok:
+            supportRules: _space \s*
+            matchRules: avc_rule
+              (avc:%{_space}%{notSpace:outcome:uppercase}%{_space}\{%{_space}%{notSpace:operation}%{_space}\}
+              for )?%{data::keyvalue("=",":?/\"|*<>,")}
     - type: grok-parser
       name: Convert `msg.grantors` attribute to array
       enabled: true
