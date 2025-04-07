@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.9.0 / 2025-04-07
+
+***Added***:
+
+* added configurable limit to index metric collection ([#20012](https://github.com/DataDog/integrations-core/pull/20012))
+
 ## 14.8.0 / 2025-03-26
 
 ***Added***:
