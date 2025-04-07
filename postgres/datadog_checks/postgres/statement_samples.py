@@ -797,6 +797,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
+        except psycopg2.errors.UndefinedFunction as e:
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
+            error_response = None, DBExplainError.undefined_function, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.undefined_function, e)
+            return error_response
         except psycopg2.errors.IndeterminateDatatype as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))

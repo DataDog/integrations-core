@@ -12,6 +12,6 @@
             "endpoint"
         ],
         "name": "Celery Flower OpenMetrics endpoint health",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Velero OpenMetrics endpoint, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Celery OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]
