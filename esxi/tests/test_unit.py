@@ -1274,10 +1274,9 @@ def test_cant_get_version(vcsim_instance, dd_run_check, caplog, service_instance
 
 
 @pytest.mark.usefixtures("service_instance")
-def test_esxi_custom_tags(vcsim_instance, dd_run_check, aggregator, caplog):
+def test_esxi_custom_tags(vcsim_instance, dd_run_check, aggregator):
     vcsim_instance['tags'] = ['test:tag']
     check = EsxiCheck('esxi', {}, [vcsim_instance])
-    caplog.set_level(logging.DEBUG)
     dd_run_check(check)
 
     base_tags = ["esxi_url:127.0.0.1:8989", "test:tag"]
