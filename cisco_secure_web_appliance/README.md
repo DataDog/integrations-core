@@ -269,7 +269,7 @@ This error occurs because by default, Syslog listens on port 514. To resolve thi
 For any further assistance, contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://www.cisco.com/site/in/en/products/security/secure-web-appliance/index.html
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install

@@ -114,7 +114,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://kyverno.io/docs/introduction/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/kyverno/datadog_checks/kyverno/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/openmetrics/
