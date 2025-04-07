@@ -2,7 +2,7 @@
 
 ## Overview
 
-F5 Networks is an application delivery networking and security company. Collect health and performance metrics of your F5 devices, including including the Big IP and LTM platforms.
+F5 Networks is an application delivery networking and security company. Collect health and performance metrics of your F5 devices, including the Big IP and LTM platforms.
 
 ## Setup
 
