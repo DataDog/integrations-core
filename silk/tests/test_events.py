@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-from freezegun import freeze_time
 
 from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
@@ -85,7 +84,7 @@ def test_events_test(aggregator, dd_run_check, instance):
     # First run to set the initial timestamp to 2012-01-13
     with mock.patch('datadog_checks.silk.check.get_timestamp', return_value=1326412800):
         check = SilkCheck('silk', {}, [instance])
-    
+
     # Second run to get events between 2012-01-13 and 2012-01-14 and set the timestamp to 2012-01-14
     # Event 1 is between 2012-01-13 and 2012-01-14
     with mock.patch('datadog_checks.silk.check.get_timestamp', return_value=1326499200):
