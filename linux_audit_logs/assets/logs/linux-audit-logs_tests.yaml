@@ -6,6 +6,7 @@ tests:
     custom:
       AUID: "root"
       auid: 0
+      event_id: 6532.0
       msg:
         comm: "semanage"
         exe: "/usr/libexec/platform-python3.6"
@@ -18,12 +19,15 @@ tests:
         resrc: "port"
         tcontext: "system_u:object_r:mysqld_port_t:s0"
         terminal: "?"
+      msg_raw: "'resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'"
       network:
         client:
           geoip:
             invalidAddress: "?"
           ip: "?"
       pid: 381980
+      post_msg_kv: "UID=\"root\" AUID=\"root\""
+      pre_msg_kv: "pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       ses: 138
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.736329118112E12
@@ -41,6 +45,7 @@ tests:
     custom:
       AUID: "unset"
       auid: 4294967295
+      event_id: 1778.0
       msg:
         acct: "devuser"
         exe: "/usr/sbin/sshd"
@@ -53,11 +58,14 @@ tests:
          - "PAM:authentication"
         res: "success"
         terminal: "ssh"
+      msg_raw: "'op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'"
       network:
         client:
           geoip: {}
           ip: "10.10.10.10"
       pid: 155615
+      post_msg_kv: "UID=\"root\" AUID=\"unset\""
+      pre_msg_kv: "pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023"
       ses: 4294967295
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
       timestamp: 1.740139921923E12
@@ -75,11 +83,13 @@ tests:
     custom:
       enabled: 1
       enforcing: 0
+      event_id: 1674.0
       lsm: "selinux"
       msg:
         res: "success"
       old-enabled: 1
       old_enforcing: 1
+      post_msg_kv: "enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
       res: 1
       ses: 36
       timestamp: 1.740386730535E12
@@ -97,12 +107,14 @@ tests:
     custom:
       comm: "groupadd"
       dev: "proc"
+      event_id: 182.0
       ino: 1
       name: "/"
       operation: "getattr"
       outcome: "DENIED"
       permissive: 0
       pid: 16660
+      post_msg_kv: "avc:  denied  { getattr } for  pid=16660 comm=\"groupadd\" name=\"/\" dev=\"proc\" ino=1 scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023 tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0"
       scontext: "unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023"
       tclass: "filesystem"
       tcontext: "system_u:object_r:proc_t:s0"
@@ -120,17 +132,21 @@ tests:
       SAUID: "root"
       auid: 4294967295
       error: "Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14 "
+      event_id: 198.0
       msg:
         exe: "/usr/lib/systemd/systemd"
         hostname: "?"
         sauid: 0
         terminal: "?"
+      msg_raw: "'Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=? addr=? terminal=?'"
       network:
         client:
           geoip:
             invalidAddress: "?"
           ip: "?"
       pid: 1
+      post_msg_kv: "UID=\"root\" AUID=\"unset\" SAUID=\"root\""
+      pre_msg_kv: "pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0"
       ses: 4294967295
       subj: "system_u:system_r:init_t:s0"
       timestamp: 1.669714331555E12
@@ -148,6 +164,7 @@ tests:
     custom:
       AUID: "devuser"
       auid: 1001
+      event_id: 2606.0
       msg:
         default-context: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
         exe: "/usr/sbin/sshd"
@@ -155,11 +172,14 @@ tests:
         res: "success"
         selected-context: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
         terminal: "ssh"
+      msg_raw: "'pam: default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'"
       network:
         client:
           geoip: {}
           ip: "10.10.10.10"
       pid: 60958
+      post_msg_kv: "UID=\"root\" AUID=\"devuser\""
+      pre_msg_kv: "pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023"
       ses: 64
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
       timestamp: 1.741000050325E12

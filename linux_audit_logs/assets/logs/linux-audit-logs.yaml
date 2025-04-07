@@ -131,7 +131,7 @@ pipeline:
           terminal=? res=success'"
       grok:
         supportRules: ""
-        matchRules: parse_msg_raw_rule %{data:msg:keyvalue("=",":?/\"|*<>, ")}
+        matchRules: parse_msg_raw_rule '%{data:msg:keyvalue("=",":?/\"|*<>, ")}'
     - type: grok-parser
       name: Parsing `post_msg_kv` attribute
       enabled: true
@@ -145,7 +145,7 @@ pipeline:
         supportRules: >-
           extract_kv_pair %{data::keyvalue("=",":?/\"|*<>, ")}
 
-          extract_UID_or_OUID_or_FSUID (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}")
+          extract_UID_or_OUID_or_FSUID_or_SAUID (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}"|SAUID="%{regex("[^\"]*"):SAUID}")
 
           extract_AUID AUID="%{regex("[^\"]*"):AUID}"
 
