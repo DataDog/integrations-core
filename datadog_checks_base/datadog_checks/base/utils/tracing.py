@@ -113,6 +113,7 @@ def configure_tracer(tracer, self_check):
     """
     apm_tracing_enabled = False
     context_provider = None
+    custom_writer = None
     try:
         integration_tracing, integration_tracing_exhaustive = tracing_enabled()
         if integration_tracing or integration_tracing_exhaustive:
@@ -128,7 +129,8 @@ def configure_tracer(tracer, self_check):
             dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
             dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
 
-        if dd_trace_id and dd_parent_id:
+        # 1 means the trace will be dropped
+        if dd_trace_id and dd_parent_id and dd_trace_id != 1:
             from ddtrace.context import Context
 
             apm_tracing_enabled = True
@@ -136,14 +138,31 @@ def configure_tracer(tracer, self_check):
                 trace_id=dd_trace_id,
                 span_id=dd_parent_id,
             )
+
+            # We send the traces to the telemetry endpoint instead of the regular intake endpoint
+            # dd_trace_id and dd_parent_id are set by the datadog-agent itself in case of a internal observability
+            from ddtrace.internal.writer import HTTPWriter
+            custom_writer = HTTPWriter(
+                intake_url=f"instrumentation-telemetry-intake.{datadog_agent.get_config('site', 'datadoghq.com')}/api/v2/apmtelemetry",
+                headers={
+                    "dd-api-key": datadog_agent.get_config('api_key'),
+                    "content-type": "application/json",
+                    "dd-telemetry-api-version": "v2",
+                    "dd-telemetry-origin": "integrations",
+                    "dd-telemetry-request-type": "traces",
+                    "dd-client-library-language": "python",
+                }
+            )
+
     except (ValueError, TypeError, AttributeError, ImportError):
-        raise
+        pass
 
     try:
         # Update the tracer configuration to make sure we trace only if we really need to
         tracer.configure(
             appsec_enabled=False,
             enabled=apm_tracing_enabled,
+            writer=custom_writer,
         )
 
         # If the current trace context is not set or is set to an empty trace_id, activate the context provider
