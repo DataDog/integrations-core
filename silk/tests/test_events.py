@@ -86,7 +86,6 @@ def test_events_test(aggregator, dd_run_check, instance):
         check = SilkCheck('silk', {}, [instance])
         assert check.latest_event_query == 1326412800
         mock_timestamp.assert_called_once()
-        assert mock_timestamp() == 1326412800
 
     # Second run to get events between 2012-01-13 and 2012-01-14 and set the timestamp to 2012-01-14
     # Event 1 is between 2012-01-13 and 2012-01-14
@@ -96,7 +95,6 @@ def test_events_test(aggregator, dd_run_check, instance):
         aggregator.assert_event("Event 2", count=0)
         assert check.latest_event_query == 1326499200
         mock_timestamp.assert_called_once()
-        assert mock_timestamp() == 1326499200
 
     # Third run to get events between 2012-01-14 and 2012-01-15
     # Event 2 is between 2012-01-14 and 2012-01-15
@@ -107,4 +105,3 @@ def test_events_test(aggregator, dd_run_check, instance):
         aggregator.assert_event("Event 2", count=1)
         assert check.latest_event_query == 1326585600
         mock_timestamp.assert_called_once()
-        assert mock_timestamp() == 1326585600
