@@ -58,7 +58,7 @@ SELECT
     waits_a.index_name,
     waits_a.object_type,
     waits_a.source
-    {blocking_column}
+    {blocking_columns}
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
@@ -89,7 +89,10 @@ WHERE
     AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
 """
 
-BLOCKING_COLUMN = ",blocking_thread.processlist_id AS blocking_pid"
+BLOCKING_COLUMNS = """\
+    ,blocking_thread.thread_id AS blocking_thread_id,
+    blocking_thread.processlist_id AS blocking_processlist_id
+"""
 
 BLOCKING_JOINS = """\
     LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
@@ -210,15 +213,15 @@ class MySQLActivity(DBMAsyncJob):
     def _get_activity_query(self):
         # type: () -> str
         # TODO: cache the query
-        blocking_column = ""
+        blocking_columns = ""
         blocking_joins = ""
         idle_blockers_subquery = ""
         if self._should_collect_blocking_sessions():
-            blocking_column = BLOCKING_COLUMN
+            blocking_columns = BLOCKING_COLUMNS
             blocking_joins = BLOCKING_JOINS
             idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY
         return ACTIVITY_QUERY.format(
-            blocking_column=blocking_column,
+            blocking_columns=blocking_columns,
             blocking_joins=blocking_joins,
             idle_blockers_subquery=idle_blockers_subquery,
         )
