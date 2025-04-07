@@ -101,7 +101,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:openvpn status:critical $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:critical"
                                             }
                                         }
                                     ],
@@ -151,7 +151,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:openvpn status:high $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:high"
                                             }
                                         }
                                     ],
@@ -210,7 +210,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:openvpn status:critical $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:critical"
                                             }
                                         }
                                     ],
@@ -276,7 +276,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:openvpn status:medium $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:medium"
                                             }
                                         }
                                     ],
@@ -327,7 +327,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:openvpn status:low $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:low"
                                             }
                                         }
                                     ],
@@ -378,7 +378,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:openvpn status:info $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:info"
                                             }
                                         }
                                     ],
@@ -437,7 +437,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:openvpn status:high $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:high"
                                             }
                                         }
                                     ],
@@ -511,7 +511,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:openvpn status:medium $User $Client-IP $Log-Type $Authentication-Method $OS $Host-Name"
+                                                "query": "source:openvpn status:medium"
                                             }
                                         }
                                     ],
