@@ -141,6 +141,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
     _common_assertions(aggregator)
 
+
 @pytest.mark.parametrize(
     'endpoint, fixture_file, expected_metrics',
     [
@@ -155,13 +156,14 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
                 'rabbitmq.queue.messages.redelivered.count',
                 'rabbitmq.queue.messages.acked.count',
                 'rabbitmq.queue.get.empty.count',
-
             },
             id="detailed, query queue_delivery_metrics family",
         ),
     ],
 )
-def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
+def test_unaggregated_endpoint_v4(
+    endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response
+):
     mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
     check = _rmq_om_check(
         {
@@ -180,6 +182,7 @@ def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggr
     for m in (DEFAULT_OPENMETRICS - expected_metrics) | MISSING_OPENMETRICS:
         # We check that all metrics that are not in the query don't show up at all.
         aggregator.assert_metric(m, at_least=0)
+
 
 def mock_http_responses(url, **_params):
     parsed = urlparse(url)
