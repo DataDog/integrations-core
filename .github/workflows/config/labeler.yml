@@ -658,6 +658,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/watchguard_firebox:
+- watchguard_firebox/**/*
 integration/wazuh:
 - wazuh/**/*
 integration/weaviate:

@@ -1,0 +1,192 @@
+id: watchguard-firebox
+tests:
+  - sample: '<140>Apr  2 11:36:21 WatchGuard-Firebox TEST (2025-04-02T06:06:21)
+      test: msg_id="3000-0148" Deny External Firebox 390 udp 20 16 10.10.10.10
+      10.10.10.10 5041 5041 flags="SR" duration="0" sent_pkts="0" rcvd_pkts="0"
+      sent_bytes="0" rcvd_bytes="0"  (Unhandled External Packet-00)'
+    result: null
+  - sample: '<142>Apr  2 11:36:20 WatchGuard-Firebox TEST (2025-04-02T06:06:20)
+      test: msg_id="3000-0151" Allow Firebox Firebox tcp 10.10.10.10 10.10.10.10
+      52260 80 flags="SDdF" duration="63" sent_pkts="8" rcvd_pkts="6"
+      sent_bytes="692" rcvd_bytes="1081"  (Any From Firebox-00)'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-0152" IPv4 source route attack from 10.10.10.10
+      detected.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-0161" DDOS from client 10.10.10.10 detected.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-0160" DDOS against server 10.0.1.34 detected.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-0167" Policy Name: HTTP-00 Source IP Address:
+      10.10.10.10 Source Port: 10 Destination IP Address: 10.10.10.10
+      Destination Port: 10'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-0168" Blocked site: Traffic detected from 10.10.10.10
+      to 10.10.10.10.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-0065" User Test@Firebox-DB used 21 MB of the bandwidth
+      quota (100 MB) and used 1 minute of the time quota (3 minutes).'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3001-1001" Temporarily blocking host 10.10.10.10 (reason =
+      autoblock by policy)'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3001-1002" The Temporary Blocked Sites list is full
+      (capacity=1000). The oldest entry 10.10.10.10 was removed.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-00C9" TCP probe packets timeout, Load Balance Server
+      10.10.10.10 port 10 is offline.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3000-012E" Cannot relearn system MAC address, possible loop
+      or MAC spoofing, ip=10.10.10.10, mac=00:00:aa:a0:00:0d, interface=5'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3100-0047" [eth0 (External)] Deactivating external
+      interface'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1600-0004" Subnet 10.10.10.10/24 for address pool on
+      interface vlan10 overlaps subnet 10.10.10.10/16 on interface eth1. Edit
+      the configuration so that DHCP server functions properly'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="5A00-0002" Resolved domain test.org to 10.10.10.10'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="5A00-0007" Could not resolve server: test.org'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="5A00-0008" Could not connect to members.dyndns.org /
+      10.10.10.10, connection refused'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="5501-0014" Generate system diagnostic file to USB drive
+      failed'
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"5501-001A\" System upgrade failed: 'LIVESECURITY' feature
+      expired"
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="5501-001B" System backup to USB drive failed due to write
+      file to USB drive error'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="0101-0001" Management user admin@Firebox-DB from 10.10.10.10
+      modified Blocked Sites Exceptions'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1100-0003" Authentication server 10.10.10.10:10 is not
+      responding'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1100-0004" Authentication of firewall user [test@Firebox-DB]
+      from 10.10.10.10 was accepted'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1100-0007" User test is locked out briefly after 3 login
+      failures'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1100-0006" User test is unlocked automatically'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1100-0008" Authentication of BOVPN TLS client [test] from
+      10.10.10.10 was rejected, pre-shared key is incorrect'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1100-0014" SSO agent failover from 10.10.10.10 to
+      10.10.10.10 failed. Reason: incompatible SSO agent version'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="3E00-0002" Management user admin from 10.10.10.10 logged in'
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"020B-0001\" BOVPN tunnel 'tunnel.2' local
+      10.10.10.10/255.255.255.255 remote 10.10.10.10/255.255.255.255 under
+      gateway 'gateway.1' is down"
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="2500-0000" Mobile VPN with SSL user test logged in. Virtual
+      IP address is 10.10.10.10. Real IP address is 10.10.10.10.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="0200-0002" Could not read DSA certificate with [n] ID'
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"0202-0001\" Virtual IP address from 'abcd' address pool is
+      not available for Mobile VPN with IPSec user 'Bob'"
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"0203-0002\" IKE phase-1 negotiation from 10.10.10.10:500 to
+      10.10.10.10:500 failed. GatewayEndpoint='gateway.1' Reason=Received
+      'Aggressive mode' exchange type. Expecting main mode."
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"0205-0002\" IKE phase-2 negotiation from 10.10.10.10:500 to
+      10.10.10.10:500 failed. Tunnel='tunnel.1' Reason=Received proposal without
+      PFS, Expecting PFS enabled"
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="0203-0016" Rejected MUVPN IPSec user from 2.2.2.2 because
+      maximum allowed user connections has been reached. Maximum:50'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="0205-0011" Dropped a simultaneous phase-2 negotiation from
+      the peer 10.10.10.10:500'
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"0208-0001\" BOVPN phase-1 mainmode completed successfully
+      as initiator for 'gateway.1' gateway endpoint. localgw:10.10.10.10:500
+      remotegw:10.10.10.10:500 SA ID:0x9d5e7809"
+    result: null
+  - sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id=\"0206-0001\" Received XAuth failed notification from
+      10.10.10.10:4500. Group:'ToFirebox_mu'"
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="0206-0002" Rejected phase-1 authentication method PSK from
+      10.10.10.10:4500, expecting client XAUTH enabled.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="0206-0004" XAuth negotiation from 10.10.10.10:4500 failed
+      due to a mismatched XAuthMode.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="021A-0001" Dropped IKEv2 IKE_SA_INIT message from
+      10.10.10.10:500. Reason=message has invalid initiator SPI (all zeros)'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="021A-0006" IKEv2 IKE_SA_INIT exchange from 10.10.10.10:500
+      to 10.10.10.10:500 failed. Reason=Matching gateway endpoint not found.'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37)
+      test: msg_id="1AFF-0008" Deny 1-Trusted 0-External tcp 10.10.10.10
+      10.10.10.10 50019 80 msg="ProxyDeny: HTTP header block oversize"
+      proxy_act="HTTPClient.1" line="Date: Fri, 30 May 2014 16:50:51
+      GMT\x0d\x0a" (HTTPproxy-00)'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:41:45)
+      test: msg_id="1CFF-0015" Deny 0-External 1-Trusted tcp 10.10.10.10
+      10.10.10.10 20 58661 msg="ProxyDrop: FTP APT detected"
+      proxy_act="FTP-Client.3" ctl_src="10.10.10.10:5120"
+      ctl_dst="10.10.10.10:47553" md5="03e7ef270a157090e2f68079603b10fc"
+      task_uuid="d21914d5a2bc4b618fae72da3b1c137e" threat_level="low"
+      file="apt.txt" (FTP-proxy-00)'
+    result: null
+  - sample: '<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:41:45)
+      test: msg_id="3000-0150" Deny 1-Trusted 0-External 1440 tcp 20 61
+      10.10.10.10 10.10.10.10 55810 80 offset 5 A 447868619 win 54
+      signature_name="EXPLOIT Apple QuickTime FLIC Animation file buffer
+      overflow -1- 2" signature_cat="Misc" signature_id="1112464" severity="4"
+      sig_vers="18.124" msg="IPS detected" (HTTP-00)'
+    result: null
