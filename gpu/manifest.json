@@ -24,6 +24,9 @@
     "sales_email": "info@datadoghq.com"
   },
   "assets": {
+    "dashboards": {
+      "network_metrics": "assets/dashboards/network_metrics.json"
+    },
     "integration": {
       "source_type_name": "GPU",
       "configuration": {},
