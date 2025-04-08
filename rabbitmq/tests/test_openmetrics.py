@@ -4,9 +4,9 @@
 from itertools import product
 from pathlib import Path
 from urllib.parse import urlparse
-from packaging import version
 
 import pytest
+from packaging import version
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.types import ServiceCheck
@@ -164,7 +164,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
 )
 @pytest.mark.skipif(
     RABBITMQ_VERSION < version.parse('4.0'),
-    reason=f"Skipping test because RABBITMQ_VERSION is {RABBITMQ_VERSION} (not greater than 4.0)"
+    reason=f"Skipping test because RABBITMQ_VERSION is {RABBITMQ_VERSION} (not greater than 4.0)",
 )
 def test_unaggregated_endpoint_v4(
     endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response
