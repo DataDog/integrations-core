@@ -306,6 +306,20 @@ DEFAULT_OPENMETRICS = {
     'rabbitmq.telemetry.scrape.size_bytes.sum',
 }
 
+# Present from 4.0
+if RABBITMQ_VERSION >= version.parse('4.0'):
+    DEFAULT_OPENMETRICS.update(
+        [
+            "rabbitmq.queue.get.ack.count",
+            "rabbitmq.queue.get.count",
+            "rabbitmq.queue.messages.delivered.ack.count",
+            "rabbitmq.queue.messages.delivered.count",
+            "rabbitmq.queue.messages.redelivered.count",
+            "rabbitmq.queue.messages.acked.count",
+            "rabbitmq.queue.get.empty.count",
+        ]
+    )
+
 SUMMARY_METRICS = {
     'rabbitmq.telemetry.scrape.duration_seconds.count',
     'rabbitmq.telemetry.scrape.duration_seconds.sum',
@@ -344,6 +358,19 @@ MISSING_OPENMETRICS = {
     'rabbitmq.queue.consumer_capacity',
     'rabbitmq.queue.messages.persistent_bytes',
 }
+
+if RABBITMQ_VERSION < version.parse('4.0'):
+    MISSING_OPENMETRICS.update(
+        [
+            "rabbitmq.queue.get.ack.count",
+            "rabbitmq.queue.get.count",
+            "rabbitmq.queue.messages.delivered.ack.count",
+            "rabbitmq.queue.messages.delivered.count",
+            "rabbitmq.queue.messages.redelivered.count",
+            "rabbitmq.queue.messages.acked.count",
+            "rabbitmq.queue.get.empty.count",
+        ]
+    )
 
 # Metrics only present in the aggregated endpoint.
 AGGREGATED_ONLY_METRICS = {

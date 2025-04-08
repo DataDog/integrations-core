@@ -141,6 +141,45 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
     _common_assertions(aggregator)
 
+@pytest.mark.parametrize(
+    'endpoint, fixture_file, expected_metrics',
+    [
+        pytest.param(
+            'detailed?family=queue_delivery_metrics',
+            "detailed-queue_delivery_metrics.txt",
+            {
+                'rabbitmq.queue.get.ack.count',
+                'rabbitmq.queue.get.count',
+                'rabbitmq.queue.messages.delivered.ack.count',
+                'rabbitmq.queue.messages.delivered.count',
+                'rabbitmq.queue.messages.redelivered.count',
+                'rabbitmq.queue.messages.acked.count',
+                'rabbitmq.queue.get.empty.count',
+
+            },
+            id="detailed, query queue_delivery_metrics family",
+        ),
+    ],
+)
+def test_unaggregated_endpoint_v4(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
+    mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
+    check = _rmq_om_check(
+        {
+            'url': TEST_URL,
+            'unaggregated_endpoint': endpoint,
+            "include_aggregated_endpoint": False,
+        }
+    )
+    dd_run_check(check)
+
+    for m in expected_metrics:
+        aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
+
+    for m in (DEFAULT_OPENMETRICS - expected_metrics) | MISSING_OPENMETRICS:
+        # We check that all metrics that are not in the query don't show up at all.
+        aggregator.assert_metric(m, at_least=0)
 
 def mock_http_responses(url, **_params):
     parsed = urlparse(url)
@@ -149,6 +188,7 @@ def mock_http_responses(url, **_params):
         '/metrics/per-object': 'per-object.txt',
         '/metrics/detailed?family=queue_consumer_count': 'detailed-queue_consumer_count.txt',
         '/metrics/detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
+        '/metrics/detailed?family=queue_delivery_metrics': 'detailed-queue_delivery_metrics.txt',
         (
             '/metrics/detailed?family=queue_consumer_count' '&family=queue_coarse_metrics'
         ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
