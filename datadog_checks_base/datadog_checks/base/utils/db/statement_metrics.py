@@ -24,7 +24,7 @@ class StatementMetrics:
     def __init__(self):
         self._previous_statements = {}
 
-    def compute_derivative_rows(self, rows, metrics, key):
+    def compute_derivative_rows(self, rows, metrics, key, execution_indicators=None):
         """
         Compute the first derivative of column-based metrics for a given set of rows. This function
         takes the difference of the previous check run's values and the current check run's values
@@ -41,10 +41,21 @@ class StatementMetrics:
         :params rows (_List[dict]_): rows from current check run
         :params metrics (_List[str]_): the metrics to compute for each row
         :params key (_callable_): function for an ID which uniquely identifies a row across runs
+        :params execution_indicators (_List[str]_): list of metrics that must change to consider a query as executed.
+            These are typically metrics that increment only when a query actually executes, such as:
+            - PostgreSQL: 'calls' from pg_stat_statements
+            - MySQL: 'exec_count' from performance_schema.events_statements_summary_by_digest
+            - Oracle: 'executions' from V$SQLAREA
+            - SQL Server: 'execution_count' from sys.dm_exec_query_stats
+            - DB2: 'num_executions' from mon_db_summary
+            This helps filter out cases where only duration metrics change slightly (possibly due to
+            floating-point precision) while execution counts remain the same.
         :return (_List[dict]_): a list of rows with the first derivative of the metrics
         """
         result = []
         metrics = set(metrics)
+        if execution_indicators:
+            execution_indicators = set(execution_indicators)
 
         merged_rows, dropped_metrics = _merge_duplicate_rows(rows, metrics, key)
         if dropped_metrics:
@@ -69,6 +80,10 @@ class StatementMetrics:
             # 2. No changes since the previous run: There is no need to store metrics of 0, since that is implied by
             #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
             #    avoids having to send a lot of unnecessary metrics.
+            #
+            # 3. Execution indicators: If execution_indicators is specified, only consider a query as changed if at
+            #    least one of the execution indicator metrics has changed. This helps filter out cases where only
+            #    duration metrics change slightly while call counts remain the same (possibly floating-point precision).
 
             diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
 
@@ -78,6 +93,12 @@ class StatementMetrics:
                 # are removed. To avoid situations where all results are discarded every check run, we err on the side
                 # of potentially including truncated rows that exceed previous run counts.
                 continue
+
+            # If execution_indicators is specified, check if any of the execution indicator metrics have changed
+            if execution_indicators:
+                indicator_columns = execution_indicators & metric_columns
+                if not any(diffed_row[k] > 0 for k in indicator_columns):
+                    continue
 
             # No changes to the query; no metric needed
             if all(diffed_row[k] == 0 for k in metric_columns):
