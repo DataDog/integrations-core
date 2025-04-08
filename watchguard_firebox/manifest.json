@@ -41,7 +41,9 @@
       "WatchGuard Firebox - Proxy Policy": "assets/dashboards/watchguard_firebox_proxy_policy.json",
       "WatchGuard Firebox - VPN": "assets/dashboards/watchguard_firebox_vpn.json"
     },
-    "source": "watchguard-firebox"
+    "logs": {
+      "source": "watchguard-firebox"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
