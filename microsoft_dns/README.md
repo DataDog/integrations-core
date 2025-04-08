@@ -4,7 +4,7 @@
 
 [Microsoft DNS][4] is a Windows Server service that translates domain names into IP addresses, allowing computers to find and communicate with each other on a network. It supports features like Dynamic DNS (DDNS), zone transfers, conditional forwarding, DNSSEC for security, and scavenging to remove stale records.
 
-This integration enriches and ingests the [DNS Server audit events][5]. Visualize detailed insights into these events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+This integration collects and enhances [DNS Server audit events][5], providing detailed insights through out-of-the-box dashboards. It also includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
 
 ## Setup
 
