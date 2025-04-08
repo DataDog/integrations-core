@@ -1,0 +1,1 @@
+Added execution indicators to StatementMetrics to filter out false positives from floating-point precision issues in duration metrics.
