@@ -65,28 +65,27 @@ FROM
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
     {blocking_joins}
 WHERE
-    thread_a.processlist_state IS NOT NULL
-    AND thread_a.processlist_id != CONNECTION_ID()
-    AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
-    AND (
-        -- Include non-idle sessions
-        (thread_a.processlist_command != 'Sleep')
-        {idle_blockers_subquery}
+    (
+        thread_a.processlist_state IS NOT NULL
+        AND thread_a.processlist_id != CONNECTION_ID()
+        AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
+        AND thread_a.processlist_command != 'Sleep'
+        AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
+        AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
+        -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
+        -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
+        AND (
+            waits_a.event_id = (
+            SELECT
+                MAX(waits_b.EVENT_ID)
+            FROM  performance_schema.events_waits_current AS waits_b
+            Where waits_b.thread_id = thread_a.thread_id
+        ) OR waits_a.event_id is NULL)
+        -- We ignore rows without SQL text because there will be rows for background operations that do not have
+        -- SQL text associated with it.
+        AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != ''
     )
-    AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
-    AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
-    -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
-    -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
-    AND (
-        waits_a.event_id = (
-           SELECT
-              MAX(waits_b.EVENT_ID)
-          FROM  performance_schema.events_waits_current AS waits_b
-          Where waits_b.thread_id = thread_a.thread_id
-    ) OR waits_a.event_id is NULL)
-    -- We ignore rows without SQL text because there will be rows for background operations that do not have
-    -- SQL text associated with it.
-    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
+    {idle_blockers_subquery};
 """
 
 BLOCKING_COLUMNS = """\
