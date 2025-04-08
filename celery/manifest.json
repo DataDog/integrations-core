@@ -43,6 +43,10 @@
       "process_signatures": [
         "celery"
       ]
+    },
+    "monitors": {
+      "Celery workers are idle": "assets/monitors/celery_exection_idle.json",
+      "Celery workers are offline": "assets/monitors/celery_workers_down.json"
     }
   },
   "author": {
