@@ -690,6 +690,15 @@ def test_pg_control(aggregator, integration_check, pg_instance):
     assert_metric_at_least(
         aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
     )
+    # After a checkpoint, we have the CHECKPOINT_ONLINE record (114 bytes) and also
+    # likely receive RUNNING_XACTS (50 bytes) record
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay_bytes', count=1, higher_bound=250, tags=dd_agent_tags
+    )
+    # And restart should be slightly more than checkpoint delay
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
+    )
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
