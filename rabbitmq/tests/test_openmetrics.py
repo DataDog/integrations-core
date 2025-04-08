@@ -4,6 +4,7 @@
 from itertools import product
 from pathlib import Path
 from urllib.parse import urlparse
+from packaging import version
 
 import pytest
 
@@ -13,7 +14,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import HERE
+from .common import HERE, RABBITMQ_VERSION
 from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS, SUMMARY_METRICS
 
 OM_RESPONSE_FIXTURES = HERE / Path('fixtures')
@@ -160,6 +161,10 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
             id="detailed, query queue_delivery_metrics family",
         ),
     ],
+)
+@pytest.mark.skipif(
+    RABBITMQ_VERSION < version.parse('4.0'),
+    reason=f"Skipping test because RABBITMQ_VERSION is {RABBITMQ_VERSION} (not greater than 4.0)"
 )
 def test_unaggregated_endpoint_v4(
     endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response
