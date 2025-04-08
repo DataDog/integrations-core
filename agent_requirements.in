@@ -37,7 +37,7 @@ pyasn1==0.4.8
 pycryptodomex==3.22.0
 pydantic==2.11.2
 pyjwt==2.10.1
-pymongo[srv]==4.11.3; python_version >= '3.9'
+pymongo[srv]==4.8.0; python_version >= '3.9'
 pymqi==1.12.11; sys_platform != 'darwin' or platform_machine != 'arm64'
 pymysql==1.1.1
 pyodbc==5.2.0; sys_platform != 'darwin' or platform_machine != 'arm64'
