@@ -137,7 +137,7 @@ def configure_tracer(tracer, self_check):
                 span_id=dd_parent_id,
             )
     except (ValueError, TypeError, AttributeError, ImportError):
-        raise
+        pass
 
     try:
         # Update the tracer configuration to make sure we trace only if we really need to
