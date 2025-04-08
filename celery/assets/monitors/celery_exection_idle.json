@@ -29,6 +29,6 @@
 		}
 	},
 	"tags": [
-		"integration:Celery"
+		"integration:celery"
 	]
 }
