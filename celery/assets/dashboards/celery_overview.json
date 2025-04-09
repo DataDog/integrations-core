@@ -1,5 +1,5 @@
 {
-    "author": "Datadog",
+    "author_name": "Datadog",
     "title": "Celery Overview",
     "description": "## Celery\n\nThis dashboard provides a high-level overview of your Celery instances so you can monitor metrics.\n\nFor further reading on monitoring Celery, see:\n\n- [Official Celery integration docs](https://docs.datadoghq.com/integrations/celery/#data-collected)\n  \nClone this template to make changes and add your own graphs and widgets.",
     "widgets": [
