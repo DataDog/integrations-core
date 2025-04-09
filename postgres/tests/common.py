@@ -269,6 +269,8 @@ def check_stat_replication(aggregator, expected_tags, count=1):
         'wal_client_addr:{}'.format(get_container_ip(REPLICA_CONTAINER_NAME)),
         'wal_state:streaming',
         'wal_sync_state:async',
+        'slot_name:replication_slot',
+        'slot_type:physical',
     ]
     for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
