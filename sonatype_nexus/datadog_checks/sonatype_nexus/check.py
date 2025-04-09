@@ -97,7 +97,9 @@ class SonatypeNexusCheck(AgentCheck):
         if isinstance(metric_data, list):
             for item in metric_data:
                 for format_type, data in item.items():
-                    self.ingest_metric(base_tags, format_type, metric_info, metric_name, data.get(metric_info["value_key"], 0))
+                    self.ingest_metric(
+                        base_tags, format_type, metric_info, metric_name, data.get(metric_info["value_key"], 0)
+                    )
         elif isinstance(metric_data, dict):
             for format_type, metric_value in metric_data.items():
                 self.ingest_metric(base_tags, format_type, metric_info, metric_name, metric_value)
