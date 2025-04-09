@@ -379,6 +379,11 @@ instances:
         #
         # collection_interval: 600
 
+    ## @param collect_blocking_queries - boolean - optional - default: false
+    ## Enable collection of blocking queries. Supported only on MySQL 8.0.
+    #
+    # collect_blocking_queries: false
+
     ## Configure collection of schemas (databases).
     ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
     #
