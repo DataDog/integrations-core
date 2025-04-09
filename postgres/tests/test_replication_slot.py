@@ -6,7 +6,7 @@ import time
 import psycopg2
 import pytest
 
-from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
+from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS, REPLICATION_STATS_METRICS
 
 from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import requires_over_10, requires_over_14
@@ -133,3 +133,28 @@ def test_replication_slot_stats(aggregator, integration_check, pg_instance):
     ]
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
         aggregator.assert_metric(metric_name, count=1, tags=expected_tags)
+
+@requires_over_10
+def test_replication_slot_information(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    client_address = _get_client_addr()
+    check.check(pg_instance)
+    base_tags = _get_expected_tags(check, pg_instance)
+    expected_tags = base_tags + [
+        'wal_app_name:subscription_cities',
+        'wal_state:streaming',
+        'wal_sync_state:async',
+        'wal_client_addr:'+client_address,
+        'slot_name:subscription_cities',
+        'slot_type:logical',
+    ]
+
+    for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
+        assert_metric_at_least(aggregator, metric_name, count=1, lower_bound=0, tags=expected_tags)
+
+def _get_client_addr() -> str:
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute("select client_addr from pg_stat_replication where application_name =  \'subscription_cities\';")
+            client_address = (cur.fetchone()[0])
+    return client_address

@@ -383,44 +383,45 @@ SELECT {metrics_columns}
 # Requires postgres 10+
 REPLICATION_STATS_METRICS = {
     'descriptors': [
-        ('replication.application_name', 'wal_app_name'),
-        ('replication.state', 'wal_state'),
-        ('replication.sync_state', 'wal_sync_state'),
-        ('replication.client_addr', 'wal_client_addr'),
-        ('replication_slot.slot_name', 'slot_name'),
-        ('replication_slot.slot_type', 'slot_type'),
+        ('pg_stat_replication.application_name', 'wal_app_name'),
+        ('pg_stat_replication.state', 'wal_state'),
+        ('pg_stat_replication.sync_state', 'wal_sync_state'),
+        ('pg_stat_replication.client_addr', 'wal_client_addr'),
+        ('pg_stat_replication_slot.slot_name', 'slot_name'),
+        ('pg_stat_replication_slot.slot_type', 'slot_type'),
     ],
     'metrics': {
-        'GREATEST (0, EXTRACT(epoch from replication.write_lag)) as write_lag': (
-            'wal_write_lag',
+        'GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag': (
+            'replication.wal_write_lag',
             AgentCheck.gauge,
         ),
-        'GREATEST (0, EXTRACT(epoch from replication.flush_lag)) AS flush_lag': (
-            'wal_flush_lag',
+        'GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) AS flush_lag': (
+            'replication.wal_flush_lag',
             AgentCheck.gauge,
         ),
-        'GREATEST (0, EXTRACT(epoch from replication.replay_lag)) AS replay_lag': (
-            'wal_replay_lag',
+        'GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag': (
+            'replication.wal_replay_lag',
             AgentCheck.gauge,
         ),
-        'GREATEST (0, age(replication.backend_xmin)) as backend_xmin_age': (
-            'backend_xmin_age',
+        'GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age': (
+            'replication.backend_xmin_age',
             AgentCheck.gauge,
         ),
     },
     'relation': False,
     'query': """
-SELECT replication.application_name,
-replication.state,
-replication.sync_state,
-replication.client_addr,
-{metrics_columns},
-replication_slot.slot_name,
-replication_slot.slot_type,
-FROM pg_stat_replication as replication
-LEFT JOIN pg_replication_slots as replication_slot
-ON replication.pid = replication_slot.active_pid;
-""",
+SELECT 
+    pg_stat_replication.application_name,
+    pg_stat_replication.state,
+    pg_stat_replication.sync_state,
+    pg_stat_replication.client_addr,
+    pg_stat_replication_slot.slot_name,
+    pg_stat_replication_slot.slot_type,
+    {metrics_columns}
+FROM pg_stat_replication as pg_stat_replication
+LEFT JOIN pg_replication_slots as pg_stat_replication_slot
+ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
+""".strip(),
     'name': 'replication_stats_metrics',
 }
 
