@@ -47,6 +47,8 @@ postgresql.conflicts.snapshot,count,,query,,"Number of queries in this database 
 postgresql.conflicts.tablespace,count,,query,,Number of queries in this database that have been canceled due to dropped tablespaces. This will occur when a temp_tablespace is dropped while being used on a standby. This metric is tagged with db.,-1,postgres,cfl tablespace,
 postgresql.connections,gauge,,connection,,"The number of active connections to this database. If DBM is enabled, this metric is tagged with state, app, db and user",0,postgres,conns,
 postgresql.control.checkpoint_delay,gauge,,second,,The time since the last checkpoint.,0,postgres,control checkpoint,
+postgresql.control.checkpoint_delay_bytes,gauge,,byte,,The amount of WAL bytes written since the last checkpoint.,0,postgres,control checkpoint byte,
+postgresql.control.redo_delay_bytes,gauge,,byte,,The amount of WAL bytes written since the last redo point.,0,postgres,control redo byte,
 postgresql.control.timeline_id,gauge,,,,The current timeline id.,0,postgres,control tid,
 postgresql.create_index.blocks_done,gauge,,,,"Number of blocks already processed in the current phase. Only available with PostgreSQL 12 and newer. This metric is tagged with db, table, index, command, phase.",0,postgres,postgres index blocks done,
 postgresql.create_index.blocks_total,gauge,,,,"Total number of blocks to be processed in the current phase. Only available with PostgreSQL 12 and newer. This metric is tagged with db, table, index, command, phase.",0,postgres,postgres index blocks total,

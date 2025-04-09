@@ -181,7 +181,6 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'top',
         'connection-pool',
         'dbstats-local',
-        'dbstats',
         'fsynclock',
         'hostinfo',
     ]
@@ -401,7 +400,6 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         'top',
         'connection-pool',
         'dbstats-local',
-        'dbstats',
         'fsynclock',
         'hostinfo',
     ]

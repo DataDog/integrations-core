@@ -341,6 +341,8 @@ class AggregatorStub(object):
             if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
+            # to assert hostname is None, pass in hostname as '':
+            # https://github.com/DataDog/integrations-core/blob/7.65.x/datadog_checks_base/datadog_checks/base/checks/base.py#L760
             if hostname is not None and hostname != metric.hostname:
                 continue
 

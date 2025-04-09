@@ -161,7 +161,7 @@ Need help? Contact [Datadog support][22].
 * [How to Monitor Docker Resource Metrics][26]
 * [How to Collect Docker Metrics][27]
 * [8 Surprising Facts about Real Docker Adoption][28]
-* [Monitor Docker on AWS ECS][29]
+* [Monitor Docker on Amazon ECS][29]
 * [Dockerize Datadog][30]
 * [Monitor Docker with Datadog][31]
 
