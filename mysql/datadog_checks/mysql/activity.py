@@ -204,10 +204,10 @@ class MySQLActivity(DBMAsyncJob):
                 tags=tags + self._check._get_debug_tags(),
             )
 
-    def _should_collect_blocking_sessions(self):
+    def _should_collect_blocking_queries(self):
         # type: () -> bool
-        # TODO: add the configuration to enable/disable blocking sessions collection
-        return self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb
+        blocking_queries_configured = self._config.collect_blocking_queries
+        return blocking_queries_configured and self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb
 
     def _get_activity_query(self):
         # type: () -> str
@@ -215,7 +215,7 @@ class MySQLActivity(DBMAsyncJob):
         blocking_columns = ""
         blocking_joins = ""
         idle_blockers_subquery = ""
-        if self._should_collect_blocking_sessions():
+        if self._should_collect_blocking_queries():
             blocking_columns = BLOCKING_COLUMNS
             blocking_joins = BLOCKING_JOINS
             idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY

@@ -381,6 +381,13 @@ files:
                 value:
                   type: number
                   example: 600
+          - name: collect_blocking_queries
+            description: |
+              Enable collection of blocking queries. Supported only on MySQL 8.0.
+            value:
+              type: boolean
+              example: false
+              display_default: false
           - name: schemas_collection 
             description: |
               Configure collection of schemas (databases).
