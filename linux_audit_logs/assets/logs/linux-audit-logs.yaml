@@ -220,6 +220,26 @@ pipeline:
             matchRules: avc_rule
               (avc:%{_space}%{notSpace:outcome:uppercase}%{_space}\{%{_space}%{notSpace:operation}%{_space}\}
               for )?%{data::keyvalue("=",":?/\"|*<>,")}
+        - type: attribute-remapper
+          name: Map `apparmor` to `outcome`
+          enabled: true
+          sources:
+            - apparmor
+          sourceType: attribute
+          target: outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `error` to `linux_audit_logs.error`
+          enabled: true
+          sources:
+            - error
+          sourceType: attribute
+          target: linux_audit_logs.error
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: grok-parser
       name: Convert `msg.grantors` attribute to array
       enabled: true
@@ -334,32 +354,6 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
-    - type: pipeline
-      name: Parsing AVC Logs
-      enabled: true
-      filter:
-        query: "@type:AVC"
-      processors:
-        - type: attribute-remapper
-          name: Map `apparmor` to `outcome`
-          enabled: true
-          sources:
-            - apparmor
-          sourceType: attribute
-          target: outcome
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `error` to `linux_audit_logs.error`
-          enabled: true
-          sources:
-            - error
-          sourceType: attribute
-          target: linux_audit_logs.error
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
     - name: Lookup on `res` to `msg.res` Field
       enabled: true
       source: res
@@ -375,3 +369,16 @@ pipeline:
         - network.client.ip
       target: network.client.geoip
       ip_processing_behavior: do-nothing
+    - name: Lookup on `msg.res` to `status`
+      enabled: true
+      source: msg.res
+      target: status
+      lookupTable: |-
+        success,ok
+        failed,error
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
