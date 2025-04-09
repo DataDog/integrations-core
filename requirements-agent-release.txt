@@ -1,7 +1,7 @@
 # DO NOT PASS THIS TO PIP DIRECTLY
 # THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
 --no-index
-datadog-active-directory==4.1.0; sys_platform == 'win32'
+datadog-active-directory==4.2.0; sys_platform == 'win32'
 datadog-activemq-xml==5.1.0
 datadog-activemq==5.0.0
 datadog-aerospike==4.1.0; sys_platform == 'linux2'
@@ -58,7 +58,7 @@ datadog-ecs-fargate==6.1.0
 datadog-eks-fargate==6.1.0
 datadog-elastic==8.1.0
 datadog-envoy==5.1.0
-datadog-esxi==3.0.0
+datadog-esxi==3.0.1
 datadog-etcd==8.1.0
 datadog-exchange-server==4.1.0; sys_platform == 'win32'
 datadog-external-dns==5.1.0
