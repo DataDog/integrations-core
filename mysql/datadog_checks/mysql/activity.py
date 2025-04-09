@@ -151,6 +151,7 @@ class MySQLActivity(DBMAsyncJob):
         self._db = None
         self._db_version = None
         self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._activity_query = None
 
     def run_job(self):
         # type: () -> None
@@ -211,7 +212,8 @@ class MySQLActivity(DBMAsyncJob):
 
     def _get_activity_query(self):
         # type: () -> str
-        # TODO: cache the query
+        if self._activity_query:
+            return self._activity_query
         blocking_columns = ""
         blocking_joins = ""
         idle_blockers_subquery = ""
