@@ -222,16 +222,45 @@ QUERY_PG_UPTIME = {
     ],
 }
 
-QUERY_PG_CONTROL_CHECKPOINT = {
+QUERY_PG_CONTROL_CHECKPOINT_LT_10 = {
     'name': 'pg_control_checkpoint',
     'query': """
         SELECT timeline_id,
-               EXTRACT (EPOCH FROM now() - checkpoint_time)
+          EXTRACT (EPOCH FROM now() - checkpoint_time),
+          pg_xlog_location_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_xlog_receive_location()
+              ELSE pg_current_xlog_location() END, checkpoint_location),
+          pg_xlog_location_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_xlog_receive_location()
+              ELSE pg_current_xlog_location() END, redo_location)
         FROM pg_control_checkpoint();
 """,
     'columns': [
         {'name': 'control.timeline_id', 'type': 'gauge'},
         {'name': 'control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay_bytes', 'type': 'gauge'},
+        {'name': 'control.redo_delay_bytes', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+          EXTRACT (EPOCH FROM now() - checkpoint_time),
+          pg_wal_lsn_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn()
+              ELSE pg_current_wal_lsn() END, checkpoint_lsn),
+          pg_wal_lsn_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn()
+              ELSE pg_current_wal_lsn() END, redo_lsn)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'control.timeline_id', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay_bytes', 'type': 'gauge'},
+        {'name': 'control.redo_delay_bytes', 'type': 'gauge'},
     ],
 }
 
