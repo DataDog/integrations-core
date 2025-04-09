@@ -7,9 +7,7 @@ import time
 
 import pytest
 
-from datadog_checks.dev import run_command
-
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 
 from .common import COMPOSE, INSTANCE
 
@@ -46,7 +44,9 @@ def get_nexus_password(max_retries=5, retry_interval=10, password_wait_retries=3
     for attempt in range(password_wait_retries):
         try:
             file_check = run_command(
-                f'docker exec {container_id} sh -c \'[ -f /opt/sonatype/sonatype-work/nexus3/admin.password ] && echo "exists" || echo "not exists"\'',
+                f"docker exec {container_id} sh -c '"
+                "[ -f /opt/sonatype/sonatype-work/nexus3/admin.password ] "
+                "&& echo \"exists\" || echo \"not exists\"'",
                 capture=True,
             ).stdout.strip()
 
