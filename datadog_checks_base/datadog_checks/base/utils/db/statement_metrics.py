@@ -13,9 +13,7 @@ class StatementMetrics:
 
         - Postgres: pg_stat_statements
         - MySQL: performance_schema.events_statements_summary_by_digest
-        - Oracle: V$SQLAREA
         - SQL Server: sys.dm_exec_query_stats
-        - DB2: mon_db_summary
 
     These tables are monotonically increasing, so the metrics are computed from the difference
     in values between check runs.
@@ -45,9 +43,7 @@ class StatementMetrics:
             These are typically metrics that increment only when a query actually executes, such as:
             - PostgreSQL: 'calls' from pg_stat_statements
             - MySQL: 'exec_count' from performance_schema.events_statements_summary_by_digest
-            - Oracle: 'executions' from V$SQLAREA
             - SQL Server: 'execution_count' from sys.dm_exec_query_stats
-            - DB2: 'num_executions' from mon_db_summary
             This helps filter out cases where a normalized query was evicted then re-inserted with same call count
             (usually 1) and slight duration change. In this case, the new normalized query entry should be treated
             as the baseline for future diffs.
