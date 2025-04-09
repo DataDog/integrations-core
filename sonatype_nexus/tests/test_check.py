@@ -39,6 +39,61 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response, aggrega
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+def test_create_metric_for_configs_int(mocker, aggregator):
+    instance = {
+        "username": "test_username",
+        "password": "test_password",
+        "min_collection_interval": 400,
+        "server_url": "https://example.com",
+    }
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
+    metric_data = {"value": 100}
+    metric_name = "analytics.total_memory"
+
+    check.create_metric_for_configs(metric_data, metric_name)
+
+    aggregator.assert_metric(
+        "sonatype_nexus.analytics.total_memory",
+    )
+
+
+def test_create_metric_for_configs_dict(mocker, aggregator):
+    instance = {
+        "username": "test_username",
+        "password": "test_password",
+        "min_collection_interval": 400,
+        "server_url": "https://example.com",
+    }
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
+    metric_data = {"value": {"total_count": 200}}
+    metric_name = "analytics.malicious_risk_on_disk"
+
+    check.create_metric_for_configs(metric_data, metric_name)
+
+    aggregator.assert_metric(
+        "sonatype_nexus.analytics.malicious_risk_on_disk",
+    )
+
+
+def test_create_metric_for_configs_by_format_type_list(mocker, aggregator):
+    instance = {
+        "username": "test_username",
+        "password": "test_password",
+        "min_collection_interval": 400,
+        "server_url": "https://example.com",
+    }
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
+    metric_data = [{"maven": {"bytes_uploaded": 100}}]
+    metric_name = "analytics.uploaded_bytes_by_format"
+    metric_info = constants.METRIC_CONFIGS_BY_FORMAT_TYPE[metric_name]
+
+    check.create_metric_for_configs_by_format_type(metric_data, metric_name, metric_info)
+
+    aggregator.assert_metric(
+        f"sonatype_nexus.{metric_name}", 
+    )
+
+
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
