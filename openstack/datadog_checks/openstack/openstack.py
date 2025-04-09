@@ -496,8 +496,6 @@ class KeystoneCatalog(object):
 
 
 class OpenStackCheck(AgentCheck):
-    HA_SUPPORTED = True
-
     CACHE_TTL = {"aggregates": 300, "physical_hosts": 300, "hypervisors": 300}  # seconds
 
     FETCH_TIME_ACCESSORS = {
