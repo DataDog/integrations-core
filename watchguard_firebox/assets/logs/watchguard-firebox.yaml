@@ -114,9 +114,9 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: parse_syslog_header_rule (<%{integer:syslog.prival}>)?(%{date("MMM d
-          hh:mm:ss")}|%{date("MMM  d hh:mm:ss")}) %{notSpace:syslog.hostname}(
+          hh:mm:ss")}|%{date("MMM  d HH:mm:ss")}) %{notSpace:syslog.hostname}(
           %{notSpace:device_serial_number})?
-          \(%{date("yyyy-MM-dd'T'hh:mm:ss"):timestamp}\) %{regex("[^:]*")}:(
+          \(%{date("yyyy-MM-dd'T'HH:mm:ss"):timestamp}\) %{regex("[^:]*")}:(
           (msg_id|id)="%{notSpace:msg_id}")? %{data:message}
     - type: message-remapper
       name: Define `message` as the official message of the log
@@ -356,12 +356,12 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - Allow Firebox abc huh 52 tcp 20 127 10.10.10.10 10.10.10.10 62443
-              80 offset 8 S 832026162 win 8192 (HTTP-00)
-            - Allow Trusted dede External 40 tcp 20 127 10.10.10.10 10.10.10.10
-              53008 80 offset 5 AF 3212213617 win 257 app_name="World Wide Web
-              HTTP" cat_ name="Network Protocols" app_beh_name="connect"
-              app_id="63" app_cat_id="18" app_ctl_disp="2" sig_vers="18.123"
+            - Allow Firebox Test 52 tcp 20 127 10.10.10.10 10.10.10.10 62443 80
+              offset 8 S 832026162 win 8192 (HTTP-00)
+            - Allow Trusted External 40 tcp 20 127 10.10.10.10 10.10.10.10 53008
+              80 offset 5 AF 3212213617 win 257 app_name="World Wide Web HTTP"
+              cat_ name="Network Protocols" app_beh_name="connect" app_id="63"
+              app_cat_id="18" app_ctl_disp="2" sig_vers="18.123"
               msg="Application identified" (HTTP-00)
             - Deny Trusted External 1440 tcp 20 61 10.10.10.10 10.10.10.10 55810
               80 offset 5 A 447868619 win 54 signature_name="EXPLOIT Apple
@@ -383,18 +383,19 @@ pipeline:
             supportRules: _space %{regex("[ \\t]+")}
             matchRules: >-
               parse_rule_30000148_30000149_30000150_30000173
-              %{regex("(Allow|Deny)"):disposition}%{_space}%{regex("\\d{1,6}\\-\\w+|[\\w\\+\\-\\.\\*
-              \\t]+|Firebox"):inif}%{_space}%{notSpace:outif}%{_space}%{regex("\\d{1,5}"):ip_pkt_len}%{_space}%{regex("[a-zA-Z]+"):protocol}%{_space}%{regex("(\\d{1,5})"):ip_header_len}%{_space}%{regex("\\d{1,3}"):ttl}%{_space}%{ip:network.client.ip}%{_space}%{ip:network.destination.ip}
-              ((%{regex("\\d{1,3}"):icmp_type}%{_space}%{regex("\\d{1,3}"):icmp_code}%{_space}id=%{regex("\\d{1,5}"):icmp_id}%{_space}seq=%{regex("\\d{1,5}"):icmp_seq})|(%{regex("\\d{1,5}"):network.client.port}%{_space}%{regex("\\d{1,5}"):network.destination.port}%{_space}(offset%{_space}%{regex("\\d{1,10}"):tcp_offset}%{_space}%{regex("[AFRS]+"):tcp_flag_code}%{_space}%{regex("\\d{1,10}"):tcp_seq}%{_space}win%{_space}%{regex("\\d{1,5}"):tcp_win})?))%{data::keyvalue}
+              %{regex("(Allow|Deny)"):disposition}%{_space}%{regex("[\\w\\+\\-\\.\\*
+              \\t]+")}%{_space}%{regex("\\d{1,5}"):ip_pkt_len}%{_space}%{regex("[a-zA-Z]+"):protocol}%{_space}%{regex("(\\d{1,5})"):ip_header_len}%{_space}%{regex("\\d{1,3}"):ttl}%{_space}%{ip:network.client.ip}%{_space}%{ip:network.destination.ip}
+              ((%{regex("\\d{1,3}"):icmp_type}%{_space}%{regex("\\d{1,3}"):icmp_code}%{_space}id=%{regex("\\d{1,5}"):icmp_id}%{_space}seq=%{regex("\\d{1,5}"):icmp_seq})|(%{regex("\\d{1,5}"):network.client.port}%{_space}%{regex("\\d{1,5}"):network.destination.port}%{_space}(offset%{_space}%{regex("\\d{1,10}"):tcp_offset}%{_space}%{regex("[A-Za-z]+"):flags}%{_space}%{regex("\\d{1,10}"):tcp_seq}%{_space}win%{_space}%{regex("\\d{1,5}"):tcp_win})?))%{data::keyvalue}
               \(%{regex("[^\\)]+"):policy}\)
 
 
-              parse_rule_30000151_30000175_30000176 %{regex("(Allow|Deny)"):disposition}%{_space}%{regex("\\d{1,6}\\-\\w+|[\\w\\+\\-\\.\\* \\t]+|Firebox"):inif}%{_space}%{notSpace:outif}%{_space}%{regex("[a-zA-Z]+"):protocol}%{_space}%{ip:network.client.ip}%{_space}%{ip:network.destination.ip}%{_space}(%{regex("\\d{1,5}"):network.client.port}%{_space}%{regex("\\d{1,5}"):network.destination.port}%{_space})?%{data::keyvalue} \(%{regex("[^\\)]+"):policy}\)
+              parse_rule_30000151_30000175_30000176 %{regex("(Allow|Deny)"):disposition}%{_space}%{regex("[\\w\\+\\-\\.\\* \\t]+")}%{_space}%{regex("[a-zA-Z]+"):protocol}%{_space}%{ip:network.client.ip}%{_space}%{ip:network.destination.ip}%{_space}(%{regex("\\d{1,5}"):network.client.port}%{_space}%{regex("\\d{1,5}"):network.destination.port}%{_space})?%{data::keyvalue} \(%{regex("[^\\)]+"):policy}\)
     - type: pipeline
       name: Processing of firewall audit events
       enabled: true
       filter:
-        query: "@msg_id:(3000-0065 OR 3001-1001 OR 3001-1002 OR 3000-00C9 OR 3000-012E)"
+        query: "@msg_id:(3000-0065 OR 3001-1001 OR 3001-1002 OR 3000-00C9 OR 3000-00CB
+          OR 3000-012E)"
       processors:
         - type: grok-parser
           name: Parsing of firewall audit events
@@ -425,7 +426,7 @@ pipeline:
               parse_rule_30011002 The Temporary Blocked Sites list is full \(capacity=%{integer:capacity}\). The oldest entry %{regex(".*(?= was removed.)"):blocked_host} was removed.
 
 
-              parse_rule_300000C9 %{regex("[^,]+")}, Load Balance Server %{ip:network.client.ip} port %{port:network.client.port} is %{regex("[^.]+"):server_status}.
+              parse_rule_300000C9 %{regex("[^,]+")}, Load Balance Server %{ip:network.client.ip}( port %{port:network.client.port})? is %{regex("[^.]+"):server_status}.
 
 
               parse_rule_3000012E Cannot relearn system MAC address, possible loop or MAC spoofing, ip=%{ip:network.client.ip}, mac=%{mac:device_mac}, interface=%{data:interface}
@@ -529,20 +530,20 @@ pipeline:
         query: "@msg_id:(020B-0001 OR 2500-0000 OR 0200-0002 OR 0202-0001 OR 0203-0002
           OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR
           0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR
-          0203-000D OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR
-          0203-0013 OR 0203-0015 OR 0203-0016 OR 0203-0017 OR 0203-0018 OR
-          0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR
-          0203-0029 OR 0203-002A OR 0203-002B OR 0205-000A OR 0205-000B OR
-          0205-000C OR 0205-000D OR 0205-000E OR 0205-0002 OR 0205-0003 OR
-          0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-0011 OR
-          0208-0001 OR 0206-0001 OR 0206-0002 OR 0206-0003 OR 0206-0004 OR
-          021A-0001 OR 021A-0002 OR 021A-0003 OR 021A-0004 OR 021A-0005 OR
-          021A-0006 OR 021A-0007 OR 021A-0008 OR 021A-0009 OR 021A-000A OR
-          021A-000B OR 021A-000C OR 021A-000D OR 021A-000E OR 021A-000F OR
-          021A-0010 OR 021A-0011 OR 021A-0012 OR 021A-0013 OR 021A-0014 OR
-          021A-0015 OR 021A-0016 OR 021A-0018 OR 021A-0019 OR 021A-001A OR
-          021A-001B OR 021A-001C OR 021A-001D OR 021A-001E OR 021A-001F OR
-          021A-0020)"
+          0203-000D OR 0203-000E OR 0203-000F OR 0203-0010 OR 0203-0011 OR
+          0203-0012 OR 0203-0013 OR 0203-0015 OR 0203-0016 OR 0203-0017 OR
+          0203-0018 OR 0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR
+          0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B OR 0205-000A OR
+          0205-000B OR 0205-000C OR 0205-000D OR 0205-000E OR 0205-0002 OR
+          0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR
+          0205-0008 OR 0205-0011 OR 0208-0001 OR 0206-0001 OR 0206-0002 OR
+          0206-0003 OR 0206-0004 OR 021A-0001 OR 021A-0002 OR 021A-0003 OR
+          021A-0004 OR 021A-0005 OR 021A-0006 OR 021A-0007 OR 021A-0008 OR
+          021A-0009 OR 021A-000A OR 021A-000B OR 021A-000C OR 021A-000D OR
+          021A-000E OR 021A-000F OR 021A-0010 OR 021A-0011 OR 021A-0012 OR
+          021A-0013 OR 021A-0014 OR 021A-0015 OR 021A-0016 OR 021A-0018 OR
+          021A-0019 OR 021A-001A OR 021A-001B OR 021A-001C OR 021A-001D OR
+          021A-001E OR 021A-001F OR 021A-0020)"
       processors:
         - type: grok-parser
           name: Parsing of VPN events
@@ -656,8 +657,8 @@ pipeline:
           grok:
             supportRules: _space %{regex("[ \\t]+")}
             matchRules: proxy_policy_rule
-              %{regex("(Allow|Deny)"):disposition}%{_space}%{regex("\\d{1,6}\\-\\w+|[\\w\\+\\-\\.\\*
-              \\t]+|Firebox"):inif}%{_space}%{notSpace:outif}%{_space}%{regex("[a-zA-Z]+"):protocol}%{_space}%{ip:network.client.ip}%{_space}%{ip:network.destination.ip}%{_space}(%{regex("\\d{1,5}"):network.client.port}%{_space}%{regex("\\d{1,5}"):network.destination.port}%{_space})?%{data::keyvalue}
+              %{regex("(Allow|Deny)"):disposition}%{_space}%{regex("[\\w\\+\\-\\.\\*
+              \\t]+")}%{_space}%{regex("[a-zA-Z]+"):protocol}%{_space}%{ip:network.client.ip}%{_space}%{ip:network.destination.ip}%{_space}(%{regex("\\d{1,5}"):network.client.port}%{_space}%{regex("\\d{1,5}"):network.destination.port}%{_space})?%{data::keyvalue}
               \(%{regex("[^\\)]+"):policy}\)
         - type: attribute-remapper
           name: Map `user`, `authenticated_user`, `src_user` to `usr.name`
@@ -731,3 +732,8 @@ pipeline:
       enabled: true
       sources:
         - severity
+    - type: service-remapper
+      name: Define `event_type` as the official service of the log
+      enabled: true
+      sources:
+        - event_type

@@ -1067,7 +1067,7 @@
                                         },
                                         {
                                             "field": "content",
-                                            "width": "compact"
+                                            "width": "auto"
                                         }
                                     ]
                                 }

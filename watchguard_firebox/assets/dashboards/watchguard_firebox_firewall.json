@@ -186,7 +186,7 @@
                             },
                             {
                                 "field": "content",
-                                "width": "compact"
+                                "width": "auto"
                             }
                         ]
                     }
@@ -2186,13 +2186,13 @@
                                     "formulas": [
                                         {
                                             "alias": "Packets",
-                                            "formula": "query1 + query2",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
                                                     "unit_name": "packet"
                                                 }
-                                            }
+                                            },
+                                            "formula": "query1 + query2"
                                         }
                                     ],
                                     "queries": [
@@ -2216,7 +2216,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:3000-0151 $Client-IP $Host $Message-ID $Disposition $Destination-IP"
+                                                "query": "source:watchguard-firebox @msg_id:(3000-0148 OR 3000-0149 OR 3000-0150 OR 3000-0151 OR 3000-0173 OR 3000-0175 OR 3000-0176) $Client-IP $Host $Message-ID $Disposition $Destination-IP"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2236,6 +2236,31 @@
                                         "line_width": "normal"
                                     },
                                     "display_type": "line"
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "events",
+                                            "name": "dashboard_events_overlay",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": ""
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "dashboard_events_overlay"
+                                        }
+                                    ],
+                                    "display_type": "overlay"
                                 }
                             ]
                         },
@@ -2362,7 +2387,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox $Message-ID $Host $Client-IP $Disposition $Destination-IP"
+                                                "query": "source:watchguard-firebox @msg_id:3000-0149 $Message-ID $Host $Client-IP $Disposition $Destination-IP"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2697,7 +2722,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:watchguard-firebox @msg_id:3000-00C9 @server_status:* $Message-ID $Host $Client-IP $Disposition $Destination-IP",
+                                        "query_string": "source:watchguard-firebox @msg_id:(3000-00C9 OR 3000-00CB) $Message-ID $Host $Client-IP $Disposition $Destination-IP",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -2724,6 +2749,10 @@
                                         },
                                         {
                                             "field": "server_status",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
                                             "width": "auto"
                                         }
                                     ]
@@ -2815,7 +2844,7 @@
         },
         {
             "name": "Host",
-            "prefix": "@host",
+            "prefix": "@syslog.hostname",
             "available_values": [],
             "default": "*"
         },

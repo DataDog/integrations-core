@@ -1524,7 +1524,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:watchguard-firebox @msg_id:(4001-0001 OR 4001-0002 OR 4001-0003 OR 4001-0004 OR 4001-0005) $Client-IP $Message-ID $Host",
+                            "query_string": "source:watchguard-firebox @msg_id:(4001-0001 OR 4001-0002 OR 4001-0003 OR 4001-0004 OR 4001-0005 OR 4001-0006) $Client-IP $Message-ID $Host",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -1722,7 +1722,7 @@
                             },
                             {
                                 "field": "content",
-                                "width": "compact"
+                                "width": "auto"
                             }
                         ]
                     }

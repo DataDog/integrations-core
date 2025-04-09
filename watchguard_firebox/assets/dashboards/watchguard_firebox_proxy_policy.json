@@ -407,7 +407,7 @@
                             },
                             {
                                 "field": "content",
-                                "width": "compact"
+                                "width": "auto"
                             }
                         ]
                     }
@@ -1392,7 +1392,7 @@
                                         },
                                         {
                                             "field": "content",
-                                            "width": "compact"
+                                            "width": "auto"
                                         }
                                     ]
                                 }
@@ -1719,7 +1719,7 @@
                                         },
                                         {
                                             "field": "content",
-                                            "width": "compact"
+                                            "width": "auto"
                                         }
                                     ]
                                 }

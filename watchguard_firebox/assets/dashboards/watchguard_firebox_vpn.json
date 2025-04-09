@@ -187,7 +187,7 @@
                             },
                             {
                                 "field": "content",
-                                "width": "compact"
+                                "width": "auto"
                             }
                         ]
                     }
@@ -1092,7 +1092,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 0203-0017 OR 0203-0018 OR 0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host"
+                                                "query": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000E OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 0203-0017 OR 0203-0018 OR 0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1138,7 +1138,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 2030-017 OR 2030-018 OR 2030-019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host"
+                                                "query": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000E OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 0203-0017 OR 0203-0018 OR 0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1207,7 +1207,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 2030-017 OR 2030-018 OR 2030-019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host"
+                                                "query": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000E OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 0203-0017 OR 0203-0018 OR 0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1270,10 +1270,8 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 2030-017 OR 2030-018 OR 2030-019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host",
-                                        "indexes": [
-                                            "*"
-                                        ],
+                                        "query_string": "source:watchguard-firebox @msg_id:(0203-0002 OR 0203-0003 OR 0203-0004 OR 0203-0005 OR 0203-0006 OR 0203-0007 OR 0203-0008 OR 0203-0009 OR 0203-000A OR 0203-000B OR 0203-000C OR 0203-000D OR 0203-000E OR 0203-000F OR 0203-0010 OR 0203-0011 OR 0203-0012 OR 0203-0013 OR 0203-0015 OR 0203-0017 OR 0203-0018 OR 0203-0019 OR 0203-0020 OR 0203-0026 OR 0203-0027 OR 0203-0028 OR 0203-0029 OR 0203-002A OR 0203-002B) $Message-ID $Host",
+                                        "indexes": [],
                                         "storage": "hot"
                                     },
                                     "columns": [
@@ -1343,7 +1341,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host"
+                                                "query": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-0008 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1393,7 +1391,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host"
+                                                "query": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-0008 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1462,7 +1460,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host"
+                                                "query": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-0008 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1525,7 +1523,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host",
+                                        "query_string": "source:watchguard-firebox @msg_id:(0205-0002 OR 0205-0003 OR 0205-0004 OR 0205-0005 OR 0205-0006 OR 0205-0007 OR 0205-0008 OR 0205-000A OR 0205-000B OR 0205-000C OR 0205-000D OR 0205-000E) $Message-ID $Host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

@@ -679,11 +679,6 @@
                             "title": "Networking Log Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "day",
-                                "value": 1
-                            },
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -712,7 +707,7 @@
                                         },
                                         {
                                             "field": "content",
-                                            "width": "compact"
+                                            "width": "auto"
                                         }
                                     ]
                                 }
