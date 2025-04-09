@@ -48,8 +48,9 @@ class StatementMetrics:
             - Oracle: 'executions' from V$SQLAREA
             - SQL Server: 'execution_count' from sys.dm_exec_query_stats
             - DB2: 'num_executions' from mon_db_summary
-            This helps filter out cases where only duration metrics change slightly (possibly due to
-            floating-point precision) while execution counts remain the same.
+            This helps filter out cases where a normalized query was evicted then re-inserted with same call count
+            (usually 1) and slight duration change. In this case, the new normalized query entry should be treated
+            as the baseline for future diffs.
         :return (_List[dict]_): a list of rows with the first derivative of the metrics
         """
         result = []
@@ -82,8 +83,10 @@ class StatementMetrics:
             #    avoids having to send a lot of unnecessary metrics.
             #
             # 3. Execution indicators: If execution_indicators is specified, only consider a query as changed if at
-            #    least one of the execution indicator metrics has changed. This helps filter out cases where only
-            #    duration metrics change slightly while call counts remain the same (possibly floating-point precision).
+            #    least one of the execution indicator metrics has changed. This helps filter out cases where an old or
+            #    less frequently executed normalized query was evicted due to the stats table being full, and then
+            #    re-inserted to the stats table with a small call count and slight duration change. In this case,
+            #    the new normalized query entry should be treated as the baseline for future diffs.
 
             diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
 
