@@ -90,7 +90,7 @@ def test_create_metric_for_configs_by_format_type_list(mocker, aggregator):
     check.create_metric_for_configs_by_format_type(metric_data, metric_name, metric_info)
 
     aggregator.assert_metric(
-        f"sonatype_nexus.{metric_name}", 
+        f"sonatype_nexus.{metric_name}",
     )
 
 
