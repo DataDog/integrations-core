@@ -29,6 +29,7 @@ tests:
       post_msg_kv: "UID=\"root\" AUID=\"root\""
       pre_msg_kv: "pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       ses: 138
+      status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.736329118112E12
       type: "USER_MAC_CONFIG_CHANGE"
@@ -36,6 +37,7 @@ tests:
         id: 0
         name: "root"
     message: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'UID=\"root\" AUID=\"root\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1736329118112
@@ -67,6 +69,7 @@ tests:
       post_msg_kv: "UID=\"root\" AUID=\"unset\""
       pre_msg_kv: "pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023"
       ses: 4294967295
+      status: "ok"
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
       timestamp: 1.740139921923E12
       type: "USER_AUTH"
@@ -74,6 +77,7 @@ tests:
         id: 0
         name: "root"
     message: "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"unset\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
@@ -92,12 +96,14 @@ tests:
       post_msg_kv: "enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
       res: 1
       ses: 36
+      status: "ok"
       timestamp: 1.740386730535E12
       type: "MAC_STATUS"
       usr:
         id: 1001
         name: "devuser"
     message: "type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740386730535
@@ -181,6 +187,7 @@ tests:
       post_msg_kv: "UID=\"root\" AUID=\"devuser\""
       pre_msg_kv: "pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023"
       ses: 64
+      status: "ok"
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
       timestamp: 1.741000050325E12
       type: "USER_ROLE_CHANGE"
@@ -188,6 +195,7 @@ tests:
         id: 0
         name: "root"
     message: "type=USER_ROLE_CHANGE msg=audit(1741000050.325:2606): pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='pam: default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"devuser\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1741000050325
