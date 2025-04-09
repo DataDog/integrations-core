@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from copy import deepcopy
 import time
+from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import docker_run, run_command
 
 from .common import COMPOSE, INSTANCE
