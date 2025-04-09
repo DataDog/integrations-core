@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from unittest.mock import patch
 import pytest
 
 from datadog_checks.dev.http import MockResponse
@@ -9,7 +8,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.errors import EmptyResponseError
-from datadog_checks.sonatype_nexus.tests.conftest import get_nexus_password
 
 
 @pytest.fixture
