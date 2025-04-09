@@ -1,1 +1,1 @@
-Added execution indicators to StatementMetrics to filter out false positives from floating-point precision issues in duration metrics.
+Added execution indicators to StatementMetrics to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change.
