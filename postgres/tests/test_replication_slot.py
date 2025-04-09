@@ -136,6 +136,7 @@ def test_replication_slot_stats(aggregator, integration_check, pg_instance):
 
 @requires_over_10
 def test_replication_slot_information(aggregator, integration_check, pg_instance):
+    client_address = None
     check = integration_check(pg_instance)
     client_address = _get_client_addr()
     check.check(pg_instance)
@@ -155,6 +156,6 @@ def test_replication_slot_information(aggregator, integration_check, pg_instance
 def _get_client_addr() -> str:
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
-            cur.execute("select client_addr from pg_stat_replication where application_name =  \'subscription_cities\';")
+            cur.execute("select client_addr from pg_stat_replication where application_name=\'subscription_cities\';")
             client_address = (cur.fetchone()[0])
     return client_address

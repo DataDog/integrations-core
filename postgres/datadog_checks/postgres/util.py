@@ -410,7 +410,7 @@ REPLICATION_STATS_METRICS = {
     },
     'relation': False,
     'query': """
-SELECT 
+SELECT
     pg_stat_replication.application_name,
     pg_stat_replication.state,
     pg_stat_replication.sync_state,
