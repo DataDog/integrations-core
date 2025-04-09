@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
-from datadog_checks.dev.testing import requires_windows
+from datadog_checks.dev.testing import requires_linux, requires_windows
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics, mock_context_manager
 from datadog_checks.disk import Disk
 from datadog_checks.disk.disk import IGNORE_CASE
@@ -221,6 +221,60 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@requires_linux  # Only linux cares about upper/lower case for paths.
+@pytest.mark.parametrize(
+    'lc_device_tag, expected_dev_path',
+    [
+        pytest.param(None, '//CIFS/DEV1', id='Default behavior, keep case'),
+        pytest.param(False, '//CIFS/DEV1', id='Disabled, keep case'),
+        pytest.param(True, '//cifs/dev1', id='Enabled, lowercase'),
+    ],
+)
+def test_lowercase_device_tag(
+    aggregator,
+    instance_basic_volume,
+    gauge_metrics,
+    rate_metrics,
+    count_metrics,
+    dd_run_check,
+    mocker,
+    lc_device_tag,
+    expected_dev_path,
+):
+    """
+    If explicitly configured, we will lowercase the "device" tag value.
+
+    For metrics with uppercase "device" tag values, our backend introduces a lowercase version of the tag.
+    Some customers don't like this and cannot use the "device_name" tag instead.
+    They requested that we add a switch for them to lowercase the "device" tag before we submit it.
+    This flag MUST be off by default to avoid breaking anyone else.
+    """
+    if lc_device_tag is not None:
+        instance_basic_volume['lowercase_device_tag'] = lc_device_tag
+    c = Disk('disk', {}, [instance_basic_volume])
+
+    if ON_WINDOWS:
+        mock_statvfs = mock_context_manager()
+    else:
+        mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
+
+    full_dev_path = '//CIFS/DEV1'
+    mocker.patch(
+        'psutil.disk_partitions',
+        return_value=[MockPart(device=full_dev_path, fstype="cifs")],
+        __name__='disk_partitions',
+    )
+    mocker.patch('psutil.disk_usage', return_value=MockDiskMetrics(), __name__='disk_usage')
+    mocker.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics(full_dev_path))
+    with mock_statvfs:
+        dd_run_check(c)
+
+    for name in chain(gauge_metrics, rate_metrics, count_metrics):
+        aggregator.assert_metric_has_tag(name, f'device:{expected_dev_path}')
+        # Make sure the "device_name" tag isn't affected.
+        aggregator.assert_metric_has_tag(name, 'device_name:DEV1')
 
 
 @pytest.mark.usefixtures('psutil_mocks')

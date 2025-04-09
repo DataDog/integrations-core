@@ -74,14 +74,21 @@ class DBExplainError(Enum):
     # search path may be different when the client executed a query from where we executed it.
     undefined_table = 'undefined_table'
 
+    # we cannot create a prepared statement because this function is undefined with the given parameters
+    # this is likely because of an obfuscated parameter
+    undefined_function = 'undefined_function'
+
     # the statement was explained with the prepared statement workaround
     explained_with_prepared_statement = 'explained_with_prepared_statement'
 
-    # the statement was tried to be explained with the prepared statement workaround but failedd
+    # the statement was tried to be explained with the prepared statement workaround but failed
     failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
 
     # the statement was tried to be explained with the prepared statement workaround but no plan was returned
     no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+    # PostgreSQL cannot determine the data type of a parameter in the query
+    indeterminate_datatype = 'indeterminate_datatype'
 
 
 class DatabaseHealthCheckError(Exception):
@@ -215,16 +222,45 @@ QUERY_PG_UPTIME = {
     ],
 }
 
-QUERY_PG_CONTROL_CHECKPOINT = {
+QUERY_PG_CONTROL_CHECKPOINT_LT_10 = {
     'name': 'pg_control_checkpoint',
     'query': """
         SELECT timeline_id,
-               EXTRACT (EPOCH FROM now() - checkpoint_time)
+          EXTRACT (EPOCH FROM now() - checkpoint_time),
+          pg_xlog_location_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_xlog_receive_location()
+              ELSE pg_current_xlog_location() END, checkpoint_location),
+          pg_xlog_location_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_xlog_receive_location()
+              ELSE pg_current_xlog_location() END, redo_location)
         FROM pg_control_checkpoint();
 """,
     'columns': [
         {'name': 'control.timeline_id', 'type': 'gauge'},
         {'name': 'control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay_bytes', 'type': 'gauge'},
+        {'name': 'control.redo_delay_bytes', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+          EXTRACT (EPOCH FROM now() - checkpoint_time),
+          pg_wal_lsn_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn()
+              ELSE pg_current_wal_lsn() END, checkpoint_lsn),
+          pg_wal_lsn_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn()
+              ELSE pg_current_wal_lsn() END, redo_lsn)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'control.timeline_id', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay_bytes', 'type': 'gauge'},
+        {'name': 'control.redo_delay_bytes', 'type': 'gauge'},
     ],
 }
 

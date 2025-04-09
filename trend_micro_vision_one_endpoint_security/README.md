@@ -46,12 +46,12 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
 
 ### Connect your Trend Micro Vision One Endpoint Security Account to Datadog
 
-1. Add your API host, application ID, API key and select the time zone from the dropdown.
+1. Add your API host, application ID, and API key, and select the time zone from the dropdown.
    | Parameters     | Description                                                             |
    | -------------- | ----------------------------------------------------------------------- |
-   | API Host       | The API host of Trend Micro Vision One Endpoint Security console.       |
-   | Application ID | The application ID of Trend Micro Vision One Endpoint Security console. |
-   | API Key        | The API key of of Trend Micro Vision One Endpoint Security console.     |
+   | API Host       | The API host of the Trend Micro Vision One Endpoint Security console.       |
+   | Application ID | The application ID of the Trend Micro Vision One Endpoint Security console. |
+   | API Key        | The API key of the Trend Micro Vision One Endpoint Security console.     |
    | Time Zone      | The time zone of the Trend Micro Vision One console.                    |
 
 2. Click the **Save** button to save your settings.

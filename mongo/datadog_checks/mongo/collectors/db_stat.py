@@ -32,7 +32,9 @@ class DbStatCollector(MongoCollector):
                 return False
             return True
         else:
-            return isinstance(deployment, (StandaloneDeployment, MongosDeployment)) or deployment.is_primary
+            return isinstance(deployment, (StandaloneDeployment, MongosDeployment)) or (
+                deployment.is_primary and not deployment.use_shards
+            )
 
     @collection_interval_checker
     def collect(self, api):
