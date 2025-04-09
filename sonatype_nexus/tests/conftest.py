@@ -52,7 +52,8 @@ def get_nexus_password(max_retries=5, retry_interval=10, password_wait_retries=3
 
             if file_check == "exists":
                 password = run_command(
-                    f"docker exec {container_id} sh -c 'cat /opt/sonatype/sonatype-work/nexus3/admin.password'", capture=True
+                    f"docker exec {container_id} sh -c 'cat /opt/sonatype/sonatype-work/nexus3/admin.password'",
+                    capture=True,
                 ).stdout.strip()
 
                 if password:
