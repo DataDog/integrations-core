@@ -42,7 +42,7 @@ Run the [Agent's status subcommand][5] and look for `process` under the Checks s
 ### Metrics notes
 
 The following metrics are not available on Linux or macOS:
-- Process I/O metrics are **not** available on Linux or macOS since the files that the Agent reads (`/proc/[pid]/io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
+- Process I/O metrics are **not** available on Linux or macOS since the files that the Agent reads (`/proc/<PID>/io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
 
 The following metrics are not available on Windows:
 - `system.cpu.iowait`
