@@ -72,8 +72,8 @@ WHERE
         AND thread_a.processlist_command != 'Sleep'
         AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
         AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
-        -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
-        -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
+        -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row
+        -- we want to use. Additionally, we want the row with the highest EVENT_ID which reflects the most recent wait.
         AND (
             waits_a.event_id = (
             SELECT
