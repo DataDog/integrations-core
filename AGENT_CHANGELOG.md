@@ -1,3 +1,7 @@
+## Datadog Agent version [7.64.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7642)
+
+* MongoDB [8.6.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+
 ## Datadog Agent version [7.64.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7641)
 
 * There were no integration updates for this version of the Agent.

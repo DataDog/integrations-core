@@ -117,9 +117,9 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### Spark on AWS EMR
+### Spark on Amazon EMR
 
-To receive metrics for Spark on AWS EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
+To receive metrics for Spark on Amazon EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
 
 For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][14].
 

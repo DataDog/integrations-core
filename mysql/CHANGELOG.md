@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.8.0 / 2025-03-26
+
+***Added***:
+
+* Add schema collection configuration ([#19910](https://github.com/DataDog/integrations-core/pull/19910))
+
 ## 14.7.0 / 2025-03-19
 
 ***Added***:

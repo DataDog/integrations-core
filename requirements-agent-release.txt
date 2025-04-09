@@ -1,7 +1,7 @@
 # DO NOT PASS THIS TO PIP DIRECTLY
 # THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
 --no-index
-datadog-active-directory==4.1.0; sys_platform == 'win32'
+datadog-active-directory==4.2.0; sys_platform == 'win32'
 datadog-activemq-xml==5.1.0
 datadog-activemq==5.0.0
 datadog-aerospike==4.1.0; sys_platform == 'linux2'
@@ -27,7 +27,7 @@ datadog-cassandra==3.0.0
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==5.3.0
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.8.0
+datadog-checks-base==37.9.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==7.1.0
 datadog-cilium==5.2.0
@@ -58,7 +58,7 @@ datadog-ecs-fargate==6.1.0
 datadog-eks-fargate==6.1.0
 datadog-elastic==8.1.0
 datadog-envoy==5.1.0
-datadog-esxi==3.0.0
+datadog-esxi==3.0.1
 datadog-etcd==8.1.0
 datadog-exchange-server==4.1.0; sys_platform == 'win32'
 datadog-external-dns==5.1.0
@@ -129,7 +129,7 @@ datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
 datadog-milvus==1.2.0
 datadog-mongo==9.0.0
-datadog-mysql==14.7.0
+datadog-mysql==14.8.0
 datadog-nagios==3.0.0
 datadog-network==5.2.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
