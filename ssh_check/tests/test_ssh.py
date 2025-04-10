@@ -22,7 +22,9 @@ CONNECTION_SUCCEEDED = None
 def _setup_check_with_mock_client(instance, connect_result):
     client = create_autospec(paramiko.SSHClient)
     client.connect.side_effect = [connect_result]
-    client.get_transport.return_value = namedtuple('Transport', ['remote_version', 'is_authenticated'])('SSH-2.0-OpenSSH_8.1', lambda: True)
+    client.get_transport.return_value = namedtuple('Transport', ['remote_version', 'is_authenticated'])(
+        'SSH-2.0-OpenSSH_8.1', lambda: True
+    )
 
     ssh = CheckSSH('ssh_check', {}, [instance])
     ssh.initialize_client = MagicMock(return_value=client)
