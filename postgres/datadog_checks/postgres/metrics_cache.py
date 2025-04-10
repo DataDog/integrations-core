@@ -27,7 +27,6 @@ from .util import (
     REPLICATION_METRICS_9_1,
     REPLICATION_METRICS_9_2,
     REPLICATION_METRICS_10,
-    REPLICATION_STATS_METRICS,
 )
 from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V12, V14, V17
 
@@ -181,11 +180,6 @@ class PostgresMetricsCache:
             if version >= V9_2:
                 self.replication_metrics.update(REPLICATION_METRICS_9_2)
         return self.replication_metrics
-
-    def get_replication_stats_metrics(self, version):
-        if version >= V10 and self.replication_stats_metrics is None:
-            self.replication_stats_metrics = dict(REPLICATION_STATS_METRICS)
-        return self.replication_stats_metrics
 
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2

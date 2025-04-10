@@ -381,34 +381,8 @@ SELECT {metrics_columns}
 }
 
 # Requires postgres 10+
-REPLICATION_STATS_METRICS = {
-    'descriptors': [
-        ('pg_stat_replication.application_name', 'wal_app_name'),
-        ('pg_stat_replication.state', 'wal_state'),
-        ('pg_stat_replication.sync_state', 'wal_sync_state'),
-        ('pg_stat_replication.client_addr', 'wal_client_addr'),
-        ('pg_stat_replication_slot.slot_name', 'slot_name'),
-        ('pg_stat_replication_slot.slot_type', 'slot_type'),
-    ],
-    'metrics': {
-        'GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag': (
-            'replication.wal_write_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) AS flush_lag': (
-            'replication.wal_flush_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag': (
-            'replication.wal_replay_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age': (
-            'replication.backend_xmin_age',
-            AgentCheck.gauge,
-        ),
-    },
-    'relation': False,
+QUERY_PG_REPLICATION_STATS_METRICS = {
+    'name': 'replication_stats_metrics',
     'query': """
 SELECT
     pg_stat_replication.application_name,
@@ -417,12 +391,24 @@ SELECT
     pg_stat_replication.client_addr,
     pg_stat_replication_slot.slot_name,
     pg_stat_replication_slot.slot_type,
-    {metrics_columns}
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag,
+    GREATEST (0, age(pg_stat_replication.backend_xmin)) AS backend_xmin_age
 FROM pg_stat_replication as pg_stat_replication
 LEFT JOIN pg_replication_slots as pg_stat_replication_slot
 ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
 """.strip(),
-    'name': 'replication_stats_metrics',
+    'columns': [
+        {'name': 'wal_app_name', 'type': 'tag'},
+        {'name': 'wal_state', 'type': 'tag'},
+        {'name': 'wal_sync_state', 'type': 'tag'},
+        {'name': 'wal_client_addr', 'type': 'tag'},
+        {'name': 'slot_name', 'type': 'tag_not_null'},
+        {'name': 'slot_type', 'type': 'tag_not_null'},
+        {'name': 'wal_write_lag', 'type': 'gauge'},
+        {'name': 'wal_flush_lag', 'type': 'gauge'},
+        {'name': 'wal_replay_lag', 'type': 'gauge'},
+    ],
 }
 
 

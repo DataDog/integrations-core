@@ -6,7 +6,7 @@ import time
 import psycopg2
 import pytest
 
-from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS, REPLICATION_STATS_METRICS
+from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS, QUERY_PG_REPLICATION_STATS_METRICS
 
 from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import requires_over_10, requires_over_14
@@ -151,7 +151,7 @@ def test_replication_slot_information(aggregator, integration_check, pg_instance
         "slot_type:logical",
     ]
 
-    for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_STATS_METRICS):
         assert_metric_at_least(aggregator, metric_name, count=1, lower_bound=0, tags=expected_tags)
 
 
