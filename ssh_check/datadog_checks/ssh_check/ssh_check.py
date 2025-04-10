@@ -78,6 +78,9 @@ class CheckSSH(AgentCheck):
             # Try to connect to check status of SSH
             try:
                 client.connect(self.host, port=self.port, username=self.username, **connect_kwargs)
+                transport = client.get_transport()
+                if transport is not None:
+                    transport.is_authenticated()
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
             except Exception as e:
