@@ -69,22 +69,11 @@ class VersionUtils(object):
                 version.append(0)
             return VersionInfo(*version)
         except ValueError:
-            pass
-        try:
             # Postgres might be in development, with format \d+[beta|rc]\d+
             match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)
             if match:
                 version = list(match.groups())
                 return VersionInfo.parse('{}.0.0-{}.{}'.format(*version))
-            else:
-                raise ValueError('Unable to match development version')
-        except ValueError:
-            # RDS changes the version format when the version switches to EOL.
-            # Example: 11.22-rds.20241121.
-            match = re.match(r'(\d+\.\d+)-rds\.(\d+)', raw_version)
-            if match:
-                version = list(match.groups())
-                return VersionInfo.parse('{}.{}'.format(*version))
         raise Exception("Cannot determine which version is {}".format(raw_version))
 
     @staticmethod
