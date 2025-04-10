@@ -10,7 +10,38 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into the WatchGuard Firebox events",
     "title": "WatchGuard Firebox",
-    "media": [],
+    "media": [
+      {
+        "caption": "WatchGuard Firebox - Overview",
+        "image_url": "images/watchguard_firebox_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Firewall",
+        "image_url": "images/watchguard_firebox_firewall.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Networking Events",
+        "image_url": "images/watchguard_firebox_networking_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Proxy Policy",
+        "image_url": "images/watchguard_firebox_proxy_policy.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - VPN",
+        "image_url": "images/watchguard_firebox_vpn.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Management Activity Monitor",
+        "image_url": "images/watchguard_firebox_management_activity_monitor.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
