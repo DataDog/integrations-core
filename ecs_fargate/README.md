@@ -252,8 +252,6 @@ Although the integration works on Linux and Windows, some metrics are OS depende
 
 For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
 
-**Note**: See the [full configuration section][] of Datadog's unified
-
 #### DogStatsD
 
 Metrics are collected with [DogStatsD][13] through UDP port 8125.
