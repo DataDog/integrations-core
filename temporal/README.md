@@ -67,7 +67,7 @@ No additional installation is needed on your server.
 
 ##### Metric collection
 
-For containerized environments, see [Configure integrations with Autodiscovery on Kubernetes][14] or [Configure integrations with Autodiscovery on Docker][15] for guidance on applying the parameters below. See the [sample temporal.d/conf.yaml][4] for all available configuration options.
+For containerized environments, refer to [Configure integrations with Autodiscovery on Kubernetes][14] or [Configure integrations with Autodiscovery on Docker][15] for instructions on using the parameters below. See the [sample temporal.d/conf.yaml][4] for a complete list of configuration options.
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
