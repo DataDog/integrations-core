@@ -281,8 +281,11 @@ def check_stat_replication_physical_slot(aggregator, expected_tags, count=1):
 def check_stat_replication_no_slot(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
+    wal_app_name = 'replica2'
+    if float(POSTGRES_VERSION) < 12:
+        wal_app_name = 'walreceiver'
     replication_tags = expected_tags + [
-        'wal_app_name:replica2',
+        f'wal_app_name:{wal_app_name}',
         f'wal_client_addr:{get_container_ip(REPLICA_CONTAINER_2_NAME)}',
         'wal_state:streaming',
         'wal_sync_state:async',
