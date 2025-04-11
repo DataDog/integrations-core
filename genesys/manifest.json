@@ -66,7 +66,7 @@
       },
       "metrics": {
         "prefix": "genesys.",
-        "check": ["genesys.conversations.total_voice", "genesys.conversations.wait_time_avg"],
+        "check": ["genesys.voice.total_conversations", "genesys.callback.wait_time_avg"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -83,7 +83,7 @@
       "Genesys Voice": "assets/dashboards/genesys_voice.json"
     },
     "monitors": {
-      "High number of abandoned outbound conversations detected": "assets/monitors/high_number_of_abandoned_outbound_conversations_detected.json",
+      "High number of abandoned outbound voice conversations detected": "assets/monitors/high_number_of_abandoned_outbound_voice_conversations_detected.json",
       "High number of errored conversations detected": "assets/monitors/high_number_of_errored_conversations_detected.json",
       "High number of over SLA conversations detected": "assets/monitors/high_number_of_over_sla_conversations_detected.json",
       "High number of state transition errors detected": "assets/monitors/high_number_of_state_transition_errors_detected.json"
