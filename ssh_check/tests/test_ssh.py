@@ -34,10 +34,18 @@ def _setup_check_with_mock_client(instance, connect_result, authentication_resul
     return client, ssh
 
 
-@pytest.mark.parametrize('authenticated,service_check_result', [pytest.param(True, CheckSSH.OK, id='authenticated'), pytest.param(False, CheckSSH.CRITICAL, id='not authenticated')])
+@pytest.mark.parametrize(
+    'authenticated,service_check_result',
+    [
+        pytest.param(True, CheckSSH.OK, id='authenticated'),
+        pytest.param(False, CheckSSH.CRITICAL, id='not authenticated'),
+    ],
+)
 def test_ssh(aggregator, authenticated, service_check_result):
     instance = common.INSTANCES['main']
-    client, check = _setup_check_with_mock_client(instance, connect_result=CONNECTION_SUCCEEDED, authentication_result=authenticated)
+    client, check = _setup_check_with_mock_client(
+        instance, connect_result=CONNECTION_SUCCEEDED, authentication_result=authenticated
+    )
 
     check.check({})
 
@@ -166,7 +174,9 @@ def test_collect_bad_metadata(datadog_agent):
 def test_force_sha1_disabled(aggregator, dd_run_check, settings):
     inst = deepcopy(common.INSTANCES['main'])
     inst.update(settings)
-    client, ssh = _setup_check_with_mock_client(inst, connect_result=paramiko.ssh_exception.AuthenticationException, authentication_result=True)
+    client, ssh = _setup_check_with_mock_client(
+        inst, connect_result=paramiko.ssh_exception.AuthenticationException, authentication_result=True
+    )
 
     with pytest.raises(Exception, match='AuthenticationException'):
         dd_run_check(ssh)
@@ -182,12 +192,20 @@ def test_force_sha1_disabled(aggregator, dd_run_check, settings):
     ]
 
 
-@pytest.mark.parametrize('authenticated,service_check_result', [pytest.param(True, CheckSSH.OK, id='authenticated'), pytest.param(False, CheckSSH.CRITICAL, id='not authenticated')])
+@pytest.mark.parametrize(
+    'authenticated,service_check_result',
+    [
+        pytest.param(True, CheckSSH.OK, id='authenticated'),
+        pytest.param(False, CheckSSH.CRITICAL, id='not authenticated'),
+    ],
+)
 def test_force_sha1_enabled(aggregator, dd_run_check, authenticated, service_check_result):
     settings = {'force_sha1': True}
     inst = deepcopy(common.INSTANCES['main'])
     inst.update(settings)
-    client, ssh = _setup_check_with_mock_client(inst, connect_result=CONNECTION_SUCCEEDED, authentication_result=authenticated)
+    client, ssh = _setup_check_with_mock_client(
+        inst, connect_result=CONNECTION_SUCCEEDED, authentication_result=authenticated
+    )
 
     dd_run_check(ssh)
 

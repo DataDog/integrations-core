@@ -79,12 +79,16 @@ class CheckSSH(AgentCheck):
             try:
                 client.connect(self.host, port=self.port, username=self.username, **connect_kwargs)
                 transport = client.get_transport()
-                # If is_authenticated() returns False, the connection is either not authenticated or only partially authenticated
+                # If is_authenticated() returns False, the connection is either not authenticated or only
+                # partially authenticated
                 # This is described in the following RFC: https://datatracker.ietf.org/doc/html/rfc4252#section-5.1
                 if transport is not None and transport.is_authenticated():
                     self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
                 elif transport is not None:
-                    self.log.error("Authentication was not successful. Please make sure the provided credentials are correct and multi-factor authentication is not required by the server.")
+                    self.log.error(
+                        "Authentication was not successful. Please make sure the provided credentials are correct \
+                        and multi-factor authentication is not required by the server."
+                    )
                     self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.base_tags)
                 else:
                     self.log.debug("Could not get transport from client.")
