@@ -146,5 +146,19 @@ files:
         enum:
         - postgres
         - mysql
+    - name: certificate_stores
+      description: |
+        For Windows Only.
+        The list of certificate stores to query from when verifying the Windows server certificates. This is
+        only used when `local_cert_path` is not set. The default is to use the system
+        certificate store.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 'MY'
+          - 'ROOT'
+          - 'CA'
     - template: instances/default
     - template: instances/tls
