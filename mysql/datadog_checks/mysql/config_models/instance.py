@@ -130,6 +130,7 @@ class QueryActivity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_blocking_queries: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
 
