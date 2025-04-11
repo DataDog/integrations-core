@@ -207,7 +207,7 @@ class MySQLActivity(DBMAsyncJob):
 
     def _should_collect_blocking_queries(self):
         # type: () -> bool
-        blocking_queries_configured = self._config.collect_blocking_queries
+        blocking_queries_configured = self._config.activity_config.get("collect_blocking_queries", False)
         return (
             blocking_queries_configured and self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb
         )

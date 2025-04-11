@@ -80,7 +80,7 @@ def dbm_instance(instance_complex):
 )
 def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated, collect_blocking_queries):
     config = deepcopy(dbm_instance)
-    config['collect_blocking_queries'] = collect_blocking_queries
+    config['query_activity']['collect_blocking_queries'] = collect_blocking_queries
     check = MySql(CHECK_NAME, {}, instances=[config])
     
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
@@ -125,7 +125,8 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     }
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
-    assert len(activity['mysql_activity']) == 1, "incorrect number of activity rows"
+    expected_activity_rows = 2 if check._query_activity._should_collect_blocking_queries() else 1
+    assert len(activity['mysql_activity']) == expected_activity_rows, "incorrect number of activity rows"
 
     # The blocked row should be fred, which is currently blocked by bob's TX
     blocked_row = None
