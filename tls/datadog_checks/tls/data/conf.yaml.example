@@ -138,7 +138,7 @@ instances:
     # start_tls: <START_TLS>
 
     ## @param certificate_stores - list of strings - optional
-    ## For Windows Only.
+    ## For Windows Only
     ## The list of certificate stores to query from when verifying the Windows server certificates. This is
     ## only used when `local_cert_path` is not set. The default is to use the system
     ## certificate store.
