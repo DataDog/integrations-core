@@ -153,15 +153,15 @@ instances:
     #
     # tls_retrieve_non_validated_cert: false
 
-    ## @param days_warning - integer - optional
+    ## @param days_warning - integer - optional - default: 14
     ## Express warning threshold for the HTTP check in days
     #
-    # days_warning: <DAYS_WARNING>
+    # days_warning: 14
 
-    ## @param days_critical - integer - optional
+    ## @param days_critical - integer - optional - default: 7
     ## Express critical threshold for the HTTP check in days
     #
-    # days_critical: <DAYS_CRITICAL>
+    # days_critical: 7
 
     ## @param seconds_warning - integer - optional
     ## Alternatively to days_warning, seconds_warning expresses
