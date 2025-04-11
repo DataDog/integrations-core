@@ -8,7 +8,7 @@ import os
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
-from copy import copy
+from copy import copy, deepcopy
 from datetime import datetime
 from threading import Event
 
@@ -52,7 +52,7 @@ def dbm_instance(instance_complex):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "query,query_signature,expected_query_truncated",
+    "query,query_signature,expected_query_truncated,collect_blocking_queries",
     [
         (
             'SELECT id, name FROM testdb.users FOR UPDATE',
@@ -62,6 +62,7 @@ def dbm_instance(instance_complex):
                 else 'aca1be410fbadb61'
             ),
             StatementTruncationState.not_truncated.value,
+            True,
         ),
         (
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
@@ -73,12 +74,15 @@ def dbm_instance(instance_complex):
                 else ('da7d6b1e9deb88e' if MYSQL_VERSION_PARSED > parse_version('5.7') else '63bd1fd025c7f7fb')
             ),
             StatementTruncationState.truncated.value,
+            False,
         ),
     ],
 )
-def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
-
+def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated, collect_blocking_queries):
+    config = deepcopy(dbm_instance)
+    config['collect_blocking_queries'] = collect_blocking_queries
+    check = MySql(CHECK_NAME, {}, instances=[config])
+    
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
 
     def _run_query(conn, _query):
@@ -121,7 +125,7 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     }
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
-    assert activity['mysql_activity'], "should have at least one activity row"
+    assert len(activity['mysql_activity']) == 1, "incorrect number of activity rows"
 
     # The blocked row should be fred, which is currently blocked by bob's TX
     blocked_row = None
