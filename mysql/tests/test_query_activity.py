@@ -128,7 +128,7 @@ def test_activity_collection(
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
     assert activity['mysql_activity'], "should have at least one activity row"
-    
+
     # The blocked row should be fred, which is currently blocked by bob's TX
     blocked_row = None
     for activity in dbm_activity:
@@ -164,6 +164,7 @@ def test_activity_collection(
                 if row['processlist_user'] == 'bob':
                     captured_idle_blocker = True
         assert captured_idle_blocker, "should have captured the idle blocker"
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
