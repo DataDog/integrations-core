@@ -20,6 +20,12 @@
 
 * Add support for Postgres 17 ([#19625](https://github.com/DataDog/integrations-core/pull/19625))
 
+## 22.6.1 / 2025-02-25
+
+***Fixed***:
+
+* When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces. ([#19694](https://github.com/DataDog/integrations-core/pull/19694))
+
 ## 22.6.0 / 2025-02-20
 
 ***Added***:
