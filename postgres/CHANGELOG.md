@@ -12,7 +12,6 @@
 ***Fixed***:
 
 * Omit .* regex filter to avoid unnecessary work in query ([#19470](https://github.com/DataDog/integrations-core/pull/19470))
-* When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces. ([#19694](https://github.com/DataDog/integrations-core/pull/19694))
 
 ## 22.7.0 / 2025-02-26 / Agent 7.64.0
 
