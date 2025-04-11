@@ -99,6 +99,22 @@ class IBMMQConfig:
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
+
+        try:
+            if self.qm_timezone != 'UTC':
+                self.qm_stats_tz = tz.gettz(self.qm_timezone)
+                if self.qm_stats_tz is None:
+                    raise ValueError(f"'{self.qm_timezone}' is not a recognized timezone.")
+            else:
+                self.qm_stats_tz = tz.UTC
+        except ValueError as e:
+            self.log.error(
+                "Invalid timezone: %s. Defaulting to UTC. Please specify a valid time zone in IANA/Olson format. %s",
+                self.qm_timezone,
+                e,
+            )
+            self.qm_stats_tz = tz.UTC
+
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
         self.use_qm_tz_for_metrics = is_affirmative(instance.get('use_qm_tz_for_metrics', False))  # type: bool
 
