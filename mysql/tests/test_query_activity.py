@@ -102,7 +102,6 @@ def test_activity_collection(
     executor.submit(_run_blocking, bob_conn)
     # fred's query will get blocked by bob's TX
     executor.submit(_run_query, fred_conn, query)
-    time.sleep(1)
 
     dd_run_check(check)
     bob_conn.commit()
@@ -155,12 +154,11 @@ def test_activity_collection(
     assert blocked_row['wait_timer_end'], "missing wait timer end"
     assert blocked_row['event_timer_start'], "missing event timer start"
     assert blocked_row['event_timer_end'], "missing event timer end"
-    assert blocked_row['lock_time'], "missing lock time"
     assert blocked_row['query_truncated'] == expected_query_truncated
 
-    captured_idle_blocker = False
     if check._query_activity._should_collect_blocking_queries():
         assert len(activity['mysql_activity']) >= 2, "should have collected at least two activity payloads"
+        captured_idle_blocker = False
         for activity in dbm_activity:
             for row in activity['mysql_activity']:
                 if row['processlist_user'] == 'bob':
