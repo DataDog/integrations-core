@@ -78,11 +78,13 @@ def dbm_instance(instance_complex):
         ),
     ],
 )
-def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated, collect_blocking_queries):
+def test_activity_collection(
+    aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated, collect_blocking_queries
+):
     config = deepcopy(dbm_instance)
     config['query_activity']['collect_blocking_queries'] = collect_blocking_queries
     check = MySql(CHECK_NAME, {}, instances=[config])
-    
+
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
 
     def _run_query(conn, _query):
