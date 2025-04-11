@@ -1,0 +1,1 @@
+Fix a spike in monotonic counter values after a failed openmetrics scrape
