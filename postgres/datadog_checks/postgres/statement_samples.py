@@ -868,6 +868,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             obfuscated_plan_event = {
                 "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
@@ -958,6 +959,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             active_sessions.append(row)
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",
