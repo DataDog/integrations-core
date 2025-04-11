@@ -12,10 +12,6 @@ def shared_propagate_agent_tags():
     return False
 
 
-def instance_collect_blocking_queries():
-    return False
-
-
 def instance_connect_timeout():
     return 10
 

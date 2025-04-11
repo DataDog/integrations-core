@@ -100,6 +100,7 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     executor.submit(_run_blocking, bob_conn)
     # fred's query will get blocked by bob's TX
     executor.submit(_run_query, fred_conn, query)
+    time.sleep(0.1)
 
     dd_run_check(check)
     bob_conn.commit()

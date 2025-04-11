@@ -129,6 +129,7 @@ class QueryActivity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_blocking_queries: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
 
@@ -195,7 +196,6 @@ class InstanceConfig(BaseModel):
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     charset: Optional[str] = None
-    collect_blocking_queries: Optional[bool] = None
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
