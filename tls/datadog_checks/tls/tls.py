@@ -109,11 +109,17 @@ class TLSCheck(AgentCheck):
 
         local_cert_path = instances[0].get('local_cert_path', '')
 
+        self._certificate_stores = self.instance.get('certificate_stores', [])
+
         # Decide the method of collection for this instance (local file vs remote connection)
         if local_cert_path:
             from .tls_local import TLSLocalCheck
 
             self.checker = TLSLocalCheck(self)
+        elif self._certificate_stores:
+            from .tls_windows import TLSWindowsCheck
+
+            self.checker = TLSWindowsCheck(self)
         else:
             from .tls_remote import TLSRemoteCheck
 
