@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+import psutil
 
 from datadog_checks.gunicorn import GUnicornCheck
 
@@ -22,3 +23,25 @@ def test_collect_metadata_parsing_matching(aggregator, datadog_agent, stdout, st
         check.check(INSTANCE)
 
     datadog_agent.assert_metadata_count(expect_metadata_count)
+
+
+def test_process_disappearing_during_scan(aggregator):
+    """Test handling of processes that disappear during scanning"""
+    check = GUnicornCheck(CHECK_NAME, {}, [INSTANCE])
+    
+    # Create a mock process that will raise NoSuchProcess when cmdline() is called
+    mock_process = mock.Mock()
+    mock_process.cmdline.side_effect = psutil.NoSuchProcess(0)  # 0 is the pid
+    mock_process.name.return_value = "dd-test-gunicorn"  # For the debug log message
+    
+    # Mock process_iter to return our disappearing process
+    with mock.patch('psutil.process_iter', return_value=[mock_process]):
+        check.check(INSTANCE)
+    
+    # Verify the service check shows critical since no processes were found
+    aggregator.assert_service_check(
+        "gunicorn.is_running",
+        check.CRITICAL,
+        tags=['app:' + INSTANCE['proc_name']],
+        message="No gunicorn process with name {} found, skipping worker metrics".format(INSTANCE['proc_name'])
+    )
