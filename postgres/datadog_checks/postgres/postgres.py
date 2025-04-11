@@ -174,6 +174,8 @@ class PostgreSql(AgentCheck):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
+        if self.reported_hostname:
+            self.tags.append("host:{}".format(self.reported_hostname))
         self.tags.append("database_hostname:{}".format(self.database_hostname))
         self.tags.append("database_instance:{}".format(self.database_identifier))
 

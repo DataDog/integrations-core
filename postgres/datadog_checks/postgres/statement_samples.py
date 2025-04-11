@@ -602,7 +602,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         raw_query_event = {
             "timestamp": time.time() * 1000,
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "rqt",
