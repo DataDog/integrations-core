@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "kubernetes==32.0.1",
+    "kubernetes==32.0.0"
 ]
 
 [project.urls]
