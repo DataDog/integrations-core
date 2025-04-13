@@ -9,7 +9,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import EXPECTED_METRICS
+from .common import DUPLICATED_TAGS, EXPECTED_METRICS
 
 
 def test_critical_service_check(dd_run_check, aggregator, mock_http_response, check):
@@ -41,6 +41,9 @@ def test_successful_run(dd_run_check, aggregator, check):
     aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(name=metric)
+        if metric == "dcgm.dram.active":
+            for tag in DUPLICATED_TAGS:
+                aggregator.assert_metric_has_tag(metric, tag)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
