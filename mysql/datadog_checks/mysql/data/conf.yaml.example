@@ -520,6 +520,11 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param collect_blocking_queries - boolean - optional - default: false
+        ## Enable collection of blocking queries. Supported only on MySQL 8.0.
+        #
+        # collect_blocking_queries: false
+
     ## Configure collection of index metrics.
     ## Metrics provided by the options:
     ##   - mysql.index.size (per index)
