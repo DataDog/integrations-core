@@ -1,23 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from __future__ import annotations
-
 import functools
+import inspect
 import os
-from typing import TYPE_CHECKING
-
-import lazy_loader
 
 from datadog_checks.base.agent import datadog_agent
 
 from ..config import is_affirmative
 from ..utils.common import to_native_string
-
-if TYPE_CHECKING:
-    import inspect as _module_inspect
-
-inspect: _module_inspect = lazy_loader.load('inspect')
 
 EXCLUDED_MODULES = ['threading']
 
