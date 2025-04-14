@@ -764,7 +764,6 @@ class AgentCheck(object):
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return
-
         aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):

@@ -144,7 +144,6 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
-                'host:stubbed.hostname',
             },
         ),
         (
@@ -157,7 +156,6 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
-                'host:stubbed.hostname',
             },
         ),
     ],
