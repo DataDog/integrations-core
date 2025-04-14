@@ -539,6 +539,11 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param collect_blocking_queries - boolean - optional - default: false
+        ## Enable collection of blocking queries. Supported only on MySQL 8.0.
+        #
+        # collect_blocking_queries: false
+
     ## Configure collection of index metrics.
     ## Metrics provided by the options:
     ##   - mysql.index.size (per index)
@@ -555,6 +560,12 @@ instances:
         ## Enable collection of index metrics.
         #
         # enabled: true
+
+        ## @param limit - integer - optional - default: 1000
+        ## Set the maximum number of unique (by combination of database, table, and index name)
+        ## indexes to collect. Defaults to 1000.
+        #
+        # limit: 1000
 
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##

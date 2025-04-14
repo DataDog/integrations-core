@@ -51,6 +51,13 @@
       "Backup Failures": "assets/monitors/backup_failures.json",
       "Restore Failures": "assets/monitors/restore_failures.json",
       "Backup Staleness": "assets/monitors/backup_staleness.json"
+    },
+    "dashboards": {
+      "Velero Overview": "assets/dashboards/velero_overview.json"
+    },
+    "saved_views": {
+      "Velero Logs Overview": "assets/saved_views/logs_overview.json",
+      "Velero Error Logs Overview": "assets/saved_views/error_logs_overview.json"
     }
   },
   "author": {

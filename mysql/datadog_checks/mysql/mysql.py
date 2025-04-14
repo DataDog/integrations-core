@@ -334,8 +334,7 @@ class MySql(AgentCheck):
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
-                    self.tags = list(set(self.tags) | set(aurora_tags))
-                    self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
+                    self._update_runtime_aurora_tags(aurora_tags)
 
                 # version collection
                 self.set_version(db)
@@ -935,18 +934,31 @@ class MySql(AgentCheck):
 
     def _get_runtime_aurora_tags(self, db):
         runtime_tags = []
-
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
-
                 if replication_role in {'writer', 'reader'}:
                     runtime_tags.append('replication_role:' + replication_role)
         except Exception:
             self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
-
         return runtime_tags
+
+    def _update_runtime_aurora_tags(self, aurora_tags):
+        """
+        Update the tags with Aurora runtime tags, ensuring no duplicate tags exist.
+        First removes any existing Aurora runtime tags by key name, then adds the new tags.
+        """
+        # Extract tag keys from aurora_tags to identify which tags to remove
+        aurora_tag_keys = {tag.split(':')[0] for tag in aurora_tags}
+
+        # Remove existing Aurora runtime tags from both tag lists
+        self.tags = [tag for tag in self.tags if tag.split(':')[0] not in aurora_tag_keys]
+        self._non_internal_tags = [tag for tag in self._non_internal_tags if tag.split(':')[0] not in aurora_tag_keys]
+
+        # Add the new Aurora tags using set operations
+        self.tags = list(set(self.tags) | set(aurora_tags))
+        self._non_internal_tags = list(set(self._non_internal_tags) | set(aurora_tags))
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None

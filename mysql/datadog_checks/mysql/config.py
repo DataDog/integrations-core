@@ -50,6 +50,7 @@ class MySQLConfig(object):
         self.activity_config = instance.get('query_activity', {}) or {}
         self.schemas_config: dict = instance.get('schemas_collection', {}) or {}
         self.index_config: dict = instance.get('index_metrics', {}) or {}
+        self.collect_blocking_queries = is_affirmative(instance.get('collect_blocking_queries', False))
 
         self.cloud_metadata = {}
         aws = instance.get('aws', {})

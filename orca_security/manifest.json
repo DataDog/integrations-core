@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c5503835-004d-4f4b-bf61-57845767f8e1",
   "app_id": "orca-security",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
