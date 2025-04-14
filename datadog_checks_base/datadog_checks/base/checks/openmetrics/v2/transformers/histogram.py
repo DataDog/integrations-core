@@ -5,6 +5,8 @@ from ..labels import canonicalize_numeric_label
 from ..utils import decumulate_histogram_buckets
 
 
+#
+
 def get_histogram(check, metric_name, modifiers, global_options):
     """
     https://prometheus.io/docs/concepts/metric_types/#histogram
