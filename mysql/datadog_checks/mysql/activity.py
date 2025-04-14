@@ -230,7 +230,7 @@ class MySQLActivity(DBMAsyncJob):
 
     def _should_collect_blocking_queries(self):
         # type: () -> bool
-        return self._config.activity_config.get("collect_blocking_queries", False)
+        return self._config.activity_config.get("collect_blocking_queries", False) and not self._check.is_mariadb
 
     def _get_activity_query(self):
         # type: () -> str

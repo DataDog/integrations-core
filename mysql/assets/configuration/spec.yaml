@@ -544,7 +544,7 @@ files:
                   example: 10
               - name: collect_blocking_queries
                 description: |
-                  Enable collection of blocking queries.
+                  Enable collection of blocking queries. Not supported on MariaDB.
                 value:
                   type: boolean
                   example: false
