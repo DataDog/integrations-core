@@ -143,6 +143,8 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'foo:bar',
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
+                'host:stubbed.hostname',
             },
         ),
         (
@@ -154,6 +156,8 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'server:localhost',
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
+                'host:stubbed.hostname',
             },
         ),
     ],
@@ -178,3 +182,14 @@ def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance)
         check = PostgreSql('test_instance', {}, [instance])
         assert check.resolved_hostname == expected_hostname
         assert resolve_db_host_mock.called is True
+
+def test_database_identifier(pg_instance):
+    """
+    Test functionality of calculating database_identifier
+    """
+    
+    pg_instance['database_identifier'] = {'template': '$env-$hostname:$port'}
+    pg_instance['tags'] = ['env:prod']
+    check = PostgreSql('postgres', {}, [pg_instance])
+    assert check.database_identifier == 'prod-stubbed.hostname:5432'
+ 

@@ -6,6 +6,7 @@ import copy
 import functools
 import os
 from time import time
+from string import Template
 
 import psycopg2
 from cachetools import TTLCache
@@ -97,6 +98,7 @@ class PostgreSql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
+        self._database_identifier = None
         self._agent_hostname = None
         self._database_hostname = None
         self._db = None
@@ -486,11 +488,13 @@ class PostgreSql(AgentCheck):
     @property
     def database_identifier(self):
         # type: () -> str
-        config_identifier = self._config.database_identifier.get('identifier')
-        if config_identifier:
-            return config_identifier
-        include_port = self._config.database_identifier.get('include_port', False)
-        return "{}{}".format(self.resolved_hostname, "." + str(self._config.port) if include_port else "")
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.get('template') or '$hostname')
+            tag_dict = {key: value for t in self.tags if ':' in t for key, value in [t.split(':', 1)]}
+            tag_dict['hostname'] = self.resolved_hostname
+            tag_dict['port'] = str(self._config.port)
+            self._database_identifier = template.substitute(**tag_dict)
+        return self._database_identifier
 
     def set_resolved_hostname_metadata(self):
         """
