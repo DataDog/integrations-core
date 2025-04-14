@@ -35,7 +35,7 @@ class MacAuditLogsCheck(AgentCheck):
                 f"'min_collection_interval' must be a positive integer in range of {constants.MIN_COLLECTION_INTERVAL}"
                 f" to {constants.MAX_COLLECTION_INTERVAL}, got {self.min_collection_interval}."
             )
-            self.log.error(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
+            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
             raise ConfigValueError(err_message)
 
         if not isinstance(self.monitor, bool):
@@ -43,7 +43,7 @@ class MacAuditLogsCheck(AgentCheck):
                 f"The provided 'MONITOR' value '{self.monitor}' is not a valid boolean. "
                 "Please provide either 'true' or 'false'."
             )
-            self.log.error(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
+            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
             raise ConfigurationError(err_message)
 
     def get_datetime_aware(self, date_str, tz_offset) -> datetime:
@@ -60,7 +60,7 @@ class MacAuditLogsCheck(AgentCheck):
         try:
             self.validate_configurations()
             message = "All the provided configurations in conf.yaml are valid."
-            self.log.info(constants.LOG_TEMPLATE.format(host=self.ip, message=message))
+            self.log.info(constants.LOG_TEMPLATE.format(message=message))
         except Exception:
             err_message = (
                 "Error occurred while validating the provided configurations in conf.yaml."
@@ -70,7 +70,7 @@ class MacAuditLogsCheck(AgentCheck):
         if self.monitor:
             if not os.path.exists("/dev/auditpipe"):
                 message = "/dev/auditpipe is not available. Please ensure auditing is enabled."
-                self.log.info(constants.LOG_TEMPLATE.format(host=self.ip, message=message))
+                self.log.info(constants.LOG_TEMPLATE.format(message=message))
             else:
                 timezone_offset = subprocess.run(['date', '+%z'], capture_output=True, text=True).stdout.strip()
                 praudit_process = subprocess.Popen(
@@ -96,11 +96,11 @@ class MacAuditLogsCheck(AgentCheck):
                     return
                 except Exception as exe:
                     err_message = f"Something went wrong while monitoring: {exe}"
-                    self.log.exception(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
+                    self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
                     raise
                 finally:
                     praudit_process.stdout.close()
                     praudit_process.wait()
         else:
             message = "Monitoring to the Mac Audit Logs is disabled."
-            self.log.info(constants.LOG_TEMPLATE.format(host=self.ip, message=message))
+            self.log.info(constants.LOG_TEMPLATE.format(message=message))
