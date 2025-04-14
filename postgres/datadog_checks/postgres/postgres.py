@@ -128,9 +128,7 @@ class PostgreSql(AgentCheck):
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
-        print(self.tags)
         self.set_resource_tags()
-        print(self.tags)
         self.pg_settings = {}
         self._warnings_by_code = {}
         self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
@@ -157,7 +155,6 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-        print(self.tags)
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -1000,7 +997,6 @@ class PostgreSql(AgentCheck):
 
     def check(self, _):
         tags = copy.copy(self.tags)
-        print(tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
         try:
@@ -1043,7 +1039,6 @@ class PostgreSql(AgentCheck):
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
-            print(tags)
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()

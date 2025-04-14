@@ -50,6 +50,7 @@ class QueryExecutor(object):
 
     def compile_queries(self):
         """This method compiles every `Query` object."""
+        print("COMPILE")
         column_transformers = COLUMN_TRANSFORMERS.copy()  # type: Dict[str, Transformer]
 
         for submission_method, transformer_name in SUBMISSION_METHODS.items():
@@ -63,6 +64,7 @@ class QueryExecutor(object):
     def execute(self, extra_tags=None):
         """This method executes all of the compiled queries."""
 
+        print("EXECUTING")
         global_tags = list(self.tags)
         print(global_tags)
         if extra_tags:
@@ -82,7 +84,7 @@ class QueryExecutor(object):
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers
             query_tags = query.base_tags
-            print(query_tags)
+            self.logger.error(query_tags)
 
             try:
                 if self.track_operation_time:
@@ -267,5 +269,7 @@ class QueryManager(QueryExecutor):
         # This needs to stay here b/c when we construct a QueryManager in a check's __init__
         # there is no check ID at that point
         self.logger = self.check.log
+
+        print("EXECUTE", extra_tags)
 
         return super(QueryManager, self).execute(extra_tags)
