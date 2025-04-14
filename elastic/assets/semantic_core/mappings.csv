@@ -1,0 +1,5 @@
+otel,dd,description,filter
+jvm.gc.collections.count,jvm.gc.major_collection_count{type: GarbageCollector},The total number of garbage collections that have occurred,"`name`: `MarkSweepCompact, PS MarkSweep, ConcurrentMarkSweep, G1 Mixed Generation, G1 Old Generation, Shenandoah Cycles, ZGC`"
+jvm.gc.collections.count,jvm.gc.minor_collection_count{type: GarbageCollector},The total number of garbage collections that have occurred,"`name`: `Copy, PS Scavenge, ParNew, G1 Young Generation`"
+jvm.gc.collections.elapsed,jvm.gc.major_collection_time{type: GarbageCollector},The approximate accumulated collection elapsed time,"`name`: `MarkSweepCompact, PS MarkSweep, ConcurrentMarkSweep, G1 Mixed Generation, G1 Old Generation, Shenandoah Cycles, ZGC`"
+jvm.gc.collections.elapsed,jvm.gc.minor_collection_time{type: GarbageCollector},The approximate accumulated collection elapsed time,"`name`: `Copy, PS Scavenge, ParNew, G1 Young Generation`"
