@@ -101,21 +101,25 @@ class InfinibandCheck(AgentCheck):
             if status_file in self.exclude_status_counters:
                 self.log.debug("Skipping status counter %s as it is in the exclude list", status_file)
                 continue
-            
             file_path = os.path.join(port_path, status_file)
             if os.path.exists(file_path):
                 with open(file_path, "r") as f:
                     content = f.read().strip()
                     # "4: ACTIVE" - split to get value and state
                     parts = content.split(":", 1)
-                    value = parts[0].strip()
+                    value = int(parts[0].strip())   
                     metric_tags = list(tags)
                     
+                    # Add state as a tag if it exists
                     if len(parts) > 1:
                         state = parts[1].strip()
                         metric_tags.append(f"port_{status_file}:{state}")
                     
-                    self._submit_counter_metric(file_path, f"port_{status_file}", metric_tags)
+                    if self.collection_type in {'gauge', 'both'}:
+                        self.gauge(f"port_{status_file}", value, metric_tags)
+                    
+                    if self.collection_type in {'monotonic_count', 'both'}:
+                        self.monotonic_count(f"port_{status_file}.count", value, metric_tags)
 
     def _submit_counter_metric(self, file_path, metric_name, tags):
         with open(file_path, "r") as f:
