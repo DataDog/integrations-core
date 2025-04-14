@@ -108,14 +108,15 @@ IDLE_BLOCKERS_SUBQUERY_MYSQL8 = """\
 """
 
 BLOCKING_COLUMNS_MYSQL7 = """\
-    ,blocking_trx.trx_mysql_thread_id AS blocking_thread_id,
-    blocking_trx.trx_id AS blocking_processlist_id
+    ,blocking_thread.thread_id AS blocking_thread_id,
+    blocking_thread.processlist_id AS blocking_processlist_id
 """
 
 BLOCKING_JOINS_MYSQL7 = """\
     LEFT JOIN information_schema.INNODB_TRX AS trx ON thread_a.processlist_id = trx.trx_mysql_thread_id
     LEFT JOIN information_schema.INNODB_LOCK_WAITS AS lock_waits ON trx.trx_id = lock_waits.requesting_trx_id
     LEFT JOIN information_schema.INNODB_TRX AS blocking_trx ON lock_waits.blocking_trx_id = blocking_trx.trx_id
+    LEFT JOIN performance_schema.threads AS blocking_thread ON blocking_trx.trx_mysql_thread_id = blocking_thread.processlist_id
 """
 
 IDLE_BLOCKERS_SUBQUERY_MYSQL7 = """\
