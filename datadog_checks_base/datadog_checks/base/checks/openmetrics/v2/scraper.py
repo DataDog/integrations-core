@@ -259,7 +259,9 @@ class OpenMetricsScraper:
             # Don't flush new monotonic counts on next scrape:
             # 1. Previous value may have expired in the aggregator, causing a spike
             # 2. New counter itself may be too old and large when we discover it next time.
-            self.flush_first_value = False
+            # If we didn't have a successful scrape yet, keep the initial value (use process_start_time to decide).
+            if self.flush_first_value:
+                self.flush_first_value = False
             raise
 
     def consume_metrics(self, runtime_data):
