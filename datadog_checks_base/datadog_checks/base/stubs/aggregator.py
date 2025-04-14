@@ -110,6 +110,7 @@ class AggregatorStub(object):
     def submit_metric_e2e(
         self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
     ):
+        print("METRIC", tags)
         check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):

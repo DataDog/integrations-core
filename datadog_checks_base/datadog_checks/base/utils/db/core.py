@@ -64,8 +64,10 @@ class QueryExecutor(object):
         """This method executes all of the compiled queries."""
 
         global_tags = list(self.tags)
+        print(global_tags)
         if extra_tags:
             global_tags.extend(list(extra_tags))
+        print(global_tags)
 
         for query in self.queries:
             if not query.should_execute():
@@ -80,6 +82,7 @@ class QueryExecutor(object):
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers
             query_tags = query.base_tags
+            print(query_tags)
 
             try:
                 if self.track_operation_time:
