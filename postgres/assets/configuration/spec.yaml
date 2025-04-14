@@ -59,16 +59,16 @@ files:
         - name: template
           value:
             type: string
-            display_default: "%%resolved_hostname%%"
-            example: "%%env%%.%%resolved_hostname%%:%%port%%"
+            display_default: "$resolved_hostname"
+            example: "$env-$resolved_hostname:$port"
           description: |
-            The template to use for the database identifier. The default value is `%%resolved_hostname%%`.
-            You can use the following variables in the template:
-            - %%resolved_hostname%%: The resolved hostname of the instance.
-            - %%host%%: The provided host of the instance.
-            - %%port%%: The port number of the instance.
+            The template to use for the database identifier. The default value is `$resolved_hostname`.
+            You can use the following variables, prefixed by `$` in the template:
+            - resolved_hostname: The resolved hostname of the instance. This value respects the `reported_hostname` option.
+            - host: The provided host of the instance.
+            - port: The port number of the instance.
             In addition, you can use any key from the `tags` section of the configuration.
-          default: "%%resolved_hostname%%"
+          default: "$resolved_hostname"
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.

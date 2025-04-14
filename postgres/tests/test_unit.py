@@ -183,13 +183,23 @@ def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance)
         assert check.resolved_hostname == expected_hostname
         assert resolve_db_host_mock.called is True
 
-def test_database_identifier(pg_instance):
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:5432', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+    ],
+)
+def test_database_identifier(pg_instance, template, expected, tags):
     """
     Test functionality of calculating database_identifier
     """
-    
-    pg_instance['database_identifier'] = {'template': '$env-$hostname:$port'}
-    pg_instance['tags'] = ['env:prod']
+
+    pg_instance['database_identifier'] = {'template': template}
+    pg_instance['tags'] = tags
     check = PostgreSql('postgres', {}, [pg_instance])
-    assert check.database_identifier == 'prod-stubbed.hostname:5432'
- 
+    assert check.database_identifier == expected
