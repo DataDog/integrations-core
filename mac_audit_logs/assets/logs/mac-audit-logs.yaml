@@ -110,17 +110,6 @@ pipeline:
         supportRules: _space %{regex("[\\s]*")}
         matchRules: parse_subject_tid_rule
           %{word:device-id}%{_space}%{ip:network.client.ip}
-    - type: grok-parser
-      name: Parse `record.time` attribute
-      enabled: true
-      source: record.time
-      samples:
-        - Wed Mar 26 15:14:18 2025
-        - Tue Apr  1 15:14:18 2025
-      grok:
-        supportRules: ""
-        matchRules: time_parsing_rule %{date("EEE MMM  d HH:mm:ss yyyy",
-          "UTC"):timestamp}|%{date("EEE MMM d HH:mm:ss yyyy", "UTC"):timestamp}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true

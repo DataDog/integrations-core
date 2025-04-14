@@ -11,7 +11,7 @@ This integration provides enrichment and visualization for various log types, in
 - **Input/Output Control**  
 - **IPC (Inter-Process Communication)**  
 
-This integration collects mac audit logs and sends them to Datadog for analysis, providing visual insights through out-of-the-box dashboards and Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
+This integration collects Mac audit logs and sends them to Datadog for analysis, providing visual insights through out-of-the-box dashboards and the Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
 
 * [Log Explorer][2]
 * [Cloud SIEM][3]
@@ -33,6 +33,7 @@ For Mac, run:
 ### Configuration
 
 #### Configure BSM Auditing on Mac
+**Note**: The following steps are required for the Mac version >=14.
 
 1. Copy the configurations from `audit_control.example` to `audit_control`
     ```shell
@@ -50,8 +51,6 @@ For Mac, run:
     ```
 
 4. Restart the Mac.
-
-**Note**: The above steps are needed for the mac version >=14.
 
 ### Validation
 
@@ -75,63 +74,22 @@ The Mac Audit Logs integration does not include any metrics.
 
    See the [sample mac_audit_logs.d/conf.yaml][6] for available configuration options.
 
-    * **Configuration for a Single MAC Machine**
       ```yaml
       init_config:
       instances:
         - MONITOR: true
-          PORT: <PORT> 
           min_collection_interval: 15
       logs:
-        - type: udp
-          port: <PORT>
+        - type: integration
           service: mac-audit-logs
           source: mac-audit-logs
       ```
 
-    * **Configuration for Centralized Monitoring**
-      * Configuration on MAC device
-        ```yaml
-        init_config:
-        instances:
-          - MONITOR: true
-            IP: <Centralized Machine IP>
-            PORT: <PORT> 
-            min_collection_interval: 15
-        ```
-      * Centralized Log Collection Configuration
-        ```yaml
-        logs:
-            - type: udp
-              port: <PORT>
-              service: mac-audit-logs
-              source: mac-audit-logs
-        ```
-
-   **Note**: 
+   **Note**:
      - Do not change the `service` and `source` values, as they are essential for proper log pipeline processing.
-     - In case of Centralized monitoring, set `instances > IP` with the centralized device IP where the datadog agent is installed.
-     - Ensure `instances > PORT` matches the value in `logs > port`.
 
 3. [Restart the Agent][7].
 
-#### Specify a time zone other than UTC in the Mac Audit Logs Datadog log pipeline
-
-Datadog expects all logs to be in the UTC time zone by default. If the timezone of your Mac machine is not UTC, specify the correct time zone in the Mac Audit Logs Datadog pipeline.
-
-To change the time zone in Mac Audit Logs pipeline:
-
-  1. Navigate to the [**Pipelines** page][9] in the Datadog app. 
-
-  2. Enter "Mac Audit Logs" in the  **Filter Pipelines** search box.
-
-  3. Hover over the Mac Audit Logs pipeline and click on the **clone**  button. This will create an editable clone of the Mac Audit Logs pipeline.
-
-  4. Edit the Grok Parser using the below steps:
-      - In the cloned pipeline, find a processor with the name "Grok Parser: Parse \`record.time\` attribute" and click on the `Edit` button by hovering over the pipeline.
-      - Under **Define parsing rules**,
-        - Change the string `UTC` to the [TZ identifier][9] of the time zone of your MAC machine. For example, if your timezone is IST, you would change the value to`Asia/Calcutta`.
-      - Click the **update** button.
 ### Events
 
 The Mac Audit Logs integration does not include any events.
@@ -149,4 +107,3 @@ Need help? Contact [Datadog support][8].
 [6]: https://github.com/DataDog/integrations-core/blob/master/mac_audit_logs/datadog_checks/mac_audit_logs/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/help/
-[9]: https://app.datadoghq.com/logs/pipelines

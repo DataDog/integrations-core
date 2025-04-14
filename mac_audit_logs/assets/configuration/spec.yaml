@@ -13,18 +13,6 @@ files:
       value:
         type: boolean
         example: true
-    - name: IP
-      required: false
-      description: "IP for sending audit logs."
-      value:
-        type: string
-        example: <IP>
-    - name: PORT
-      required: true
-      description: "Port for sending audit logs. Ensure it matches the value in logs > port."
-      value:
-        type: string
-        example: <PORT>
     - template: instances/default
       overrides:
         min_collection_interval.required: true
@@ -36,7 +24,6 @@ files:
         metric_patterns.hidden: true
   - template: logs
     example:
-    - type: udp
-      port: <PORT>
+    - type: integration
       service: mac-audit-logs
       source: mac-audit-logs

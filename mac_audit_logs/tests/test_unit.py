@@ -29,32 +29,6 @@ def test_validate_configurations_with_wrong_monitor_value(instance):
 
 
 @pytest.mark.unit
-def test_validate_configurations_with_wrong_ip_address(instance):
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-
-    wrong_ip_address = "10.10"
-    err_message = (
-        "'IP' is not valid. Please provide a valid IP address with ipv4 protocol where the datadog agent is installed."
-    )
-    with pytest.raises(ConfigurationError, match=err_message):
-        check.ip = wrong_ip_address
-        check.validate_configurations()
-
-
-@pytest.mark.unit
-def test_validate_configurations_with_wrong_port(instance):
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-
-    wrong_port = 65536
-    err_message = (
-        f"'PORT' must be a positive integer in range of {constants.MIN_PORT} to {constants.MAX_PORT}, got {wrong_port}."
-    )
-    with pytest.raises(ConfigurationError, match=err_message):
-        check.port = wrong_port
-        check.validate_configurations()
-
-
-@pytest.mark.unit
 def test_validate_configurations_with_wrong_min_collection_interval(instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
 

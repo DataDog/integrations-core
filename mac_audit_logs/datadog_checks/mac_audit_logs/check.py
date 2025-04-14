@@ -2,15 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import re
-import socket
 import subprocess
+from datetime import datetime, timedelta, timezone
+from xml.etree.ElementTree import ParseError
+
+from lxml import etree
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.errors import (
     ConfigurationError,
     ConfigValueError,
 )
+from datadog_checks.base.utils.time import get_timestamp
 
 from . import constants
 
@@ -22,17 +25,10 @@ class MacAuditLogsCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(MacAuditLogsCheck, self).__init__(name, init_config, instances)
 
-        self.host_address = None
         self.monitor = self.instance.get("MONITOR", True)
-        self.ip = self.instance.get("IP", constants.LOCALHOST)
-        self.port = self.instance.get("PORT")
         self.min_collection_interval = self.instance.get("min_collection_interval")
 
     def validate_configurations(self) -> None:
-        for field_name in constants.REQUIRED_FIELDS:
-            if self.instance.get(field_name) is None:
-                err_message = f"'{field_name}' field is required."
-                raise ConfigurationError(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
 
         if not constants.MIN_COLLECTION_INTERVAL <= self.min_collection_interval <= constants.MAX_COLLECTION_INTERVAL:
             err_message = (
@@ -50,30 +46,15 @@ class MacAuditLogsCheck(AgentCheck):
             self.log.error(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
             raise ConfigurationError(err_message)
 
-        if self.ip != constants.LOCALHOST and not re.match(
-            constants.IPV4_PATTERN,
-            self.ip,
-        ):
-            err_message = (
-                "'IP' is not valid."
-                " Please provide a valid IP address with ipv4 protocol where the datadog agent is installed."
-            )
-            self.log.error(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
-            raise ConfigurationError(err_message)
+    def get_datetime_aware(self, date_str, tz_offset) -> datetime:
+        dt = datetime.strptime(date_str, constants.TIMESTAMP_FORMAT)
 
-        try:
-            self.port = int(self.port)
-        except ValueError:
-            err_message = f"Invalid 'PORT': {self.port} is not an integer."
-            self.log.error(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
+        sign = 1 if tz_offset[0] == "+" else -1
+        hours_offset = int(tz_offset[1:3])
+        minutes_offset = int(tz_offset[3:5])
+        offset = timedelta(hours=hours_offset, minutes=minutes_offset) * sign
 
-        if not constants.MIN_PORT <= int(self.port) <= constants.MAX_PORT:
-            err_message = (
-                f"'PORT' must be a positive integer in range of {constants.MIN_PORT}"
-                f" to {constants.MAX_PORT}, got {self.port}."
-            )
-            self.log.error(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
-            raise ConfigurationError(err_message)
+        return dt.replace(tzinfo=timezone(offset))
 
     def check(self, _):
         try:
@@ -86,13 +67,12 @@ class MacAuditLogsCheck(AgentCheck):
                 " Please check logs for more details."
             )
             raise
-
         if self.monitor:
             if not os.path.exists("/dev/auditpipe"):
                 message = "/dev/auditpipe is not available. Please ensure auditing is enabled."
                 self.log.info(constants.LOG_TEMPLATE.format(host=self.ip, message=message))
             else:
-                udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                timezone_offset = subprocess.run(['date', '+%z'], capture_output=True, text=True).stdout.strip()
                 praudit_process = subprocess.Popen(
                     ["praudit", "-xsl", "/dev/auditpipe"], stdout=subprocess.PIPE, text=True
                 )
@@ -101,13 +81,24 @@ class MacAuditLogsCheck(AgentCheck):
                     for log in praudit_process.stdout:
                         if log.strip() in ["<?xml version='1.0' encoding='UTF-8'?>", "<audit>"]:
                             continue
-                        udp_sock.sendto(log.encode(), (self.ip, self.port))
+
+                        data_xml = etree.fromstring(log)
+                        time_value = data_xml.get("time")
+                        datetime_aware = self.get_datetime_aware(time_value, timezone_offset)
+
+                        data = {}
+                        data['timestamp'] = get_timestamp(datetime_aware)
+                        data['message'] = log
+
+                        self.send_log(data)
+                except ParseError as exe:
+                    self.log.error(f"Unable to parse the XML response: {exe}")  # noqa: G004
+                    return
                 except Exception as exe:
                     err_message = f"Something went wrong while monitoring: {exe}"
                     self.log.exception(constants.LOG_TEMPLATE.format(host=self.ip, message=err_message))
                     raise
                 finally:
-                    udp_sock.close()
                     praudit_process.stdout.close()
                     praudit_process.wait()
         else:

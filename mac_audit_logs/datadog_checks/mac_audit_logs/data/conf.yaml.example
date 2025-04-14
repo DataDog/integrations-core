@@ -18,16 +18,6 @@ instances:
     #
   - MONITOR: true
 
-    ## @param IP - string - optional
-    ## IP for sending audit logs.
-    #
-    # IP: <IP>
-
-    ## @param PORT - string - required
-    ## Port for sending audit logs. Ensure it matches the value in logs > port.
-    #
-    PORT: <PORT>
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -59,7 +49,6 @@ instances:
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
-#   - type: udp
-#     port: <PORT>
+#   - type: integration
 #     service: mac-audit-logs
 #     source: mac-audit-logs
