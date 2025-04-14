@@ -88,7 +88,8 @@ class CheckSSH(AgentCheck):
                     else:
                         self.log.error(
                             "Authentication was not successful. Allowed authentication methods are: `password`, \
-                            `publickey` with optional passphrase for the private key. Multi-factor authentication is not supported."
+                            `publickey` with optional passphrase for the private key. Multi-factor authentication \
+                            is not supported."
                         )
                         self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.base_tags)
                 else:
