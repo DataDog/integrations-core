@@ -10,15 +10,11 @@ from math import isinf, isnan
 from os.path import isfile
 from re import compile
 
-import requests
-from prometheus_client.samples import Sample
-
 from datadog_checks.base.agent import datadog_agent
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_native_string
-from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 from ..libs.prometheus import text_fd_to_metric_families
 
@@ -380,6 +376,10 @@ class OpenMetricsScraperMixin(object):
         The http handler is cached using `prometheus_url` as key.
         The http handler doesn't use the cache if a bearer token is used to allow refreshing it.
         """
+
+        # See Performance Optimizations in this package's README.md.
+        from ...utils.http import RequestsWrapper
+
         prometheus_url = scraper_config['prometheus_url']
         bearer_token = scraper_config['_bearer_token']
         if prometheus_url in self._http_handlers and bearer_token is None:
@@ -826,6 +826,9 @@ class OpenMetricsScraperMixin(object):
 
         Custom headers can be added to the default headers.
         """
+        # See Performance Optimizations in this package's README.md.
+        import requests
+
         endpoint = scraper_config.get('prometheus_url')
 
         # Should we send a service check for when we make a request
@@ -1060,6 +1063,9 @@ class OpenMetricsScraperMixin(object):
         """
         Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
         """
+        # See Performance Optimizations in this package's README.md.
+        from prometheus_client.samples import Sample
+
         bucket_values_by_context_upper_bound = {}
         for sample in metric.samples:
             if sample[self.SAMPLE_NAME].endswith("_bucket"):

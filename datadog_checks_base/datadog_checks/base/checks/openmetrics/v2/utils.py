@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from prometheus_client.samples import Sample
 
 NEGATIVE_INFINITY = float('-inf')
 
@@ -10,6 +9,9 @@ def decumulate_histogram_buckets(sample_data):
     """
     Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
     """
+    # See Performance Optimizations in this package's README.md.
+    from prometheus_client.samples import Sample
+
     # TODO: investigate performance optimizations
     new_sample_data = []
     bucket_values_by_context_upper_bound = {}
