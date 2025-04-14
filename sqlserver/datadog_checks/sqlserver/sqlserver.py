@@ -7,6 +7,7 @@ from __future__ import division
 import copy
 import time
 from collections import defaultdict
+from string import Template
 
 from cachetools import TTLCache
 
@@ -129,6 +130,7 @@ class SQLServer(AgentCheck):
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self.tags = self._config.tags
         self.add_core_tags()
+        self.cloud_metadata = self._config.cloud_metadata
 
         self.databases = set()
         self.autodiscovery_query = None
@@ -160,7 +162,6 @@ class SQLServer(AgentCheck):
         self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.load_static_information)
-        self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
 
@@ -211,26 +212,29 @@ class SQLServer(AgentCheck):
         self.tags.append("database_instance:{}".format(self.database_identifier))
 
     def set_resource_tags(self):
-        if self._config.cloud_metadata.get("gcp") is not None:
+        if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self._config.cloud_metadata.get("gcp")["project_id"],
-                    self._config.cloud_metadata.get("gcp")["instance_id"],
+                    self.cloud_metadata.get("gcp")["project_id"],
+                    self.cloud_metadata.get("gcp")["instance_id"],
                 )
             )
-        if self._config.cloud_metadata.get("aws") is not None:
+        if self.cloud_metadata.get("aws") is not None:
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
-                    self._config.cloud_metadata.get("aws")["instance_endpoint"],
+                    self.cloud_metadata.get("aws")["instance_endpoint"],
                 )
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
-        if self._config.cloud_metadata.get("azure") is not None:
-            deployment_type = self._config.cloud_metadata.get("azure")["deployment_type"]
-            name = self._config.cloud_metadata.get("azure")["name"]
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.cloud_metadata["aws"] = {
+                "instance_endpoint": self.resolved_hostname,
+            }
+        if self.cloud_metadata.get("azure") is not None:
+            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+            name = self.cloud_metadata.get("azure")["name"]
             db_instance = None
             if "sql_database" in deployment_type and self._config.dbm_enabled:
                 # azure_sql_server_database resource should be set to {fully_qualified_server_name}/{database_name}
@@ -286,17 +290,23 @@ class SQLServer(AgentCheck):
     @property
     def database_identifier(self):
         # type: () -> str
-        config_identifier = self._config.database_identifier.get('identifier')
-        if config_identifier:
-            return config_identifier
-        include_port = self._config.database_identifier.get('include_port', False)
-        include_instance = self._config.database_identifier.get('include_instance', False)
-
-        return "{}{}{}".format(
-            self.resolved_hostname,
-            ":" + self.port if include_port else "",
-            "\\" + self.instance.get("database") if include_instance else "",
-        )
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            tag_dict = {}
+            for t in self.tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['resolved_hostname'] = self.resolved_hostname
+            tag_dict['host'] = str(self.port)
+            tag_dict['port'] = str(self.host)
+            tag_dict['server_name'] = self.static_info_cache[STATIC_INFO_SERVERNAME]
+            tag_dict['instance_name'] = self.static_info_cache[STATIC_INFO_INSTANCENAME]
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     @property
     def database_hostname(self):
@@ -378,7 +388,8 @@ class SQLServer(AgentCheck):
             # after it's loaded
             if engine_edition_reloaded:
                 self._resolved_hostname = None
-            self.set_resolved_hostname()
+            # re-initialize database_identifier to ensure we take into consideration any included static information
+            self._database_identifier = None
 
     def debug_tags(self):
         return self.tags + ["agent_hostname:{}".format(self.agent_hostname)]
@@ -1020,7 +1031,7 @@ class SQLServer(AgentCheck):
                 "integration_version": __version__,
                 "tags": self.non_internal_tags,
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.connection_host,

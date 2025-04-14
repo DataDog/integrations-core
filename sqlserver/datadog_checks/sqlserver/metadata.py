@@ -146,7 +146,7 @@ class SqlserverMetadata(DBMAsyncJob):
                     ),
                     "tags": self.tags,
                     "timestamp": time.time() * 1000,
-                    "cloud_metadata": self._config.cloud_metadata,
+                    "cloud_metadata": self.cloud_metadata,
                     "metadata": settings_rows,
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

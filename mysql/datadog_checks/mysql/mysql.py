@@ -9,6 +9,7 @@ import time
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
+from string import Template
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
@@ -109,6 +110,7 @@ class MySql(AgentCheck):
         self.version = None
         self.is_mariadb = None
         self._resolved_hostname = None
+        self._database_identifier = None
         self._agent_hostname = None
         self._database_hostname = None
         self._is_aurora = None
@@ -178,11 +180,22 @@ class MySql(AgentCheck):
     @property
     def database_identifier(self):
         # type: () -> str
-        config_identifier = self._config.database_identifier.get('identifier')
-        if config_identifier:
-            return config_identifier
-        include_port = self._config.database_identifier.get('include_port', False)
-        return "{}{}".format(self.resolved_hostname, "." + str(self._config.port) if include_port else "")
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            tag_dict = {}
+            for t in self.tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['resolved_hostname'] = self.resolved_hostname
+            tag_dict['host'] = str(self._config.host)
+            tag_dict['port'] = str(self._config.port)
+            tag_dict['mysql_sock'] = str(self._config.mysql_sock)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     @property
     def agent_hostname(self):
@@ -222,6 +235,9 @@ class MySql(AgentCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.cloud_metadata["aws"] = {
+                "instance_endpoint": self.resolved_hostname,
+            }
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             # some `deployment_type`s map to multiple `resource_type`s
