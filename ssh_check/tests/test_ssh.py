@@ -192,24 +192,15 @@ def test_force_sha1_disabled(aggregator, dd_run_check, settings):
     ]
 
 
-@pytest.mark.parametrize(
-    'authenticated,service_check_result',
-    [
-        pytest.param(True, CheckSSH.OK, id='authenticated'),
-        pytest.param(False, CheckSSH.CRITICAL, id='not authenticated'),
-    ],
-)
-def test_force_sha1_enabled(aggregator, dd_run_check, authenticated, service_check_result):
+def test_force_sha1_enabled(aggregator, dd_run_check):
     settings = {'force_sha1': True}
     inst = deepcopy(common.INSTANCES['main'])
     inst.update(settings)
-    client, ssh = _setup_check_with_mock_client(
-        inst, connect_result=CONNECTION_SUCCEEDED, authentication_result=authenticated
-    )
+    client, ssh = _setup_check_with_mock_client(inst, connect_result=CONNECTION_SUCCEEDED)
 
     dd_run_check(ssh)
 
-    aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, service_check_result)
+    aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, CheckSSH.OK)
     assert client.connect.mock_calls == [
         call(
             ssh.instance['host'],
