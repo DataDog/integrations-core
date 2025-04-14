@@ -19,11 +19,10 @@ pytestmark = pytest.mark.unit
 CONNECTION_SUCCEEDED = None
 
 
-def _setup_check_with_mock_client(instance, connect_result, authentication_result=None):
+def _setup_check_with_mock_client(instance, connect_result, authentication_result=True):
     mock_transport = MagicMock()
     mock_transport.remote_version = 'SSH-2.0-OpenSSH_8.1'
-    if authentication_result is not None:
-        mock_transport.is_authenticated.return_value = authentication_result
+    mock_transport.is_authenticated.return_value = authentication_result
 
     client = create_autospec(paramiko.SSHClient)
     client.connect.side_effect = [connect_result]
