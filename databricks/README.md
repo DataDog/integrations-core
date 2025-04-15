@@ -19,6 +19,8 @@ Datadog offers several Databricks monitoring capabilities.
 
 [Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
 
+[Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry—logs, metrics, and traces—with critical context like workspace names, job definitions, cluster configurations, and user roles.
+
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
 
@@ -522,3 +524,4 @@ Additional helpful documentation, links, and articles:
 [29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
 [30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
 [31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal
+[32]: https://docs.datadoghq.com/reference_tables
