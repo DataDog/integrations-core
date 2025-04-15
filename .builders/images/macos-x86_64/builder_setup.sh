@@ -23,8 +23,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.4.1" \
-SHA256="002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3" \
+VERSION="3.4.0" \
+SHA256="e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
