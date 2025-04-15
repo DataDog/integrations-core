@@ -14,6 +14,7 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+from datadog_checks.sqlserver.const import STATIC_INFO_INSTANCENAME, STATIC_INFO_SERVERNAME
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -25,8 +26,6 @@ from datadog_checks.sqlserver.utils import (
     parse_sqlserver_major_version,
     set_default_driver_conf,
 )
-from datadog_checks.sqlserver.const import STATIC_INFO_SERVERNAME, STATIC_INFO_INSTANCENAME
-
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import deep_compare, not_windows_ci, windows_ci
@@ -886,6 +885,7 @@ def test_get_unixodbc_sysconfig():
         "embedded",
         "etc",
     ], "incorrect unix odbc config dir"
+
 
 @pytest.mark.parametrize(
     'template, expected, tags',
