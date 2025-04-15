@@ -308,8 +308,8 @@ class SQLServer(AgentCheck):
             tag_dict['resolved_hostname'] = self.resolved_hostname
             tag_dict['host'] = str(self.port)
             tag_dict['port'] = str(self.host)
-            tag_dict['server_name'] = self.static_info_cache[STATIC_INFO_SERVERNAME]
-            tag_dict['instance_name'] = self.static_info_cache[STATIC_INFO_INSTANCENAME]
+            tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
+            tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
             self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
 
