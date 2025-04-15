@@ -94,6 +94,7 @@ foundationdb.process.role.stored_bytes,gauge,,byte,,,0,foundationdb,stored bytes
 foundationdb.process.role.total_queries.counter,count,,query,,,0,foundationdb,total queries,
 foundationdb.process.role.total_queries.hz,gauge,,query,,,0,foundationdb,total queries,
 foundationdb.processes,gauge,,process,,,0,foundationdb,processes,
+foundationdb.processes_per_role,gauge,,process,,,0,foundationdb,processes per role/process class,
 foundationdb.processes_per_role.cluster_controller,gauge,,process,,,0,foundationdb,processes per cluster controller,
 foundationdb.processes_per_role.coordinator,gauge,,process,,,0,foundationdb,processes per coordinator,
 foundationdb.processes_per_role.data_distributor,gauge,,process,,,0,foundationdb,processes per data distributor,
