@@ -6,7 +6,7 @@ tests:
     custom:
       AUID: "root"
       auid: 0
-      event_id: 6532.0
+      event_id: 6532
       msg:
         comm: "semanage"
         exe: "/usr/libexec/platform-python3.6"
@@ -47,7 +47,7 @@ tests:
     custom:
       AUID: "unset"
       auid: 4294967295
-      event_id: 1778.0
+      event_id: 1778
       msg:
         acct: "devuser"
         exe: "/usr/sbin/sshd"
@@ -87,7 +87,7 @@ tests:
     custom:
       enabled: 1
       enforcing: 0
-      event_id: 1674.0
+      event_id: 1674
       lsm: "selinux"
       msg:
         res: "success"
@@ -113,7 +113,7 @@ tests:
     custom:
       comm: "groupadd"
       dev: "proc"
-      event_id: 182.0
+      event_id: 182
       ino: 1
       name: "/"
       operation: "getattr"
@@ -170,7 +170,7 @@ tests:
     custom:
       AUID: "devuser"
       auid: 1001
-      event_id: 2606.0
+      event_id: 2606
       msg:
         default-context: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
         exe: "/usr/sbin/sshd"
