@@ -4,12 +4,12 @@
 
 import os
 from pathlib import Path
-
+from rich.console import Console
 import click
 
 from .common import (
     compress,
-    get_dependencies,
+    get_dependencies_list,
     get_dependencies_sizes,
     get_gitignore_files,
     group_modules,
@@ -17,44 +17,56 @@ from .common import (
     is_valid_integration,
     print_csv,
     print_table,
+    valid_platforms_versions
 )
 
-VALID_PLATFORMS = ["linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"]
-VALID_PYTHON_VERSIONS = ["3.12"]
-REPO_PATH = Path(__file__).resolve().parents[5]
+#VALID_PLATFORMS = ["linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"]
 
+
+REPO_PATH = Path(__file__).resolve().parents[5]
+# VALID_PLATFORMS, VALID_PYTHON_VERSIONS = valid_platforms_versions()
+
+console = Console()
 
 @click.command()
-@click.option('--platform', type=click.Choice(VALID_PLATFORMS), help="Target platform")
-@click.option('--python', 'version', type=click.Choice(VALID_PYTHON_VERSIONS), help="Python version (MAJOR.MINOR)")
+@click.option('--platform', help="Target platform")
+@click.option('--python', 'version', help="Python version (MAJOR.MINOR)")
 @click.option('--compressed', is_flag=True, help="Measure compressed size")
 @click.option('--csv', is_flag=True, help="Output in CSV format")
 @click.pass_obj
 def status(app, platform, version, compressed, csv):
     try:
-        platforms = VALID_PLATFORMS if platform is None else [platform]
-        versions = VALID_PYTHON_VERSIONS if version is None else [version]
-
-        for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-            status_mode(app, plat, ver, compressed, csv, i)
+        repo_path = app.repo.path
+        valid_platforms,valid_versions = valid_platforms_versions(repo_path)
+        if platform and platform not in valid_platforms:
+            raise ValueError(f"Invalid platform: {platform}")
+        elif version and version not in valid_versions:
+            raise ValueError(f"Invalid version: {version}")
+        if platform is None or version is None:
+            platforms =  valid_platforms if platform is None else [platform]
+            versions = valid_versions if version is None else [version]
+            for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
+                status_mode(app, plat, ver, compressed, csv, i)
+        else:
+           status_mode(app, platform, version, compressed, csv, None)
+        
     except Exception as e:
         app.abort(str(e))
 
 
 def status_mode(app, platform, version, compressed, csv, i):
-    if compressed:
-        modules = get_compressed_files() + get_compressed_dependencies(platform, version)
+    with console.status("[cyan]Calculating sizes...", spinner="dots"):
+        modules = get_files(compressed) + get_dependencies(platform, version,compressed)
+    grouped_modules = group_modules(modules, platform, version, i)
+    grouped_modules.sort(key=lambda x: x['Size (Bytes)'], reverse=True)
 
-        grouped_modules = group_modules(modules, platform, version)
-        grouped_modules.sort(key=lambda x: x['Size (Bytes)'], reverse=True)
-
-        if csv:
-            print_csv(app, i, grouped_modules)
-        else:
-            print_table(app, grouped_modules, platform, version)
+    if csv:
+        print_csv(app, i, grouped_modules)
+    else:
+        print_table(app, "STATUS", grouped_modules)
 
 
-def get_compressed_files():
+def get_files(compressed):
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(REPO_PATH)
@@ -70,24 +82,27 @@ def get_compressed_files():
 
             # Filter files
             if is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
-                compressed_size = compress(file_path)
+                size = compress(file_path) if compressed else os.path.getsize(file_path)
                 integration = relative_path.split(os.sep)[0]
                 file_data.append(
                     {
                         "File Path": relative_path,
                         "Type": "Integration",
                         "Name": integration,
-                        "Size (Bytes)": compressed_size,
+                        "Size (Bytes)": size,
                     }
                 )
     return file_data
 
 
-def get_compressed_dependencies(platform, version):
+def get_dependencies(platform, version):
 
     resolved_path = os.path.join(REPO_PATH, ".deps/resolved")
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls = get_dependencies(file_path)
+            deps, download_urls = get_dependencies_list(file_path)
             return get_dependencies_sizes(deps, download_urls)
+
+
+

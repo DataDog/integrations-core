@@ -10,7 +10,37 @@ from ddev.cli.size.common import (
     is_correct_dependency,
     is_valid_integration,
     print_csv,
+    valid_platforms_versions
 )
+
+
+def test_valid_platforms_versions():
+    filenames = [
+        "linux-aarch64_3.12.txt",
+        "linux-aarch64_py2.txt",
+        "linux-aarch64_py3.txt",
+        "linux-x86_64_3.12.txt",
+        "linux-x86_64_py2.txt",
+        "linux-x86_64_py3.txt",
+        "macos-x86_64_3.12.txt",
+        "macos-x86_64_py2.txt",
+        "macos-x86_64_py3.txt",
+        "windows-x86_64_3.12.txt",
+        "windows-x86_64_py2.txt",
+        "windows-x86_64_py3.txt"
+    ]
+
+    expected_platforms = {
+        "linux-aarch64",
+        "linux-x86_64",
+        "macos-x86_64",
+        "windows-x86_64"
+    }
+    expected_versions = {"3.12"}
+    with patch("os.listdir", return_value=filenames):
+        platforms, versions = valid_platforms_versions("/tmp/fake_repo")
+        assert platforms == expected_platforms
+        assert versions == expected_versions
 
 
 def test_is_correct_dependency():
@@ -97,7 +127,7 @@ def test_group_modules():
         },
     ]
 
-    assert group_modules(modules, platform, version) == expected_output
+    assert group_modules(modules, platform, version,0) == expected_output
 
 
 def test_get_gitignore_files():

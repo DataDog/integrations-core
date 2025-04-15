@@ -138,6 +138,7 @@ def mock_size_diff_dependencies():
     get_compressed_dependencies_side_effect.counter = 0
 
     with (
+        patch("ddev.cli.size.diff.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch("ddev.cli.size.diff.GitRepo.checkout_commit"),
@@ -174,15 +175,20 @@ def test_diff_csv(ddev, mock_size_diff_dependencies):
 
 
 
-
 def test_diff_no_differences(ddev):
     fake_repo = MagicMock()
+    fake_repo.repo_dir = "/tmp/fake_repo"
 
     with (
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),
+        patch("ddev.cli.size.diff.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch.object(fake_repo, "checkout_commit"),
         patch("tempfile.mkdtemp", return_value="/tmp/fake_repo"),
+        patch("os.path.exists", return_value=True),
+        patch("os.path.isdir", return_value=True),
+        patch("os.path.isfile", return_value=True),
+        patch("os.listdir", return_value=["linux-aarch64_3.12"]),
         patch(
             "ddev.cli.size.diff.get_compressed_files",
             return_value={

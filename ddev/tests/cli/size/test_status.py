@@ -12,7 +12,7 @@ from ddev.cli.size.status import (
 )
 
 
-def test_get_compressed_files():
+def test_get_files_compressed():
     mock_files = [
         ("root/integration/datadog_checks", [], ["file1.py", "file2.py"]),
         ("root/integration_b/datadog_checks", [], ["file3.py"]),
@@ -35,7 +35,7 @@ def test_get_compressed_files():
         patch("ddev.cli.size.status.compress", side_effect=fake_compress),
     ):
 
-        result = get_compressed_files()
+        result = get_files(True)
 
     expected = [
         {
@@ -93,6 +93,7 @@ def test_get_compressed_dependencies():
 @pytest.fixture()
 def mock_size_status():
     with (
+        patch("ddev.cli.size.status.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
         patch("ddev.cli.size.status.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.status.compress", return_value=1234),
         patch("ddev.cli.size.status.get_dependencies", return_value=(["dep1"], {"dep1": "https://example.com/dep1"})),
