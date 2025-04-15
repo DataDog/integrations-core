@@ -96,7 +96,7 @@ pipeline:
       grok:
         supportRules: >-
           log_prefix
-          type=%{notSpace:type}%{_space}msg=audit\(%{number:timestamp}\:%{number:event_id}\)
+          type=%{notSpace:type}%{_space}msg=audit\(%{number:timestamp}\:%{integer:event_id}\)
 
           unicode_char %{regex("[\\p{C}]")}
 
@@ -172,8 +172,9 @@ pipeline:
               addr=? terminal=?'\x1d"
           grok:
             supportRules: _space \s*
-            matchRules: user_selinux_err_rule '(%{regex(".*(?=
-              exe)"):error})?%{_space}%{data:msg:keyvalue("=",":?/\"|*<>, ")}'
+            matchRules: user_selinux_err_rule
+              '%{data:error}%{_space}exe="%{regex("[^\"]+"):exe}"
+              %{data:msg:keyvalue("=",":?/\"|*<>, ")}'
     - type: pipeline
       name: Parsing User Role Change  logs
       enabled: true

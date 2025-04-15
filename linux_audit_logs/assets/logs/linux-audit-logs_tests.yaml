@@ -199,3 +199,6 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1741000050325
+ -
+  sample: "type=MAC_CONFIG_CHANGE msg=audit(1678360880.644:121): bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1\x1dAUID=\"serviceuser\""
+  result: null
