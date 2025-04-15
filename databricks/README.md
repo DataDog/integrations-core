@@ -19,7 +19,7 @@ Datadog offers several Databricks monitoring capabilities.
 
 [Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
 
-[Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry—logs, metrics, and traces—with critical context like workspace names, job definitions, cluster configurations, and user roles.
+[Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry with critical context like workspace names, job definitions, cluster configurations, and user roles.
 
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
