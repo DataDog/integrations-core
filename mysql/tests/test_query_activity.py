@@ -120,6 +120,7 @@ def test_activity_collection(
     assert activity['ddagentversion'], "missing agent version"
     assert set(activity['ddtags']) == {
         'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
         'tag1:value1',
         'tag2:value2',
         'port:13306',

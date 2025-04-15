@@ -885,6 +885,7 @@ def test_get_unixodbc_sysconfig():
         "etc",
     ], "incorrect unix odbc config dir"
 
+
 @pytest.mark.parametrize(
     'template, expected, tags',
     [

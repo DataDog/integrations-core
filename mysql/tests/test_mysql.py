@@ -848,6 +848,7 @@ def test_propagate_agent_tags(
         instance_basic.get('tags', [])
         + [
             'database_hostname:stubbed.hostname',
+            'database_instance:stubbed.hostname',
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
             'dd.internal.resource:database_instance:forced_hostname',
