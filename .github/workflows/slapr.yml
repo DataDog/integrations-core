@@ -32,17 +32,17 @@ jobs:
         ddev size status --csv > size-uncompressed.csv
         ddev size status
         echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
-        echo "```" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
         ddev size status >> $GITHUB_STEP_SUMMARY
-        echo "```" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
     - name: Measure disk usage (compressed)
       run: |
         ddev size status --csv --compressed > size-compressed.csv
         ddev size status --compressed
         echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
-        echo "```" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
         ddev size status --compressed >> $GITHUB_STEP_SUMMARY
-        echo "```" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
     - name: Upload file sizes (uncompressed)
       uses: actions/upload-artifact@v4
       with:
