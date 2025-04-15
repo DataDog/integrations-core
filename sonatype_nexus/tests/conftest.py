@@ -19,6 +19,7 @@ instance = {
     "server_url": "https://example.com",
 }
 
+
 def get_nexus_password(max_retries=5, retry_interval=10, password_wait_retries=30, password_wait_interval=10):
     try:
         run_command("docker run -d -p 8081:8081 --name sonatype_nexus_38 sonatype/nexus3:3.79.0")
