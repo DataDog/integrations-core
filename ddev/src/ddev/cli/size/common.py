@@ -83,9 +83,9 @@ def get_dependencies_sizes(deps, download_urls, compressed):
     file_data = []
     for dep, url in zip(deps, download_urls, strict=False):
         if compressed:
-            with requests.get(url, stream=True) as response:
-                response.raise_for_status()
-                size = int(response.headers.get("Content-Length"))
+            response = requests.head(url)
+            response.raise_for_status()
+            size = int(response.headers.get("Content-Length"))
         else:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()

@@ -95,14 +95,14 @@ def get_files(compressed):
     return file_data
 
 
-def get_dependencies(platform, version):
+def get_dependencies(platform, version, compressed):
 
     resolved_path = os.path.join(REPO_PATH, ".deps/resolved")
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             deps, download_urls = get_dependencies_list(file_path)
-            return get_dependencies_sizes(deps, download_urls)
+            return get_dependencies_sizes(deps, download_urls, compressed)
 
 
 

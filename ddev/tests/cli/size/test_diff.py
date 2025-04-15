@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-from ddev.cli.size.diff import get_compressed_dependencies, get_compressed_files, get_diff
+from ddev.cli.size.diff import get_dependencies, get_files, get_diff
 
 
 def test_get_compressed_files():
@@ -36,7 +36,7 @@ def test_get_compressed_files():
         patch("ddev.cli.size.diff.compress", side_effect=fake_compress),
     ):
 
-        result = get_compressed_files(mock_repo_path)
+        result = get_files(mock_repo_path, True)
 
     expected = {
         "integration/datadog_checks/file1.py": 1000,
@@ -55,9 +55,16 @@ def test_get_compressed_dependencies(terminal):
         "dependency1 @ https://example.com/dependency1.whl\ndependency2 @ https://example.com/dependency2.whl"
     )
 
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.headers = {"Content-Length": "12345"}
+    mock_head_response = MagicMock()
+    mock_head_response.status_code = 200
+    mock_head_response.headers = {"Content-Length": "12345"}
+
+    mock_get_response = MagicMock()
+    mock_get_response.__enter__.return_value = mock_get_response  # for use in `with` block
+    mock_get_response.status_code = 200
+    mock_get_response.headers = {"Content-Length": "12345"}
+    mock_get_response.content = b"Fake wheel file content"
+
     mock_repo_path = "root"
 
     with (
@@ -66,16 +73,15 @@ def test_get_compressed_dependencies(terminal):
         patch("os.listdir", return_value=[f"{platform}-{version}"]),
         patch("os.path.isfile", return_value=True),
         patch("builtins.open", mock_open(read_data=fake_file_content)),
-        patch("requests.head", return_value=mock_response),
+        patch("requests.head", return_value=mock_head_response),
+        patch("requests.get", return_value=mock_get_response),
     ):
-
-        file_data = get_compressed_dependencies(mock_repo_path, platform, version)
+        file_data = get_dependencies(mock_repo_path, platform, version, True)
 
     assert file_data == {
         "dependency1": 12345,
         "dependency2": 12345,
     }
-
 
 def test_get_diff():
     size_before = {
@@ -119,7 +125,7 @@ def mock_size_diff_dependencies():
     mock_git_repo = MagicMock()
     mock_git_repo.repo_dir = "/tmp/fake_repo"
 
-    def get_compressed_files_side_effect(_):
+    def get_compressed_files_side_effect(_, __):
         get_compressed_files_side_effect.counter += 1
         if get_compressed_files_side_effect.counter % 2 == 1:
             return {"path1.py": 1000}  # before
@@ -128,7 +134,7 @@ def mock_size_diff_dependencies():
 
     get_compressed_files_side_effect.counter = 0
 
-    def get_compressed_dependencies_side_effect(_, __, ___):
+    def get_compressed_dependencies_side_effect(_, __, ___, ____):
         get_compressed_dependencies_side_effect.counter += 1
         if get_compressed_dependencies_side_effect.counter % 2 == 1:
             return {"dep1.whl": 2000}  # before
@@ -143,8 +149,8 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch("ddev.cli.size.diff.GitRepo.checkout_commit"),
         patch("tempfile.mkdtemp", return_value="/tmp/fake_repo"),
-        patch("ddev.cli.size.diff.get_compressed_files", side_effect=get_compressed_files_side_effect),
-        patch("ddev.cli.size.diff.get_compressed_dependencies", side_effect=get_compressed_dependencies_side_effect),
+        patch("ddev.cli.size.diff.get_files", side_effect=get_compressed_files_side_effect),
+        patch("ddev.cli.size.diff.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
         patch("ddev.cli.size.common.group_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.common.print_csv"),
         patch("ddev.cli.size.common.print_table"),
@@ -190,14 +196,14 @@ def test_diff_no_differences(ddev):
         patch("os.path.isfile", return_value=True),
         patch("os.listdir", return_value=["linux-aarch64_3.12"]),
         patch(
-            "ddev.cli.size.diff.get_compressed_files",
+            "ddev.cli.size.diff.get_files",
             return_value={
                 "path1.py": 1000,
                 "path2.py": 500,
             },
         ),
         patch(
-            "ddev.cli.size.diff.get_compressed_dependencies",
+            "ddev.cli.size.diff.get_dependencies",
             return_value={
                 "dep1.whl": 2000,
                 "dep2.whl": 1000,

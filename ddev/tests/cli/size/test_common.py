@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, mock_open, patch
 from ddev.cli.size.common import (
     compress,
     convert_size,
-    get_dependencies,
+    get_dependencies_list,
     get_dependencies_sizes,
     get_gitignore_files,
     group_modules,
@@ -67,13 +67,13 @@ def test_is_valid_integration():
     assert not is_valid_integration(".git/config", included_folder, ignored_files, git_ignore)
 
 
-def test_get_dependencies():
+def test_get_dependencies_list():
     file_content = (
         "dependency1 @ https://example.com/dependency1.whl\ndependency2 @ https://example.com/dependency2.whl"
     )
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
-        deps, urls = get_dependencies("fake_path")
+        deps, urls = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
     assert urls == ["https://example.com/dependency1.whl", "https://example.com/dependency2.whl"]
 
@@ -83,7 +83,7 @@ def test_get_dependencies_sizes():
     mock_response.status_code = 200
     mock_response.headers = {"Content-Length": "12345"}
     with patch("requests.head", return_value=mock_response):
-        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1.whl"])
+        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1.whl"], True)
     assert file_data == [
         {"File Path": "dependency1", "Type": "Dependency", "Name": "dependency1", "Size (Bytes)": 12345}
     ]
