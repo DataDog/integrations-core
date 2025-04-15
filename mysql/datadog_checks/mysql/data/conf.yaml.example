@@ -520,6 +520,11 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param collect_blocking_queries - boolean - optional - default: false
+        ## Enable collection of blocking queries. Not supported on MariaDB.
+        #
+        # collect_blocking_queries: false
+
     ## Configure collection of index metrics.
     ## Metrics provided by the options:
     ##   - mysql.index.size (per index)

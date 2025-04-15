@@ -26,7 +26,7 @@ class PostgresAutodiscovery(Discovery):
         super(PostgresAutodiscovery, self).__init__(
             self._get_databases,
             # parent class asks for includelist to be a dictionary
-            include={db: 0 for db in autodiscovery_config.get("include", [".*"])},
+            include=dict.fromkeys(autodiscovery_config.get("include", [".*"]), 0),
             exclude=autodiscovery_config.get("exclude", DEFAULT_EXCLUDES),
             interval=autodiscovery_config.get("refresh", DEFAULT_REFRESH),
         )

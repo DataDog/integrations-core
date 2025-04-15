@@ -51,6 +51,7 @@ from .util import (
     QUERY_PG_CONTROL_CHECKPOINT_LT_10,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
+    QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
     QUERY_PG_STAT_WAL_RECEIVER,
@@ -320,6 +321,7 @@ class PostgreSql(AgentCheck):
             if self._config.collect_buffercache_metrics:
                 queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
+            queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
             queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
 
@@ -739,10 +741,6 @@ class PostgreSql(AgentCheck):
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
-
-        replication_stats_metrics = self.metrics_cache.get_replication_stats_metrics(self.version)
-        if replication_stats_metrics:
-            metric_scope.append(replication_stats_metrics)
 
         with self.db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
