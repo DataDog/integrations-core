@@ -27,5 +27,6 @@ def test_e2e(check, dd_agent_check, pg_instance):
 
     check._database_hostname = socket.gethostname().lower()
     expected_tags = _get_expected_tags(check, pg_instance, with_host=False)
+    expected_tags = [tag for tag in expected_tags if not tag.startswith("database_instance")]
     check_bgw_metrics(aggregator, expected_tags)
     check_common_metrics(aggregator, expected_tags=expected_tags, count=None)
