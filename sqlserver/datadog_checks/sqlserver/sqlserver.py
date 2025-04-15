@@ -293,7 +293,10 @@ class SQLServer(AgentCheck):
         if self._database_identifier is None:
             template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
             tag_dict = {}
-            for t in self.tags:
+            tags = self.tags.copy()
+            # sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
                 if ':' in t:
                     key, value = t.split(':', 1)
                     if key in tag_dict:
