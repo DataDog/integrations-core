@@ -136,6 +136,7 @@ class SqlserverMetadata(DBMAsyncJob):
                 settings_rows = self._load_settings_rows(cursor)
                 event = {
                     "host": self._check.reported_hostname,
+                    "database_instance": self._check.database_identifier,
                     "agent_version": datadog_agent.get_version(),
                     "dbms": "sqlserver",
                     "kind": "sqlserver_configs",
@@ -146,7 +147,7 @@ class SqlserverMetadata(DBMAsyncJob):
                     ),
                     "tags": self.tags,
                     "timestamp": time.time() * 1000,
-                    "cloud_metadata": self.cloud_metadata,
+                    "cloud_metadata": self._check.cloud_metadata,
                     "metadata": settings_rows,
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

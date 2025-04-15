@@ -270,6 +270,7 @@ class Deadlocks(DBMAsyncJob):
     def _create_deadlock_event(self, deadlock_rows):
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "deadlocks",

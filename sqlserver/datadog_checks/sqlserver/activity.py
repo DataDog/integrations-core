@@ -317,7 +317,8 @@ class SqlserverActivity(DBMAsyncJob):
 
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
@@ -455,6 +456,7 @@ class SqlserverActivity(DBMAsyncJob):
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",

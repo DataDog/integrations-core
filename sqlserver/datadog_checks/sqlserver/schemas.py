@@ -51,8 +51,9 @@ class SubmitData:
         self.db_to_schemas = {}  # dbname : { id : schema }
         self.db_info = {}  # name to info
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
+    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version):
         self._base_event["host"] = hostname
+        self._base_event["database_instance"] = database_instance
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
@@ -288,7 +289,8 @@ class Schemas(DBMAsyncJob):
         """
         self._data_submitter.reset()
         self._data_submitter.set_base_event_data(
-            self._check.resolved_hostname,
+            self._check.reported_hostname,
+            self._check.database_identifier,
             self._check.non_internal_tags,
             self._check.cloud_metadata,
             "{},{}".format(

@@ -446,7 +446,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
         return {
-            'host': self._check.resolved_hostname,
+            'host': self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
@@ -510,6 +511,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
@@ -600,6 +602,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     tags += ["db:{}".format(row['database_name'])]
                 obfuscated_plan_event = {
                     "host": self._check.reported_hostname,
+                    "database_instance": self._check.database_identifier,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
