@@ -230,7 +230,7 @@ class MySQLActivity(DBMAsyncJob):
 
     def _should_collect_blocking_queries(self):
         # type: () -> bool
-        return self._config.activity_config.get("collect_blocking_queries", False) and not self._check.is_mariadb
+        return self._config.activity_config.get("collect_blocking_queries", False)
 
     def _get_activity_query(self):
         # type: () -> str
@@ -240,7 +240,7 @@ class MySQLActivity(DBMAsyncJob):
         blocking_joins = ""
         idle_blockers_subquery = ""
         if self._should_collect_blocking_queries():
-            if self._db_version == MySQLVersion.VERSION_80:
+            if self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb:
                 blocking_columns = BLOCKING_COLUMNS_MYSQL8
                 blocking_joins = BLOCKING_JOINS_MYSQL8
                 idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY_MYSQL8
