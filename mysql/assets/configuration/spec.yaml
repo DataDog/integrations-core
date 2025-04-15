@@ -544,7 +544,7 @@ files:
                   example: 10
               - name: collect_blocking_queries
                 description: |
-                  Enable collection of blocking queries. Supported only on MySQL 8.0.
+                  Enable collection of blocking queries.
                 value:
                   type: boolean
                   example: false
