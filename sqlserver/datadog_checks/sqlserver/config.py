@@ -22,6 +22,7 @@ class SQLServerConfig:
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            additional_tags=[],
         )
         self.empty_default_hostname = instance.get("empty_default_hostname", False)
         self.reported_hostname: str = instance.get('reported_hostname')
