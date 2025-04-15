@@ -64,24 +64,20 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
-    ## Controls how the database is identified. The default value is the hostname for the instance, 
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
     ## which respects the `reported_hostname` option.
     #
     # database_identifier:
 
-        ## @param include_port - boolean - optional - default: false
-        ## Set to `true` to include the port in the database identifier. For example, for a server with host
-        ## `postgres.mycompany.com` and port `5432` will be identified as `postgres.mycompany.com:5432`.
-        ##
-        ## Use this option if runnining multiple instances on one host.
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
         #
-        # include_port: false
-
-        ## @param identifier - string - optional
-        ## Override the default database identifier. Use this only for backwards compatibility with previous
-        ## usage of reported_hostname.
-        #
-        # identifier: <IDENTIFIER>
+        # template: $env-$resolved_hostname:$port
 
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.

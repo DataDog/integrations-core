@@ -83,7 +83,7 @@ files:
                 description: |
                   The template to use for the database identifier. The default value is `$resolved_hostname`.
                   You can use the following variables, prefixed by `$` in the template:
-                  - resolved_hostname: The resolved hostname of the instance. This value respects the `reported_hostname` option.
+                  - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
                   - host: The provided host of the instance.
                   - port: The port number of the instance.
                   - mysql_sock: The socket path of the instance.

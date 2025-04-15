@@ -80,34 +80,22 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
-    ## Controls how the database is identified. The default value is the hostname for the instance, which
-    ## respects the `reported_hostname` option.
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
+    ## which respects the `reported_hostname` option.
     #
     # database_identifier:
 
-        ## @param include_port - boolean - optional - default: false
-        ## Set to `true` to include the port in the database identifier. For example, for a server with host
-        ## `sqlserver.mycompany.com` and port `1433` will be identified as `sqlserver.mycompany.com:1433`.
-        ##
-        ## Use this option if runnining multiple instances on one host differentiated by ports. If both `include_port`
-        ## and `include_instance` are set to true the port will come first. If the instance name in the above example
-        ## is `users` then the database identifier will be `sqlserver.mycompany.com:1433\users`.
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - server_name: The resolved server name of the instance.
+        ## - instance_name: The resolved instance name of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
         #
-        # include_port: false
-
-        ## @param include_instance - boolean - optional - default: false
-        ## Set to `true` to include the instance name in the database identifier. For example, for a server with host
-        ## `sqlserver.mycompany.com` and instance name `users` will be identified as `sqlserver.mycompany.com\users`.
-        ##
-        ## Use this option if runnining multiple instances on one host and port differentiated by database instance.
-        #
-        # include_instance: false
-
-        ## @param identifier - string - optional
-        ## Override the default database identifier. Use this only for backwards compatibility with previous
-        ## usage of reported_hostname.
-        #
-        # identifier: <IDENTIFIER>
+        # template: $env-$resolved_hostname:$port
 
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check.
