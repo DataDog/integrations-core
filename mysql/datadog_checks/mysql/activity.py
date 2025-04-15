@@ -131,7 +131,6 @@ IDLE_BLOCKERS_SUBQUERY_MYSQL7 = """\
 """
 
 
-
 class MySQLVersion(Enum):
     # 8.0
     VERSION_80 = 80
