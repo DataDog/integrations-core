@@ -88,22 +88,45 @@ WHERE
     {idle_blockers_subquery};
 """
 
-BLOCKING_COLUMNS = """\
+BLOCKING_COLUMNS_MYSQL8 = """\
     ,blocking_thread.thread_id AS blocking_thread_id,
     blocking_thread.processlist_id AS blocking_processlist_id
 """
 
-BLOCKING_JOINS = """\
+BLOCKING_JOINS_MYSQL8 = """\
     LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
     LEFT JOIN performance_schema.threads AS blocking_thread ON lock_waits.blocking_thread_id = blocking_thread.thread_id
 """
 
-IDLE_BLOCKERS_SUBQUERY = """\
+IDLE_BLOCKERS_SUBQUERY_MYSQL8 = """\
         OR
         -- Include idle sessions that are blocking others
         thread_a.thread_id IN (
             SELECT blocking_thread_id
             FROM performance_schema.data_lock_waits
+        )
+"""
+
+BLOCKING_COLUMNS_MYSQL7 = """\
+    ,blocking_thread.thread_id AS blocking_thread_id,
+    blocking_thread.processlist_id AS blocking_processlist_id
+"""
+
+BLOCKING_JOINS_MYSQL7 = """\
+    LEFT JOIN information_schema.INNODB_TRX AS trx ON thread_a.processlist_id = trx.trx_mysql_thread_id
+    LEFT JOIN information_schema.INNODB_LOCK_WAITS AS lock_waits ON trx.trx_id = lock_waits.requesting_trx_id
+    LEFT JOIN information_schema.INNODB_TRX AS blocking_trx ON lock_waits.blocking_trx_id = blocking_trx.trx_id
+    LEFT JOIN performance_schema.threads AS blocking_thread
+        ON blocking_trx.trx_mysql_thread_id = blocking_thread.processlist_id
+"""
+
+IDLE_BLOCKERS_SUBQUERY_MYSQL7 = """\
+        OR
+        -- Include idle sessions that are blocking others
+        thread_a.processlist_id IN (
+            SELECT blocking_trx.trx_mysql_thread_id
+            FROM information_schema.INNODB_LOCK_WAITS AS lock_waits
+            JOIN information_schema.INNODB_TRX AS blocking_trx ON lock_waits.blocking_trx_id = blocking_trx.trx_id
         )
 """
 
@@ -207,10 +230,7 @@ class MySQLActivity(DBMAsyncJob):
 
     def _should_collect_blocking_queries(self):
         # type: () -> bool
-        blocking_queries_configured = self._config.activity_config.get("collect_blocking_queries", False)
-        return (
-            blocking_queries_configured and self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb
-        )
+        return self._config.activity_config.get("collect_blocking_queries", False) and not self._check.is_mariadb
 
     def _get_activity_query(self):
         # type: () -> str
@@ -220,9 +240,14 @@ class MySQLActivity(DBMAsyncJob):
         blocking_joins = ""
         idle_blockers_subquery = ""
         if self._should_collect_blocking_queries():
-            blocking_columns = BLOCKING_COLUMNS
-            blocking_joins = BLOCKING_JOINS
-            idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY
+            if self._db_version == MySQLVersion.VERSION_80:
+                blocking_columns = BLOCKING_COLUMNS_MYSQL8
+                blocking_joins = BLOCKING_JOINS_MYSQL8
+                idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY_MYSQL8
+            else:
+                blocking_columns = BLOCKING_COLUMNS_MYSQL7
+                blocking_joins = BLOCKING_JOINS_MYSQL7
+                idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY_MYSQL7
         return ACTIVITY_QUERY.format(
             blocking_columns=blocking_columns,
             blocking_joins=blocking_joins,
