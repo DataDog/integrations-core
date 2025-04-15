@@ -25,18 +25,20 @@ def dd_environment():
         yield common.E2E_INSTANCE
 
 
-@pytest.fixture
-def instance():
-    return common.MOCKED_INSTANCE
+@pytest.fixture(params=common.MOCKED_INSTANCES, ids=common.MOCKED_INSTANCE_IDS)
+def instance(request):
+    return request.param
 
 
 def mock_requests_get(url, *args, **kwargs):
     url_parts = url.split('/')
+    print(url_parts)
 
-    if url_parts[0] != 'mocked':
+    if url_parts[0] == 'wrong':
         return MockResponse(status_code=404)
 
-    path = os.path.join(common.HERE, 'fixtures', 'standalone', '{}.json'.format(url_parts[1]))
+    json_file = f"rrd_updates_{url_parts[0]}.json" if url_parts[1] == "rrd_updates" else f"{url_parts[1]}.json"
+    path = os.path.join(common.HERE, 'fixtures', 'standalone', json_file)
     if not os.path.exists(path):
         return MockResponse(status_code=404)
 
