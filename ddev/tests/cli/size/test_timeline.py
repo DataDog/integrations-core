@@ -7,9 +7,8 @@ from ddev.cli.size.timeline import (
     group_modules,
     get_dependency_size,
     get_dependency, 
-    get_compressed_dependencies,
-    get_compressed_files,
-    module_exists
+    get_dependencies,
+    get_files,
 )
 from datetime import datetime
 
@@ -23,14 +22,15 @@ def test_get_compressed_files():
         patch("ddev.cli.size.timeline.is_valid_integration", return_value=True),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
     ):
-        result = get_compressed_files(
+        result = get_files(
             "/tmp/fake_repo",
             "int1",
             "abc1234",
             datetime(2025, 4, 4).date(),
             "auth",
             "Added int1",
-            []
+            [],
+            True
         )
         assert result == [
             {
@@ -56,7 +56,7 @@ def test_get_compressed_files_deleted_only():
         patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"{repo_path}/", "")),
         patch("os.path.exists", return_value=False),  
     ):
-        file_data = get_compressed_files(repo_path, module, commit, date, author, message, [])
+        file_data = get_files(repo_path, module, commit, date, author, message, [], True)
 
     assert file_data == [
         {
@@ -166,14 +166,15 @@ def test_get_compressed_dependencies():
         patch("ddev.cli.size.timeline.get_dependency", return_value="https://example.com/dep1.whl"),
         patch("ddev.cli.size.timeline.requests.get", return_value=make_mock_response("12345")),
     ):
-        result = get_compressed_dependencies(
+        result = get_dependencies(
             "/tmp/fake_repo",
             "dep1",
             "linux-x86_64",
             "abc1234",
             datetime(2025, 4, 4).date(),
             "auth",
-            "Added dep1"
+            "Added dep1",
+            True
         )
         assert result == {
             "Size (Bytes)": 12345,
@@ -190,7 +191,8 @@ def test_get_dependency_size():
             "abc1234",
             datetime(2025, 4, 4).date(),
             "auth",
-            "Fixed bug"
+            "Fixed bug",
+            True
         )
         assert result == {
             "Size (Bytes)": 45678,
@@ -259,16 +261,15 @@ def mock_timeline_dependencies():
         patch("os.path.isfile", return_value=True),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.get_dependency", return_value="https://example.com/dep1.whl"),
-        patch("ddev.cli.size.timeline.requests.get") as mock_get,
+        patch("ddev.cli.size.timeline.requests.head") as mock_head,
         patch("ddev.cli.size.timeline.group_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.print_table"),
     ):
         mock_response = MagicMock()
-        mock_response.__enter__.return_value = mock_response
         mock_response.headers = {"Content-Length": "1024"}
         mock_response.raise_for_status = lambda: None
-        mock_get.return_value = mock_response
+        mock_head.return_value = mock_response
 
         yield
 
@@ -300,6 +301,10 @@ def test_timeline_no_changes_in_integration(ddev):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("os.path.exists", return_value=True),
+        patch("os.path.isdir", return_value=True),
+        patch("os.listdir", return_value=[]),
+
     ):
         result = ddev("size", "timeline", "integration", "integration/foo", "commit1", "commit2", "--compressed")
         assert result.exit_code != 0

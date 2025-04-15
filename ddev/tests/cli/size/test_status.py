@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, mock_open, patch
 import pytest
 
 from ddev.cli.size.status import (
-    get_compressed_dependencies,
-    get_compressed_files,
+    get_dependencies,
+    get_files,
 )
 
 
@@ -82,7 +82,7 @@ def test_get_compressed_dependencies():
         patch("requests.head", return_value=mock_response),
     ):
 
-        file_data = get_compressed_dependencies(platform, version)
+        file_data = get_dependencies(platform, version, True)
 
     assert file_data == [
         {"File Path": "dependency1", "Type": "Dependency", "Name": "dependency1", "Size (Bytes)": 12345},
@@ -96,7 +96,7 @@ def mock_size_status():
         patch("ddev.cli.size.status.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
         patch("ddev.cli.size.status.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.status.compress", return_value=1234),
-        patch("ddev.cli.size.status.get_dependencies", return_value=(["dep1"], {"dep1": "https://example.com/dep1"})),
+        patch("ddev.cli.size.status.get_dependencies_list", return_value=(["dep1"], {"dep1": "https://example.com/dep1"})),
         patch(
             "ddev.cli.size.status.get_dependencies_sizes",
             return_value=[
