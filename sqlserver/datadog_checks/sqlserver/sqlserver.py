@@ -118,6 +118,12 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
+        self.static_info_cache = TTLCache(
+            maxsize=100,
+            # cache these for a full day
+            ttl=60 * 60 * 24,
+        )
+
         self._resolved_hostname = None
         self._agent_hostname = None
         self._database_hostname = None
@@ -148,11 +154,6 @@ class SQLServer(AgentCheck):
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
 
-        self.static_info_cache = TTLCache(
-            maxsize=100,
-            # cache these for a full day
-            ttl=60 * 60 * 24,
-        )
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
