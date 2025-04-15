@@ -2,7 +2,7 @@
 
 <div class="alert alert-info">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks model serving metrics and cluster utilization data.
+This page is limited to documentation for ingesting Databricks model serving metrics, cluster utilization data, and reference tables.
 </div>
 
 ![Databricks default dashboard][21]
@@ -44,6 +44,16 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 4. On the **Configure** tab, click **Add Databricks Workspace**.
 5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
 6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
+
+#### Reference Table Configuration
+1. Configure a workspace in Datadog's Databricks integration tile.
+2. In the accounts detail panel, click **Reference Tables**.
+3. In the **Reference Tables** tab, click the **Add New Reference Table** button.
+4. Provide the **Reference table name**, **Databricks table name**, and **Primary key** of your Databricks view or table.
+
+  * For the best results, it is recommended to generate and use a view with the exact scope required.
+
+5. Click **Save**.
 
 #### Spark Configuration
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
