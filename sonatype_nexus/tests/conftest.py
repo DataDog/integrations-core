@@ -12,6 +12,13 @@ from datadog_checks.dev import docker_run, run_command
 from .common import COMPOSE, INSTANCE
 
 
+instance = {
+    "username": "test_username",
+    "password": "test_password",
+    "min_collection_interval": 400,
+    "server_url": "https://example.com",
+}
+
 def get_nexus_password(max_retries=5, retry_interval=10, password_wait_retries=30, password_wait_interval=10):
     try:
         run_command("docker run -d -p 8081:8081 --name sonatype_nexus_38 sonatype/nexus3:3.79.0")
@@ -87,11 +94,3 @@ def dd_environment():
         modified_instance = deepcopy(INSTANCE)
         modified_instance["password"] = password
         yield modified_instance
-
-
-@pytest.fixture
-def instance():
-    password = get_nexus_password()
-    modified_instance = deepcopy(INSTANCE)
-    modified_instance["password"] = password
-    return modified_instance

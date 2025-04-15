@@ -5,6 +5,6 @@ import pytest
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance, aggregator):
-    aggregator = dd_agent_check(instance)
+def test_e2e(dd_agent_check, aggregator):
+    aggregator = dd_agent_check()
     aggregator.assert_metric('sonatype_nexus.status.available_cpus_health', value=1)
