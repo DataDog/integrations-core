@@ -1,6 +1,6 @@
 {
   "title": "Genesys Message",
-  "description": "The Genesys Message Dashboard provides a comprehensive overview of messaging interactions, including total messages, conversation types, queue metrics, and agent performance indicators. Key widgets track outbound messages, agent consultations, response times, and handling durations. This layout helps analyze message flow, identify potential issues, and optimize handling times and responsiveness for improved customer communication.\n",
+  "description": "The Genesys Message Dashboard provides a comprehensive overview of messaging interactions, including total messages, conversation types, queue metrics, and agent performance indicators. Key widgets track outbound messages, agent consultations, response times, and handling durations. This layout helps analyze message flow, identify potential issues, and optimize handling times and responsiveness for improved customer communication.",
   "widgets": [
     {
       "id": 6686255836399149,
@@ -28,7 +28,7 @@
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
-        "vertical_align": "top",
+        "vertical_align": "center",
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "left",
@@ -85,7 +85,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.total_messages{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -127,7 +127,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.connected_conversations_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.connected_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -169,7 +169,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.bot_interactions_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.bot_interactions_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -211,7 +211,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.consulted_conversations_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.consulted_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -246,7 +246,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -275,22 +275,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.total_transferred_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.total_transferred_count{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.blind_transferred_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.blind_transferred_count{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.consult_transferred_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.consult_transferred_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -320,7 +319,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.consult_transferred_conversations_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.consult_transferred_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -355,7 +354,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -380,17 +379,16 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.total_messages{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.total_conversations{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.connected_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.connected_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -413,7 +411,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -442,22 +440,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.outbound_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.outbound_conversations_count{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.attempted_outbound_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.attempted_outbound_conversations_count{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.connected_outbound_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.connected_outbound_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -505,7 +502,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.offered_conversations_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.offered_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -552,7 +549,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.blind_transferred_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.blind_transferred_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -599,7 +596,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.errored_conversations_count{media_type:message}.as_count()",
+                      "query": "sum:genesys.message.errored_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -646,7 +643,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.acw_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.acw_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -688,7 +685,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.flow_out_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.flow_out_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -736,7 +733,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.not_responding_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.not_responding_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -802,7 +799,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.alert_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.alert_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -844,7 +841,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.answered_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.answered_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -886,7 +883,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "min:genesys.conversations.answered_time_min{media_type:message}.as_count()",
+                      "query": "min:genesys.message.answered_time_min{*}.as_count()",
                       "aggregator": "min"
                     }
                   ],
@@ -928,7 +925,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.user_response_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.user_response_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -969,7 +966,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -998,22 +995,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.answered_time_avg{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.answered_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.answered_time_min{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.answered_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.answered_time_max{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.answered_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -1036,7 +1032,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -1065,22 +1061,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.agent_response_time_avg{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.agent_response_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.agent_response_time_min{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.agent_response_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.agent_response_time_max{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.agent_response_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -1129,7 +1124,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.connected_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.connected_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1171,7 +1166,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.handle_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.handle_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1219,7 +1214,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.contacting_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.contacting_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1267,7 +1262,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.dialing_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.dialing_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1315,7 +1310,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.held_complete_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.held_complete_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1356,7 +1351,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -1385,22 +1380,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.held_complete_time_avg{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.held_complete_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.held_complete_time_max{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.held_complete_time_max{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.held_complete_time_min{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.held_complete_time_min{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -1430,7 +1424,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:genesys.conversations.held_complete_time_max{media_type:message}.as_count()",
+                      "query": "max:genesys.message.held_complete_time_max{*}.as_count()",
                       "aggregator": "max"
                     }
                   ],
@@ -1471,7 +1465,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -1500,22 +1494,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.handle_time_avg{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.handle_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.handle_time_min{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.handle_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.handle_time_max{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.handle_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -1563,7 +1556,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.conversations.monitoring_complete_time_avg{media_type:message}.as_count()",
+                      "query": "avg:genesys.message.monitoring_complete_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1604,7 +1597,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -1633,22 +1626,21 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.talk_complete_time_avg{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.talk_complete_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.talk_complete_time_min{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.talk_complete_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.talk_complete_time_max{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.talk_complete_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
@@ -1696,17 +1688,16 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.barged_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.barged_conversations_count{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.conversations.coached_conversations_count{media_type:message}.as_count()"
+                      "query": "sum:genesys.message.coached_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
-                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
