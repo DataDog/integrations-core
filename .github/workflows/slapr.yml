@@ -27,17 +27,19 @@ jobs:
       run: |
         ddev config set repos.core .
         ddev config set repo core
-    - name: Measure disk usage Uncompressed
+    - name: Measure disk usage (uncompressed)
       run: | 
         ddev size status --csv > size-uncompressed.csv
         ddev size status
+        echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
         echo "```" >> $GITHUB_STEP_SUMMARY
         ddev size status >> $GITHUB_STEP_SUMMARY
         echo "```" >> $GITHUB_STEP_SUMMARY
-    - name: Measure disk usage Compressed
+    - name: Measure disk usage (compressed)
       run: |
         ddev size status --csv --compressed > size-compressed.csv
         ddev size status --compressed
+        echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
         echo "```" >> $GITHUB_STEP_SUMMARY
         ddev size status --compressed >> $GITHUB_STEP_SUMMARY
         echo "```" >> $GITHUB_STEP_SUMMARY
