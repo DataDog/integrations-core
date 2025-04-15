@@ -18,8 +18,28 @@
       },
       {
         "media_type": "image",
-        "caption": "Overview of other logs visualized",
-        "image_url": "images/plaid_other_logs.png"
+        "caption": "Overview of Plaid Logs",
+        "image_url": "images/plaid_overview_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Overview of Plaid Investment Transaction logs visualized",
+        "image_url": "images/inves_transactions.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Overview of Plaid Transfer logs visualized",
+        "image_url": "images/transfer.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Overview ofPlaid Transfer logs visualized",
+        "image_url": "images/transfer_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Overview of Plaid Recurring Transfer logs visualized",
+        "image_url": "images/recurr_transfer.png"
       }
     ],
     "classifier_tags": [
@@ -30,20 +50,20 @@
   },
   "assets": {
     "integration": {
-        "auto_install": true,
-        "source_type_id": 30173459,
-        "source_type_name": "plaid",
-        "events": {
-            "creates_events": false
-        },
-        "service_checks": {
-      "metadata_path": "assets/service_checks.json"
+      "auto_install": true,
+      "source_type_id": 30173459,
+      "source_type_name": "plaid",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Plaid logs Overview": "assets/dashboards/plaid_overview.json"
     }
   },
-  "dashboards": {
-    "Plaid logs Overview": "assets/dashboards/plaid_overview.json"
-  }
-},
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
