@@ -35,7 +35,7 @@ services:
     volumes:
       - ../fixtures/standalone:/usr/share/responses
     ports:
-      - 8084:5000
+      - 9081:5000
     environment:
       - RRD_UPDATES_FILE=rrd_updates_broken_json.json
   mock-pool-slave-broken-json:
@@ -44,7 +44,7 @@ services:
     volumes:
       - ../fixtures/slave:/usr/share/responses
     ports:
-      - 8085:5000
+      - 9082:5000
     environment:
       - RRD_UPDATES_FILE=rrd_updates_broken_json.json
   mock-pool-master-broken-json:
@@ -53,6 +53,6 @@ services:
     volumes:
       - ../fixtures/master:/usr/share/responses
     ports:
-      - 8086:5000
+      - 9083:5000
     environment:
       - RRD_UPDATES_FILE=rrd_updates_broken_json.json

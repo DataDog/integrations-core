@@ -59,17 +59,17 @@ E2E_INSTANCE = [
         'password': 'password',
     },
     {
-        'url': 'http://{}:8084'.format(HOST),
+        'url': 'http://{}:9081'.format(HOST),
         'username': 'datadog',
         'password': 'password',
     },
     {
-        'url': 'http://{}:8085'.format(HOST),
+        'url': 'http://{}:9082'.format(HOST),
         'username': 'datadog',
         'password': 'password',
     },
     {
-        'url': 'http://{}:8086'.format(HOST),
+        'url': 'http://{}:9083'.format(HOST),
         'username': 'datadog',
         'password': 'password',
     },
