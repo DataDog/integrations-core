@@ -20,6 +20,9 @@ def dd_environment():
             '{}/rrd_updates'.format(common.E2E_INSTANCE[0]['url']),
             '{}/rrd_updates'.format(common.E2E_INSTANCE[1]['url']),
             '{}/rrd_updates'.format(common.E2E_INSTANCE[2]['url']),
+            '{}/rrd_updates'.format(common.E2E_INSTANCE[3]['url']),
+            '{}/rrd_updates'.format(common.E2E_INSTANCE[4]['url']),
+            '{}/rrd_updates'.format(common.E2E_INSTANCE[5]['url']),
         ],
     ):
         yield common.E2E_INSTANCE

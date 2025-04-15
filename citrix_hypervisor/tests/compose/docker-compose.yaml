@@ -1,4 +1,4 @@
-# Container for valida and broken json are defined for testing the
+# Container for valid and broken json are defined for testing the
 # the integration with both type of payloads.
 # More info: https://github.com/DataDog/integrations-core/pull/19936
 services:
