@@ -137,10 +137,10 @@ tests:
       AUID: "unset"
       SAUID: "root"
       auid: 4294967295
-      error: "Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14 "
-      event_id: 198.0
+      error: "Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14"
+      event_id: 198
+      exe: "/usr/lib/systemd/systemd"
       msg:
-        exe: "/usr/lib/systemd/systemd"
         hostname: "?"
         sauid: 0
         terminal: "?"
@@ -201,4 +201,22 @@ tests:
     timestamp: 1741000050325
  -
   sample: "type=MAC_CONFIG_CHANGE msg=audit(1678360880.644:121): bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1\x1dAUID=\"serviceuser\""
-  result: null
+  result:
+    custom:
+      event_id: 121
+      linux_audit_logs:
+        bool: "virt_use_nfs"
+      old_val: 0
+      post_msg_kv: "AUID=\"serviceuser\""
+      pre_msg_kv: "bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1"
+      ses: 1
+      timestamp: 1.678360880644E12
+      type: "MAC_CONFIG_CHANGE"
+      usr:
+        id: 1000
+        name: "serviceuser"
+      val: 1
+    message: "type=MAC_CONFIG_CHANGE msg=audit(1678360880.644:121): bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1\x1dAUID=\"serviceuser\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1678360880644
