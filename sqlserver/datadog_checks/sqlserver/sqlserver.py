@@ -121,6 +121,7 @@ class SQLServer(AgentCheck):
         self._resolved_hostname = None
         self._agent_hostname = None
         self._database_hostname = None
+        self._database_identifier = None
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []

@@ -884,3 +884,23 @@ def test_get_unixodbc_sysconfig():
         "embedded",
         "etc",
     ], "incorrect unix odbc config dir"
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:22', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+    ],
+)
+def test_database_identifier(instance_docker, template, expected, tags):
+    """
+    Test functionality of calculating database_identifier
+    """
+    instance_docker['database_identifier'] = {'template': template}
+    instance_docker['tags'] = tags
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    assert check.database_identifier == expected
