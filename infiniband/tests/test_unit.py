@@ -44,12 +44,12 @@ def test_check(aggregator, instance, mock_fs):
 
     _assert_metrics(aggregator, MOCK_IB_COUNTER_DATA, 'infiniband', tags)
     _assert_metrics(aggregator, MOCK_RDMA_COUNTER_DATA, 'infiniband.rdma', tags)
-    
+
     for status_name, status_value in MOCK_STATUS_DATA.items():
         value, state_name = status_value.split(':', 1)
         value = int(value.strip())
         state_name = state_name.strip()
-        
+
         expected_tags = tags + [f'port_{status_name}:{state_name}']
         aggregator.assert_metric(
             f'infiniband.port_{status_name}',

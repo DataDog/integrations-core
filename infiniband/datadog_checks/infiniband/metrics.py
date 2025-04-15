@@ -100,7 +100,4 @@ RDMA_COUNTERS = {
     "rdma_read_bytes",
 }
 
-STATUS_COUNTERS = {
-    "state",     # "4: ACTIVE"
-    "phys_state" # "5: LinkUp"
-}
+STATUS_COUNTERS = {"state", "phys_state"}  # "4: ACTIVE"  # "5: LinkUp"

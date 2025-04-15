@@ -107,17 +107,17 @@ class InfinibandCheck(AgentCheck):
                     content = f.read().strip()
                     # "4: ACTIVE" - split to get value and state
                     parts = content.split(":", 1)
-                    value = int(parts[0].strip())   
+                    value = int(parts[0].strip())
                     metric_tags = list(tags)
-                    
+
                     # Add state as a tag if it exists
                     if len(parts) > 1:
                         state = parts[1].strip()
                         metric_tags.append(f"port_{status_file}:{state}")
-                    
+
                     if self.collection_type in {'gauge', 'both'}:
                         self.gauge(f"port_{status_file}", value, metric_tags)
-                    
+
                     if self.collection_type in {'monotonic_count', 'both'}:
                         self.monotonic_count(f"port_{status_file}.count", value, metric_tags)
 
