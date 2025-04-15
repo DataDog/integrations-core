@@ -5,7 +5,11 @@ from . import common
 
 
 def database_instance_resource_tags(hostname):
-    return [f'dd.internal.resource:database_instance:{hostname}', f'database_hostname:{hostname}', 'database_instance:{hostname}']
+    return [
+        f'dd.internal.resource:database_instance:{hostname}',
+        f'database_hostname:{hostname}',
+        'database_instance:{hostname}',
+    ]
 
 
 METRIC_TAGS = ['tag1:value1', 'tag2:value2']
