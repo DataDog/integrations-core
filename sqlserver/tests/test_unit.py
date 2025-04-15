@@ -25,6 +25,8 @@ from datadog_checks.sqlserver.utils import (
     parse_sqlserver_major_version,
     set_default_driver_conf,
 )
+from datadog_checks.sqlserver.const import STATIC_INFO_SERVERNAME, STATIC_INFO_INSTANCENAME
+
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import deep_compare, not_windows_ci, windows_ci
@@ -885,7 +887,6 @@ def test_get_unixodbc_sysconfig():
         "etc",
     ], "incorrect unix odbc config dir"
 
-
 @pytest.mark.parametrize(
     'template, expected, tags',
     [
@@ -894,14 +895,20 @@ def test_get_unixodbc_sysconfig():
         ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
         ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
         ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+        ('$env-$server_name/$instance_name', 'prod,staging-server/instance', ['env:prod', 'env:staging']),
     ],
 )
 def test_database_identifier(instance_docker, template, expected, tags):
     """
     Test functionality of calculating database_identifier
     """
+    instance_docker['host'] = 'localhost,22'
     instance_docker['database_identifier'] = {'template': template}
     instance_docker['tags'] = tags
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.static_info_cache[STATIC_INFO_SERVERNAME] = 'server'
+    check.static_info_cache[STATIC_INFO_INSTANCENAME] = 'instance'
+    # Reset for recalculation with static info
+    check._database_identifier = None
 
     assert check.database_identifier == expected
