@@ -1,6 +1,6 @@
 ## Overview
 
-[WatchGuard Firebox][4] is a network security platform offering comprehensive threat protection, including firewall, networking and other security features, suitable for various network environments, from small offices to large enterprises.
+[WatchGuard Firebox][4] is a network security platform offering comprehensive threat protection, including firewall, networking, and other security features, suitable for various network environments, from small offices to large enterprises.
 
 This integration enriches and ingests the following events:
 
@@ -10,7 +10,7 @@ This integration enriches and ingests the following events:
 - **VPN Events**: Represents log messages generated for processes related to the all VPNs configured on your Firebox. This includes changes to the VPN configuration, tunnel status, and daemon activity.
 - **Proxy Policy Events**: Represents log messages generated for traffic managed by the proxy policies configured on your Firebox. This can include events related to traffic through the proxy, proxy actions, and security services.
 
-This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into firewall, networking, management, vpn and proxy policy events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into firewall, networking, management, VPN, and proxy policy events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
@@ -47,7 +47,7 @@ Linux command:
       ```
 
       Note:
-      - PORT: Port should be similar to the port provided in **Configure Syslog Message Forwarding from WatchGuard Firebox Server**.
+      - PORT: Port should be identical to the port provided in **Configure Syslog Message Forwarding from WatchGuard Firebox Server**.
       - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][1].
@@ -58,7 +58,7 @@ Linux command:
 2. Select **System** > **Logging**.
 3. Select the **Syslog Server** tab.
 4. Select the **Send log messages to these syslog servers** check box.
-5. Click **Add**, then the Syslog Server dialog box opens.
+5. Click **Add** to open the Syslog Server dialog box.
 6. In the **IP Address** text box, enter the IP address of the server on which datadog-agent is installed.
 7. In the **Port** text box, enter the port you configured to receive the Firebox logs.
 8. From the **Log Format** drop-down list, select **Syslog**.
@@ -73,7 +73,7 @@ Linux command:
 
 ### Logs
 
-The WatchGuard Firebox integration collects Firewall, Networking, Management, VPN and Proxy Policy Events.
+The WatchGuard Firebox integration collects firewall, networking, management, VPN, and proxy policy Events.
 
 ### Metrics
 
@@ -121,7 +121,7 @@ Make sure that traffic is bypassed from the configured port if the firewall is e
 
 **Port already in use:**
 
-If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
+If you see the **Port <PORT_NUMBER> Already in Use** error, see the following instructions. The example below is for a PORT_NUMBER equal to 514:
 
 On systems using Syslog, if the Agent listens for events on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
