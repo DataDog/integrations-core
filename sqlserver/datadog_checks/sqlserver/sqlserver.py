@@ -316,7 +316,8 @@ class SQLServer(AgentCheck):
         # type: () -> str
         if self._database_hostname is None:
             host, _ = split_sqlserver_host_port(self.instance.get("host"))
-            self._database_hostname = self.resolve_db_host(host)
+            self.host = host
+            self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
     def load_static_information(self):
