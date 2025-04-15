@@ -175,7 +175,7 @@ class Schemas(DBMAsyncJob):
             "collection_interval": collection_interval,
             "dbms_version": None,
             "tags": self._check.non_internal_tags,
-            "cloud_metadata": self._check._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
         }
         self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
@@ -290,7 +290,7 @@ class Schemas(DBMAsyncJob):
         self._data_submitter.set_base_event_data(
             self._check.resolved_hostname,
             self._check.non_internal_tags,
-            self._check._config.cloud_metadata,
+            self._check.cloud_metadata,
             "{},{}".format(
                 self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                 self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),

@@ -135,9 +135,10 @@ class SQLServer(AgentCheck):
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
+        self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         self.add_core_tags()
-        self.cloud_metadata = self._config.cloud_metadata
+        self.set_resource_tags()
 
         self.databases = set()
         self.autodiscovery_query = None

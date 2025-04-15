@@ -451,7 +451,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
             'kind': 'query_metrics',
-            'cloud_metadata': self.cloud_metadata,
+            'cloud_metadata': self._check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
