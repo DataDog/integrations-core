@@ -521,7 +521,7 @@ instances:
         # collection_interval: 10
 
         ## @param collect_blocking_queries - boolean - optional - default: false
-        ## Enable collection of blocking queries. Not supported on MariaDB.
+        ## Enable collection of blocking queries.
         #
         # collect_blocking_queries: false
 
