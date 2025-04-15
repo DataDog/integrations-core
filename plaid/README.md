@@ -23,8 +23,8 @@ Here are some insights that can be drawn from your Plaid dashboard:
 
 Configure the Datadog endpoint to forward Plaid logs to Datadog.
 1. Log in to [Plaid Dashboard](https://dashboard.plaid.com/)
-2. Navigate to the “Developers” section in the left pane.
-3. Extend the drop-down menu and click on “Keys” 
+2. Navigate to the **Developers** section in the left pane.
+3. Extend the drop-down menu and click on **Keys** 
 4. Obtain the client_id and Secret.
 
 #### To obtain Access Token, follow these steps:
