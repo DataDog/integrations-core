@@ -51,7 +51,7 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 3. In the **Reference Tables** tab, click the **Add New Reference Table** button.
 4. Provide the **Reference table name**, **Databricks table name**, and **Primary key** of your Databricks view or table.
 
-  * For the best results, it is recommended to generate and use a view with the exact scope required.
+  * For optimal results, create a view in Databricks that includes only the specific data you want to send to Datadog. This means generating a dedicated table that reflects the exact scope needed for your use case.
 
 5. Click **Save**.
 
