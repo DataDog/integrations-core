@@ -6,11 +6,20 @@ metric_id: plaid
 # If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - facetType: list
+  - description: ""
+    facetType: list
     groups:
       - Plaid
     name: Account id
-    path: plaid_account_id
+    path: account_id
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Plaid
+    name: created
+    path: created
     source: log
     type: string
 pipeline:
@@ -18,10 +27,10 @@ pipeline:
   name: plaid_logs
   enabled: true
   filter:
-    query: "source:plaid"
+    query: "source:plaid_logs "
   processors:
     - type: attribute-remapper
-      name: "Map `created` to `timestamp`"
+      name: Map `created` to `timestamp`
       enabled: true
       sources:
         - created
@@ -31,7 +40,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: date-remapper
-      name: "Define `timestamp` as the official date of the log"
+      name: " Define `timestamp` as the official date of the log"
       enabled: true
       sources:
         - timestamp
