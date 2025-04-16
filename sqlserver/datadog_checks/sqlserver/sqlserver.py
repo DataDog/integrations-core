@@ -53,6 +53,7 @@ from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
+from datadog_checks.sqlserver.xe_sessions.registry import get_xe_session_handlers
 
 try:
     import datadog_agent
@@ -156,6 +157,9 @@ class SQLServer(AgentCheck):
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
+        
+        # XE Session Handlers
+        self.xe_session_handlers = []
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -169,6 +173,7 @@ class SQLServer(AgentCheck):
         self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
+        self.check_initializations.append(self.initialize_xe_session_handlers)
 
         # Query declarations
         self._query_manager = None
@@ -177,6 +182,16 @@ class SQLServer(AgentCheck):
 
         self._schemas = Schemas(self, self._config)
 
+    def initialize_xe_session_handlers(self):
+        """Initialize the XE session handlers"""
+        # Initialize XE session handlers
+        if not self.xe_session_handlers:
+            self.xe_session_handlers = get_xe_session_handlers(self, self._config)
+        
+        # Start XE session handlers 
+        for handler in self.xe_session_handlers:
+            handler.start()
+
     def cancel(self):
         self.statement_metrics.cancel()
         self.procedure_metrics.cancel()
@@ -184,6 +199,10 @@ class SQLServer(AgentCheck):
         self.sql_metadata.cancel()
         self._schemas.cancel()
         self.deadlocks.cancel()
+
+        # Cancel XE session handlers
+        for handler in self.xe_session_handlers:
+            handler.cancel()
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
