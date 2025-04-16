@@ -1,0 +1,59 @@
+name: Measure Disk Usage
+
+on:
+  push:
+    branches:
+    - master
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  measure-disk-usage:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    - name: Install ddev
+      run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
+
+    - name: Configure ddev
+      run: |
+        ddev config set repos.core .
+        ddev config set repo core
+    - name: Measure disk usage (uncompressed)
+      run: | 
+        ddev size status --csv > size-uncompressed.csv
+        ddev size status > size-uncompressed.txt
+        cat size-uncompressed.txt
+        echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat size-uncompressed.txt >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+    - name: Measure disk usage (compressed)
+      run: |
+        ddev size status --csv --compressed > size-compressed.csv
+        ddev size status --compressed > size-compressed.txt
+        cat size-compressed.txt
+        echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat size-compressed.txt >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+    - name: Upload file sizes (uncompressed)
+      uses: actions/upload-artifact@v4
+      with:
+        name: size-uncompressed.csv
+        path: size-uncompressed.csv
+        if-no-files-found: error
+    - name: Upload file sizes (compressed)
+      uses: actions/upload-artifact@v4
+      with:
+        name: size-compressed.csv
+        path: size-compressed.csv
+        if-no-files-found: error
