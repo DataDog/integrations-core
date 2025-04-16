@@ -1,6 +1,6 @@
 # Agent Check: Plaid
 
-[Plaid](https://plaid.com/) specializes in financial technology by offering APIs that allow developers to integrate banking services into their applications. By connecting users' bank accounts to apps, Plaid enables features like account verification, transaction history retrieval, and balance checks. This functionality is crucial for various applications, including budgeting tools, personal finance management, and payment processing.
+[Plaid][4] specializes in financial technology by offering APIs that allow developers to integrate banking services into their applications. By connecting users' bank accounts to apps, Plaid enables features like account verification, transaction history retrieval, and balance checks. This functionality is crucial for various applications, including budgeting tools, personal finance management, and payment processing.
 
 ## Overview
 
@@ -16,23 +16,23 @@ Here are some insights that can be drawn from your Plaid dashboard:
 
 ## Setup
 
-1. Log in to [Plaid](https://dashboard.plaid.com/signin/).
-2. Client ID and Secret can be obtained through this [link](https://dashboard.plaid.com/developers/keys).
+1. Log in to [Plaid][5].
+2. Client ID and Secret can be obtained through this [link][6].
 
 ### Configuration
 
 Configure the Datadog endpoint to forward Plaid logs to Datadog.
-1. Log in to [Plaid Dashboard](https://dashboard.plaid.com/)
+1. Log in to [Plaid Dashboard][7]
 2. In the left pane, go to the **Developers** section.
 3. Expand the drop-down menu and select **Keys** 
 4. Retrieve your `client_id` and `secret`.
 
 #### To obtain Access Token, follow these steps:
-1. [**Retrieve the `institution_id` from Plaid**](https://plaid.com/docs/api/institutions/#institutionsget) :  
+1. [**Retrieve the `institution_id` from Plaid**][8] :  
     Use the Plaid API's **/institutions/get** endpoint to fetch the `institution_id`.
-2. [**Create a Public Token**](https://plaid.com/docs/api/sandbox/#sandboxpublic_tokencreate):  
+2. [**Create a Public Token**][9]:  
     Create a public token by using the `institution_id` that you retrieved from Step 1 and hit **/public_token/create** endpoint.
-3. [**Obtain the Access token**](https://plaid.com/docs/api/items/#itempublic_tokenexchange):  
+3. [**Obtain the Access token**][10]:  
     Use the `public_token` you obtained from Step 2 to exchange it for an `access_token`. Send the `public_token` to the **/item/public_token/** exchange.
 4. **Store the Access Token Securely**:  
 
@@ -52,7 +52,7 @@ The crawler collects Plaid logs, including Transfer events, Recurring Transfer e
 
 ### Metrics
 
-The Plaid integration does not include any metrics.
+The Plaid integration includes Auth metrics.
 
 ### Events
 
@@ -70,4 +70,10 @@ Need help? Contact [Datadog support][3].
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
-
+[4]: https://plaid.com/
+[5]: https://dashboard.plaid.com/
+[6]: https://dashboard.plaid.com/developers/keys/
+[7]: https://dashboard.plaid.com/
+[8]: https://plaid.com/docs/api/institutions/#institutionsget
+[9]: https://plaid.com/docs/api/sandbox/#sandboxpublic_tokencreate
+[10]: https://plaid.com/docs/api/items/#itempublic_tokenexchange
