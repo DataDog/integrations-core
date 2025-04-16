@@ -28,10 +28,10 @@ Configure the Datadog endpoint to forward Plaid logs to Datadog.
 4. Retrieve your `client_id` and `secret`.
 
 #### To obtain Access Token, follow these steps:
-   1. **Get institution_id from Plaid**:  
-      Hit Plaid API **/institutions/get** endpoint to obtain institution_id. Reference [link](https://plaid.com/docs/api/institutions/#institutionsget) 
-   2. **Create a Public Token**:  
-      You will need to create a public token. Use the institution_id that you retrieved from Step 1 and hit **/public_token/create** endpoint. Reference  [link](https://plaid.com/docs/api/sandbox/#sandboxpublic_tokencreate) 
+1. [**Retrieve the `institution_id` from Plaid**](https://plaid.com/docs/api/institutions/#institutionsget) :  
+    Use the Plaid API's **/institutions/get** endpoint to fetch the `institution_id`.
+2. [**Create a Public Token**](https://plaid.com/docs/api/sandbox/#sandboxpublic_tokencreate):  
+    Create a public token by using the `institution_id` that you retrieved from Step 1 and hit **/public_token/create** endpoint.
    3. **Obtain the Access token**:  
       Now, use the public_token you obtained from Step 2 to exchange it for an access_token. Send the public_token to this **/item/public_token/** exchange . Reference [link](https://plaid.com/docs/api/items/#itempublic_tokenexchange) 
 
