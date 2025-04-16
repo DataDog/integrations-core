@@ -140,13 +140,20 @@ instances:
     ## @param certificate_stores - list of strings - optional
     ## For Windows Only
     ## The list of certificate stores to query from when verifying the Windows server certificates. This is
-    ## only used when `local_cert_path` is not set. The default is to use the system
-    ## certificate store.
+    ## only used when `local_cert_path` is not set.
     #
     # certificate_stores:
     #   - MY
     #   - ROOT
     #   - CA
+
+    ## @param cert_subject - string - optional
+    ## A regex pattern to filter by the subject of the certificates. For example if you have `cert_subject`
+    ## set to `Microsoft Root Authority` and you have a certificate with subject, 
+    ## "CN=Microsoft Root Authority, OU=Microsoft Corporation, OU=Copyright (c) 1997 Microsoft Corp."
+    ## then the certificate will be matched and metrics will be collected for that certificate.
+    #
+    # cert_subject: <REGEX>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

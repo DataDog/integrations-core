@@ -150,8 +150,7 @@ files:
       description: |
         For Windows Only
         The list of certificate stores to query from when verifying the Windows server certificates. This is
-        only used when `local_cert_path` is not set. The default is to use the system
-        certificate store.
+        only used when `local_cert_path` is not set.
       value:
         type: array
         items:
@@ -160,5 +159,14 @@ files:
           - 'MY'
           - 'ROOT'
           - 'CA'
+    - name: cert_subject
+      description: |
+        A regex pattern to filter by the subject of the certificates. For example if you have `cert_subject`
+        set to `Microsoft Root Authority` and you have a certificate with subject, 
+        "CN=Microsoft Root Authority, OU=Microsoft Corporation, OU=Copyright (c) 1997 Microsoft Corp."
+        then the certificate will be matched and metrics will be collected for that certificate.
+      value:
+        type: string
+        example: <REGEX>
     - template: instances/default
     - template: instances/tls

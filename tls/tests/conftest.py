@@ -7,6 +7,7 @@ import pytest
 from datadog_test_libs.utils.mock_dns import mock_local
 
 from datadog_checks.dev import TempDir, docker_run
+from datadog_checks.dev.docker import using_windows_containers
 from datadog_checks.tls.utils import days_to_seconds
 
 from .utils import download_cert, temp_binary
@@ -37,11 +38,18 @@ def clean_fips_environment():
     yield
 
 
+E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance_e2e, mock_local_tls_dns):
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):
-        e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
+    if using_windows_containers():
+        e2e_metadata = {'docker_platform': 'windows'}
         yield instance_e2e, e2e_metadata
+    else:
+        with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):
+            e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
+            yield instance_e2e, e2e_metadata
 
 
 @pytest.fixture(scope='session')
