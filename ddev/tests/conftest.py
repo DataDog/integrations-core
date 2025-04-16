@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import os
 import random
 from contextlib import ExitStack
 from typing import Generator
 
 import pytest
 import vcr
-from click.testing import CliRunner as __CliRunner
 from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.cli.terminal import Terminal
@@ -23,43 +21,9 @@ from ddev.utils.fs import Path, temp_directory
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
-PLATFORM = Platform()
-
-
-class ClonedRepo:
-    def __init__(self, path: Path, original_branch: str, testing_branch: str):
-        self.path = path
-        self.original_branch = original_branch
-        self.testing_branch = testing_branch
-
-    def reset_branch(self):
-        with self.path.as_cwd():
-            # Hard reset
-            PLATFORM.check_command_output(['git', 'checkout', '-fB', self.testing_branch, self.original_branch])
-
-            # Remove untracked files
-            PLATFORM.check_command_output(['git', 'clean', '-fd'])
-
-            # Remove all tags
-            tags_dir = self.path / '.git' / 'refs' / 'tags'
-            if tags_dir.is_dir():
-                tags_dir.remove()
-
-    @staticmethod
-    def new_branch():
-        return os.urandom(10).hex()
-
-
-class CliRunner(__CliRunner):
-    def __init__(self, command):
-        super().__init__()
-        self._command = command
-
-    def __call__(self, *args, **kwargs):
-        # Exceptions should always be handled
-        kwargs.setdefault('catch_exceptions', False)
-
-        return self.invoke(self._command, args, **kwargs)
+from .helpers import PLATFORM
+from .helpers.git import ClonedRepo
+from .helpers.runner import CliRunner
 
 
 @pytest.fixture(scope='session')
@@ -148,8 +112,9 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
 def overrides_config(temp_dir) -> Generator[Path]:
     """Creates a temporary overrides config file in the temp current directory."""
     with temp_dir.as_cwd():
-        (temp_dir / DDEV_TOML).touch()
-        yield temp_dir / DDEV_TOML
+        ddev_toml = temp_dir / DDEV_TOML
+        ddev_toml.touch()
+        yield ddev_toml
 
 
 @pytest.fixture
@@ -187,6 +152,7 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
         PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
+        PLATFORM.check_command_output(['git', 'config', 'tag.gpgsign', 'false'])
 
     cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
@@ -204,6 +170,12 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     finally:
         set_root('')
         local_clone.reset_branch()
+
+
+@pytest.fixture
+def repository_as_cwd(repository: ClonedRepo) -> Generator[ClonedRepo, None, None]:
+    with repository.path.as_cwd():
+        yield repository
 
 
 @pytest.fixture(scope='session')

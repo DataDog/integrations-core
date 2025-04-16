@@ -1,68 +1,165 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-def test_create_new_overrides_config(ddev, config_file, helpers, temp_dir):
-    with temp_dir.as_cwd():
-        result = ddev('config', 'local-repo')
-        local_path = str(temp_dir).replace('\\', '\\\\')
+from collections.abc import Generator
 
-        expected_output = helpers.dedent(
-            f"""
-            Local repo configuration added in {config_file.pretty_overrides_path}
-            Local config content:
-            repo = "local"
+import pytest
 
-            [repos]
-            local = "{local_path}"
-            """
-        )
-        # Reload new values
-        config_file.load()
-
-        assert result.exit_code == 0, result.output
-        assert result.output == expected_output
-
-        # Verify the config was actually created
-        assert config_file.overrides_path.exists()
-        assert config_file.overrides_model.raw_data['repos']['local'] == str(config_file.overrides_path.parent)
-        assert config_file.overrides_model.raw_data['repo'] == 'local'
+from ddev.config.file import DDEV_TOML, ConfigFileWithOverrides
+from ddev.utils.fs import Path
+from ddev.utils.toml import dump_toml_data, load_toml_file
+from tests.helpers.git import ClonedRepo
+from tests.helpers.runner import CliRunner, Result
 
 
-def test_update_existing_local_config(ddev, config_file, helpers, overrides_config):
-    """Test updating an existing local config file while preserving other settings."""
-    # Create an existing local config with some settings
+@pytest.fixture
+def repo_with_ddev_tool_config(repository_as_cwd: ClonedRepo) -> Generator[ClonedRepo, None, None]:
+    pyproject_path = repository_as_cwd.path / "pyproject.toml"
+    pyproject = load_toml_file(pyproject_path)
+    pyproject["tool"]["ddev"] = {"repo": "integrations-core"}
+    dump_toml_data(pyproject, pyproject_path)
+
+    yield repository_as_cwd
+
+
+def test_create_new_overrides_config(
+    ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, repo_with_ddev_tool_config: ClonedRepo
+):
+    temp_dir = repo_with_ddev_tool_config.path
+
+    result = ddev("config", "local-repo")
+    local_path = str(temp_dir).replace("\\", "\\\\")
+
+    expected_output = helpers.dedent(
+        f"""
+        Local repo configuration added in {config_file.pretty_overrides_path}
+
+        Local config content:
+        repo = "core"
+
+        [repos]
+        core = "{local_path}"
+        """
+    )
+    # Reload new values
+    config_file.load()
+
+    assert result.exit_code == 0, result.output
+    assert result.output == expected_output
+
+    # Verify the config was actually created
+    assert config_file.overrides_path.exists()
+    assert config_file.overrides_model.raw_data["repos"]["core"] == str(config_file.overrides_path.parent)
+    assert config_file.overrides_model.raw_data["repo"] == "core"
+
+
+def test_update_existing_local_config(
+    ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, repo_with_ddev_tool_config: ClonedRepo
+):
+    ddev_path = repo_with_ddev_tool_config.path / DDEV_TOML
     existing_config = helpers.dedent(
         """
         [orgs.default]
         api_key = "test_key"
 
         [repos]
-        local = "/old/path"
+        core = "/old/path"
         """
     )
-    overrides_config.write_text(existing_config)
+    ddev_path.write_text(existing_config)
 
-    result = ddev('config', 'local-repo')
-    local_path = str(config_file.overrides_path.parent).replace('\\', '\\\\')
+    result = ddev("config", "local-repo")
+    local_path = str(ddev_path.parent).replace("\\", "\\\\")
 
     assert result.exit_code == 0, result.output
     assert result.output == helpers.dedent(
         f"""
         Local config file already exists. Updating...
         Local repo configuration added in {config_file.pretty_overrides_path}
+
         Local config content:
-        repo = "local"
+        repo = "core"
 
         [orgs.default]
         api_key = "*****"
 
         [repos]
-        local = "{local_path}"
+        core = "{local_path}"
         """
     )
 
     # Verify the config was updated correctly
     config_file.load()
-    assert config_file.overrides_model.raw_data['repos']['local'] == str(config_file.overrides_path.parent)
-    assert config_file.overrides_model.raw_data['repo'] == 'local'
-    assert config_file.overrides_model.raw_data['orgs']['default']['api_key'] == 'test_key'
+    assert config_file.overrides_model.raw_data["repos"]["core"] == str(repo_with_ddev_tool_config.path)
+    assert config_file.overrides_model.raw_data["repo"] == "core"
+    assert config_file.overrides_model.raw_data["orgs"]["default"]["api_key"] == "test_key"
+
+
+def assert_valid_local_config(
+    config_file: ConfigFileWithOverrides, repo_path: Path, result: Result, expected_output: str
+):
+    assert result.exit_code == 0
+    assert "The current repo could not be inferred" in result.output
+    assert "What repo are you trying to override?" in result.output
+    assert expected_output in result.output
+    assert config_file.overrides_model.raw_data["repos"]["extras"] == str(repo_path)
+    assert config_file.overrides_model.raw_data["repo"] == "extras"
+
+
+def test_not_in_repo_ask_user(ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, overrides_config: Path):
+    result = ddev("config", "local-repo", input="extras")
+    extras_path = str(config_file.overrides_path.parent).replace("\\", "\\\\")
+
+    expected_output = helpers.dedent(
+        f"""
+        Local config file already exists. Updating...
+        Local repo configuration added in {config_file.pretty_overrides_path}
+
+        Local config content:
+        repo = "extras"
+
+        [repos]
+        extras = "{extras_path}"
+        """
+    )
+    # Reload new values
+    config_file.load()
+    assert_valid_local_config(config_file, overrides_config.parent, result, expected_output)
+
+
+def test_pyproject_not_found_ask_user(
+    ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, repository_as_cwd: ClonedRepo
+):
+    (repository_as_cwd.path / "pyproject.toml").unlink()
+    result = ddev("config", "local-repo", input="extras")
+    extras_path = str(config_file.overrides_path.parent).replace("\\", "\\\\")
+
+    expected_output = helpers.dedent(
+        f"""
+        Local repo configuration added in {config_file.pretty_overrides_path}
+
+        Local config content:
+        repo = "extras"
+
+        [repos]
+        extras = "{extras_path}"
+        """
+    )
+    # Reload new values
+    config_file.load()
+    assert_valid_local_config(config_file, config_file.overrides_path.parent, result, expected_output)
+
+
+def test_misconfigured_pyproject_fails(
+    ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, repository_as_cwd: ClonedRepo
+):
+    # Setup wrongly configured pyproject.toml
+    pyproject_path = repository_as_cwd.path / "pyproject.toml"
+    pyproject = load_toml_file(pyproject_path)
+    pyproject["tool"]["ddev"] = {"repo": "wrong-repo"}
+    dump_toml_data(pyproject, pyproject_path)
+
+    result = ddev("config", "local-repo")
+    assert result.exit_code == 1
+    assert "Invalid ddev metadata found in pyproject.toml" in result.output
+    assert "[tool.ddev.repo] is 'wrong-repo': Input should be 'integrations-core'" in result.output
