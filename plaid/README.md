@@ -35,8 +35,6 @@ Configure the Datadog endpoint to forward Plaid logs to Datadog.
 3. [**Obtain the Access token**](https://plaid.com/docs/api/items/#itempublic_tokenexchange):  
     Use the `public_token` you obtained from Step 2 to exchange it for an `access_token`. Send the `public_token` to the **/item/public_token/** exchange.
 4. **Store the Access Token Securely**:  
-      
-
 
 | Plaid Parameters | Description |
 |----------|----------|
