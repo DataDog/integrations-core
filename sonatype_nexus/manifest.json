@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6cec5ac3-a686-4408-936d-26f19fa6763a",
   "app_id": "sonatype-nexus",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -48,7 +48,10 @@
       },
       "metrics": {
         "prefix": "sonatype_nexus.",
-        "check": ["sonatype_nexus.analytics.available_cpus", "sonatype_nexus.status.available_cpus_health"],
+        "check": [
+          "sonatype_nexus.analytics.available_cpus",
+          "sonatype_nexus.status.available_cpus_health"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -56,8 +59,8 @@
       }
     },
     "dashboards": {
-        "Sonatype Nexus Instance Health": "assets/dashboards/sonatype_nexus_instance_health.json",
-        "Sonatype Nexus Metrics": "assets/dashboards/sonatype_nexus_metrics.json"
+      "Sonatype Nexus Instance Health": "assets/dashboards/sonatype_nexus_instance_health.json",
+      "Sonatype Nexus Metrics": "assets/dashboards/sonatype_nexus_metrics.json"
     },
     "monitors": {
       "High Number of Failed Unique User Authentication Detected": "assets/monitors/high_number_of_failed_unique_user_authentication_detected.json",
