@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     allowed_versions: Optional[tuple[str, ...]] = None
+    cert_subject: Optional[str] = None
     certificate_stores: Optional[tuple[str, ...]] = None
     days_critical: Optional[float] = None
     days_warning: Optional[float] = None

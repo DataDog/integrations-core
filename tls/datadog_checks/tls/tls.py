@@ -110,6 +110,7 @@ class TLSCheck(AgentCheck):
         local_cert_path = instances[0].get('local_cert_path', '')
 
         self._certificate_stores = self.instance.get('certificate_stores', [])
+        self._cert_subject = self.instance.get('cert_subject', '')
 
         # Decide the method of collection for this instance (local file vs remote connection)
         if local_cert_path:
@@ -150,6 +151,20 @@ class TLSCheck(AgentCheck):
             self.log.debug('Could not validate the certificate')
             return
         self.log.debug('Validating certificate')
+
+        # Create a copy of the tags list
+        tags = list(self._tags)
+
+        # Add certificate subject as tag if available
+        try:
+            if cert.subject:
+                subject = str(cert.subject)
+                subject_tag = 'cert_subject:{}'.format(subject)
+                tags.append(subject_tag)
+                self.log.debug('Added certificate subject tag: %s', subject_tag)
+        except (AttributeError, TypeError) as e:
+            self.log.debug('Could not extract certificate subject: %s', str(e))
+
         if self._tls_validate_hostname:
             validator, host_type = self.validation_data
 
@@ -161,7 +176,7 @@ class TLSCheck(AgentCheck):
                 self.service_check(
                     SERVICE_CHECK_VALIDATION,
                     self.CRITICAL,
-                    tags=self._tags,
+                    tags=tags,
                     message=message,
                 )
                 return
@@ -171,17 +186,30 @@ class TLSCheck(AgentCheck):
                 self.service_check(
                     SERVICE_CHECK_VALIDATION,
                     self.CRITICAL,
-                    tags=self._tags,
+                    tags=tags,
                     message=message,
                 )
                 return
         self.log.debug('Certificate is valid')
-        self.service_check(SERVICE_CHECK_VALIDATION, self.OK, tags=self._tags)
+        self.service_check(SERVICE_CHECK_VALIDATION, self.OK, tags=tags)
 
     def check_age(self, cert):
         if cert is None:
             self.log.debug('Cannot verify certificate expiration')
             return
+
+        # Create a copy of the tags list
+        tags = list(self._tags)
+
+        # Add certificate subject as tag if available
+        try:
+            if cert.subject:
+                subject = str(cert.subject)
+                subject_tag = 'cert_subject:{}'.format(subject)
+                tags.append(subject_tag)
+                self.log.debug('Added certificate subject tag: %s', subject_tag)
+        except (AttributeError, TypeError) as e:
+            self.log.debug('Could not extract certificate subject: %s', str(e))
 
         if self._send_cert_duration:
             self.log.debug('Checking issued days of certificate')
@@ -189,38 +217,36 @@ class TLSCheck(AgentCheck):
             issued_seconds = issued_delta.total_seconds()
             issued_days = seconds_to_days(issued_seconds)
 
-            self.count('tls.issued_days', issued_days, tags=self._tags)
-            self.count('tls.issued_seconds', issued_seconds, tags=self._tags)
+            self.count('tls.issued_days', issued_days, tags=tags)
+            self.count('tls.issued_seconds', issued_seconds, tags=tags)
 
         self.log.debug('Checking age of certificate')
         delta = cert.not_valid_after_utc - datetime.now(timezone.utc)
         seconds_left = delta.total_seconds()
         days_left = seconds_to_days(seconds_left)
 
-        self.gauge('tls.days_left', days_left, tags=self._tags)
-        self.gauge('tls.seconds_left', seconds_left, tags=self._tags)
+        self.gauge('tls.days_left', days_left, tags=tags)
+        self.gauge('tls.seconds_left', seconds_left, tags=tags)
 
         if seconds_left <= 0:
-            self.service_check(
-                SERVICE_CHECK_EXPIRATION, self.CRITICAL, tags=self._tags, message='Certificate has expired'
-            )
+            self.service_check(SERVICE_CHECK_EXPIRATION, self.CRITICAL, tags=tags, message='Certificate has expired')
         elif seconds_left < self._seconds_critical:
             self.service_check(
                 SERVICE_CHECK_EXPIRATION,
                 self.CRITICAL,
-                tags=self._tags,
+                tags=tags,
                 message='Certificate will expire in only {} days'.format(days_left),
             )
         elif seconds_left < self._seconds_warning:
             self.service_check(
                 SERVICE_CHECK_EXPIRATION,
                 self.WARNING,
-                tags=self._tags,
+                tags=tags,
                 message='Certificate will expire in {} days'.format(days_left),
             )
         else:
             self.log.debug('Age is valid')
-            self.service_check(SERVICE_CHECK_EXPIRATION, self.OK, tags=self._tags)
+            self.service_check(SERVICE_CHECK_EXPIRATION, self.OK, tags=tags)
 
     def create_connection(self):
         """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""

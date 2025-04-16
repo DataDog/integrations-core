@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
 import ssl
 
 from cryptography.x509.base import load_der_x509_certificate
@@ -15,18 +16,23 @@ class TLSWindowsCheck(object):
     def __init__(self, agent_check):
         self.agent_check = agent_check
         self.log = get_check_logger()
-        self.log.debug('Selecting local connection for method of collection')
+        self.log.debug('Selecting windows certificates for method of collection')
         if self.agent_check._tls_validate_hostname and self.agent_check._server_hostname:
             self.agent_check._tags.append('server_hostname:{}'.format(self.agent_check._server_hostname))
 
-    def _get_windows_cert(self, store):
+    def _get_windows_cert(self, store, cert_filter):
         certs = []
         try:
             self.log.debug('Reading from Windows cert store')
             for cert, _encoding, _trust in ssl.enum_certificates(store):
-                if cert not in certs:
-                    certs.append(self.append_cert(cert))
-                    self.log.debug('Found certificate: %s', cert)
+                decoded_cert = self._parse_cert(cert)
+                if self.agent_check._cert_subject:
+                    if re.search(cert_filter, str(decoded_cert.subject)):
+                        if decoded_cert not in certs:
+                            certs.append(decoded_cert)
+                else:
+                    if decoded_cert not in certs:
+                        certs.append(decoded_cert)
         except Exception as e:
             self.log.debug('Error occurred while reading from Windows cert store: %s', str(e))
             self.agent_check.service_check(
@@ -63,8 +69,9 @@ class TLSWindowsCheck(object):
             )
 
         certs = []
+        cert_filter = re.compile(self.agent_check._cert_subject, re.IGNORECASE)
         for store in self.agent_check._certificate_stores:
-            certs.append(self._get_windows_cert(store))
+            certs.extend(self._get_windows_cert(store, cert_filter))
 
         for cert in certs:
             self.agent_check.validate_certificate(cert)
