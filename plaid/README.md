@@ -46,8 +46,21 @@ Configure the Datadog endpoint to forward Plaid logs to Datadog.
 
 ## Data Collected
 
-The crawler will implement data collection of Plaid logs for the List of Transfer events, Recurring Transfer events, Investment transactions
-events and Auth metrics. Sensitive data are removed and sent to Datadog.
+### Logs
+
+The crawler collects Plaid logs, including Transfer events, Recurring Transfer events, Investment transactions, and Auth metrics. All sensitive data is removed before sending the logs to Datadog.
+
+### Metrics
+
+The Plaid integration does not include any metrics.
+
+### Events
+
+The Plaid integration does not include any events.
+
+### Service checks
+
+The Plaid integration does not include any service checks.
 
 
 ## Troubleshooting
