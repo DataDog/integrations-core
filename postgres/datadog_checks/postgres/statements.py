@@ -254,7 +254,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "dd.postgresql.pg_stat_statements.calls_changed",
                     len(self._query_calls_cache.called_queryids),
                     tags=self.tags,
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                     raw=True,
                 )
 
@@ -279,11 +279,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
             payload_wrapper = {
-                'host': self._check.resolved_hostname,
+                'host': self._check.reported_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
-                'cloud_metadata': self._config.cloud_metadata,
+                'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
                 'ddagenthostname': self._check.agent_hostname,
@@ -336,7 +336,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     warning_with_tags(
                         "Unable to collect statement metrics because required fields are unavailable: %s.",
                         ', '.join(sorted(missing_columns)),
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                         dbname=self._config.dbname,
                     ),
                 )
@@ -348,7 +348,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         "error:database-missing_pg_stat_statements_required_columns",
                     ]
                     + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                     raw=True,
                 )
                 return []
@@ -380,7 +380,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         self._pg_stat_statements_max_warning_threshold,
                         self._pg_stat_statements_max_warning_threshold,
                         DatabaseConfigurationError.high_pg_stat_statements_max.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                         dbname=self._config.dbname,
                         code=DatabaseConfigurationError.high_pg_stat_statements_max.value,
                         value=pg_stat_statements_max,
@@ -438,7 +438,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         "troubleshooting#%s for more details",
                         self._config.dbname,
                         DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                         dbname=self._config.dbname,
                         code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
                     ),
@@ -453,7 +453,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         "troubleshooting#%s for more details",
                         self._config.dbname,
                         DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                         dbname=self._config.dbname,
                         code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
                     ),
@@ -466,7 +466,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         "help: %s",
                         self._config.dbname,
                         str(e),
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                         dbname=self._config.dbname,
                     ),
                 )
@@ -475,7 +475,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "dd.postgres.statement_metrics.error",
                 1,
                 tags=self.tags + [error_tag] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
 
@@ -497,7 +497,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         "pg_stat_statements.dealloc",
                         dealloc,
                         tags=self.tags,
-                        hostname=self._check.resolved_hostname,
+                        hostname=self._check.reported_hostname,
                     )
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements_info: %s", e)
@@ -519,13 +519,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
                 tags=self.tags,
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             self._check.count(
                 "pg_stat_statements.count",
                 count,
                 tags=self.tags,
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
@@ -577,7 +577,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "dd.postgres.statement_metrics.baseline_metrics_cache_reset",
                 1,
                 tags=self.tags + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
 
@@ -618,7 +618,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             'dd.postgres.queries.query_rows_raw',
             len(rows),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
 
@@ -660,7 +660,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ]
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
