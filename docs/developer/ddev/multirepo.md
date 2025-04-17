@@ -14,6 +14,71 @@ When you run a `ddev` command, it searches for a `.ddev.toml` file in the curren
 *   **Discovery:** `ddev` automatically finds the closest `.ddev.toml` by traversing up the directory tree from your current location.
 *   **Use Case:** Ideal for setting a specific `repo` path for a project checkout, managing different worktrees of the same repository, or defining other project-specific configurations without altering the global settings.
 
+## The `local-repo` command
+
+The `ddev config local-repo` command overrides the repo configuration with a `.ddev.toml` file in the current working directory. The command tries to identify the repo you are in by reading the `[tool.ddev]` table in the `pyproject.toml` file in the current repo root directory.
+
+```toml
+# pyproject.toml
+
+[tool.ddev]
+repo = "integrations-core"
+# The valid options for this value are
+# "integrations-core"
+# "integrations-extras"
+# "integrations-internal"
+# "datadog-agent"
+# "marketplace"
+# "integrations-internal-core"
+```
+
+If the command `ddev config local-repo` is run in a directory that is not part of a git repository, the repository root does not have a `pyproject.toml` file, or the file exists but has no `[tool.ddev]` table, the command prompts you to specify which repo configuration to override.
+
+As an example, let's imagine we have our `integrations-core` repo locally with the following structure:
+
+```
+/some/parent/directory/
+│
+└── integrations-core/        <-- Main Git Repository Checkout
+    │
+    ├── pyproject.toml
+    ├── hatch.toml
+    ├── ddev/
+    │
+    ├── ...
+    ├── ddev/
+    └── issue_XYZ/            <-- Git Worktree (e.g., on 'feature/XYZ' branch)
+        │
+        ├── pyproject.toml    <-- Same file structure as the main checkout,
+        ├── hatch.toml
+        ├── ddev/
+        │
+        └── ...
+```
+
+We have created a worktree to work on a separate branch without modifying our current working directory. When we run `ddev`, we want it to point to this current directory as our repo. To do this, we can just run the following command from the `issue_XYZ` directory:
+
+```bash
+ddev config local-repo
+```
+
+The output specifies how the configuration has changed:
+
+```
+Local repo configuration added in .ddev.toml
+
+Local config content:
+repo = "core"
+
+[repos]
+core = "/some/parent/directory/integrations-core/issue_XYZ"
+```
+
+Now, the `.ddev.toml` file in the `issue_XYZ` directory modifies where the `core` repo is when we execute `ddev` from the worktree.
+
+If we go back to our `integrations-core` directory and execute any `ddev` command, this override won't take effect.
+
+
 ## Command Behavior with Overrides
 
 The presence of a `.ddev.toml` file influences how certain `ddev` config commands behave. Assume the global config has `repo = "core"` and `org = "default"`, and a local `.ddev.toml` has `repo = "extras"` and `github.user = "test-user"`.
@@ -82,13 +147,12 @@ The presence of a `.ddev.toml` file influences how certain `ddev` config command
     # In /path/to/your/project
     $ ddev config local-repo
     Local repo configuration added in .ddev.toml
-    Local config content:
 
+    Local config content:
     repo = "local"
 
     [repos]
     local = "/path/to/your/project"
-
     ```
 
 *   **`ddev config restore`**: Restores the global configuration file to its default settings. If a `.ddev.toml` file with local overrides exists, it prompts whether to delete it.

@@ -31,12 +31,7 @@ agent = "/path/to/datadog-agent"
 would make it so running e.g. `ddev test nginx` will look for an integration named `nginx` in `/path/to/integrations-core`
 no matter what directory you are in. If the selected path does not exist, then the current directory will be used.
 
-By default, `repo` is set to `core`.
-
-!!! info "Working with multiple repositories"
-    Using the configuration overrides you can set `ddev` to use your current working directory as the active repository by running `ddev config local-repo`.
-    This creates (or updates) a `.ddev.toml` file in your working directory with a `local` repository set to this path.
-    Refer to the [Multi-repo/Worktrees](multirepo.md) documentation for examples and more context on managing local overrides.
+By default, `repo` is set to `core`. To easily switch between repositories depending on your current directory take a look at how to work with [Multi-repo/Worktrees](multirepo.md).
 
 ## Agent
 

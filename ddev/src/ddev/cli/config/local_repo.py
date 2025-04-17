@@ -62,7 +62,14 @@ def repo_to_override(app: Application) -> str:
 @click.pass_obj
 def local_repo(app: Application):
     """
-    Creates a local .ddev.toml file in the current directory overriding the current repo path.
+    Overrides the repo configuration with a `.ddev.toml` file in the current working directory.
+
+    The command tries to identify the repo you are in by reading the `repo` field in the `[tool.ddev]` table in
+    the `pyproject.toml` file located at the root of your git repository.
+
+    If the current directory is not part of a git repository, the repository root does not have a `pyproject.toml` file,
+    or the file exists but has no `[tool.ddev]` table, you will be prompted to specify which repo
+    configuration to override.
     """
     from rich.syntax import Syntax
 
