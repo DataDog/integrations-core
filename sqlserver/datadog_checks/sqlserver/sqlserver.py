@@ -183,14 +183,11 @@ class SQLServer(AgentCheck):
         self._schemas = Schemas(self, self._config)
 
     def initialize_xe_session_handlers(self):
-        """Initialize the XE session handlers"""
-        # Initialize XE session handlers
+        """Initialize the XE session handlers without starting them"""
+        # Initialize XE session handlers if not already initialized
         if not self.xe_session_handlers:
             self.xe_session_handlers = get_xe_session_handlers(self, self._config)
-
-        # Start XE session handlers
-        for handler in self.xe_session_handlers:
-            handler.start()
+            self.log.debug(f"Initialized {len(self.xe_session_handlers)} XE session handlers")
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -200,9 +197,12 @@ class SQLServer(AgentCheck):
         self._schemas.cancel()
         self.deadlocks.cancel()
 
-        # Cancel XE session handlers
+        # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
-            handler.cancel()
+            try:
+                handler.cancel()
+            except Exception as e:
+                self.log.error(f"Error canceling XE session handler for {handler.session_name}: {e}")
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -829,6 +829,13 @@ class SQLServer(AgentCheck):
                 self.sql_metadata.run_job_loop(self.tags)
                 self._schemas.run_job_loop(self.tags)
                 self.deadlocks.run_job_loop(self.tags)
+
+                # Run XE session handlers
+                for handler in self.xe_session_handlers:
+                    try:
+                        handler.run_job_loop(self.tags)
+                    except Exception as e:
+                        self.log.error(f"Error running XE session handler for {handler.session_name}: {e}")
         else:
             self.log.debug("Skipping check")
 
