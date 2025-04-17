@@ -44,8 +44,9 @@ class SubmitData:
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version, flavor):
+    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
+        self._base_event["database_instance"] = database_instance
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
@@ -157,7 +158,7 @@ class DatabasesData:
                 "dd.mysql.db.error",
                 1,
                 tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
-                hostname=self._check.reported_hostname,
+                hostname=self._check.resolved_hostname,
             )
             raise
 
@@ -251,7 +252,8 @@ class DatabasesData:
         self._tags = tags
         with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._data_submitter.set_base_event_data(
-                self._check.resolved_hostname,
+                self._check.reported_hostname,
+                self._check.database_identifier,
                 self._tags,
                 self._check._config.cloud_metadata,
                 self._check.version.version,
