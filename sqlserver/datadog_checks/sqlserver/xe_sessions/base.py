@@ -96,20 +96,99 @@ class XESessionBase(DBMAsyncJob):
 
                 return result[0]
 
+    def _extract_value(self, element, default=None):
+        """Helper method to extract values from XML elements with consistent handling"""
+        if element is None:
+            return default
+
+        # First try to get from value element
+        value_elem = element.find('./value')
+        if value_elem is not None and value_elem.text:
+            return value_elem.text.strip()
+
+        # If no value element or empty, try the element's text directly
+        if element.text:
+            return element.text.strip()
+
+        return default
+
+    def _extract_int_value(self, element, default=None):
+        """Helper method to extract integer values with error handling"""
+        value = self._extract_value(element, default)
+        if value is None:
+            return default
+
+        try:
+            return int(value)
+        except (ValueError, TypeError) as e:
+            self._log.debug(f"Error converting to int: {e}")
+            return default
+
+    def _extract_text_representation(self, element, default=None):
+        """Get the text representation when both value and text are available"""
+        text_elem = element.find('./text')
+        if text_elem is not None and text_elem.text:
+            return text_elem.text.strip()
+        return default
+
     def _process_events(self, xml_data):
         """Process the events from the XML data - override in subclasses"""
         raise NotImplementedError
 
-    def _create_event_payload(self, events):
-        """Create a payload to send to Datadog"""
-        if not events:
-            return None
+    def _normalize_event(self, event, numeric_fields, string_fields):
+        """
+        Generic method to normalize and validate an event data structure.
 
+        Args:
+            event: The raw event data dictionary
+            numeric_fields: Dictionary mapping field names to default values for numeric fields
+            string_fields: List of string field names
+
+        Returns:
+            A normalized event dictionary with consistent types
+        """
+        normalized = {}
+
+        # Required fields with defaults
+        normalized["timestamp"] = event.get("timestamp", "")
+
+        # Numeric fields with defaults
+        for field, default in numeric_fields.items():
+            value = event.get(field)
+            if value is None:
+                normalized[field] = default
+            else:
+                try:
+                    normalized[field] = float(value) if field == "duration_ms" else int(value)
+                except (ValueError, TypeError):
+                    normalized[field] = default
+
+        # String fields with defaults
+        for field in string_fields:
+            normalized[field] = str(event.get(field, "") or "")
+
+        return normalized
+
+    def _create_event_payload(self, raw_event, event_type, normalized_event_field):
+        """
+        Create a structured event payload for a single event with consistent format.
+
+        Args:
+            raw_event: The raw event data to normalize
+            event_type: The type of event (e.g., "xe_rpc" or "xe_batch")
+            normalized_event_field: The field name for the normalized event in the payload
+
+        Returns:
+            A dictionary with the standard payload structure
+        """
+        # Normalize the event - must be implemented by subclass
+        normalized_event = self._normalize_event_impl(raw_event)
+            
         return {
             "host": self._check.hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": f"xe_{self.session_name}",
+            "dbm_type": event_type,
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time() * 1000,
@@ -117,15 +196,23 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "service": self._config.service,
-            f"sqlserver_{self.session_name}_events": events,
+            normalized_event_field: normalized_event
         }
 
-    def _format_event_for_log(self, event):
-        """Format a single event for logging"""
-        formatted_event = {}
-        # Include the most important fields first for readability
-        important_fields = ['timestamp', 'sql_text', 'duration_ms', 'statement', 'client_app_name', 'database_name']
+    def _format_event_for_log(self, event, important_fields):
+        """
+        Format a single event for logging with important fields first
 
+        Args:
+            event: The event data dictionary
+            important_fields: List of field names to prioritize in the output
+
+        Returns:
+            A formatted event dictionary with the most important fields first
+        """
+        formatted_event = {}
+
+        # Include the most important fields first for readability
         for field in important_fields:
             if field in event:
                 formatted_event[field] = event[field]
@@ -137,9 +224,23 @@ class XESessionBase(DBMAsyncJob):
 
         return formatted_event
 
+    def _normalize_event_impl(self, event):
+        """
+        Implementation of event normalization - to be overridden by subclasses.
+        This method should apply the specific normalization logic for each event type.
+        """
+        raise NotImplementedError
+
+    def _get_important_fields(self):
+        """
+        Get the list of important fields for this event type - to be overridden by subclasses.
+        Used for formatting events for logging.
+        """
+        return ['timestamp', 'duration_ms']
+
     def run_job(self):
         """Run the XE session collection job"""
-        self._log.info(f"ALLEN: Running job for {self.session_name} session")
+        self._log.info(f"Running job for {self.session_name} session")
         if not self.session_exists():
             self._log.warning(f"XE session {self.session_name} not found or not running")
             return
@@ -158,7 +259,8 @@ class XESessionBase(DBMAsyncJob):
 
         # Log a sample of events (up to 3) for debugging
         sample_size = min(3, len(events))
-        sample_events = [self._format_event_for_log(event) for event in events[:sample_size]]
+        important_fields = self._get_important_fields()
+        sample_events = [self._format_event_for_log(event, important_fields) for event in events[:sample_size]]
 
         try:
             formatted_json = json_module.dumps(sample_events, indent=2, default=str)
@@ -166,9 +268,20 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error formatting events for logging: {e}")
 
-        # Create the payload but don't send it
-        payload = self._create_event_payload(events)
-        if payload:
-            self._log.debug(f"Created payload for {self.session_name} session with {len(events)} events (not sending)")
-            # serialized_payload = json.dumps(payload, default=default_json_event_encoding)
-            # self._check.database_monitoring_query_activity(serialized_payload) 
+        # Process each event individually
+        event_type = f"xe_{self.session_name.replace('datadog_', '')}"
+        normalized_event_field = f"sqlserver_{self.session_name.replace('datadog_', '')}_event"
+
+        for event in events:
+            try:
+                # Create a properly structured payload for this specific event
+                payload = self._create_event_payload(event, event_type, normalized_event_field)
+                # For now, just log it instead of sending
+                self._log.debug(f"Created payload for {self.session_name} event (not sending)")
+
+                # Uncomment to enable sending to Datadog in the future:
+                # serialized_payload = json.dumps(payload, default=default_json_event_encoding)
+                # self._check.database_monitoring_query_activity(serialized_payload)
+            except Exception as e:
+                self._log.error(f"Error processing event: {e}")
+                continue 
