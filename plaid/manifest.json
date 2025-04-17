@@ -18,28 +18,8 @@
       },
       {
         "media_type": "image",
-        "caption": "Overview of Plaid Logs",
-        "image_url": "images/plaid_overview_2.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Overview of Plaid Investment Transaction logs visualized",
-        "image_url": "images/inves_transactions.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Overview of Plaid Transfer logs visualized",
-        "image_url": "images/transfer.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Overview ofPlaid Transfer logs visualized",
-        "image_url": "images/transfer_2.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Overview of Plaid Recurring Transfer logs visualized",
-        "image_url": "images/recurr_transfer.png"
+        "caption": "Overview of other Plaid Logs",
+        "image_url": "images/plaid_other_logs.png"
       }
     ],
     "classifier_tags": [

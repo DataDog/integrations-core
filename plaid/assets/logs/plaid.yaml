@@ -10,16 +10,8 @@ facets:
     facetType: list
     groups:
       - Plaid
-    name: Account id
-    path: account_id
-    source: log
-    type: string
-  - description: ""
-    facetType: list
-    groups:
-      - Plaid
-    name: created
-    path: created
+    name: Log Label
+    path: label
     source: log
     type: string
 pipeline:
