@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 22.9.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Postgres: Add checkpoint byte delay metric ([#20017](https://github.com/DataDog/integrations-core/pull/20017))
+* add replication slot information and replication slot type to postgres replication stat metric ([#20035](https://github.com/DataDog/integrations-core/pull/20035))
+
+***Fixed***:
+
+* Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
+* Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
+
 ## 22.8.0 / 2025-03-19
 
 ***Added***:
