@@ -163,7 +163,7 @@ class MySql(AgentCheck):
     @property
     def reported_hostname(self):
         # type: () -> str
-        if self._config.empty_default_hostname:
+        if self._config.exclude_hostname:
             return None
         return self.resolved_hostname
 

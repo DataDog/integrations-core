@@ -13,7 +13,7 @@ class MySQLConfig(object):
     def __init__(self, instance, init_config):
         self.log = get_check_logger()
         self.database_identifier = instance.get('database_identifier', {})
-        self.empty_default_hostname = instance.get("empty_default_hostname", False)
+        self.exclude_hostname = instance.get("exclude_hostname", False)
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
         self.reported_hostname = instance.get('reported_hostname', '')

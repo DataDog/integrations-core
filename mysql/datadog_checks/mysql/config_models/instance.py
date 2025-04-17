@@ -213,7 +213,7 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
-    empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None
     index_metrics: Optional[IndexMetrics] = None
