@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 import socket
 import ssl
 from datetime import datetime
@@ -109,10 +110,12 @@ class TLSCheck(AgentCheck):
 
         local_cert_path = instances[0].get('local_cert_path', '')
 
+        # load certificate stores and cert_subject if they are configured
         self._certificate_stores = self.instance.get('certificate_stores', [])
-        self._cert_subject = self.instance.get('cert_subject', '')
+        self._cert_subject = self.instance.get('cert_subject', [])
 
-        # Decide the method of collection for this instance (local file vs remote connection)
+        # Decide the method of collection for this instance
+        # (local file vs Certificate Stores vs remote connection)
         if local_cert_path:
             from .tls_local import TLSLocalCheck
 
@@ -146,24 +149,27 @@ class TLSCheck(AgentCheck):
                 message='Disallowed protocol version: {}'.format(version),
             )
 
-    def validate_certificate(self, cert):
+    def validate_certificate(self, cert, tags=None):
         if cert is None:
             self.log.debug('Could not validate the certificate')
             return
         self.log.debug('Validating certificate')
 
         # Create a copy of the tags list
-        tags = list(self._tags)
+        if tags is None:
+            tags = list(self._tags)
+        else:
+            tags.extend(list(self._tags))
 
-        # Add certificate subject as tag if available
-        try:
-            if cert.subject:
-                subject = str(cert.subject)
-                subject_tag = 'cert_subject:{}'.format(subject)
-                tags.append(subject_tag)
-                self.log.debug('Added certificate subject tag: %s', subject_tag)
-        except (AttributeError, TypeError) as e:
-            self.log.debug('Could not extract certificate subject: %s', str(e))
+        # For Windows: Add the certificate subject as a tag if available
+        if self._certificate_stores:
+            try:
+                if cert.subject:
+                    subject_tag = self.parse_subject(cert.subject)
+                    tags.extend(subject_tag)
+                    self.log.debug('Added certificate subject tag: %s', subject_tag)
+            except (AttributeError, TypeError) as e:
+                self.log.debug('Could not extract certificate subject: %s', str(e))
 
         if self._tls_validate_hostname:
             validator, host_type = self.validation_data
@@ -193,23 +199,27 @@ class TLSCheck(AgentCheck):
         self.log.debug('Certificate is valid')
         self.service_check(SERVICE_CHECK_VALIDATION, self.OK, tags=tags)
 
-    def check_age(self, cert):
+    def check_age(self, cert, tags=None):
         if cert is None:
             self.log.debug('Cannot verify certificate expiration')
             return
 
         # Create a copy of the tags list
-        tags = list(self._tags)
+        if tags is None:
+            tags = list(self._tags)
+        else:
+            tags.extend(list(self._tags))
+            self.log.debug('Tags after extension: %s', tags)
 
-        # Add certificate subject as tag if available
-        try:
-            if cert.subject:
-                subject = str(cert.subject)
-                subject_tag = 'cert_subject:{}'.format(subject)
-                tags.append(subject_tag)
-                self.log.debug('Added certificate subject tag: %s', subject_tag)
-        except (AttributeError, TypeError) as e:
-            self.log.debug('Could not extract certificate subject: %s', str(e))
+        # For Windows: Add the certificate subject as a tag if available
+        if self._certificate_stores:
+            try:
+                if cert.subject:
+                    subject_tag = self.parse_subject(cert.subject)
+                    tags.extend(subject_tag)
+                    self.log.debug('Added certificate subject tag: %s', subject_tag)
+            except (AttributeError, TypeError) as e:
+                self.log.debug('Could not extract certificate subject: %s', str(e))
 
         if self._send_cert_duration:
             self.log.debug('Checking issued days of certificate')
@@ -278,6 +288,24 @@ class TLSCheck(AgentCheck):
                 raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
 
             raise
+
+    # Parse the subject of the certificate and return a list of tags
+    # Example: "CN=DigiCert Global Root CA,OU=www.digicert.com,O=DigiCert Inc,C=US
+    # Returns: ['subject_CN:DigiCert Global Root CA', 'subject_OU:www.digicert.com',
+    # 'subject_O:DigiCert Inc', 'subject_C:US']
+    def parse_subject(self, subject):
+        subject_tags = []
+        subject_str = subject.rfc4514_string()
+        try:
+            # Split the string by commas, but not if preceded by a backslash
+            subject_parts = re.split(r'(?<!\\),', subject_str)
+        except:
+            # If there are no backslashes, split by commas
+            subject_parts = re.split(',', subject_str)
+        for item in subject_parts:
+            subject_item = item.split('=')
+            subject_tags.append('subject_{}:{}'.format(subject_item[0], subject_item[1]))
+        return subject_tags
 
     @property
     def validation_data(self):

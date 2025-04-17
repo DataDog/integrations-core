@@ -147,13 +147,17 @@ instances:
     #   - ROOT
     #   - CA
 
-    ## @param cert_subject - string - optional
-    ## A regex pattern to filter by the subject of the certificates. For example if you have `cert_subject`
-    ## set to `Microsoft Root Authority` and you have a certificate with subject, 
+    ## @param cert_subject - list of strings - optional
+    ## For Windows Only
+    ## A list of regex patterns to filter by the subject of the certificates. 
+    ## For example if you have `Microsoft Root Authority` in `cert_subject`
+    ## and you have a certificate with subject, 
     ## "CN=Microsoft Root Authority, OU=Microsoft Corporation, OU=Copyright (c) 1997 Microsoft Corp."
     ## then the certificate will be matched and metrics will be collected for that certificate.
     #
-    # cert_subject: <REGEX>
+    # cert_subject:
+    #   - <REGEX_1>
+    #   - <REGEX_2>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
