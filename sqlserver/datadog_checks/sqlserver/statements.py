@@ -167,7 +167,7 @@ qstats_aggr as (
         query_hash,
         query_plan_hash,
         CAST(qs.dbid as int) as dbid,
-        DB_NAME(qs.dbid) as database_name,
+        DB_NAME(CAST(qs.dbid as int)) as database_name,
         max(plan_handle_and_offsets) as plan_handle_and_offsets,
         max(last_execution_time) as last_execution_time,
         max(last_elapsed_time) as last_elapsed_time,
