@@ -137,7 +137,8 @@ class XESessionBase(DBMAsyncJob):
         return formatted_event
 
     def run_job(self):
-        """Run the XE session collection job - modified to log events instead of sending to Datadog"""
+        """Run the XE session collection job"""
+        self._log.info(f"ALLEN: Running job for {self.session_name} session")
         if not self.session_exists():
             self._log.warning(f"XE session {self.session_name} not found or not running")
             return
