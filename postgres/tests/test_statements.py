@@ -2097,6 +2097,7 @@ def test_statement_metrics_execution_indicators(prev_row, curr_row, expected_inc
         assert result[0]["total_time"] == curr_row["total_time"] - prev_row["total_time"]
 
 
+@requires_over_13
 def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
     # don't need samples for this test
