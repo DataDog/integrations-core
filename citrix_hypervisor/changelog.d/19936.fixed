@@ -1,1 +1,0 @@
-Fix issue by which older Citrix versions returning broken JSON payloads may fail with older versions of the datadog_base_check package
