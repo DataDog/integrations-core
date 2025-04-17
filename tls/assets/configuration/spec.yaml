@@ -161,12 +161,18 @@ files:
           - 'CA'
     - name: cert_subject
       description: |
-        A regex pattern to filter by the subject of the certificates. For example if you have `cert_subject`
-        set to `Microsoft Root Authority` and you have a certificate with subject, 
+        For Windows Only
+        A list of regex patterns to filter by the subject of the certificates. 
+        For example if you have `Microsoft Root Authority` in `cert_subject`
+        and you have a certificate with subject, 
         "CN=Microsoft Root Authority, OU=Microsoft Corporation, OU=Copyright (c) 1997 Microsoft Corp."
         then the certificate will be matched and metrics will be collected for that certificate.
       value:
-        type: string
-        example: <REGEX>
+        type: array
+        items:
+          type: string
+        example:
+          - '<REGEX_1>'
+          - '<REGEX_2>'
     - template: instances/default
     - template: instances/tls
