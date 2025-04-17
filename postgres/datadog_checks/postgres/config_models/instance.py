@@ -256,7 +256,7 @@ class InstanceConfig(BaseModel):
     dbname: Optional[str] = None
     dbstrict: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
-    exclude_hostname: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: str
     idle_connection_timeout: Optional[int] = None
