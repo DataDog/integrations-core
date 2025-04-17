@@ -12,6 +12,8 @@ DEFAULT_MAX_CUSTOM_QUERIES = 20
 class MySQLConfig(object):
     def __init__(self, instance, init_config):
         self.log = get_check_logger()
+        self.database_identifier = instance.get('database_identifier', {})
+        self.empty_default_hostname = instance.get("empty_default_hostname", False)
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
         self.reported_hostname = instance.get('reported_hostname', '')
@@ -48,6 +50,7 @@ class MySQLConfig(object):
         self.activity_config = instance.get('query_activity', {}) or {}
         self.schemas_config: dict = instance.get('schemas_collection', {}) or {}
         self.index_config: dict = instance.get('index_metrics', {}) or {}
+        self.collect_blocking_queries = is_affirmative(instance.get('collect_blocking_queries', False))
 
         self.cloud_metadata = {}
         aws = instance.get('aws', {})

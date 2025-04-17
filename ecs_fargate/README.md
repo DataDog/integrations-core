@@ -22,7 +22,7 @@ The only configuration required to enable this metrics collection is to set an e
 
 ## Setup
 
-The following steps cover setup of the Datadog Container Agent within AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
+The following steps cover setup of the Datadog Container Agent within Amazon ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
 
 Tasks that do not have the Datadog Agent still report metrics with Cloudwatch, however the Agent is needed for Autodiscovery, detailed container metrics, tracing, and more. Additionally, Cloudwatch metrics are less granular, and have more latency in reporting than metrics shipped directly through the Datadog Agent.
 
@@ -969,6 +969,8 @@ To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `far
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task or job. The list of tags automatically attached depends on the Agent's [cardinality configuration][33].
 
+**Note**: Set the `env` and `service` tags in your task definition to get the full benefits of Datadog's unified service tagging. See the [full configuration section][64] of the unified service tagging documentation for instructions.
+
   | Tag                           | Cardinality  | Source               |
   |-------------------------------|--------------|----------------------|
   | `container_name`              | High         | ECS API              |
@@ -1080,3 +1082,4 @@ Need help? Contact [Datadog support][18].
 [61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
 [62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
 [63]: https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/
+[64]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=ecs#full-configuration

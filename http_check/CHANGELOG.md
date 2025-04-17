@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 11.2.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Add primary/standby failover support for http_check with Agent High Availability feature. ([#19765](https://github.com/DataDog/integrations-core/pull/19765))
+
 ## 11.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

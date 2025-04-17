@@ -69,13 +69,15 @@ To configure this check for an Agent running on a host:
      - host: "<SQL_HOST>,<SQL_PORT>"
        username: datadog
        password: "<YOUR_PASSWORD>"
-       connector: odbc # alternative is 'adodbapi'
-       driver: SQL Server
+       connector: adodbapi 
+       adoprovider: MSOLEDBSQL19  # Replace with MSOLEDBSQL for versions 18 and previous
    ```
 
     If you use port autodiscovery, use `0` for `SQL_PORT`. See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
+    
+    Use [supported drivers][25] based on your SQL Server setup.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL19` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. If you're using `MSOLEDBSQL` version 18 or lower, set the `adoprovider` variable to `MSOLEDBSQL` instead. It is also possible to use the Windows Authentication and not specify the username/password with:
+    **Note**: It is also possible to use the Windows Authentication and not specify the username/password with:
 
       ```yaml
       connection_string: "Trusted_Connection=yes"
@@ -222,3 +224,4 @@ This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and ab
 [22]: https://www.datadoghq.com/blog/sql-server-metrics
 [23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/
 [24]: https://www.datadoghq.com/blog/optimize-sql-server-performance-with-datadog/
+[25]: https://docs.datadoghq.com/database_monitoring/setup_sql_server/selfhosted/#supported-drivers

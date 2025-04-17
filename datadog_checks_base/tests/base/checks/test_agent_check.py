@@ -42,7 +42,12 @@ def test_check_version():
 
 
 def test_load_config():
-    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
+    assert AgentCheck.load_config('raw_foo: bar') == {'raw_foo': 'bar'}
+    assert AgentCheck.load_config('invalid:mapping') == 'invalid:mapping'
+    assert AgentCheck.load_config('') is None
+
+    with pytest.raises(ValueError, match='Failed to load config: '):
+        AgentCheck.load_config(':')
 
 
 def test_persistent_cache(datadog_agent):
