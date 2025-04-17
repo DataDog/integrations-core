@@ -12,41 +12,6 @@ class RPCEventsHandler(XESessionBase):
     def __init__(self, check, config):
         super(RPCEventsHandler, self).__init__(check, config, "datadog_rpc")
 
-    def _extract_value(self, element, default=None):
-        """Helper method to extract values from XML elements with consistent handling"""
-        if element is None:
-            return default
-
-        # First try to get from value element
-        value_elem = element.find('./value')
-        if value_elem is not None and value_elem.text:
-            return value_elem.text.strip()
-
-        # If no value element or empty, try the element's text directly
-        if element.text:
-            return element.text.strip()
-
-        return default
-
-    def _extract_int_value(self, element, default=None):
-        """Helper method to extract integer values with error handling"""
-        value = self._extract_value(element, default)
-        if value is None:
-            return default
-
-        try:
-            return int(value)
-        except (ValueError, TypeError) as e:
-            self._log.debug(f"Error converting to int: {e}")
-            return default
-
-    def _extract_text_representation(self, element, default=None):
-        """Get the text representation when both value and text are available"""
-        text_elem = element.find('./text')
-        if text_elem is not None and text_elem.text:
-            return text_elem.text.strip()
-        return default
-
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
         """Process RPC events from the XML data - keeping SQL text unobfuscated"""
@@ -101,7 +66,11 @@ class RPCEventsHandler(XESessionBase):
                 for action in event.findall('./action'):
                     action_name = action.get('name')
                     if action_name:
-                        event_data[action_name] = self._extract_value(action)
+                        # Add activity_id support
+                        if action_name == 'attach_activity_id':
+                            event_data['activity_id'] = self._extract_value(action)
+                        else:
+                            event_data[action_name] = self._extract_value(action)
 
                 events.append(event_data)
             except Exception as e:
@@ -109,3 +78,57 @@ class RPCEventsHandler(XESessionBase):
                 continue
 
         return events
+
+    def _normalize_event_impl(self, event):
+        """
+        Implementation of RPC event normalization with type handling.
+
+        Expected fields:
+        - timestamp: ISO8601 timestamp string
+        - duration_ms: float (milliseconds)
+        - cpu_time: int (microseconds)
+        - page_server_reads: int
+        - physical_reads: int
+        - logical_reads: int
+        - writes: int
+        - result: string ("OK", etc.)
+        - row_count: int
+        - connection_reset_option: string
+        - object_name: string (procedure name)
+        - statement: string (SQL text)
+        - data_stream: binary (nullable)
+        - output_parameters: string (nullable)
+        - username: string
+        - database_name: string
+        - request_id: int
+        - session_id: int
+        - client_app_name: string
+        - sql_text: string
+        - activity_id: string (GUID+sequence when using TRACK_CAUSALITY)
+        """
+        # Define numeric fields with defaults
+        numeric_fields = {
+            "duration_ms": 0.0,
+            "cpu_time": 0,
+            "page_server_reads": 0,
+            "physical_reads": 0,
+            "logical_reads": 0, 
+            "writes": 0,
+            "row_count": 0,
+            "session_id": 0,
+            "request_id": 0
+        }
+
+        # Define string fields
+        string_fields = [
+            "result", "connection_reset_option", "object_name", "statement",
+            "username", "database_name", "client_app_name", "sql_text",
+            "activity_id"
+        ]
+
+        # Use base class method to normalize
+        return self._normalize_event(event, numeric_fields, string_fields)
+
+    def _get_important_fields(self):
+        """Get the list of important fields for RPC events logging"""
+        return ['timestamp', 'sql_text', 'duration_ms', 'statement', 'client_app_name', 'database_name', 'activity_id']
