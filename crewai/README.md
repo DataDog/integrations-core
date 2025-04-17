@@ -1,19 +1,11 @@
 # CrewAI
 
 ## Overview
-Use the CrewAI integration to monitor, troubleshoot, and evaluate your LLM powered applications, based on [CrewAI][1]'s agent-based framework. 
-
-If you are building LLM applications, use LLM Observability to investigate the root cause of issues,
-monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
-
-See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
+Use the CrewAI integration to monitor, troubleshoot, and evaluate your applications based on [CrewAI][1]'s framework.
 
 ## Setup
 
-### LLM Observability: Get end-to-end visibility into your LLM application using CrewAI
-You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
-
-#### Installation for Python
+#### Installation
 
 ##### If you do not have the Datadog Agent:
 1. Install the `ddtrace` package:
@@ -72,7 +64,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 
 ##### Automatic CrewAI tracing
 
-The CrewAI integration allows for automatic tracing of Crew kickoffs, including task/agent/tool invocations, made through [CrewAI's Python SDK][1]. The CrewAI integration further captures latency, errors, input/output messages, and directional data flow linking during Crew executions.
+The CrewAI integration allows for automatic tracing of Crew kickoffs, including task/agent/tool invocations, made through [CrewAI's Python SDK][1]. The CrewAI integration also captures latency, errors, input/output messages, and directional data flow linking during Crew executions.
 
 The following CrewAI methods are traced:
 - [Crew Kickoff][2]:
@@ -115,7 +107,7 @@ If you encounter issues during setup, enable debug logging by passing the `--deb
   ddtrace-run --debug
   ```
 
-This displays any errors related to data transmission or instrumentation, including issues with Anthropic traces.
+This displays any errors related to data transmission or instrumentation, including issues with CrewAI traces.
 
 ## Data Collected
 
