@@ -52,7 +52,7 @@ datadog-delinea-privilege-manager==1.0.0
 datadog-directory==4.0.1
 datadog-disk==7.1.0
 datadog-dns-check==5.1.0
-datadog-dotnetclr==4.1.0; sys_platform == 'win32'
+datadog-dotnetclr==4.2.0; sys_platform == 'win32'
 datadog-druid==4.1.0
 datadog-duckdb==1.0.0
 datadog-ecs-fargate==6.1.0
