@@ -32,7 +32,7 @@ datadog-checks-base==37.9.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==7.1.0
 datadog-cilium==5.2.0
-datadog-cisco-aci==4.4.0
+datadog-cisco-aci==4.5.0
 datadog-cisco-secure-firewall==1.0.0
 datadog-cisco-secure-web-appliance==1.0.0
 datadog-citrix-hypervisor==5.1.0
