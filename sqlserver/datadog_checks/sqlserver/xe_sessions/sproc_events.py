@@ -8,10 +8,10 @@ from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check
 
 class SprocEventsHandler(XESessionBase):
     """Handler for Stored Procedure (Module End) events"""
-    
+
     def __init__(self, check, config):
         super(SprocEventsHandler, self).__init__(check, config, "datadog_sprocs")
-    
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
         """Process stored procedure events from the XML data"""
@@ -20,25 +20,25 @@ class SprocEventsHandler(XESessionBase):
         except Exception as e:
             self._log.error(f"Error parsing XML data: {e}")
             return []
-            
+
         events = []
-        
+
         for event in root.findall('./event')[:self.max_events]:
             try:
                 # Extract basic info
                 timestamp = event.get('timestamp')
-                
+
                 # Extract action data
                 event_data = {
                     "timestamp": timestamp,
                 }
-                
+
                 # Get the SQL text and other action data
                 for action in event.findall('./action'):
                     action_name = action.get('name').split('.')[-1] if action.get('name') else None
                     if action_name and action.text:
                         event_data[action_name] = action.text
-                
+
                 # Extract data elements - stored procedure specific
                 for data in event.findall('./data'):
                     data_name = data.get('name')
@@ -58,10 +58,10 @@ class SprocEventsHandler(XESessionBase):
                         event_data["object_type"] = data.text
                     elif data_name:
                         event_data[data_name] = data.text
-                
+
                 events.append(event_data)
             except Exception as e:
                 self._log.error(f"Error processing stored procedure event: {e}")
                 continue
-                
-        return events 
+
+        return events
