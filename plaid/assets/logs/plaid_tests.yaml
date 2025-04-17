@@ -49,6 +49,7 @@ tests:
       originator_client_id: "66dec76ee40771001aff0759"
       status: "failed"
       sweep_status: "unswept"
+      timestamp: "2025-04-15T04:31:55.577677Z"
       type: "debit"
       user:
         legal_name: "Alberta Bobbeth Charleson"
@@ -81,6 +82,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1744691515577
  -
   sample: |-
     {
@@ -137,6 +139,7 @@ tests:
         interval_unit: "week"
         start_date: "2025-04-15"
       status: "active"
+      timestamp: "2025-04-15T07:10:31.960472Z"
       type: "credit"
       user:
         address:
@@ -185,6 +188,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1744701031960
  -
   sample: |-
     {
@@ -232,3 +236,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
