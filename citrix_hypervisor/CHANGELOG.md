@@ -7,6 +7,7 @@
 ***Fixed***:
 
 * Fix issue by which older Citrix versions returning broken JSON payloads may fail with older versions of the datadog_base_check package ([#19936](https://github.com/DataDog/integrations-core/pull/19936))
+* Bump the version of datadog-checks-base to 37.9.0 ([#19936](https://github.com/DataDog/integrations-core/pull/19936))
 
 ## 5.1.0 / 2025-01-16 / Agent 7.63.0
 
