@@ -64,11 +64,11 @@ class XESessionBase(DBMAsyncJob):
                 level = ""
                 if self._is_azure_sql_database:
                     level = "database_"
-                
+
                 # Build the query with proper parameterization
                 query = f"SELECT 1 FROM sys.dm_xe_{level}sessions WHERE name = ?"
                 cursor.execute(query, (self.session_name,))
-                
+
                 return cursor.fetchone() is not None
 
     def _query_ring_buffer(self):
@@ -79,7 +79,7 @@ class XESessionBase(DBMAsyncJob):
                 level = ""
                 if self._is_azure_sql_database:
                     level = "database_"
-                
+
                 # Build the complete query string with the correct level
                 query = f"""
                     SELECT CAST(t.target_data as xml) as event_data
@@ -89,9 +89,7 @@ class XESessionBase(DBMAsyncJob):
                     WHERE s.name = ?
                     AND t.target_name = 'ring_buffer'
                 """
-                
                 cursor.execute(query, (self.session_name,))
-                
                 result = cursor.fetchone()
                 if not result:
                     return None
