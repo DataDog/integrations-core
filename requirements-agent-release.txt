@@ -174,7 +174,7 @@ datadog-silverstripe-cms==1.0.0
 datadog-singlestore==4.1.0
 datadog-slurm==1.1.0; sys_platform == 'linux2'
 datadog-snmp==10.0.0
-datadog-snowflake==7.4.0
+datadog-snowflake==7.5.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.2.1
 datadog-sonatype-nexus==1.0.0; sys_platform != 'darwin'
