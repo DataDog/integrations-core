@@ -157,7 +157,7 @@ class SQLServer(AgentCheck):
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
-        
+
         # XE Session Handlers
         self.xe_session_handlers = []
 
@@ -187,8 +187,8 @@ class SQLServer(AgentCheck):
         # Initialize XE session handlers
         if not self.xe_session_handlers:
             self.xe_session_handlers = get_xe_session_handlers(self, self._config)
-        
-        # Start XE session handlers 
+
+        # Start XE session handlers
         for handler in self.xe_session_handlers:
             handler.start()
 
