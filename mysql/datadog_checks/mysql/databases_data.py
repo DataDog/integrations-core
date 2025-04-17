@@ -43,7 +43,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
-        self.any_tables_found = False # Flag to track for permission issues
+        self.any_tables_found = False  # Flag to track for permission issues
 
     def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
@@ -293,8 +293,7 @@ class DatabasesData:
         if db_infos and not self._data_submitter.any_tables_found:
             self._log.warning(
                 "No tables were found across any of the {} databases. This may indicate insufficient privileges "
-                "to view table metadata. The datadog user needs SELECT privileges on the tables."
-                .format(len(db_infos))
+                "to view table metadata. The datadog user needs SELECT privileges on the tables.".format(len(db_infos))
             )
 
     @tracked_method(agent_check_getter=agent_check_getter)
