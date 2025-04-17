@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 15.0.0 / 2025-04-17
+
+***Changed***:
+
+* Warning for missing explain_plan function ([#19908](https://github.com/DataDog/integrations-core/pull/19908))
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Add blocking queries support for MySQL 8 ([#20008](https://github.com/DataDog/integrations-core/pull/20008))
+* added configurable limit to index metric collection ([#20012](https://github.com/DataDog/integrations-core/pull/20012))
+* Blocking queries for older MySQL 5.7 ([#20068](https://github.com/DataDog/integrations-core/pull/20068))
+* Add blocking queries support for MariaDB ([#20074](https://github.com/DataDog/integrations-core/pull/20074))
+
+***Fixed***:
+
+* Fix Aurora replication role tags being appended instead of updated during failover events. ([#20048](https://github.com/DataDog/integrations-core/pull/20048))
+
 ## 14.8.0 / 2025-03-26
 
 ***Added***:
