@@ -19,7 +19,7 @@ pipeline:
   name: plaid_logs
   enabled: true
   filter:
-    query: "source:plaid_logs "
+    query: "source:plaid "
   processors:
     - type: attribute-remapper
       name: Map `created` to `timestamp`
@@ -32,7 +32,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: date-remapper
-      name: " Define `timestamp` as the official date of the log"
+      name: "Define `timestamp` as the official date of the log"
       enabled: true
       sources:
         - timestamp
