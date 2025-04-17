@@ -97,10 +97,10 @@ class MySQLMetadata(DBMAsyncJob):
             self._db = connect_with_autocommit(**self._connection_args)
         else:
             # Metadata checks runs far less frequently than other checks, and there are reports
-			# that unused pymysql connections sometimes end up being closed unexpectedly.
-			# This is a simple attempt to ensure that the connection is still valid before
-			# returning it. ping() will by default automatically reconnect
-			# if the connection is lost.
+            # that unused pymysql connections sometimes end up being closed unexpectedly.
+            # This is a simple attempt to ensure that the connection is still valid before
+            # returning it. ping() will by default automatically reconnect
+            # if the connection is lost.
             self._db.ping()
         return self._db
 
