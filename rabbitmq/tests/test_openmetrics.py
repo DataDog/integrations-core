@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from itertools import product
-from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
@@ -15,9 +15,15 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import HERE, RABBITMQ_VERSION
-from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS, SUMMARY_METRICS
+from .metrics import (
+    AGGREGATED_ONLY_METRICS,
+    DEFAULT_OPENMETRICS,
+    MISSING_OPENMETRICS,
+    RABBITMQ_4_0_ADDED,
+    SUMMARY_METRICS,
+)
 
-OM_RESPONSE_FIXTURES = HERE / Path('fixtures')
+OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures')
 TEST_URL = "http://localhost:15692"
 OM_ENDPOINT_TAG = f"endpoint:{TEST_URL}/metrics"
 BUILD_INFO_TAGS = [
@@ -55,7 +61,7 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
 
     We expect in this case all the metrics from the '/metrics' endpoint.
     """
-    mock_http_response(file_path=OM_RESPONSE_FIXTURES / "metrics.txt")
+    mock_http_response(file_path=os.path.join(OM_RESPONSE_FIXTURES, "metrics.txt"))
     prometheus_settings = {'url': TEST_URL, **aggregated_setting}
     check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
@@ -78,7 +84,7 @@ def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http_r
 
     We expect all metrics except the ones unique to the `/metrics` endpoint to be collected.
     """
-    mock_http_response(file_path=OM_RESPONSE_FIXTURES / "per-object.txt")
+    mock_http_response(file_path=os.path.join(OM_RESPONSE_FIXTURES, "per-object.txt"))
     prometheus_settings = {'url': TEST_URL}
     check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
@@ -118,7 +124,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
 
     We expect in this case only the metrics for the unaggregated endpoint, nothing from '/metrics'.
     """
-    mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
+    mock_http_response(file_path=os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
     check = _rmq_om_check(
         {
             'url': TEST_URL,
@@ -149,15 +155,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
         pytest.param(
             'detailed?family=queue_delivery_metrics',
             "detailed-queue_delivery_metrics.txt",
-            {
-                'rabbitmq.queue.get.ack.count',
-                'rabbitmq.queue.get.count',
-                'rabbitmq.queue.messages.delivered.ack.count',
-                'rabbitmq.queue.messages.delivered.count',
-                'rabbitmq.queue.messages.redelivered.count',
-                'rabbitmq.queue.messages.acked.count',
-                'rabbitmq.queue.get.empty.count',
-            },
+            RABBITMQ_4_0_ADDED,
             id="detailed, query queue_delivery_metrics family",
         ),
     ],
@@ -169,7 +167,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
 def test_unaggregated_endpoint_v4(
     endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response
 ):
-    mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
+    mock_http_response(file_path=os.path.join(OM_RESPONSE_FIXTURES, fixture_file))
     check = _rmq_om_check(
         {
             'url': TEST_URL,
@@ -204,7 +202,7 @@ def mock_http_responses(url, **_params):
             '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
         ): 'detailed-only-metrics.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
-    with open(OM_RESPONSE_FIXTURES / fname) as fh:
+    with open(os.path.join(OM_RESPONSE_FIXTURES, fname)) as fh:
         return MockResponse(content=fh.read())
 
 
