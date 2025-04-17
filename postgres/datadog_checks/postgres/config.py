@@ -29,7 +29,7 @@ class PostgresConfig:
     MONOTONIC = AgentCheck.monotonic_count
 
     def __init__(self, instance, init_config, check):
-        self.empty_default_hostname = instance.get("empty_default_hostname", False)
+        self.exclude_hostname = instance.get("exclude_hostname", False)
         self.database_identifier = instance.get('database_identifier', {})
         self.init_config = init_config
         self.host = instance.get('host', '')
