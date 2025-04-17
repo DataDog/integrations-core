@@ -1033,35 +1033,19 @@ def test_statement_samples_calculate_timer_end(dbm_instance, timer_end, now, upt
     "end_event_id,timer_end,uptime,event_timestamp_offset,window_seconds,expected_result",
     [
         # Test case 1: Event timestamp is within the window (should return False)
-        pytest.param(
-            123, 3019558487284095384, 21466230, 5000, 60, False,
-            id="within_window"
-        ),
+        pytest.param(123, 3019558487284095384, 21466230, 5000, 60, False, id="within_window"),
         # Test case 2: Event timestamp is outside the window (should return True)
-        pytest.param(
-            123, 3019558487284095384, 21466230, 65000, 60, True,
-            id="outside_window"
-        ),
+        pytest.param(123, 3019558487284095384, 21466230, 65000, 60, True, id="outside_window"),
         # Test case 3: No end_event_id (should return False)
-        pytest.param(
-            None, 3019558487284095384, 21466230, 65000, 60, False,
-            id="no_end_event_id"
-        ),
+        pytest.param(None, 3019558487284095384, 21466230, 65000, 60, False, id="no_end_event_id"),
         # Test case 4: Event timestamp is before query end time (should return False)
-        pytest.param(
-            123, 3019558487284095384, 21466230, -5000, 60, False,
-            id="before_query_end"
-        ),
+        pytest.param(123, 3019558487284095384, 21466230, -5000, 60, False, id="before_query_end"),
         # Test case 5: Edge case - exactly at window boundary (should return True)
-        pytest.param(
-            123, 3019558487284095384, 21466230, 60000, 60, False,
-            id="at_window_boundary"
-        ),
+        pytest.param(123, 3019558487284095384, 21466230, 60000, 60, False, id="at_window_boundary"),
     ],
 )
 def test_has_sampled_since_completion(
-    dbm_instance, end_event_id, timer_end, uptime, event_timestamp_offset,
-    window_seconds, expected_result
+    dbm_instance, end_event_id, timer_end, uptime, event_timestamp_offset, window_seconds, expected_result
 ):
     """Test the _has_sampled_since_completion method with various scenarios."""
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
