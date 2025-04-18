@@ -133,7 +133,7 @@ class XESessionBase(DBMAsyncJob):
                     return None
 
                 # Define the file path pattern
-                file_path = f"C:\\XELogs\\{self.session_name}*.xel"
+                file_path = f"d:\\rdsdbdata\\log\\{self.session_name}*.xel"
                 self._log.debug(f"Reading events from file path: {file_path}")
 
                 # Build parameters based on checkpoints
