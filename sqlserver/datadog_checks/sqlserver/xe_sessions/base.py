@@ -90,7 +90,7 @@ class XESessionBase(DBMAsyncJob):
                     timestamp_filter = "AND event_data.value('(@timestamp)[1]', 'datetime2') > ?"
                     params.append(self._last_event_timestamp)
 
-                # Build the query with timestamp filtering
+                # Build the query
                 query = f"""
                     SELECT event_data.query('.') as event_xml
                     FROM (
@@ -121,6 +121,65 @@ class XESessionBase(DBMAsyncJob):
                     return combined_xml
                 except Exception as e:
                     self._log.error(f"Error querying ring buffer: {e}")
+                    return None
+
+    def _query_event_file(self):
+        """Query the event file for this XE session with timestamp filtering"""
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                # Azure SQL Database doesn't support file targets
+                if self._is_azure_sql_database:
+                    self._log.warning("Event file target is not supported on Azure SQL Database")
+                    return None
+
+                # Define the file path pattern
+                file_path = f"C:\\XELogs\\{self.session_name}*.xel"
+                self._log.debug(f"Reading events from file path: {file_path}")
+
+                # Build parameters based on checkpoints
+                params = []
+                where_clauses = []
+
+                if self._last_event_timestamp:
+                    where_clauses.append("CAST(xe.event_data AS XML).value('(event/@timestamp)[1]', 'datetime2') > ?")
+                    params.append(self._last_event_timestamp)
+                    self._log.debug(f"Filtering events newer than timestamp: {self._last_event_timestamp}")
+
+                # Build the query
+                where_clause = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+                query = f"""
+                    SELECT CAST(event_data AS XML).query('/event') as event_xml
+                    FROM (
+                        SELECT *
+                        FROM sys.fn_xe_file_target_read_file(
+                            ?,
+                            NULL,
+                            NULL,
+                            NULL
+                        )
+                    ) AS xe
+                    {where_clause}
+                    ORDER BY CAST(xe.event_data AS XML).value('(event/@timestamp)[1]', 'datetime2')
+                """
+
+                try:
+                    params.insert(0, file_path)
+                    cursor.execute(query, params)
+
+                    # Combine all results into one XML document
+                    rows = cursor.fetchall()
+                    if not rows:
+                        return None
+
+                    combined_xml = "<events>"
+                    for row in rows:
+                        combined_xml += str(row[0])
+                    combined_xml += "</events>"
+
+                    return combined_xml
+                except Exception as e:
+                    self._log.error(f"Error querying event file: {e}")
                     return None
 
     def _extract_value(self, element, default=None):
@@ -275,7 +334,9 @@ class XESessionBase(DBMAsyncJob):
 
         # Time the query execution
         query_start_time = time()
-        xml_data = self._query_ring_buffer()
+        # NOTE: Currently hardcoded to use event file, will be replaced with config-based target selection
+        # xml_data = self._query_ring_buffer()
+        xml_data = self._query_event_file()
         query_time = time() - query_start_time
 
         if not xml_data:
