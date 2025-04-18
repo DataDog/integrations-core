@@ -446,12 +446,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
         return {
-            'host': self._check.resolved_hostname,
+            'host': self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
             'kind': 'query_metrics',
-            'cloud_metadata': self._config.cloud_metadata,
+            'cloud_metadata': self._check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -509,7 +510,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 tags += ["db:{}".format(row['database_name'])]
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
@@ -599,13 +601,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 obfuscated_plan_event = {
-                    "host": self._check.resolved_hostname,
+                    "host": self._check.reported_hostname,
+                    "database_instance": self._check.database_identifier,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
-                    "cloud_metadata": self._config.cloud_metadata,
+                    "cloud_metadata": self._check.cloud_metadata,
                     'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                     'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     'service': self._config.service,

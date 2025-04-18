@@ -355,6 +355,8 @@ def test_statement_metrics_and_plans(
     if collect_raw_query_statement:
         dbm_instance["collect_raw_query_statement"] = {"enabled": True}
         expected_instance_tags.add("raw_query_statement:enabled")
+    expected_instance_tags.add("database_hostname:stubbed.hostname")
+    expected_instance_tags.add("database_instance:stubbed.hostname")
     expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 

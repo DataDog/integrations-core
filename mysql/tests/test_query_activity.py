@@ -8,7 +8,7 @@ import os
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
-from copy import copy
+from copy import copy, deepcopy
 from datetime import datetime
 from threading import Event
 
@@ -52,7 +52,7 @@ def dbm_instance(instance_complex):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "query,query_signature,expected_query_truncated",
+    "query,query_signature,expected_query_truncated,collect_blocking_queries",
     [
         (
             'SELECT id, name FROM testdb.users FOR UPDATE',
@@ -62,6 +62,7 @@ def dbm_instance(instance_complex):
                 else 'aca1be410fbadb61'
             ),
             StatementTruncationState.not_truncated.value,
+            True,
         ),
         (
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
@@ -73,11 +74,16 @@ def dbm_instance(instance_complex):
                 else ('da7d6b1e9deb88e' if MYSQL_VERSION_PARSED > parse_version('5.7') else '63bd1fd025c7f7fb')
             ),
             StatementTruncationState.truncated.value,
+            False,
         ),
     ],
 )
-def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
-    check = MySql(CHECK_NAME, {}, [dbm_instance])
+def test_activity_collection(
+    aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated, collect_blocking_queries
+):
+    config = deepcopy(dbm_instance)
+    config['query_activity']['collect_blocking_queries'] = collect_blocking_queries
+    check = MySql(CHECK_NAME, {}, instances=[config])
 
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
 
@@ -114,6 +120,7 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     assert activity['ddagentversion'], "missing agent version"
     assert set(activity['ddtags']) == {
         'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
         'tag1:value1',
         'tag2:value2',
         'port:13306',
@@ -148,8 +155,16 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     assert blocked_row['wait_timer_end'], "missing wait timer end"
     assert blocked_row['event_timer_start'], "missing event timer start"
     assert blocked_row['event_timer_end'], "missing event timer end"
-    assert blocked_row['lock_time'], "missing lock time"
     assert blocked_row['query_truncated'] == expected_query_truncated
+
+    if check._query_activity._should_collect_blocking_queries():
+        assert len(activity['mysql_activity']) >= 2, "should have collected at least two activity payloads"
+        captured_idle_blocker = False
+        for activity in dbm_activity:
+            for row in activity['mysql_activity']:
+                if row['processlist_user'] == 'bob':
+                    captured_idle_blocker = True
+        assert captured_idle_blocker, "should have captured the idle blocker"
 
 
 @pytest.mark.integration
@@ -527,6 +542,7 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
 def _expected_dbm_job_err_tags(dbm_instance):
     return dbm_instance['tags'] + [
         'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',

@@ -9,7 +9,7 @@
 /docs/                @DataDog/documentation @DataDog/agent-integrations
 *.md                  @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
-conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-metrics-logs
+conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/assets             @DataDog/documentation @DataDog/agent-integrations
@@ -137,11 +137,6 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /otel/                                    @DataDog/opentelemetry @DataDog/agent-integrations
 /otel/*.md                                @DataDog/opentelemetry @DataDog/agent-integrations @DataDog/documentation
 /otel/manifest.json                       @DataDog/opentelemetry @DataDog/agent-integrations @DataDog/documentation
-
-# Agent Platform
-/nvidia_jetson/                           @DataDog/agent-platform @DataDog/agent-integrations
-/nvidia_jetson/*.md                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/nvidia_jetson/manifest.json              @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 
 # Database monitoring
 **/base/utils/db/utils.py                           @DataDog/agent-integrations @DataDog/database-monitoring-agent
@@ -464,6 +459,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/servicenow_performance/                                            @DataDog/saas-integrations
+/servicenow_performance/*.md                                        @DataDog/saas-integrations @DataDog/documentation
+/servicenow_performance/manifest.json                               @DataDog/saas-integrations @DataDog/documentation
+/servicenow_performance/assets/logs/                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /silverstripe_cms/                                                  @DataDog/agent-integrations
 /silverstripe_cms/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
@@ -515,7 +515,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
-/.github/workflows/build-deps.yml                                     @DataDog/agent-delivery
+/.github/workflows/resolve-build-deps.yml                             @DataDog/agent-delivery
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.github/CODEOWNERS                                                   @DataDog/agent-integrations @DataDog/saas-integrations
 /.github/workflows/config/labeler.yml                                 @DataDog/agent-integrations @DataDog/saas-integrations

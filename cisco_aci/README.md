@@ -59,13 +59,13 @@ To configure this check for an Agent running on a host:
         #
         # send_ndm_metadata: false
 
-        # send_faultinst_faults - boolean - optional - default: false
-        # Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
+        ## @param send_faultinst_faults - boolean - optional - default: false
+        ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
         #
         # send_faultinst_faults: false
 
-        # send_faultdelegate_faults - boolean - optional - default: false
-        # Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
+        ## @param send_faultdelegate_faults - boolean - optional - default: false
+        ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
         #
         # send_faultdelegate_faults: false
    ```
