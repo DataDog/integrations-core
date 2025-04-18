@@ -304,6 +304,7 @@ def test__get_is_aurora():
             {
                 'port:unix_socket',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -314,6 +315,7 @@ def test__get_is_aurora():
                 'port:unix_socket',
                 'server:localhost',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -323,6 +325,7 @@ def test__get_is_aurora():
             {
                 'port:unix_socket',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -333,6 +336,7 @@ def test__get_is_aurora():
                 'port:unix_socket',
                 'server:foo',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -471,3 +475,24 @@ def test_update_runtime_aurora_tags():
     assert 'replication_role:writer' not in mysql_check._non_internal_tags
     assert len([t for t in mysql_check.tags if t.startswith('replication_role:')]) == 1
     assert len([t for t in mysql_check._non_internal_tags if t.startswith('replication_role:')]) == 1
+
+
+# @pytest.mark.parametrize(
+#     'template, expected, tags',
+#     [
+#         ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+#         ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:5432', ['env:prod', 'port:1']),
+#         ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+#         ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+#         ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+#     ],
+# )
+# def test_database_identifier(template, expected, tags):
+#     """
+#     Test functionality of calculating database_identifier
+#     """
+#     config = {'host': 'stubbed.hostname', 'user': 'datadog', 'port': 5432, 'tags': tags}
+#     config['database_identifier'] = {'template': template}
+#     check = MySql(common.CHECK_NAME, {}, instances=[config])
+
+#     assert check.database_identifier == expected

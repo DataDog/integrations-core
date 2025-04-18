@@ -864,6 +864,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
 def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance.get('tags', []) + [
         'database_hostname:{}'.format('stubbed.hostname'),
+        'database_instance:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
@@ -875,6 +876,7 @@ def _expected_dbm_instance_tags(dbm_instance):
 def _expected_dbm_job_err_tags(dbm_instance):
     return dbm_instance['tags'] + [
         'database_hostname:{}'.format('stubbed.hostname'),
+        'database_instance:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
