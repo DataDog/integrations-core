@@ -80,6 +80,27 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
+    ## which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - server_name: The resolved server name of the instance.
+        ## - instance_name: The resolved instance name of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check.
     ## If `true`, overrides `database` option.
@@ -506,6 +527,8 @@ instances:
         ## @param aggregate_sql_databases - boolean - optional - default: false
         ## Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
         ## Only applicable when `deployment_type` is set to `sql_database`.
+        ##
+        ## Deprecated.
         #
         # aggregate_sql_databases: false
 

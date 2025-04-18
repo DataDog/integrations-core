@@ -195,7 +195,7 @@ class MySQLActivity(DBMAsyncJob):
                         'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
                         DatabaseConfigurationError.events_waits_current_not_enabled.value,
                         code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                     ),
                 )
             return
@@ -332,7 +332,7 @@ class MySQLActivity(DBMAsyncJob):
     def _create_activity_event(self, active_sessions, tags):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mysql",
             "dbm_type": "activity",
