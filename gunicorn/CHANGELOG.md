@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2025-04-17
+
+***Added***:
+
+* Add NoSuchProcess exception handling during initial proc search ([#20059](https://github.com/DataDog/integrations-core/pull/20059))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
