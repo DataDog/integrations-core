@@ -43,6 +43,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
+        self.any_tables_found = False  # Flag to track for permission issues
 
     def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
@@ -55,6 +56,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self._columns_count = 0
         self.db_info.clear()
+        self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
         for db_info in db_infos:
@@ -64,6 +66,8 @@ class SubmitData:
         self._columns_count += columns_count
         known_tables = self.db_to_tables.setdefault(db_name, [])
         known_tables.extend(tables)
+        if tables:
+            self.any_tables_found = True
 
     def columns_since_last_submit(self):
         return self._columns_count
@@ -282,6 +286,16 @@ class DatabasesData:
                     )
                 )
 
+        # Check if we found databases but no tables across all of them.
+        # This happens when the datadog user has permissions to see databases
+        # but lacks SELECT privileges on the tables themselves, which prevents
+        # the agent from collecting table metadata.
+        if db_infos and not self._data_submitter.any_tables_found:
+            self._log.warning(
+                "No tables were found across any of the {} databases. This may indicate insufficient privileges "
+                "to view table metadata. The datadog user needs SELECT privileges on the tables.".format(len(db_infos))
+            )
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
         self._cursor_run(cursor, query=SQL_DATABASES)
@@ -302,13 +316,12 @@ class DatabasesData:
     def _get_tables_data(self, table_list, db_name, cursor):
 
         if len(table_list) == 0:
-            return
+            return 0, []
+
         table_name_to_table_index = {}
-        table_names = ""
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
-            table_names += '"' + str(table["name"]) + '",'
-        table_names = table_names[:-1]
+        table_names = ','.join(f'"{str(table["name"])}"' for table in table_list)
         total_columns_number = self._populate_with_columns_data(
             table_name_to_table_index, table_list, table_names, db_name, cursor
         )
