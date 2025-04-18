@@ -14,7 +14,7 @@ import pytest
 from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
@@ -554,6 +554,7 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
         'uptime': '21466230',
         'timer_end': 3019558487284095384,
         'timer_wait_ns': 12.9,
+        'end_event_id': None,
     }
 
     mysql_check._statement_samples._collect_plan_for_statement(row)
@@ -1025,3 +1026,50 @@ def test_statement_samples_calculate_timer_end(dbm_instance, timer_end, now, upt
         'uptime': uptime,
     }
     assert check._statement_samples._calculate_timer_end(row) == expected_timestamp
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "end_event_id,timer_end,uptime,event_timestamp_offset,window_seconds,expected_result",
+    [
+        # Test case 1: Event timestamp is within the window (should return False)
+        pytest.param(123, 3019558487284095384, 21466230, 5000, 60, False, id="within_window"),
+        # Test case 2: Event timestamp is outside the window (should return True)
+        pytest.param(123, 3019558487284095384, 21466230, 65000, 60, True, id="outside_window"),
+        # Test case 3: No end_event_id (should return False)
+        pytest.param(None, 3019558487284095384, 21466230, 65000, 60, False, id="no_end_event_id"),
+        # Test case 4: Event timestamp is before query end time (should return False)
+        pytest.param(123, 3019558487284095384, 21466230, -5000, 60, False, id="before_query_end"),
+        # Test case 5: Edge case - exactly at window boundary (should return True)
+        pytest.param(123, 3019558487284095384, 21466230, 60000, 60, False, id="at_window_boundary"),
+    ],
+)
+def test_has_sampled_since_completion(
+    dbm_instance, end_event_id, timer_end, uptime, event_timestamp_offset, window_seconds, expected_result
+):
+    """Test the _has_sampled_since_completion method with various scenarios."""
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    now = 1708025457
+
+    # Create a mock row with the provided parameters
+    row = {
+        'end_event_id': end_event_id,
+        'timer_end': timer_end,
+        'now': now,
+        'uptime': uptime,
+    }
+
+    # Calculate the query end time
+    query_end_time = mysql_check._statement_samples._calculate_timer_end(row)
+
+    # Set the window size
+    mysql_check._statement_samples._seen_samples_ratelimiter = RateLimitingTTLCache(
+        maxsize=10000,
+        ttl=window_seconds,
+    )
+
+    # Calculate event timestamp based on offset from query end time
+    event_timestamp = query_end_time + event_timestamp_offset
+
+    assert mysql_check._statement_samples._has_sampled_since_completion(row, event_timestamp) == expected_result

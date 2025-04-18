@@ -61,6 +61,7 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     'current_schema',
     # used for signature
     'digest_text',
+    'end_event_id',
     'uptime',
     'now',
     'timer_end',
@@ -79,6 +80,7 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         sql_text,
         digest,
         digest_text,
+        end_event_id,
         timer_start,
         @uptime as uptime,
         unix_timestamp() as now,
@@ -440,8 +442,13 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
+            event_timestamp = time.time() * 1000
+
+            if self._has_sampled_since_completion(row, event_timestamp):
+                return None
+
             return {
-                "timestamp": self._calculate_timer_end(row),
+                "timestamp": event_timestamp,
                 "dbm_type": "plan",
                 "host": self._check.reported_hostname,
                 "ddagentversion": datadog_agent.get_version(),
@@ -820,6 +827,20 @@ class MySQLStatementSamples(DBMAsyncJob):
                     ),
                 )
             raise
+
+    def _has_sampled_since_completion(self, row, event_timestamp):
+        # If the query has finished end_event_id will be set
+        if row['end_event_id']:
+            query_end_time = self._calculate_timer_end(row)
+            time_diff = abs(event_timestamp - query_end_time)
+            window_ms = self._seen_samples_ratelimiter.ttl * 1000
+            # When some clients hold a connection open they also hold a server thread open.
+            # If the client issues queries infrequently we will sample the same query multiple times
+            # since it will still exist in events_statements_current table.
+            # This check ensures we only emit an event for a completed query on the first sample check after completion.
+            if time_diff > window_ms:
+                return True
+        return False
 
     @staticmethod
     def _can_explain(obfuscated_statement):
