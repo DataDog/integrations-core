@@ -15,7 +15,7 @@
                         "id": 6416205973430436,
                         "definition": {
                             "type": "note",
-                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. [These metrics](https://app.datadoghq.com/metric/summary?filter=otelcol) are scraped by the Prometheus receiver.\n\n## To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. [These metrics](https://app.datadoghq.com/metric/summary?filter=otelcol) are scraped by the Prometheus receiver.\n\n## To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).\n\nNote the 2 sections `Datadog Exporter: Traffic Sent` and `Datadog Connector: Stats Sent` have the `equiv_otel` function in some graphs. If you need to use `equiv_otel` in other queries, monitors or alerts, please opt in to the [Preview](http://docs.datadoghq.com/opentelemetry/guide/combining_otel_and_datadog_metrics/).",
                             "background_color": "transparent",
                             "font_size": "18",
                             "text_align": "left",
