@@ -42,10 +42,10 @@ E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance_e2e, mock_local_tls_dns):
+def dd_environment(instance_e2e, mock_local_tls_dns, instance_e2e_windows):
     if using_windows_containers():
         e2e_metadata = {'docker_platform': 'windows'}
-        yield instance_e2e, e2e_metadata
+        yield instance_e2e_windows, e2e_metadata
     else:
         with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):
             e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
@@ -67,21 +67,25 @@ def mock_local_tls_dns():
 
 @pytest.fixture(scope='session', autouse=True)
 def certs(dd_environment):
-    downloads = {'https://valid.mock': 'valid.pem', 'https://expired.mock': 'expired.pem'}
-    raw_downloads = {
-        'https://valid.mock': 'valid.crt',
-    }
-    certs = {}
-    with TempDir('certs') as tmp_dir:
-        for address, name in downloads.items():
-            filepath = os.path.join(tmp_dir, name)
-            download_cert(filepath, address)
-            certs[name] = filepath
-        for address, name in raw_downloads.items():
-            filepath = os.path.join(tmp_dir, name)
-            certs[name] = download_cert(filepath, address, raw=True)
-            certs[name] = filepath
-        yield certs
+    # Skip the fixture when running on Windows
+    if using_windows_containers():
+        yield
+    else:
+        downloads = {'https://valid.mock': 'valid.pem', 'https://expired.mock': 'expired.pem'}
+        raw_downloads = {
+            'https://valid.mock': 'valid.crt',
+        }
+        certs = {}
+        with TempDir('certs') as tmp_dir:
+            for address, name in downloads.items():
+                filepath = os.path.join(tmp_dir, name)
+                download_cert(filepath, address)
+                certs[name] = filepath
+            for address, name in raw_downloads.items():
+                filepath = os.path.join(tmp_dir, name)
+                certs[name] = download_cert(filepath, address, raw=True)
+                certs[name] = filepath
+            yield certs
 
 
 @pytest.fixture
@@ -203,6 +207,15 @@ def instance_e2e_non_fips():
     }
 
 
+@pytest.fixture(scope='session')
+def instance_e2e_windows():
+    return {
+        'server': 'https://localhost',
+        'server_hostname': 'valid.mock',
+        'certificate_stores': ['MY', 'CA', 'ROOT'],
+    }
+
+
 @pytest.fixture
 def instance_remote_ok_ip():
     return {'server': '1.1.1.1', 'tls_validate_hostname': False, 'days_warning': 1, 'days_critical': 1}
@@ -318,4 +331,13 @@ def instance_remote_mysql_valid():
         'server_hostname': 'valid.mock',
         'start_tls': 'mysql',
         'tls_ca_cert': CA_CERT,
+    }
+
+
+@pytest.fixture
+def instance_windows_cert_store():
+    return {
+        'server': 'https://localhost',
+        'server_hostname': 'valid.mock',
+        'certificate_stores': ['MY', 'CA', 'ROOT'],
     }
