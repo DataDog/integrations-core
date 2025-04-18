@@ -2,7 +2,7 @@
 
 <div class="alert alert-info">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks model serving metrics and cluster utilization data.
+This page is limited to documentation for ingesting Databricks model serving metrics, cluster utilization data, and reference tables.
 </div>
 
 ![Databricks default dashboard][21]
@@ -18,6 +18,8 @@ Datadog offers several Databricks monitoring capabilities.
 [Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
 
 [Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+
+[Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry with critical context like workspace names, job definitions, cluster configurations, and user roles.
 
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
@@ -42,6 +44,16 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 4. On the **Configure** tab, click **Add Databricks Workspace**.
 5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
 6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
+
+#### Reference Table Configuration
+1. Configure a workspace in Datadog's Databricks integration tile.
+2. In the accounts detail panel, click **Reference Tables**.
+3. In the **Reference Tables** tab, click **Add New Reference Table**.
+4. Provide the **Reference table name**, **Databricks table name**, and **Primary key** of your Databricks view or table.
+
+  * For optimal results, create a view in Databricks that includes only the specific data you want to send to Datadog. This means generating a dedicated table that reflects the exact scope needed for your use case.
+
+5. Click **Save**.
 
 #### Spark Configuration
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
@@ -522,3 +534,4 @@ Additional helpful documentation, links, and articles:
 [29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
 [30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
 [31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal
+[32]: https://docs.datadoghq.com/reference_tables
