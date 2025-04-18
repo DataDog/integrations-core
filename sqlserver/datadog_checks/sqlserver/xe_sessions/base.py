@@ -32,6 +32,7 @@ class XESessionBase(DBMAsyncJob):
         self._config = config
         self.collection_interval = 60  # Default for POC
         self.max_events = 100  # Default max events to collect
+        self._last_event_timestamp = None  # Initialize timestamp tracking
 
         super(XESessionBase, self).__init__(
             check,
@@ -72,7 +73,7 @@ class XESessionBase(DBMAsyncJob):
                 return cursor.fetchone() is not None
 
     def _query_ring_buffer(self):
-        """Query the ring buffer for this XE session"""
+        """Query the ring buffer for this XE session with timestamp filtering"""
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
@@ -80,21 +81,47 @@ class XESessionBase(DBMAsyncJob):
                 if self._is_azure_sql_database:
                     level = "database_"
 
-                # Build the complete query string with the correct level
-                query = f"""
-                    SELECT CAST(t.target_data as xml) as event_data
-                    FROM sys.dm_xe_{level}sessions s
-                    JOIN sys.dm_xe_{level}session_targets t
-                        ON s.address = t.event_session_address
-                    WHERE s.name = ?
-                    AND t.target_name = 'ring_buffer'
-                """
-                cursor.execute(query, (self.session_name,))
-                result = cursor.fetchone()
-                if not result:
-                    return None
+                # Add a timestamp filter if we have a checkpoint
+                timestamp_filter = ""
+                params = [self.session_name]
 
-                return result[0]
+                if self._last_event_timestamp:
+                    self._log.debug(f"Filtering events newer than timestamp: {self._last_event_timestamp}")
+                    timestamp_filter = "AND event_data.value('(@timestamp)[1]', 'datetime2') > ?"
+                    params.append(self._last_event_timestamp)
+
+                # Build the query with timestamp filtering
+                query = f"""
+                    SELECT event_data.query('.') as event_xml
+                    FROM (
+                        SELECT CAST(t.target_data AS XML) AS target_xml
+                        FROM sys.dm_xe_{level}sessions s
+                        JOIN sys.dm_xe_{level}session_targets t
+                            ON s.address = t.event_session_address
+                        WHERE s.name = ?
+                        AND t.target_name = 'ring_buffer'
+                    ) AS src
+                    CROSS APPLY target_xml.nodes('//RingBufferTarget/event') AS XTbl(event_data)
+                    WHERE 1=1 {timestamp_filter}
+                    ORDER BY event_data.value('(@timestamp)[1]', 'datetime2')
+                """
+
+                try:
+                    cursor.execute(query, params)
+
+                    # Combine all results into one XML document
+                    rows = cursor.fetchall()
+                    if not rows:
+                        return None
+                    combined_xml = "<events>"
+                    for row in rows:
+                        combined_xml += str(row[0])
+                    combined_xml += "</events>"
+
+                    return combined_xml
+                except Exception as e:
+                    self._log.error(f"Error querying ring buffer: {e}")
+                    return None
 
     def _extract_value(self, element, default=None):
         """Helper method to extract values from XML elements with consistent handling"""
@@ -183,7 +210,7 @@ class XESessionBase(DBMAsyncJob):
         """
         # Normalize the event - must be implemented by subclass
         normalized_event = self._normalize_event_impl(raw_event)
-            
+
         return {
             "host": self._check.hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -240,22 +267,40 @@ class XESessionBase(DBMAsyncJob):
 
     def run_job(self):
         """Run the XE session collection job"""
+        job_start_time = time()
         self._log.info(f"Running job for {self.session_name} session")
         if not self.session_exists():
             self._log.warning(f"XE session {self.session_name} not found or not running")
             return
 
+        # Time the query execution
+        query_start_time = time()
         xml_data = self._query_ring_buffer()
+        query_time = time() - query_start_time
+
         if not xml_data:
             self._log.debug(f"No data found in ring buffer for session {self.session_name}")
             return
 
+        # Time the event processing
+        process_start_time = time()
         events = self._process_events(xml_data)
+        process_time = time() - process_start_time
+
         if not events:
             self._log.debug(f"No events processed from {self.session_name} session")
             return
 
-        self._log.info(f"Found {len(events)} events from {self.session_name} session")
+        # Update timestamp tracking with the last event (events are ordered by timestamp)
+        if events and 'timestamp' in events[-1]:
+            self._last_event_timestamp = events[-1]['timestamp']
+            self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
+
+        total_time = time() - job_start_time
+        self._log.info(
+            f"Found {len(events)} events from {self.session_name} session - "
+            f"Times: query={query_time:.3f}s process={process_time:.3f}s total={total_time:.3f}s"
+        )
 
         # Log a sample of events (up to 3) for debugging
         sample_size = min(3, len(events))
@@ -284,4 +329,4 @@ class XESessionBase(DBMAsyncJob):
                 # self._check.database_monitoring_query_activity(serialized_payload)
             except Exception as e:
                 self._log.error(f"Error processing event: {e}")
-                continue 
+                continue
