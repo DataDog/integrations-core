@@ -33,7 +33,7 @@ For more information on integrations, please reference our [documentation][11] a
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/developers/integrations/
 [7]: https://github.com/DataDog/datadog-agent
-[8]: https://app.datadoghq.com/account/settings/agent/latest
+[8]: /account/settings/agent/latest
 [9]: https://docs.pytest.org/en/latest/
 [10]: https://packaging.python.org/tutorials/distributing-packages/
 [11]: https://docs.datadoghq.com

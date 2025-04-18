@@ -112,7 +112,7 @@ Need help? Contact [Datadog support][15].
 
 
 [1]: https://linkerd.io
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example
 [5]: https://github.com/DataDog/integrations-core/blob/7.30.x/linkerd/datadog_checks/linkerd/data/conf.yaml.example

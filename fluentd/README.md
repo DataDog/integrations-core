@@ -188,7 +188,7 @@ Need help? Contact [Datadog support][17].
 - [How to monitor Fluentd with Datadog][18]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -197,7 +197,7 @@ Need help? Contact [Datadog support][17].
 [8]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [10]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
-[11]: https://app.datadoghq.com/infrastructure
+[11]: /infrastructure
 [12]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
 [13]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

@@ -62,7 +62,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.vmware.com/products/esxi-and-esx.html
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

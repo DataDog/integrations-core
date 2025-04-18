@@ -185,7 +185,7 @@ The GPU check does not include any service checks.
 
 Need help? Contact [Datadog support][8].
 
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/gpu.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

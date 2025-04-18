@@ -63,4 +63,4 @@ Need help? Contact [Datadog support][4].
 [2]: https://www.contentful.com/developers/docs/webhooks/overview/
 [3]: https://be.contentful.com/login/
 [4]: https://docs.datadoghq.com/help/
-[5]: https://app.datadoghq.com/integrations/contentful
+[5]: /integrations/contentful

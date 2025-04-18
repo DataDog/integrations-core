@@ -89,7 +89,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring the health and performance of your container-native CI/CD pipelines][11]
 
 [1]: https://argoproj.github.io/rollouts/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/argo_rollouts/datadog_checks/argo_rollouts/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/openmetrics/

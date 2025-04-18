@@ -256,7 +256,7 @@ Additional helpful documentation, links, and articles:
 - [How to monitor CoreDNS with Datadog][23]
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
 [4]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations

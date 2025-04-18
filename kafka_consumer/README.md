@@ -128,7 +128,7 @@ sudo service datadog-agent restart
 - [Monitoring Kafka with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -142,5 +142,5 @@ sudo service datadog-agent restart
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[18]: https://app.datadoghq.com/data-streams
-[19]: https://app.datadoghq.com/integrations/kafka?search=kafka
+[18]: /data-streams
+[19]: /integrations/kafka?search=kafka

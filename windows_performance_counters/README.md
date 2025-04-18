@@ -50,7 +50,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor Windows Performance Counters with Datadog][11]
 
 [1]: https://docs.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/windows_performance_counters/datadog_checks/windows_performance_counters/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

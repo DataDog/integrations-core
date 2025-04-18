@@ -122,7 +122,7 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][14].
 
 [1]: https://docs.gitlab.com/ee/administration/monitoring/prometheus
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
 [5]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
@@ -137,5 +137,5 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
-[17]: https://app.datadoghq.com/ci/getting-started
+[17]: /ci/getting-started
 [18]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

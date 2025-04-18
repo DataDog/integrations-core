@@ -33,7 +33,7 @@ Need help? Contact [Datadog support][7].
 
 [1]: https://docs.oracle.com/en-us/iaas/Content/ContEng/Reference/contengmetrics.htm
 [2]: https://docs.datadoghq.com/agent/kubernetes/#installation
-[3]: https://app.datadoghq.com/dashboard/lists/preset/3?q=kubernetes
+[3]: /dashboard/lists/preset/3?q=kubernetes
 [4]: https://docs.datadoghq.com/integrations/oracle_cloud_infrastructure/
 [5]: https://cloud.oracle.com/connector-hub/service-connectors
 [6]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm

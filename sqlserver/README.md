@@ -201,7 +201,7 @@ This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and ab
 - [Optimize SQL Server performance with Datadog Database Monitoring][24]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15
 [4]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
