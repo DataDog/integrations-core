@@ -26,9 +26,9 @@ class BatchEventsHandler(XESessionBase):
         for event in root.findall('./event')[:self.max_events]:
             try:
                 # Extract basic info from event attributes
-                event_data = {
-                    "timestamp": event.get('timestamp'),
-                }
+                timestamp = event.get('timestamp')
+                event_data = {"timestamp": timestamp}
+
                 # Process data elements
                 for data in event.findall('./data'):
                     data_name = data.get('name')
@@ -54,7 +54,7 @@ class BatchEventsHandler(XESessionBase):
                         else:
                             event_data[data_name] = self._extract_value(data)
                     # Handle numeric fields
-                    elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads', 
+                    elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads',
                                       'writes', 'spills', 'row_count']:
                         event_data[data_name] = self._extract_int_value(data)
                     # Handle all other fields
@@ -117,7 +117,7 @@ class BatchEventsHandler(XESessionBase):
 
         # Define string fields
         string_fields = [
-            "result", "batch_text", "database_name", 
+            "result", "batch_text", "database_name",
             "client_app_name", "sql_text", "activity_id"
         ]
 

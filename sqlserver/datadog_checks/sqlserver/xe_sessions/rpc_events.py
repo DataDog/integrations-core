@@ -23,15 +23,11 @@ class RPCEventsHandler(XESessionBase):
 
         events = []
 
-        # Log the raw XML data for debugging if needed
-        # self._log.debug(f"Raw XML data: {str(xml_data)[:500]}...")
-
         for event in root.findall('./event')[:self.max_events]:
             try:
                 # Extract basic info from event attributes
-                event_data = {
-                    "timestamp": event.get('timestamp'),
-                }
+                timestamp = event.get('timestamp')
+                event_data = {"timestamp": timestamp}
 
                 # Process data elements
                 for data in event.findall('./data'):
@@ -46,8 +42,11 @@ class RPCEventsHandler(XESessionBase):
                             event_data["duration_ms"] = duration_value / 1000
                         else:
                             event_data["duration_ms"] = None
+                    # Handle special case for statement vs SQL field name
+                    elif data_name == 'statement':
+                        event_data["sql_text"] = self._extract_value(data)
                     # Handle special cases with text representations
-                    elif data_name in ['result', 'connection_reset_option']:
+                    elif data_name in ['result', 'data_stream']:
                         # Try to get text representation first
                         text_value = self._extract_text_representation(data)
                         if text_value is not None:
@@ -56,7 +55,7 @@ class RPCEventsHandler(XESessionBase):
                             event_data[data_name] = self._extract_value(data)
                     # Handle numeric fields
                     elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads', 
-                                      'writes', 'row_count']:
+                                      'writes', 'spills', 'row_count', 'object_id', 'line_number']:
                         event_data[data_name] = self._extract_int_value(data)
                     # Handle all other fields
                     else:
@@ -91,19 +90,19 @@ class RPCEventsHandler(XESessionBase):
         - physical_reads: int
         - logical_reads: int
         - writes: int
+        - spills: int
         - result: string ("OK", etc.)
         - row_count: int
-        - connection_reset_option: string
-        - object_name: string (procedure name)
-        - statement: string (SQL text)
-        - data_stream: binary (nullable)
-        - output_parameters: string (nullable)
-        - username: string
+        - sql_text: string (statement)
         - database_name: string
         - request_id: int
         - session_id: int
         - client_app_name: string
-        - sql_text: string
+        - object_name: string
+        - procedure_name: string
+        - data_stream: string (binary encoded as string)
+        - object_id: int
+        - line_number: int
         - activity_id: string (GUID+sequence when using TRACK_CAUSALITY)
         """
         # Define numeric fields with defaults
@@ -114,16 +113,18 @@ class RPCEventsHandler(XESessionBase):
             "physical_reads": 0,
             "logical_reads": 0, 
             "writes": 0,
+            "spills": 0,
             "row_count": 0,
             "session_id": 0,
-            "request_id": 0
+            "request_id": 0,
+            "object_id": 0,
+            "line_number": 0
         }
 
         # Define string fields
         string_fields = [
-            "result", "connection_reset_option", "object_name", "statement",
-            "username", "database_name", "client_app_name", "sql_text",
-            "activity_id"
+            "result", "sql_text", "database_name", "client_app_name",
+            "object_name", "procedure_name", "data_stream", "activity_id"
         ]
 
         # Use base class method to normalize
@@ -131,4 +132,4 @@ class RPCEventsHandler(XESessionBase):
 
     def _get_important_fields(self):
         """Get the list of important fields for RPC events logging"""
-        return ['timestamp', 'sql_text', 'duration_ms', 'statement', 'client_app_name', 'database_name', 'activity_id']
+        return ['timestamp', 'procedure_name', 'sql_text', 'duration_ms', 'client_app_name', 'database_name', 'activity_id']
