@@ -149,7 +149,7 @@ class XESessionBase(DBMAsyncJob):
                 where_clause = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
 
                 query = f"""
-                    SELECT CAST(event_data AS XML).query('/event') as event_xml
+                    SELECT CAST(event_data AS XML) as event_xml
                     FROM (
                         SELECT *
                         FROM sys.fn_xe_file_target_read_file(
@@ -176,6 +176,9 @@ class XESessionBase(DBMAsyncJob):
                     for row in rows:
                         combined_xml += str(row[0])
                     combined_xml += "</events>"
+                    # Log a sample of the generated XML for debugging
+                    if rows:
+                        self._log.debug(f"Sample XML from event file: {str(rows[0][0])[:200]}...")
 
                     return combined_xml
                 except Exception as e:
