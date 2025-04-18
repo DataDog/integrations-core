@@ -145,6 +145,60 @@ select
     cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
+STATEMENT_METRICS_QUERY_AZURE_SQL_DATABASE = """\
+with qstats as (
+    select
+        qs.query_hash,
+        qs.query_plan_hash,
+        qs.last_execution_time,
+        qs.last_elapsed_time,
+        CONCAT(
+            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
+           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
+           eps.object_id as sproc_object_id,
+           {query_metrics_columns}
+    from sys.dm_exec_query_stats qs
+    left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
+),
+qstats_aggr as (
+    select
+        query_hash,
+        query_plan_hash,
+        CAST(qs.dbid as int) as dbid,
+        DB_NAME(CAST(qs.dbid as int)) as database_name,
+        max(plan_handle_and_offsets) as plan_handle_and_offsets,
+        max(last_execution_time) as last_execution_time,
+        max(last_elapsed_time) as last_elapsed_time,
+        sproc_object_id,
+        {query_metrics_column_sums}
+    from qstats qs
+    group by query_hash, query_plan_hash, qs.dbid, sproc_object_id
+),
+qstats_aggr_split as (
+    select TOP {limit}
+        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
+        *
+    from qstats_aggr
+    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
+)
+select
+    SUBSTRING(text, (statement_start_offset / 2) + 1,
+    ((CASE statement_end_offset
+        WHEN -1 THEN DATALENGTH(text)
+        ELSE statement_end_offset END
+            - statement_start_offset) / 2) + 1) AS statement_text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
+    encrypted as is_encrypted,
+    OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
+    OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
+    s.* from qstats_aggr_split s
+    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
+"""
+
 PLAN_LOOKUP_QUERY = """\
 select cast(query_plan as nvarchar(max)) as query_plan, encrypted as is_encrypted
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
@@ -275,9 +329,16 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return self._statement_metrics_query
         available_columns = self._get_available_query_metrics_columns(cursor, SQL_SERVER_QUERY_METRICS_COLUMNS)
 
-        statements_query = (
-            STATEMENT_METRICS_QUERY_NO_AGGREGATES if self.disable_secondary_tags else STATEMENT_METRICS_QUERY
-        )
+        if self.disable_secondary_tags:
+            # If disable_secondary_tags is enabled, we need to use the query without aggregates
+            statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES
+        elif is_azure_sql_database(self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")):
+            # If the database is Azure SQL Database, we need to use the Azure SQL Database specific query
+            statements_query = STATEMENT_METRICS_QUERY_AZURE_SQL_DATABASE
+        else:
+            # Otherwise, we use the default query
+            statements_query = STATEMENT_METRICS_QUERY
+
         self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(['qs.{} as {}'.format(col, col) for col in available_columns]),
             query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
