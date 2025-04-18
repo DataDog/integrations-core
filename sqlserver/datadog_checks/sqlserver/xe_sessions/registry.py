@@ -15,4 +15,4 @@ def get_xe_session_handlers(check, config):
         ErrorEventsHandler(check, config),
         SprocEventsHandler(check, config)
     ]
-    return handlers 
+    return handlers
