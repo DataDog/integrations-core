@@ -628,6 +628,38 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         self._check.database_monitoring_query_sample(json.dumps(raw_query_event, default=default_json_event_encoding))
 
+    # Expects one or more SQL statements in a string. If the string
+    # begins with any SET statements, they are removed and the rest
+    # of the string is returned. Otherwise, the string is returned
+    # as it was received.
+    def _trim_leading_set_stmts(self, obfuscated_statement):
+        match = re.match(
+            r"""
+                (?: # match leading SET commands
+                  \s*SET\s+
+                (?:SESSION\s+|LOCAL\s+)?
+                (?: # two forms: TIME ZONE or TO/=
+                    TIME\s+ZONE\s+ |
+                    [\w\.]+\b\s*
+                    (?:TO\b|=)\s*
+                )
+                (?:
+                    [^';]* | # integer literals, bare values
+                    (?:'[^']*?')* # single-quoted strings
+                )+
+                ;
+                )*
+                \s*(.+)
+            """,
+            obfuscated_statement,
+            flags=(re.I | re.X),
+        )
+
+        if match:
+            return match.group(1)
+        else:
+            return obfuscated_statement
+
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
             return False
@@ -748,6 +780,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
+        obfuscated_statement = self._trim_leading_set_stmts(obfuscated_statement)
+
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
