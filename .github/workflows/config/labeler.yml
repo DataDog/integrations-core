@@ -388,6 +388,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_dns:
+- microsoft_dns/**/*
 integration/milvus:
 - milvus/**/*
 integration/mimecast:
