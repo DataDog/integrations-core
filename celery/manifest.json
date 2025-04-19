@@ -44,6 +44,9 @@
         "celery"
       ]
     },
+    "dashboards": {
+      "Celery Overview": "assets/dashboards/celery_overview.json"
+    },
     "monitors": {
       "Celery workers are idle": "assets/monitors/celery_exection_idle.json",
       "Celery workers are offline": "assets/monitors/celery_workers_down.json"
