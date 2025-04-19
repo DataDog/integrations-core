@@ -1,0 +1,1 @@
+Make the pymysql connection ping() to reconnect for metadata collection. Sometimes, when a connection is held by pymysql for a long time without being used (such as during settings collection), the connection gets closed unexpectedly and attempting to re-use it will fail unless we validate that the connection is still valid.
