@@ -1,0 +1,2278 @@
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 6.1185e-05
+go_gc_duration_seconds{quantile="0.25"} 6.5599e-05
+go_gc_duration_seconds{quantile="0.5"} 0.000171854
+go_gc_duration_seconds{quantile="0.75"} 0.000200275
+go_gc_duration_seconds{quantile="1"} 0.000257027
+go_gc_duration_seconds_sum 0.000902316
+go_gc_duration_seconds_count 6
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 28
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.19.2"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 5.105112e+06
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.2656064e+07
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 6791
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 67648
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 9.831256e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 5.105112e+06
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 1.0928128e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 8.732672e+06
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 30811
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 7.241728e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 1.96608e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6876005560881631e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 98459
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 19200
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 31200
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 202640
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 244800
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.038824e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 2.975761e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.31072e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.31072e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 3.4061328e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 21
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 0
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP sm_api_http_req_process_duration Duration of HTTP requests.
+# TYPE sm_api_http_req_process_duration histogram
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.005"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.01"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.025"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.05"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.1"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.25"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.5"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="1"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="2.5"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="5"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="10"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="+Inf"} 0
+sm_api_http_req_process_duration_sum{method="GET",path="/api/metrics",route_name="Metrics"} 0
+sm_api_http_req_process_duration_count{method="GET",path="/api/metrics",route_name="Metrics"} 0
+# TYPE envoy_cluster_upstream_cx_active counter
+envoy_cluster_upstream_cx_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_default_total_match_count counter
+envoy_cluster_default_total_match_count{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_lb_healthy_panic counter
+envoy_cluster_lb_healthy_panic{envoy_cluster_name="example"} 1
+# TYPE envoy_cluster_circuit_breakers_default_cx_open gauge
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 330
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+
+# TYPE envoy_cluster_circuit_breakers_default_cx_pool_open gauge
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="access_log_sink"} 21
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="ads_cluster"} 22
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 23
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 630
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 24
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 25
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="kuma_envoy_admin"} 26
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 27
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 28
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 29
+
+# TYPE envoy_cluster_circuit_breakers_default_rq_open gauge
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="access_log_sink"} 31
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="ads_cluster"} 32
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 33
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 930
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 34
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 35
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="kuma_envoy_admin"} 36
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 37
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 38
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 39
+
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="ads_cluster"} 2
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 1
+
+# TYPE envoy_cluster_health_check_attempt counter
+envoy_cluster_health_check_attempt{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_healthy counter
+envoy_cluster_health_check_healthy{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_success counter
+envoy_cluster_health_check_success{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_internal_upstream_rq_xx counter
+envoy_cluster_internal_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_membership_total counter
+envoy_cluster_membership_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_outlier_detection_ejections_active counter
+envoy_cluster_outlier_detection_ejections_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_ssl_handshake counter
+envoy_cluster_ssl_handshake{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_active counter
+envoy_cluster_upstream_cx_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_ms_bucket counter
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_timeout counter
+envoy_cluster_upstream_cx_connect_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_local_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_local_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_remote_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_remote_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_length_ms_bucket counter
+envoy_cluster_upstream_cx_length_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_overflow counter
+envoy_cluster_upstream_cx_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_rx_bytes_total counter
+envoy_cluster_upstream_cx_rx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_tx_bytes_total counter
+envoy_cluster_upstream_cx_tx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_failure_eject counter
+envoy_cluster_upstream_rq_pending_failure_eject{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_overflow counter
+envoy_cluster_upstream_rq_pending_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_retry_overflow counter
+envoy_cluster_upstream_rq_retry_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_rx_reset counter
+envoy_cluster_upstream_rq_rx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_time_bucket counter
+envoy_cluster_upstream_rq_time_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_timeout counter
+envoy_cluster_upstream_rq_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_total counter
+envoy_cluster_upstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_tx_reset counter
+envoy_cluster_upstream_rq_tx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_connected_state counter
+envoy_control_plane_connected_state{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_identifier counter
+envoy_control_plane_identifier{envoy_cluster_name="example"} 1
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_denied counter
+envoy_rbac_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_allowed counter
+envoy_rbac_shadow_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_denied counter
+envoy_rbac_shadow_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_live counter
+envoy_server_live{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_allocated counter
+envoy_server_memory_allocated{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_heap_size counter
+envoy_server_memory_heap_size{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_uptime counter
+envoy_server_uptime{envoy_cluster_name="example"} 1
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_attempt counter
+envoy_cluster_health_check_attempt{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_healthy counter
+envoy_cluster_health_check_healthy{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_success counter
+envoy_cluster_health_check_success{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_internal_upstream_rq_xx counter
+envoy_cluster_internal_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_membership_total counter
+envoy_cluster_membership_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_outlier_detection_ejections_active counter
+envoy_cluster_outlier_detection_ejections_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_ssl_handshake counter
+envoy_cluster_ssl_handshake{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_active counter
+envoy_cluster_upstream_cx_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_ms_bucket counter
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_timeout counter
+envoy_cluster_upstream_cx_connect_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_local_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_local_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_remote_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_remote_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_length_ms_bucket counter
+envoy_cluster_upstream_cx_length_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_overflow counter
+envoy_cluster_upstream_cx_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_rx_bytes_total counter
+envoy_cluster_upstream_cx_rx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_tx_bytes_total counter
+envoy_cluster_upstream_cx_tx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_failure_eject counter
+envoy_cluster_upstream_rq_pending_failure_eject{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_overflow counter
+envoy_cluster_upstream_rq_pending_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_retry_overflow counter
+envoy_cluster_upstream_rq_retry_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_rx_reset counter
+envoy_cluster_upstream_rq_rx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_time_bucket counter
+envoy_cluster_upstream_rq_time_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_timeout counter
+envoy_cluster_upstream_rq_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_total counter
+envoy_cluster_upstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_tx_reset counter
+envoy_cluster_upstream_rq_tx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_connected_state counter
+envoy_control_plane_connected_state{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_identifier counter
+envoy_control_plane_identifier{envoy_cluster_name="example"} 1
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_denied counter
+envoy_rbac_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_allowed counter
+envoy_rbac_shadow_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_denied counter
+envoy_rbac_shadow_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_live counter
+envoy_server_live{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_allocated counter
+envoy_server_memory_allocated{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_heap_size counter
+envoy_server_memory_heap_size{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_uptime counter
+envoy_server_uptime{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_external_upstream_rq counter
+envoy_cluster_external_upstream_rq{envoy_response_code="200",envoy_cluster_name="backend_kuma-demo_svc_3001-0382aaf295add2eb"} 14
+envoy_cluster_external_upstream_rq{envoy_response_code="404",envoy_cluster_name="backend_kuma-demo_svc_3001-0382aaf295add2eb"} 2
+envoy_cluster_external_upstream_rq{envoy_response_code="200",envoy_cluster_name="backend_kuma-demo_svc_3001-fe04929f294bcdea"} 24
+envoy_cluster_external_upstream_rq{envoy_response_code="404",envoy_cluster_name="backend_kuma-demo_svc_3001-fe04929f294bcdea"} 12
+envoy_cluster_external_upstream_rq{envoy_response_code="200",envoy_cluster_name="kuma_envoy_admin"} 255
+# TYPE custom_metrics untyped
+custom_metrics{envoy_cluster_name="access_log_sink"} 11
+custom_metrics{envoy_cluster_name="ads_cluster"} 12
+custom_metrics{envoy_cluster_name="demo-client"} 13
+custom_metrics{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 101
+custom_metrics{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 102
+custom_metrics{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 103
+custom_metrics{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+custom_metrics{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+custom_metrics{envoy_cluster_name="kuma_envoy_admin"} 16
+custom_metrics{envoy_cluster_name="localhost_3000"} 17
+custom_metrics{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+custom_metrics{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE custom_metrics_2 untyped
+custom_metrics_2{envoy_cluster_name="access_log_sink"} 1
+custom_metrics_2{envoy_cluster_name="ads_cluster"} 2
+custom_metrics_2{envoy_cluster_name="demo-client"} 3
+custom_metrics_2{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 201
+custom_metrics_2{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 202
+custom_metrics_2{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 203
+custom_metrics_2{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+custom_metrics_2{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+custom_metrics_2{envoy_cluster_name="kuma_envoy_admin"} 6
+custom_metrics_2{envoy_cluster_name="localhost_3000"} 7
+custom_metrics_2{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+custom_metrics_2{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+
+# TYPE custom_metric_seconds summary
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",quantile="0.5"} 9
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",quantile="0.9"} 18
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",quantile="0.99"} 44
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 2400
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 800
+
+# HELP python_gc_objects_collected Objects collected during gc
+# TYPE python_gc_objects_collected counter
+python_gc_objects_collected_total{generation="0"} 309.0
+python_gc_objects_collected_total{generation="1"} 53.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections Number of times this generation was collected
+# TYPE python_gc_collections counter
+python_gc_collections_total{generation="0"} 77.0
+python_gc_collections_total{generation="1"} 7.0
+python_gc_collections_total{generation="2"} 0.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="10",patchlevel="8",version="3.10.8"} 1.0
+# HELP python_gc_objects_collected Objects collected during gc
+# TYPE python_gc_objects_collected counter
+python_gc_objects_collected_total{generation="0"} 309.0
+python_gc_objects_collected_total{generation="1"} 53.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections Number of times this generation was collected
+# TYPE python_gc_collections counter
+python_gc_collections_total{generation="0"} 77.0
+python_gc_collections_total{generation="1"} 7.0
+python_gc_collections_total{generation="2"} 0.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="10",patchlevel="8",version="3.10.8"} 1.0
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 306
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway",kuma_io_mesh_traffic="true"} 10
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+# EOF
+# TYPE envoy_server_live gauge
+envoy_server_live 1
+
+# TYPE envoy_server_memory_allocated gauge
+envoy_server_memory_allocated 9.217064e+06
+
+# TYPE envoy_server_memory_heap_size gauge
+envoy_server_memory_heap_size 1.4680064e+07
+
+# TYPE envoy_server_memory_physical_size gauge
+envoy_server_memory_physical_size 1.6388166e+07
+
+# TYPE envoy_tcp_downstream_cx_rx_bytes_buffered gauge
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="demo-client"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="inbound_passthrough_ipv4"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="inbound_passthrough_ipv6"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="localhost_3000"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="outbound_passthrough_ipv4"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="outbound_passthrough_ipv6"} 0
+
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 306
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_active counter
+envoy_cluster_upstream_cx_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_default_total_match_count counter
+envoy_cluster_default_total_match_count{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_external_upstream_rq counter
+envoy_cluster_external_upstream_rq{envoy_response_code="404",envoy_cluster_name="backend_kuma-demo_svc_3001",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_external_upstream_rq{envoy_response_code="200",envoy_cluster_name="backend_kuma-demo_svc_3001",kuma_io_mesh_traffic="true"} 38
+envoy_cluster_external_upstream_rq{envoy_response_code="200",envoy_cluster_name="kuma_envoy_admin"} 255
+
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_attempt counter
+envoy_cluster_health_check_attempt{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_healthy counter
+envoy_cluster_health_check_healthy{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_success counter
+envoy_cluster_health_check_success{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_internal_upstream_rq_xx counter
+envoy_cluster_internal_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_membership_total counter
+envoy_cluster_membership_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_outlier_detection_ejections_active counter
+envoy_cluster_outlier_detection_ejections_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_ssl_handshake counter
+envoy_cluster_ssl_handshake{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_active counter
+envoy_cluster_upstream_cx_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_ms_bucket counter
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_timeout counter
+envoy_cluster_upstream_cx_connect_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_local_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_local_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_remote_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_remote_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_length_ms_bucket counter
+envoy_cluster_upstream_cx_length_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_overflow counter
+envoy_cluster_upstream_cx_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_rx_bytes_total counter
+envoy_cluster_upstream_cx_rx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_tx_bytes_total counter
+envoy_cluster_upstream_cx_tx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_failure_eject counter
+envoy_cluster_upstream_rq_pending_failure_eject{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_overflow counter
+envoy_cluster_upstream_rq_pending_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_retry_overflow counter
+envoy_cluster_upstream_rq_retry_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_rx_reset counter
+envoy_cluster_upstream_rq_rx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_time_bucket counter
+envoy_cluster_upstream_rq_time_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_timeout counter
+envoy_cluster_upstream_rq_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_total counter
+envoy_cluster_upstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_tx_reset counter
+envoy_cluster_upstream_rq_tx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_connected_state counter
+envoy_control_plane_connected_state{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_identifier counter
+envoy_control_plane_identifier{envoy_cluster_name="example"} 1
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_denied counter
+envoy_rbac_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_allowed counter
+envoy_rbac_shadow_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_denied counter
+envoy_rbac_shadow_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_live counter
+envoy_server_live{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_allocated counter
+envoy_server_memory_allocated{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_heap_size counter
+envoy_server_memory_heap_size{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_uptime counter
+envoy_server_uptime{envoy_cluster_name="example"} 1
+
+# TYPE envoy_dns_cares_not_found counter
+envoy_dns_cares_not_found 1
+
+# TYPE envoy_dns_cares_resolve_total counter
+envoy_dns_cares_resolve_total 1
+
+# TYPE envoy_dns_filter_srv_record_queries counter
+envoy_dns_filter_srv_record_queries{envoy_dns_filter_prefix="kuma_dns"} 1
+
+# TYPE envoy_dns_filter_unanswered_queries counter
+envoy_dns_filter_unanswered_queries{envoy_dns_filter_prefix="kuma_dns"} 1
+
+# TYPE envoy_dns_filter_unsupported_queries counter
+envoy_dns_filter_unsupported_queries{envoy_dns_filter_prefix="kuma_dns"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_ms histogram
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="access_log_sink"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="access_log_sink"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="100"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="10000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="250"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="2500"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="30000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="300000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="3.6e+06"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="50"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="5000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="60000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="25"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="500"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="600000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1.8e+06"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="+Inf"} 1
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="ads_cluster"} 20.5
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="ads_cluster"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="100"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="60000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="600000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="2500"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="5000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="300000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="50"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="1000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="10000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="1.8e+06"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="+Inf"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="5"} 9
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="10"} 9
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="500"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="30000"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="3.6e+06"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="25"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true",le="250"} 12
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 85.94999999999999
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 12
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="kuma_envoy_admin"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="kuma_envoy_admin"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="1.8e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="3.6e+06"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 0
+
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 6.1185e-05
+go_gc_duration_seconds{quantile="0.25"} 6.5599e-05
+go_gc_duration_seconds{quantile="0.5"} 0.000171854
+go_gc_duration_seconds{quantile="0.75"} 0.000200275
+go_gc_duration_seconds{quantile="1"} 0.000257027
+go_gc_duration_seconds_sum 0.000902316
+go_gc_duration_seconds_count 6
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 28
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.19.2"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 5.105112e+06
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.2656064e+07
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 6791
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 67648
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 9.831256e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 5.105112e+06
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 1.0928128e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 8.732672e+06
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 30811
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 7.241728e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 1.96608e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6876005560881631e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 98459
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 19200
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 31200
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 202640
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 244800
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.038824e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 2.975761e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.31072e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.31072e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 3.4061328e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 21
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 0
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP sm_api_http_req_process_duration Duration of HTTP requests.
+# TYPE sm_api_http_req_process_duration histogram
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.005"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.01"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.025"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.05"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.1"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.25"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="0.5"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="1"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="2.5"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="5"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="10"} 0
+sm_api_http_req_process_duration_bucket{method="GET",path="/api/metrics",route_name="Metrics",le="+Inf"} 0
+sm_api_http_req_process_duration_sum{method="GET",path="/api/metrics",route_name="Metrics"} 0
+sm_api_http_req_process_duration_count{method="GET",path="/api/metrics",route_name="Metrics"} 0
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 306
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway",kuma_io_mesh_traffic="true"} 10
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="ads_cluster"} 2
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 1
+
+# TYPE envoy_cluster_health_check_attempt counter
+envoy_cluster_health_check_attempt{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_healthy counter
+envoy_cluster_health_check_healthy{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_health_check_success counter
+envoy_cluster_health_check_success{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_internal_upstream_rq_xx counter
+envoy_cluster_internal_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_membership_total counter
+envoy_cluster_membership_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_outlier_detection_ejections_active counter
+envoy_cluster_outlier_detection_ejections_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_ssl_handshake counter
+envoy_cluster_ssl_handshake{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_active counter
+envoy_cluster_upstream_cx_active{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_ms_bucket counter
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_connect_timeout counter
+envoy_cluster_upstream_cx_connect_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_local_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_local_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_destroy_remote_with_active_rq counter
+envoy_cluster_upstream_cx_destroy_remote_with_active_rq{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_length_ms_bucket counter
+envoy_cluster_upstream_cx_length_ms_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_overflow counter
+envoy_cluster_upstream_cx_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_rx_bytes_total counter
+envoy_cluster_upstream_cx_rx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_cx_tx_bytes_total counter
+envoy_cluster_upstream_cx_tx_bytes_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_failure_eject counter
+envoy_cluster_upstream_rq_pending_failure_eject{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_pending_overflow counter
+envoy_cluster_upstream_rq_pending_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_retry_overflow counter
+envoy_cluster_upstream_rq_retry_overflow{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_rx_reset counter
+envoy_cluster_upstream_rq_rx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_time_bucket counter
+envoy_cluster_upstream_rq_time_bucket{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_timeout counter
+envoy_cluster_upstream_rq_timeout{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_total counter
+envoy_cluster_upstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_cluster_upstream_rq_tx_reset counter
+envoy_cluster_upstream_rq_tx_reset{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_connected_state counter
+envoy_control_plane_connected_state{envoy_cluster_name="example"} 1
+
+# TYPE envoy_control_plane_identifier counter
+envoy_control_plane_identifier{envoy_cluster_name="example"} 1
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_allowed counter
+envoy_rbac_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_denied counter
+envoy_rbac_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_allowed counter
+envoy_rbac_shadow_allowed{envoy_cluster_name="example"} 1
+
+# TYPE envoy_rbac_shadow_denied counter
+envoy_rbac_shadow_denied{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_live counter
+envoy_server_live{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_allocated counter
+envoy_server_memory_allocated{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_memory_heap_size counter
+envoy_server_memory_heap_size{envoy_cluster_name="example"} 1
+
+# TYPE envoy_server_uptime counter
+envoy_server_uptime{envoy_cluster_name="example"} 1
+
+# TYPE envoy_dns_cares_not_found counter
+envoy_dns_cares_not_found{} 1
+
+# TYPE envoy_dns_cares_resolve_total counter
+envoy_dns_cares_resolve_total{} 1
+
+# TYPE envoy_dns_filter_srv_record_queries counter
+envoy_dns_filter_srv_record_queries{envoy_dns_filter_prefix="kuma_dns"} 1
+
+# TYPE envoy_dns_filter_unanswered_queries counter
+envoy_dns_filter_unanswered_queries{envoy_dns_filter_prefix="kuma_dns"} 1
+
+# TYPE envoy_dns_filter_unsupported_queries counter
+envoy_dns_filter_unsupported_queries{envoy_dns_filter_prefix="kuma_dns"} 1
+# TYPE custom_metric_seconds summary
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",quantile="0.5"} 2
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",quantile="0.9"} 5
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",quantile="0.99"} 20
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 1000
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 500
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",quantile="0.5"} 3
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",quantile="0.9"} 6
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",quantile="0.99"} 11
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 600
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 100
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",quantile="0.5"} 4
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",quantile="0.9"} 7
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",quantile="0.99"} 13
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 800
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 200
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+
+# TYPE envoy_cluster_external_upstream_rq_xx counter
+envoy_cluster_external_upstream_rq_xx{envoy_cluster_name="example"} 1
+
+# TYPE custom_metrics untyped
+custom_metrics{envoy_cluster_name="access_log_sink"} 11
+custom_metrics{envoy_cluster_name="ads_cluster"} 12
+custom_metrics{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+custom_metrics{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 306
+custom_metrics{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+custom_metrics{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+custom_metrics{envoy_cluster_name="kuma_envoy_admin"} 16
+custom_metrics{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+custom_metrics{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+custom_metrics{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+
+# TYPE custom_metrics_2 untyped
+custom_metrics_2{envoy_cluster_name="access_log_sink"} 1
+custom_metrics_2{envoy_cluster_name="ads_cluster"} 2
+custom_metrics_2{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+custom_metrics_2{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+custom_metrics_2{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+custom_metrics_2{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+custom_metrics_2{envoy_cluster_name="kuma_envoy_admin"} 6
+custom_metrics_2{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+custom_metrics_2{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+custom_metrics_2{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink",custom_label="value2"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster",custom_label="value2"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",custom_label="value2",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",custom_label="value2",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",custom_label="value2",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",custom_label="value2",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin",custom_label="value2"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",custom_label="value2",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",custom_label="value2",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",custom_label="value2",kuma_io_mesh_traffic="true"} 9
+
+# TYPE response_codes counter
+response_codes{response_code="200",envoy_cluster_name="backend",kuma_io_mesh_traffic="true"} 11
+response_codes{response_code="404",envoy_cluster_name="backend",kuma_io_mesh_traffic="true"} 22
+response_codes{response_code="500",envoy_cluster_name="backend",kuma_io_mesh_traffic="true"} 33
+response_codes{response_code="503",envoy_cluster_name="backend",kuma_io_mesh_traffic="true"} 4
+response_codes{response_code="401",envoy_cluster_name="backend",kuma_io_mesh_traffic="true"} 40
+response_codes{response_code="200",envoy_cluster_name="frontend",kuma_io_mesh_traffic="true"} 300
+response_codes{response_code="401",envoy_cluster_name="frontend",kuma_io_mesh_traffic="true"} 400
+
+# TYPE several_labels counter
+several_labels{envoy_cluster_name="backend",l1="v11",l2="v12",l3="v13",kuma_io_mesh_traffic="true"} 11
+several_labels{envoy_cluster_name="backend",l1="v21",l2="v22",l3="v23",kuma_io_mesh_traffic="true"} 22
+several_labels{envoy_cluster_name="backend",l1="v31",l2="v32",l3="v33",kuma_io_mesh_traffic="true"} 33
+
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink",custom_label="value1"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster",custom_label="value1"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",custom_label="value1",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",custom_label="value1",kuma_io_mesh_traffic="true"} 306
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",custom_label="value1",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",custom_label="value1",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin",custom_label="value1"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",custom_label="value1",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",custom_label="value1",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",custom_label="value1",kuma_io_mesh_traffic="true"} 19
+
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 411
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+
+# TYPE envoy_server_live gauge
+envoy_server_live{} 1
+
+# TYPE envoy_server_memory_allocated gauge
+envoy_server_memory_allocated{} 9217064
+
+# TYPE envoy_server_memory_heap_size gauge
+envoy_server_memory_heap_size{} 14680064
+
+# TYPE envoy_server_memory_physical_size gauge
+envoy_server_memory_physical_size{} 16388166
+
+# TYPE envoy_tcp_downstream_cx_rx_bytes_buffered gauge
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="demo-client"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="inbound_passthrough_ipv4"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="inbound_passthrough_ipv6"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="localhost_3000"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="outbound_passthrough_ipv4"} 0
+envoy_tcp_downstream_cx_rx_bytes_buffered{envoy_tcp_prefix="outbound_passthrough_ipv6"} 0
+
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+# HELP python_gc_objects_collected Objects collected during gc
+# TYPE python_gc_objects_collected counter
+python_gc_objects_collected_total{generation="0"} 309.0
+python_gc_objects_collected_total{generation="1"} 53.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections Number of times this generation was collected
+# TYPE python_gc_collections counter
+python_gc_collections_total{generation="0"} 77.0
+python_gc_collections_total{generation="1"} 7.0
+python_gc_collections_total{generation="2"} 0.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="10",patchlevel="8",version="3.10.8"} 1.0
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 306
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway",kuma_io_mesh_traffic="true"} 10
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+# EOF
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11 1395066363000
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+# TYPE envoy_cluster_upstream_cx_connect_ms histogram
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="access_log_sink"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="access_log_sink"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="25"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="50"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="100"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="250"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="500"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="2500"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="5000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="10000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="30000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="60000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="300000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="600000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1800000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="3600000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="+Inf"} 1
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="ads_cluster"} 20.5
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="ads_cluster"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="demo-client"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="demo-client"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="5"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="10"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="25"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="50"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="100"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="250"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="1000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="2500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="5000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="10000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="30000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="60000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="300000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="1800000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="3600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="+Inf"} 4
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 27.6499999999999985789145284798
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="5"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="10"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="25"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="50"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="100"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="250"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="1000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="2500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="5000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="10000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="30000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="60000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="300000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="1800000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="3600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="+Inf"} 4
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 30.6499999999999985789145284798
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="5"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="10"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="25"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="50"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="100"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="250"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="1000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="2500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="5000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="10000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="30000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="60000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="300000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="1800000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="3600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="+Inf"} 4
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 27.6499999999999985789145284798
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="inbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="inbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="inbound_passthrough_ipv6"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="inbound_passthrough_ipv6"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="kuma_envoy_admin"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="kuma_envoy_admin"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="localhost_3000"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="localhost_3000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="outbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="outbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="outbound_passthrough_ipv6"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="outbound_passthrough_ipv6"} 0
+# TYPE envoy_cluster_upstream_cx_connect_ms histogram
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="access_log_sink",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="access_log_sink"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="access_log_sink"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="25"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="50"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="100"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="250"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="500"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="2500"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="5000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="10000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="30000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="60000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="300000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="600000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="1800000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="3600000"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="ads_cluster",le="+Inf"} 1
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="ads_cluster"} 20.5
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="ads_cluster"} 1
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="demo-client",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="demo-client"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="demo-client"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="5"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="10"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="25"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="50"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="100"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="250"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="1000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="2500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="5000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="10000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="30000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="60000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="300000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="1800000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="3600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",le="+Inf"} 4
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 27.6499999999999985789145284798
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="5"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="10"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="25"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="50"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="100"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="250"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="1000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="2500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="5000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="10000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="30000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="60000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="300000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="1800000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="3600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",le="+Inf"} 4
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 30.6499999999999985789145284798
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="5"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="10"} 3
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="25"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="50"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="100"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="250"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="1000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="2500"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="5000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="10000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="30000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="60000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="300000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="1800000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="3600000"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",le="+Inf"} 4
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 27.6499999999999985789145284798
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 4
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv4",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="inbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="inbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="inbound_passthrough_ipv6",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="inbound_passthrough_ipv6"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="inbound_passthrough_ipv6"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoyfd '.*\.(in|golden|out)$' ~/dd/integrations-core.worktrees/nubtron/kuma/kuma/tests/fixtures/testdata -x cat {} + > concatenated_file.txt_cluster_name="kuma_envoy_admin",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="kuma_envoy_admin",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="kuma_envoy_admin"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="kuma_envoy_admin"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="localhost_3000",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="localhost_3000"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="localhost_3000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv4",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="outbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="outbound_passthrough_ipv4"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="0.5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="1"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="5"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="10"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="25"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="50"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="100"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="250"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="1000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="2500"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="5000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="10000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="30000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="60000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="300000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="1800000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="3600000"} 0
+envoy_cluster_upstream_cx_connect_ms_bucket{envoy_cluster_name="outbound_passthrough_ipv6",le="+Inf"} 0
+envoy_cluster_upstream_cx_connect_ms_sum{envoy_cluster_name="outbound_passthrough_ipv6"} 0
+envoy_cluster_upstream_cx_connect_ms_count{envoy_cluster_name="outbound_passthrough_ipv6"} 0
+# TYPE custom_metric_seconds summary
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",quantile="0.5"} 2
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",quantile="0.9"} 5
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea",quantile="0.99"} 20
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 1000
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 500
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",quantile="0.5"} 3
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",quantile="0.9"} 6
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",quantile="0.99"} 11
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 600
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 100
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",quantile="0.5"} 4
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",quantile="0.9"} 7
+custom_metric_seconds{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",quantile="0.99"} 13
+custom_metric_seconds_sum{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 800
+custom_metric_seconds_count{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 200
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink",custom_label="value1"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster",custom_label="value1"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",custom_label="value1"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",custom_label="value1"} 101
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",custom_label="value1"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",custom_label="value1"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",custom_label="value1"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",custom_label="value1"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin",custom_label="value1"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",custom_label="value1"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",custom_label="value1"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",custom_label="value1"} 19
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink",custom_label="value2"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster",custom_label="value2"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",custom_label="value2"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb",custom_label="value2"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb",custom_label="value2"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff",custom_label="value2"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",custom_label="value2"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",custom_label="value2"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin",custom_label="value2"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",custom_label="value2"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",custom_label="value2"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",custom_label="value2"} 9
+
+# TYPE response_codes counter
+response_codes{response_code="200",envoy_cluster_name="backend-fe04929f294bcdea"} 1
+response_codes{response_code="404",envoy_cluster_name="backend-fe04929f294bcdea"} 2
+response_codes{response_code="500",envoy_cluster_name="backend-fe04929f294bcdea"} 3
+response_codes{response_code="503",envoy_cluster_name="backend-fe04929f294bcdea"} 4
+response_codes{response_code="200",envoy_cluster_name="backend-0382aaf295add2eb"} 10
+response_codes{response_code="404",envoy_cluster_name="backend-0382aaf295add2eb"} 20
+response_codes{response_code="500",envoy_cluster_name="backend-0382aaf295add2eb"} 30
+response_codes{response_code="401",envoy_cluster_name="backend-0382aaf295add2eb"} 40
+response_codes{response_code="200",envoy_cluster_name="frontend-0382aaf295add2eb"} 300
+response_codes{response_code="401",envoy_cluster_name="frontend-0382aaf295add2eb"} 400
+
+# TYPE several_labels counter
+several_labels{envoy_cluster_name="backend-fe04929f294bcdea",l1="v11",l2="v12",l3="v13"} 1
+several_labels{envoy_cluster_name="backend-fe04929f294bcdea",l1="v21",l2="v22",l3="v23"} 2
+several_labels{envoy_cluster_name="backend-fe04929f294bcdea",l1="v31",l2="v32",l3="v33"} 3
+several_labels{envoy_cluster_name="backend-0382aaf295add2eb",l1="v11",l2="v12",l3="v13"} 10
+several_labels{envoy_cluster_name="backend-0382aaf295add2eb",l1="v21",l2="v22",l3="v23"} 20
+several_labels{envoy_cluster_name="backend-0382aaf295add2eb",l1="v31",l2="v32",l3="v33"} 30
+
+# HELP python_gc_objects_collected Objects collected during gc
+# TYPE python_gc_objects_collected counter
+python_gc_objects_collected_total{generation="0"} 309.0
+python_gc_objects_collected_total{generation="1"} 53.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections Number of times this generation was collected
+# TYPE python_gc_collections counter
+python_gc_collections_total{generation="0"} 77.0
+python_gc_collections_total{generation="1"} 7.0
+python_gc_collections_total{generation="2"} 0.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="10",patchlevel="8",version="3.10.8"} 1.0
+# EOF
+# TYPE envoy_cluster_circuit_breakers_default_cx_open gauge
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="demo-client"} 3
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 100
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 110
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 120
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+
+# TYPE envoy_cluster_circuit_breakers_default_cx_pool_open gauge
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="access_log_sink"} 21
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="ads_cluster"} 22
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="demo-client"} 23
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 200
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 210
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 220
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="inbound_passthrough_ipv4"} 24
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="inbound_passthrough_ipv6"} 25
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="kuma_envoy_admin"} 26
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="localhost_3000"} 27
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="outbound_passthrough_ipv4"} 28
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="outbound_passthrough_ipv6"} 29
+
+# TYPE envoy_cluster_circuit_breakers_default_rq_open gauge
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="access_log_sink"} 31
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="ads_cluster"} 32
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="demo-client"} 33
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 300
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 310
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 320
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="inbound_passthrough_ipv4"} 34
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="inbound_passthrough_ipv6"} 35
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="kuma_envoy_admin"} 36
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="localhost_3000"} 37
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="outbound_passthrough_ipv4"} 38
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="outbound_passthrough_ipv6"} 39
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_name="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 306
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 19
+
+# TYPE envoy_http_downstream_rq_total counter
+envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix="default_gateway",kuma_io_mesh_traffic="true"} 10
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client",kuma_io_mesh_traffic="true"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080",kuma_io_mesh_traffic="true"} 606
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000",kuma_io_mesh_traffic="true"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4",kuma_io_mesh_traffic="true"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6",kuma_io_mesh_traffic="true"} 9
+
+# TYPE envoy_cluster_circuit_breakers_default_cx_open gauge
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="demo-client"} 3
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 100
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 110
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 120
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_circuit_breakers_default_cx_open{envoy_cluster_name="outbound_passthrough_ipv6"} 9
+
+# TYPE envoy_cluster_circuit_breakers_default_cx_pool_open gauge
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="access_log_sink"} 21
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="ads_cluster"} 22
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="demo-client"} 23
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 200
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 210
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 220
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="inbound_passthrough_ipv4"} 24
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="inbound_passthrough_ipv6"} 25
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="kuma_envoy_admin"} 26
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="localhost_3000"} 27
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="outbound_passthrough_ipv4"} 28
+envoy_cluster_circuit_breakers_default_cx_pool_open{envoy_cluster_name="outbound_passthrough_ipv6"} 29
+
+# TYPE envoy_cluster_circuit_breakers_default_rq_open gauge
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="access_log_sink"} 31
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="ads_cluster"} 32
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="demo-client"} 33
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 300
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 310
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 320
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="inbound_passthrough_ipv4"} 34
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="inbound_passthrough_ipv6"} 35
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="kuma_envoy_admin"} 36
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="localhost_3000"} 37
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="outbound_passthrough_ipv4"} 38
+envoy_cluster_circuit_breakers_default_rq_open{envoy_cluster_name="outbound_passthrough_ipv6"} 39
+# TYPE envoy_cluster_assignment_stale counter
+envoy_cluster_assignment_stale{envoy_cluster_name="access_log_sink"} 11
+envoy_cluster_assignment_stale{envoy_cluster_namefd '.*\.(in|golden|out)$' ~/dd/integrations-core.worktrees/nubtron/kuma/kuma/tests/fixtures/testdata -x cat {} + > concatenated_file.txt="ads_cluster"} 12
+envoy_cluster_assignment_stale{envoy_cluster_name="demo-client"} 13
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-369bce2d30623ffb"} 102
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 103
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv4"} 14
+envoy_cluster_assignment_stale{envoy_cluster_name="inbound_passthrough_ipv6"} 15
+envoy_cluster_assignment_stale{envoy_cluster_name="kuma_envoy_admin"} 16
+envoy_cluster_assignment_stale{envoy_cluster_name="localhost_3000"} 17
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv4"} 18
+envoy_cluster_assignment_stale{envoy_cluster_name="outbound_passthrough_ipv6"} 19
+
+# TYPE envoy_cluster_assignment_timeout_received counter
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="access_log_sink"} 1
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="ads_cluster"} 2
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="demo-client"} 3
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-94bcdea309bceaff"} 201
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-fe04929f294bcdea"} 202
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="echo-server_kuma-test_svc_8080-0382aaf295add2eb"} 203
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv4"} 4
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="inbound_passthrough_ipv6"} 5
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="kuma_envoy_admin"} 6
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="localhost_3000"} 7
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv4"} 8
+envoy_cluster_assignment_timeout_received{envoy_cluster_name="outbound_passthrough_ipv6"} 9
