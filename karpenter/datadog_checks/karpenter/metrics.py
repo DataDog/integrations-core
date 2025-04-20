@@ -151,7 +151,6 @@ METRIC_MAP = {
     'karpenter_voluntary_disruption_decisions': 'disruption.actions_performed',
     'karpenter_scheduler_scheduling_duration_seconds': 'provisioner.scheduling.simulation.duration_seconds',
     'karpenter_scheduler_queue_depth': 'provisioner.scheduling.queue_depth',
-    'karpenter_interruption_message_queue_duration_seconds': 'interruption.message.latency.time_seconds',
     'karpenter_nodepools_usage': 'nodepool_usage',
     'karpenter_nodepools_limit': 'nodepool_limit',
     'operator_ec2nodeclass_status_condition_transitions': 'operator.ec2nodeclass.status_condition.transitions',
