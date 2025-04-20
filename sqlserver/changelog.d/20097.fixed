@@ -1,0 +1,1 @@
+Use DB_NAME for query metrics in an azure sql database since joining on sys.databases doesn't always work. The dbid from dm_exec_query_stats doesn't match the one in sys.databases.
