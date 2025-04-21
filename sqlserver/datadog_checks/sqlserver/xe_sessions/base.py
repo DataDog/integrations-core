@@ -430,6 +430,14 @@ class XESessionBase(DBMAsyncJob):
                 # For now, just log it instead of sending
                 self._log.debug(f"Created payload for {self.session_name} event (not sending)")
 
+                # Log the first event payload in each batch for validation
+                if event == events[0]:
+                    try:
+                        payload_json = json.dumps(payload, default=default_json_event_encoding, indent=2)
+                        self._log.debug(f"Sample event payload:\n{payload_json}")
+                    except Exception as e:
+                        self._log.error(f"Error serializing payload for logging: {e}")
+
                 # Uncomment to enable sending to Datadog in the future:
                 # serialized_payload = json.dumps(payload, default=default_json_event_encoding)
                 # self._check.database_monitoring_query_activity(serialized_payload)
