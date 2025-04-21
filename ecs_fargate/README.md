@@ -1016,7 +1016,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 <!-- xxx tab "CDK" xxx -->
 ##### Datadog ECS Fargate CDK Construct
 
-To enable logging through the [Datadog ECS Fargate CDK](67) construct, configure the `logCollection` property as seen below:
+To enable logging through the [Datadog ECS Fargate CDK][67] construct, configure the `logCollection` property as seen below:
 
 ```typescript
 const ecsDatadog = new DatadogECSFargate({
@@ -1033,7 +1033,7 @@ const ecsDatadog = new DatadogECSFargate({
 <!-- xxx tab "Terraform" xxx -->
 ##### Datadog ECS Fargate Terraform Module
 
-To enable logging through the [Datadog ECS Fargate Terraform](71) module, configure the `dd_log_collection` input argument as seen below:
+To enable logging through the [Datadog ECS Fargate Terraform][71] module, configure the `dd_log_collection` input argument as seen below:
 
 ```hcl
 module "ecs_fargate_task" {
