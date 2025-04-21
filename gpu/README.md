@@ -39,7 +39,7 @@ collect_gpu_tags: true
 enable_nvml_detection: true
 ```
 
-Enabling the `gpu` integration requires `system-probe` to have the configuration option enabled, in order to collect per-process metrics. Inside the `/etc/datadog-agent/system-probe.yaml` configuration file, the following parameters must be set:
+Enabling the `gpu` integration requires `system-probe` to have the configuration option enabled for collecting per-process metrics. Inside the `/etc/datadog-agent/system-probe.yaml` configuration file, the following parameters must be set:
 
 ```yaml
 gpu_monitoring:
