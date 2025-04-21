@@ -47,6 +47,7 @@ jobs:
         echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Measure disk usage differences from last commit (uncompressed)
+      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
       run: | 
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
@@ -59,6 +60,7 @@ jobs:
         echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Measure disk usage differences from last commit (compressed)
+      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
       run: | 
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
@@ -83,14 +85,16 @@ jobs:
         name: size-compressed.csv
         path: size-compressed.csv
         if-no-files-found: error
-        
+
     - name: Upload file sizes diff (uncompressed)
+      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
       uses: actions/upload-artifact@v4
       with:
         name: diff-uncompressed.csv
         path: diff-uncompressed.csv
         if-no-files-found: error     
     - name: Upload file sizes diff (compressed)
+      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
       uses: actions/upload-artifact@v4
       with:
         name: diff-compressed.csv
