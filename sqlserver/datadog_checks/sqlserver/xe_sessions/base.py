@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json as json_module
-import xml.etree.ElementTree as ET
+from lxml import etree
 from io import StringIO
 from time import time
 
@@ -129,6 +129,7 @@ class XESessionBase(DBMAsyncJob):
         Query the ring buffer data and parse the XML on the client side.
         This avoids expensive server-side XML parsing and may be more efficient for large datasets.
         """
+        raw_xml = None
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
@@ -153,76 +154,59 @@ class XESessionBase(DBMAsyncJob):
                         return None
 
                     raw_xml = str(row[0])
-
-                    # Parse the raw XML data to extract events
-                    filtered_events = self._filter_ring_buffer_events(raw_xml)
-                    if not filtered_events:
-                        return None
-
-                    # Combine events into a document with the same structure as _query_ring_buffer
-                    combined_xml = "<events>"
-                    for event_xml in filtered_events:
-                        combined_xml += event_xml
-                    combined_xml += "</events>"
-
-                    return combined_xml
                 except Exception as e:
                     self._log.error(f"Error querying ring buffer (client parse): {e}")
                     return None
 
+        # Parsing is done outside the DB connection to ensure timing is accurate
+        if raw_xml:
+            # Parse the raw XML data to extract events
+            filtered_events = self._filter_ring_buffer_events(raw_xml)
+            if not filtered_events:
+                return None
+
+            # Combine events into a document with the same structure as _query_ring_buffer
+            combined_xml = "<events>"
+            for event_xml in filtered_events:
+                combined_xml += event_xml
+            combined_xml += "</events>"
+
+            return combined_xml
+
+        return None
+
     def _filter_ring_buffer_events(self, xml_data):
         """
-        Parse and filter ring buffer XML data using ElementTree.iterparse.
+        Parse and filter ring buffer XML data using lxml.etree.iterparse.
         Returns a list of event XML strings that match the timestamp filter.
         """
         if not xml_data:
             return []
 
         filtered_events = []
-
         try:
-            # Create a string buffer for iterative parsing
             xml_stream = StringIO(xml_data)
 
-            # Track if we're in a relevant event
-            current_event = None
-            is_event_valid = False
+            # Only parse 'end' events for <event> tags
+            context = etree.iterparse(xml_stream, events=('end',), tag='event')
 
-            # Use iterparse for memory-efficient parsing
-            for event, elem in ET.iterparse(xml_stream, events=('start', 'end')):
-                if event == 'start' and elem.tag == 'event':
-                    # Start of a new event
-                    current_event = ET.tostring(elem, encoding='unicode', method='xml')
+            for _, elem in context:
+                timestamp = elem.get('timestamp')
 
-                    # Check timestamp if we have a filter
-                    if self._last_event_timestamp:
-                        timestamp = elem.get('timestamp')
-                        if timestamp and timestamp > self._last_event_timestamp:
-                            is_event_valid = True
-                        else:
-                            is_event_valid = False
-                    else:
-                        is_event_valid = True
+                if (not self._last_event_timestamp) or (timestamp and timestamp > self._last_event_timestamp):
+                    event_xml = etree.tostring(elem, encoding='unicode')
+                    filtered_events.append(event_xml)
 
-                elif event == 'end' and elem.tag == 'event':
-                    # End of event - if valid, add it to our filtered list
-                    if is_event_valid and current_event:
-                        # Get the complete event XML with all child elements
-                        event_xml = ET.tostring(elem, encoding='unicode', method='xml')
-                        filtered_events.append(event_xml)
+                # Free memory for processed elements
+                elem.clear()
+                while elem.getprevious() is not None:
+                    del elem.getparent()[0]
 
-                    # Clear for next event
-                    current_event = None
-                    is_event_valid = False
-
-                    # Clear element to avoid memory leak
-                    elem.clear()
-
-                # Stop once we have enough events
                 if len(filtered_events) >= self.max_events:
                     break
 
             return filtered_events
+
         except Exception as e:
             self._log.error(f"Error filtering ring buffer events: {e}")
             return []
@@ -439,21 +423,54 @@ class XESessionBase(DBMAsyncJob):
             self._log.warning(f"XE session {self.session_name} not found or not running")
             return
 
-        # Time the query execution
+        # Time just the database query execution
         query_start_time = time()
-        # NOTE: Currently hardcoded to use ring buffer, will be replaced with config-based target selection
-        # xml_data = self._query_ring_buffer()
-        xml_data = self._query_ring_buffer_client_parse()
-       # xml_data = self._query_event_file()
+        raw_xml = None
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                # For Azure SQL Database support
+                level = ""
+                if self._is_azure_sql_database:
+                    level = "database_"
+
+                # Get raw XML data without server-side parsing
+                query = f"""
+                    SELECT CAST(t.target_data AS XML) AS target_xml
+                    FROM sys.dm_xe_{level}sessions s
+                    JOIN sys.dm_xe_{level}session_targets t
+                        ON s.address = t.event_session_address
+                    WHERE s.name = ?
+                    AND t.target_name = 'ring_buffer'
+                """
+                try:
+                    cursor.execute(query, (self.session_name,))
+                    row = cursor.fetchone()
+                    if row and row[0]:
+                        raw_xml = str(row[0])
+                except Exception as e:
+                    self._log.error(f"Error querying ring buffer: {e}")
+
         query_time = time() - query_start_time
 
-        if not xml_data:
+        if not raw_xml:
             self._log.debug(f"No data found in ring buffer for session {self.session_name}")
             return
 
+        # Time the XML parsing separately
+        parse_start_time = time()
+        filtered_events = self._filter_ring_buffer_events(raw_xml)
+        if not filtered_events:
+            self._log.debug(f"No events found in XML data for session {self.session_name}")
+            return
+
+        combined_xml = "<events>"
+        for event_xml in filtered_events:
+            combined_xml += event_xml
+        combined_xml += "</events>"
+        parse_time = time() - parse_start_time
         # Time the event processing
         process_start_time = time()
-        events = self._process_events(xml_data)
+        events = self._process_events(combined_xml)
         process_time = time() - process_start_time
 
         if not events:
@@ -468,7 +485,7 @@ class XESessionBase(DBMAsyncJob):
         total_time = time() - job_start_time
         self._log.info(
             f"Found {len(events)} events from {self.session_name} session - "
-            f"Times: query={query_time:.3f}s process={process_time:.3f}s total={total_time:.3f}s"
+            f"Times: query={query_time:.3f}s parse={parse_time:.3f}s process={process_time:.3f}s total={total_time:.3f}s"
         )
 
         # Log a sample of events (up to 3) for debugging

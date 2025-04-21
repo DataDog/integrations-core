@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import xml.etree.ElementTree as ET
+
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check_getter
+
 
 class RPCEventsHandler(XESessionBase):
     """Handler for RPC Completed events"""
@@ -23,7 +25,7 @@ class RPCEventsHandler(XESessionBase):
 
         events = []
 
-        for event in root.findall('./event')[:self.max_events]:
+        for event in root.findall('./event')[: self.max_events]:
             try:
                 # Extract basic info from event attributes
                 timestamp = event.get('timestamp')
@@ -54,8 +56,17 @@ class RPCEventsHandler(XESessionBase):
                         else:
                             event_data[data_name] = self._extract_value(data)
                     # Handle numeric fields
-                    elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads',
-                                      'writes', 'spills', 'row_count', 'object_id', 'line_number']:
+                    elif data_name in [
+                        'cpu_time',
+                        'page_server_reads',
+                        'physical_reads',
+                        'logical_reads',
+                        'writes',
+                        'spills',
+                        'row_count',
+                        'object_id',
+                        'line_number',
+                    ]:
                         event_data[data_name] = self._extract_int_value(data)
                     # Handle all other fields
                     else:
@@ -118,13 +129,19 @@ class RPCEventsHandler(XESessionBase):
             "session_id": 0,
             "request_id": 0,
             "object_id": 0,
-            "line_number": 0
+            "line_number": 0,
         }
 
         # Define string fields
         string_fields = [
-            "result", "sql_text", "database_name", "client_app_name",
-            "object_name", "procedure_name", "data_stream", "activity_id"
+            "result",
+            "sql_text",
+            "database_name",
+            "client_app_name",
+            "object_name",
+            "procedure_name",
+            "data_stream",
+            "activity_id",
         ]
 
         # Use base class method to normalize
@@ -132,4 +149,12 @@ class RPCEventsHandler(XESessionBase):
 
     def _get_important_fields(self):
         """Get the list of important fields for RPC events logging"""
-        return ['timestamp', 'procedure_name', 'sql_text', 'duration_ms', 'client_app_name', 'database_name', 'activity_id']
+        return [
+            'timestamp',
+            'procedure_name',
+            'sql_text',
+            'duration_ms',
+            'client_app_name',
+            'database_name',
+            'activity_id',
+        ]
