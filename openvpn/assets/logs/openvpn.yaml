@@ -178,24 +178,42 @@ pipeline:
               authentication failed: {\\'status\\': 2, \\'user\\': \\'abc\\',
               \\'reason\\': \"Cannot connect to LDAP server ldap://10.10.10.10:
               socket connection error while opening: [Errno 113] No route to
-              host (facility=\\'initialize [10.10.10.10]\\')\"}'"
+              host (facility=\\'initialize [10.10.10.10.10]\\')\"}'"
+          grok:
+            supportRules: ""
+            matchRules: "rule %{regex(\"(.*?)(?=:)\")}:(\\s+)?(\\\"|\\')%{notSpace}
+              %{notSpace} %{regex(\"Web login authentication
+              failed\"):log_type}:
+              %{regex(\"(.*)(?:})\"):authentication_info}(\\\"|\\')"
+        - type: grok-parser
+          name: Parsing of authentication infomation
+          enabled: true
+          source: authentication_info
+          samples:
+            - "{'status': 1, 'user': 'openvpn', 'reason': 'local auth failed:
+              password verification failed', 'auth method': 'local'}"
+            - "{\\'status\\': 2, \\'user\\': \\'abc\\', \\'reason\\': \"Cannot
+              connect to LDAP server ldap://10.10.10.10: socket connection
+              error while opening: [Errno 113] No route to host
+              (facility=\\'initialize [10.10.10.10]\\')\", \\'auth method\\':
+              \\'ldap\\'}"
+            - "{\\'status\\': 2, \\'user\\': \\'abc\\', \\'reason\\': \"Cannot
+              connect to LDAP server ldap://10.10.10.10: socket connection
+              error while opening: [Errno 113] No route to host
+              (facility=\\'initialize [10.10.10.10]\\')\"}"
+            - "{'status': 1, 'user': 'openvpn', 'reason': 'local auth failed:
+              password verification failed'}"
           grok:
             supportRules: ""
             matchRules: >-
-              rule1 %{regex("(.*?)(?=:)")}:(\s+)?\"%{notSpace} %{notSpace}
-              %{regex("Web login authentication failed"):log_type}:
-              \{%{data::keyvalue(": ",", ")}, 'auth method':
-              '%{regex("(.*?)(?=\\')"):auth_method}'(%{data::keyvalue(": ",",
-              ")})?
+              rule_1 \{%{data::keyvalue(": ",", ")}, 'auth method':
+              '%{regex("(.*?)(?=\\')"):auth_method}'%{data::keyvalue(": ",", ")}
 
 
-              rule2 %{regex("(.*?)(?=:)")}:(\s+)?\"%{notSpace} %{notSpace} %{regex("Web login authentication failed"):log_type}: \{%{data::keyvalue(": ",", ")}
+              rule_2 \{\\'status\\': %{integer:status}, \\'user\\': \\'%{regex("(.*)(?=\\\\')"):user}\\', \\'reason\\': "%{regex("(.*)(?=\")"):reason}"(, \\'auth method\\': \\'%{regex("(.*?)(?=\\\\')"):auth_method}\\')?}
 
 
-              rule3 %{regex("(.*?)(?=:)")}:(\s+)?\'%{notSpace} %{notSpace} %{regex("Web login authentication failed"):log_type}: \{\\'status\\': %{integer:status}, \\'user\\': \\'%{regex("(.*)(?=\\\\')"):user}\\', \\'reason\\': "%{regex("(.*)(?=\")"):reason}", \\'auth method\\': \\'%{regex("(.*?)(?=\\\\')"):auth_method}\\'}'
-
-
-              rule4 %{regex("(.*?)(?=:)")}:(\s+)?\'%{notSpace} %{notSpace} %{regex("Web login authentication failed"):log_type}: \{\\'status\\': %{integer:status}, \\'user\\': \\'%{regex("(.*)(?=\\\\')"):user}\\', \\'reason\\': "%{regex("(.*)(?=\")"):reason}"}'
+              rule_3 \{%{data::keyvalue(": ",", ")}
         - type: grok-parser
           name: Parsing Peer Connection Logs
           enabled: true
