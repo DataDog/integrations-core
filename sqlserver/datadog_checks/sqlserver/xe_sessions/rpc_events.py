@@ -44,9 +44,9 @@ class RPCEventsHandler(XESessionBase):
                             event_data["duration_ms"] = duration_value / 1000
                         else:
                             event_data["duration_ms"] = None
-                    # Handle special case for statement vs SQL field name
+                    # Capture statement field directly
                     elif data_name == 'statement':
-                        event_data["sql_text"] = self._extract_value(data)
+                        event_data["statement"] = self._extract_value(data)
                     # Handle special cases with text representations
                     elif data_name in ['result', 'data_stream']:
                         # Try to get text representation first
@@ -104,7 +104,8 @@ class RPCEventsHandler(XESessionBase):
         - spills: int
         - result: string ("OK", etc.)
         - row_count: int
-        - sql_text: string (statement)
+        - sql_text: string (from the action field)
+        - statement: string (the RPC statement)
         - database_name: string
         - request_id: int
         - session_id: int
@@ -136,12 +137,15 @@ class RPCEventsHandler(XESessionBase):
         string_fields = [
             "result",
             "sql_text",
+            "statement",
             "database_name",
             "client_app_name",
             "object_name",
             "procedure_name",
             "data_stream",
             "activity_id",
+            "username",
+            "connection_reset_option",
         ]
 
         # Use base class method to normalize
@@ -151,7 +155,8 @@ class RPCEventsHandler(XESessionBase):
         """Get the list of important fields for RPC events logging"""
         return [
             'timestamp',
-            'procedure_name',
+            'object_name',
+            'statement',
             'sql_text',
             'duration_ms',
             'client_app_name',
