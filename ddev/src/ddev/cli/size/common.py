@@ -117,7 +117,6 @@ def get_dependencies_sizes(
     return cast(List[Dict[str, Union[str, int]]], file_data)
 
 
-
 def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str]]:
     download_urls = []
     deps = []
