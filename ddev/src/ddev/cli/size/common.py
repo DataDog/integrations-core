@@ -74,7 +74,9 @@ def format(s: str) -> str:
 
 
 def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int, date]]]) -> None:
-    modules_table : Dict[str, Dict[str, Union[str, int]]] = {col: {} for col in modules[0].keys() if '(Bytes)' not in col}
+    modules_table: Dict[str, Dict[str, Union[str, int]]] = {
+        col: {} for col in modules[0].keys() if '(Bytes)' not in col
+    }
     for i, row in enumerate(modules):
         for key, value in row.items():
             if key in modules_table:
@@ -147,7 +149,7 @@ def group_modules(
                 'Version': '',
             }
         ]
-    grouped_aux : Dict[tuple[str, str], int] = {}
+    grouped_aux: Dict[tuple[str, str], int] = {}
     for file in modules:
         key = (file['Name'], file['Type'])
         grouped_aux[key] = grouped_aux.get(key, 0) + file["Size (Bytes)"]
@@ -198,9 +200,9 @@ class WrongDependencyFormat(Exception):
 
 
 class GitRepo:
-    def __init__(self, url: Union[Path,str]) -> None:
+    def __init__(self, url: Union[Path, str]) -> None:
         self.url = url
-        self.repo_dir : str
+        self.repo_dir: str
 
     def __enter__(self):
         self.repo_dir = tempfile.mkdtemp()

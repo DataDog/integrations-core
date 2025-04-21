@@ -337,7 +337,7 @@ def get_version(files: List[str], platform: str) -> str:
 def group_modules(
     modules: List[Dict[str, Union[str, int, date]]], platform: Optional[str], i: Optional[int]
 ) -> List[Dict[str, Union[str, int, date]]]:
-    grouped_aux : Dict[tuple[date, str, str, str], int] = {}
+    grouped_aux: Dict[tuple[date, str, str, str], int] = {}
 
     for file in modules:
         key = (file['Date'], file['Author'], file['Commit Message'], file['Commit SHA'])
