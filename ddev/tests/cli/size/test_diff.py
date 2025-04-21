@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-from ddev.cli.size.diff import get_dependencies, get_files, get_diff
+from ddev.cli.size.diff import get_dependencies, get_diff, get_files
 
 
 def test_get_compressed_files():
@@ -83,6 +83,7 @@ def test_get_compressed_dependencies(terminal):
         "dependency2": 12345,
     }
 
+
 def test_get_diff():
     size_before = {
         "integration/foo.py": 1000,
@@ -144,7 +145,10 @@ def mock_size_diff_dependencies():
     get_compressed_dependencies_side_effect.counter = 0
 
     with (
-        patch("ddev.cli.size.diff.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
+        patch(
+            "ddev.cli.size.diff.valid_platforms_versions",
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+        ),
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch("ddev.cli.size.diff.GitRepo.checkout_commit"),
@@ -180,14 +184,16 @@ def test_diff_csv(ddev, mock_size_diff_dependencies):
     assert result.exit_code == 0
 
 
-
 def test_diff_no_differences(ddev):
     fake_repo = MagicMock()
     fake_repo.repo_dir = "/tmp/fake_repo"
 
     with (
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),
-        patch("ddev.cli.size.diff.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
+        patch(
+            "ddev.cli.size.diff.valid_platforms_versions",
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+        ),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch.object(fake_repo, "checkout_commit"),
         patch("tempfile.mkdtemp", return_value="/tmp/fake_repo"),
@@ -221,6 +227,14 @@ def test_diff_no_differences(ddev):
 
 
 def test_diff_invalid_platform(ddev):
+    mock_git_repo = MagicMock()
+    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
+    mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
+    patch(
+        "ddev.cli.size.timeline.valid_platforms_versions",
+        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+    ),
     result = ddev(
         'size', 'diff', 'commit1', 'commit2', '--platform', 'linux', '--python', '3.12', '--compressed'  # inválido
     )
@@ -228,6 +242,14 @@ def test_diff_invalid_platform(ddev):
 
 
 def test_diff_invalid_version(ddev):
+    mock_git_repo = MagicMock()
+    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
+    mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
+    patch(
+        "ddev.cli.size.timeline.valid_platforms_versions",
+        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+    ),
     result = ddev(
         'size',
         'diff',
@@ -243,5 +265,13 @@ def test_diff_invalid_version(ddev):
 
 
 def test_diff_invalid_platform_and_version(ddev):
+    mock_git_repo = MagicMock()
+    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
+    mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
+    patch(
+        "ddev.cli.size.timeline.valid_platforms_versions",
+        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+    ),
     result = ddev('size', 'diff', 'commit1', 'commit2', '--platform', 'linux', '--python', '2.10', '--compressed')
     assert result.exit_code != 0

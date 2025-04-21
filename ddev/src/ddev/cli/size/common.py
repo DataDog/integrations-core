@@ -3,16 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-import zlib
 import shutil
 import subprocess
 import tempfile
-import requests
-from pathlib import Path
 import zipfile
+import zlib
+from pathlib import Path
+from types import TracebackType
+from typing import Dict, List, Optional, Set, Tuple, Type, Union
+
+import requests
+
+from ddev.cli.application import Application
 
 
-def valid_platforms_versions(repo_path):
+def valid_platforms_versions(repo_path: str) -> Tuple[Set[str], Set[str]]:
     resolved_path = os.path.join(repo_path, ".deps/resolved")
     platforms = []
     versions = []
@@ -22,18 +27,17 @@ def valid_platforms_versions(repo_path):
         if match:
             versions.append(match.group())
     return set(platforms), set(versions)
-    
 
-# mirar si existe
-def convert_size(size_bytes):
+
+def convert_size(size_bytes: int) -> str:
     for unit in [' B', ' KB', ' MB', ' GB']:
-        if size_bytes < 1024:
+        if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024
     return str(round(size_bytes, 2)) + " TB"
 
 
-def is_valid_integration(path, included_folder, ignored_files, git_ignore):
+def is_valid_integration(path: str, included_folder: str, ignored_files: Set[str], git_ignore: List[str]) -> bool:
     # It is not an integration
     if path.startswith('.'):
         return False
@@ -50,11 +54,11 @@ def is_valid_integration(path, included_folder, ignored_files, git_ignore):
         return True
 
 
-def is_correct_dependency(platform, version, name):
+def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def print_csv(app, i, modules):
+def print_csv(app: Application, i: Optional[int], modules: List[Dict[str, Union[str, int]]]) -> None:
     headers = [k for k in modules[0].keys() if k not in ['Size', 'Delta']]
     if not i:
         app.display(",".join(headers))
@@ -63,14 +67,11 @@ def print_csv(app, i, modules):
         app.display(",".join(format(str(row[h])) for h in headers))
 
 
-def format(s):
-    if "," in s:
-        return '"' + s + '"'
-    else:
-        return s
+def format(s: str) -> str:
+    return f'"{s}"' if "," in s else s
 
 
-def print_table(app, mode, modules):
+def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int]]]) -> None:
     modules_table = {col: {} for col in modules[0].keys() if '(Bytes)' not in col}
     for i, row in enumerate(modules):
         for key, value in row.items():
@@ -79,7 +80,9 @@ def print_table(app, mode, modules):
     app.display_table(mode, modules_table)
 
 
-def get_dependencies_sizes(deps, download_urls, compressed):
+def get_dependencies_sizes(
+    deps: List[str], download_urls: List[str], compressed: bool
+) -> List[Dict[str, Union[str, int]]]:
     file_data = []
     for dep, url in zip(deps, download_urls, strict=False):
         if compressed:
@@ -108,7 +111,7 @@ def get_dependencies_sizes(deps, download_urls, compressed):
     return file_data
 
 
-def get_dependencies_list(file_path):
+def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str]]:
     download_urls = []
     deps = []
     with open(file_path, "r", encoding="utf-8") as file:
@@ -124,7 +127,9 @@ def get_dependencies_list(file_path):
     return deps, download_urls
 
 
-def group_modules(modules, platform, version, i):
+def group_modules(
+    modules: List[Dict[str, Union[str, int]]], platform: str, version: str, i: Optional[int]
+) -> List[Dict[str, Union[str, int]]]:
     grouped_aux = {}
 
     for file in modules:
@@ -132,15 +137,10 @@ def group_modules(modules, platform, version, i):
         grouped_aux[key] = grouped_aux.get(key, 0) + file["Size (Bytes)"]
     if i is None:
         return [
-        {
-            'Name': name,
-            'Type': type,
-            'Size (Bytes)': size,
-            'Size': convert_size(size)
-        }
-        for (name, type), size in grouped_aux.items()
+            {'Name': name, 'Type': type, 'Size (Bytes)': size, 'Size': convert_size(size)}
+            for (name, type), size in grouped_aux.items()
         ]
-    else: 
+    else:
         return [
             {
                 'Name': name,
@@ -154,7 +154,7 @@ def group_modules(modules, platform, version, i):
         ]
 
 
-def get_gitignore_files(repo_path):
+def get_gitignore_files(repo_path: str) -> List[str]:
     gitignore_path = os.path.join(repo_path, ".gitignore")
     with open(gitignore_path, "r", encoding="utf-8") as file:
         gitignore_content = file.read()
@@ -164,7 +164,7 @@ def get_gitignore_files(repo_path):
         return ignored_patterns
 
 
-def compress(file_path):
+def compress(file_path: str) -> int:
     compressor = zlib.compressobj()
     compressed_size = 0
     # original_size = os.path.getsize(file_path)
@@ -175,12 +175,14 @@ def compress(file_path):
         compressed_size += len(compressor.flush())
     return compressed_size
 
+
 class WrongDependencyFormat(Exception):
-    def __init__(self, mensaje):
+    def __init__(self, mensaje: str) -> None:
         super().__init__(mensaje)
 
+
 class GitRepo:
-    def __init__(self, url):
+    def __init__(self, url: str) -> None:
         self.url = url
         self.repo_dir = None
 
@@ -193,12 +195,14 @@ class GitRepo:
             self._run(f"git clone --quiet {self.url} {self.repo_dir}")
         return self
 
-    def _run(self, command):
+    def _run(self, command: str) -> List[str]:
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True, cwd=self.repo_dir)
         return result.stdout.strip().split('\n')
 
-    def get_module_commits(self, module_path, initial, final, time):
-        self._run("git fetch origin --quiet") # 1 min no coger todo solo el module
+    def get_module_commits(
+        self, module_path: str, initial: Optional[str], final: Optional[str], time: Optional[str]
+    ) -> List[str]:
+        self._run("git fetch origin --quiet")
         self._run("git checkout origin/HEAD")
         if time:
             return self._run(f'git log --since="{time}" --reverse --pretty=format:%H -- {module_path}')
@@ -212,25 +216,30 @@ class GitRepo:
             except subprocess.CalledProcessError:
                 raise ValueError(f"Commit {initial} does not come before {final}")
             return self._run(f"git log --reverse --pretty=format:%H {initial}..{final} -- {module_path}")
-           
 
-    def checkout_commit(self, commit):
+    def checkout_commit(self, commit: str) -> None:
         self._run(f"git fetch --quiet --depth 1 origin {commit}")
         self._run(f"git checkout --quiet {commit}")
 
-    def sparse_checkout_commit(self, commit_sha, module):
-        self._run("git sparse-checkout init --cone") 
+    def sparse_checkout_commit(self, commit_sha: str, module: str) -> None:
+        self._run("git sparse-checkout init --cone")
         self._run(f"git sparse-checkout set {module}")
         self._run(f"git checkout {commit_sha}")
-    
-    def get_commit_metadata(self,commit):
+
+    def get_commit_metadata(self, commit: str) -> Tuple[str, str, str]:
         result = self._run(f'git log -1 --date=format:"%b %d %Y" --pretty=format:"%ad\n%an\n%s" {commit}')
         date, author, message = result
         return date, author, message
-    
-    def get_creation_commit_module(self, module):
+
+    def get_creation_commit_module(self, module: str) -> str:
         return self._run(f'git log --reverse --format="%H" -- {module}')[0]
 
-    def __exit__(self, exception_type, exception_value, exception_traceback):
+
+    def __exit__(
+        self,
+        exception_type: Optional[Type[BaseException]],
+        exception_value: Optional[BaseException],
+        exception_traceback: Optional[TracebackType],
+    ) -> None:
         if self.repo_dir and os.path.exists(self.repo_dir):
             shutil.rmtree(self.repo_dir)

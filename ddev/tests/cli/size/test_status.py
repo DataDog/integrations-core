@@ -93,10 +93,15 @@ def test_get_compressed_dependencies():
 @pytest.fixture()
 def mock_size_status():
     with (
-        patch("ddev.cli.size.status.valid_platforms_versions", return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'})),
+        patch(
+            "ddev.cli.size.status.valid_platforms_versions",
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+        ),
         patch("ddev.cli.size.status.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.status.compress", return_value=1234),
-        patch("ddev.cli.size.status.get_dependencies_list", return_value=(["dep1"], {"dep1": "https://example.com/dep1"})),
+        patch(
+            "ddev.cli.size.status.get_dependencies_list", return_value=(["dep1"], {"dep1": "https://example.com/dep1"})
+        ),
         patch(
             "ddev.cli.size.status.get_dependencies_sizes",
             return_value=[
@@ -135,15 +140,27 @@ def test_status_csv(ddev, mock_size_status):
 
 
 def test_status_wrong_platform(ddev):
+    patch(
+        "ddev.cli.size.timeline.valid_platforms_versions",
+        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+    ),
     result = ddev('size', 'status', '--platform', 'linux', '--python', '3.12', '--compressed')
     assert result.exit_code != 0
 
 
 def test_status_wrong_version(ddev):
+    patch(
+        "ddev.cli.size.timeline.valid_platforms_versions",
+        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+    ),
     result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '2.10', '--compressed')
     assert result.exit_code != 0
 
 
 def test_status_wrong_plat_and_version(ddev):
+    patch(
+        "ddev.cli.size.timeline.valid_platforms_versions",
+        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
+    ),
     result = ddev('size', 'status', '--platform', 'linux', '--python', '2.10', '--compressed')
     assert result.exit_code != 0

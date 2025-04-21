@@ -3,15 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-from pathlib import Path
-from rich.console import Console
-import click
-import requests
 import tempfile
 import zipfile
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import click
+import requests
+from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+
+from ddev.cli.application import Application
+
 from .common import (
+    GitRepo,
     compress,
-    valid_platforms_versions,
     get_dependencies_list,
     get_gitignore_files,
     group_modules,
@@ -19,45 +25,74 @@ from .common import (
     is_valid_integration,
     print_csv,
     print_table,
-    GitRepo
+    valid_platforms_versions,
 )
 
-# VALID_PLATFORMS, VALID_PYTHON_VERSIONS = valid_platforms_versions()
 console = Console()
 
 
 @click.command()
 @click.argument("before")
 @click.argument("after")
-@click.option('--platform', help="Target platform")
-@click.option('--python', 'version', help="Python version (MAJOR.MINOR)")
+@click.option(
+    '--platform', help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
+)
+@click.option('--python', 'version', help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option('--compressed', is_flag=True, help="Measure compressed size")
 @click.option('--csv', is_flag=True, help="Output in CSV format")
 @click.pass_obj
-def diff(app, before, after, platform, version, compressed, csv):
-    repo_url = app.repo.path
-    with GitRepo(repo_url) as gitRepo:
-        try:
-            valid_platforms,valid_versions = valid_platforms_versions(gitRepo.repo_dir)
-            if platform and platform not in valid_platforms:
-                raise ValueError(f"Invalid platform: {platform}")
-            elif version and version not in valid_versions:
-                raise ValueError(f"Invalid version: {version}")
-            if platform is None or version is None:
-                platforms = valid_platforms if platform is None else [platform]
-                versions = valid_versions if version is None else [version]
+def diff(
+    app: str, before: str, after: str, platform: Optional[str], version: Optional[str], compressed: bool, csv: bool
+) -> None:
+    """
+    Compare the size of integrations and dependencies between two commits.
+    """
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TimeElapsedColumn(),
+        transient=True,
+    ) as progress:
+        task = progress.add_task("[cyan]Calculating differences...", total=None)
+        repo_url = app.repo.path
+        with GitRepo(repo_url) as gitRepo:
+            try:
+                valid_platforms, valid_versions = valid_platforms_versions(gitRepo.repo_dir)
+                if platform and platform not in valid_platforms:
+                    raise ValueError(f"Invalid platform: {platform}")
+                elif version and version not in valid_versions:
+                    raise ValueError(f"Invalid version: {version}")
+                if platform is None or version is None:
+                    platforms = valid_platforms if platform is None else [platform]
+                    versions = valid_versions if version is None else [version]
+                    progress.remove_task(task)
 
-                for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-                    diff_mode(app, gitRepo, before, after, plat, ver, compressed, csv, i)
-            else:
-                    diff_mode(app, gitRepo, before, after, platform, version, compressed, csv, None)
+                    for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
+                        diff_mode(app, gitRepo, before, after, plat, ver, compressed, csv, i,progress)
+                else:
+                    progress.remove_task(task)
+                    diff_mode(app, gitRepo, before, after, platform, version, compressed, csv, None, progress)
 
-        except Exception as e:
-            app.abort(str(e))
+            except Exception as e:
+                app.abort(str(e))
 
 
-def diff_mode(app, gitRepo, before, after, platform, version, compressed, csv, i):
-    files_b, dependencies_b, files_a, dependencies_a = get_repo_info(gitRepo, platform, version, before, after, compressed)
+def diff_mode(
+    app: Application,
+    gitRepo: GitRepo,
+    before: str,
+    after: str,
+    platform: str,
+    version: str,
+    compressed: bool,
+    csv: bool,
+    i: Optional[int],
+    progress: Progress,
+) -> None:
+    files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
+        gitRepo, platform, version, before, after, compressed,progress
+    )
 
     integrations = get_diff(files_b, files_a, 'Integration')
     dependencies = get_diff(dependencies_b, dependencies_a, 'Dependency')
@@ -75,22 +110,27 @@ def diff_mode(app, gitRepo, before, after, platform, version, compressed, csv, i
             print_table(app, "Diff", grouped_modules)
 
 
-def get_repo_info(gitRepo, platform, version, before, after, compressed):
+def get_repo_info(
+    gitRepo: GitRepo, platform: str, version: str, before: str, after: str, compressed: bool,progress: Progress,
+) -> Tuple[Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int]]:
     repo = gitRepo.repo_dir
-    with console.status("[cyan]Calculating compressed sizes for the first commit...", spinner="dots"):
-        gitRepo.checkout_commit(before)
-        files_b = get_files(repo, compressed)
-        dependencies_b = get_dependencies(repo, platform, version, compressed)
+    task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
+    gitRepo.checkout_commit(before)
+    files_b = get_files(repo, compressed)
+    dependencies_b = get_dependencies(repo, platform, version, compressed)
+    progress.remove_task(task)
 
-    with console.status("[cyan]Calculating compressed sizes for the second commit...", spinner="dots"):
-        gitRepo.checkout_commit(after)
-        files_a = get_files(repo, compressed)
-        dependencies_a = get_dependencies(repo, platform, version, compressed)
+    task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
+    gitRepo.checkout_commit(after)
+    files_a = get_files(repo, compressed)
+    dependencies_a = get_dependencies(repo, platform, version, compressed)
+    progress.remove_task(task)
+
 
     return files_b, dependencies_b, files_a, dependencies_a
 
 
-def get_diff(size_before, size_after, type):
+def get_diff(size_before: Dict[str, int], size_after: Dict[str, int], type: str) -> List[Dict[str, str | int]]:
     all_paths = set(size_before.keys()) | set(size_after.keys())
     diff_files = []
 
@@ -131,7 +171,7 @@ def get_diff(size_before, size_after, type):
     return diff_files
 
 
-def get_files(repo_path, compressed):
+def get_files(repo_path: str, compressed: bool) -> Dict[str, int]:
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
@@ -152,7 +192,7 @@ def get_files(repo_path, compressed):
     return file_data
 
 
-def get_dependencies(repo_path, platform, version, compressed):
+def get_dependencies(repo_path: str, platform: str, version: str, compressed: bool) -> Dict[str, int]:
 
     resolved_path = os.path.join(repo_path, ".deps/resolved")
 
@@ -165,9 +205,9 @@ def get_dependencies(repo_path, platform, version, compressed):
     return {}
 
 
-def get_dependencies_sizes(deps, download_urls, compressed):
+def get_dependencies_sizes(deps: List[str], download_urls: List[str], compressed: bool) -> Dict[str, int]:
     file_data = {}
-    for dep, url in zip(deps, download_urls):
+    for dep, url in zip(deps, download_urls, strict=False):
         if compressed:
             response = requests.head(url)
             response.raise_for_status()
@@ -192,5 +232,3 @@ def get_dependencies_sizes(deps, download_urls, compressed):
                         size += os.path.getsize(file_path)
         file_data[dep] = size
     return file_data
-
-
