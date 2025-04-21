@@ -4,7 +4,7 @@ import tempfile
 import zipfile
 from datetime import date, datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 import click
 import requests
@@ -91,7 +91,7 @@ def timeline(
                 elif (
                     type == 'dependency'
                     and platform
-                    and module not in get_dependency_list(gitRepo.repo_dir, [platform])
+                    and module not in get_dependency_list(gitRepo.repo_dir, {platform})
                 ):
                     raise ValueError(
                         f"Dependency {module} not found in latest commit for the platform {platform}, "
@@ -193,8 +193,8 @@ def process_commits(
     folder = module if type == 'integration' else '.deps/resolved'
     for commit in commits:
         gitRepo.sparse_checkout_commit(commit, folder)
-        date, author, message = gitRepo.get_commit_metadata(commit)
-        date, message, commit = format_commit_data(date, message, commit, first_commit)
+        date_str, author, message = gitRepo.get_commit_metadata(commit)
+        date, message, commit = format_commit_data(date_str, message, commit, first_commit)
         if type == 'dependency' and date < MINIMUM_DATE:
             continue
         elif type == 'dependency':
@@ -257,7 +257,7 @@ def get_files(
 def get_dependencies(
     repo_path: str,
     module: str,
-    platform: Optional[str],
+    platform: str,
     commit: str,
     date: date,
     author: str,
@@ -274,6 +274,7 @@ def get_dependencies(
             return (
                 get_dependency_size(download_url, commit, date, author, message, compressed) if download_url else None
             )
+    return None
 
 
 def get_dependency(file_path: str, module: str) -> Optional[str]:
@@ -295,7 +296,10 @@ def get_dependency_size(
     if compressed:
         response = requests.head(download_url)
         response.raise_for_status()
-        size = int(response.headers.get("Content-Length"))
+        size_str = response.headers.get("Content-Length")
+        if size_str is None:
+            raise ValueError(f"Missing size for commit {commit}")
+        size = int(size_str)
     else:
         with requests.get(download_url, stream=True) as response:
             response.raise_for_status()
@@ -318,14 +322,14 @@ def get_dependency_size(
     return {"Size (Bytes)": size, "Date": date, "Author": author, "Commit Message": message, "Commit SHA": commit}
 
 
-def get_version(files: List[str], platform: Optional[str]) -> str:
+def get_version(files: List[str], platform: str) -> str:
     final_version = ''
     for file in files:
         if platform in file:
-            version = file.split('_')[-1]
-            match = re.search(r"\d+(?:\.\d+)?", version)
+            curr_version = file.split('_')[-1]
+            match = re.search(r"\d+(?:\.\d+)?", curr_version)
             version = match.group(0) if match else None
-            if version > final_version:
+            if version and version > final_version:
                 final_version = version
     return final_version if len(final_version) != 1 else 'py' + final_version
 
@@ -333,7 +337,7 @@ def get_version(files: List[str], platform: Optional[str]) -> str:
 def group_modules(
     modules: List[Dict[str, Union[str, int, date]]], platform: Optional[str], i: Optional[int]
 ) -> List[Dict[str, Union[str, int, date]]]:
-    grouped_aux = {}
+    grouped_aux : Dict[tuple[date, str, str, str], int] = {}
 
     for file in modules:
         key = (file['Date'], file['Author'], file['Commit Message'], file['Commit SHA'])
@@ -353,6 +357,7 @@ def group_modules(
             for (date, author, message, commit), size in grouped_aux.items()
         ]
     else:
+        assert platform is not None
         return [
             {
                 "Commit SHA": commit,
@@ -380,7 +385,8 @@ def trim_modules(
     for i in range(1, len(modules)):
         prev = modules[i - 1]
         curr = modules[i]
-        delta = curr['Size (Bytes)'] - prev['Size (Bytes)']
+        delta = cast(int, curr['Size (Bytes)']) - cast(int, prev['Size (Bytes)'])
+
         if abs(delta) > threshold_value or i == len(modules) - 1:
             curr['Delta (Bytes)'] = delta
             curr['Delta'] = convert_size(delta)

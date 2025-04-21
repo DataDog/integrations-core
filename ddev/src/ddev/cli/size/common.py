@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import zipfile
 import zlib
+from datetime import date
 from pathlib import Path
 from types import TracebackType
 from typing import Dict, List, Optional, Set, Tuple, Type, Union
@@ -29,7 +30,7 @@ def valid_platforms_versions(repo_path: str) -> Tuple[Set[str], Set[str]]:
     return set(platforms), set(versions)
 
 
-def convert_size(size_bytes: int) -> str:
+def convert_size(size_bytes: float) -> str:
     for unit in [' B', ' KB', ' MB', ' GB']:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
@@ -58,7 +59,7 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def print_csv(app: Application, i: Optional[int], modules: List[Dict[str, Union[str, int]]]) -> None:
+def print_csv(app: Application, i: Optional[int], modules: List[Dict[str, Union[str, int, date]]]) -> None:
     headers = [k for k in modules[0].keys() if k not in ['Size', 'Delta']]
     if not i:
         app.display(",".join(headers))
@@ -72,8 +73,8 @@ def format(s: str) -> str:
     return f'"{s}"' if "," in s else s
 
 
-def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int]]]) -> None:
-    modules_table = {col: {} for col in modules[0].keys() if '(Bytes)' not in col}
+def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int, date]]]) -> None:
+    modules_table : Dict[str, Dict[str, Union[str, int]]] = {col: {} for col in modules[0].keys() if '(Bytes)' not in col}
     for i, row in enumerate(modules):
         for key, value in row.items():
             if key in modules_table:
@@ -89,7 +90,11 @@ def get_dependencies_sizes(
         if compressed:
             response = requests.head(url)
             response.raise_for_status()
-            size = int(response.headers.get("Content-Length"))
+            size_str = response.headers.get("Content-Length")
+            if size_str is None:
+                raise ValueError(f"Missing size for {dep}")
+            size = int(size_str)
+
         else:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()
@@ -131,7 +136,6 @@ def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str]]:
 def group_modules(
     modules: List[Dict[str, Union[str, int]]], platform: str, version: str, i: Optional[int]
 ) -> List[Dict[str, Union[str, int]]]:
-    grouped_aux = {}
     if modules == []:
         return [
             {
@@ -143,6 +147,7 @@ def group_modules(
                 'Version': '',
             }
         ]
+    grouped_aux : Dict[tuple[str, str], int] = {}
     for file in modules:
         key = (file['Name'], file['Type'])
         grouped_aux[key] = grouped_aux.get(key, 0) + file["Size (Bytes)"]
@@ -193,9 +198,9 @@ class WrongDependencyFormat(Exception):
 
 
 class GitRepo:
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: Union[Path,str]) -> None:
         self.url = url
-        self.repo_dir = None
+        self.repo_dir : str
 
     def __enter__(self):
         self.repo_dir = tempfile.mkdtemp()
