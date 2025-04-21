@@ -69,7 +69,7 @@ def status_mode(app: Application, platform: str, version: str, compressed: bool,
     if csv:
         print_csv(app, i, grouped_modules)
     else:
-        print_table(app, "STATUS", grouped_modules)
+        print_table(app, "Status", grouped_modules)
 
 
 def get_files(compressed: bool) -> List[Dict[str, Union[str, int]]]:

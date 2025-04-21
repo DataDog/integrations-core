@@ -33,7 +33,7 @@ console = Console()
 
 @click.command()
 @click.argument('type', type=click.Choice(['integration', 'dependency']))
-@click.argument('module')
+@click.argument('name')
 @click.argument('initial', required=False)
 @click.argument('final', required=False)
 @click.option(
@@ -52,7 +52,7 @@ console = Console()
 def timeline(
     app: Application,
     type: str,
-    module: str,
+    name: str,
     initial: Optional[str],
     final: Optional[str],
     time: Optional[str],
@@ -71,6 +71,7 @@ def timeline(
         TimeElapsedColumn(),
         transient=True,
     ) as progress:
+        module = name  # module is the name of the integration or the dependency
         task = progress.add_task("[cyan]Calculating timeline...", total=None)
         url = app.repo.path
         with GitRepo(url) as gitRepo:

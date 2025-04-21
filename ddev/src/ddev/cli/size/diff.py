@@ -42,7 +42,13 @@ console = Console()
 @click.option('--csv', is_flag=True, help="Output in CSV format")
 @click.pass_obj
 def diff(
-    app: str, before: str, after: str, platform: Optional[str], version: Optional[str], compressed: bool, csv: bool
+    app: Application,
+    before: str,
+    after: str,
+    platform: Optional[str],
+    version: Optional[str],
+    compressed: bool,
+    csv: bool,
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -69,7 +75,7 @@ def diff(
                     progress.remove_task(task)
 
                     for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-                        diff_mode(app, gitRepo, before, after, plat, ver, compressed, csv, i,progress)
+                        diff_mode(app, gitRepo, before, after, plat, ver, compressed, csv, i, progress)
                 else:
                     progress.remove_task(task)
                     diff_mode(app, gitRepo, before, after, platform, version, compressed, csv, None, progress)
@@ -91,18 +97,19 @@ def diff_mode(
     progress: Progress,
 ) -> None:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
-        gitRepo, platform, version, before, after, compressed,progress
+        gitRepo, platform, version, before, after, compressed, progress
     )
 
     integrations = get_diff(files_b, files_a, 'Integration')
     dependencies = get_diff(dependencies_b, dependencies_a, 'Dependency')
+    if integrations + dependencies == [] and not csv:
+        app.display(f"No size differences were detected between the selected commits for {platform}.")
+
     grouped_modules = group_modules(integrations + dependencies, platform, version, i)
     grouped_modules.sort(key=lambda x: abs(x['Size (Bytes)']), reverse=True)
     for module in grouped_modules:
         if module['Size (Bytes)'] > 0:
             module['Size'] = f"+{module['Size']}"
-    if grouped_modules == []:
-        app.display("No size differences were detected between the selected commits.")
     else:
         if csv:
             print_csv(app, i, grouped_modules)
@@ -111,21 +118,27 @@ def diff_mode(
 
 
 def get_repo_info(
-    gitRepo: GitRepo, platform: str, version: str, before: str, after: str, compressed: bool,progress: Progress,
+    gitRepo: GitRepo,
+    platform: str,
+    version: str,
+    before: str,
+    after: str,
+    compressed: bool,
+    progress: Progress,
 ) -> Tuple[Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int]]:
-    repo = gitRepo.repo_dir
-    task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
-    gitRepo.checkout_commit(before)
-    files_b = get_files(repo, compressed)
-    dependencies_b = get_dependencies(repo, platform, version, compressed)
-    progress.remove_task(task)
+    with progress:
+        repo = gitRepo.repo_dir
+        task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
+        gitRepo.checkout_commit(before)
+        files_b = get_files(repo, compressed)
+        dependencies_b = get_dependencies(repo, platform, version, compressed)
+        progress.remove_task(task)
 
-    task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
-    gitRepo.checkout_commit(after)
-    files_a = get_files(repo, compressed)
-    dependencies_a = get_dependencies(repo, platform, version, compressed)
-    progress.remove_task(task)
-
+        task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
+        gitRepo.checkout_commit(after)
+        files_a = get_files(repo, compressed)
+        dependencies_a = get_dependencies(repo, platform, version, compressed)
+        progress.remove_task(task)
 
     return files_b, dependencies_b, files_a, dependencies_a
 

@@ -64,7 +64,8 @@ def print_csv(app: Application, i: Optional[int], modules: List[Dict[str, Union[
         app.display(",".join(headers))
 
     for row in modules:
-        app.display(",".join(format(str(row[h])) for h in headers))
+        if any(str(value).strip() not in ("", "0") for value in row.values()):
+            app.display(",".join(format(str(row[h])) for h in headers))
 
 
 def format(s: str) -> str:
@@ -131,7 +132,17 @@ def group_modules(
     modules: List[Dict[str, Union[str, int]]], platform: str, version: str, i: Optional[int]
 ) -> List[Dict[str, Union[str, int]]]:
     grouped_aux = {}
-
+    if modules == []:
+        return [
+            {
+                'Name': '',
+                'Type': '',
+                'Size (Bytes)': 0,
+                'Size': '',
+                'Platform': '',
+                'Version': '',
+            }
+        ]
     for file in modules:
         key = (file['Name'], file['Type'])
         grouped_aux[key] = grouped_aux.get(key, 0) + file["Size (Bytes)"]
@@ -233,7 +244,6 @@ class GitRepo:
 
     def get_creation_commit_module(self, module: str) -> str:
         return self._run(f'git log --reverse --format="%H" -- {module}')[0]
-
 
     def __exit__(
         self,
