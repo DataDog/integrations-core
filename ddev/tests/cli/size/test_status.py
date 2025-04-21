@@ -140,27 +140,27 @@ def test_status_csv(ddev, mock_size_status):
 
 
 def test_status_wrong_platform(ddev):
-    patch(
+    with patch(
         "ddev.cli.size.timeline.valid_platforms_versions",
         return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
-    ),
-    result = ddev('size', 'status', '--platform', 'linux', '--python', '3.12', '--compressed')
-    assert result.exit_code != 0
+    ):
+        result = ddev('size', 'status', '--platform', 'linux', '--python', '3.12', '--compressed')
+        assert result.exit_code != 0
 
 
 def test_status_wrong_version(ddev):
-    patch(
+    with patch(
         "ddev.cli.size.timeline.valid_platforms_versions",
         return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
-    ),
-    result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '2.10', '--compressed')
-    assert result.exit_code != 0
+    ):
+        result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '2.10', '--compressed')
+        assert result.exit_code != 0
 
 
 def test_status_wrong_plat_and_version(ddev):
-    patch(
+    with patch(
         "ddev.cli.size.timeline.valid_platforms_versions",
         return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
-    ),
-    result = ddev('size', 'status', '--platform', 'linux', '--python', '2.10', '--compressed')
-    assert result.exit_code != 0
+    ):
+        result = ddev('size', 'status', '--platform', 'linux', '--python', '2.10', '--compressed')
+        assert result.exit_code != 0

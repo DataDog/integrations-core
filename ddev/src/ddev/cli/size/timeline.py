@@ -198,6 +198,7 @@ def process_commits(
         if type == 'dependency' and date < MINIMUM_DATE:
             continue
         elif type == 'dependency':
+            assert platform is not None
             result = get_dependencies(repo, module, platform, commit, date, author, message, compressed)
             if result:
                 file_data.append(result)
@@ -340,8 +341,13 @@ def group_modules(
     grouped_aux: Dict[tuple[date, str, str, str], int] = {}
 
     for file in modules:
-        key = (file['Date'], file['Author'], file['Commit Message'], file['Commit SHA'])
-        grouped_aux[key] = grouped_aux.get(key, 0) + file["Size (Bytes)"]
+        key = (
+            cast(date, file['Date']),
+            cast(str, file['Author']),
+            cast(str, file['Commit Message']),
+            cast(str, file['Commit SHA']),
+        )
+        grouped_aux[key] = grouped_aux.get(key, 0) + cast(int, file["Size (Bytes)"])
     if i is None:
         return [
             {
@@ -407,7 +413,7 @@ def module_exists(path: str, module: str) -> bool:
     return os.path.exists(os.path.join(path, module))
 
 
-def get_dependency_list(path: str, platforms: List[str]) -> Set[str]:
+def get_dependency_list(path: str, platforms: Set[str]) -> Set[str]:
     resolved_path = os.path.join(path, ".deps/resolved")
     all_files = os.listdir(resolved_path)
     dependencies = set()

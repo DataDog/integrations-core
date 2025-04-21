@@ -18,7 +18,7 @@ import requests
 from ddev.cli.application import Application
 
 
-def valid_platforms_versions(repo_path: str) -> Tuple[Set[str], Set[str]]:
+def valid_platforms_versions(repo_path: Union[Path, str]) -> Tuple[Set[str], Set[str]]:
     resolved_path = os.path.join(repo_path, ".deps/resolved")
     platforms = []
     versions = []
@@ -74,9 +74,7 @@ def format(s: str) -> str:
 
 
 def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int, date]]]) -> None:
-    modules_table: Dict[str, Dict[str, Union[str, int]]] = {
-        col: {} for col in modules[0].keys() if '(Bytes)' not in col
-    }
+    modules_table: Dict[str, Dict[int, str]] = {col: {} for col in modules[0].keys() if '(Bytes)' not in col}
     for i, row in enumerate(modules):
         for key, value in row.items():
             if key in modules_table:
@@ -115,7 +113,7 @@ def get_dependencies_sizes(
                     for name in filenames:
                         file_path = os.path.join(dirpath, name)
                         size += os.path.getsize(file_path)
-        file_data.append({"File Path": dep, "Type": "Dependency", "Name": dep, "Size (Bytes)": int(size)})
+        file_data.append({"File Path": str(dep), "Type": "Dependency", "Name": str(dep), "Size (Bytes)": int(size)})
     return file_data
 
 
@@ -137,7 +135,7 @@ def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str]]:
 
 def group_modules(
     modules: List[Dict[str, Union[str, int]]], platform: str, version: str, i: Optional[int]
-) -> List[Dict[str, Union[str, int]]]:
+) -> List[Dict[str, Union[str, int, date]]]:
     if modules == []:
         return [
             {
@@ -151,8 +149,8 @@ def group_modules(
         ]
     grouped_aux: Dict[tuple[str, str], int] = {}
     for file in modules:
-        key = (file['Name'], file['Type'])
-        grouped_aux[key] = grouped_aux.get(key, 0) + file["Size (Bytes)"]
+        key = (str(file['Name']), str(file['Type']))
+        grouped_aux[key] = grouped_aux.get(key, 0) + int(file["Size (Bytes)"])
     if i is None:
         return [
             {'Name': name, 'Type': type, 'Size (Bytes)': size, 'Size': convert_size(size)}
@@ -172,7 +170,7 @@ def group_modules(
         ]
 
 
-def get_gitignore_files(repo_path: str) -> List[str]:
+def get_gitignore_files(repo_path: Union[str, Path]) -> List[str]:
     gitignore_path = os.path.join(repo_path, ".gitignore")
     with open(gitignore_path, "r", encoding="utf-8") as file:
         gitignore_content = file.read()

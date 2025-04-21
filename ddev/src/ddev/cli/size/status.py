@@ -109,3 +109,4 @@ def get_dependencies(platform: str, version: str, compressed: bool) -> List[Dict
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             deps, download_urls = get_dependencies_list(file_path)
             return get_dependencies_sizes(deps, download_urls, compressed)
+    return {}

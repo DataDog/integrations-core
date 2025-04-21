@@ -298,13 +298,28 @@ def test_timeline_invalid_platform(ddev):
     mock_git_repo.repo_dir = "/tmp/fake_repo"
     mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
     mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
-    patch(
-        "ddev.cli.size.timeline.valid_platforms_versions",
-        return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}, {'3.12'}),
-    ),
-    result = ddev(
-        "size", "timeline", "dependency", "dep1", "commit1", "commit2", "--compressed", "--platform", "invalid-platform"
-    )
+    mock_git_repo.__enter__.return_value = mock_git_repo
+
+    with (
+        patch("ddev.cli.size.timeline.GitRepo", return_value=mock_git_repo),
+        patch(
+            "ddev.cli.size.timeline.valid_platforms_versions",
+            return_value=({'linux-x86_64', 'linux-aarch64', 'macos-x86_64'}, {'3.12'}),
+        ),
+    ):
+
+        result = ddev(
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "commit1",
+            "commit2",
+            "--compressed",
+            "--platform",
+            "invalid-platform",
+        )
+
     assert result.exit_code != 0
 
 

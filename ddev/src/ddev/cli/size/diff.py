@@ -224,7 +224,10 @@ def get_dependencies_sizes(deps: List[str], download_urls: List[str], compressed
         if compressed:
             response = requests.head(url)
             response.raise_for_status()
-            size = int(response.headers.get("Content-Length"))
+            size_str = response.headers.get("Content-Length")
+            if size_str is None:
+                raise ValueError(f"Missing size for {dep}")
+            size = int(size_str)
         else:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()
