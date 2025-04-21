@@ -303,14 +303,13 @@ class XESessionBase(DBMAsyncJob):
 
         return normalized
 
-    def _create_event_payload(self, raw_event, event_type, normalized_event_field):
+    def _create_event_payload(self, raw_event, event_source):
         """
         Create a structured event payload for a single event with consistent format.
 
         Args:
             raw_event: The raw event data to normalize
-            event_type: The type of event (e.g., "xe_rpc" or "xe_batch")
-            normalized_event_field: The field name for the normalized event in the payload
+            event_source: The source of event (e.g., "xe_rpc" or "xe_batch")
 
         Returns:
             A dictionary with the standard payload structure
@@ -322,7 +321,8 @@ class XESessionBase(DBMAsyncJob):
             "host": self._check.hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": event_type,
+            "dbm_type": "query_completion",
+            "event_source": event_source,
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time() * 1000,
@@ -330,7 +330,7 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "service": self._config.service,
-            normalized_event_field: normalized_event,
+            "query_details": normalized_event,
         }
 
     def _format_event_for_log(self, event, important_fields):
@@ -421,12 +421,11 @@ class XESessionBase(DBMAsyncJob):
 
         # Process each event individually
         event_type = f"xe_{self.session_name.replace('datadog_', '')}"
-        normalized_event_field = f"sqlserver_{self.session_name.replace('datadog_', '')}_event"
 
         for event in events:
             try:
                 # Create a properly structured payload for this specific event
-                payload = self._create_event_payload(event, event_type, normalized_event_field)
+                payload = self._create_event_payload(event, event_type)
                 # For now, just log it instead of sending
                 self._log.debug(f"Created payload for {self.session_name} event (not sending)")
 

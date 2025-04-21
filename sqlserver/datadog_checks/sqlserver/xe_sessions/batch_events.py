@@ -16,7 +16,7 @@ class BatchEventsHandler(XESessionBase):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
-        """Process batch events from the XML data - keeping SQL text unobfuscated"""
+        """Process batch events from the XML data"""
         try:
             root = ET.fromstring(str(xml_data))
         except Exception as e:
