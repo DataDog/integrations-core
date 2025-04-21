@@ -75,62 +75,9 @@ class XESessionBase(DBMAsyncJob):
                 return cursor.fetchone() is not None
 
     def _query_ring_buffer(self):
-        """Query the ring buffer for this XE session with timestamp filtering - SQLServer-side processing"""
-        query_start_time = time()
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                # For Azure SQL Database support
-                level = ""
-                if self._is_azure_sql_database:
-                    level = "database_"
-
-                # Add a timestamp filter if we have a checkpoint
-                timestamp_filter = ""
-                params = [self.session_name]
-
-                if self._last_event_timestamp:
-                    self._log.debug(f"Filtering events newer than timestamp: {self._last_event_timestamp}")
-                    timestamp_filter = "AND event_data.value('(@timestamp)[1]', 'datetime2') > ?"
-                    params.append(self._last_event_timestamp)
-
-                # Build the query
-                query = f"""
-                    SELECT event_data.query('.') as event_xml
-                    FROM (
-                        SELECT CAST(t.target_data AS XML) AS target_xml
-                        FROM sys.dm_xe_{level}sessions s
-                        JOIN sys.dm_xe_{level}session_targets t
-                            ON s.address = t.event_session_address
-                        WHERE s.name = ?
-                        AND t.target_name = 'ring_buffer'
-                    ) AS src
-                    CROSS APPLY target_xml.nodes('//RingBufferTarget/event') AS XTbl(event_data)
-                    WHERE 1=1 {timestamp_filter}
-                    ORDER BY event_data.value('(@timestamp)[1]', 'datetime2')
-                """
-
-                try:
-                    cursor.execute(query, params)
-
-                    # Combine all results into one XML document
-                    rows = cursor.fetchall()
-                    if not rows:
-                        return {'xml_data': None, 'query_time': time() - query_start_time, 'parse_time': 0}
-                    combined_xml = "<events>"
-                    for row in rows:
-                        combined_xml += str(row[0])
-                    combined_xml += "</events>"
-
-                    return {'xml_data': combined_xml, 'query_time': time() - query_start_time, 'parse_time': 0}
-                except Exception as e:
-                    self._log.error(f"Error querying ring buffer: {e}")
-                    return {'xml_data': None, 'query_time': time() - query_start_time, 'parse_time': 0}
-
-    def _query_ring_buffer_client_parse(self):
         """
         Query the ring buffer data and parse the XML on the client side.
-        This avoids expensive server-side XML parsing and may be more efficient for large datasets.
-        Returns a dict with xml_data, query_time, and parse_time.
+        This avoids expensive server-side XML parsing for better performance.
         """
         # Time just the database query
         query_start_time = time()
@@ -163,13 +110,13 @@ class XESessionBase(DBMAsyncJob):
         query_time = time() - query_start_time
 
         if not raw_xml:
-            return {'xml_data': None, 'query_time': query_time, 'parse_time': 0}
+            return None, query_time, 0
 
         # Time the XML parsing separately
         parse_start_time = time()
         filtered_events = self._filter_ring_buffer_events(raw_xml)
         if not filtered_events:
-            return {'xml_data': None, 'query_time': query_time, 'parse_time': time() - parse_start_time}
+            return None, query_time, time() - parse_start_time
 
         combined_xml = "<events>"
         for event_xml in filtered_events:
@@ -177,7 +124,7 @@ class XESessionBase(DBMAsyncJob):
         combined_xml += "</events>"
         parse_time = time() - parse_start_time
 
-        return {'xml_data': combined_xml, 'query_time': query_time, 'parse_time': parse_time}
+        return combined_xml, query_time, parse_time
 
     def _query_event_file(self):
         """Query the event file for this XE session with timestamp filtering"""
@@ -187,7 +134,8 @@ class XESessionBase(DBMAsyncJob):
                 # Azure SQL Database doesn't support file targets
                 if self._is_azure_sql_database:
                     self._log.warning("Event file target is not supported on Azure SQL Database")
-                    return {'xml_data': None, 'query_time': time() - query_start_time, 'parse_time': 0}
+                    query_time = time() - query_start_time
+                    return None, query_time, 0
 
                 # Define the file path pattern
                 file_path = f"d:\\rdsdbdata\\log\\{self.session_name}*.xel"
@@ -226,8 +174,10 @@ class XESessionBase(DBMAsyncJob):
 
                     # Combine all results into one XML document
                     rows = cursor.fetchall()
+                    query_time = time() - query_start_time
+
                     if not rows:
-                        return {'xml_data': None, 'query_time': time() - query_start_time, 'parse_time': 0}
+                        return None, query_time, 0
 
                     combined_xml = "<events>"
                     for row in rows:
@@ -238,10 +188,11 @@ class XESessionBase(DBMAsyncJob):
                     if rows:
                         self._log.debug(f"Sample XML from event file: {str(rows[0][0])[:200]}...")
 
-                    return {'xml_data': combined_xml, 'query_time': time() - query_start_time, 'parse_time': 0}
+                    return combined_xml, query_time, 0
                 except Exception as e:
                     self._log.error(f"Error querying event file: {e}")
-                    return {'xml_data': None, 'query_time': time() - query_start_time, 'parse_time': 0}
+                    query_time = time() - query_start_time
+                    return None, query_time, 0
 
     def _filter_ring_buffer_events(self, xml_data):
         """
@@ -429,19 +380,13 @@ class XESessionBase(DBMAsyncJob):
             self._log.warning(f"XE session {self.session_name} not found or not running")
             return
 
+        # Get the XML data and timing info
+        xml_data, query_time, parse_time = self._query_ring_buffer()
+        # xml_data, query_time, parse_time = self._query_event_file()  # Alternate data source
 
-        result = self._query_ring_buffer()  # SQL-side XML parsing
-        # result = self._query_ring_buffer_client_parse()  # Client-side XML parsing
-        # result = self._query_event_file()  # Query from event file
-
-        if not result['xml_data']:
+        if not xml_data:
             self._log.debug(f"No data found for session {self.session_name}")
             return
-
-        # Extract timing data from the query result
-        query_time = result['query_time']
-        parse_time = result['parse_time']
-        xml_data = result['xml_data']
 
         # Time the event processing
         process_start_time = time()
