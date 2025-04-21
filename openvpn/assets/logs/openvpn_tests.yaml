@@ -79,13 +79,11 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 36220273000
-  - sample: "<14>Feb 24 05:12:14 openvpnas2 openvpnas: [-] [WEB] OUT:
-      \"2025-02-24T05:12:14+0000 [stdout#info] Web login authentication failed:
-      {'status': 1, 'user': 'openvpn', 'reason': 'local auth failed: password
-      verification failed', 'auth method': 'local'}\""
+  - sample: "<14>Feb 24 05:12:14 openvpnas2 openvpnas: [-] [WEB] OUT: \"2025-02-24T05:12:14+0000 [stdout#info] Web login authentication failed: {'status': 1, 'user': 'openvpn', 'reason': 'local auth failed: password verification failed', 'auth method': 'local'}\""
     result:
       custom:
         auth_method: "local"
+        authentication_info: "{'status': 1, 'user': 'openvpn', 'reason': 'local auth failed: password verification failed', 'auth method': 'local'}"
         log_type: "Web login authentication failed"
         reason: "local auth failed: password verification failed"
         status: 1
@@ -182,15 +180,11 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 36220279000
-  - sample: "<14>Mar 11 12:59:46 openvpnas2 openvpnas: [-] [WEB] OUT:
-      '2025-03-11T12:59:46+0000 [stdout#info] Web login authentication failed:
-      {\\'status\\': 2, \\'user\\': \\'abc\\', \\'reason\\': \"Cannot connect to
-      LDAP server ldap://10.10.10.10: socket connection error while opening:
-      [Errno 113] No route to host (facility=\\'initialize [10.10.10.10]\\')\",
-      \\'auth method\\': \\'ldap\\'}'"
+  - sample: "<14>Mar 11 12:59:46 openvpnas2 openvpnas: [-] [WEB] OUT: '2025-03-11T12:59:46+0000 [stdout#info] Web login authentication failed: {\\'status\\': 2, \\'user\\': \\'abc\\', \\'reason\\': \"Cannot connect to LDAP server ldap://10.10.10.10: socket connection error while opening: [Errno 113] No route to host (facility=\\'initialize [10.10.10.10]\\')\", \\'auth method\\': \\'ldap\\'}'"
     result:
       custom:
         auth_method: "ldap"
+        authentication_info: "{\\'status\\': 2, \\'user\\': \\'abc\\', \\'reason\\': \"Cannot connect to LDAP server ldap://10.10.10.10: socket connection error while opening: [Errno 113] No route to host (facility=\\'initialize [10.10.10.10]\\')\", \\'auth method\\': \\'ldap\\'}"
         log_type: "Web login authentication failed"
         reason: "Cannot connect to LDAP server ldap://10.10.10.10: socket connection error while opening: [Errno 113] No route to host (facility=\\'initialize [10.10.10.10]\\')"
         status: 2
