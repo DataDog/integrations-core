@@ -106,9 +106,9 @@ def diff_mode(
         app.display(f"No size differences were detected between the selected commits for {platform}.")
 
     grouped_modules = group_modules(integrations + dependencies, platform, version, i)
-    grouped_modules.sort(key=lambda x: abs(int(x['Size (Bytes)'])), reverse=True)
+    grouped_modules.sort(key=lambda x: abs(cast(int, x['Size (Bytes)'])), reverse=True)
     for module in grouped_modules:
-        if int(module['Size (Bytes)']) > 0:
+        if cast(int,module['Size (Bytes)']) > 0:
             module['Size'] = f"+{module['Size']}"
     else:
         if csv:
