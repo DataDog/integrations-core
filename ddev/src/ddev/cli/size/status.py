@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 import click
 from rich.console import Console
@@ -95,10 +95,10 @@ def get_files(compressed: bool) -> List[Dict[str, Union[str, int]]]:
                         "File Path": relative_path,
                         "Type": "Integration",
                         "Name": integration,
-                        "Size (Bytes)": size,
+                        "Size (Bytes)": int(size),
                     }
                 )
-    return file_data
+    return cast(List[Dict[str, Union[str, int]]], file_data)
 
 
 def get_dependencies(platform: str, version: str, compressed: bool) -> List[Dict[str, Union[str, int]]]:
@@ -109,4 +109,4 @@ def get_dependencies(platform: str, version: str, compressed: bool) -> List[Dict
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
             deps, download_urls = get_dependencies_list(file_path)
             return get_dependencies_sizes(deps, download_urls, compressed)
-    return {}
+    return []

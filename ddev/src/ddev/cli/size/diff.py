@@ -6,7 +6,7 @@ import os
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 import click
 import requests
@@ -106,9 +106,9 @@ def diff_mode(
         app.display(f"No size differences were detected between the selected commits for {platform}.")
 
     grouped_modules = group_modules(integrations + dependencies, platform, version, i)
-    grouped_modules.sort(key=lambda x: abs(x['Size (Bytes)']), reverse=True)
+    grouped_modules.sort(key=lambda x: abs(int(x['Size (Bytes)'])), reverse=True)
     for module in grouped_modules:
-        if module['Size (Bytes)'] > 0:
+        if int(module['Size (Bytes)']) > 0:
             module['Size'] = f"+{module['Size']}"
     else:
         if csv:
@@ -181,7 +181,7 @@ def get_diff(size_before: Dict[str, int], size_after: Dict[str, int], type: str)
                     }
                 )
 
-    return diff_files
+    return cast(List[Dict[str, str | int]], diff_files)
 
 
 def get_files(repo_path: str, compressed: bool) -> Dict[str, int]:

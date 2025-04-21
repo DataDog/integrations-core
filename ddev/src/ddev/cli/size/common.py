@@ -11,7 +11,7 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import requests
 
@@ -114,7 +114,8 @@ def get_dependencies_sizes(
                         file_path = os.path.join(dirpath, name)
                         size += os.path.getsize(file_path)
         file_data.append({"File Path": str(dep), "Type": "Dependency", "Name": str(dep), "Size (Bytes)": int(size)})
-    return file_data
+    return cast(List[Dict[str, Union[str, int]]], file_data)
+
 
 
 def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str]]:
