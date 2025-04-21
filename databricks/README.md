@@ -507,8 +507,8 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[3]: https://app.datadoghq.com/integrations/spark
-[4]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /integrations/spark
+[4]: /account/settings/agent/latest
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
@@ -525,7 +525,7 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/troubleshooting/
 [21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
-[23]: https://app.datadoghq.com/integrations/spark
+[23]: /integrations/spark
 [24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
 [25]: https://www.datadoghq.com/product/data-jobs-monitoring/
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
