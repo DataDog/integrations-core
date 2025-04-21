@@ -413,6 +413,15 @@ class SqlserverActivity(DBMAsyncJob):
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = comments
+
+            # Log timestamp for queries with ALLEN TEST comment
+            if comments and any('-- ALLEN TEST' in comment for comment in comments):
+                self.log.info(
+                    "ALLEN TEST QUERY FOUND in activity.py: query_start=%s, statement=%s",
+                    row.get('query_start', 'UNKNOWN'),
+                    row['statement_text'][:100]  # Log first 100 chars of the query
+                )
+
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             if row.get('procedure_name') and row.get('schema_name'):
                 row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()

@@ -5,6 +5,7 @@
 import json as json_module
 from io import BytesIO, StringIO
 from time import time
+import datetime
 
 from lxml import etree
 
@@ -424,6 +425,34 @@ class XESessionBase(DBMAsyncJob):
 
         for event in events:
             try:
+                # Check for ALLEN TEST comment
+                if 'sql_text' in event and event.get('sql_text') and '-- ALLEN TEST' in event.get('sql_text'):
+                    # Calculate start time if duration is available
+                    start_time = "UNKNOWN"
+                    end_time = event.get('timestamp', 'UNKNOWN')
+
+                    if end_time != "UNKNOWN" and 'duration_ms' in event:
+                        try:
+                            # Parse the timestamp (assuming ISO format)
+                            end_datetime = datetime.datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+
+                            # Convert duration_ms (milliseconds) to a timedelta
+                            duration_ms = float(event.get('duration_ms', 0))
+                            duration_delta = datetime.timedelta(milliseconds=duration_ms)
+
+                            # Calculate start time
+                            start_datetime = end_datetime - duration_delta
+                            start_time = start_datetime.isoformat()
+                        except Exception as e:
+                            self._log.warning(f"Error calculating start time: {e}")
+
+                    self._log.info(
+                        f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
+                        f"end_timestamp={end_time}, calculated_start_time={start_time}, "
+                        f"duration_ms={event.get('duration_ms', 'UNKNOWN')}, "
+                        f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(event, default=str)}"
+                    )
+
                 # Create a properly structured payload for this specific event
                 payload = self._create_event_payload(event, event_type)
                 # For now, just log it instead of sending
