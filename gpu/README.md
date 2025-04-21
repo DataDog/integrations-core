@@ -9,6 +9,12 @@ Supported vendors: NVIDIA.
 - Track utilization of GPU devices and retrieve performance and health metrics.
 - Monitor processes that are using GPU devices and their performance.
 
+## Requirements
+
+- NVIDIA driver version: 450.51 and above
+- Supported OS: Linux only
+- Linux kernel version: 5.8 and above
+
 ## Setup
 
 ### Installation
