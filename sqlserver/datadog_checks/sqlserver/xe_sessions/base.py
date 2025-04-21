@@ -4,7 +4,7 @@
 
 import json as json_module
 from lxml import etree
-from io import StringIO
+from io import StringIO, BytesIO
 from time import time
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
@@ -182,10 +182,10 @@ class XESessionBase(DBMAsyncJob):
         """
         if not xml_data:
             return []
-
         filtered_events = []
         try:
-            xml_stream = StringIO(xml_data)
+            # Convert string to bytes for lxml
+            xml_stream = BytesIO(xml_data.encode('utf-8'))
 
             # Only parse 'end' events for <event> tags
             context = etree.iterparse(xml_stream, events=('end',), tag='event')
