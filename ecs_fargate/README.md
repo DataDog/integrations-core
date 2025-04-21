@@ -155,7 +155,7 @@ You can use the [Datadog CDK Constructs][72] to configure your ECS Fargate task 
 
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
-Update this construct definition below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) property if necessary, as this defaults to `datadoghq.com` if you don't set it.
+Update this construct definition below with your [Datadog API Key][41]. In addition, include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) property if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
 [41]: https://app.datadoghq.com/organization-settings/api-keys
 {{< /site-region >}}
@@ -308,7 +308,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 <!-- xxx tab "CDK" xxx -->
 ##### AWS CDK Replica Service
 
-In the CDK code you can reference the `fargateTaskDefinition` resource created in the previous example into the `FargateService` resource being created. After this, specify your `Cluster`, `DesiredCount` and any other parameters necessary for your application in your replica service.
+In the CDK code you can reference the `fargateTaskDefinition` resource created in the previous example into the `FargateService` resource being created. After this, specify your `Cluster`, `DesiredCount`, and any other parameters necessary for your application in your replica service.
 
 ```typescript
 const service = new ecs.FargateService(this, <SERVICE_ID>, {
@@ -325,7 +325,7 @@ For more information on the CDK ECS service construct and syntax, see the [AWS C
 <!-- xxx tab "Terraform" xxx -->
 ##### AWS Terraform Replica Service
 
-In the Terraform code you can reference the `aws_ecs_task_definition` resource created in the previous example into the `aws_ecs_service` resource being created. After this specify your `Cluster`, `DesiredCount`, and any other parameters necessary for your application in your replica service.
+In the Terraform code you can reference the `aws_ecs_task_definition` resource created in the previous example within the `aws_ecs_service` resource being created. Then, specify your `Cluster`, `DesiredCount`, and any other parameters necessary for your application in your replica service.
 
 ```hcl
 resource "aws_ecs_service" <SERVICE_ID> {
@@ -1016,7 +1016,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 <!-- xxx tab "CDK" xxx -->
 ##### Datadog ECS Fargate CDK Construct
 
-To enable logging through the [Datadog ECS Fargate CDK](67) construct, simply configure the `logCollection` property as seen below:
+To enable logging through the [Datadog ECS Fargate CDK](67) construct, configure the `logCollection` property as seen below:
 
 ```typescript
 const ecsDatadog = new DatadogECSFargate({
@@ -1033,7 +1033,7 @@ const ecsDatadog = new DatadogECSFargate({
 <!-- xxx tab "Terraform" xxx -->
 ##### Datadog ECS Fargate Terraform Module
 
-To enable logging through the [Datadog ECS Fargate Terraform](71) module, simply configure the `dd_log_collection` input argument as seen below:
+To enable logging through the [Datadog ECS Fargate Terraform](71) module, configure the `dd_log_collection` input argument as seen below:
 
 ```hcl
 module "ecs_fargate_task" {
