@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import xml.etree.ElementTree as ET
+
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check_getter
+
 
 class ErrorEventsHandler(XESessionBase):
     """Handler for Error Events and Attentions"""
@@ -23,17 +25,14 @@ class ErrorEventsHandler(XESessionBase):
 
         events = []
 
-        for event in root.findall('./event')[:self.max_events]:
+        for event in root.findall('./event')[: self.max_events]:
             try:
                 # Extract basic info
                 timestamp = event.get('timestamp')
                 event_name = event.get('name', '').split('.')[-1]
 
                 # Initialize event data
-                event_data = {
-                    "timestamp": timestamp,
-                    "event_type": event_name
-                }
+                event_data = {"timestamp": timestamp, "event_type": event_name}
 
                 # Special processing for xml_deadlock_report
                 if event_name == 'xml_deadlock_report':

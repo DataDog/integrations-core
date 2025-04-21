@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from time import time
+import json as json_module
 import xml.etree.ElementTree as ET
-import json as json_module 
+from io import StringIO
+from time import time
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
@@ -30,7 +31,7 @@ class XESessionBase(DBMAsyncJob):
         self._check = check
         self._log = check.log
         self._config = config
-        self.collection_interval = 60  # Default for POC
+        self.collection_interval = 10  # Default for POC
         self.max_events = 100  # Default max events to collect
         self._last_event_timestamp = None  # Initialize timestamp tracking
 
@@ -122,6 +123,109 @@ class XESessionBase(DBMAsyncJob):
                 except Exception as e:
                     self._log.error(f"Error querying ring buffer: {e}")
                     return None
+
+    def _query_ring_buffer_client_parse(self):
+        """
+        Query the ring buffer data and parse the XML on the client side.
+        This avoids expensive server-side XML parsing and may be more efficient for large datasets.
+        """
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                # For Azure SQL Database support
+                level = ""
+                if self._is_azure_sql_database:
+                    level = "database_"
+
+                # Get raw XML data without server-side parsing
+                query = f"""
+                    SELECT CAST(t.target_data AS XML) AS target_xml
+                    FROM sys.dm_xe_{level}sessions s
+                    JOIN sys.dm_xe_{level}session_targets t
+                        ON s.address = t.event_session_address
+                    WHERE s.name = ?
+                    AND t.target_name = 'ring_buffer'
+                """
+
+                try:
+                    cursor.execute(query, (self.session_name,))
+                    row = cursor.fetchone()
+                    if not row or not row[0]:
+                        return None
+
+                    raw_xml = str(row[0])
+
+                    # Parse the raw XML data to extract events
+                    filtered_events = self._filter_ring_buffer_events(raw_xml)
+                    if not filtered_events:
+                        return None
+
+                    # Combine events into a document with the same structure as _query_ring_buffer
+                    combined_xml = "<events>"
+                    for event_xml in filtered_events:
+                        combined_xml += event_xml
+                    combined_xml += "</events>"
+
+                    return combined_xml
+                except Exception as e:
+                    self._log.error(f"Error querying ring buffer (client parse): {e}")
+                    return None
+
+    def _filter_ring_buffer_events(self, xml_data):
+        """
+        Parse and filter ring buffer XML data using ElementTree.iterparse.
+        Returns a list of event XML strings that match the timestamp filter.
+        """
+        if not xml_data:
+            return []
+
+        filtered_events = []
+
+        try:
+            # Create a string buffer for iterative parsing
+            xml_stream = StringIO(xml_data)
+
+            # Track if we're in a relevant event
+            current_event = None
+            is_event_valid = False
+
+            # Use iterparse for memory-efficient parsing
+            for event, elem in ET.iterparse(xml_stream, events=('start', 'end')):
+                if event == 'start' and elem.tag == 'event':
+                    # Start of a new event
+                    current_event = ET.tostring(elem, encoding='unicode', method='xml')
+
+                    # Check timestamp if we have a filter
+                    if self._last_event_timestamp:
+                        timestamp = elem.get('timestamp')
+                        if timestamp and timestamp > self._last_event_timestamp:
+                            is_event_valid = True
+                        else:
+                            is_event_valid = False
+                    else:
+                        is_event_valid = True
+
+                elif event == 'end' and elem.tag == 'event':
+                    # End of event - if valid, add it to our filtered list
+                    if is_event_valid and current_event:
+                        # Get the complete event XML with all child elements
+                        event_xml = ET.tostring(elem, encoding='unicode', method='xml')
+                        filtered_events.append(event_xml)
+
+                    # Clear for next event
+                    current_event = None
+                    is_event_valid = False
+
+                    # Clear element to avoid memory leak
+                    elem.clear()
+
+                # Stop once we have enough events
+                if len(filtered_events) >= self.max_events:
+                    break
+
+            return filtered_events
+        except Exception as e:
+            self._log.error(f"Error filtering ring buffer events: {e}")
+            return []
 
     def _query_event_file(self):
         """Query the event file for this XE session with timestamp filtering"""
@@ -285,7 +389,7 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "service": self._config.service,
-            normalized_event_field: normalized_event
+            normalized_event_field: normalized_event,
         }
 
     def _format_event_for_log(self, event, important_fields):
@@ -337,9 +441,10 @@ class XESessionBase(DBMAsyncJob):
 
         # Time the query execution
         query_start_time = time()
-        # NOTE: Currently hardcoded to use event file, will be replaced with config-based target selection
+        # NOTE: Currently hardcoded to use ring buffer, will be replaced with config-based target selection
         # xml_data = self._query_ring_buffer()
-        xml_data = self._query_event_file()
+        xml_data = self._query_ring_buffer_client_parse()
+       # xml_data = self._query_event_file()
         query_time = time() - query_start_time
 
         if not xml_data:

@@ -54,7 +54,7 @@ class RPCEventsHandler(XESessionBase):
                         else:
                             event_data[data_name] = self._extract_value(data)
                     # Handle numeric fields
-                    elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads', 
+                    elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads',
                                       'writes', 'spills', 'row_count', 'object_id', 'line_number']:
                         event_data[data_name] = self._extract_int_value(data)
                     # Handle all other fields
@@ -111,7 +111,7 @@ class RPCEventsHandler(XESessionBase):
             "cpu_time": 0,
             "page_server_reads": 0,
             "physical_reads": 0,
-            "logical_reads": 0, 
+            "logical_reads": 0,
             "writes": 0,
             "spills": 0,
             "row_count": 0,

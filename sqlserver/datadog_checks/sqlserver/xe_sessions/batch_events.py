@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import xml.etree.ElementTree as ET
+
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check_getter
+
 
 class BatchEventsHandler(XESessionBase):
     """Handler for SQL Batch Completed events"""
@@ -23,7 +25,7 @@ class BatchEventsHandler(XESessionBase):
 
         events = []
 
-        for event in root.findall('./event')[:self.max_events]:
+        for event in root.findall('./event')[: self.max_events]:
             try:
                 # Extract basic info from event attributes
                 timestamp = event.get('timestamp')
@@ -54,8 +56,15 @@ class BatchEventsHandler(XESessionBase):
                         else:
                             event_data[data_name] = self._extract_value(data)
                     # Handle numeric fields
-                    elif data_name in ['cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads',
-                                      'writes', 'spills', 'row_count']:
+                    elif data_name in [
+                        'cpu_time',
+                        'page_server_reads',
+                        'physical_reads',
+                        'logical_reads',
+                        'writes',
+                        'spills',
+                        'row_count',
+                    ]:
                         event_data[data_name] = self._extract_int_value(data)
                     # Handle all other fields
                     else:
@@ -107,19 +116,16 @@ class BatchEventsHandler(XESessionBase):
             "cpu_time": 0,
             "page_server_reads": 0,
             "physical_reads": 0,
-            "logical_reads": 0, 
+            "logical_reads": 0,
             "writes": 0,
             "spills": 0,
             "row_count": 0,
             "session_id": 0,
-            "request_id": 0
+            "request_id": 0,
         }
 
         # Define string fields
-        string_fields = [
-            "result", "batch_text", "database_name",
-            "client_app_name", "sql_text", "activity_id"
-        ]
+        string_fields = ["result", "batch_text", "database_name", "client_app_name", "sql_text", "activity_id"]
 
         # Use base class method to normalize
         return self._normalize_event(event, numeric_fields, string_fields)

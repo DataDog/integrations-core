@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import xml.etree.ElementTree as ET
+
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check_getter
+
 
 class SprocEventsHandler(XESessionBase):
     """Handler for Stored Procedure (Module End) events"""
@@ -23,7 +25,7 @@ class SprocEventsHandler(XESessionBase):
 
         events = []
 
-        for event in root.findall('./event')[:self.max_events]:
+        for event in root.findall('./event')[: self.max_events]:
             try:
                 # Extract basic info
                 timestamp = event.get('timestamp')
