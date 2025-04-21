@@ -14,15 +14,9 @@ def size():
     """
     Analyze the download size of integrations and dependencies in various modes.
 
-    This command provides tools to inspect, compare, and monitor size changes of modules
+    This command provides tools to inspect the current status, compare commits and monitor size changes of modules
     across different commits, platforms, and Python versions.
 
-    Available subcommands:
-      • status   Show the current sizes of all modules
-      • diff     Compare sizes between two commits
-      • timeline Show the size evolution of a module over time
-
-    Use `ddev size <subcommand> --help` for more details on each mode.
     """
 
     pass
