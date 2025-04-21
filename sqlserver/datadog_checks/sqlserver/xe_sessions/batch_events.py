@@ -2,23 +2,24 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import xml.etree.ElementTree as ET
+from lxml import etree
 
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check_getter
 
 
 class BatchEventsHandler(XESessionBase):
-    """Handler for SQL Batch Completed events"""
+    """Handler for SQL Server Batch Events"""
 
     def __init__(self, check, config):
         super(BatchEventsHandler, self).__init__(check, config, "datadog_batch")
+        self.max_events = config.get('batch_max_events', 100)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
         """Process batch events from the XML data"""
         try:
-            root = ET.fromstring(str(xml_data))
+            root = etree.fromstring(xml_data.encode('utf-8') if isinstance(xml_data, str) else xml_data)
         except Exception as e:
             self._log.error(f"Error parsing XML data: {e}")
             return []
