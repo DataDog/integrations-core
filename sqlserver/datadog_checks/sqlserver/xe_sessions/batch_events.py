@@ -13,7 +13,6 @@ class BatchEventsHandler(XESessionBase):
 
     def __init__(self, check, config):
         super(BatchEventsHandler, self).__init__(check, config, "datadog_batch")
-        self.max_events = config.get('batch_max_events', 100)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):

@@ -13,8 +13,6 @@ class ErrorEventsHandler(XESessionBase):
 
     def __init__(self, check, config):
         super(ErrorEventsHandler, self).__init__(check, config, "datadog_query_errors")
-        # Adjust settings for errors
-        self.max_events = config.get('error_max_events', 100)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):

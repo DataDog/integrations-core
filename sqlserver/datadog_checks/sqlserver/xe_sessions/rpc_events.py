@@ -13,7 +13,6 @@ class RPCEventsHandler(XESessionBase):
 
     def __init__(self, check, config):
         super(RPCEventsHandler, self).__init__(check, config, "datadog_rpc")
-        self.max_events = config.get('rpc_max_events', 100)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
