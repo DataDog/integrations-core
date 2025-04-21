@@ -217,7 +217,6 @@ def get_dependencies(repo_path: str, platform: str, version: str, compressed: bo
             return get_dependencies_sizes(deps, download_urls, compressed)
     return {}
 
-
 def get_dependencies_sizes(deps: List[str], download_urls: List[str], compressed: bool) -> Dict[str, int]:
     file_data = {}
     for dep, url in zip(deps, download_urls, strict=False):
