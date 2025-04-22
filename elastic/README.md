@@ -36,6 +36,16 @@ To configure this check for an Agent running on a host:
      ## fetch statistics from the nodes and information about the cluster health.
      #
      - url: http://localhost:9200
+
+       ## @param username - string - optional
+       ## The username to authenticate with.
+       #
+       # username: elastic
+
+       ## @param password - string - optional
+       ## The password to authenticate with.
+       #
+       # password: changeme
    ```
 
     **Notes**:
