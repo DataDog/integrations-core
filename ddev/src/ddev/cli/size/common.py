@@ -13,12 +13,12 @@ from pathlib import Path
 from types import TracebackType
 from typing import Dict, List, Optional, Set, Tuple, Type, Union, cast
 
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
+# import matplotlib.cm as cm
+# import matplotlib.pyplot as plt
 import requests
-import squarify
-from matplotlib.patches import Patch
 
+# import squarify
+# from matplotlib.patches import Patch
 from ddev.cli.application import Application
 
 
@@ -87,6 +87,7 @@ def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, 
 
 
 def plot_treemap(modules: List[Dict[str, Union[str, int, date]]]) -> None:
+    '''
     sizes = [mod["Size (Bytes)"] for mod in modules]
 
     integrations = [mod for mod in modules if mod["Type"] == "Integration"]
@@ -166,6 +167,7 @@ def plot_treemap(modules: List[Dict[str, Union[str, int, date]]]) -> None:
     plt.subplots_adjust(right=0.8)
     plt.tight_layout()
     plt.show()
+    '''
 
 
 def get_dependencies_sizes(
