@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Adds sanitization to the url tag when user and password options are supplied to the user configured endpoint. ([#20121](https://github.com/DataDog/integrations-core/pull/20121))
+* Adds sanitization to the URL tag when user and password options are supplied to the user configured endpoint. ([#20121](https://github.com/DataDog/integrations-core/pull/20121))
 
 ## 8.1.0 / 2025-01-16 / Agent 7.63.0
 
