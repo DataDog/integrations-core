@@ -448,6 +448,7 @@ class XESessionBase(DBMAsyncJob):
 
                     self._log.info(
                         f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
+                        f"host={self._check.hostname}, session_id={event.get('session_id', 'UNKNOWN')}, "
                         f"end_timestamp={end_time}, calculated_start_time={start_time}, "
                         f"duration_ms={event.get('duration_ms', 'UNKNOWN')}, "
                         f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(event, default=str)}"

@@ -260,16 +260,18 @@ class SqlserverActivity(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
+
         # Check if any raw statement contains 'ALLEN TEST'
         for row in rows:
             if row.get('statement_text') and '-- ALLEN TEST' in row.get('statement_text'):
                 self.log.info(
-                    "ALLEN TEST QUERY FOUND in raw activity data (pre-obfuscation): query_start=%s, statement=%s",
+                    "ALLEN TEST QUERY FOUND in raw activity data (pre-obfuscation): host=%s, session_id=%s, query_start=%s, statement=%s",
+                    self._check.resolved_hostname,
+                    row.get('id', 'UNKNOWN'),
                     row.get('query_start', 'UNKNOWN'),
                     row.get('statement_text', '')[:100]
                 )
-        
+
         # construct set of unique session ids
         session_ids = {r['id'] for r in rows}
         # construct set of blocking session ids
@@ -388,30 +390,11 @@ class SqlserverActivity(DBMAsyncJob):
         row = self._remove_null_vals(row)
         if 'statement_text' not in row:
             return self._sanitize_row(row)
-            
-        # Check for ALLEN TEST in raw SQL before obfuscation
-        if row.get('statement_text') and '-- ALLEN TEST' in row.get('statement_text'):
-            self.log.info(
-                "ALLEN TEST QUERY FOUND in raw statement_text (in _obfuscate_and_sanitize_row): query_start=%s",
-                row.get('query_start', 'UNKNOWN')
-            )
-            
         try:
             statement = obfuscate_sql_with_metadata(
                 row['statement_text'], self._config.obfuscator_options, replace_null_character=True
             )
             comments = statement['metadata'].get('comments', [])
-            
-            # Check all raw comments for ALLEN TEST
-            if comments:
-                for comment in comments:
-                    if 'ALLEN TEST' in comment:
-                        self.log.info(
-                            "ALLEN TEST QUERY FOUND in extracted comment: comment='%s', query_start=%s",
-                            comment,
-                            row.get('query_start', 'UNKNOWN')
-                        )
-            
             row['is_proc'] = bool(row.get('procedure_name'))
             if row['is_proc'] and row.get('text'):
                 try:
@@ -446,7 +429,9 @@ class SqlserverActivity(DBMAsyncJob):
             # Log timestamp for queries with ALLEN TEST comment
             if comments and any('-- ALLEN TEST' in comment for comment in comments):
                 self.log.info(
-                    "ALLEN TEST QUERY FOUND in activity.py: query_start=%s, statement=%s",
+                    "ALLEN TEST QUERY FOUND in activity.py: host=%s, session_id=%s, query_start=%s, statement=%s",
+                    self._check.resolved_hostname,
+                    row.get('id', 'UNKNOWN'),
                     row.get('query_start', 'UNKNOWN'),
                     row['statement_text'][:100]  # Log first 100 chars of the query
                 )
