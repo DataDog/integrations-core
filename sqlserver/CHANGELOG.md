@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.3.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+
 ## 22.2.0 / 2025-04-18
 
 ***Added***:
