@@ -86,7 +86,7 @@ def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, 
     app.display_table(mode, modules_table)
 
 
-def plot_treemap(modules):
+def plot_treemap(modules: List[Dict[str, Union[str, int, date]]]) -> None:
     sizes = [mod["Size (Bytes)"] for mod in modules]
 
     integrations = [mod for mod in modules if mod["Type"] == "Integration"]
@@ -104,7 +104,6 @@ def plot_treemap(modules):
     norm_int = normalize(integrations)
     norm_dep = normalize(dependencies)
 
-    # Use lighter color range: from 0.3 to 0.85
     def scale(val, vmin=0.3, vmax=0.85):
         return vmin + val * (vmax - vmin)
 
@@ -115,7 +114,7 @@ def plot_treemap(modules):
     for mod in modules:
         if mod["Type"] == "Integration":
             idx = integrations.index(mod)
-            colors.append(cmap_int(scale(norm_int[idx], 0.6, 0.85)))  # lighter start for integrations
+            colors.append(cmap_int(scale(norm_int[idx], 0.6, 0.85)))
         elif mod["Type"] == "Dependency":
             idx = dependencies.index(mod)
             colors.append(cmap_dep(scale(norm_dep[idx], 0.3, 0.85)))
@@ -135,18 +134,23 @@ def plot_treemap(modules):
 
         area = dx * dy
         font_size = max(6, min(18, area / 100))
+        name = mod["Name"]
+        size_str = f"({mod['Size']})"
 
-        if area > 400:
-            label = f"{mod['Name']}\n({mod['Size']})"
-        elif area > 40:
-            label = f"{mod['Name']}"
+        label = ""
+        name_fits = 0.5 * (len(name) + 2) < dx
+        size_fits = 0.5 * (len(size_str) + 2)
+        both_fit = 5 < dy
+
+        if name_fits and size_fits and both_fit:
+            label = f"{name}\n{size_str}"
+        elif name_fits:
+            label = name
         else:
             label = None
 
         if label:
-            ax.text(
-                x + dx / 2, y + dy / 2, label, va="center", ha="center", fontsize=font_size, color="black", wrap=True
-            )
+            ax.text(x + dx / 2, y + dy / 2, label, va="center", ha="center", fontsize=font_size, color="black")
 
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)

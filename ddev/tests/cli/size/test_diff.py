@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
