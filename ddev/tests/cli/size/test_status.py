@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
@@ -12,10 +13,14 @@ from ddev.cli.size.status import (
 )
 
 
+def to_native_path(path: str) -> str:
+    return path.replace("/", os.sep)
+
+
 def test_get_files_compressed():
     mock_files = [
-        ("root/integration/datadog_checks", [], ["file1.py", "file2.py"]),
-        ("root/integration_b/datadog_checks", [], ["file3.py"]),
+        (os.path.join("root", "integration", "datadog_checks"), [], ["file1.py", "file2.py"]),
+        (os.path.join("root", "integration_b", "datadog_checks"), [], ["file3.py"]),
         ("root", [], ["ignored.py"]),
     ]
 
@@ -26,7 +31,7 @@ def test_get_files_compressed():
 
     with (
         patch("os.walk", return_value=mock_files),
-        patch("os.path.relpath", side_effect=lambda path, _: path.replace("root/", "")),
+        patch("os.path.relpath", side_effect=lambda path, _: os.path.relpath(path, "root")),
         patch("ddev.cli.size.status.get_gitignore_files", return_value=fake_gitignore),
         patch(
             "ddev.cli.size.status.is_valid_integration",
@@ -39,19 +44,19 @@ def test_get_files_compressed():
 
     expected = [
         {
-            "File Path": "integration/datadog_checks/file1.py",
+            "File Path": to_native_path("integration/datadog_checks/file1.py"),
             "Type": "Integration",
             "Name": "integration",
             "Size (Bytes)": 1000,
         },
         {
-            "File Path": "integration/datadog_checks/file2.py",
+            "File Path": to_native_path("integration/datadog_checks/file2.py"),
             "Type": "Integration",
             "Name": "integration",
             "Size (Bytes)": 1000,
         },
         {
-            "File Path": "integration_b/datadog_checks/file3.py",
+            "File Path": to_native_path("integration_b/datadog_checks/file3.py"),
             "Type": "Integration",
             "Name": "integration_b",
             "Size (Bytes)": 1000,
@@ -126,16 +131,19 @@ def mock_size_status():
 
 def test_status_no_args(ddev, mock_size_status):
     result = ddev('size', 'status', '--compressed')
+    print(result.output)
     assert result.exit_code == 0
 
 
 def test_status(ddev, mock_size_status):
     result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed')
+    print(result.output)
     assert result.exit_code == 0
 
 
 def test_status_csv(ddev, mock_size_status):
     result = ddev('size', 'status', '--platform', 'linux-aarch64', '--python', '3.12', '--compressed', '--csv')
+    print(result.output)
     assert result.exit_code == 0
 
 
