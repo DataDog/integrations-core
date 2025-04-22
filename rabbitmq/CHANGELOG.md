@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.0 / 2025-04-22
+
+***Added***:
+
+* Add support for queue_delivery_metrics group ([#19963](https://github.com/DataDog/integrations-core/pull/19963))
+
 ## 7.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
