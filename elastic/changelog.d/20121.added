@@ -1,0 +1,1 @@
+Adds sanitization to the url tag when user and password options are supplied to the user configured endpoint.
