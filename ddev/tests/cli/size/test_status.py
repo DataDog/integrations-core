@@ -31,7 +31,7 @@ def test_get_files_compressed():
 
     with (
         patch("os.walk", return_value=mock_files),
-        patch("os.path.relpath", side_effect=lambda path, _: os.path.relpath(path, "root")),
+        patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"root{os.sep}", "")),
         patch("ddev.cli.size.status.get_gitignore_files", return_value=fake_gitignore),
         patch(
             "ddev.cli.size.status.is_valid_integration",
