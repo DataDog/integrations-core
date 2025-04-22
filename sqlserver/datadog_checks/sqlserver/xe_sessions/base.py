@@ -34,7 +34,7 @@ class XESessionBase(DBMAsyncJob):
         self._log = check.log
         self._config = config
         self.collection_interval = 10  # Default for POC
-        self.max_events = 100  # Default max events to collect
+        self.max_events = 100000  # Temporarily increased to see actual event volume
         self._last_event_timestamp = None  # Initialize timestamp tracking
 
         super(XESessionBase, self).__init__(
@@ -224,7 +224,7 @@ class XESessionBase(DBMAsyncJob):
 
                 if len(filtered_events) >= self.max_events:
                     self._log.debug(f"Filtered {len(filtered_events)} events from ring buffer")
-                    ## break
+                    break
 
             return filtered_events
 
