@@ -77,6 +77,6 @@ Need help? Contact [Datadog support][4].
 [2]: https://docs.datadoghq.com/logs/guide/azure-logging-guide/
 [3]: https://learn.microsoft.com/entra/identity/monitoring-health/howto-stream-logs-to-event-hub
 [4]: https://docs.datadoghq.com/help
-[5]: https://app.datadoghq.com/event/explorer
+[5]: /event/explorer
 [6]: https://docs.datadoghq.com/integrations/guide/azure-graph-api-permissions/
 [7]: https://docs.datadoghq.com/integrations/azure/
