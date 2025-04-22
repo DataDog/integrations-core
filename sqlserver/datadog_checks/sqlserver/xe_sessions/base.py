@@ -305,6 +305,42 @@ class XESessionBase(DBMAsyncJob):
 
         return normalized
 
+    def _normalize_event_impl(self, event):
+        """
+        Implementation of event normalization - to be overridden by subclasses.
+        This method should apply the specific normalization logic for each event type.
+        """
+        raise NotImplementedError
+
+    def _determine_dbm_type(self):
+        """
+        Determine the dbm_type based on the session name.
+        Returns the appropriate dbm_type for the current session.
+        """
+        # Error events from datadog_query_errors session
+        if self.session_name == "datadog_query_errors":
+            return "query_errors"
+        # RPC completed events
+        elif self.session_name == "datadog_rpc":
+            return "query_completion"
+        # Batch completed events
+        elif self.session_name == "datadog_batch":
+            return "query_completion"
+        # Stored procedure events
+        elif self.session_name == "datadog_sprocs":
+            return "query_completion"
+        # Default fallback for any new/unknown session types
+        else:
+            self._log.debug(f"Unrecognized session name: {self.session_name}, using default dbm_type")
+            return "query_completion"
+
+    def _get_important_fields(self):
+        """
+        Get the list of important fields for this event type - to be overridden by subclasses.
+        Used for formatting events for logging.
+        """
+        return ['timestamp', 'duration_ms']
+
     def _create_event_payload(self, raw_event, event_source):
         """
         Create a structured event payload for a single event with consistent format.
@@ -319,11 +355,14 @@ class XESessionBase(DBMAsyncJob):
         # Normalize the event - must be implemented by subclass
         normalized_event = self._normalize_event_impl(raw_event)
 
+        # Determine dbm_type based on the session name
+        dbm_type = self._determine_dbm_type()
+
         return {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": "query_completion",
+            "dbm_type": dbm_type,
             "event_source": event_source,
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
@@ -359,20 +398,6 @@ class XESessionBase(DBMAsyncJob):
                 formatted_event[key] = value
 
         return formatted_event
-
-    def _normalize_event_impl(self, event):
-        """
-        Implementation of event normalization - to be overridden by subclasses.
-        This method should apply the specific normalization logic for each event type.
-        """
-        raise NotImplementedError
-
-    def _get_important_fields(self):
-        """
-        Get the list of important fields for this event type - to be overridden by subclasses.
-        Used for formatting events for logging.
-        """
-        return ['timestamp', 'duration_ms']
 
     def run_job(self):
         """Run the XE session collection job"""
