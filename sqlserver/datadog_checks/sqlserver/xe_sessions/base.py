@@ -319,7 +319,7 @@ class XESessionBase(DBMAsyncJob):
         normalized_event = self._normalize_event_impl(raw_event)
 
         return {
-            "host": self._check.hostname,
+            "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "query_completion",
@@ -448,7 +448,7 @@ class XESessionBase(DBMAsyncJob):
 
                     self._log.info(
                         f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
-                        f"host={self._check.hostname}, session_id={event.get('session_id', 'UNKNOWN')}, "
+                        f"host={self._check.resolved_hostname}, session_id={event.get('session_id', 'UNKNOWN')}, "
                         f"end_timestamp={end_time}, calculated_start_time={start_time}, "
                         f"duration_ms={event.get('duration_ms', 'UNKNOWN')}, "
                         f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(event, default=str)}"
