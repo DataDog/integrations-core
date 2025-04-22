@@ -119,6 +119,7 @@ def mock_size_status():
             "ddev.cli.size.status.get_dependencies_sizes",
             return_value=[{"File Path": "dep1.whl", "Type": "Dependency", "Name": "dep1", "Size (Bytes)": 5678}],
         ),
+        patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", "")),
         patch("ddev.cli.size.status.is_valid_integration", return_value=True),
         patch("ddev.cli.size.status.is_correct_dependency", return_value=True),
         patch("ddev.cli.size.status.print_csv"),
