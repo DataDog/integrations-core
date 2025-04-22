@@ -188,7 +188,7 @@ def get_files(repo_path: str, compressed: bool) -> Dict[str, int]:
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks/"
+    included_folder = "datadog_checks" + os.sep
 
     file_data = {}
     for root, _, files in os.walk(repo_path):
@@ -207,7 +207,7 @@ def get_files(repo_path: str, compressed: bool) -> Dict[str, int]:
 
 def get_dependencies(repo_path: str, platform: str, version: str, compressed: bool) -> Dict[str, int]:
 
-    resolved_path = os.path.join(repo_path, ".deps/resolved")
+    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
 
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)

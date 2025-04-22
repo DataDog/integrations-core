@@ -19,12 +19,13 @@ from .common import (
     group_modules,
     is_correct_dependency,
     is_valid_integration,
+    plot_treemap,
     print_csv,
     print_table,
     valid_platforms_versions,
 )
 
-REPO_PATH = Path(__file__).resolve().parents[5]
+# REPO_PATH = Path(__file__).resolve().parents[5]
 
 console = Console()
 
@@ -52,17 +53,19 @@ def status(app: Application, platform: Optional[str], version: Optional[str], co
             platforms = valid_platforms if platform is None else [platform]
             versions = valid_versions if version is None else [version]
             for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-                status_mode(app, plat, ver, compressed, csv, i)
+                status_mode(app, repo_path, plat, ver, compressed, csv, i)
         else:
-            status_mode(app, platform, version, compressed, csv, None)
+            status_mode(app, repo_path, platform, version, compressed, csv, None)
 
     except Exception as e:
         app.abort(str(e))
 
 
-def status_mode(app: Application, platform: str, version: str, compressed: bool, csv: bool, i: Optional[int]) -> None:
+def status_mode(
+    app: Application, repo_path: Path, platform: str, version: str, compressed: bool, csv: bool, i: Optional[int]
+) -> None:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
-        modules = get_files(compressed) + get_dependencies(platform, version, compressed)
+        modules = get_files(compressed, repo_path) + get_dependencies(repo_path, platform, version, compressed)
     grouped_modules = group_modules(modules, platform, version, i)
     grouped_modules.sort(key=lambda x: x['Size (Bytes)'], reverse=True)
 
@@ -70,21 +73,22 @@ def status_mode(app: Application, platform: str, version: str, compressed: bool,
         print_csv(app, i, grouped_modules)
     else:
         print_table(app, "Status", grouped_modules)
+        plot_treemap(grouped_modules)
 
 
-def get_files(compressed: bool) -> List[Dict[str, Union[str, int]]]:
+def get_files(compressed: bool, repo_path: Path) -> List[Dict[str, Union[str, int]]]:
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(REPO_PATH)
-    included_folder = "datadog_checks/"
+    git_ignore = get_gitignore_files(repo_path)
+    included_folder = "datadog_checks" + os.sep
 
     file_data = []
-    for root, _, files in os.walk(REPO_PATH):
+    for root, _, files in os.walk(repo_path):
         for file in files:
             file_path = os.path.join(root, file)
 
             # Convert the path to a relative format within the repo
-            relative_path = os.path.relpath(file_path, REPO_PATH)
+            relative_path = os.path.relpath(file_path, repo_path)
 
             # Filter files
             if is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
@@ -101,9 +105,11 @@ def get_files(compressed: bool) -> List[Dict[str, Union[str, int]]]:
     return cast(List[Dict[str, Union[str, int]]], file_data)
 
 
-def get_dependencies(platform: str, version: str, compressed: bool) -> List[Dict[str, Union[str, int]]]:
+def get_dependencies(
+    repo_path: Path, platform: str, version: str, compressed: bool
+) -> List[Dict[str, Union[str, int]]]:
 
-    resolved_path = os.path.join(REPO_PATH, ".deps/resolved")
+    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):

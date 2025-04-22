@@ -13,17 +13,21 @@ from pathlib import Path
 from types import TracebackType
 from typing import Dict, List, Optional, Set, Tuple, Type, Union, cast
 
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import requests
+import squarify
+from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
 
 
 def valid_platforms_versions(repo_path: Union[Path, str]) -> Tuple[Set[str], Set[str]]:
-    resolved_path = os.path.join(repo_path, ".deps/resolved")
+    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
     platforms = []
     versions = []
     for file in os.listdir(resolved_path):
-        platforms.append("_".join(file.split('_')[:-1]))
+        platforms.append("_".join(file.split("_")[:-1]))
         match = re.search(r"\d+\.\d+", file)
         if match:
             versions.append(match.group())
@@ -31,7 +35,7 @@ def valid_platforms_versions(repo_path: Union[Path, str]) -> Tuple[Set[str], Set
 
 
 def convert_size(size_bytes: float) -> str:
-    for unit in [' B', ' KB', ' MB', ' GB']:
+    for unit in [" B", " KB", " MB", " GB"]:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024
@@ -40,7 +44,7 @@ def convert_size(size_bytes: float) -> str:
 
 def is_valid_integration(path: str, included_folder: str, ignored_files: Set[str], git_ignore: List[str]) -> bool:
     # It is not an integration
-    if path.startswith('.'):
+    if path.startswith("."):
         return False
     # It is part of an integration and it is not in the datadog_checks folder
     elif included_folder not in path:
@@ -60,7 +64,7 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
 
 
 def print_csv(app: Application, i: Optional[int], modules: List[Dict[str, Union[str, int, date]]]) -> None:
-    headers = [k for k in modules[0].keys() if k not in ['Size', 'Delta']]
+    headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
     if not i:
         app.display(",".join(headers))
 
@@ -74,12 +78,90 @@ def format(s: str) -> str:
 
 
 def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int, date]]]) -> None:
-    modules_table: Dict[str, Dict[int, str]] = {col: {} for col in modules[0].keys() if '(Bytes)' not in col}
+    modules_table: Dict[str, Dict[int, str]] = {col: {} for col in modules[0].keys() if "(Bytes)" not in col}
     for i, row in enumerate(modules):
         for key, value in row.items():
             if key in modules_table:
                 modules_table[key][i] = str(value)
     app.display_table(mode, modules_table)
+
+
+def plot_treemap(modules):
+    sizes = [mod["Size (Bytes)"] for mod in modules]
+
+    integrations = [mod for mod in modules if mod["Type"] == "Integration"]
+    dependencies = [mod for mod in modules if mod["Type"] == "Dependency"]
+
+    def normalize(mods):
+        if not mods:
+            return []
+        sizes = [mod["Size (Bytes)"] for mod in mods]
+        min_size = min(sizes)
+        max_size = max(sizes)
+        range_size = max_size - min_size or 1
+        return [(s - min_size) / range_size for s in sizes]
+
+    norm_int = normalize(integrations)
+    norm_dep = normalize(dependencies)
+
+    # Use lighter color range: from 0.3 to 0.85
+    def scale(val, vmin=0.3, vmax=0.85):
+        return vmin + val * (vmax - vmin)
+
+    cmap_int = cm.get_cmap("Purples")
+    cmap_dep = cm.get_cmap("Reds")
+
+    colors = []
+    for mod in modules:
+        if mod["Type"] == "Integration":
+            idx = integrations.index(mod)
+            colors.append(cmap_int(scale(norm_int[idx], 0.6, 0.85)))  # lighter start for integrations
+        elif mod["Type"] == "Dependency":
+            idx = dependencies.index(mod)
+            colors.append(cmap_dep(scale(norm_dep[idx], 0.3, 0.85)))
+        else:
+            colors.append("#999999")
+
+    plt.figure(figsize=(12, 8))
+    ax = plt.gca()
+    ax.set_axis_off()
+
+    rects = squarify.normalize_sizes(sizes, 100, 100)
+    rects = squarify.squarify(rects, 0, 0, 100, 100)
+
+    for rect, mod, color in zip(rects, modules, colors, strict=False):
+        x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
+        ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
+
+        area = dx * dy
+        font_size = max(6, min(18, area / 100))
+
+        if area > 400:
+            label = f"{mod['Name']}\n({mod['Size']})"
+        elif area > 40:
+            label = f"{mod['Name']}"
+        else:
+            label = None
+
+        if label:
+            ax.text(
+                x + dx / 2, y + dy / 2, label, va="center", ha="center", fontsize=font_size, color="black", wrap=True
+            )
+
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
+
+    plt.title("Modules by Disk Usage", fontsize=16)
+
+    legend_handles = [
+        Patch(color=cmap_int(0.6), label="Integration"),
+        Patch(color=cmap_dep(0.6), label="Dependency"),
+    ]
+    plt.legend(handles=legend_handles, title="Type", loc="center left", bbox_to_anchor=(1.0, 0.5))
+
+    plt.subplots_adjust(right=0.8)
+    plt.tight_layout()
+    plt.show()
 
 
 def get_dependencies_sizes(
@@ -105,7 +187,7 @@ def get_dependencies_sizes(
                 with open(wheel_path, "wb") as f:
                     f.write(wheel_data)
                 extract_path = Path(tmpdir) / "extracted"
-                with zipfile.ZipFile(wheel_path, 'r') as zip_ref:
+                with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     zip_ref.extractall(extract_path)
 
                 size = 0
@@ -139,32 +221,32 @@ def group_modules(
     if modules == []:
         return [
             {
-                'Name': '',
-                'Type': '',
-                'Size (Bytes)': 0,
-                'Size': '',
-                'Platform': '',
-                'Version': '',
+                "Name": "",
+                "Type": "",
+                "Size (Bytes)": 0,
+                "Size": "",
+                "Platform": "",
+                "Version": "",
             }
         ]
     grouped_aux: Dict[tuple[str, str], int] = {}
     for file in modules:
-        key = (str(file['Name']), str(file['Type']))
+        key = (str(file["Name"]), str(file["Type"]))
         grouped_aux[key] = grouped_aux.get(key, 0) + int(file["Size (Bytes)"])
     if i is None:
         return [
-            {'Name': name, 'Type': type, 'Size (Bytes)': size, 'Size': convert_size(size)}
+            {"Name": name, "Type": type, "Size (Bytes)": size, "Size": convert_size(size)}
             for (name, type), size in grouped_aux.items()
         ]
     else:
         return [
             {
-                'Name': name,
-                'Type': type,
-                'Size (Bytes)': size,
-                'Size': convert_size(size),
-                'Platform': platform,
-                'Version': version,
+                "Name": name,
+                "Type": type,
+                "Size (Bytes)": size,
+                "Size": convert_size(size),
+                "Platform": platform,
+                "Version": version,
             }
             for (name, type), size in grouped_aux.items()
         ]
@@ -213,7 +295,7 @@ class GitRepo:
 
     def _run(self, command: str) -> List[str]:
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True, cwd=self.repo_dir)
-        return result.stdout.strip().split('\n')
+        return result.stdout.strip().split("\n")
 
     def get_module_commits(
         self, module_path: str, initial: Optional[str], final: Optional[str], time: Optional[str]

@@ -1,4 +1,6 @@
+import os
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
@@ -17,16 +19,14 @@ from ddev.cli.size.timeline import (
 
 def test_get_compressed_files():
     with (
-        patch("os.walk", return_value=[("/tmp/fake_repo/int1", [], ["int1.py"])]),
-        patch("os.path.relpath", return_value="int1/int1.py"),
+        patch("os.walk", return_value=[(os.path.join("fake_repo", "int1"), [], ["int1.py"])]),
+        patch("os.path.relpath", return_value=os.path.join("int1", "int1.py")),
         patch("os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.is_valid_integration", return_value=True),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
     ):
-        result = get_files(
-            "/tmp/fake_repo", "int1", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added int1", [], True
-        )
+        result = get_files("fake_repo", "int1", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added int1", [], True)
         assert result == [
             {
                 "Size (Bytes)": 1234,
@@ -39,7 +39,7 @@ def test_get_compressed_files():
 
 
 def test_get_compressed_files_deleted_only():
-    repo_path = "/tmp/fake_repo"
+    repo_path = "fake_repo"
     module = "foo"
     commit = "abc1234"
     date = datetime.strptime("Apr 5 2025", "%b %d %Y").date()
@@ -49,7 +49,7 @@ def test_get_compressed_files_deleted_only():
     with (
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("os.walk", return_value=[]),
-        patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"{repo_path}/", "")),
+        patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"{repo_path}{os.sep}", "")),
         patch("os.path.exists", return_value=False),
     ):
         file_data = get_files(repo_path, module, commit, date, author, message, [], True)
@@ -153,7 +153,7 @@ def test_get_dependency():
     content = """dep1 @ https://example.com/dep1.whl
 dep2 @ https://example.com/dep2.whl"""
     with patch("builtins.open", mock_open(read_data=content)):
-        url = get_dependency("some/path/file.txt", "dep2")
+        url = get_dependency(Path("some") / "path" / "file.txt", "dep2")
         assert url == "https://example.com/dep2.whl"
 
 
@@ -190,7 +190,7 @@ def test_get_compressed_dependencies():
         patch("ddev.cli.size.timeline.requests.head", return_value=make_mock_response("12345")),
     ):
         result = get_dependencies(
-            "/tmp/fake_repo", "dep1", "linux-x86_64", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added dep1", True
+            "fake_repo", "dep1", "linux-x86_64", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added dep1", True
         )
         assert result == {
             "Size (Bytes)": 12345,
@@ -204,7 +204,7 @@ def test_get_compressed_dependencies():
 @pytest.fixture
 def mock_timeline_gitrepo():
     mock_git_repo = MagicMock()
-    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.repo_dir = "fake_repo"
     mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
     mock_git_repo.get_creation_commit_module.return_value = "commit1"
     mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Initial commit", c)
@@ -215,7 +215,7 @@ def mock_timeline_gitrepo():
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
-        patch("os.walk", return_value=[("/tmp/fake_repo/int", [], ["file1.py"])]),
+        patch("os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
         patch("os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.group_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
@@ -232,7 +232,7 @@ def mock_timeline_gitrepo():
 @pytest.fixture
 def app():
     mock_app = MagicMock()
-    mock_app.repo.path = "/tmp/fake_repo"
+    mock_app.repo.path = "fake_repo"
     return mock_app
 
 
@@ -244,7 +244,7 @@ def test_timeline_integration_compressed(ddev, mock_timeline_gitrepo, app):
 @pytest.fixture
 def mock_timeline_dependencies():
     mock_git_repo = MagicMock()
-    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.repo_dir = "fake_repo"
     mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
     mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
 
@@ -295,7 +295,7 @@ def test_timeline_dependency_compressed(ddev, mock_timeline_dependencies, app):
 
 def test_timeline_invalid_platform(ddev):
     mock_git_repo = MagicMock()
-    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.repo_dir = "fake_repo"
     mock_git_repo.get_module_commits.return_value = ["commit1", "commit2"]
     mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
     mock_git_repo.__enter__.return_value = mock_git_repo
@@ -325,7 +325,7 @@ def test_timeline_invalid_platform(ddev):
 
 def test_timeline_no_changes_in_integration(ddev):
     mock_git_repo = MagicMock()
-    mock_git_repo.repo_dir = "/tmp/fake_repo"
+    mock_git_repo.repo_dir = "fake_repo"
     mock_git_repo.get_module_commits.return_value = [""]
 
     with (
@@ -342,7 +342,7 @@ def test_timeline_no_changes_in_integration(ddev):
 
 def test_timeline_integration_not_found(ddev):
     mock_repo = MagicMock()
-    mock_repo.repo_dir = "/fake"
+    mock_repo.repo_dir = "fake"
     mock_repo.get_module_commits.return_value = [""]
     mock_repo.get_creation_commit_module.return_value = "c1"
     mock_repo.checkout_commit.return_value = None
@@ -363,7 +363,7 @@ def test_timeline_integration_not_found(ddev):
 
 def test_timeline_dependency_missing_no_platform(ddev):
     mock_repo = MagicMock()
-    mock_repo.repo_dir = "/fake"
+    mock_repo.repo_dir = "fake"
     mock_repo.get_module_commits.return_value = ["c1"]
     mock_repo.get_creation_commit_module.return_value = "c1"
     mock_repo.checkout_commit.return_value = None
@@ -381,7 +381,7 @@ def test_timeline_dependency_missing_no_platform(ddev):
 
 def test_timeline_dependency_missing_for_platform(ddev, app):
     mock_repo = MagicMock()
-    mock_repo.repo_dir = "/fake"
+    mock_repo.repo_dir = "fake"
     mock_repo.get_module_commits.return_value = ["c1"]
     mock_repo.get_creation_commit_module.return_value = "c1"
     mock_repo.checkout_commit.return_value = None
@@ -413,7 +413,7 @@ def test_timeline_dependency_missing_for_platform(ddev, app):
 
 def test_timeline_dependency_no_changes(ddev, app):
     mock_repo = MagicMock()
-    mock_repo.repo_dir = "/fake"
+    mock_repo.repo_dir = "fake"
     mock_repo.get_module_commits.return_value = [""]
     mock_repo.get_creation_commit_module.return_value = "c1"
     mock_repo.checkout_commit.return_value = None
