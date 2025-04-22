@@ -31,7 +31,9 @@ class NfsStatCheck(AgentCheck):
                     '(through nfs-utils) or set the path to the installed version'
                 )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
-        self.disable_missing_mountpoints_warning = is_affirmative(self.instance.get('disable_missing_mountpoints_warning', False))
+        self.disable_missing_mountpoints_warning = is_affirmative(
+            self.instance.get('disable_missing_mountpoints_warning', False)
+        )
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
