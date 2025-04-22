@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.1 / 2025-04-09
+
+***Fixed***:
+
+* Properly support custom tags. ([#20022](https://github.com/DataDog/integrations-core/pull/20022))
+
 ## 3.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

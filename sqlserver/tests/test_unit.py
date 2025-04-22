@@ -14,6 +14,7 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+from datadog_checks.sqlserver.const import STATIC_INFO_INSTANCENAME, STATIC_INFO_SERVERNAME
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -884,3 +885,30 @@ def test_get_unixodbc_sysconfig():
         "embedded",
         "etc",
     ], "incorrect unix odbc config dir"
+
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:22', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+        ('$env-$server_name/$instance_name', 'prod,staging-server/instance', ['env:prod', 'env:staging']),
+    ],
+)
+def test_database_identifier(instance_docker, template, expected, tags):
+    """
+    Test functionality of calculating database_identifier
+    """
+    instance_docker['host'] = 'localhost,22'
+    instance_docker['database_identifier'] = {'template': template}
+    instance_docker['tags'] = tags
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.static_info_cache[STATIC_INFO_SERVERNAME] = 'server'
+    check.static_info_cache[STATIC_INFO_INSTANCENAME] = 'instance'
+    # Reset for recalculation with static info
+    check._database_identifier = None
+
+    assert check.database_identifier == expected

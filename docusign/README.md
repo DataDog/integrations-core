@@ -8,78 +8,49 @@ Docusign integration provides real-time insights into Docusign activities, such 
 
 ## Setup
 
-### Configuration
 
-#### Prerequisites
+### Prerequisites
 
-- Docusign Developer Account, Account Type, Docusign Account Name, UserID, Integration Key, RSA Private Key (Refer to the [steps](#set-up-your-account) below)
-- A Docusign account with a plan that includes Docusign Monitor
+- Docusign Developer Account
+- Docusign account with a plan that includes Docusign Monitor
 
-#### Set up your account
 
-For first-time setup:
+### Generate API credentials in Docusign
 
-1. Go to the [Developer Center][2] and select **Developer Account**.
-1. Choose **Create Account**. For first-time setup, the Account Type will be `Developer`.
-1. Navigate to the [Developer Admin Console][3].
-1. Under the **Account** section, click **Account Profile** .
-1. From the **Account Name** section, copy the Docusign account name.
-1. Under the **Integrations** section, select **Apps and Keys**.
-1. From the **My Account Information** section, copy the **User ID**.
-1. Click **Add App and Integration Key**.
-1. Provide an app name and create the app.
-1. Copy the generated **Integration Key**, under the General Info section.
-1. Scroll to the Service Integration section, and click on **Generate RSA**.
-1. Copy only the **RSA Private Key** to a safe location (it won't be displayed again).
-1. In the **Additional settings** section, under **Redirect URIs**, click "Add URI."
-1. Add the URI `http://localhost/`, and click **Save**.
+1. Log in to [Developer Admin Console][2].
+2. Get your **Account Name** from the **Account Profile** page.
+3. Access the **Apps and Keys** page under the **Integrations** section.
+4. Obtain the **User ID** from the **My Account Information** section.
+5. Click on **Add App and Integration Key** button.
+6. Provide an App Name and click **Create App**.
+7. Get your **Integration Key** from the General Info section.
+8. Click on **Generate RSA**, to get **RSA Private Key**.
+9. Click on **ADD URI**, set Redirect URI to `http://localhost/`.
+10. Click on **Save** button.
+11. Perform application consent by opening the accompanying Sample URL after replacing the placeholders 
+    - URL: `<BASE_URI>/oauth/auth?response_type=code&scope=signature impersonation organization_read&client_id=<YOUR_INTEGRATION_KEY>&redirect_uri=<YOUR_REDIRECT_URI>`
+        - `<BASE_URI>`: Use `https://account-d.docusign.com` for Developer or `https://account.docusign.com` for Production.
+        - `<YOUR_INTEGRATION_KEY>`: Replace with your Integration Key (Client ID) obtained previously.
+        - `<YOUR_REDIRECT_URI>`: Replace with your redirect URI, e.g., `http://localhost/`.
+    - Sign in to your account if prompted to
+    - Click on **Allow Access** 
+    - Note: _After selecting Accept, the browser will display a message saying that it can't load the page. You can safely ignore this page and close the tab._
+12. To test the integration with Developer account, select `Developer` option for the **Account Type** configuration parameter of the integration.
+13. Perform the [Go-Live][3] process for the App to access the [Production Account][4].
+14. Navigate to the Admin console and perform steps 2 to 10 and update the respective configuration parameters for the integration.
 
-For production account setup:
 
-1. Ensure you have completed the [go-live][4] steps.
-1. For the production account setup, the Account Type will be `Production`.
-1. Navigate to the [Admin Console][5].
-1. Under the **Account** section, click **Account Profile**.
-1. From the **Account Name** section, copy the Docusign account name.
-1. Under the **Integrations** section, select **Apps and Keys**.
-1. Select the app that has been duplicated from your developer account.
-1. Under the **General Info** section, find and copy the generated **Integration Key**.
-1. Scroll to the **Service Integration** section, and click **Generate RSA**.
-1. Copy only the **RSA Private Key** to a safe location (it won't be displayed again).
-1. In the **Additional settings** section, under **Redirect URIs**, click "Add URI."
-1. Add the URI `http://localhost/`, and click **Save**.
+### Connect your Docusign Account to Datadog
 
-#### Obtain JWT consent
-
-1. Construct your consent URI::
-   - **Syntax:**`<BASE_URI>/oauth/auth?response_type=code&scope=signature impersonation organization_read&client_id=<YOUR_INTEGRATION_KEY>&redirect_uri=<YOUR_REDIRECT_URI>`
-     - Replace `<BASE_URI>`with:
-       1. `https://account-d.docusign.com` for a developer account.
-       2. `https://account.docusign.com` for production account.
-     - Replace `<YOUR_INTEGRATION_KEY>` with your Integration Key (Client ID).
-     - Replace `<YOUR_REDIRECT_URI>` with your redirect URI, such as `http://localhost/`.
-2. Open the constructed URI in an embedded browser.
-3. The user will be prompted to log in to their Docusign account (if not already logged in) and grant consent for your application to impersonate them with the specified scopes.
-4. After consent is granted, Docusign will redirect the user's browser to your specified redirect URI with extra information in the URL, indicating successful consent without needing to use the extra parameters directly.
- 
-
-**Note:**
-- For a localhost URI, the redirect will occur on the same page.
-- The impersonated user must be a Docusign administrator or have the Security Reports Administrator permissions profile. For information about permission profiles, see [Docusign Administrator Permission Profiles][6] in the Organization Administrators topic.
-- To ingest data from a [production account][7], complete the [Docusign go-live process][4]. After the go-live process, follow the [account setup steps](#set-up-your-account) to generate configuration information for your production account.
-
-### Configure the Docusign Datadog integration 
-
-1. Navigate to `Docusign`.
-2. Add your Docusign credentials.
-
-| Docusign Parameters   | Description |
-| --------------------- |------------ |
-| Account Type          | Dropdown to select between different types of Docusign accounts (for example, developer or production) |
-| Docusign Account Name | The name associated with the Docusign account (case sensitive) |
-| User Id               | A GUID value that uniquely identifies a Docusign user |
-| Integration Key       | A unique GUID that identifies a Docusign integration |
-| RSA Private Key       | A cryptographic key for signing JWT tokens for secure API authentication |
+1. Add your Account Type, Docusign Account Name, User Id, Integration Key, and RSA Private Key
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Account Type|Dropdown to select the type of Docusign account (e.g., Developer or Production).|
+    |Docusign Account Name|The name associated with the Docusign account (case sensitive).|
+    |User ID |A GUID value that uniquely identifies a Docusign user.|
+    |Integration Key|A unique GUID that identifies a Docusign integration.|
+    |RSA Private Key|A cryptographic key for signing JWT tokens for secure API authentication.|
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
@@ -97,13 +68,10 @@ The Docusign integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][8].
+For further assistance, contact [Datadog Support][5].
 
 [1]: https://www.docusign.com/
-[2]: https://developers.docusign.com/
-[3]: https://apps-d.docusign.com/admin/admin-dashboard
-[4]: https://developers.docusign.com/platform/go-live/
-[5]: https://apps.docusign.com/admin/admin-dashboard
-[6]: https://support.docusign.com/s/document-item?bundleId=rrf1583359212854&topicId=god1583359152535.html
-[7]: https://account.docusign.com/
-[8]: https://docs.datadoghq.com/help/
+[2]: https://apps-d.docusign.com/admin/admin-dashboard
+[3]: https://developers.docusign.com/platform/go-live/
+[4]: https://apps.docusign.com/admin/admin-dashboard
+[5]: https://docs.datadoghq.com/help/
