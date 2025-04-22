@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 15.3.0 / 2025-04-22
+
+***Added***:
+
+* Print permission mySQL warning ([#20090](https://github.com/DataDog/integrations-core/pull/20090))
+
+***Fixed***:
+
+* Include database_instance for MySQL schema data ([#20089](https://github.com/DataDog/integrations-core/pull/20089))
+
 ## 15.2.0 / 2025-04-22
 
 ***Added***:
