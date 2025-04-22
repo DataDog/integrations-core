@@ -3,6 +3,8 @@
 ## Overview
 Use the CrewAI integration to monitor, troubleshoot, and evaluate your applications based on [CrewAI][1]'s framework.
 
+**Note**: Requires Python.
+
 ## Setup
 
 #### Installation
