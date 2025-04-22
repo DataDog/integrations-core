@@ -37,15 +37,15 @@ To configure this check for an Agent running on a host:
      #
      - url: http://localhost:9200
 
-       ## @param username - string - optional
-       ## The username to authenticate with.
-       #
-       # username: elastic
+      ## @param username - string - optional
+      ## The username to use if services are behind basic or digest auth.
+      #
+      # username: <USERNAME>
 
-       ## @param password - string - optional
-       ## The password to authenticate with.
-       #
-       # password: changeme
+      ## @param password - string - optional
+      ## The password to use if services are behind basic or NTLM auth.
+      #
+      # password: <PASSWORD>
    ```
 
     **Notes**:
