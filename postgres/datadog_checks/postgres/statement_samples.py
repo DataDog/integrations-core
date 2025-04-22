@@ -636,20 +636,14 @@ class PostgresStatementSamples(DBMAsyncJob):
         match = re.match(
             r"""
                 (?: # match leading SET commands
-                  \s*SET\s+
-                (?:SESSION\s+|LOCAL\s+)?
-                (?: # two forms: TIME ZONE or TO/=
-                    TIME\s+ZONE\s+ |
-                    [\w\.]+\b\s*
-                    (?:TO\b|=)\s*
-                )
-                (?:
-                    [^';]* | # integer literals, bare values
-                    (?:'[^']*?')* # single-quoted strings
-                )+
-                ;
-                )*
-                \s*(.+)
+                    \s*SET\b
+                    (?:
+                        [^';]*? | # keywords, integer literals, etc.
+                        (?:'[^']*?')* # single-quoted strings
+                    )+
+                    ;
+                )+?
+                \s*(.+) # actual non-SET cmds
             """,
             obfuscated_statement,
             flags=(re.I | re.X),
