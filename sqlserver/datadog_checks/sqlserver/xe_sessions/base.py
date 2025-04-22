@@ -398,12 +398,21 @@ class XESessionBase(DBMAsyncJob):
             self._log.debug(f"No events processed from {self.session_name} session")
             return
 
-        # Detect timestamp gap between polls
+        # Detect timestamp gap between polls and log session type and actual gap
         if events and 'timestamp' in events[0] and self._last_event_timestamp:
             current_first_timestamp = events[0]['timestamp']
+            # Calculate actual gap in seconds
+            try:
+                prev_dt = datetime.datetime.fromisoformat(self._last_event_timestamp.replace('Z', '+00:00'))
+                curr_dt = datetime.datetime.fromisoformat(current_first_timestamp.replace('Z', '+00:00'))
+                gap_seconds = (curr_dt - prev_dt).total_seconds()
+            except Exception:
+                gap_seconds = None
+            # Log session name, timestamps, and gap
             self._log.debug(
-                f"Timestamp gap: last_poll_last_timestamp={self._last_event_timestamp} "
-                f"to current_poll_first_timestamp={current_first_timestamp}"
+                f"[{self.session_name}] Timestamp gap: last={self._last_event_timestamp} "
+                f"first={current_first_timestamp}"
+                + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
             )
 
         # Update timestamp tracking with the last event (events are ordered by timestamp)
