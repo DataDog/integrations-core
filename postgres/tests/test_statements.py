@@ -565,26 +565,6 @@ def dbm_instance_replica2(pg_instance):
 
 
 @pytest.mark.parametrize(
-    "query,expected_trimmed_query",
-    [
-        ("SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1"),
-        ("SELECT * FROM pg_settings; DELETE FROM pg_settings;", "SELECT * FROM pg_settings; DELETE FROM pg_settings;"),
-        ("SET search_path TO 'my_schema', public; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
-        ("SET TIME ZONE 'Europe/Rome'; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
-        (
-            "SET LOCAL request_id = 1234; SET LOCAL hostname TO 'Bob''s Laptop'; SELECT * FROM pg_settings",
-            "SELECT * FROM pg_settings",
-        ),
-    ],
-)
-def test_trim_set_stmts(integration_check, dbm_instance, query, expected_trimmed_query):
-    check = integration_check(dbm_instance)
-    check._connect()
-    trimmed_query = check.statement_samples._trim_leading_set_stmts(query)
-    assert trimmed_query == expected_trimmed_query
-
-
-@pytest.mark.parametrize(
     "dbname,expected_db_explain_error",
     [
         ("datadog_test", None),

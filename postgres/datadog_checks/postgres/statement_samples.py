@@ -32,7 +32,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, DBExplainError, warning_with_tags
+from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -628,32 +628,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         self._check.database_monitoring_query_sample(json.dumps(raw_query_event, default=default_json_event_encoding))
 
-    # Expects one or more SQL statements in a string. If the string
-    # begins with any SET statements, they are removed and the rest
-    # of the string is returned. Otherwise, the string is returned
-    # as it was received.
-    def _trim_leading_set_stmts(self, obfuscated_statement):
-        match = re.match(
-            r"""
-                (?: # match leading SET commands
-                    \s*SET\b
-                    (?:
-                        [^';]*? | # keywords, integer literals, etc.
-                        (?:'[^']*?')* # single-quoted strings
-                    )+
-                    ;
-                )+?
-                \s*(.+) # actual non-SET cmds
-            """,
-            obfuscated_statement,
-            flags=(re.I | re.X),
-        )
-
-        if match:
-            return match.group(1)
-        else:
-            return obfuscated_statement
-
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
             return False
@@ -774,7 +748,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
-        obfuscated_statement = self._trim_leading_set_stmts(obfuscated_statement)
+        obfuscated_statement = trim_leading_set_stmts(obfuscated_statement)
 
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):

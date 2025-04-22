@@ -201,3 +201,27 @@ def test_database_identifier(pg_instance, template, expected, tags):
     pg_instance['tags'] = tags
     check = PostgreSql('postgres', {}, [pg_instance])
     assert check.database_identifier == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query,expected_trimmed_query",
+    [
+        ("SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1"),
+        ("SELECT * FROM pg_settings; DELETE FROM pg_settings;", "SELECT * FROM pg_settings; DELETE FROM pg_settings;"),
+        ("SET search_path TO 'my_schema', public; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
+        ("SET TIME ZONE 'Europe/Rome'; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
+        (
+            "SET LOCAL request_id = 1234; SET LOCAL hostname TO 'Bob''s Laptop'; SELECT * FROM pg_settings",
+            "SELECT * FROM pg_settings",
+        ),
+        ("SET LONG;" * 1024 + "SELECT *;", "SELECT *;"),
+        ("SET " + "'quotable'" * 1024 + "; SELECT *;", "SELECT *;"),
+        ("SET 'l" + "o" * 1024 + "ng'; SELECT *;", "SELECT *;"),
+        ("this isn't SQL", "this isn't SQL"),
+        ("", ""),
+    ],
+)
+def test_trim_set_stmts(query, expected_trimmed_query):
+    trimmed_query = util.trim_leading_set_stmts(query)
+    assert trimmed_query == expected_trimmed_query
