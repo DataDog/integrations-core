@@ -223,7 +223,8 @@ class XESessionBase(DBMAsyncJob):
                     del elem.getparent()[0]
 
                 if len(filtered_events) >= self.max_events:
-                    break
+                    self._log.debug(f"Filtered {len(filtered_events)} events from ring buffer")
+                    ## break
 
             return filtered_events
 
