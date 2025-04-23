@@ -94,7 +94,7 @@ See [service_checks.json][6] for a list of service checks provided by this integ
 For further assistance, contact [Datadog support][4].
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.datadoghq.com/help/

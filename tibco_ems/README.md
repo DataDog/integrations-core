@@ -107,7 +107,7 @@ Need help? Contact [Datadog support][8].
 
 
 [1]: https://docs.tibco.com/products/tibco-enterprise-message-service
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/tibco_ems/datadog_checks/tibco_ems/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

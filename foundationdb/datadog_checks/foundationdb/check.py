@@ -93,6 +93,19 @@ class FoundationdbCheck(AgentCheck):
             return
         tags = self._tags + ["fdb_process:" + process["address"]]
 
+        if "class_type" in process:
+            tags.append("fdb_process_class:" + process["class_type"])
+
+        if "roles" in process:
+            # First, report role-specific metrics before we add role tags to the list…
+            for role in process["roles"]:
+                self.report_role(role, tags)
+
+            # …then add role tags so we can associate process metrics with roles.
+            for role in process["roles"]:
+                if "role" in role:
+                    tags.append("fdb_role:" + role["role"])
+
         if "cpu" in process:
             self.maybe_gauge("process.cpu.usage_cores", process["cpu"], "usage_cores", tags)
         if "disk" in process:
@@ -121,10 +134,6 @@ class FoundationdbCheck(AgentCheck):
             self.maybe_hz_counter("process.network.megabits_received", network, "megabits_received", tags)
             self.maybe_hz_counter("process.network.megabits_sent", network, "megabits_sent", tags)
             self.maybe_hz_counter("process.network.tls_policy_failures", network, "tls_policy_failures", tags)
-
-        if "roles" in process:
-            for role in process["roles"]:
-                self.report_role(role, tags)
 
     def report_role(self, role, process_tags):
         if "role" not in role:
