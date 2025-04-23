@@ -535,11 +535,6 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the activity collection interval (in seconds).
-        #
-        # collection_interval: 10
-
         ## @param collect_blocking_queries - boolean - optional - default: false
         ## Enable collection of blocking queries.
         #
