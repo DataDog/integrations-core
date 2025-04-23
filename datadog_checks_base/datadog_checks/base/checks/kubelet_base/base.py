@@ -4,7 +4,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 
-from ...utils.date import UTC, parse_rfc3339
+from ...utils.date import parse_rfc3339
 from .. import AgentCheck
 
 try:

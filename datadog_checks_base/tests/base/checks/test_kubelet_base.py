@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 import mock
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
-from datadog_checks.base.utils.date import UTC
 from datadog_checks.dev import get_here
 
 HERE = get_here()

@@ -6,7 +6,7 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
-from dateutil import parser, tz
+from dateutil import parser
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.serialization import json

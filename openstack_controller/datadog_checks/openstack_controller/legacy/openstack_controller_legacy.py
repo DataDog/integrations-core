@@ -6,7 +6,7 @@
 import copy
 import re
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import requests
 from openstack.config.loader import OpenStackConfig
