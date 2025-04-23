@@ -267,6 +267,34 @@ class XESessionBase(DBMAsyncJob):
             return text_elem.text.strip()
         return default
 
+    def _extract_duration(self, data, event_data):
+        """Extract duration value and convert to milliseconds"""
+        duration_value = self._extract_int_value(data)
+        if duration_value is not None:
+            event_data["duration_ms"] = duration_value / 1000
+        else:
+            event_data["duration_ms"] = None
+
+    def _extract_numeric_fields(self, data, event_data, field_name, numeric_fields):
+        """Extract numeric field if it's in the numeric_fields list"""
+        if field_name in numeric_fields:
+            event_data[field_name] = self._extract_int_value(data)
+
+    def _extract_string_fields(self, data, event_data, field_name, string_fields):
+        """Extract string field if it's in the string_fields list"""
+        if field_name in string_fields:
+            event_data[field_name] = self._extract_value(data)
+
+    def _extract_text_fields(self, data, event_data, field_name, text_fields):
+        """Extract field with text representation"""
+        if field_name in text_fields:
+            # Try to get text representation first
+            text_value = self._extract_text_representation(data)
+            if text_value is not None:
+                event_data[field_name] = text_value
+            else:
+                event_data[field_name] = self._extract_value(data)
+
     def _process_events(self, xml_data):
         """Process the events from the XML data - override in subclasses"""
         raise NotImplementedError

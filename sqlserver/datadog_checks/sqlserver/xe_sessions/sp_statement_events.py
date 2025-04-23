@@ -31,48 +31,32 @@ class SpStatementEventsHandler(XESessionBase):
                 timestamp = event.get('timestamp')
                 event_data = {"timestamp": timestamp}
 
+                # Define field groups for SP statement events
+                numeric_fields = [
+                    'source_database_id', 'object_id', 'cpu_time',
+                    'page_server_reads', 'physical_reads', 'logical_reads',
+                    'writes', 'spills', 'row_count', 'last_row_count',
+                    'nest_level', 'line_number', 'offset', 'offset_end'
+                ]
+                string_fields = ['object_name', 'statement']
+                text_fields = ['object_type']
+
                 # Process data elements
                 for data in event.findall('./data'):
                     data_name = data.get('name')
                     if not data_name:
                         continue
 
-                    # Handle special case for duration (conversion to milliseconds)
+                    # Handle special case for duration
                     if data_name == 'duration':
-                        duration_value = self._extract_int_value(data)
-                        if duration_value is not None:
-                            event_data["duration_ms"] = duration_value / 1000
-                        else:
-                            event_data["duration_ms"] = None
-                    # Handle statement and object_name fields
-                    elif data_name in ['statement', 'object_name']:
-                        event_data[data_name] = self._extract_value(data)
-                    # Handle object_type with text representation
-                    elif data_name == 'object_type':
-                        # Try to get text representation first
-                        text_value = self._extract_text_representation(data)
-                        if text_value is not None:
-                            event_data[data_name] = text_value
-                        else:
-                            event_data[data_name] = self._extract_value(data)
-                    # Handle numeric fields
-                    elif data_name in [
-                        'source_database_id',
-                        'object_id',
-                        'cpu_time',
-                        'page_server_reads',
-                        'physical_reads',
-                        'logical_reads',
-                        'writes',
-                        'spills',
-                        'row_count',
-                        'last_row_count',
-                        'nest_level',
-                        'line_number',
-                        'offset',
-                        'offset_end',
-                    ]:
-                        event_data[data_name] = self._extract_int_value(data)
+                        self._extract_duration(data, event_data)
+                    # Handle field based on type
+                    elif data_name in numeric_fields:
+                        self._extract_numeric_fields(data, event_data, data_name, numeric_fields)
+                    elif data_name in string_fields:
+                        self._extract_string_fields(data, event_data, data_name, string_fields)
+                    elif data_name in text_fields:
+                        self._extract_text_fields(data, event_data, data_name, text_fields)
                     # Handle all other fields
                     else:
                         event_data[data_name] = self._extract_value(data)

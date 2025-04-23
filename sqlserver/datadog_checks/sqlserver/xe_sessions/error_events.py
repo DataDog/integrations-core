@@ -65,21 +65,29 @@ class ErrorEventsHandler(XESessionBase):
 
     def _process_error_reported_event(self, event, event_data):
         """Process error_reported event"""
+        # Define field groups for error_reported events
+        numeric_fields = ['error_number', 'severity', 'state', 'category']
+        string_fields = ['message', 'server_instance_name', 'client_hostname',
+                         'username', 'database_name', 'client_app_name', 'sql_text']
+
         # Extract data elements
         for data in event.findall('./data'):
-            name = data.get('name')
-            if name:
-                value = self._extract_value(data)
-                if value is not None:
-                    event_data[name] = value
+            data_name = data.get('name')
+            if not data_name:
+                continue
+
+            if data_name in numeric_fields:
+                self._extract_numeric_fields(data, event_data, data_name, numeric_fields)
+            elif data_name in string_fields:
+                self._extract_string_fields(data, event_data, data_name, string_fields)
+            else:
+                event_data[data_name] = self._extract_value(data)
 
         # Extract action elements
         for action in event.findall('./action'):
-            name = action.get('name')
-            if name:
-                value = self._extract_value(action)
-                if value is not None:
-                    event_data[name] = value
+            action_name = action.get('name')
+            if action_name:
+                event_data[action_name] = self._extract_value(action)
 
     def _process_generic_error_event(self, event, event_data):
         """Process other error event types"""

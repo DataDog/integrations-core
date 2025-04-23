@@ -31,37 +31,31 @@ class SqlStatementEventsHandler(XESessionBase):
                 timestamp = event.get('timestamp')
                 event_data = {"timestamp": timestamp}
 
+                # Define field groups for SQL statement events
+                numeric_fields = [
+                    'cpu_time', 'page_server_reads', 'physical_reads',
+                    'logical_reads', 'writes', 'spills', 'row_count',
+                    'last_row_count', 'line_number', 'offset', 'offset_end'
+                ]
+                string_fields = ['statement']
+                text_fields = []
+
                 # Process data elements
                 for data in event.findall('./data'):
                     data_name = data.get('name')
                     if not data_name:
                         continue
 
-                    # Handle special case for duration (conversion to milliseconds)
+                    # Handle special case for duration
                     if data_name == 'duration':
-                        duration_value = self._extract_int_value(data)
-                        if duration_value is not None:
-                            event_data["duration_ms"] = duration_value / 1000
-                        else:
-                            event_data["duration_ms"] = None
-                    # Handle statement field
-                    elif data_name == 'statement':
-                        event_data["statement"] = self._extract_value(data)
-                    # Handle numeric fields
-                    elif data_name in [
-                        'cpu_time',
-                        'page_server_reads',
-                        'physical_reads',
-                        'logical_reads',
-                        'writes',
-                        'spills',
-                        'row_count',
-                        'last_row_count',
-                        'line_number',
-                        'offset',
-                        'offset_end',
-                    ]:
-                        event_data[data_name] = self._extract_int_value(data)
+                        self._extract_duration(data, event_data)
+                    # Handle field based on type
+                    elif data_name in numeric_fields:
+                        self._extract_numeric_fields(data, event_data, data_name, numeric_fields)
+                    elif data_name in string_fields:
+                        self._extract_string_fields(data, event_data, data_name, string_fields)
+                    elif data_name in text_fields:
+                        self._extract_text_fields(data, event_data, data_name, text_fields)
                     # Handle binary data fields
                     elif data_name == 'parameterized_plan_handle':
                         # Just note its presence/absence for now
