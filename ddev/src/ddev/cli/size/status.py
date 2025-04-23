@@ -67,6 +67,9 @@ def status(
             platforms = valid_platforms if platform is None else [platform]
             versions = valid_versions if version is None else [version]
             for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
+                if save_to_png_path:
+                    base, ext = os.path.splitext(save_to_png_path)
+                    save_to_png_path = f"{base}_{plat}_{ver}{ext}"
                 status_mode(app, repo_path, plat, ver, compressed, csv, i, save_to_png_path, show_gui)
         else:
             status_mode(app, repo_path, platform, version, compressed, csv, None, save_to_png_path, show_gui)

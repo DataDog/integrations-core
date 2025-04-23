@@ -84,6 +84,9 @@ def diff(
                     progress.remove_task(task)
 
                     for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
+                        if save_to_png_path:
+                            base, ext = os.path.splitext(save_to_png_path)
+                            save_to_png_path = f"{base}_{plat}_{ver}{ext}"
                         diff_mode(
                             app,
                             gitRepo,
