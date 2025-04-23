@@ -748,14 +748,17 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
-        obfuscated_statement = trim_leading_set_stmts(obfuscated_statement)
-
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
-        if not self._can_explain_statement(obfuscated_statement):
+
+        # remove leading SET statements from our SQL
+        trimmed_stmt = trim_leading_set_stmts(statement)
+
+        if not self._can_explain_statement(trimmed_stmt):
             return None, DBExplainError.no_plans_possible, None
 
         track_activity_query_size = self._get_track_activity_query_size()
 
+        # truncation check is on the original query, not the trimmed version
         if (
             self._get_truncation_state(track_activity_query_size, statement, query_signature)
             == StatementTruncationState.truncated
@@ -778,10 +781,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             # if the statement is a parameterized query, then we can't explain it directly
             # we should directly jump into self._explain_parameterized_queries.explain_statement
             # instead of trying to explain it then failing
-            if self._explain_parameterized_queries._is_parameterized_query(statement):
+            if self._explain_parameterized_queries._is_parameterized_query(trimmed_stmt):
                 if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                     return self._explain_parameterized_queries.explain_statement(
-                        dbname, statement, obfuscated_statement
+                        dbname, trimmed_stmt, obfuscated_statement
                     )
                 e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
@@ -793,7 +796,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._explain_errors_cache[query_signature] = error_response
                 self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
                 return error_response
-            return self._run_explain(dbname, statement, obfuscated_statement), None, None
+            return self._run_explain(dbname, trimmed_stmt, obfuscated_statement), None, None
         except psycopg2.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
