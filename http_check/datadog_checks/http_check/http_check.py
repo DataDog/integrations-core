@@ -7,7 +7,7 @@ import copy
 import re
 import socket
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import requests
@@ -358,7 +358,7 @@ class HTTPCheck(AgentCheck):
             self.log.debug('Unable to parse the certificate to get expiration: %s', e)
             return AgentCheck.UNKNOWN, None, None, msg
 
-        time_left = exp_date - datetime.utcnow()
+        time_left = exp_date - datetime.now(timezone.utc)
         days_left = time_left.days
         seconds_left = time_left.total_seconds()
 

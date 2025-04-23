@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import socket
 import ssl
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import service_identity
@@ -187,7 +187,7 @@ class TLSCheck(AgentCheck):
             self.count('tls.issued_seconds', issued_seconds, tags=self._tags)
 
         self.log.debug('Checking age of certificate')
-        delta = cert.not_valid_after_utc - datetime.utcnow()
+        delta = cert.not_valid_after_utc - datetime.now(timezone.utc)
         seconds_left = delta.total_seconds()
         days_left = seconds_to_days(seconds_left)
 

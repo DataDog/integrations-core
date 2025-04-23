@@ -4,7 +4,7 @@
 
 import time
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from dateutil import parser, tz
 
@@ -39,7 +39,7 @@ class TwistlockCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TwistlockCheck, self).__init__(name, init_config, instances)
 
-        self.last_run = datetime.utcnow()
+        self.last_run = datetime.now(timezone.utc)
 
         self._config = None
         if instances:
@@ -57,7 +57,7 @@ class TwistlockCheck(AgentCheck):
 
         # alert if a scan hasn't been able to run in a few hours and then in a day
         # only calculate this once per check run
-        self.current_date = datetime.now(tz.tzutc())
+        self.current_date = datetime.now(timezone.utc)
         self.warning_date = self.current_date - timedelta(hours=7)
         self.critical_date = self.current_date - timedelta(days=1)
 
@@ -69,7 +69,7 @@ class TwistlockCheck(AgentCheck):
 
         self.report_vulnerabilities()
 
-        self.last_run = datetime.utcnow()
+        self.last_run = datetime.now(timezone.utc)
 
     def report_license_expiration(self):
         service_check_name = "{}.license_ok".format(self.NAMESPACE)
@@ -84,7 +84,7 @@ class TwistlockCheck(AgentCheck):
 
         # alert if your license will expire in 30 days and then in a week
         expiration_date = parser.isoparse(license.get("expiration_date"))
-        current_date = datetime.now(tz.tzutc())
+        current_date = datetime.now(timezone.utc)
         warning_date = current_date + timedelta(days=30)
         critical_date = current_date + timedelta(days=7)
 
