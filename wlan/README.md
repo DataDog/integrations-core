@@ -34,6 +34,16 @@ See [metadata.csv][14] for a list of metrics provided by this integration.
 
 wlan does not include any events.
 
+## Terminology
+
+### Roaming
+
+`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. `Roaming` event is detected when the *BSSID* of the connected Router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the Router or AP is not broadcasted Roaming detection is not possible. When a `Roaming` event is detected then `wlan.roaming_events` metric is incremented. Switch to router with a different *SSID* is not considered `Roaming`.
+
+### Channel Swap
+
+`Channel Swap` refers to the process of changing the Wi-Fi channel a router or Access Point is using to broadcast its signal. This is done to improve signal strength, reduce interference, or optimize performance, especially in areas with many competing Wi-Fi networks. `Channel Swap` event is detected when the *BSSID* of the connected Router or AP is the same but its channel had been changed. When the *BSSID* of the connected Router or AP had been changed (which makes it `Roaming` event if the Router or AP has the same *SSID*) it will not be considered as `Channel Swap` event even if the channel has been changed.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][15].
