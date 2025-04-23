@@ -1,6 +1,6 @@
 {
     "title": "Check Point Harmony Email & Collaboration - Email Application Insights",
-    "description": "This dashboard provides a comprehensive view of email activity, including event trends, incoming and outgoing email volumes, and security insights. It helps monitor sender behaviour, attachment types, phishing reports, and email authentication results for enhanced email security.",
+    "description": "This dashboard provides a comprehensive view of email activity, including event trends, incoming and outgoing email volumes, and security insights. It helps monitor sender behavior, attachment types, phishing reports, and email authentication results for enhanced email security.",
     "widgets": [
         {
             "id": 5183346169083596,
@@ -25,7 +25,7 @@
             "id": 6596204143857430,
             "definition": {
                 "type": "note",
-                "content": "[Check Point Harmony Email & Collaboration](https://www.checkpoint.com/harmony/email-security/) is a security solution that protects cloud-based email and collaboration platforms from cyber threats like malware, phishing, and data loss.\n\n**Email Application Insights** dashboard provides a comprehensive view of email activity, including event trends, incoming and outgoing email volumes, and security insights. It helps monitor sender behaviour, attachment types, phishing reports, and email authentication results for enhanced email security.\n\nFor more information, see the [Check Point Harmony Email & Collaboration Documentation](https://docs.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "[Check Point Harmony Email & Collaboration](https://www.checkpoint.com/harmony/email-security/) is a security solution that protects cloud-based email and collaboration platforms from cyber threats like malware, phishing, and data loss.\n\n**Email Application Insights** dashboard provides a comprehensive view of email activity, including event trends, incoming and outgoing email volumes, and security insights. It helps monitor sender behavior, attachment types, phishing reports, and email authentication results for enhanced email security.\n\nFor more information, see the [Check Point Harmony Email & Collaboration Documentation](https://docs.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "pink",
                 "font_size": "14",
                 "text_align": "left",

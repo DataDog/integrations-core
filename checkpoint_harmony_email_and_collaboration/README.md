@@ -6,7 +6,7 @@
 
 This integration provides enrichment and visualization for Phishing, Malware, Malicious URL, DLP, Anomaly, Shadow IT, and Spam event types.
 
-Get detailed visibility into these events with out-of-the-box dashboards, and strengthen security with prebuilt Cloud SIEM detection rules for proactive threat monitoring and response.
+Get detailed visibility into these events with out-of-the-box dashboards, and strengthen security with pre-built Cloud SIEM detection rules for proactive threat monitoring and response.
 
 ## Setup
 
@@ -20,15 +20,15 @@ Configure the Datadog endpoint to forward Check Point Harmony Email & Collaborat
 
 1. Copy the generated URL inside the **Configuration** tab on the Datadog [Check Point Harmony Email & Collaboration integration tile][4].
 2. Sign in to [Check Point Infinity Portal][5].
-3. If you are not already in the **Harmony Email & Collaboration** Administrator Portal
+3. If you are not already in the **Harmony Email & Collaboration** Administrator Portal:
    - Click the **Menu** icon in the top-left corner.
    - In the **Harmony** section, click **Email & Collaboration**.
 4. In the left-side menu, navigate to **Security Settings** > **Security Engines**.
 5. Locate the **SIEM Integration** section and click **Configure**.
 6. In the **Configure SIEM Integration** section, provide the following details:
-   - **Transport**: Choose `HTTP Collector` from the dropdown.
-   - **HTTP Collector URL**: Enter the endpoint URL that you generated in step 1 of [Webhook configuration][6].
-   - **Format**: Choose `JSON` from the dropdown.
+   - **Transport**: Choose **HTTP Collector** from the dropdown.
+   - **HTTP Collector URL**: Enter the endpoint URL that you generated in step 1.
+   - **Format**: Choose **JSON** from the dropdown.
 7. Click **Save**.
 
 ## Data Collected
@@ -58,4 +58,3 @@ Need help? Contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://app.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration
 [5]: https://portal.checkpoint.com/
-[6]: https://docs.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration/#webhook-configuration

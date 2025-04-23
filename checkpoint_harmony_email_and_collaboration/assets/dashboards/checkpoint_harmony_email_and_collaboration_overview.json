@@ -1126,7 +1126,7 @@
                         "id": 1802776679974242,
                         "definition": {
                             "type": "note",
-                            "content": "\nDatadog Cloud SIEM analyzes and correlates Check Point Harmony Email & Collaboration Security Events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates Check Point Harmony Email & Collaboration Security Events to detect threats to your environment in real time. If you don't see signals, please make sure you've enabled [Datadog Cloud SIEM](/security). ",
                             "background_color": "vivid_pink",
                             "font_size": "14",
                             "text_align": "center",
