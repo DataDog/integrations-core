@@ -24,12 +24,15 @@ class ErrorEventsHandler(XESessionBase):
             return []
 
         events = []
+        self._last_processed_event_type = None
 
         for event in root.findall('./event')[: self.max_events]:
             try:
                 # Extract basic info
                 timestamp = event.get('timestamp')
                 event_name = event.get('name', '')
+                # Store the event type for _get_important_fields
+                self._last_processed_event_type = event_name
 
                 # Initialize event data
                 event_data = {"timestamp": timestamp, "name": event_name}
@@ -39,6 +42,8 @@ class ErrorEventsHandler(XESessionBase):
                     self._process_deadlock_event(event, event_data)
                 elif event_name == 'error_reported':
                     self._process_error_reported_event(event, event_data)
+                elif event_name == 'attention':
+                    self._process_attention_event(event, event_data)
                 else:
                     # Generic processing for other error events
                     self._process_generic_error_event(event, event_data)
@@ -89,6 +94,38 @@ class ErrorEventsHandler(XESessionBase):
             if action_name:
                 event_data[action_name] = self._extract_value(action)
 
+    def _process_attention_event(self, event, event_data):
+        """Process attention event"""
+        # Define field groups for attention events
+        numeric_fields = ['request_id']
+        string_fields = ['server_instance_name', 'client_hostname', 'username', 
+                        'database_name', 'client_app_name', 'sql_text']
+        # Process duration specifically to convert to milliseconds
+        for data in event.findall('./data'):
+            data_name = data.get('name')
+            if not data_name:
+                continue
+            if data_name == 'duration':
+                self._extract_duration(data, event_data)
+            elif data_name in numeric_fields:
+                self._extract_numeric_fields(data, event_data, data_name, numeric_fields)
+            else:
+                event_data[data_name] = self._extract_value(data)
+        # Extract action elements
+        for action in event.findall('./action'):
+            action_name = action.get('name')
+            if not action_name:
+                continue
+            if action_name == 'session_id' or action_name == 'request_id':
+                # These are numeric values in the actions
+                value = self._extract_int_value(action)
+                if value is not None:
+                    event_data[action_name] = value
+            elif action_name in string_fields:
+                event_data[action_name] = self._extract_value(action)
+            else:
+                event_data[action_name] = self._extract_value(action)
+
     def _process_generic_error_event(self, event, event_data):
         """Process other error event types"""
         # Extract action data
@@ -109,6 +146,8 @@ class ErrorEventsHandler(XESessionBase):
 
         if event_name == 'error_reported':
             return self._normalize_error_reported_event(event)
+        elif event_name == 'attention':
+            return self._normalize_attention_event(event)
 
         # Default normalization for other error events
         return event
@@ -133,6 +172,30 @@ class ErrorEventsHandler(XESessionBase):
 
         return self._normalize_event(event, numeric_fields, string_fields)
 
+    def _normalize_attention_event(self, event):
+        """Normalize attention event data"""
+        # Define field types for normalization
+        numeric_fields = {
+            'duration_ms': 0.0,  # Float for duration in ms
+            'request_id': 0,
+            'session_id': 0
+        }
+
+        string_fields = [
+            'server_instance_name', 'client_hostname', 'username',
+            'database_name', 'client_app_name', 'sql_text'
+        ]
+
+        return self._normalize_event(event, numeric_fields, string_fields)
+
     def _get_important_fields(self):
         """Define important fields for logging based on event type"""
-        return ['timestamp', 'name', 'error_number', 'severity', 'message', 'sql_text']
+        # Common important fields for all event types
+        important_fields = ['timestamp', 'name']
+        # Add event-type specific fields
+        if hasattr(self, '_last_processed_event_type'):
+            if self._last_processed_event_type == 'error_reported':
+                important_fields.extend(['error_number', 'severity', 'message', 'sql_text'])
+            elif self._last_processed_event_type == 'attention':
+                important_fields.extend(['duration_ms', 'session_id', 'sql_text'])
+        return important_fields
