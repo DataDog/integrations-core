@@ -1252,14 +1252,22 @@ def test_integration_custom_metrics_collection_interval(
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags, count=0)
 
 
-def test_integration_skip_free_storage_metrics(instance_integration_autodiscovery, aggregator, check, dd_run_check):
-    instance_integration_autodiscovery['free_storage_metrics'] = False
-    mongo_check = check(instance_integration_autodiscovery)
+def test_integration_skip_free_storage_metrics(instance_integration, aggregator, check, dd_run_check):
+    instance_integration['free_storage_metrics'] = False
+    mongo_check = check(instance_integration)
 
     with mock_pymongo("replica-primary"):
         dd_run_check(mongo_check)
 
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
+    ]
     metrics_categories = [
         'dbstats-non-free-storage',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
