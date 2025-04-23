@@ -2,6 +2,56 @@
 
 <!-- towncrier release notes start -->
 
+## 22.11.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+* Added query call count `calls` to StatementMetrics execution indicators to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20096](https://github.com/DataDog/integrations-core/pull/20096))
+
+## 22.10.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.9.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Postgres: Add checkpoint byte delay metric ([#20017](https://github.com/DataDog/integrations-core/pull/20017))
+* add replication slot information and replication slot type to postgres replication stat metric ([#20035](https://github.com/DataDog/integrations-core/pull/20035))
+
+***Fixed***:
+
+* Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
+* Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
+
+## 22.8.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* When Amazon adds Extended Support to older Postgres versions, they update the version string to a format we are currently unable to parse. This adds the ability to parse those versions. Here is an example announcement where they communicate such a version string: https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-rds-postgresql-minor-11-22-rds-20241121/ ([#19773](https://github.com/DataDog/integrations-core/pull/19773))
+
+***Fixed***:
+
+* Omit .* regex filter to avoid unnecessary work in query ([#19470](https://github.com/DataDog/integrations-core/pull/19470))
+
+## 22.7.0 / 2025-02-26 / Agent 7.64.0
+
+***Added***:
+
+* Add support for Postgres 17 ([#19625](https://github.com/DataDog/integrations-core/pull/19625))
+
+## 22.6.1 / 2025-02-25
+
+***Fixed***:
+
+* When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces. ([#19694](https://github.com/DataDog/integrations-core/pull/19694))
+
 ## 22.6.0 / 2025-02-20
 
 ***Added***:

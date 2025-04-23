@@ -50,7 +50,6 @@ class OpenMetricsScraper:
         """
         The base class for any scraper overrides.
         """
-
         self.config = config
 
         # Save a reference to the check instance
@@ -231,13 +230,13 @@ class OpenMetricsScraper:
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
         # Used for monotonic counts
-        self.flush_first_value = False
+        self.flush_first_value = None
 
-    def scrape(self):
+    def _scrape(self):
         """
         Execute a scrape, and for each metric collected, transform the metric.
         """
-        runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
+        runtime_data = {'flush_first_value': bool(self.flush_first_value), 'static_tags': self.static_tags}
 
         # Determine which consume method to use based on target_info config
         if self.target_info:
@@ -252,7 +251,18 @@ class OpenMetricsScraper:
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
-        self.flush_first_value = True
+    def scrape(self):
+        try:
+            self._scrape()
+            self.flush_first_value = True
+        except:
+            # Don't flush new monotonic counts on next scrape:
+            # 1. Previous value may have expired in the aggregator, causing a spike
+            # 2. New counter itself may be too old and large when we discover it next time.
+            # If we didn't have a successful scrape yet, keep the initial value (use process_start_time to decide).
+            if self.flush_first_value:
+                self.flush_first_value = False
+            raise
 
     def consume_metrics(self, runtime_data):
         """
@@ -261,7 +271,7 @@ class OpenMetricsScraper:
 
         metric_parser = self.parse_metrics()
 
-        if not self.flush_first_value and self.use_process_start_time:
+        if self.flush_first_value is None and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
@@ -284,7 +294,7 @@ class OpenMetricsScraper:
 
         metric_parser = self.parse_metrics()
 
-        if not self.flush_first_value and self.use_process_start_time:
+        if self.flush_first_value is None and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
@@ -393,7 +403,6 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
-
         try:
             with self.get_connection() as connection:
                 # Media type will be used to select parser dynamically

@@ -2,7 +2,53 @@
 
 <!-- towncrier release notes start -->
 
-## 37.6.1 / 2025-02-20
+## 37.10.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Added execution indicators to StatementMetrics to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20037](https://github.com/DataDog/integrations-core/pull/20037))
+
+***Fixed***:
+
+* Fix a spike in monotonic counter values after a failed openmetrics scrape ([#20063](https://github.com/DataDog/integrations-core/pull/20063))
+
+## 37.9.0 / 2025-03-27
+
+***Security***:
+
+* The `pyyaml` library is no longer globally patched to force the use of safe_* methods ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
+
+***Added***:
+
+* Remove unnecessary `pyyaml` usage ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
+
+## 37.8.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Add lazy import mechanism using the [lazy-loader](https://github.com/scientific-python/lazy-loader) library. This allows us to continue exposing a nice API (simple, short imports) for customers without the baseline memory overhead of importing everything all the time. ([#19838](https://github.com/DataDog/integrations-core/pull/19838))
+* Add `datadog_checks.base.utils.format.json` module for JSON serialization ([#19845](https://github.com/DataDog/integrations-core/pull/19845))
+* Add more lazy imports to reduce memory overhead. ([#19845](https://github.com/DataDog/integrations-core/pull/19845))
+
+***Fixed***:
+
+* Import dependencies in base check classes lazily. With only the disk and network checks running, the Agent uses almost 50MB less memory after this change. ([#19781](https://github.com/DataDog/integrations-core/pull/19781))
+* Reduce log verbosity level for unverified HTTP requests. WARNING level spams a lot with no evidence that users pay attention. DEBUG will be useful for support cases. ([#19791](https://github.com/DataDog/integrations-core/pull/19791))
+* Stop using the `uptime` library. It has alternatives that are more actively maintained. By removing the dependency we also reduce our disk usage footprint. ([#19842](https://github.com/DataDog/integrations-core/pull/19842))
+
+## 37.7.0 / 2025-03-05
+
+***Added***:
+
+* Add is_enabled() to FIPS utils ([#19735](https://github.com/DataDog/integrations-core/pull/19735))
+
+***Fixed***:
+
+* Use regex in service check message assertion ([#19736](https://github.com/DataDog/integrations-core/pull/19736))
+
+## 37.6.1 / 2025-02-20 / Agent 7.64.0
 
 ***Fixed***:
 

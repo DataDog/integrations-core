@@ -269,7 +269,8 @@ class Deadlocks(DBMAsyncJob):
 
     def _create_deadlock_event(self, deadlock_rows):
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "deadlocks",
@@ -278,7 +279,7 @@ class Deadlocks(DBMAsyncJob):
             "timestamp": time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             'service': self._config.service,
             "sqlserver_deadlocks": deadlock_rows,
         }

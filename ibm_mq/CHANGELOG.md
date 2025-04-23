@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.2.0 / 2025-04-17
+
+***Added***:
+
+* Allow timezone config option to be used in metric collection ([#19912](https://github.com/DataDog/integrations-core/pull/19912))
+
 ## 8.1.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:

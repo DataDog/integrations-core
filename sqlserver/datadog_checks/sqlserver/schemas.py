@@ -51,8 +51,9 @@ class SubmitData:
         self.db_to_schemas = {}  # dbname : { id : schema }
         self.db_info = {}  # name to info
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
+    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version):
         self._base_event["host"] = hostname
+        self._base_event["database_instance"] = database_instance
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
@@ -175,7 +176,7 @@ class Schemas(DBMAsyncJob):
             "collection_interval": collection_interval,
             "dbms_version": None,
             "tags": self._check.non_internal_tags,
-            "cloud_metadata": self._check._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
         }
         self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
@@ -279,6 +280,8 @@ class Schemas(DBMAsyncJob):
                         "referencing_column": str
                         "referenced_table": str
                         "referenced_column": str
+                        "delete_action": str
+                        "update_action": str
                 partitions: partition dict
                     partition
                     key/value:
@@ -286,9 +289,10 @@ class Schemas(DBMAsyncJob):
         """
         self._data_submitter.reset()
         self._data_submitter.set_base_event_data(
-            self._check.resolved_hostname,
+            self._check.reported_hostname,
+            self._check.database_identifier,
             self._check.non_internal_tags,
-            self._check._config.cloud_metadata,
+            self._check.cloud_metadata,
             "{},{}".format(
                 self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                 self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -365,6 +369,8 @@ class Schemas(DBMAsyncJob):
                     "referencing_column": str
                     "referenced_table": str
                     "referenced_column": str
+                    "delete_action": str
+                    "update_action": str
             partitions: partition dict
                 partition
                 key/value:
@@ -443,7 +449,7 @@ class Schemas(DBMAsyncJob):
             foreign_key_query = FOREIGN_KEY_QUERY_PRE_2017
         rows = execute_query(foreign_key_query.format(table_ids), cursor)
         for row in rows:
-            table_id = row.pop("id", None)
+            table_id = row.pop("table_id", None)
             table_id_str = str(table_id)
             table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
             table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)

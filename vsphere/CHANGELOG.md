@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 8.3.0 / 2025-04-17
+
+***Added***:
+
+* Add failover support with Agent High Availability feature ([#19987](https://github.com/DataDog/integrations-core/pull/19987))
+
+***Fixed***:
+
+* Don't submit property metrics with unknown hostname. ([#19944](https://github.com/DataDog/integrations-core/pull/19944))
+
+## 8.2.1 / 2025-03-19
+
+***Fixed***:
+
+* Submit non-VM or ESXI events with an empty hostname. ([#19393](https://github.com/DataDog/integrations-core/pull/19393))
+
 ## 8.2.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

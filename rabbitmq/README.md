@@ -10,6 +10,8 @@ This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 - Track node-based stats: waiting processes, used sockets, used file descriptors, and more.
 - Monitor vhosts for aliveness and number of connections.
 
+Consider [Data Streams Monitoring][24] to enhance your RabbitMQ integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
+
 ## Setup
 
 ### Installation
@@ -194,7 +196,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://www.rabbitmq.com/management.html
 [5]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -215,3 +217,4 @@ Additional helpful documentation, links, and articles:
 [21]: https://docs.datadoghq.com/containers/docker/integrations/?tab=dockeradv2
 [22]: https://www.rabbitmq.com/prometheus.html#detailed-endpoint
 [23]: https://docs.datadoghq.com/integrations/rabbitmq/?tab=host#metrics
+[24]: https://docs.datadoghq.com/data_streams/
