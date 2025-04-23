@@ -49,7 +49,7 @@ class DbStatCollector(MongoCollector):
             ]
         else:
             additional_tags = None
-        
+
         collect_free_storage_metrics = 1 if self.free_storage_metrics else 0
         stats = {'stats': db.command({'dbStats': 1, 'freeStorage': collect_free_storage_metrics})}
         return self._submit_payload(stats, additional_tags)
