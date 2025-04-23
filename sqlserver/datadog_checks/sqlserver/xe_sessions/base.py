@@ -326,6 +326,9 @@ class XESessionBase(DBMAsyncJob):
         # Batch completed events
         elif self.session_name == "datadog_batch":
             return "query_completion"
+        # SQL statement completed events
+        elif self.session_name == "datadog_sql_statement":
+            return "query_completion"
         # Stored procedure events
         elif self.session_name == "datadog_sprocs":
             return "query_completion"
@@ -506,7 +509,7 @@ class XESessionBase(DBMAsyncJob):
                 if event == events[0]:
                     try:
                         payload_json = json_module.dumps(payload, default=str, indent=2)
-                        self._log.debug(f"Sample event payload:\n{payload_json}")
+                        self._log.debug(f"Sample {self.session_name} event payload:\n{payload_json}")
                     except Exception as e:
                         self._log.error(f"Error serializing payload for logging: {e}")
 
