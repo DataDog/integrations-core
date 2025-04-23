@@ -319,11 +319,9 @@ class XESessionBase(DBMAsyncJob):
         """
         # Sessions that produce query_completion events
         query_completion_sessions = [
-            "datadog_rpc",
-            "datadog_batch",
+            "datadog_query_completions",
             "datadog_sql_statement",
             "datadog_sp_statement",
-            "datadog_sprocs",
         ]
 
         # Error events have a distinct type
