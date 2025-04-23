@@ -8,6 +8,20 @@ It collects key Wi-Fi metrics, including Access Point (AP) information such as [
 
 ## Setup
 
+### Prerequisite
+
+#### Windows
+
+Starting from Windows 11 24H2 (Fall 2024), according to [Changes to API behavior for Wi-Fi access and location][16], wlan check which is using Windows wlan APIs, requires a user or an administrator consent. If the host's `Settings > Privacy & security > Location` has not been enabled this wlan check will fail to report wlan/Wi-Fi telemetry.
+
+The following settings needs to be enabled
+- Settings > Privacy & security > Location > Location services
+- Settings > Privacy & security > Location > Let's desktop apps access your location
+
+One can quickly check if the Location API is not disabled by running `netsh wlan show interface` command which would fail to report any Wi-Fi interface connection even if you are connected.
+
+An administrator can also enable these settings using Group Policy or InTune Local Settings.
+
 ### Installation
 
 The wlan check is included in the [Datadog Agent][8], but is not configured. Please see the next section to configure the check.
@@ -63,3 +77,4 @@ Need help? Contact [Datadog support][15].
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/wlan/metadata.csv
 [15]: https://docs.datadoghq.com/help/
+[16]: https://learn.microsoft.com/en-us/windows/win32/nativewifi/wi-fi-access-location-changes
