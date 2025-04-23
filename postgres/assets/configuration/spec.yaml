@@ -553,6 +553,7 @@ files:
           value:
             type: number
             example: 10
+          hidden: true
         - name: payload_row_limit
           description: |
             Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
