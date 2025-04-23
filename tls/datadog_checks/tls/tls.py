@@ -179,7 +179,7 @@ class TLSCheck(AgentCheck):
 
         if self._send_cert_duration:
             self.log.debug('Checking issued days of certificate')
-            issued_delta = cert.not_valid_after_utc - cert.not_valid_before
+            issued_delta = cert.not_valid_after_utc - cert.not_valid_before_utc
             issued_seconds = issued_delta.total_seconds()
             issued_days = seconds_to_days(issued_seconds)
 

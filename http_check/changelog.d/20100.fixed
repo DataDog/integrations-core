@@ -1,1 +1,0 @@
-Stop using deprecated cryptography's `cert.not_valid_after` in favor of `cert.not_valid_after_utc`
