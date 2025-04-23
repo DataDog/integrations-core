@@ -51,7 +51,7 @@ jobs:
 
 
     - name: Measure disk usage differences from last commit (uncompressed)
-      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
+      #if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
       run: | 
         mkdir -p diff_visualizations
         BEFORE=$(git rev-parse HEAD^)
@@ -65,7 +65,7 @@ jobs:
         echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Measure disk usage differences from last commit (compressed)
-      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
+      #if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
       run: | 
         mkdir -p diff_visualizations
         BEFORE=$(git rev-parse HEAD^)
