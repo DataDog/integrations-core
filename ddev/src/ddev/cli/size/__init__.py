@@ -8,9 +8,17 @@ from ddev.cli.size.diff import diff
 from ddev.cli.size.status import status
 from ddev.cli.size.timeline import timeline
 
-@click.group(short_help='Get the size of integrations and dependencies by platform and python version')
+
+@click.group()
 def size():
-    """Package Size Analyzer"""
+    """
+    Analyze the download size of integrations and dependencies in various modes.
+
+    This command provides tools to inspect the current status, compare commits and monitor size changes of modules
+    across different commits, platforms, and Python versions.
+
+    """
+
     pass
 
 

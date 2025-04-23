@@ -40,7 +40,9 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
-    "requests"
+    "requests",
+    "matplotlib",
+    "squarify"
 ]
 dynamic = ["version"]
 
