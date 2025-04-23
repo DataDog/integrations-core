@@ -23,6 +23,7 @@ from .common import (
     group_modules,
     is_correct_dependency,
     is_valid_integration,
+    plot_treemap,
     print_csv,
     print_table,
     valid_platforms_versions,
@@ -40,6 +41,12 @@ console = Console()
 @click.option('--python', 'version', help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option('--compressed', is_flag=True, help="Measure compressed size")
 @click.option('--csv', is_flag=True, help="Output in CSV format")
+@click.option('--save_to_png_path', help="Path to save the treemap as PNG")
+@click.option(
+    '--show_gui',
+    is_flag=True,
+    help="Display a pop-up window with a treemap showing size differences between the two commits.",
+)
 @click.pass_obj
 def diff(
     app: Application,
@@ -49,6 +56,8 @@ def diff(
     version: Optional[str],
     compressed: bool,
     csv: bool,
+    save_to_png_path: str,
+    show_gui: bool,
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -75,10 +84,36 @@ def diff(
                     progress.remove_task(task)
 
                     for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-                        diff_mode(app, gitRepo, before, after, plat, ver, compressed, csv, i, progress)
+                        diff_mode(
+                            app,
+                            gitRepo,
+                            before,
+                            after,
+                            plat,
+                            ver,
+                            compressed,
+                            csv,
+                            i,
+                            progress,
+                            save_to_png_path,
+                            show_gui,
+                        )
                 else:
                     progress.remove_task(task)
-                    diff_mode(app, gitRepo, before, after, platform, version, compressed, csv, None, progress)
+                    diff_mode(
+                        app,
+                        gitRepo,
+                        before,
+                        after,
+                        platform,
+                        version,
+                        compressed,
+                        csv,
+                        None,
+                        progress,
+                        save_to_png_path,
+                        show_gui,
+                    )
 
             except Exception as e:
                 app.abort(str(e))
@@ -95,6 +130,8 @@ def diff_mode(
     csv: bool,
     i: Optional[int],
     progress: Progress,
+    save_to_png_path: str,
+    show_gui: bool,
 ) -> None:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
         gitRepo, platform, version, before, after, compressed, progress
@@ -113,6 +150,15 @@ def diff_mode(
     else:
         if csv:
             print_csv(app, i, grouped_modules)
+        elif show_gui or save_to_png_path:
+            print_table(app, "Diff", grouped_modules)
+            plot_treemap(
+                grouped_modules,
+                f"Disk Usage Differences for {platform} and Python version {version}",
+                show_gui,
+                "diff",
+                save_to_png_path,
+            )
         else:
             print_table(app, "Diff", grouped_modules)
 

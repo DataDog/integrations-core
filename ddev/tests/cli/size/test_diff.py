@@ -163,6 +163,7 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.common.group_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.common.print_csv"),
         patch("ddev.cli.size.common.print_table"),
+        patch("ddev.cli.size.common.plot_treemap"),
     ):
         yield
 

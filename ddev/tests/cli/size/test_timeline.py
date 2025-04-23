@@ -267,6 +267,7 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.timeline.group_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.print_table"),
+        patch("ddev.cli.size.timeline.plot_linegraph"),
     ):
         mock_response = MagicMock()
         mock_response.headers = {"Content-Length": "1024"}

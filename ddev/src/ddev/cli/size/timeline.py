@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 import click
+import matplotlib.pyplot as plt
 import requests
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
@@ -48,6 +49,12 @@ console = Console()
 )
 @click.option('--compressed', is_flag=True, help="Measure compressed size")
 @click.option('--csv', is_flag=True, help="Output results in CSV format")
+@click.option('--save_to_png_path', help="Path to save the treemap as PNG")
+@click.option(
+    '--show_gui',
+    is_flag=True,
+    help="Display a pop-up window with a line chart showing the size evolution of the selected module over time.",
+)
 @click.pass_obj
 def timeline(
     app: Application,
@@ -60,6 +67,8 @@ def timeline(
     platform: Optional[str],
     compressed: bool,
     csv: bool,
+    save_to_png_path: str,
+    show_gui: bool,
 ) -> None:
     """
     Show the size evolution of a module (integration or dependency) over time.
@@ -109,7 +118,20 @@ def timeline(
                     progress.remove_task(task)
                     for i, plat in enumerate(valid_platforms):
                         timeline_mode(
-                            app, gitRepo, type, module, commits, threshold, plat, compressed, csv, i, None, progress
+                            app,
+                            gitRepo,
+                            type,
+                            module,
+                            commits,
+                            threshold,
+                            plat,
+                            compressed,
+                            csv,
+                            i,
+                            None,
+                            progress,
+                            save_to_png_path,
+                            show_gui,
                         )
                 else:
                     progress.remove_task(task)
@@ -127,6 +149,8 @@ def timeline(
                         None,
                         first_commit,
                         progress,
+                        save_to_png_path,
+                        show_gui,
                     )
 
             except Exception as e:
@@ -147,6 +171,8 @@ def timeline_mode(
     i: Optional[int],
     first_commit: Optional[str],
     progress: Progress,
+    save_to_png_path: str,
+    show_gui: bool,
 ) -> None:
     modules = get_repo_info(gitRepo, type, platform, module, commits, compressed, first_commit, progress)
     if modules != []:
@@ -154,6 +180,9 @@ def timeline_mode(
         trimmed_modules = trim_modules(grouped_modules, threshold)
         if csv:
             print_csv(app, i, trimmed_modules)
+        elif show_gui or save_to_png_path:
+            print_table(app, "Timeline for " + module, trimmed_modules)
+            plot_linegraph(trimmed_modules, module, platform, show_gui, save_to_png_path)
         else:
             print_table(app, "Timeline for " + module, trimmed_modules)
 
@@ -427,3 +456,24 @@ def get_dependency_list(path: str, platforms: Set[str]) -> Set[str]:
                     matches = re.findall(r"([\w\-\d\.]+) @ https?://[^\s#]+", file.read())
                     dependencies.update(matches)
     return dependencies
+
+
+def plot_linegraph(modules, module, platform, show, path):
+    dates = [entry["Date"] for entry in modules]
+    sizes = [entry["Size (Bytes)"] for entry in modules]
+    title = f"Disk Usage Evolution of {module} for {platform}" if platform else f"Disk Usage Evolution of {module}"
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(dates, sizes, linestyle='-')
+    plt.title(title)
+    plt.xlabel("Date")
+    plt.ylabel("Size (Bytes)")
+    plt.grid(True)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    if path:
+        plt.savefig(path)
+    if show:
+        plt.show()
+    plt.close()

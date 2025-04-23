@@ -37,8 +37,22 @@ console = Console()
 @click.option('--python', 'version', help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option('--compressed', is_flag=True, help="Measure compressed size")
 @click.option('--csv', is_flag=True, help="Output in CSV format")
+@click.option('--save_to_png_path', help="Path to save the treemap as PNG")
+@click.option(
+    '--show_gui',
+    is_flag=True,
+    help="Display a pop-up window with a treemap showing the current size distribution of modules.",
+)
 @click.pass_obj
-def status(app: Application, platform: Optional[str], version: Optional[str], compressed: bool, csv: bool) -> None:
+def status(
+    app: Application,
+    platform: Optional[str],
+    version: Optional[str],
+    compressed: bool,
+    csv: bool,
+    save_to_png_path: str,
+    show_gui: bool,
+) -> None:
     """
     Show the current size of all integrations and dependencies.
     """
@@ -53,16 +67,24 @@ def status(app: Application, platform: Optional[str], version: Optional[str], co
             platforms = valid_platforms if platform is None else [platform]
             versions = valid_versions if version is None else [version]
             for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
-                status_mode(app, repo_path, plat, ver, compressed, csv, i)
+                status_mode(app, repo_path, plat, ver, compressed, csv, i, save_to_png_path, show_gui)
         else:
-            status_mode(app, repo_path, platform, version, compressed, csv, None)
+            status_mode(app, repo_path, platform, version, compressed, csv, None, save_to_png_path, show_gui)
 
     except Exception as e:
         app.abort(str(e))
 
 
 def status_mode(
-    app: Application, repo_path: Path, platform: str, version: str, compressed: bool, csv: bool, i: Optional[int]
+    app: Application,
+    repo_path: Path,
+    platform: str,
+    version: str,
+    compressed: bool,
+    csv: bool,
+    i: Optional[int],
+    save_to_png_path: str,
+    show_gui: bool,
 ) -> None:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
         modules = get_files(compressed, repo_path) + get_dependencies(repo_path, platform, version, compressed)
@@ -71,9 +93,17 @@ def status_mode(
 
     if csv:
         print_csv(app, i, grouped_modules)
+    elif show_gui or save_to_png_path:
+        print_table(app, "Status", grouped_modules)
+        plot_treemap(
+            grouped_modules,
+            f"Disk Usage Status for {platform} and Python version {version}",
+            show_gui,
+            "status",
+            save_to_png_path,
+        )
     else:
         print_table(app, "Status", grouped_modules)
-        plot_treemap(grouped_modules)
 
 
 def get_files(compressed: bool, repo_path: Path) -> List[Dict[str, Union[str, int]]]:
