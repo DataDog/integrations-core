@@ -15,7 +15,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 3. Select **Admin settings**.
 4. Go to the **Settings** tab.
 5. Click on the **Authentication** tab from the left menu.
-6. Scroll to the **API Keys** section and click **Manage**.
+6. Select the **API Keys** section.
 7. Click **Create API Key**.
 8. Enter a key name.
 9. Select the **Administrators** Group.
@@ -37,8 +37,11 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 **Note**: Your self-hosted Metabase instance must be accessible from the internet via HTTPS only.
 1. Log in to your Metabase instance as an administrator.
-2. Go to **Settings > Admin Settings > General**.
-3. Under **Site URL**, copy the domain portion of the URL. For example, if the URL is `https://example.com`, copy `example.com`.
+2. Click on the gear icon in the upper right corner.
+3. Select **Admin settings**.
+4. Go to the **Settings** tab.
+5. Click on the **General** tab from the left menu.
+6. Under **SITE URL**, copy the domain portion of the URL. For example, if the URL is `https://example.com`, copy `example.com`.
 
 ### Connect your Metabase account to Datadog
 
