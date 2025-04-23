@@ -1,6 +1,6 @@
 {
   "title": "Genesys Conversation Overview",
-  "description": "The Genesys Conversation Overview Dashboard provides essential metrics across voice, messages, emails, callbacks, and chats, focusing on conversation counts, connected and errored sessions, and efficiency indicators like handle and wait times. The dashboard includes SLA adherence and logs transitions and activity trends over time, helping monitor and improve contact center performance.\n",
+  "description": "The Genesys Conversation Overview Dashboard provides essential metrics across voice, messages, emails, callbacks, and chats, focusing on conversation counts, connected and errored sessions, and efficiency indicators like handle and wait times. The dashboard includes SLA adherence and logs transitions and activity trends over time, helping monitor and improve contact center performance.",
   "widgets": [
     {
       "id": 5088819716215640,
@@ -67,11 +67,11 @@
       "id": 3058556336333808,
       "definition": {
         "type": "note",
-        "content": "**Overview**\n\nThe Genesys Conversation Overview Dashboard provides essential metrics across voice, messages, emails, callbacks, and chats, focusing on conversation counts, connected and errored sessions, and efficiency indicators like handle and wait times. The dashboard includes SLA adherence and logs transitions and activity trends over time, helping monitor and improve contact center performance.\n\nFor more information, see the [Genesys Integration Documentation](https://docs.datadoghq.com/integrations/genesys/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "content": "**Overview**\n\nThe Genesys Conversation Overview Dashboard provides essential metrics across voice, messages, emails, callbacks, and chats, focusing on conversation counts, connected and errored sessions, and efficiency indicators like handle and wait times. The dashboard tracks SLA adherence and logs transitions, displaying activity trends over time to help monitor and improve contact center performance.\n\nFor more information, see the [Genesys Integration Documentation](https://docs.datadoghq.com/integrations/genesys/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
-        "vertical_align": "top",
+        "vertical_align": "center",
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "left",
@@ -128,7 +128,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.total_voice{*}.as_count()",
+                      "query": "sum:genesys.voice.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -171,7 +171,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.total_messages{*}.as_count()",
+                      "query": "sum:genesys.message.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -214,7 +214,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.total_emails{*}.as_count()",
+                      "query": "sum:genesys.email.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -257,7 +257,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.total_callbacks{*}.as_count()",
+                      "query": "sum:genesys.callback.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -300,7 +300,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.total_chats{*}.as_count()",
+                      "query": "sum:genesys.chat.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -336,7 +336,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": [
                 "avg",
                 "min",
@@ -373,27 +373,27 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.total_voice{*}.as_count()"
+                      "query": "sum:genesys.voice.total_conversations{*}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:genesys.conversations.total_messages{*}.as_count()"
+                      "query": "sum:genesys.message.total_conversations{*}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:genesys.conversations.total_emails{*}.as_count()"
+                      "query": "sum:genesys.email.total_conversations{*}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:genesys.conversations.total_callbacks{*}.as_count()"
+                      "query": "sum:genesys.callback.total_conversations{*}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:genesys.conversations.total_chats{*}.as_count()"
+                      "query": "sum:genesys.chat.total_conversations{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -433,377 +433,683 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 4387473460711846,
-            "definition": {
-              "title": "Average Connected Time",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:genesys.conversations.connected_time_avg{*}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 0,
-                      "palette": "black_on_light_green"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 6055382138957310,
-            "definition": {
-              "title": "Maximum Queue Wait Time",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "max:genesys.conversations.wait_time_max{*}.as_count()",
-                      "aggregator": "max"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 0,
-                      "palette": "black_on_light_red"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 4,
-              "y": 0,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 251638852119456,
-            "definition": {
-              "title": "Average Queue Wait Time",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:genesys.conversations.wait_time_avg{*}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 0,
-                      "palette": "black_on_light_yellow"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 8,
-              "y": 0,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 7755271001648840,
-            "definition": {
-              "title": "State Transition Errors",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:genesys.conversations.state_transition_errors_count{*}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 0,
-                      "palette": "black_on_light_red"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 2270782593360342,
-            "definition": {
-              "title": "Average Handle Time",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:genesys.conversations.handle_time_avg{*}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 0,
-                      "palette": "black_on_light_yellow"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 4,
-              "y": 3,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
-            "id": 5363077593624186,
-            "definition": {
-              "title": "Over SLA Interactions",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:genesys.conversations.over_sla_count{*}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 0,
-                      "palette": "black_on_light_red"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 8,
-              "y": 3,
-              "width": 4,
-              "height": 3
-            }
-          },
-          {
             "id": 5020510291563622,
             "definition": {
-              "title": "Errored Conversations by Media Type",
+              "title": "Errored Conversations Trend by Media Type",
               "title_size": "16",
               "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
               "requests": [
                 {
-                  "response_format": "scalar",
                   "formulas": [
                     {
+                      "alias": "Callback",
                       "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.errored_conversations_count{*} by {media_type}.as_count()",
-                      "aggregator": "sum"
+                      "query": "sum:genesys.callback.errored_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:genesys.chat.errored_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:genesys.email.errored_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:genesys.message.errored_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:genesys.voice.errored_conversations_count{*}.as_count()"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
-                    "palette": "datadog16"
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
                   },
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 0,
-                        "order": "desc"
-                      }
-                    ]
-                  }
+                  "display_type": "line"
                 }
-              ],
-              "type": "sunburst",
-              "legend": {
-                "type": "table"
-              }
+              ]
             },
             "layout": {
               "x": 0,
-              "y": 6,
+              "y": 0,
               "width": 6,
-              "height": 5
+              "height": 4
             }
           },
           {
             "id": 1966840644256202,
             "definition": {
-              "title": "Connected Conversations by Media Type",
+              "title": "Connected Conversations Trend by Media Type",
               "title_size": "16",
               "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
               "requests": [
                 {
-                  "response_format": "scalar",
                   "formulas": [
                     {
+                      "alias": "Callback",
                       "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.connected_conversations_count{*} by {media_type}.as_count()",
-                      "aggregator": "sum"
+                      "query": "sum:genesys.callback.connected_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:genesys.chat.connected_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:genesys.email.connected_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:genesys.message.connected_conversations_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:genesys.voice.connected_conversations_count{*}.as_count()"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
-                    "palette": "datadog16"
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
                   },
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 0,
-                        "order": "desc"
-                      }
-                    ]
-                  }
+                  "display_type": "line"
                 }
-              ],
-              "type": "sunburst",
-              "legend": {
-                "type": "table"
-              }
+              ]
             },
             "layout": {
               "x": 6,
-              "y": 6,
+              "y": 0,
               "width": 6,
-              "height": 5
+              "height": 4
+            }
+          },
+          {
+            "id": 6055382138957310,
+            "definition": {
+              "title": "Maximum Queue Wait Duration Trend by Media Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Callback",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:genesys.callback.wait_time_max{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "max:genesys.chat.wait_time_max{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "max:genesys.email.wait_time_max{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "max:genesys.message.wait_time_max{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "max:genesys.voice.wait_time_max{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 251638852119456,
+            "definition": {
+              "title": "Average Queue Wait Duration Trend by Media Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Callback",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:genesys.callback.wait_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:genesys.chat.wait_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:genesys.email.wait_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:genesys.message.wait_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "avg:genesys.voice.wait_time_avg{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4387473460711846,
+            "definition": {
+              "title": "Average Connected Duration Trend by Media Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Callback",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:genesys.callback.connected_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:genesys.chat.connected_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:genesys.email.connected_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:genesys.message.connected_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "avg:genesys.voice.connected_time_avg{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2270782593360342,
+            "definition": {
+              "title": "Average Handle Duration Trend by Media Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Callback",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:genesys.callback.handle_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:genesys.chat.handle_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:genesys.email.handle_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:genesys.message.handle_time_avg{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "avg:genesys.voice.handle_time_avg{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7755271001648840,
+            "definition": {
+              "title": "State Transition Errors Trend by Media Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Callback",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:genesys.callback.state_transition_errors_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:genesys.chat.state_transition_errors_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:genesys.email.state_transition_errors_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:genesys.message.state_transition_errors_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:genesys.voice.state_transition_errors_count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5363077593624186,
+            "definition": {
+              "title": "Over SLA Interactions Trend by Media Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Callback",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Chat",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Email",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Message",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Voice",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:genesys.callback.over_sla_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:genesys.chat.over_sla_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:genesys.email.over_sla_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:genesys.message.over_sla_count{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:genesys.voice.over_sla_count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 12,
+              "width": 6,
+              "height": 4
             }
           }
         ]
@@ -812,19 +1118,12 @@
         "x": 0,
         "y": 14,
         "width": 12,
-        "height": 12,
+        "height": 17,
         "is_column_break": true
       }
     }
   ],
-  "template_variables": [
-    {
-      "name": "Media_Type",
-      "prefix": "media_type",
-      "available_values": [],
-      "default": "*"
-    }
-  ],
+  "template_variables": [],
   "layout_type": "ordered",
   "notify_list": [],
   "reflow_type": "fixed"

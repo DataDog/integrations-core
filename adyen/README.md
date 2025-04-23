@@ -62,4 +62,4 @@ For further assistance, contact [Datadog Support][3].
 [1]: https://www.adyen.com/
 [2]: https://docs.adyen.com/development-resources/webhooks/
 [3]: https://docs.datadoghq.com/help/
-[4]: https://app.datadoghq.com/integrations/adyen
+[4]: /integrations/adyen

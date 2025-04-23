@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.1 / 2025-04-17
+
+***Fixed***:
+
+* Skip collect explain plan for shardCollection operation. ([#19990](https://github.com/DataDog/integrations-core/pull/19990))
+* Skip dbstats metrics on shards primary because `db.stats` cannot run on shards. ([#19996](https://github.com/DataDog/integrations-core/pull/19996))
+
 ## 9.0.0 / 2025-03-19
 
 ***Changed***:
@@ -20,7 +27,7 @@
 
 * Revert "[mongo] add service tag to agent operations (#19456)" ([#19768](https://github.com/DataDog/integrations-core/pull/19768))
 
-## 8.6.0 / 2025-03-25
+## 8.6.0 / 2025-03-25 / Agent 7.64.2
 
 ***Added***:
 

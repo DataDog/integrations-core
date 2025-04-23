@@ -9,6 +9,7 @@ import time
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
+from string import Template
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
@@ -109,11 +110,13 @@ class MySql(AgentCheck):
         self.version = None
         self.is_mariadb = None
         self._resolved_hostname = None
+        self._database_identifier = None
         self._agent_hostname = None
         self._database_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
+        self.add_core_tags()
         self.cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
@@ -158,13 +161,44 @@ class MySql(AgentCheck):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.exclude_hostname:
+            return None
+        return self.resolved_hostname
+
+    @property
     def resolved_hostname(self):
+        # type: () -> str
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        # type: () -> str
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            tag_dict = {}
+            tags = self.tags.copy()
+            # sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['resolved_hostname'] = self.resolved_hostname
+            tag_dict['host'] = str(self._config.host)
+            tag_dict['port'] = str(self._config.port)
+            tag_dict['mysql_sock'] = str(self._config.mysql_sock)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     @property
     def agent_hostname(self):
@@ -180,9 +214,14 @@ class MySql(AgentCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
-    def set_resource_tags(self):
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
+    def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -199,6 +238,9 @@ class MySql(AgentCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.cloud_metadata["aws"] = {
+                "instance_endpoint": self.resolved_hostname,
+            }
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             # some `deployment_type`s map to multiple `resource_type`s
@@ -210,7 +252,7 @@ class MySql(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 
@@ -311,8 +353,7 @@ class MySql(AgentCheck):
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
-                    self.tags = list(set(self.tags) | set(aurora_tags))
-                    self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
+                    self._update_runtime_aurora_tags(aurora_tags)
 
                 # version collection
                 self.set_version(db)
@@ -372,7 +413,7 @@ class MySql(AgentCheck):
             self.execute_query_raw,
             self,
             queries=queries,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=True,
         )
 
@@ -468,12 +509,12 @@ class MySql(AgentCheck):
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.resolved_hostname
+                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.reported_hostname
             )
             yield db
         except Exception:
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.resolved_hostname
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
             )
             raise
         finally:
@@ -797,20 +838,20 @@ class MySql(AgentCheck):
             name=self.SLAVE_SERVICE_CHECK_NAME,
             value=1 if status == AgentCheck.OK else 0,
             tags=self.tags + additional_tags,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
         self.service_check(
             self.SLAVE_SERVICE_CHECK_NAME,
             status,
             tags=self.service_check_tags + additional_tags,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
         )
         self.service_check(
             self.REPLICA_SERVICE_CHECK_NAME,
             status,
             tags=self.service_check_tags + additional_tags,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
         )
 
     def _is_source_host(self, replicas, results):
@@ -859,13 +900,13 @@ class MySql(AgentCheck):
                     metric_tags.append(tag)
             if value is not None:
                 if metric_type == RATE:
-                    self.rate(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
+                    self.rate(metric_name, value, tags=metric_tags, hostname=self.reported_hostname)
                 elif metric_type == GAUGE:
-                    self.gauge(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
+                    self.gauge(metric_name, value, tags=metric_tags, hostname=self.reported_hostname)
                 elif metric_type == COUNT:
-                    self.count(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
+                    self.count(metric_name, value, tags=metric_tags, hostname=self.reported_hostname)
                 elif metric_type == MONOTONIC:
-                    self.monotonic_count(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
+                    self.monotonic_count(metric_name, value, tags=metric_tags, hostname=self.reported_hostname)
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
@@ -892,15 +933,15 @@ class MySql(AgentCheck):
                                 self.log.debug("Collecting done, value %s", result[col_idx])
                                 if metric_type == GAUGE:
                                     self.gauge(
-                                        metric, float(result[col_idx]), tags=tags, hostname=self.resolved_hostname
+                                        metric, float(result[col_idx]), tags=tags, hostname=self.reported_hostname
                                     )
                                 elif metric_type == RATE:
                                     self.rate(
-                                        metric, float(result[col_idx]), tags=tags, hostname=self.resolved_hostname
+                                        metric, float(result[col_idx]), tags=tags, hostname=self.reported_hostname
                                     )
                                 else:
                                     self.gauge(
-                                        metric, float(result[col_idx]), tags=tags, hostname=self.resolved_hostname
+                                        metric, float(result[col_idx]), tags=tags, hostname=self.reported_hostname
                                     )
                             else:
                                 self.log.debug("Received value is None for index %d", col_idx)
@@ -912,18 +953,31 @@ class MySql(AgentCheck):
 
     def _get_runtime_aurora_tags(self, db):
         runtime_tags = []
-
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
-
                 if replication_role in {'writer', 'reader'}:
                     runtime_tags.append('replication_role:' + replication_role)
         except Exception:
             self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
-
         return runtime_tags
+
+    def _update_runtime_aurora_tags(self, aurora_tags):
+        """
+        Update the tags with Aurora runtime tags, ensuring no duplicate tags exist.
+        First removes any existing Aurora runtime tags by key name, then adds the new tags.
+        """
+        # Extract tag keys from aurora_tags to identify which tags to remove
+        aurora_tag_keys = {tag.split(':')[0] for tag in aurora_tags}
+
+        # Remove existing Aurora runtime tags from both tag lists
+        self.tags = [tag for tag in self.tags if tag.split(':')[0] not in aurora_tag_keys]
+        self._non_internal_tags = [tag for tag in self._non_internal_tags if tag.split(':')[0] not in aurora_tag_keys]
+
+        # Add the new Aurora tags using set operations
+        self.tags = list(set(self.tags) | set(aurora_tags))
+        self._non_internal_tags = list(set(self._non_internal_tags) | set(aurora_tags))
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -944,10 +998,10 @@ class MySql(AgentCheck):
                     scpu = proc.cpu_times()[1]
 
                     if ucpu and scpu:
-                        self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.resolved_hostname)
+                        self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.reported_hostname)
                         # should really be system_time
-                        self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
-                        self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
+                        self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.reported_hostname)
+                        self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.reported_hostname)
                 else:
                     self.log.debug("psutil is not available, will not collect mysql.performance.* metrics")
             except Exception:
@@ -1322,10 +1376,11 @@ class MySql(AgentCheck):
             self.warning(warning)
 
     def _send_database_instance_metadata(self):
-        if self.resolved_hostname not in self._database_instance_emitted:
+        if self.database_identifier not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
                 "port": self._config.port,
+                "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
@@ -1341,5 +1396,5 @@ class MySql(AgentCheck):
                     "connection_host": self._config.host,
                 },
             }
-            self._database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

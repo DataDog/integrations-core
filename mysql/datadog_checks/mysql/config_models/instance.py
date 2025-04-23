@@ -58,6 +58,14 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -74,6 +82,7 @@ class IndexMetrics(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
@@ -129,6 +138,7 @@ class QueryActivity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_blocking_queries: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
 
@@ -198,6 +208,7 @@ class InstanceConfig(BaseModel):
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None

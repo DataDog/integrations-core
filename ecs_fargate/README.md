@@ -22,7 +22,7 @@ The only configuration required to enable this metrics collection is to set an e
 
 ## Setup
 
-The following steps cover setup of the Datadog Container Agent within AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
+The following steps cover setup of the Datadog Container Agent within Amazon ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
 
 Tasks that do not have the Datadog Agent still report metrics with Cloudwatch, however the Agent is needed for Autodiscovery, detailed container metrics, tracing, and more. Additionally, Cloudwatch metrics are less granular, and have more latency in reporting than metrics shipped directly through the Datadog Agent.
 
@@ -69,7 +69,7 @@ The instructions below show you how to configure the task using the [Amazon Web 
 
 [4]: https://aws.amazon.com/console
 [12]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 
 {{< /site-region >}}
 partial -->
@@ -84,7 +84,7 @@ partial -->
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
 
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 {{< /site-region >}}
 partial -->
 3. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
@@ -118,7 +118,7 @@ You can use [AWS CloudFormation][6] templating to configure your Fargate contain
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 Update this CloudFormation template below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 {{< /site-region >}}
 partial -->
 
@@ -969,6 +969,8 @@ To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `far
 
 The Agent can autodiscover and attach tags to all data emitted by the entire task or an individual container within this task or job. The list of tags automatically attached depends on the Agent's [cardinality configuration][33].
 
+**Note**: Set the `env` and `service` tags in your task definition to get the full benefits of Datadog's unified service tagging. See the [full configuration section][64] of the unified service tagging documentation for instructions.
+
   | Tag                           | Cardinality  | Source               |
   |-------------------------------|--------------|----------------------|
   | `container_name`              | High         | ECS API              |
@@ -1041,7 +1043,7 @@ Need help? Contact [Datadog support][18].
 [22]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [23]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
 [24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
-[25]: https://app.datadoghq.com/logs
+[25]: /logs
 [26]: https://docs.datadoghq.com/monitors/monitor_types/
 [27]: https://docs.datadoghq.com/infrastructure/livecontainers/?tab=linuxwindows
 [28]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html
@@ -1057,7 +1059,7 @@ Need help? Contact [Datadog support][18].
 [38]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [39]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
 [40]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 [42]: https://docs.datadoghq.com/resources/json/datadog-agent-ecs-fargate.json
 [43]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
@@ -1072,7 +1074,7 @@ Need help? Contact [Datadog support][18].
 [53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
 [54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
-[56]: https://app.datadoghq.com/process
+[56]: /process
 [57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
 [58]: https://www.datadoghq.com/blog/monitor-fargate-processes/
 [59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
@@ -1080,3 +1082,4 @@ Need help? Contact [Datadog support][18].
 [61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
 [62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
 [63]: https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/
+[64]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=ecs#full-configuration
