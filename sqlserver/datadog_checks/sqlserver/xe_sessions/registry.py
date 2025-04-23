@@ -5,6 +5,7 @@
 from datadog_checks.sqlserver.xe_sessions.batch_events import BatchEventsHandler
 from datadog_checks.sqlserver.xe_sessions.error_events import ErrorEventsHandler
 from datadog_checks.sqlserver.xe_sessions.rpc_events import RPCEventsHandler
+from datadog_checks.sqlserver.xe_sessions.sp_statement_events import SpStatementEventsHandler
 from datadog_checks.sqlserver.xe_sessions.sql_statement_events import SqlStatementEventsHandler
 from datadog_checks.sqlserver.xe_sessions.sproc_events import SprocEventsHandler
 
@@ -17,5 +18,6 @@ def get_xe_session_handlers(check, config):
         ErrorEventsHandler(check, config),
         SprocEventsHandler(check, config),
         SqlStatementEventsHandler(check, config),
+        SpStatementEventsHandler(check, config),
     ]
     return handlers

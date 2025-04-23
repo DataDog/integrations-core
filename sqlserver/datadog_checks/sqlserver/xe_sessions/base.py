@@ -317,20 +317,20 @@ class XESessionBase(DBMAsyncJob):
         Determine the dbm_type based on the session name.
         Returns the appropriate dbm_type for the current session.
         """
-        # Error events from datadog_query_errors session
+        # Sessions that produce query_completion events
+        query_completion_sessions = [
+            "datadog_rpc",
+            "datadog_batch",
+            "datadog_sql_statement",
+            "datadog_sp_statement",
+            "datadog_sprocs",
+        ]
+
+        # Error events have a distinct type
         if self.session_name == "datadog_query_errors":
             return "query_errors"
-        # RPC completed events
-        elif self.session_name == "datadog_rpc":
-            return "query_completion"
-        # Batch completed events
-        elif self.session_name == "datadog_batch":
-            return "query_completion"
-        # SQL statement completed events
-        elif self.session_name == "datadog_sql_statement":
-            return "query_completion"
-        # Stored procedure events
-        elif self.session_name == "datadog_sprocs":
+        # Most session types produce completion events
+        elif self.session_name in query_completion_sessions:
             return "query_completion"
         # Default fallback for any new/unknown session types
         else:
