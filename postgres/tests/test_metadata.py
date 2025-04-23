@@ -81,6 +81,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         "pgtable",
         "pg_newtable",
         "cities",
+        "sample_foreign_d73a8c"
     }
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
