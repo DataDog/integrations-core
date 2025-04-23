@@ -117,6 +117,9 @@ def timeline(
                 if type == "dependency" and platform is None:
                     progress.remove_task(task)
                     for i, plat in enumerate(valid_platforms):
+                        if save_to_png_path:
+                            base, ext = os.path.splitext(save_to_png_path)
+                            path = f"{base}_{plat}{ext}"
                         timeline_mode(
                             app,
                             gitRepo,
@@ -130,7 +133,7 @@ def timeline(
                             i,
                             None,
                             progress,
-                            save_to_png_path,
+                            path,
                             show_gui,
                         )
                 else:

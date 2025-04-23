@@ -84,6 +84,11 @@ def diff(
                     progress.remove_task(task)
 
                     for i, (plat, ver) in enumerate([(p, v) for p in platforms for v in versions]):
+                        path = None
+                        if save_to_png_path:
+                            base, ext = os.path.splitext(save_to_png_path)
+                            path = f"{base}_{plat}_{ver}{ext}"
+
                         diff_mode(
                             app,
                             gitRepo,
@@ -95,7 +100,7 @@ def diff(
                             csv,
                             i,
                             progress,
-                            save_to_png_path,
+                            path,
                             show_gui,
                         )
                 else:

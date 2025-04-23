@@ -87,7 +87,6 @@ def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, 
                 modules_table[key][i] = str(value)
     app.display_table(mode, modules_table)
 
-
 def plot_treemap(
     modules: List[Dict[str, Union[str, int, date]]],
     title: str,
@@ -95,29 +94,30 @@ def plot_treemap(
     mode: Literal["status", "diff"] = "status",
     path: Optional[str] = None,
 ) -> None:
-    # Always use absolute value for sizing
-    sizes = [abs(mod["Size (Bytes)"]) for mod in modules]
+    # Convert sizes to absolute values for layout computation
+    sizes = [abs(cast(int, mod["Size (Bytes)"])) for mod in modules]
 
-    # Setup figure
+    # Initialize figure and axis
     plt.figure(figsize=(12, 8))
     ax = plt.gca()
     ax.set_axis_off()
 
-    # Compute layout
+    # Compute layout rectangles based on size
     rects = squarify.normalize_sizes(sizes, 100, 100)
     rects = squarify.squarify(rects, 0, 0, 100, 100)
 
     colors = []
 
     if mode == "status":
-        # Normalization by type
+        # Separate modules by type
         integrations = [mod for mod in modules if mod["Type"] == "Integration"]
         dependencies = [mod for mod in modules if mod["Type"] == "Dependency"]
 
+        # Normalize sizes within each group
         def normalize(mods):
             if not mods:
                 return []
-            sizes = [mod["Size (Bytes)"] for mod in mods]
+            sizes = [cast(int, mod["Size (Bytes)"]) for mod in mods]
             min_size = min(sizes)
             max_size = max(sizes)
             range_size = max_size - min_size or 1
@@ -126,12 +126,14 @@ def plot_treemap(
         norm_int = normalize(integrations)
         norm_dep = normalize(dependencies)
 
+        # Map normalized values to color intensity
         def scale(val, vmin=0.3, vmax=0.85):
             return vmin + val * (vmax - vmin)
 
         cmap_int = cm.get_cmap("Purples")
         cmap_dep = cm.get_cmap("Reds")
 
+        # Assign colors based on type and normalized size
         for mod in modules:
             if mod["Type"] == "Integration":
                 idx = integrations.index(mod)
@@ -143,53 +145,38 @@ def plot_treemap(
                 colors.append("#999999")
 
     elif mode == "diff":
-        '''
-        # ------- BOTH POSITIVE AND NEGATIVE IN THE SAME TREEMAP --------
-        # Reds for positive, Greens for negative
-        cmap_pos = cm.get_cmap("Reds")
-        cmap_neg = cm.get_cmap("Greens")
-
-        max_size = max(abs(mod["Size (Bytes)"]) for mod in modules)
-
-        for mod in modules:
-            value = mod["Size (Bytes)"]
-            intensity = abs(value) / max_size
-            color = cmap_pos(intensity) if value > 0 else cmap_neg(intensity)
-            colors.append(color)
-
-        '''
+        # Separate modules by positive and negative size change
         cmap_pos = cm.get_cmap("Oranges")
         cmap_neg = cm.get_cmap("Blues")
 
-        positives = [mod for mod in modules if mod["Size (Bytes)"] > 0]
-        negatives = [mod for mod in modules if mod["Size (Bytes)"] < 0]
+        positives = [mod for mod in modules if cast(int, mod["Size (Bytes)"]) > 0]
+        negatives = [mod for mod in modules if cast(int, mod["Size (Bytes)"]) < 0]
 
-        sizes_pos = [mod["Size (Bytes)"] for mod in positives]
-        sizes_neg = [abs(mod["Size (Bytes)"]) for mod in negatives]
+        sizes_pos = [cast(int, mod["Size (Bytes)"]) for mod in positives]
+        sizes_neg = [abs(cast(int, mod["Size (Bytes)"])) for mod in negatives]
 
         sum_pos = sum(sizes_pos)
         sum_neg = sum(sizes_neg)
 
-        canvas_area = 50 * 100  # each half has same max area
+        canvas_area = 50 * 100
 
-        # Determine which side is dominant (fills fully)
+        # Determine dominant side and scale layout accordingly
         if sum_pos >= sum_neg:
-            # Red fills right, green scales left
             norm_sizes_pos = [s / sum_pos * canvas_area for s in sizes_pos]
             norm_sizes_neg = [s / sum_pos * canvas_area for s in sizes_neg]
             rects_pos = squarify.squarify(norm_sizes_pos, 50, 0, 50, 100)
             rects_neg = squarify.squarify(norm_sizes_neg, 0, 0, 50, 100)
         else:
-            # Green fills left, red scales right
             norm_sizes_neg = [s / sum_neg * canvas_area for s in sizes_neg]
             norm_sizes_pos = [s / sum_neg * canvas_area for s in sizes_pos]
             rects_neg = squarify.squarify(norm_sizes_neg, 0, 0, 50, 100)
             rects_pos = squarify.squarify(norm_sizes_pos, 50, 0, 50, 100)
 
+        # Merge layout and module lists for unified drawing
         rects = rects_neg + rects_pos
         modules = negatives + positives
 
-        # Draw colors
+        # Compute color intensity for each module
         def rescale_intensity(val, min_val=0.3, max_val=0.8):
             return min_val + (max_val - min_val) * val
 
@@ -197,21 +184,21 @@ def plot_treemap(
         colors = []
 
         for mod in negatives:
-            raw = abs(mod["Size (Bytes)"]) / max_size
+            raw = abs(cast(int, mod["Size (Bytes)"])) / max_size
             intensity = rescale_intensity(raw)
             colors.append(cmap_neg(intensity))
 
         for mod in positives:
-            raw = mod["Size (Bytes)"] / max_size
+            raw = cast(int, mod["Size (Bytes)"]) / max_size
             intensity = rescale_intensity(raw)
             colors.append(cmap_pos(intensity))
 
-    # Draw rectangles and labels
+    # Manual treemap layout and coloring to personalize labels
     for rect, mod, color in zip(rects, modules, colors, strict=False):
         x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
         ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
 
-        # Font size config
+        # Determine font size based on rectangle area
         MIN_FONT_SIZE = 6
         MAX_FONT_SIZE = 12
         FONT_SIZE_SCALE = 0.4
@@ -220,12 +207,14 @@ def plot_treemap(
         name = mod["Name"]
         size_str = f"({mod['Size']})"
 
+        # Check whether text fits inside the rectangle
         CHAR_WIDTH_FACTOR = 0.1
         CHAR_HEIGHT_FACTOR = 0.5
         name_fits = (len(name) + 2) * font_size * CHAR_WIDTH_FACTOR < dx and dy > font_size * CHAR_HEIGHT_FACTOR
         size_fits = (len(size_str) + 2) * font_size * CHAR_WIDTH_FACTOR < dx
         both_fit = dy > font_size * CHAR_HEIGHT_FACTOR * 2
 
+        # Possibly truncate name if it doesn't fit
         if dx < 5 or dy < 5:
             label = None
         elif not name_fits and dx > 5:
@@ -234,6 +223,7 @@ def plot_treemap(
                 name = name[: max_chars - 3] + "..."
                 name_fits = True
 
+        # Construct label if there's space
         if name_fits and size_fits and both_fit:
             label = f"{name}\n{size_str}"
         elif name_fits:
@@ -241,9 +231,11 @@ def plot_treemap(
         else:
             label = None
 
+        # Draw label
         if label:
             ax.text(x + dx / 2, y + dy / 2, label, va="center", ha="center", fontsize=font_size, color="black")
 
+    # Finalize layout and show/save plot
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
 
@@ -263,11 +255,11 @@ def plot_treemap(
     plt.legend(handles=legend_handles, title="Type", loc="center left", bbox_to_anchor=(1.0, 0.5))
     plt.subplots_adjust(right=0.8)
     plt.tight_layout()
+
     if show:
         plt.show()
     if path:
         plt.savefig(path, bbox_inches='tight')
-
 
 def get_dependencies_sizes(
     deps: List[str], download_urls: List[str], compressed: bool
