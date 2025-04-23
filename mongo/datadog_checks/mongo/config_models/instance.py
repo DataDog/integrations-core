@@ -155,6 +155,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     slow_operations: Optional[SlowOperations] = None
     system_database_stats: Optional[bool] = None
+    free_storage_metrics: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None
