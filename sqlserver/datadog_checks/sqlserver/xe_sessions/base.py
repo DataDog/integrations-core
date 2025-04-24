@@ -507,13 +507,10 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error formatting events for logging: {e}")
 
-        # Process each event individually
-        event_type = f"xe_{self.session_name.replace('datadog_', '')}"
-
         for event in events:
             try:
-                # Create a properly structured payload for this specific event
-                payload = self._create_event_payload(event, event_type)
+                # Create a properly structured payload for this event
+                payload = self._create_event_payload(event)
 
                 # Check for ALLEN TEST comment
                 if 'sql_text' in event and event.get('sql_text') and '-- ALLEN TEST' in event.get('sql_text'):
