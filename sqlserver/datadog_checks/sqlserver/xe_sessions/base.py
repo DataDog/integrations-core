@@ -314,7 +314,27 @@ class XESessionBase(DBMAsyncJob):
         normalized = {}
 
         # Required fields with defaults
-        normalized["timestamp"] = event.get("timestamp", "")
+        # Rename timestamp to query_complete
+        normalized["query_complete"] = event.get("timestamp", "")
+
+        # Calculate query_start if duration_ms and timestamp are available
+        if "timestamp" in event and "duration_ms" in event and event.get("timestamp") and event.get("duration_ms") is not None:
+            try:
+                # Parse the timestamp (assuming ISO format)
+                end_datetime = datetime.datetime.fromisoformat(event.get("timestamp").replace('Z', '+00:00'))
+
+                # Convert duration_ms (milliseconds) to a timedelta
+                duration_ms = float(event.get("duration_ms", 0))
+                duration_delta = datetime.timedelta(milliseconds=duration_ms)
+
+                # Calculate start time
+                start_datetime = end_datetime - duration_delta
+                normalized["query_start"] = start_datetime.isoformat()
+            except Exception as e:
+                self._log.debug(f"Error calculating query_start time: {e}")
+                normalized["query_start"] = ""
+        else:
+            normalized["query_start"] = ""
 
         # Numeric fields with defaults
         for field, default in numeric_fields.items():
@@ -368,7 +388,7 @@ class XESessionBase(DBMAsyncJob):
         Get the list of important fields for this event type - to be overridden by subclasses.
         Used for formatting events for logging.
         """
-        return ['timestamp', 'duration_ms']
+        return ['query_start', 'query_complete', 'duration_ms']
 
     def _create_event_payload(self, raw_event, event_source):
         """
@@ -497,37 +517,23 @@ class XESessionBase(DBMAsyncJob):
 
         for event in events:
             try:
+                # Create a properly structured payload for this specific event
+                payload = self._create_event_payload(event, event_type)
+
                 # Check for ALLEN TEST comment
                 if 'sql_text' in event and event.get('sql_text') and '-- ALLEN TEST' in event.get('sql_text'):
-                    # Calculate start time if duration is available
-                    start_time = "UNKNOWN"
-                    end_time = event.get('timestamp', 'UNKNOWN')
-
-                    if end_time != "UNKNOWN" and 'duration_ms' in event:
-                        try:
-                            # Parse the timestamp (assuming ISO format)
-                            end_datetime = datetime.datetime.fromisoformat(end_time.replace('Z', '+00:00'))
-
-                            # Convert duration_ms (milliseconds) to a timedelta
-                            duration_ms = float(event.get('duration_ms', 0))
-                            duration_delta = datetime.timedelta(milliseconds=duration_ms)
-
-                            # Calculate start time
-                            start_datetime = end_datetime - duration_delta
-                            start_time = start_datetime.isoformat()
-                        except Exception as e:
-                            self._log.warning(f"Error calculating start time: {e}")
+                    # Get the normalized query details with query_start and query_complete
+                    query_details = payload.get('query_details', {})
 
                     self._log.info(
                         f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
-                        f"host={self._check.resolved_hostname}, session_id={event.get('session_id', 'UNKNOWN')}, "
-                        f"end_timestamp={end_time}, calculated_start_time={start_time}, "
-                        f"duration_ms={event.get('duration_ms', 'UNKNOWN')}, "
-                        f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(event, default=str)}"
+                        f"host={self._check.resolved_hostname}, session_id={query_details.get('session_id', 'UNKNOWN')}, "
+                        f"query_complete={query_details.get('query_complete', 'UNKNOWN')}, "
+                        f"query_start={query_details.get('query_start', 'UNKNOWN')}, "
+                        f"duration_ms={query_details.get('duration_ms', 'UNKNOWN')}, "
+                        f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(query_details, default=str)}"
                     )
 
-                # Create a properly structured payload for this specific event
-                payload = self._create_event_payload(event, event_type)
                 # For now, just log it instead of sending
                 self._log.debug(f"Created payload for {self.session_name} event (not sending)")
 
