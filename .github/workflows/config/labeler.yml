@@ -110,6 +110,8 @@ integration/ceph:
 - ceph/**/*
 integration/cert_manager:
 - cert_manager/**/*
+integration/checkpoint_harmony_email_and_collaboration:
+- checkpoint_harmony_email_and_collaboration/**/*
 integration/checkpoint_quantum_firewall:
 - checkpoint_quantum_firewall/**/*
 integration/cilium:

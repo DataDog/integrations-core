@@ -1,1 +1,0 @@
-Skip dbstats metrics on shards primary because `db.stats` cannot run on shards.

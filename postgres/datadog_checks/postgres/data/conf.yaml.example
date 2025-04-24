@@ -32,9 +32,8 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## The hostname to connect to.
-    ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
-    ## provide a value for the sock key.
+    ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
+    ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
     #
   - host: localhost
 
@@ -64,6 +63,25 @@ instances:
     ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
     #
     # reported_hostname: <REPORTED_HOSTNAME>
+
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
+    ## which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
 
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
@@ -481,12 +499,6 @@ instances:
         ## Enable collection of query activity. Requires `dbm: true`.
         #
         # enabled: true
-
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
-        ## query_samples configured collection_interval.
-        #
-        # collection_interval: 10
 
         ## @param payload_row_limit - number - optional - default: 3500
         ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger

@@ -32,7 +32,17 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
     |Client ID| Client ID for your Genesys account.                                                        |
     |Client Secret| Client Secret for your Genesys account.                                                 |
 
-2. Click the Save button to save your settings.
+2. Enable Metrics Collection:
+
+    |Parameters| Description |
+    |--------------------|------------------------------------------------------------------------------------------------|
+    |Get Callback Metrics| Enable to collect Callback Metrics from Genesys. By default, it is enabled. |
+    |Get Chat Metrics| Enable to collect Chat Metrics from Genesys. By default, it is enabled. |
+    |Get Email Metrics| Enable to collect Email Metrics from Genesys. By default, it is enabled. |
+    |Get Message Metrics| Enable to collect Message Metrics from Genesys. By default, it is enabled. |
+    |Get Voice Metrics| Enable to collect Voice Metrics from Genesys. By default, it is enabled. |
+
+3. Click the **Save** button to save your settings.
 
 ## Data Collected
 

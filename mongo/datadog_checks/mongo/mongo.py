@@ -83,6 +83,8 @@ class MongoDb(AgentCheck):
       Connectivity health to the instance.
     """
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
         self._config = MongoConfig(self.instance, self.log, self.init_config)

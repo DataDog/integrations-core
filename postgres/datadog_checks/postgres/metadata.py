@@ -81,7 +81,7 @@ SELECT c.oid                 AS id,
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'p' )
+WHERE  c.relkind IN ( 'r', 'p', 'f' )
        AND c.relispartition != 't'
        AND c.relnamespace = {schema_oid}
        {filter};
@@ -96,7 +96,7 @@ SELECT c.oid                 AS id,
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r' )
+WHERE  c.relkind IN ( 'r', 'f' )
        AND c.relnamespace = {schema_oid}
        {filter};
 """
@@ -278,7 +278,8 @@ class PostgresMetadata(DBMAsyncJob):
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
             "dbms": "postgres",
             "kind": "pg_settings",
@@ -286,7 +287,7 @@ class PostgresMetadata(DBMAsyncJob):
             "dbms_version": payload_pg_version(self._check.version),
             "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             "metadata": self._pg_settings_cached,
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
@@ -314,14 +315,15 @@ class PostgresMetadata(DBMAsyncJob):
             # We emit an event for each batch of tables to reduce total data in memory
             # and keep event size reasonable
             base_event = {
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
                 "kind": "pg_databases",
                 "collection_interval": self.schemas_collection_interval,
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self._check.cloud_metadata,
             }
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
@@ -378,14 +380,14 @@ class PostgresMetadata(DBMAsyncJob):
                 "dd.postgres.schema.time",
                 elapsed_ms,
                 tags=self._check.tags + ["status:" + status],
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 "dd.postgres.schema.tables_count",
                 total_tables,
                 tags=self._check.tags + ["status:" + status],
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
             datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")
