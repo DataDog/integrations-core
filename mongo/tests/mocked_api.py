@@ -79,7 +79,7 @@ class MockedDB(object):
     def command(self, command, *args, **kwargs):
         filename = command
         if "dbStats" in command:
-            if "freeStorage: 0" in command:
+            if command.get("freeStorage") == 0:
                 filename = f"dbstats-non-free-storage-{self._db_name}"
             else:
                 filename = f"dbstats-{self._db_name}"
