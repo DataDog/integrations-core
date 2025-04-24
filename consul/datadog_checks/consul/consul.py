@@ -4,7 +4,7 @@
 from __future__ import division
 
 from collections import defaultdict, namedtuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from itertools import islice
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
@@ -166,10 +166,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
     def _get_local_config(self):
         time_window = 0
         if self._last_config_fetch_time:
-            time_window = datetime.utcnow() - self._last_config_fetch_time
+            time_window = datetime.now(timezone.utc) - self._last_config_fetch_time
         if not self._local_config or time_window > timedelta(seconds=MAX_CONFIG_TTL):
             self._local_config = self.consul_request('/v1/agent/self')
-            self._last_config_fetch_time = datetime.utcnow()
+            self._last_config_fetch_time = datetime.now(timezone.utc)
 
         return self._local_config
 

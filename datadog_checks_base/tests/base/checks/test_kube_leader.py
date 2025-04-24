@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import mock
 import pytest
@@ -160,7 +160,9 @@ class TestElectionRecord:
             make_record(
                 holder="me", duration=30, renew="2018-12-18T12:32:22Z"
             ): "Invalid record: no acquire time recorded",
-            make_record(holder="me", duration=30, renew=datetime.utcnow(), acquire="2018-12-18T12:32:22Z"): None,
+            make_record(
+                holder="me", duration=30, renew=datetime.now(timezone.utc), acquire="2018-12-18T12:32:22Z"
+            ): None,
             make_record(
                 holder="me", duration=30, renew="invalid", acquire="2018-12-18T12:32:22Z"
             ): "Invalid record: bad format for renewTime field",
@@ -179,7 +181,10 @@ class TestElectionRecord:
 
     def test_seconds_until_renew(self):
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() + timedelta(seconds=20)
+            holder="me",
+            duration=30,
+            acquire="2018-12-18T12:32:22Z",
+            renew=datetime.now(timezone.utc) + timedelta(seconds=20),
         )
 
         record = ElectionRecordAnnotation("endpoints", raw)
@@ -187,7 +192,10 @@ class TestElectionRecord:
         assert record.seconds_until_renew < 21
 
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() - timedelta(seconds=5)
+            holder="me",
+            duration=30,
+            acquire="2018-12-18T12:32:22Z",
+            renew=datetime.now(timezone.utc) - timedelta(seconds=5),
         )
 
         record = ElectionRecordAnnotation("endpoints", raw)
@@ -246,7 +254,7 @@ class TestBaseCheck:
 
     def test_ok_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object(
-            make_record(holder="me", duration=30, renew=datetime.utcnow(), acquire="2018-12-18T12:32:22Z")
+            make_record(holder="me", duration=30, renew=datetime.now(timezone.utc), acquire="2018-12-18T12:32:22Z")
         )
         c = KubeLeaderElectionBaseCheck()
         c.check(CM_INSTANCE)
