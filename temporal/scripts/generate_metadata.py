@@ -8,6 +8,8 @@
 # and passed the go code from temporal's codebase where metrics are defined via stdin, e.g.:
 # cat ${path_to_temporal}/common/metrics/metric_defs.go | hatch run py3.8-1.19:python ./scripts/generate_metadata.py
 
+# Some metrics are in multi-line and not parsed correctly, please verify the metric_defs file after running this script
+
 import csv
 import re
 import sys
