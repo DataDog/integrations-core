@@ -81,7 +81,7 @@ SELECT c.oid                 AS id,
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'p' )
+WHERE  c.relkind IN ( 'r', 'p', 'f' )
        AND c.relispartition != 't'
        AND c.relnamespace = {schema_oid}
        {filter};
@@ -96,7 +96,7 @@ SELECT c.oid                 AS id,
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r' )
+WHERE  c.relkind IN ( 'r', 'f' )
        AND c.relnamespace = {schema_oid}
        {filter};
 """
