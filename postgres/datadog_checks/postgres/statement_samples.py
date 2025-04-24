@@ -763,9 +763,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         track_activity_query_size = self._get_track_activity_query_size()
 
         # truncation check is on the original query, not the trimmed version
-        stmt_trunc = self._get_truncation_state(track_activity_query_size,
-                                                orig_statement,
-                                                query_signature)
+        stmt_trunc = self._get_truncation_state(track_activity_query_size, orig_statement, query_signature)
         if stmt_trunc == StatementTruncationState.truncated:
             return (
                 None,
