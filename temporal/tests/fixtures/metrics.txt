@@ -496,16 +496,16 @@ buffered_events_size_sum{namespace="temporal_system",operation="SessionStats",se
 buffered_events_size_count{namespace="temporal_system",operation="SessionStats",service_name="history"} 17
 # HELP build_age build_age gauge
 # TYPE build_age gauge
-build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="frontend"} 3.266755158820213e+15
-build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="history"} 3.26675525312813e+15
-build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="matching"} 3.266755159078172e+15
-build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="worker"} 3.266755160737922e+15
+build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="frontend"} 3.266755158820213e+15
+build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="history"} 3.26675525312813e+15
+build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="matching"} 3.266755159078172e+15
+build_age{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="worker"} 3.266755160737922e+15
 # HELP build_information build_information gauge
 # TYPE build_information gauge
-build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="frontend"} 1
-build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="history"} 1
-build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="matching"} 1
-build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_19_1",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="worker"} 1
+build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="frontend"} 1
+build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="history"} 1
+build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="matching"} 1
+build_information{build_date="2023_01_13T19_43_08Z",build_platform="arm64",build_version="1_27_2",git_revision="07f758a2175eb270c56ee8f0d46b7dc2afe47300",go_version="go1_19_3",service_name="worker"} 1
 # HELP cache_latency cache_latency histogram
 # TYPE cache_latency histogram
 cache_latency_bucket{cache_type="events",operation="EventsCacheGetEvent",service_name="history",le="0.001"} 6
