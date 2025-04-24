@@ -927,6 +927,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for monitoring AWS Fargate][32]
 - [How to collect metrics and logs from AWS Fargate workloads][27]
 - [AWS Fargate monitoring with Datadog][28]
+- [Tracing API Gateway][37]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
@@ -964,3 +965,4 @@ Additional helpful documentation, links, and articles:
 [34]: https://docs.datadoghq.com/containers/guide/clustercheckrunners
 [35]: http://docs.datadoghq.com/agent/cluster_agent
 [36]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[37]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
