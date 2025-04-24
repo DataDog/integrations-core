@@ -374,7 +374,7 @@ class XESessionBase(DBMAsyncJob):
 
         # Error events have a distinct type
         if self.session_name == "datadog_query_errors":
-            return "query_errors"
+            return "query_error"
         # Most session types produce completion events
         elif self.session_name in query_completion_sessions:
             return "query_completion"
@@ -390,29 +390,24 @@ class XESessionBase(DBMAsyncJob):
         """
         return ['query_start', 'query_complete', 'duration_ms']
 
-    def _create_event_payload(self, raw_event, event_source):
+    def _create_event_payload(self, raw_event):
         """
         Create a structured event payload for a single event with consistent format.
 
         Args:
             raw_event: The raw event data to normalize
-            event_source: The source of event (e.g., "xe_rpc" or "xe_batch")
-
         Returns:
             A dictionary with the standard payload structure
         """
         # Normalize the event - must be implemented by subclass
         normalized_event = self._normalize_event_impl(raw_event)
 
-        # Determine dbm_type based on the session name
-        dbm_type = self._determine_dbm_type()
-
         return {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": dbm_type,
-            "event_source": event_source,
+            "dbm_type": self._determine_dbm_type(),
+            "event_source": self.session_name,
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time() * 1000,
@@ -533,9 +528,6 @@ class XESessionBase(DBMAsyncJob):
                         f"duration_ms={query_details.get('duration_ms', 'UNKNOWN')}, "
                         f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(query_details, default=str)}"
                     )
-
-                # For now, just log it instead of sending
-                self._log.debug(f"Created payload for {self.session_name} event (not sending)")
 
                 # Log the first event payload in each batch for validation
                 if event == events[0]:
