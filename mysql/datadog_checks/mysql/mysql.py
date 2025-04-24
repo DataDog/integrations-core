@@ -104,6 +104,8 @@ class MySql(AgentCheck):
     GROUP_REPLICATION_SERVICE_CHECK_NAME = 'mysql.replication.group.status'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}

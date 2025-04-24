@@ -115,6 +115,8 @@ set_default_driver_conf()
 class SQLServer(AgentCheck):
     __NAMESPACE__ = "sqlserver"
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
