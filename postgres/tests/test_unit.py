@@ -218,6 +218,7 @@ def test_database_identifier(pg_instance, template, expected, tags):
         ("SET LONG;" * 1024 + "SELECT *;", "SELECT *;"),
         ("SET " + "'quotable'" * 1024 + "; SELECT *;", "SELECT *;"),
         ("SET 'l" + "o" * 1024 + "ng'; SELECT *;", "SELECT *;"),
+        (" /** pl/pgsql **/ SET 'comment'; SELECT *;", "SELECT *;"),
         ("this isn't SQL", "this isn't SQL"),
         ("", ""),
     ],

@@ -133,7 +133,15 @@ def get_list_chunks(lst, n):
 
 SET_TRIM_PATTERN = re.compile(
     r"""
-    ^(?: # match leading SET commands
+    ^(?:
+        # match one leading comment
+        (?:
+            \s*
+            /\*
+            .*?
+            \*/
+        )?
+        # match leading SET commands
         \s*SET\b
         (?:
             [^';]*? | # keywords, integer literals, etc.
