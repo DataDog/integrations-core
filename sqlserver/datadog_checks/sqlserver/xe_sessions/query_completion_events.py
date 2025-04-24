@@ -201,8 +201,8 @@ class QueryCompletionEventsHandler(XESessionBase):
     }
 
     _BATCH_STRING_FIELDS = [
-        "result", "batch_text", "database_name", 
-        "client_app_name", "sql_text", "activity_id"
+        "result", "batch_text", "database_name", "username",
+        "client_app_name", "sql_text", "activity_id", "client_hostname",
     ]
 
     _RPC_NUMERIC_FIELDS = {
@@ -221,7 +221,7 @@ class QueryCompletionEventsHandler(XESessionBase):
     }
 
     _RPC_STRING_FIELDS = [
-        "result", "sql_text", "statement", "database_name",
+        "result", "sql_text", "statement", "database_name", "client_hostname",
         "client_app_name", "object_name", "procedure_name",
         "data_stream", "activity_id", "username", "connection_reset_option",
     ]
@@ -239,7 +239,7 @@ class QueryCompletionEventsHandler(XESessionBase):
     }
 
     _MODULE_STRING_FIELDS = [
-        "object_name", "object_type", "statement", "sql_text",
+        "object_name", "object_type", "statement", "sql_text", "client_hostname",
         "database_name", "client_app_name", "activity_id", "username",
     ]
 

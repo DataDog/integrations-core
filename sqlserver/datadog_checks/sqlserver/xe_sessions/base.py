@@ -372,13 +372,10 @@ class XESessionBase(DBMAsyncJob):
             "datadog_sp_statement",
         ]
 
-        # Error events have a distinct type
         if self.session_name == "datadog_query_errors":
             return "query_error"
-        # Most session types produce completion events
         elif self.session_name in query_completion_sessions:
             return "query_completion"
-        # Default fallback for any new/unknown session types
         else:
             self._log.debug(f"Unrecognized session name: {self.session_name}, using default dbm_type")
             return "query_completion"
@@ -453,7 +450,8 @@ class XESessionBase(DBMAsyncJob):
 
         # Get the XML data and timing info
         xml_data, query_time, parse_time = self._query_ring_buffer()
-        # xml_data, query_time, parse_time = self._query_event_file()  # Alternate data source
+        # Eventually we will use this to get events from the event file, controlled by config
+        # xml_data, query_time, parse_time = self._query_event_file() 
 
         if not xml_data:
             self._log.debug(f"No data found for session {self.session_name}")
@@ -468,9 +466,14 @@ class XESessionBase(DBMAsyncJob):
             self._log.debug(f"No events processed from {self.session_name} session")
             return
 
-        # Detect timestamp gap between polls and log session type and actual gap
-        if events and 'timestamp' in events[0] and self._last_event_timestamp:
-            current_first_timestamp = events[0]['timestamp']
+        # Update timestamp tracking with the last event (events are ordered by timestamp)
+        if events and 'query_complete' in events[-1]:
+            self._last_event_timestamp = events[-1]['query_complete']
+            self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
+
+        # Update the timestamp gap detection
+        if events and self._last_event_timestamp and 'query_complete' in events[0]:
+            current_first_timestamp = events[0]['query_complete']
             # Calculate actual gap in seconds
             try:
                 prev_dt = datetime.datetime.fromisoformat(self._last_event_timestamp.replace('Z', '+00:00'))
@@ -484,11 +487,6 @@ class XESessionBase(DBMAsyncJob):
                 f"first={current_first_timestamp}"
                 + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
             )
-
-        # Update timestamp tracking with the last event (events are ordered by timestamp)
-        if events and 'timestamp' in events[-1]:
-            self._last_event_timestamp = events[-1]['timestamp']
-            self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
 
         total_time = time() - job_start_time
         self._log.info(

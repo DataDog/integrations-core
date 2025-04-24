@@ -72,7 +72,7 @@ class ErrorEventsHandler(XESessionBase):
         """Process error_reported event"""
         # Define field groups for error_reported events
         numeric_fields = ['error_number', 'severity', 'state', 'category']
-        string_fields = ['message', 'server_instance_name', 'client_hostname',
+        string_fields = ['message', 'client_hostname',
                          'username', 'database_name', 'client_app_name', 'sql_text']
 
         # Extract data elements
@@ -98,7 +98,7 @@ class ErrorEventsHandler(XESessionBase):
         """Process attention event"""
         # Define field groups for attention events
         numeric_fields = ['request_id']
-        string_fields = ['server_instance_name', 'client_hostname', 'username', 
+        string_fields = ['client_hostname', 'username',
                         'database_name', 'client_app_name', 'sql_text']
         # Process duration specifically to convert to milliseconds
         for data in event.findall('./data'):
@@ -165,7 +165,7 @@ class ErrorEventsHandler(XESessionBase):
         }
 
         string_fields = [
-            'message', 'server_instance_name', 'client_hostname',
+            'message', 'client_hostname',
             'username', 'database_name', 'client_app_name', 'sql_text',
             'destination', 'is_intercepted', 'user_defined'
         ]
@@ -182,7 +182,7 @@ class ErrorEventsHandler(XESessionBase):
         }
 
         string_fields = [
-            'server_instance_name', 'client_hostname', 'username',
+            'client_hostname', 'username',
             'database_name', 'client_app_name', 'sql_text'
         ]
 
