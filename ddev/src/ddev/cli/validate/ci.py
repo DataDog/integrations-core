@@ -82,6 +82,7 @@ def ci(app: Application, sync: bool):
             'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
+            'fetch-depth': '${{ inputs.ddev-fetch-depth }}',
         }
         if is_core or is_marketplace:
             config.update(
@@ -124,6 +125,7 @@ def ci(app: Application, sync: bool):
         'agent-image-py2',
         'agent-image-windows',
         'agent-image-windows-py2',
+        'fetch-depth',
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
 
