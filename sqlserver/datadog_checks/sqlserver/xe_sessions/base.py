@@ -408,6 +408,10 @@ class XESessionBase(DBMAsyncJob):
         for field in string_fields:
             normalized[field] = str(event.get(field, "") or "")
 
+        # Add query_signature if present
+        if "query_signature" in event:
+            normalized["query_signature"] = event["query_signature"]
+
         return normalized
 
     def _normalize_event_impl(self, event):
@@ -455,6 +459,10 @@ class XESessionBase(DBMAsyncJob):
         """
         # Normalize the event - must be implemented by subclass
         normalized_event = self._normalize_event_impl(raw_event)
+
+        # Add SQL metadata and signatures to the normalized event
+        if 'query_signature' in raw_event:
+            normalized_event['query_signature'] = raw_event['query_signature']
 
         return {
             "host": self._check.resolved_hostname,

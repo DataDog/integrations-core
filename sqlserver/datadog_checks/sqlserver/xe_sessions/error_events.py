@@ -126,7 +126,7 @@ class ErrorEventsHandler(XESessionBase):
 
     def _normalize_event_impl(self, event):
         """Normalize error event data based on event type"""
-        event_name = event.get('name', '')
+        event_name = event.get('event_name', '')
 
         if event_name == 'error_reported':
             return self._normalize_error_reported_event(event)
@@ -167,7 +167,7 @@ class ErrorEventsHandler(XESessionBase):
     def _get_important_fields(self):
         """Define important fields for logging based on event type"""
         # Common important fields for all event types
-        important_fields = ['timestamp', 'name']
+        important_fields = ['timestamp', 'event_name']
         # Add event-type specific fields
         if hasattr(self, '_last_processed_event_type'):
             if self._last_processed_event_type == 'error_reported':
@@ -186,7 +186,7 @@ class ErrorEventsHandler(XESessionBase):
         Returns:
             List of field names to obfuscate for this error event type
         """
-        event_name = event.get('name', '')
+        event_name = event.get('event_name', '')
 
         if event_name == 'error_reported':
             return ['sql_text']  # error_reported events may have sql_text
