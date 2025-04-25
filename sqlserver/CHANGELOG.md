@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.3.1 / 2025-04-25
+
+***Fixed***:
+
+* Use DB_NAME for query metrics in an azure sql database since joining on sys.databases doesn't always work. The dbid from dm_exec_query_stats doesn't match the one in sys.databases. ([#20097](https://github.com/DataDog/integrations-core/pull/20097))
+
 ## 22.3.0 / 2025-04-22
 
 ***Added***:
