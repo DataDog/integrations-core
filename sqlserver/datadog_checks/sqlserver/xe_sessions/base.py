@@ -358,6 +358,9 @@ class XESessionBase(DBMAsyncJob):
         """
         normalized = {}
 
+        # Add the XE event type to normalized data
+        normalized["xe_type"] = event.get("event_name", "")
+
         # Normalize the query_complete timestamp (from event's timestamp)
         normalized["query_complete"] = self._normalize_timestamp(event.get("timestamp", ""))
 
@@ -839,6 +842,7 @@ class XESessionBase(DBMAsyncJob):
         # Create the sqlserver section with performance metrics
         sqlserver_fields = {
             "session_id": event.get("session_id"),
+            "xe_type": event.get("event_name"),
             "duration_ms": event.get("duration_ms"),
             "query_start": query_details.get("query_start"),
             "query_complete": query_details.get("query_complete"),
