@@ -73,8 +73,8 @@ def diff(
             raise click.BadParameter(
                 "Second commit hash must be at least 7 characters long.", param_hint="second_commit"
             )
-        # if first_commit == second_commit:
-        # raise click.BadParameter("Commit hashes must be different")
+        if first_commit == second_commit:
+            raise click.BadParameter("Commit hashes must be different")
 
         repo_url = app.repo.path
         with GitRepo(repo_url) as gitRepo:

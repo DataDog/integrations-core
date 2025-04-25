@@ -93,8 +93,8 @@ def test_trim_modules_keep_some_remove_some():
         {"Size_Bytes": 1400, "Version": "1.1.0"},
     ]
     expected = [
-        {"Size_Bytes": 1000, "Delta (Bytes)": 0, "Delta": " ", "Version": "1.0.0"},
-        {"Size_Bytes": 1400, "Delta (Bytes)": 300, "Delta": "300 B", "Version": "1.0.0 -> 1.1.0"},
+        {"Size_Bytes": 1000, "Delta_Bytes": 0, "Delta": " ", "Version": "1.0.0"},
+        {"Size_Bytes": 1400, "Delta_Bytes": 300, "Delta": "300 B", "Version": "1.0.0 -> 1.1.0"},
     ]
     trimmed = trim_modules(modules, threshold=200)
     assert trimmed == expected
