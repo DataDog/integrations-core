@@ -336,7 +336,19 @@ class XESessionBase(DBMAsyncJob):
             for _, elem in context:
                 timestamp = elem.get('timestamp')
 
-                if (not self._last_event_timestamp) or (timestamp and timestamp > self._last_event_timestamp):
+                # Normalize both timestamps to ensure consistent comparison
+                normalized_timestamp = None
+                if timestamp:
+                    normalized_timestamp = TimestampHandler.normalize(timestamp)
+
+                # Compare normalized timestamps for proper filtering
+                should_include = False
+                if not self._last_event_timestamp:
+                    should_include = True
+                elif normalized_timestamp and normalized_timestamp > self._last_event_timestamp:
+                    should_include = True
+
+                if should_include:
                     event_xml = etree.tostring(elem, encoding='unicode')
                     filtered_events.append(event_xml)
 
@@ -429,7 +441,7 @@ class XESessionBase(DBMAsyncJob):
             try:
                 # Basic common info from event attributes
                 event_data = {"timestamp": event.get('timestamp'), "event_name": event.get('name', '')}
-                
+
                 # Use the strategy pattern to process events
                 event_name = event_data["event_name"]
                 if event_name in self._event_handlers:
