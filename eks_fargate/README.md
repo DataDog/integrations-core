@@ -7,15 +7,15 @@
 
 Amazon EKS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. The EKS Fargate nodes are managed by AWS Fargate and abstracted away from the user.
 
-EKS Fargate pods not run on traditional EKS nodes and EC2 instances. While the Agent does report [system checks][1], like `system.cpu.*` and `system.memory.*`, these are just for the Agent container. In order to collect data from your AWS Fargate pods, run the Agent as a sidecar within *each* of your desired application pods. The pod needs to be deployed with custom RBAC granting permissions to the kubelet for the Agent to get the required information.
+EKS Fargate pods do not run on traditional EKS nodes backed by EC2 instances. While the Agent does report [system checks][1], like `system.cpu.*` and `system.memory.*`, these are just for the Agent container. In order to collect data from your EKS Fargate pods, run the Agent as a sidecar within *each* of your desired application pods. The pod needs to be deployed with custom RBAC granting permissions to the kubelet for the Agent to get the required information.
 
-The Agent can only monitor the other containers in the same pod as itself. It will also communicate with the Cluster Agent for some of its reporting. Overall the Agent can:
+The Agent sidecar is responsible for monitoring the other containers in the same pod as itself. As well as communicating with the Cluster Agent for portions of its reporting. Overall the Agent can:
 
 - Report Kubernetes metrics collection from the pod running your application containers and the Agent
 - Run [Autodiscovery][2] based Agent integrations against the containers in the same pod
 - Collect APM and DogStatsD metrics for containers in the same pod
 
-If you have a mixed cluster of traditional EKS Nodes and Fargate pods, you will manage the traditional Datadog Kubernetes installation with a Helm Chart or Datadog Operator, and then manage your EKS Fargate pods separately.
+If you have a mixed cluster of traditional EKS Nodes and Fargate pods, you manage the traditional Datadog Kubernetes installation with a Helm Chart or Datadog Operator deployment, and then manage your EKS Fargate pods separately. With the Datadog Admission Controller the Cluster Agent can manage the deployment of the Agent sidecars for you.
 
 **Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
 
@@ -142,7 +142,7 @@ If you have a mixed cluster of the traditional EKS nodes and Fargate pods you ma
 
 ### Installation
 
-To collect data from your applications running in Amazon EKS Fargate over a Fargate node you will run the Agent as a sidecar. This can be done either manually or using the Datadog Admission Controller's automatic injection. This automatic injection requires the Cluster Agent to be running, and will automatically add the Agent sidecar to your desired pods.
+To collect data from your applications running in Amazon EKS Fargate over a Fargate node you run the Agent as a sidecar container within your pods. This can be done either manually or using the Datadog Admission Controller's automatic injection. This automatic injection requires the Cluster Agent to be running, and automatically adds the Agent sidecar to your desired pods on creation.
 
 Both methods require you to set your RBAC and `serviceAccountName` in your pod manually.
 
@@ -197,7 +197,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 2.  After the Cluster Agent reaches a running state and registers Admission Controller's mutating webhooks add the label `agent.datadoghq.com/sidecar: fargate` to your desired pods (not the parent workload) to trigger the injection of the Datadog Agent sidecar container.
 
-**Note:** The Admission Controller does not mutate pods that are already created, only new pods. Nor does it adjust your `serviceAccountName`, if you have not set the RBAC for this pod the Agent will not connect to Kubernetes.
+**Note:** The Admission Controller does not mutate pods that are already created, only new pods. Nor does it adjust your `serviceAccountName`, if you have not set the RBAC for this pod the Agent cannot connect to Kubernetes.
 
 ##### Example standard injection result
 
@@ -376,7 +376,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 3.  After the Cluster Agent reaches a running state and registers Admission Controller's mutating webhooks add the label `agent.datadoghq.com/sidecar: fargate` to your desired pods (not the parent workload) to trigger the injection of the Datadog Agent sidecar container.
 
-**Note:** The Admission Controller does not mutate pods that are already created, only new pods. Nor does it adjust your `serviceAccountName`, if you have not set the RBAC for this pod the Agent will not connect to Kubernetes.
+**Note:** The Admission Controller does not mutate pods that are already created, only new pods. Nor does it adjust your `serviceAccountName`, if you have not set the RBAC for this pod the Agent cannot connect to Kubernetes.
 
 ##### Example standard injection result
 
@@ -581,7 +581,7 @@ spec:
                 cpu: "200m"
 ```
 
-**Note**: Add `DD_TAGS` to append additional space separated `<KEY>:<VALUE>` tags. The `DD_CLUSTER_NAME` environment variable will set your `kube_cluster_name` tag.
+**Note**: Add `DD_TAGS` to append additional space separated `<KEY>:<VALUE>` tags. The `DD_CLUSTER_NAME` environment variable sets your `kube_cluster_name` tag.
 
 #### Running the Cluster Agent or the Cluster Checks Runner
 
@@ -644,7 +644,7 @@ In both cases, you need to change the Datadog Agent sidecar manifest in order to
           value: https://<CLUSTER_AGENT_SERVICE_NAME>.<CLUSTER_AGENT_SERVICE_NAMESPACE>.svc.cluster.local:5005
 ```
 
-Se the `DD_CLUSTER_AGENT_URL` relative to the Service name and Namespace created for your Datadog Cluster Agent.
+See the `DD_CLUSTER_AGENT_URL` relative to the Service name and Namespace created for your Datadog Cluster Agent.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -764,9 +764,7 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 
 ### Kubernetes resources view
 
-To collect Kubernetes resource views, you need a [Cluster Agent setup][17] and a valid connection between the sidecar Agent and Cluster Agent. This is connected for you automatically if you are using the sidecar injection setup.
-
-When configuring manually ensure you are [connecting the sidecar Agent](#configuring-sidecar-for-cluster-agent).
+To collect Kubernetes resource views, you need a [Cluster Agent setup][17] and a valid connection between the sidecar Agent and Cluster Agent. When using the Admission Controller's sidecar injection setup this is connected for you automatically. When configuring the sidecar manually ensure you are [connecting the sidecar Agent](#configuring-sidecar-for-cluster-agent).
 
 ## Process collection
 
@@ -939,7 +937,7 @@ For example if your Fargate pod is in the `fargate` namespace with the ServiceAc
 kubectl auth can-i get nodes/pods --as system:serviceaccount:fargate:datadog-agent
 ```
 
-This will return `yes` or `no` based on the access.
+This returns `yes` or `no` based on the access.
 
 
 ### Datadog Agent Container Security Context
