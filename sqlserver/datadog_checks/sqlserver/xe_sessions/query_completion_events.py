@@ -105,20 +105,6 @@ class QueryCompletionEventsHandler(XESessionBase):
         """Process all query completion event types using base implementation"""
         return super()._process_events(xml_data)
 
-    def _process_event(self, event, event_data):
-        """Process a single query event - base implementation for backward compatibility"""
-        event_name = event_data.get("event_name", "")
-
-        if event_name == 'sql_batch_completed':
-            return self._process_batch_event(event, event_data)
-        elif event_name == 'rpc_completed':
-            return self._process_rpc_event(event, event_data)
-        elif event_name == 'module_end':
-            return self._process_module_event(event, event_data)
-        else:
-            self._log.debug(f"Unknown event type: {event_name}, skipping")
-            return False
-
     def _process_batch_event(self, event, event_data):
         """Process sql_batch_completed event"""
         # Process data elements

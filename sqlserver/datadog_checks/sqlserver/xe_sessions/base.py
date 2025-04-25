@@ -429,17 +429,15 @@ class XESessionBase(DBMAsyncJob):
             try:
                 # Basic common info from event attributes
                 event_data = {"timestamp": event.get('timestamp'), "event_name": event.get('name', '')}
-
-                # Use either the strategy pattern or direct method call
-                if self._event_handlers and event_data["event_name"] in self._event_handlers:
-                    # Strategy pattern approach
-                    handler = self._event_handlers[event_data["event_name"]]
+                
+                # Use the strategy pattern to process events
+                event_name = event_data["event_name"]
+                if event_name in self._event_handlers:
+                    handler = self._event_handlers[event_name]
                     if handler(event, event_data):
                         events.append(event_data)
                 else:
-                    # Traditional approach (for backward compatibility)
-                    if self._process_event(event, event_data):
-                        events.append(event_data)
+                    self._log.debug(f"No handler for event type: {event_name}")
             except Exception as e:
                 self._log.error(f"Error processing event {event.get('name', 'unknown')}: {e}")
                 continue
@@ -447,8 +445,11 @@ class XESessionBase(DBMAsyncJob):
         return events
 
     @abstractmethod
-    def _process_event(self, event, event_data):
-        """Process a single event - override in subclasses"""
+    def _normalize_event_impl(self, event):
+        """
+        Implementation of event normalization - to be overridden by subclasses.
+        This method should apply the specific normalization logic for each event type.
+        """
         raise NotImplementedError
 
     def _normalize_event(self, event, custom_numeric_fields=None, custom_string_fields=None):
@@ -510,14 +511,6 @@ class XESessionBase(DBMAsyncJob):
             normalized["query_signature"] = event["query_signature"]
 
         return normalized
-
-    @abstractmethod
-    def _normalize_event_impl(self, event):
-        """
-        Implementation of event normalization - to be overridden by subclasses.
-        This method should apply the specific normalization logic for each event type.
-        """
-        raise NotImplementedError
 
     def _determine_dbm_type(self):
         """

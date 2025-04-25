@@ -70,24 +70,11 @@ class ErrorEventsHandler(XESessionBase):
         self._last_processed_event_type = None
         return super()._process_events(xml_data)
 
-    def _process_event(self, event, event_data):
-        """Process a single error event - base implementation for backward compatibility"""
-        # Store the event type for _get_important_fields
-        self._last_processed_event_type = event_data.get("event_name")
-
-        # Call the appropriate handler based on event type
-        event_name = event_data.get("event_name", "")
-
-        if event_name == 'error_reported':
-            return self._process_error_reported_event(event, event_data)
-        elif event_name == 'attention':
-            return self._process_attention_event(event, event_data)
-        else:
-            self._log.debug(f"Unknown event type: {event_name}, skipping")
-            return False
-
     def _process_error_reported_event(self, event, event_data):
         """Process error_reported event"""
+        # Store the event type for _get_important_fields
+        self._last_processed_event_type = 'error_reported'
+        
         # Extract data elements
         for data in event.findall('./data'):
             data_name = data.get('name')
@@ -107,6 +94,9 @@ class ErrorEventsHandler(XESessionBase):
 
     def _process_attention_event(self, event, event_data):
         """Process attention event"""
+        # Store the event type for _get_important_fields
+        self._last_processed_event_type = 'attention'
+        
         # Process data elements
         for data in event.findall('./data'):
             data_name = data.get('name')
