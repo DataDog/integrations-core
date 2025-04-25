@@ -554,6 +554,8 @@ class XESessionBase(DBMAsyncJob):
 
                 # Create a properly structured payload for the main event
                 payload = self._create_event_payload(obfuscated_event)
+                # Extract normalized query details for use in RQT event
+                query_details = payload.get("query_details", {})
 
                 # Log the first event payload in each batch for validation
                 if event == events[0]:
@@ -565,7 +567,8 @@ class XESessionBase(DBMAsyncJob):
 
                 # Create and send RQT event if applicable
                 if raw_sql_fields:
-                    rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields)
+                    # Pass normalized query details for proper timing fields
+                    rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
                     if rqt_event:
                         # For now, just log the first RQT event in each batch
                         if event == events[0]:
@@ -729,13 +732,14 @@ class XESessionBase(DBMAsyncJob):
                 return field
         return None
 
-    def _create_rqt_event(self, event, raw_sql_fields):
+    def _create_rqt_event(self, event, raw_sql_fields, query_details):
         """
         Create a Raw Query Text (RQT) event for a raw SQL statement.
 
         Args:
-            event: The normalized event with metadata
+            event: The event data dictionary with obfuscated SQL fields
             raw_sql_fields: Dictionary containing the original SQL fields
+            query_details: Dictionary containing normalized query details with timing information
 
         Returns:
             Dictionary with the RQT event payload or None if the event should be skipped
@@ -780,18 +784,14 @@ class XESessionBase(DBMAsyncJob):
                 "commands": event.get('dd_commands', None),
                 "comments": event.get('dd_comments', None),
             },
-            "procedure_signature": event.get("procedure_signature"),
-            "procedure_name": event.get("procedure_name"),
         }
 
         # Create the sqlserver section with performance metrics
         sqlserver_fields = {
-            "query_hash": event.get("query_hash"),
-            "query_plan_hash": event.get("query_plan_hash"),
             "session_id": event.get("session_id"),
             "duration_ms": event.get("duration_ms"),
-            "query_start": event.get("query_start"),
-            "query_complete": event.get("query_complete"),
+            "query_start": query_details.get("query_start"),
+            "query_complete": query_details.get("query_complete"),
         }
 
         # Add additional SQL fields to the sqlserver section
