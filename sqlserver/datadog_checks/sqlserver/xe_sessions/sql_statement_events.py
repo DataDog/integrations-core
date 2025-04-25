@@ -33,9 +33,17 @@ class SqlStatementEventsHandler(XESessionBase):
 
                 # Define field groups for SQL statement events
                 numeric_fields = [
-                    'cpu_time', 'page_server_reads', 'physical_reads',
-                    'logical_reads', 'writes', 'spills', 'row_count',
-                    'last_row_count', 'line_number', 'offset', 'offset_end'
+                    'cpu_time',
+                    'page_server_reads',
+                    'physical_reads',
+                    'logical_reads',
+                    'writes',
+                    'spills',
+                    'row_count',
+                    'last_row_count',
+                    'line_number',
+                    'offset',
+                    'offset_end',
                 ]
                 string_fields = ['statement']
                 text_fields = []

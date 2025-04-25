@@ -33,10 +33,20 @@ class SpStatementEventsHandler(XESessionBase):
 
                 # Define field groups for SP statement events
                 numeric_fields = [
-                    'source_database_id', 'object_id', 'cpu_time',
-                    'page_server_reads', 'physical_reads', 'logical_reads',
-                    'writes', 'spills', 'row_count', 'last_row_count',
-                    'nest_level', 'line_number', 'offset', 'offset_end'
+                    'source_database_id',
+                    'object_id',
+                    'cpu_time',
+                    'page_server_reads',
+                    'physical_reads',
+                    'logical_reads',
+                    'writes',
+                    'spills',
+                    'row_count',
+                    'last_row_count',
+                    'nest_level',
+                    'line_number',
+                    'offset',
+                    'offset_end',
                 ]
                 string_fields = ['object_name', 'statement']
                 text_fields = ['object_type']

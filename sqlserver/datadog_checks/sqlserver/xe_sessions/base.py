@@ -2,14 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import datetime
 import json as json_module
 from io import BytesIO, StringIO
 from time import time
-import datetime
 
 from lxml import etree
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database
@@ -36,6 +42,18 @@ class XESessionBase(DBMAsyncJob):
         self.collection_interval = 10  # Default for POC
         self.max_events = 100000  # Temporarily increased to see actual event volume
         self._last_event_timestamp = None  # Initialize timestamp tracking
+
+        # Configuration for raw query text (RQT) events
+        self._collect_raw_query = True  # Will be configurable in the future
+        self._raw_statement_text_cache = RateLimitingTTLCache(
+            maxsize=1000,  # Will be configurable in the future
+            ttl=60 * 60 / 10,  # 10 samples per hour per query - will be configurable
+        )
+
+        # Obfuscator options - use the same options as the main check
+        self._obfuscator_options = getattr(
+            self._config, 'obfuscator_options', {'dbms': 'mssql', 'obfuscation_mode': 'replace'}
+        )
 
         super(XESessionBase, self).__init__(
             check,
@@ -318,7 +336,12 @@ class XESessionBase(DBMAsyncJob):
         normalized["query_complete"] = event.get("timestamp", "")
 
         # Calculate query_start if duration_ms and timestamp are available
-        if "timestamp" in event and "duration_ms" in event and event.get("timestamp") and event.get("duration_ms") is not None:
+        if (
+            "timestamp" in event
+            and "duration_ms" in event
+            and event.get("timestamp")
+            and event.get("duration_ms") is not None
+        ):
             try:
                 # Parse the timestamp (assuming ISO format)
                 end_datetime = datetime.datetime.fromisoformat(event.get("timestamp").replace('Z', '+00:00'))
@@ -450,8 +473,8 @@ class XESessionBase(DBMAsyncJob):
 
         # Get the XML data and timing info
         xml_data, query_time, parse_time = self._query_ring_buffer()
-        # Eventually we will use this to get events from the event file, controlled by config
-        # xml_data, query_time, parse_time = self._query_event_file() 
+        # Eventually we will use this to get events from an event file, controlled by config
+        # xml_data, query_time, parse_time = self._query_event_file()
 
         if not xml_data:
             self._log.debug(f"No data found for session {self.session_name}")
@@ -484,8 +507,7 @@ class XESessionBase(DBMAsyncJob):
             # Log session name, timestamps, and gap
             self._log.debug(
                 f"[{self.session_name}] Timestamp gap: last={self._last_event_timestamp} "
-                f"first={current_first_timestamp}"
-                + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
+                f"first={current_first_timestamp}" + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
             )
 
         total_time = time() - job_start_time
@@ -507,22 +529,31 @@ class XESessionBase(DBMAsyncJob):
 
         for event in events:
             try:
-                # Create a properly structured payload for this event
-                payload = self._create_event_payload(event)
+                # Obfuscate SQL fields and get the raw statement
+                obfuscated_event, raw_sql_fields = self._obfuscate_sql_fields(event)
 
-                # Check for ALLEN TEST comment
-                if 'sql_text' in event and event.get('sql_text') and '-- ALLEN TEST' in event.get('sql_text'):
-                    # Get the normalized query details with query_start and query_complete
-                    query_details = payload.get('query_details', {})
+                # Check for ALLEN TEST comment in raw SQL fields
+                if raw_sql_fields:
+                    # Check each field for ALLEN TEST comment
+                    for field_name, field_value in raw_sql_fields.items():
+                        if (
+                            field_name in ['statement', 'sql_text', 'batch_text']
+                            and field_value
+                            and '-- ALLEN TEST' in field_value
+                        ):
+                            self._log.info(
+                                f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
+                                f"host={self._check.resolved_hostname}, field={field_name}, "
+                                f"session_id={obfuscated_event.get('session_id', 'UNKNOWN')}, "
+                                f"query_complete={obfuscated_event.get('query_complete', 'UNKNOWN')}, "
+                                f"query_start={obfuscated_event.get('query_start', 'UNKNOWN')}, "
+                                f"duration_ms={obfuscated_event.get('duration_ms', 'UNKNOWN')}, "
+                                f"text={field_value[:100]}, full_event={json_module.dumps(obfuscated_event, default=str)}"
+                            )
+                            break
 
-                    self._log.info(
-                        f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
-                        f"host={self._check.resolved_hostname}, session_id={query_details.get('session_id', 'UNKNOWN')}, "
-                        f"query_complete={query_details.get('query_complete', 'UNKNOWN')}, "
-                        f"query_start={query_details.get('query_start', 'UNKNOWN')}, "
-                        f"duration_ms={query_details.get('duration_ms', 'UNKNOWN')}, "
-                        f"sql_text={event.get('sql_text', '')[:100]}, full_event={json_module.dumps(query_details, default=str)}"
-                    )
+                # Create a properly structured payload for the main event
+                payload = self._create_event_payload(obfuscated_event)
 
                 # Log the first event payload in each batch for validation
                 if event == events[0]:
@@ -532,9 +563,252 @@ class XESessionBase(DBMAsyncJob):
                     except Exception as e:
                         self._log.error(f"Error serializing payload for logging: {e}")
 
-                # Uncomment to enable sending to Datadog in the future:
+                # Create and send RQT event if applicable
+                if raw_sql_fields:
+                    rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields)
+                    if rqt_event:
+                        # For now, just log the first RQT event in each batch
+                        if event == events[0]:
+                            try:
+                                rqt_payload_json = json_module.dumps(rqt_event, default=str, indent=2)
+                                self._log.debug(f"Sample {self.session_name} RQT event payload:\n{rqt_payload_json}")
+                            except Exception as e:
+                                self._log.error(f"Error serializing RQT payload for logging: {e}")
+
+                        # Log that we created an RQT event but are not sending it yet
+                        self._log.debug(
+                            f"Created RQT event for query_signature={obfuscated_event.get('query_signature')} (not sending)"
+                        )
+
+                        # Uncomment to enable sending the RQT event in the future:
+                        # rqt_payload = json.dumps(rqt_event, default=default_json_event_encoding)
+                        # self._check.database_monitoring_query_sample(rqt_payload)
+
+                # Uncomment to enable sending the main event in the future:
                 # serialized_payload = json.dumps(payload, default=default_json_event_encoding)
                 # self._check.database_monitoring_query_activity(serialized_payload)
             except Exception as e:
                 self._log.error(f"Error processing event: {e}")
                 continue
+
+    def _obfuscate_sql_fields(self, event):
+        """
+        Base implementation for SQL field obfuscation.
+        This is a template method that delegates to subclasses to handle their specific fields.
+
+        Args:
+            event: The event data dictionary with SQL fields
+
+        Returns:
+            A tuple of (obfuscated_event, raw_sql_fields) where:
+            - obfuscated_event is the event with SQL fields obfuscated
+            - raw_sql_fields is a dict containing original SQL fields for RQT event
+        """
+        # Create a copy to avoid modifying the original
+        obfuscated_event = event.copy()
+
+        # Call the subclass implementation to get the fields to obfuscate
+        # and perform any event-type specific processing
+        sql_fields_to_obfuscate = self._get_sql_fields_to_obfuscate(event)
+        if not sql_fields_to_obfuscate:
+            return obfuscated_event, None
+
+        # Save original SQL fields
+        raw_sql_fields = {}
+        for field in sql_fields_to_obfuscate:
+            if field in event and event[field]:
+                raw_sql_fields[field] = event[field]
+
+        if not raw_sql_fields:
+            return obfuscated_event, None
+
+        # Process each SQL field
+        combined_commands = None
+        combined_tables = None
+        combined_comments = []
+
+        # First pass - obfuscate and collect metadata
+        for field in sql_fields_to_obfuscate:
+            if field in event and event[field]:
+                try:
+                    obfuscated_result = obfuscate_sql_with_metadata(
+                        event[field], self._obfuscator_options, replace_null_character=True
+                    )
+
+                    # Store obfuscated SQL
+                    obfuscated_event[field] = obfuscated_result['query']
+
+                    # Compute and store signature for this field
+                    raw_sql_fields[f"{field}_signature"] = compute_sql_signature(event[field])
+
+                    # Collect metadata
+                    metadata = obfuscated_result['metadata']
+                    field_commands = metadata.get('commands', None)
+                    field_tables = metadata.get('tables', None)
+                    field_comments = metadata.get('comments', [])
+
+                    # Store the first non-empty metadata values
+                    if field_commands and not combined_commands:
+                        combined_commands = field_commands
+                    if field_tables and not combined_tables:
+                        combined_tables = field_tables
+                    if field_comments:
+                        combined_comments.extend(field_comments)
+
+                except Exception as e:
+                    self._log.debug(f"Error obfuscating {field}: {e}")
+                    obfuscated_event[field] = "ERROR: failed to obfuscate"
+
+        # Store the combined metadata
+        obfuscated_event['dd_commands'] = combined_commands
+        obfuscated_event['dd_tables'] = combined_tables
+        obfuscated_event['dd_comments'] = list(set(combined_comments)) if combined_comments else []
+
+        # Get the primary SQL field for this event type and use it for query_signature
+        primary_field = self._get_primary_sql_field(event)
+        if (
+            primary_field
+            and primary_field in obfuscated_event
+            and obfuscated_event[primary_field] != "ERROR: failed to obfuscate"
+        ):
+            try:
+                obfuscated_event['query_signature'] = compute_sql_signature(obfuscated_event[primary_field])
+            except Exception as e:
+                self._log.debug(f"Error calculating signature from primary field {primary_field}: {e}")
+
+        # If no signature from primary field, try others
+        if 'query_signature' not in obfuscated_event:
+            for field in sql_fields_to_obfuscate:
+                if (
+                    field != primary_field
+                    and field in obfuscated_event
+                    and obfuscated_event[field]
+                    and obfuscated_event[field] != "ERROR: failed to obfuscate"
+                ):
+                    try:
+                        obfuscated_event['query_signature'] = compute_sql_signature(obfuscated_event[field])
+                        break
+                    except Exception as e:
+                        self._log.debug(f"Error calculating signature from {field}: {e}")
+
+        return obfuscated_event, raw_sql_fields
+
+    def _get_sql_fields_to_obfuscate(self, event):
+        """
+        Get the list of SQL fields to obfuscate for this event type.
+
+        Subclasses should override this method to return the specific fields
+        they want to obfuscate based on their event type.
+
+        Args:
+            event: The event data dictionary
+
+        Returns:
+            List of field names to obfuscate
+        """
+        # Default implementation - will be overridden by subclasses
+        return ['statement', 'sql_text', 'batch_text']
+
+    def _get_primary_sql_field(self, event):
+        """
+        Get the primary SQL field for this event type.
+        This is the field that will be used for the main query signature.
+
+        Subclasses should override this method to return their primary field.
+
+        Args:
+            event: The event data dictionary
+
+        Returns:
+            Name of the primary SQL field
+        """
+        # Default implementation - will be overridden by subclasses
+        # Try statement first, then sql_text, then batch_text
+        for field in ['statement', 'sql_text', 'batch_text']:
+            if field in event and event[field]:
+                return field
+        return None
+
+    def _create_rqt_event(self, event, raw_sql_fields):
+        """
+        Create a Raw Query Text (RQT) event for a raw SQL statement.
+
+        Args:
+            event: The normalized event with metadata
+            raw_sql_fields: Dictionary containing the original SQL fields
+
+        Returns:
+            Dictionary with the RQT event payload or None if the event should be skipped
+        """
+        if not self._collect_raw_query or not raw_sql_fields:
+            return None
+
+        # Check if we have the necessary signatures
+        query_signature = event.get('query_signature')
+        if not query_signature:
+            self._log.debug("Missing query_signature for RQT event")
+            return None
+
+        # Get the primary SQL field for this event type
+        primary_field = self._get_primary_sql_field(event)
+        if not primary_field or primary_field not in raw_sql_fields:
+            self._log.debug(f"Primary SQL field {primary_field} not found in raw_sql_fields")
+            return None
+
+        # Ensure we have a signature for the primary field
+        primary_signature_field = f"{primary_field}_signature"
+        if primary_signature_field not in raw_sql_fields:
+            self._log.debug(f"Signature for primary field {primary_field} not found in raw_sql_fields")
+            return None
+
+        # Use primary field's signature as the raw_query_signature
+        raw_query_signature = raw_sql_fields[primary_signature_field]
+
+        # Use rate limiting cache to control how many RQT events we send
+        cache_key = (query_signature, raw_query_signature)
+        if not self._raw_statement_text_cache.acquire(cache_key):
+            return None
+
+        # Create basic db fields structure
+        db_fields = {
+            "instance": event.get('database_name', None),
+            "query_signature": query_signature,
+            "raw_query_signature": raw_query_signature,
+            "statement": raw_sql_fields[primary_field],  # Primary field becomes the statement
+            "metadata": {
+                "tables": event.get('dd_tables', None),
+                "commands": event.get('dd_commands', None),
+                "comments": event.get('dd_comments', None),
+            },
+            "procedure_signature": event.get("procedure_signature"),
+            "procedure_name": event.get("procedure_name"),
+        }
+
+        # Create the sqlserver section with performance metrics
+        sqlserver_fields = {
+            "query_hash": event.get("query_hash"),
+            "query_plan_hash": event.get("query_plan_hash"),
+            "session_id": event.get("session_id"),
+            "duration_ms": event.get("duration_ms"),
+            "query_start": event.get("query_start"),
+            "query_complete": event.get("query_complete"),
+        }
+
+        # Add additional SQL fields to the sqlserver section
+        # but only if they're not the primary field and not empty
+        for field in ["statement", "sql_text", "batch_text"]:
+            if field != primary_field and field in raw_sql_fields and raw_sql_fields[field]:
+                sqlserver_fields[field] = raw_sql_fields[field]
+
+        return {
+            "timestamp": time() * 1000,
+            "host": self._check.resolved_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "sqlserver",
+            "dbm_type": "rqt",
+            "event_source": self.session_name,
+            "ddtags": ",".join(self.tags),
+            'service': self._config.service,
+            "db": db_fields,
+            "sqlserver": sqlserver_fields,
+        }

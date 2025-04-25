@@ -72,8 +72,7 @@ class ErrorEventsHandler(XESessionBase):
         """Process error_reported event"""
         # Define field groups for error_reported events
         numeric_fields = ['error_number', 'severity', 'state', 'category']
-        string_fields = ['message', 'client_hostname',
-                         'username', 'database_name', 'client_app_name', 'sql_text']
+        string_fields = ['message', 'client_hostname', 'username', 'database_name', 'client_app_name', 'sql_text']
 
         # Extract data elements
         for data in event.findall('./data'):
@@ -98,8 +97,7 @@ class ErrorEventsHandler(XESessionBase):
         """Process attention event"""
         # Define field groups for attention events
         numeric_fields = ['request_id']
-        string_fields = ['client_hostname', 'username',
-                        'database_name', 'client_app_name', 'sql_text']
+        string_fields = ['client_hostname', 'username', 'database_name', 'client_app_name', 'sql_text']
         # Process duration specifically to convert to milliseconds
         for data in event.findall('./data'):
             data_name = data.get('name')
@@ -155,19 +153,18 @@ class ErrorEventsHandler(XESessionBase):
     def _normalize_error_reported_event(self, event):
         """Normalize error_reported event data"""
         # Define field types for normalization
-        numeric_fields = {
-            'error_number': 0,
-            'severity': 0,
-            'state': 0,
-            'category': 0,
-            'session_id': 0,
-            'request_id': 0
-        }
+        numeric_fields = {'error_number': 0, 'severity': 0, 'state': 0, 'category': 0, 'session_id': 0, 'request_id': 0}
 
         string_fields = [
-            'message', 'client_hostname',
-            'username', 'database_name', 'client_app_name', 'sql_text',
-            'destination', 'is_intercepted', 'user_defined'
+            'message',
+            'client_hostname',
+            'username',
+            'database_name',
+            'client_app_name',
+            'sql_text',
+            'destination',
+            'is_intercepted',
+            'user_defined',
         ]
 
         return self._normalize_event(event, numeric_fields, string_fields)
@@ -175,16 +172,9 @@ class ErrorEventsHandler(XESessionBase):
     def _normalize_attention_event(self, event):
         """Normalize attention event data"""
         # Define field types for normalization
-        numeric_fields = {
-            'duration_ms': 0.0,  # Float for duration in ms
-            'request_id': 0,
-            'session_id': 0
-        }
+        numeric_fields = {'duration_ms': 0.0, 'request_id': 0, 'session_id': 0}  # Float for duration in ms
 
-        string_fields = [
-            'client_hostname', 'username',
-            'database_name', 'client_app_name', 'sql_text'
-        ]
+        string_fields = ['client_hostname', 'username', 'database_name', 'client_app_name', 'sql_text']
 
         return self._normalize_event(event, numeric_fields, string_fields)
 
@@ -199,3 +189,44 @@ class ErrorEventsHandler(XESessionBase):
             elif self._last_processed_event_type == 'attention':
                 important_fields.extend(['duration_ms', 'session_id', 'sql_text'])
         return important_fields
+
+    def _get_sql_fields_to_obfuscate(self, event):
+        """
+        Get the SQL fields to obfuscate based on the error event type.
+
+        Args:
+            event: The event data dictionary
+
+        Returns:
+            List of field names to obfuscate for this error event type
+        """
+        event_name = event.get('name', '')
+
+        if event_name == 'error_reported':
+            return ['sql_text']  # error_reported events may have sql_text
+        elif event_name == 'attention':
+            return ['sql_text']  # attention events may have sql_text
+        elif event_name == 'xml_deadlock_report':
+            # No SQL to obfuscate in deadlock reports, but they may contain sensitive data in the XML
+            # This could be handled in _post_process_obfuscated_event if needed
+            return []
+        else:
+            # Default case
+            return ['sql_text']
+
+    def _get_primary_sql_field(self, event):
+        """
+        Get the primary SQL field for error events.
+        For error events, sql_text is typically the only SQL field.
+
+        Args:
+            event: The event data dictionary
+
+        Returns:
+            Name of the primary SQL field for this event type
+        """
+        # For most error events, sql_text is the only SQL field
+        if 'sql_text' in event and event['sql_text']:
+            return 'sql_text'
+
+        return None

@@ -63,8 +63,13 @@ class QueryCompletionEventsHandler(XESessionBase):
         """Process sql_batch_completed event"""
         # Define field groups for batch events
         numeric_fields = [
-            'cpu_time', 'page_server_reads', 'physical_reads',
-            'logical_reads', 'writes', 'spills', 'row_count'
+            'cpu_time',
+            'page_server_reads',
+            'physical_reads',
+            'logical_reads',
+            'writes',
+            'spills',
+            'row_count',
         ]
         string_fields = ['batch_text']
         text_fields = ['result']
@@ -95,8 +100,15 @@ class QueryCompletionEventsHandler(XESessionBase):
         """Process rpc_completed event"""
         # Define field groups for RPC events
         numeric_fields = [
-            'cpu_time', 'page_server_reads', 'physical_reads', 'logical_reads',
-            'writes', 'spills', 'row_count', 'object_id', 'line_number'
+            'cpu_time',
+            'page_server_reads',
+            'physical_reads',
+            'logical_reads',
+            'writes',
+            'spills',
+            'row_count',
+            'object_id',
+            'line_number',
         ]
         string_fields = ['statement']
         text_fields = ['result', 'data_stream']
@@ -126,10 +138,7 @@ class QueryCompletionEventsHandler(XESessionBase):
     def _process_module_event(self, event, event_data):
         """Process module_end event (for stored procedures, triggers, functions, etc.)"""
         # Define field groups for module events
-        numeric_fields = [
-            'source_database_id', 'object_id', 'row_count',
-            'line_number', 'offset', 'offset_end'
-        ]
+        numeric_fields = ['source_database_id', 'object_id', 'row_count', 'line_number', 'offset', 'offset_end']
         string_fields = ['object_name', 'object_type', 'statement']
 
         # Process data elements
@@ -201,8 +210,14 @@ class QueryCompletionEventsHandler(XESessionBase):
     }
 
     _BATCH_STRING_FIELDS = [
-        "result", "batch_text", "database_name", "username",
-        "client_app_name", "sql_text", "activity_id", "client_hostname",
+        "result",
+        "batch_text",
+        "database_name",
+        "username",
+        "client_app_name",
+        "sql_text",
+        "activity_id",
+        "client_hostname",
     ]
 
     _RPC_NUMERIC_FIELDS = {
@@ -221,9 +236,18 @@ class QueryCompletionEventsHandler(XESessionBase):
     }
 
     _RPC_STRING_FIELDS = [
-        "result", "sql_text", "statement", "database_name", "client_hostname",
-        "client_app_name", "object_name", "procedure_name",
-        "data_stream", "activity_id", "username", "connection_reset_option",
+        "result",
+        "sql_text",
+        "statement",
+        "database_name",
+        "client_hostname",
+        "client_app_name",
+        "object_name",
+        "procedure_name",
+        "data_stream",
+        "activity_id",
+        "username",
+        "connection_reset_option",
     ]
 
     _MODULE_NUMERIC_FIELDS = {
@@ -239,8 +263,15 @@ class QueryCompletionEventsHandler(XESessionBase):
     }
 
     _MODULE_STRING_FIELDS = [
-        "object_name", "object_type", "statement", "sql_text", "client_hostname",
-        "database_name", "client_app_name", "activity_id", "username",
+        "object_name",
+        "object_type",
+        "statement",
+        "sql_text",
+        "client_hostname",
+        "database_name",
+        "client_app_name",
+        "activity_id",
+        "username",
     ]
 
     def _normalize_batch_event(self, event):
@@ -269,3 +300,53 @@ class QueryCompletionEventsHandler(XESessionBase):
             'database_name',
             'activity_id',
         ]
+
+    def _get_sql_fields_to_obfuscate(self, event):
+        """
+        Get the SQL fields to obfuscate based on the event type.
+        Different event types have different SQL fields.
+
+        Args:
+            event: The event data dictionary
+
+        Returns:
+            List of field names to obfuscate for this event type
+        """
+        event_name = event.get('event_name', '')
+
+        if event_name == 'sql_batch_completed':
+            return ['batch_text', 'sql_text']  # batch_text is the main SQL field for batch events
+        elif event_name == 'rpc_completed':
+            return ['statement', 'sql_text']  # statement is the main SQL field for RPC events
+        elif event_name == 'module_end':
+            return ['statement', 'sql_text']  # statement is the main SQL field for module events
+        else:
+            # Default case - handle any SQL fields
+            return ['statement', 'sql_text', 'batch_text']
+
+    def _get_primary_sql_field(self, event):
+        """
+        Get the primary SQL field based on the event type.
+        This is the field that will be used as the main source for query signatures.
+
+        Args:
+            event: The event data dictionary
+
+        Returns:
+            Name of the primary SQL field for this event type
+        """
+        event_name = event.get('event_name', '')
+
+        if event_name == 'sql_batch_completed':
+            return 'batch_text'
+        elif event_name == 'rpc_completed':
+            return 'statement'
+        elif event_name == 'module_end':
+            return 'statement'
+
+        # Default fallback - try fields in priority order
+        for field in ['statement', 'sql_text', 'batch_text']:
+            if field in event and event[field]:
+                return field
+
+        return None
