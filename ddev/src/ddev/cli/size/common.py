@@ -11,17 +11,46 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Dict, List, Literal, Optional, Set, Tuple, Type, Union, cast
+from typing import Dict, List, Literal, Optional, Set, Tuple, Type, TypedDict, Union, cast
 
 import matplotlib.cm as cm
-
-# import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import requests
 import squarify
 from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
+
+
+class FileDataEntry(TypedDict):
+    Name: str
+    Version: str
+    Size_Bytes: int
+    Size: str
+    Type: str
+
+
+class FileDataEntryPlatformVersion(FileDataEntry):
+    Platform: str
+    Python_Version: str
+
+
+class CommitEntry(TypedDict):
+    Size_Bytes: int
+    Version: str
+    Date: date
+    Author: str
+    Commit_Message: str
+    Commit_SHA: str
+
+
+class CommitEntryWithDelta(CommitEntry):
+    Delta_Bytes: int
+    Delta: str
+
+
+class CommitEntryPlatformWithDelta(CommitEntryWithDelta):
+    Platform: str
 
 
 def valid_platforms_versions(repo_path: Union[Path, str]) -> Tuple[Set[str], Set[str]]:
@@ -65,37 +94,58 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def print_csv(app: Application, i: Optional[int], modules: List[Dict[str, Union[str, int, date]]]) -> None:
+def print_csv(
+    app: Application,
+    i: Optional[int],
+    modules: (
+        List[FileDataEntry]
+        | List[FileDataEntryPlatformVersion]
+        | List[CommitEntryWithDelta]
+        | List[CommitEntryPlatformWithDelta]
+    ),
+) -> None:
     headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
     if not i:
         app.display(",".join(headers))
 
     for row in modules:
         if any(str(value).strip() not in ("", "0") for value in row.values()):
-            app.display(",".join(format(str(row[h])) for h in headers))
+            app.display(",".join(format(str(row.get(h, ""))) for h in headers))
 
 
 def format(s: str) -> str:
     return f'"{s}"' if "," in s else s
 
 
-def print_table(app: Application, mode: str, modules: List[Dict[str, Union[str, int, date]]]) -> None:
-    modules_table: Dict[str, Dict[int, str]] = {col: {} for col in modules[0].keys() if "(Bytes)" not in col}
+def print_table(
+    app: Application,
+    mode: str,
+    modules: (
+        List[FileDataEntry]
+        | List[FileDataEntryPlatformVersion]
+        | List[CommitEntryWithDelta]
+        | List[CommitEntryPlatformWithDelta]
+    ),
+) -> None:
+    columns = [col for col in modules[0].keys() if "Bytes" not in col]
+    modules_table: Dict[str, Dict[int, str]] = {col: {} for col in columns}
+
     for i, row in enumerate(modules):
-        for key, value in row.items():
-            if key in modules_table:
-                modules_table[key][i] = str(value)
+        for key in columns:
+            modules_table[key][i] = str(row.get(key, ""))
+
     app.display_table(mode, modules_table)
 
+
 def plot_treemap(
-    modules: List[Dict[str, Union[str, int, date]]],
+    modules: List[FileDataEntry] | List[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
     mode: Literal["status", "diff"] = "status",
     path: Optional[str] = None,
 ) -> None:
     # Convert sizes to absolute values for layout computation
-    sizes = [abs(cast(int, mod["Size (Bytes)"])) for mod in modules]
+    sizes = [abs(mod["Size_Bytes"]) for mod in modules]
 
     # Initialize figure and axis
     plt.figure(figsize=(12, 8))
@@ -117,7 +167,7 @@ def plot_treemap(
         def normalize(mods):
             if not mods:
                 return []
-            sizes = [cast(int, mod["Size (Bytes)"]) for mod in mods]
+            sizes = [mod["Size_Bytes"] for mod in mods]
             min_size = min(sizes)
             max_size = max(sizes)
             range_size = max_size - min_size or 1
@@ -149,11 +199,11 @@ def plot_treemap(
         cmap_pos = cm.get_cmap("Oranges")
         cmap_neg = cm.get_cmap("Blues")
 
-        positives = [mod for mod in modules if cast(int, mod["Size (Bytes)"]) > 0]
-        negatives = [mod for mod in modules if cast(int, mod["Size (Bytes)"]) < 0]
+        positives = [mod for mod in modules if cast(int, mod["Size_Bytes"]) > 0]
+        negatives = [mod for mod in modules if cast(int, mod["Size_Bytes"]) < 0]
 
-        sizes_pos = [cast(int, mod["Size (Bytes)"]) for mod in positives]
-        sizes_neg = [abs(cast(int, mod["Size (Bytes)"])) for mod in negatives]
+        sizes_pos = [mod["Size_Bytes"] for mod in positives]
+        sizes_neg = [abs(mod["Size_Bytes"]) for mod in negatives]
 
         sum_pos = sum(sizes_pos)
         sum_neg = sum(sizes_neg)
@@ -184,12 +234,12 @@ def plot_treemap(
         colors = []
 
         for mod in negatives:
-            raw = abs(cast(int, mod["Size (Bytes)"])) / max_size
+            raw = abs(mod["Size_Bytes"]) / max_size
             intensity = rescale_intensity(raw)
             colors.append(cmap_neg(intensity))
 
         for mod in positives:
-            raw = cast(int, mod["Size (Bytes)"]) / max_size
+            raw = mod["Size_Bytes"] / max_size
             intensity = rescale_intensity(raw)
             colors.append(cmap_pos(intensity))
 
@@ -259,13 +309,14 @@ def plot_treemap(
     if show:
         plt.show()
     if path:
-        plt.savefig(path, bbox_inches='tight')
+        plt.savefig(path, bbox_inches="tight", format="png")
+
 
 def get_dependencies_sizes(
-    deps: List[str], download_urls: List[str], compressed: bool
-) -> List[Dict[str, Union[str, int]]]:
-    file_data = []
-    for dep, url in zip(deps, download_urls, strict=False):
+    deps: List[str], download_urls: List[str], versions: List[str], compressed: bool
+) -> List[FileDataEntry]:
+    file_data: List[FileDataEntry] = []
+    for dep, url, version in zip(deps, download_urls, versions, strict=False):
         if compressed:
             response = requests.head(url)
             response.raise_for_status()
@@ -292,64 +343,140 @@ def get_dependencies_sizes(
                     for name in filenames:
                         file_path = os.path.join(dirpath, name)
                         size += os.path.getsize(file_path)
-        file_data.append({"File Path": str(dep), "Type": "Dependency", "Name": str(dep), "Size (Bytes)": int(size)})
-    return cast(List[Dict[str, Union[str, int]]], file_data)
+        file_data.append(
+            {
+                "Name": str(dep),
+                "Version": version,
+                "Size_Bytes": int(size),
+                "Size": convert_size(size),
+                "Type": "Dependency",
+            }
+        )
+
+    return file_data
 
 
-def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str]]:
+def get_files(repo_path: str | Path, compressed: bool) -> List[FileDataEntry]:
+    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
+    git_ignore = get_gitignore_files(repo_path)
+    included_folder = "datadog_checks/"
+
+    integration_sizes: Dict[str, int] = {}
+    integration_versions: Dict[str, str] = {}
+
+    for root, _, files in os.walk(repo_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            relative_path = os.path.relpath(file_path, repo_path)
+
+            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+                continue
+            path = Path(relative_path)
+            parts = path.parts
+
+            integration_name = parts[0]
+
+            size = compress(file_path) if compressed else os.path.getsize(file_path)
+            integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size
+
+            if integration_name not in integration_versions:
+                about_path = os.path.join(
+                    repo_path, integration_name, "datadog_checks", integration_name, "__about__.py"
+                )
+                version = extract_version_from_about_py(about_path)
+                integration_versions[integration_name] = version
+
+    return [
+        {
+            "Name": name,
+            "Version": integration_versions.get(name, ""),
+            "Size_Bytes": size,
+            "Size": convert_size(size),
+            "Type": "Integration",
+        }
+        for name, size in integration_sizes.items()
+    ]
+
+
+def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str], List[str]]:
     download_urls = []
     deps = []
+    versions = []
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
         for line in file_content.splitlines():
             match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
-            if match:
-                deps.append(match.group(1))
-                download_urls.append(match.group(2))
-            else:
+            if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
+            name = match.group(1)
+            url = match.group(2)
 
-    return deps, download_urls
+            deps.append(name)
+            download_urls.append(url)
+            version_match = re.search(rf"{re.escape(name)}-([0-9]+(?:\.[0-9]+)*)-", url)
+            if version_match:
+                versions.append(version_match.group(1))
+
+    return deps, download_urls, versions
 
 
 def group_modules(
-    modules: List[Dict[str, Union[str, int]]], platform: str, version: str, i: Optional[int]
-) -> List[Dict[str, Union[str, int, date]]]:
-    if modules == []:
-        return [
-            {
-                "Name": "",
-                "Type": "",
-                "Size (Bytes)": 0,
-                "Size": "",
-                "Platform": "",
-                "Version": "",
-            }
+    modules: List[FileDataEntry], platform: str, version: str, i: Optional[int]
+) -> List[FileDataEntryPlatformVersion] | List[FileDataEntry]:
+    if modules == [] and i is None:
+        empty_entry: FileDataEntry = {
+            "Name": "",
+            "Version": "",
+            "Size_Bytes": 0,
+            "Size": "",
+            "Type": "",
+        }
+        return [empty_entry]
+    elif modules == []:
+        empty_entry_with_platform: FileDataEntryPlatformVersion = {
+            "Name": "",
+            "Version": "",
+            "Size_Bytes": 0,
+            "Size": "",
+            "Type": "",
+            "Platform": "",
+            "Python_Version": "",
+        }
+        return [empty_entry_with_platform]
+    elif i is not None:
+        new_modules: List[FileDataEntryPlatformVersion] = [
+            {**entry, "Platform": platform, "Python_Version": version} for entry in modules
         ]
-    grouped_aux: Dict[tuple[str, str], int] = {}
-    for file in modules:
-        key = (str(file["Name"]), str(file["Type"]))
-        grouped_aux[key] = grouped_aux.get(key, 0) + int(file["Size (Bytes)"])
-    if i is None:
-        return [
-            {"Name": name, "Type": type, "Size (Bytes)": size, "Size": convert_size(size)}
-            for (name, type), size in grouped_aux.items()
-        ]
+        return new_modules
     else:
-        return [
-            {
-                "Name": name,
-                "Type": type,
-                "Size (Bytes)": size,
-                "Size": convert_size(size),
-                "Platform": platform,
-                "Version": version,
-            }
-            for (name, type), size in grouped_aux.items()
-        ]
+        return modules
 
 
-def get_gitignore_files(repo_path: Union[str, Path]) -> List[str]:
+def extract_version_from_about_py(path: str) -> str:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("__version__"):
+                    return line.split("=")[1].strip().strip("'\"")
+    except Exception:
+        pass
+    return ""
+
+
+def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> List[FileDataEntry]:
+    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+
+    for filename in os.listdir(resolved_path):
+        file_path = os.path.join(resolved_path, filename)
+
+        if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
+            deps, download_urls, versions = get_dependencies_list(file_path)
+            return get_dependencies_sizes(deps, download_urls, versions, compressed)
+    return []
+
+
+def get_gitignore_files(repo_path: str | Path) -> List[str]:
     gitignore_path = os.path.join(repo_path, ".gitignore")
     with open(gitignore_path, "r", encoding="utf-8") as file:
         gitignore_content = file.read()
@@ -413,7 +540,15 @@ class GitRepo:
             return self._run(f"git log --reverse --pretty=format:%H {initial}..{final} -- {module_path}")
 
     def checkout_commit(self, commit: str) -> None:
-        self._run(f"git fetch --quiet --depth 1 origin {commit}")
+        try:
+            self._run(f"git fetch --quiet --depth 1 origin {commit}")
+        except subprocess.CalledProcessError as e:
+            if e.returncode == 128:
+                raise ValueError(
+                    f"Failed to fetch commit '{commit}'.\n"
+                    f"Make sure the commit hash is correct and that your local repository "
+                    "is up to date with the remote.\n"
+                ) from e
         self._run(f"git checkout --quiet {commit}")
 
     def sparse_checkout_commit(self, commit_sha: str, module: str) -> None:

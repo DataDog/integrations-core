@@ -3,26 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import tempfile
-import zipfile
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 import click
-import requests
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
 
 from .common import (
+    FileDataEntry,
     GitRepo,
-    compress,
-    get_dependencies_list,
-    get_gitignore_files,
+    convert_size,
+    get_dependencies,
+    get_files,
     group_modules,
-    is_correct_dependency,
-    is_valid_integration,
     plot_treemap,
     print_csv,
     print_table,
@@ -33,8 +28,8 @@ console = Console()
 
 
 @click.command()
-@click.argument("before")
-@click.argument("after")
+@click.argument("first_commit")
+@click.argument("second_commit")
 @click.option(
     '--platform', help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
 )
@@ -50,8 +45,8 @@ console = Console()
 @click.pass_obj
 def diff(
     app: Application,
-    before: str,
-    after: str,
+    first_commit: str,
+    second_commit: str,
     platform: Optional[str],
     version: Optional[str],
     compressed: bool,
@@ -70,6 +65,17 @@ def diff(
         transient=True,
     ) as progress:
         task = progress.add_task("[cyan]Calculating differences...", total=None)
+        if len(first_commit) < 7 and len(second_commit) < 7:
+            raise click.BadParameter("Commit hashes must be at least 7 characters long")
+        elif len(first_commit) < 7:
+            raise click.BadParameter("First commit hash must be at least 7 characters long.", param_hint="first_commit")
+        elif len(second_commit) < 7:
+            raise click.BadParameter(
+                "Second commit hash must be at least 7 characters long.", param_hint="second_commit"
+            )
+        # if first_commit == second_commit:
+        # raise click.BadParameter("Commit hashes must be different")
+
         repo_url = app.repo.path
         with GitRepo(repo_url) as gitRepo:
             try:
@@ -92,8 +98,8 @@ def diff(
                         diff_mode(
                             app,
                             gitRepo,
-                            before,
-                            after,
+                            first_commit,
+                            second_commit,
                             plat,
                             ver,
                             compressed,
@@ -108,8 +114,8 @@ def diff(
                     diff_mode(
                         app,
                         gitRepo,
-                        before,
-                        after,
+                        first_commit,
+                        second_commit,
                         platform,
                         version,
                         compressed,
@@ -121,42 +127,47 @@ def diff(
                     )
 
             except Exception as e:
+                if progress and progress.tasks:
+                    progress.remove_task(task)
+                    progress.stop()
+
                 app.abort(str(e))
 
 
 def diff_mode(
     app: Application,
     gitRepo: GitRepo,
-    before: str,
-    after: str,
+    first_commit: str,
+    second_commit: str,
     platform: str,
     version: str,
     compressed: bool,
     csv: bool,
     i: Optional[int],
     progress: Progress,
-    save_to_png_path: str,
+    save_to_png_path: Optional[str],
     show_gui: bool,
 ) -> None:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
-        gitRepo, platform, version, before, after, compressed, progress
+        gitRepo, platform, version, first_commit, second_commit, compressed, progress
     )
 
     integrations = get_diff(files_b, files_a, 'Integration')
     dependencies = get_diff(dependencies_b, dependencies_a, 'Dependency')
     if integrations + dependencies == [] and not csv:
         app.display(f"No size differences were detected between the selected commits for {platform}.")
-
-    grouped_modules = group_modules(integrations + dependencies, platform, version, i)
-    grouped_modules.sort(key=lambda x: abs(cast(int, x['Size (Bytes)'])), reverse=True)
-    for module in grouped_modules:
-        if cast(int, module['Size (Bytes)']) > 0:
-            module['Size'] = f"+{module['Size']}"
     else:
+        grouped_modules = group_modules(integrations + dependencies, platform, version, i)
+        grouped_modules.sort(key=lambda x: abs(cast(int, x['Size_Bytes'])), reverse=True)
+        for module in grouped_modules:
+            if cast(int, module['Size_Bytes']) > 0:
+                module['Size'] = f"+{module['Size']}"
         if csv:
             print_csv(app, i, grouped_modules)
-        elif show_gui or save_to_png_path:
+        else:
             print_table(app, "Diff", grouped_modules)
+
+        if show_gui or save_to_png_path:
             plot_treemap(
                 grouped_modules,
                 f"Disk Usage Differences for {platform} and Python version {version}",
@@ -164,29 +175,27 @@ def diff_mode(
                 "diff",
                 save_to_png_path,
             )
-        else:
-            print_table(app, "Diff", grouped_modules)
 
 
 def get_repo_info(
     gitRepo: GitRepo,
     platform: str,
     version: str,
-    before: str,
-    after: str,
+    first_commit: str,
+    second_commit: str,
     compressed: bool,
     progress: Progress,
-) -> Tuple[Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int]]:
+) -> Tuple[List[FileDataEntry], List[FileDataEntry], List[FileDataEntry], List[FileDataEntry]]:
     with progress:
         repo = gitRepo.repo_dir
         task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
-        gitRepo.checkout_commit(before)
+        gitRepo.checkout_commit(first_commit)
         files_b = get_files(repo, compressed)
         dependencies_b = get_dependencies(repo, platform, version, compressed)
         progress.remove_task(task)
 
         task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
-        gitRepo.checkout_commit(after)
+        gitRepo.checkout_commit(second_commit)
         files_a = get_files(repo, compressed)
         dependencies_a = get_dependencies(repo, platform, version, compressed)
         progress.remove_task(task)
@@ -194,108 +203,54 @@ def get_repo_info(
     return files_b, dependencies_b, files_a, dependencies_a
 
 
-def get_diff(size_before: Dict[str, int], size_after: Dict[str, int], type: str) -> List[Dict[str, str | int]]:
-    all_paths = set(size_before.keys()) | set(size_after.keys())
-    diff_files = []
+def get_diff(
+    size_first_commit: List[FileDataEntry], size_second_commit: List[FileDataEntry], type: str
+) -> List[FileDataEntry]:
 
-    for path in all_paths:
-        size_b = size_before.get(path, 0)
-        size_a = size_after.get(path, 0)
-        size_delta = size_a - size_b
-        module = Path(path).parts[0]
-        if size_delta != 0:
-            if size_b == 0:
-                diff_files.append(
-                    {
-                        'File Path': path,
-                        'Type': type,
-                        'Name': module + " (NEW)",
-                        'Size (Bytes)': size_delta,
-                    }
-                )
-            elif size_a == 0:
-                diff_files.append(
-                    {
-                        'File Path': path,
-                        'Type': type,
-                        'Name': module + " (DELETED)",
-                        'Size (Bytes)': size_delta,
-                    }
-                )
-            else:
-                diff_files.append(
-                    {
-                        'File Path': path,
-                        'Type': type,
-                        'Name': module,
-                        'Size (Bytes)': size_delta,
-                    }
-                )
+    first_commit = {entry["Name"]: entry for entry in size_first_commit}
+    second_commit = {entry["Name"]: entry for entry in size_second_commit}
 
-    return cast(List[Dict[str, str | int]], diff_files)
+    all_names = set(first_commit) | set(second_commit)
+    diffs: List[FileDataEntry] = []
 
+    for name in all_names:
+        b = first_commit.get(name)
+        a = second_commit.get(name)
 
-def get_files(repo_path: str, compressed: bool) -> Dict[str, int]:
+        size_b = b["Size_Bytes"] if b else 0
+        size_a = a["Size_Bytes"] if a else 0
+        delta = size_a - size_b
 
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
+        if delta == 0:
+            continue
 
-    file_data = {}
-    for root, _, files in os.walk(repo_path):
-        for file in files:
-            file_path = os.path.join(root, file)
+        ver_b = b["Version"] if b else ""
+        ver_a = a["Version"] if a else ""
 
-            # Convert the path to a relative format within the repo
-            relative_path = os.path.relpath(file_path, repo_path)
-
-            # Filter files
-            if is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
-                size = compress(file_path) if compressed else os.path.getsize(file_path)
-                file_data[relative_path] = size
-    return file_data
-
-
-def get_dependencies(repo_path: str, platform: str, version: str, compressed: bool) -> Dict[str, int]:
-
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
-
-    for filename in os.listdir(resolved_path):
-        file_path = os.path.join(resolved_path, filename)
-
-        if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls = get_dependencies_list(file_path)
-            return get_dependencies_sizes(deps, download_urls, compressed)
-    return {}
-
-
-def get_dependencies_sizes(deps: List[str], download_urls: List[str], compressed: bool) -> Dict[str, int]:
-    file_data = {}
-    for dep, url in zip(deps, download_urls, strict=False):
-        if compressed:
-            response = requests.head(url)
-            response.raise_for_status()
-            size_str = response.headers.get("Content-Length")
-            if size_str is None:
-                raise ValueError(f"Missing size for {dep}")
-            size = int(size_str)
+        if size_b == 0:
+            name_str = f"{name} (NEW)"
+            version_str = ver_a
+        elif size_a == 0:
+            name_str = f"{name} (DELETED)"
+            version_str = ver_b
         else:
-            with requests.get(url, stream=True) as response:
-                response.raise_for_status()
-                wheel_data = response.content
+            name_str = name
+            version_str = f"{ver_b} -> {ver_a}" if ver_a != ver_b else ver_a
+        if a:
+            type = a["Type"]
+        elif b:
+            type = b["Type"]
+        else:
+            type = ""
 
-            with tempfile.TemporaryDirectory() as tmpdir:
-                wheel_path = Path(tmpdir) / "package.whl"
-                with open(wheel_path, "wb") as f:
-                    f.write(wheel_data)
-                extract_path = Path(tmpdir) / "extracted"
-                with zipfile.ZipFile(wheel_path, 'r') as zip_ref:
-                    zip_ref.extractall(extract_path)
+        diffs.append(
+            {
+                "Name": name_str,
+                "Version": version_str,
+                "Type": type,
+                "Size_Bytes": delta,
+                "Size": convert_size(delta),
+            }
+        )
 
-                size = 0
-                for dirpath, _, filenames in os.walk(extract_path):
-                    for name in filenames:
-                        file_path = os.path.join(dirpath, name)
-                        size += os.path.getsize(file_path)
-        file_data[dep] = size
-    return file_data
+    return diffs

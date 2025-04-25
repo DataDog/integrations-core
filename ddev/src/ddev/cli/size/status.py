@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union, cast
+from typing import Optional
 
 import click
 from rich.console import Console
@@ -12,20 +12,14 @@ from rich.console import Console
 from ddev.cli.application import Application
 
 from .common import (
-    compress,
-    get_dependencies_list,
-    get_dependencies_sizes,
-    get_gitignore_files,
+    get_dependencies,
+    get_files,
     group_modules,
-    is_correct_dependency,
-    is_valid_integration,
     plot_treemap,
     print_csv,
     print_table,
     valid_platforms_versions,
 )
-
-# REPO_PATH = Path(__file__).resolve().parents[5]
 
 console = Console()
 
@@ -50,7 +44,7 @@ def status(
     version: Optional[str],
     compressed: bool,
     csv: bool,
-    save_to_png_path: str,
+    save_to_png_path: Optional[str],
     show_gui: bool,
 ) -> None:
     """
@@ -87,13 +81,13 @@ def status_mode(
     compressed: bool,
     csv: bool,
     i: Optional[int],
-    save_to_png_path: str,
+    save_to_png_path: Optional[str],
     show_gui: bool,
 ) -> None:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
-        modules = get_files(compressed, repo_path) + get_dependencies(repo_path, platform, version, compressed)
+        modules = get_files(repo_path, compressed) + get_dependencies(repo_path, platform, version, compressed)
     grouped_modules = group_modules(modules, platform, version, i)
-    grouped_modules.sort(key=lambda x: x['Size (Bytes)'], reverse=True)
+    grouped_modules.sort(key=lambda x: x['Size_Bytes'], reverse=True)
 
     if csv:
         print_csv(app, i, grouped_modules)
@@ -108,45 +102,3 @@ def status_mode(
         )
     else:
         print_table(app, "Status", grouped_modules)
-
-
-def get_files(compressed: bool, repo_path: Path) -> List[Dict[str, Union[str, int]]]:
-
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
-
-    file_data = []
-    for root, _, files in os.walk(repo_path):
-        for file in files:
-            file_path = os.path.join(root, file)
-
-            # Convert the path to a relative format within the repo
-            relative_path = os.path.relpath(file_path, repo_path)
-
-            # Filter files
-            if is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
-                size = compress(file_path) if compressed else os.path.getsize(file_path)
-                integration = relative_path.split(os.sep)[0]
-                file_data.append(
-                    {
-                        "File Path": relative_path,
-                        "Type": "Integration",
-                        "Name": integration,
-                        "Size (Bytes)": int(size),
-                    }
-                )
-    return cast(List[Dict[str, Union[str, int]]], file_data)
-
-
-def get_dependencies(
-    repo_path: Path, platform: str, version: str, compressed: bool
-) -> List[Dict[str, Union[str, int]]]:
-
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
-    for filename in os.listdir(resolved_path):
-        file_path = os.path.join(resolved_path, filename)
-        if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls = get_dependencies_list(file_path)
-            return get_dependencies_sizes(deps, download_urls, compressed)
-    return []

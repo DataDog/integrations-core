@@ -1,11 +1,14 @@
 import os
+from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
 from ddev.cli.size.common import (
     compress,
     convert_size,
+    extract_version_from_about_py,
     get_dependencies_list,
     get_dependencies_sizes,
+    get_files,
     get_gitignore_files,
     group_modules,
     is_correct_dependency,
@@ -70,14 +73,13 @@ def test_is_valid_integration():
 
 
 def test_get_dependencies_list():
-    file_content = (
-        "dependency1 @ https://example.com/dependency1.whl\ndependency2 @ https://example.com/dependency2.whl"
-    )
+    file_content = "dependency1 @ https://example.com/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2-1.1.1-.whl"
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
-        deps, urls = get_dependencies_list("fake_path")
+        deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
-    assert urls == ["https://example.com/dependency1.whl", "https://example.com/dependency2.whl"]
+    assert urls == ["https://example.com/dependency1-1.1.1-.whl", "https://example.com/dependency2-1.1.1-.whl"]
+    assert versions == ["1.1.1", "1.1.1"]
 
 
 def test_get_dependencies_sizes():
@@ -85,20 +87,23 @@ def test_get_dependencies_sizes():
     mock_response.status_code = 200
     mock_response.headers = {"Content-Length": "12345"}
     with patch("requests.head", return_value=mock_response):
-        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1.whl"], True)
+        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1.whl"], ["1.1.1"], True)
     assert file_data == [
-        {"File Path": "dependency1", "Type": "Dependency", "Name": "dependency1", "Size (Bytes)": 12345}
+        {
+            "Name": "dependency1",
+            "Version": "1.1.1",
+            "Size_Bytes": 12345,
+            "Size": convert_size(12345),
+            "Type": "Dependency",
+        }
     ]
 
 
 def test_group_modules():
     modules = [
-        {"Name": "module1", "Type": "A", "Size (Bytes)": 1500},
-        {"Name": "module2", "Type": "B", "Size (Bytes)": 3000},
-        {"Name": "module1", "Type": "A", "Size (Bytes)": 2500},
-        {"Name": "module3", "Type": "A", "Size (Bytes)": 4000},
+        {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
+        {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
     ]
-
     platform = "linux-aarch64"
     version = "3.12"
 
@@ -106,30 +111,70 @@ def test_group_modules():
         {
             "Name": "module1",
             "Type": "A",
-            "Size (Bytes)": 4000,
-            "Size": "3.91 KB",
+            "Size_Bytes": 1500,
             "Platform": "linux-aarch64",
-            "Version": "3.12",
+            "Python_Version": "3.12",
         },
         {
             "Name": "module2",
             "Type": "B",
-            "Size (Bytes)": 3000,
-            "Size": "2.93 KB",
+            "Size_Bytes": 3000,
             "Platform": "linux-aarch64",
-            "Version": "3.12",
-        },
-        {
-            "Name": "module3",
-            "Type": "A",
-            "Size (Bytes)": 4000,
-            "Size": "3.91 KB",
-            "Platform": "linux-aarch64",
-            "Version": "3.12",
+            "Python_Version": "3.12",
         },
     ]
 
     assert group_modules(modules, platform, version, 0) == expected_output
+
+
+def test_get_files_grouped_and_with_versions():
+    repo_path = Path("fake_repo")
+
+    os_walk_output = [
+        (repo_path / "integration1" / "datadog_checks", [], ["file1.py", "file2.py"]),
+        (repo_path / "integration2" / "datadog_checks", [], ["file3.py"]),
+    ]
+
+    def mock_is_valid_integration(path, included_folder, ignored, ignored_files):
+        return True
+
+    def mock_getsize(path):
+        file_sizes = {
+            repo_path / "integration1" / "datadog_checks" / "file1.py": 1000,
+            repo_path / "integration1" / "datadog_checks" / "file2.py": 2000,
+            repo_path / "integration2" / "datadog_checks" / "file3.py": 3000,
+        }
+        return file_sizes[Path(path)]
+
+    with (
+        patch("os.walk", return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output]),
+        patch("os.path.getsize", side_effect=mock_getsize),
+        patch("ddev.cli.size.common.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.common.is_valid_integration", side_effect=mock_is_valid_integration),
+        patch("ddev.cli.size.common.extract_version_from_about_py", return_value="1.2.3"),
+        patch("ddev.cli.size.common.convert_size", side_effect=lambda s: f"{s / 1024:.2f} KB"),
+    ):
+
+        result = get_files(repo_path, compressed=False)
+
+    expected = [
+        {
+            "Name": "integration1",
+            "Version": "1.2.3",
+            "Size_Bytes": 3000,
+            "Size": "2.93 KB",
+            "Type": "Integration",
+        },
+        {
+            "Name": "integration2",
+            "Version": "1.2.3",
+            "Size_Bytes": 3000,
+            "Size": "2.93 KB",
+            "Type": "Integration",
+        },
+    ]
+
+    assert result == expected
 
 
 def test_get_gitignore_files():
@@ -171,3 +216,24 @@ def test_print_csv():
 
     actual_calls = mock_app.display.call_args_list
     assert actual_calls == expected_calls
+
+
+def test_extract_version_from_about_py_pathlib():
+    # Usa Path para compatibilidad multiplataforma
+    fake_path = Path("some") / "module" / "__about__.py"
+    fake_content = "__version__ = '1.2.3'\n"
+
+    with patch("builtins.open", mock_open(read_data=fake_content)):
+        version = extract_version_from_about_py(str(fake_path))
+
+    assert version == "1.2.3"
+
+
+def test_extract_version_from_about_py_no_version_pathlib():
+    fake_path = Path("another") / "module" / "__about__.py"
+    fake_content = "version = 'not_defined'\n"
+
+    with patch("builtins.open", mock_open(read_data=fake_content)):
+        version = extract_version_from_about_py(str(fake_path))
+
+    assert version == ""
