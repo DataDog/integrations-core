@@ -82,6 +82,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         "pg_newtable",
         "cities",
         "sample_foreign_d73a8c",
+        "rds_admin_misc",
     }
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
@@ -89,6 +90,14 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
     tables_got = []
+
+    schemas_want = {
+        'public',
+        'public2',
+        'rdsadmin_test'
+    }
+
+    schemas_got = set()
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         assert schema_event.get("timestamp") is not None
@@ -100,8 +109,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
         schema_name = schema['name']
-        assert schema_name in ['public', 'public2', 'datadog']
-        if schema_name == 'public':
+        assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test']
+        schemas_got.add(schema_name)
+        if schema_name in ['public', 'rdsadmin_test']:
             for table in schema['tables']:
                 tables_got.append(table['name'])
 
@@ -151,6 +161,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
                         assert_fields(keys, ["num_partitions", "partition_key"])
                         assert table['num_partitions'] == 0
 
+    assert schemas_want == schemas_got
     assert_fields(tables_got, tables_set)
     assert_not_fields(tables_got, tables_not_reported_set)
 
@@ -308,7 +319,7 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
             database_metadata = schema_event['metadata']
             schema = database_metadata[0]['schemas'][0]
             schema_name = schema['name']
-            assert schema_name in ['public', 'public2', 'datadog']
+            assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test']
             if schema_name == 'public':
                 for table in schema['tables']:
                     tables_got.append(table['name'])

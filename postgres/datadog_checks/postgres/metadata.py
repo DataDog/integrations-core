@@ -111,8 +111,7 @@ FROM   pg_namespace nsp
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
        AND nspname NOT LIKE 'pg_toast%'
        AND nspname NOT LIKE 'pg_temp_%'
-       AND r.rolname  !=       'rds_superuser'
-       AND r.rolname  !=       'rdsadmin';
+       AND r.rolname  !=       'rds_superuser';
 """
 
 PG_INDEXES_QUERY = """
