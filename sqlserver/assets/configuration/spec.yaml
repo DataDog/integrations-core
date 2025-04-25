@@ -640,6 +640,7 @@ files:
           value:
             type: number
             example: 10
+          hidden: true
     - name: stored_procedure_characters_limit
       description: |
         Limit the number of characters of the text of a stored procedure that is collected.

@@ -1,0 +1,2422 @@
+{
+    "title": "Check Point Harmony Email & Collaboration - Messaging and File Sharing Application Insights",
+    "description": "This dashboard provides insights into messaging and file-sharing activities, tracking event trends, external interactions, and security actions. It helps monitor deleted, quarantined, and shared files for better data protection and compliance.",
+    "widgets": [
+        {
+            "id": 5183346169083596,
+            "definition": {
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/checkpoint-firewall_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/checkpoint-firewall_reversed_large.svg",
+                "sizing": "cover",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6596204143857430,
+            "definition": {
+                "type": "note",
+                "content": "[Check Point Harmony Email & Collaboration](https://www.checkpoint.com/harmony/email-security/) is a security solution that protects cloud-based email and collaboration platforms from cyber threats like malware, phishing, and data loss.\n\n**Messaging and File Sharing Application Insights** dashboard provides insights into messaging and file-sharing activities, tracking event trends, external interactions, and security actions. It helps monitor deleted, quarantined, and shared files for better data protection and compliance.\n\nFor more information, see the [Check Point Harmony Email & Collaboration Documentation](https://docs.datadoghq.com/integrations/checkpoint_harmony_email_and_collaboration/).\n\n**Tips**:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "pink",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 472376703637330,
+            "definition": {
+                "title": "Messaging Application Overview",
+                "background_color": "vivid_pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 110750674174272,
+                        "definition": {
+                            "title": "Total Messaging Application Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5795734812896090,
+                        "definition": {
+                            "title": "Total External Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_external:true service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7051992098438742,
+                        "definition": {
+                            "title": "Total Deleted Entity Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_deleted:true service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4116295353884616,
+                        "definition": {
+                            "title": "Events by SaaS Application",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@saas_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2977321344602454,
+                        "definition": {
+                            "title": "Messaging Events by Application Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@saas_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2815840103890502,
+                        "definition": {
+                            "title": "Entity Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.security_event.saas_info.entity_type",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3296547116540800,
+                        "definition": {
+                            "title": "Distribution by Direction",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.direction",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6164765835740724,
+                        "definition": {
+                            "title": "Conversation Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.conversation_type",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3094220209021256,
+                        "definition": {
+                            "title": "Top Users",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.actor_email",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7774355166511292,
+                        "definition": {
+                            "title": "Top Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.conversation_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2393704383735232,
+                        "definition": {
+                            "title": "Events by Category",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.security_event.entity_payload.category",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4293489368004510,
+                        "definition": {
+                            "title": "Average File Size Over Time ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Average File Size",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "kilobyte"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@event.entity.entity_payload.size"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 12,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7650165324989264,
+                        "definition": {
+                            "title": "Top Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.file_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 15,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6375945773129102,
+                        "definition": {
+                            "title": "Top Mime Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.mime_type",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 15,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2251906917557558,
+                        "definition": {
+                            "title": "Top Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@download_url_details.host",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 19,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7988564833776644,
+                        "definition": {
+                            "title": "Deleted Files Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_deleted:true service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@download_url_details.host",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@event.entity.entity_payload.mime_type",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@event.entity.entity_payload.file_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 6250,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "# Events",
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 19,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7606835105104164,
+                        "definition": {
+                            "title": "Messaging Application Event Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:checkpoint-harmony-email-and-collaboration service:(ms_teams OR slack) $Severity $SaaS-Application $Category $Customer-Domain",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "saas_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "event.security_event.entity_payload.category",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 23,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 28
+            }
+        },
+        {
+            "id": 8823274281878358,
+            "definition": {
+                "title": "File Sharing Application Overview",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4549436163758202,
+                        "definition": {
+                            "title": "Total File Sharing Application Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5706061983705826,
+                        "definition": {
+                            "title": "File Sharing Application Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3938202399881922,
+                        "definition": {
+                            "title": "Events by SaaS Application",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@saas_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4070483726760396,
+                        "definition": {
+                            "title": "Events by Application Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@saas_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6639394261728920,
+                        "definition": {
+                            "title": "Events by Category ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.security_event.entity_payload.category",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6281203979486666,
+                        "definition": {
+                            "title": "Events by Category Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.security_event.entity_payload.category",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 6,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4607966854806528,
+                        "definition": {
+                            "title": "Total External Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_external:true service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6344390110952020,
+                        "definition": {
+                            "title": "Average File Size Over Time ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Average File Size",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "kilobyte"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@event.entity.entity_payload.size"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 9,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1790358765744782,
+                        "definition": {
+                            "title": "Top Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@download_url_details.host",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5167495436951576,
+                        "definition": {
+                            "title": "Top Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.file_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 12,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5525470935482612,
+                        "definition": {
+                            "title": "Top External Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_external:true service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.file_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7181537394131942,
+                        "definition": {
+                            "title": "Top Mime Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@event.entity.entity_payload.mime_type",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6044780628661152,
+                        "definition": {
+                            "title": "Total Quarantined Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_quarantined:true service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6465084146362188,
+                        "definition": {
+                            "title": "Quarantined File Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_quarantined:true service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@download_url_details.host",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@event.entity.entity_payload.mime_type",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@event.entity.entity_payload.file_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 6250,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "# Events",
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 20,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3793714828414110,
+                        "definition": {
+                            "title": "Total Deleted Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_deleted:true service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 23,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 128034552161110,
+                        "definition": {
+                            "title": "Deleted Files Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration @event.entity.entity_payload.is_deleted:true service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@download_url_details.host",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@event.entity.entity_payload.mime_type",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@event.entity.entity_payload.file_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "# Events",
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 23,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7832272424211582,
+                        "definition": {
+                            "title": "Top Security Matched Tools",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@matched_security_tool_name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "@event.security_event._id"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@event.security_event._id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 15,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 26,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2083316363337374,
+                        "definition": {
+                            "title": "File Sharing Event Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:checkpoint-harmony-email-and-collaboration service:(sharefile OR box OR dropbox OR office365_sharepoint OR office365_onedrive) $Severity $SaaS-Application $Category $Customer-Domain",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "saas_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@event.security_event.entity_payload.category",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 26,
+                            "width": 9,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 31,
+                "width": 12,
+                "height": 31,
+                "is_column_break": true
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Severity",
+            "prefix": "@severity",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Customer-Domain",
+            "prefix": "@event.security_event.entity_info.customer_domain",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "SaaS-Application",
+            "prefix": "@saas_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Category",
+            "prefix": "@event.security_event.entity_payload.category",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

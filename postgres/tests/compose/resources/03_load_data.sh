@@ -44,6 +44,18 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
 
+# Create a foreign table
+echo -e "id,name\n1,Alice\n2,Bob" > /tmp/sample.csv
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE EXTENSION IF NOT EXISTS file_fdw;
+    
+    CREATE SERVER file_server FOREIGN DATA WRAPPER file_fdw;
+    
+    CREATE FOREIGN TABLE sample_foreign_d73a8c (id INTEGER, name TEXT) SERVER file_server OPTIONS (filename '/tmp/sample.csv', format 'csv', header 'true');
+
+    SELECT * FROM sample_foreign_d73a8c;
+EOSQL
+
 # Create publication for logical replication tests
 if [[ !("$PG_MAJOR" == 9.*) ]]; then
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -p5432 datadog_test <<-EOSQL
