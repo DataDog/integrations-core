@@ -4,6 +4,7 @@
 
 import datetime
 import json as json_module
+from abc import abstractmethod
 from io import BytesIO, StringIO
 from time import time
 
@@ -30,8 +31,92 @@ def agent_check_getter(self):
     return self._check
 
 
+class TimestampHandler:
+    """Utility class for handling timestamps"""
+
+    @staticmethod
+    def normalize(timestamp_str):
+        """
+        Normalize timestamp to a consistent format: YYYY-MM-DDTHH:MM:SS.sssZ
+
+        Args:
+            timestamp_str: A timestamp string in various possible formats
+
+        Returns:
+            A normalized timestamp string or empty string if parsing fails
+        """
+        if not timestamp_str:
+            return ""
+
+        try:
+            # Replace Z with +00:00 for consistent parsing
+            if timestamp_str.endswith('Z'):
+                timestamp_str = timestamp_str[:-1] + '+00:00'
+
+            # Parse the timestamp
+            dt = datetime.datetime.fromisoformat(timestamp_str)
+
+            # Format to consistent format with milliseconds precision: YYYY-MM-DDTHH:MM:SS.sssZ
+            return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+        except Exception:
+            return timestamp_str
+
+    @staticmethod
+    def calculate_start_time(end_timestamp, duration_ms):
+        """
+        Calculate start time from end time and duration
+
+        Args:
+            end_timestamp: The end timestamp in ISO format
+            duration_ms: Duration in milliseconds
+
+        Returns:
+            Start timestamp in ISO format or empty string if calculation fails
+        """
+        if not end_timestamp or duration_ms is None:
+            return ""
+        try:
+            # Parse end time
+            if end_timestamp.endswith('Z'):
+                end_timestamp = end_timestamp[:-1] + '+00:00'
+            end_datetime = datetime.datetime.fromisoformat(end_timestamp)
+
+            # Calculate start time
+            duration_delta = datetime.timedelta(milliseconds=float(duration_ms))
+            start_datetime = end_datetime - duration_delta
+
+            # Format consistently
+            return start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+        except Exception:
+            return ""
+
+
 class XESessionBase(DBMAsyncJob):
     """Base class for all XE session handlers"""
+
+    # Base fields common to most/all event types
+    BASE_NUMERIC_FIELDS = {
+        "duration_ms": 0.0,
+        "session_id": 0,
+        "request_id": 0,
+    }
+
+    BASE_STRING_FIELDS = [
+        "database_name",
+        "client_hostname",
+        "client_app_name",
+        "username",
+        "activity_id",
+    ]
+
+    BASE_SQL_FIELDS = [
+        "statement",
+        "sql_text",
+        "batch_text",
+    ]
+
+    # Fields that should use text representation when available
+    TEXT_FIELDS = ["result", "data_stream"]
 
     def __init__(self, check, config, session_name):
         self.session_name = session_name
@@ -55,6 +140,9 @@ class XESessionBase(DBMAsyncJob):
             self._config, 'obfuscator_options', {'dbms': 'mssql', 'obfuscation_mode': 'replace'}
         )
 
+        # Register event handlers - subclasses will override this
+        self._event_handlers = {}
+
         super(XESessionBase, self).__init__(
             check,
             run_sync=True,
@@ -68,6 +156,23 @@ class XESessionBase(DBMAsyncJob):
         self._conn_key_prefix = f"dbm-xe-{session_name}-"
         self._is_azure_sql_database = False
         self._check_azure_status()
+
+    # Methods to allow subclasses to extend field definitions
+    def get_numeric_fields(self, event_type=None):
+        """Get numeric fields with defaults for given event type"""
+        return self.BASE_NUMERIC_FIELDS.copy()
+
+    def get_string_fields(self, event_type=None):
+        """Get string fields for given event type"""
+        return self.BASE_STRING_FIELDS.copy()
+
+    def get_sql_fields(self, event_type=None):
+        """Get SQL fields for given event type"""
+        return self.BASE_SQL_FIELDS.copy()
+
+    def register_event_handler(self, event_name, handler_method):
+        """Register a handler method for a specific event type"""
+        self._event_handlers[event_name] = handler_method
 
     def _check_azure_status(self):
         """Check if this is Azure SQL Database"""
@@ -285,6 +390,24 @@ class XESessionBase(DBMAsyncJob):
             return text_elem.text.strip()
         return default
 
+    def _extract_field(self, data, event_data, field_name):
+        """Extract field value based on its type"""
+        if field_name == 'duration':
+            self._extract_duration(data, event_data)
+        elif field_name in self.get_numeric_fields(event_data.get('event_name')):
+            value = self._extract_int_value(data)
+            if value is not None:
+                event_data[field_name] = value
+        elif field_name in self.TEXT_FIELDS:
+            # Try to get text representation first
+            text_value = self._extract_text_representation(data)
+            if text_value is not None:
+                event_data[field_name] = text_value
+            else:
+                event_data[field_name] = self._extract_value(data)
+        else:
+            event_data[field_name] = self._extract_value(data)
+
     def _extract_duration(self, data, event_data):
         """Extract duration value and convert to milliseconds"""
         duration_value = self._extract_int_value(data)
@@ -293,76 +416,66 @@ class XESessionBase(DBMAsyncJob):
         else:
             event_data["duration_ms"] = None
 
-    def _extract_numeric_fields(self, data, event_data, field_name, numeric_fields):
-        """Extract numeric field if it's in the numeric_fields list"""
-        if field_name in numeric_fields:
-            event_data[field_name] = self._extract_int_value(data)
-
-    def _extract_string_fields(self, data, event_data, field_name, string_fields):
-        """Extract string field if it's in the string_fields list"""
-        if field_name in string_fields:
-            event_data[field_name] = self._extract_value(data)
-
-    def _extract_text_fields(self, data, event_data, field_name, text_fields):
-        """Extract field with text representation"""
-        if field_name in text_fields:
-            # Try to get text representation first
-            text_value = self._extract_text_representation(data)
-            if text_value is not None:
-                event_data[field_name] = text_value
-            else:
-                event_data[field_name] = self._extract_value(data)
-
     def _process_events(self, xml_data):
-        """Process the events from the XML data - override in subclasses"""
+        """Template method for processing events with standardized XML parsing"""
+        try:
+            root = etree.fromstring(xml_data.encode('utf-8') if isinstance(xml_data, str) else xml_data)
+        except Exception as e:
+            self._log.error(f"Error parsing XML data: {e}")
+            return []
+
+        events = []
+        for event in root.findall('./event')[: self.max_events]:
+            try:
+                # Basic common info from event attributes
+                event_data = {"timestamp": event.get('timestamp'), "event_name": event.get('name', '')}
+
+                # Use either the strategy pattern or direct method call
+                if self._event_handlers and event_data["event_name"] in self._event_handlers:
+                    # Strategy pattern approach
+                    handler = self._event_handlers[event_data["event_name"]]
+                    if handler(event, event_data):
+                        events.append(event_data)
+                else:
+                    # Traditional approach (for backward compatibility)
+                    if self._process_event(event, event_data):
+                        events.append(event_data)
+            except Exception as e:
+                self._log.error(f"Error processing event {event.get('name', 'unknown')}: {e}")
+                continue
+
+        return events
+
+    @abstractmethod
+    def _process_event(self, event, event_data):
+        """Process a single event - override in subclasses"""
         raise NotImplementedError
 
-    def _normalize_timestamp(self, timestamp_str):
-        """
-        Normalize timestamp to a consistent format: YYYY-MM-DDTHH:MM:SS.sssZ
-
-        Args:
-            timestamp_str: A timestamp string in various possible formats
-
-        Returns:
-            A normalized timestamp string or empty string if parsing fails
-        """
-        if not timestamp_str:
-            return ""
-
-        try:
-            # Replace Z with +00:00 for consistent parsing
-            if timestamp_str.endswith('Z'):
-                timestamp_str = timestamp_str[:-1] + '+00:00'
-
-            # Parse the timestamp
-            dt = datetime.datetime.fromisoformat(timestamp_str)
-
-            # Format to consistent format with milliseconds precision: YYYY-MM-DDTHH:MM:SS.sssZ
-            return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
-        except Exception as e:
-            self._log.debug(f"Error normalizing timestamp {timestamp_str}: {e}")
-            return timestamp_str
-
-    def _normalize_event(self, event, numeric_fields, string_fields):
+    def _normalize_event(self, event, custom_numeric_fields=None, custom_string_fields=None):
         """
         Generic method to normalize and validate an event data structure.
 
         Args:
             event: The raw event data dictionary
-            numeric_fields: Dictionary mapping field names to default values for numeric fields
-            string_fields: List of string field names
+            custom_numeric_fields: Optional override of numeric fields
+            custom_string_fields: Optional override of string fields
 
         Returns:
             A normalized event dictionary with consistent types
         """
         normalized = {}
 
+        event_type = event.get("event_name", "")
+
+        # Get the field definitions for this event type
+        numeric_fields = custom_numeric_fields or self.get_numeric_fields(event_type)
+        string_fields = custom_string_fields or self.get_string_fields(event_type)
+
         # Add the XE event type to normalized data
         normalized["xe_type"] = event.get("event_name", "")
 
         # Normalize the query_complete timestamp (from event's timestamp)
-        normalized["query_complete"] = self._normalize_timestamp(event.get("timestamp", ""))
+        normalized["query_complete"] = TimestampHandler.normalize(event.get("timestamp", ""))
 
         # Calculate and normalize query_start if duration_ms and timestamp are available
         if (
@@ -371,25 +484,9 @@ class XESessionBase(DBMAsyncJob):
             and event.get("timestamp")
             and event.get("duration_ms") is not None
         ):
-            try:
-                # Parse the timestamp only once
-                ts = event.get("timestamp")
-                if ts.endswith('Z'):
-                    ts = ts[:-1] + '+00:00'
-                end_datetime = datetime.datetime.fromisoformat(ts)
-
-                # Convert duration_ms (milliseconds) to a timedelta
-                duration_ms = float(event.get("duration_ms", 0))
-                duration_delta = datetime.timedelta(milliseconds=duration_ms)
-
-                # Calculate start time
-                start_datetime = end_datetime - duration_delta
-
-                # Format directly to our standard format
-                normalized["query_start"] = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
-            except Exception as e:
-                self._log.debug(f"Error calculating query_start time: {e}")
-                normalized["query_start"] = ""
+            normalized["query_start"] = TimestampHandler.calculate_start_time(
+                event.get("timestamp"), event.get("duration_ms")
+            )
         else:
             normalized["query_start"] = ""
 
@@ -414,6 +511,7 @@ class XESessionBase(DBMAsyncJob):
 
         return normalized
 
+    @abstractmethod
     def _normalize_event_impl(self, event):
         """
         Implementation of event normalization - to be overridden by subclasses.
@@ -654,122 +752,54 @@ class XESessionBase(DBMAsyncJob):
         )
 
     def _obfuscate_sql_fields(self, event):
-        """
-        Base implementation for SQL field obfuscation.
-        This is a template method that delegates to subclasses to handle their specific fields.
-
-        Args:
-            event: The event data dictionary with SQL fields
-
-        Returns:
-            A tuple of (obfuscated_event, raw_sql_fields) where:
-            - obfuscated_event is the event with SQL fields obfuscated
-            - raw_sql_fields is a dict containing original SQL fields for RQT event
-        """
-        # Create a copy to avoid modifying the original
+        """Simplified SQL field obfuscation"""
         obfuscated_event = event.copy()
-
-        # Call the subclass implementation to get the fields to obfuscate
-        # and perform any event-type specific processing
-        sql_fields_to_obfuscate = self._get_sql_fields_to_obfuscate(event)
-        if not sql_fields_to_obfuscate:
-            return obfuscated_event, None
-
-        # Save original SQL fields
         raw_sql_fields = {}
-        for field in sql_fields_to_obfuscate:
+
+        # Get SQL fields for this event type
+        sql_fields = self.get_sql_fields(event.get('event_name', ''))
+
+        # Process each SQL field that exists in the event
+        for field in sql_fields:
             if field in event and event[field]:
                 raw_sql_fields[field] = event[field]
 
-        if not raw_sql_fields:
-            return obfuscated_event, None
-
-        # Process each SQL field
-        combined_commands = None
-        combined_tables = None
-        combined_comments = []
-
-        # First pass - obfuscate and collect metadata
-        for field in sql_fields_to_obfuscate:
-            if field in event and event[field]:
                 try:
-                    obfuscated_result = obfuscate_sql_with_metadata(
+                    # Obfuscate the SQL
+                    result = obfuscate_sql_with_metadata(
                         event[field], self._obfuscator_options, replace_null_character=True
                     )
 
-                    # Store obfuscated SQL
-                    obfuscated_event[field] = obfuscated_result['query']
+                    # Store the obfuscated SQL
+                    obfuscated_event[field] = result['query']
 
-                    # Compute and store signature for this field
+                    # Store metadata from the first field with metadata
+                    if 'dd_commands' not in obfuscated_event and result['metadata'].get('commands'):
+                        obfuscated_event['dd_commands'] = result['metadata']['commands']
+                    if 'dd_tables' not in obfuscated_event and result['metadata'].get('tables'):
+                        obfuscated_event['dd_tables'] = result['metadata']['tables']
+                    if result['metadata'].get('comments'):
+                        if 'dd_comments' not in obfuscated_event:
+                            obfuscated_event['dd_comments'] = []
+                        obfuscated_event['dd_comments'].extend(result['metadata']['comments'])
+
+                    # Compute signature
                     raw_sql_fields[f"{field}_signature"] = compute_sql_signature(event[field])
 
-                    # Collect metadata
-                    metadata = obfuscated_result['metadata']
-                    field_commands = metadata.get('commands', None)
-                    field_tables = metadata.get('tables', None)
-                    field_comments = metadata.get('comments', [])
-
-                    # Store the first non-empty metadata values
-                    if field_commands and not combined_commands:
-                        combined_commands = field_commands
-                    if field_tables and not combined_tables:
-                        combined_tables = field_tables
-                    if field_comments:
-                        combined_comments.extend(field_comments)
+                    # Set query_signature from the primary field
+                    primary_field = self._get_primary_sql_field(event)
+                    if field == primary_field or 'query_signature' not in obfuscated_event:
+                        obfuscated_event['query_signature'] = compute_sql_signature(result['query'])
 
                 except Exception as e:
                     self._log.debug(f"Error obfuscating {field}: {e}")
                     obfuscated_event[field] = "ERROR: failed to obfuscate"
 
-        # Store the combined metadata
-        obfuscated_event['dd_commands'] = combined_commands
-        obfuscated_event['dd_tables'] = combined_tables
-        obfuscated_event['dd_comments'] = list(set(combined_comments)) if combined_comments else []
+        # Deduplicate comments if any
+        if 'dd_comments' in obfuscated_event:
+            obfuscated_event['dd_comments'] = list(set(obfuscated_event['dd_comments']))
 
-        # Get the primary SQL field for this event type and use it for query_signature
-        primary_field = self._get_primary_sql_field(event)
-        if (
-            primary_field
-            and primary_field in obfuscated_event
-            and obfuscated_event[primary_field] != "ERROR: failed to obfuscate"
-        ):
-            try:
-                obfuscated_event['query_signature'] = compute_sql_signature(obfuscated_event[primary_field])
-            except Exception as e:
-                self._log.debug(f"Error calculating signature from primary field {primary_field}: {e}")
-
-        # If no signature from primary field, try others
-        if 'query_signature' not in obfuscated_event:
-            for field in sql_fields_to_obfuscate:
-                if (
-                    field != primary_field
-                    and field in obfuscated_event
-                    and obfuscated_event[field]
-                    and obfuscated_event[field] != "ERROR: failed to obfuscate"
-                ):
-                    try:
-                        obfuscated_event['query_signature'] = compute_sql_signature(obfuscated_event[field])
-                        break
-                    except Exception as e:
-                        self._log.debug(f"Error calculating signature from {field}: {e}")
-
-        return obfuscated_event, raw_sql_fields
-
-    def _get_sql_fields_to_obfuscate(self, event):
-        """
-        Get the list of SQL fields to obfuscate for this event type.
-
-        Subclasses should override this method to return the specific fields
-        they want to obfuscate based on their event type.
-
-        Args:
-            event: The event data dictionary
-
-        Returns:
-            List of field names to obfuscate
-        """
-        # Default implementation - will be overridden by subclasses
-        return ['statement', 'sql_text', 'batch_text']
+        return obfuscated_event, raw_sql_fields if raw_sql_fields else None
 
     def _get_primary_sql_field(self, event):
         """
@@ -786,7 +816,7 @@ class XESessionBase(DBMAsyncJob):
         """
         # Default implementation - will be overridden by subclasses
         # Try statement first, then sql_text, then batch_text
-        for field in ['statement', 'sql_text', 'batch_text']:
+        for field in self.get_sql_fields(event.get('event_name', '')):
             if field in event and event[field]:
                 return field
         return None
@@ -816,13 +846,17 @@ class XESessionBase(DBMAsyncJob):
         # Get the primary SQL field for this event type
         primary_field = self._get_primary_sql_field(event)
         if not primary_field or primary_field not in raw_sql_fields:
-            self._log.debug(f"Skipping RQT event creation: Primary SQL field {primary_field} not found in raw_sql_fields")
+            self._log.debug(
+                f"Skipping RQT event creation: Primary SQL field {primary_field} not found in raw_sql_fields"
+            )
             return None
 
         # Ensure we have a signature for the primary field
         primary_signature_field = f"{primary_field}_signature"
         if primary_signature_field not in raw_sql_fields:
-            self._log.debug(f"Skipping RQT event creation: Signature for primary field {primary_field} not found in raw_sql_fields")
+            self._log.debug(
+                f"Skipping RQT event creation: Signature for primary field {primary_field} not found in raw_sql_fields"
+            )
             return None
 
         # Use primary field's signature as the raw_query_signature

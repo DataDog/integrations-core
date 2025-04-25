@@ -268,7 +268,7 @@ class SqlserverActivity(DBMAsyncJob):
                     self._check.resolved_hostname,
                     row.get('id', 'UNKNOWN'),
                     row.get('query_start', 'UNKNOWN'),
-                    row.get('statement_text', '')[:100]
+                    row.get('statement_text', '')[:100],
                 )
         # construct set of unique session ids
         session_ids = {r['id'] for r in rows}
