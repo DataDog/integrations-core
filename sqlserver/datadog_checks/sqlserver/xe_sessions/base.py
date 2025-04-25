@@ -592,8 +592,6 @@ class XESessionBase(DBMAsyncJob):
                         # Uncomment to enable sending the RQT event in the future:
                         # rqt_payload = json.dumps(rqt_event, default=default_json_event_encoding)
                         # self._check.database_monitoring_query_sample(rqt_payload)
-                    else:
-                        self._log.debug("RQT event creation returned None")
 
                 # Uncomment to enable sending the main event in the future:
                 # serialized_payload = json.dumps(payload, default=default_json_event_encoding)
@@ -786,7 +784,7 @@ class XESessionBase(DBMAsyncJob):
             return None
 
         # Use primary field's signature as the raw_query_signature
-        raw_query_signature = raw_sql_fields[primary_signature_field]
+        raw_query_signature = compute_sql_signature(raw_sql_fields[primary_signature_field])
 
         # Use rate limiting cache to control how many RQT events we send
         # cache_key = (query_signature, raw_query_signature)
