@@ -564,6 +564,7 @@ files:
                 value:
                   type: number
                   example: 10
+                hidden: true
               - name: collect_blocking_queries
                 description: |
                   Enable collection of blocking queries.
