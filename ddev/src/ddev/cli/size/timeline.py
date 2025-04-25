@@ -96,7 +96,8 @@ def timeline(
             raise click.BadParameter("Initial commit hash must be at least 7 characters long.", param_hint="initial")
         elif final_commit and len(final_commit) < 7:
             raise click.BadParameter("Final commit hash must be at least 7 characters long.", param_hint="final")
-
+        elif final_commit and initial_commit and final_commit == initial_commit:
+            raise click.BadParameter("Commit hashes must be different")
         task = progress.add_task("[cyan]Calculating timeline...", total=None)
         url = app.repo.path
         with GitRepo(url) as gitRepo:
@@ -114,13 +115,13 @@ def timeline(
                     raise ValueError(
                         f"Final commit must be after {MINIMUM_DATE_INTEGRATIONS.strftime('%b %d %Y')} "
                         "in case of Integrations "
-                        "and after {MINIMUM_DATE_DEPENDENCIES.strftime('%b %d %Y')} in case of Dependencies"
+                        f"and after {MINIMUM_DATE_DEPENDENCIES.strftime('%b %d %Y')} in case of Dependencies"
                     )
                 valid_platforms, _ = valid_platforms_versions(gitRepo.repo_dir)
                 if platform and platform not in valid_platforms:
                     raise ValueError(f"Invalid platform: {platform}")
                 elif commits == [""] and type == "integration" and module_exists(gitRepo.repo_dir, module):
-                    raise ValueError(f"No changes found: {module}")
+                    raise ValueError(f"No changes found for {type}: {module}")
                 elif commits == [""] and type == "integration" and not module_exists(gitRepo.repo_dir, module):
                     raise ValueError(f"Integration {module} not found in latest commit, is the name correct?")
                 elif (
@@ -139,7 +140,7 @@ def timeline(
                 ):
                     raise ValueError(f"Dependency {module} not found in latest commit, is the name correct?")
                 elif type == "dependency" and commits == [""]:
-                    raise ValueError(f"No changes found: {module}")
+                    raise ValueError(f"No changes found for {type}: {module}")
                 if type == "dependency" and platform is None:
                     progress.remove_task(task)
                     for i, plat in enumerate(valid_platforms):
@@ -184,7 +185,6 @@ def timeline(
                     )
 
             except Exception as e:
-                progress.remove_task(task)
                 progress.stop()
 
                 app.abort(str(e))

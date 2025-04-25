@@ -379,11 +379,8 @@ def get_files(repo_path: str | Path, compressed: bool) -> List[FileDataEntry]:
             size = compress(file_path) if compressed else os.path.getsize(file_path)
             integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size
 
-            if integration_name not in integration_versions:
-                about_path = os.path.join(
-                    repo_path, integration_name, "datadog_checks", integration_name, "__about__.py"
-                )
-                version = extract_version_from_about_py(about_path)
+            if integration_name not in integration_versions and file == "__about__.py":
+                version = extract_version_from_about_py(file_path)
                 integration_versions[integration_name] = version
 
     return [
@@ -526,18 +523,25 @@ class GitRepo:
     ) -> List[str]:
         self._run("git fetch origin --quiet")
         self._run("git checkout origin/HEAD")
-        if time:
-            return self._run(f'git log --since="{time}" --reverse --pretty=format:%H -- {module_path}')
-        elif not initial and not final:
-            return self._run(f"git log --reverse --pretty=format:%H -- {module_path}")
-        elif not final:
-            return self._run(f"git log --reverse --pretty=format:%H {initial}..HEAD -- {module_path}")
-        else:
-            try:
-                self._run(f"git merge-base --is-ancestor {initial} {final}")
-            except subprocess.CalledProcessError:
-                raise ValueError(f"Commit {initial} does not come before {final}")
-            return self._run(f"git log --reverse --pretty=format:%H {initial}..{final} -- {module_path}")
+        try:
+            if time:
+                return self._run(f'git log --since="{time}" --reverse --pretty=format:%H -- {module_path}')
+            elif not initial and not final:
+                return self._run(f"git log --reverse --pretty=format:%H -- {module_path}")
+            elif not final:
+                return self._run(f"git log --reverse --pretty=format:%H {initial}..HEAD -- {module_path}")
+            else:
+                try:
+                    self._run(f"git merge-base --is-ancestor {initial} {final}")
+                except subprocess.CalledProcessError:
+                    raise ValueError(f"Commit {initial} does not come before {final}")
+                return self._run(f"git log --reverse --pretty=format:%H {initial}..{final} -- {module_path}")
+        except subprocess.CalledProcessError as e:
+            raise ValueError(
+                "Failed to retrieve commit history.\n"
+                "Make sure that the provided commits are correct and that your local repository is up to"
+                "date with the remote"
+            ) from e
 
     def checkout_commit(self, commit: str) -> None:
         try:
@@ -546,8 +550,8 @@ class GitRepo:
             if e.returncode == 128:
                 raise ValueError(
                     f"Failed to fetch commit '{commit}'.\n"
-                    f"Make sure the commit hash is correct and that your local repository "
-                    "is up to date with the remote.\n"
+                    f"Make sure the provided commit hash is correct and that your local repository "
+                    "is up to date with the remote\n"
                 ) from e
         self._run(f"git checkout --quiet {commit}")
 

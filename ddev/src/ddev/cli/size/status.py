@@ -26,14 +26,14 @@ console = Console()
 
 @click.command()
 @click.option(
-    '--platform', help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
+    "--platform", help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
 )
-@click.option('--python', 'version', help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
-@click.option('--compressed', is_flag=True, help="Measure compressed size")
-@click.option('--csv', is_flag=True, help="Output in CSV format")
-@click.option('--save_to_png_path', help="Path to save the treemap as PNG")
+@click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--compressed", is_flag=True, help="Measure compressed size")
+@click.option("--csv", is_flag=True, help="Output in CSV format")
+@click.option("--save_to_png_path", help="Path to save the treemap as PNG")
 @click.option(
-    '--show_gui',
+    "--show_gui",
     is_flag=True,
     help="Display a pop-up window with a treemap showing the current size distribution of modules.",
 )
@@ -87,12 +87,14 @@ def status_mode(
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
         modules = get_files(repo_path, compressed) + get_dependencies(repo_path, platform, version, compressed)
     grouped_modules = group_modules(modules, platform, version, i)
-    grouped_modules.sort(key=lambda x: x['Size_Bytes'], reverse=True)
+    grouped_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
 
     if csv:
         print_csv(app, i, grouped_modules)
-    elif show_gui or save_to_png_path:
+    else:
         print_table(app, "Status", grouped_modules)
+
+    if show_gui or save_to_png_path:
         plot_treemap(
             grouped_modules,
             f"Disk Usage Status for {platform} and Python version {version}",
@@ -100,5 +102,3 @@ def status_mode(
             "status",
             save_to_png_path,
         )
-    else:
-        print_table(app, "Status", grouped_modules)

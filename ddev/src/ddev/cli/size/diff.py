@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from datetime import datetime
 from typing import List, Optional, Tuple, cast
 
 import click
@@ -25,20 +26,21 @@ from .common import (
 )
 
 console = Console()
+MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
 
 
 @click.command()
 @click.argument("first_commit")
 @click.argument("second_commit")
 @click.option(
-    '--platform', help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
+    "--platform", help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
 )
-@click.option('--python', 'version', help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
-@click.option('--compressed', is_flag=True, help="Measure compressed size")
-@click.option('--csv', is_flag=True, help="Output in CSV format")
-@click.option('--save_to_png_path', help="Path to save the treemap as PNG")
+@click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--compressed", is_flag=True, help="Measure compressed size")
+@click.option("--csv", is_flag=True, help="Output in CSV format")
+@click.option("--save_to_png_path", help="Path to save the treemap as PNG")
 @click.option(
-    '--show_gui',
+    "--show_gui",
     is_flag=True,
     help="Display a pop-up window with a treemap showing size differences between the two commits.",
 )
@@ -79,6 +81,10 @@ def diff(
         repo_url = app.repo.path
         with GitRepo(repo_url) as gitRepo:
             try:
+                date_str, _, _ = gitRepo.get_commit_metadata(first_commit)
+                date = datetime.strptime(date_str, "%b %d %Y").date()
+                if date < MINIMUM_DATE:
+                    raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
                 valid_platforms, valid_versions = valid_platforms_versions(gitRepo.repo_dir)
                 if platform and platform not in valid_platforms:
                     raise ValueError(f"Invalid platform: {platform}")
@@ -127,10 +133,7 @@ def diff(
                     )
 
             except Exception as e:
-                if progress and progress.tasks:
-                    progress.remove_task(task)
-                    progress.stop()
-
+                progress.stop()
                 app.abort(str(e))
 
 
@@ -152,16 +155,16 @@ def diff_mode(
         gitRepo, platform, version, first_commit, second_commit, compressed, progress
     )
 
-    integrations = get_diff(files_b, files_a, 'Integration')
-    dependencies = get_diff(dependencies_b, dependencies_a, 'Dependency')
+    integrations = get_diff(files_b, files_a, "Integration")
+    dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
     if integrations + dependencies == [] and not csv:
         app.display(f"No size differences were detected between the selected commits for {platform}.")
     else:
         grouped_modules = group_modules(integrations + dependencies, platform, version, i)
-        grouped_modules.sort(key=lambda x: abs(cast(int, x['Size_Bytes'])), reverse=True)
+        grouped_modules.sort(key=lambda x: abs(cast(int, x["Size_Bytes"])), reverse=True)
         for module in grouped_modules:
-            if cast(int, module['Size_Bytes']) > 0:
-                module['Size'] = f"+{module['Size']}"
+            if cast(int, module["Size_Bytes"]) > 0:
+                module["Size"] = f"+{module['Size']}"
         if csv:
             print_csv(app, i, grouped_modules)
         else:
@@ -206,7 +209,6 @@ def get_repo_info(
 def get_diff(
     size_first_commit: List[FileDataEntry], size_second_commit: List[FileDataEntry], type: str
 ) -> List[FileDataEntry]:
-
     first_commit = {entry["Name"]: entry for entry in size_first_commit}
     second_commit = {entry["Name"]: entry for entry in size_second_commit}
 

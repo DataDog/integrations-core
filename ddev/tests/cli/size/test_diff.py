@@ -139,6 +139,7 @@ def test_get_diff():
 def mock_size_diff_dependencies():
     mock_git_repo = MagicMock()
     mock_git_repo.repo_dir = "fake_repo"
+    mock_git_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     def get_compressed_files_side_effect(_, __):
         get_compressed_files_side_effect.counter += 1
@@ -185,6 +186,7 @@ def mock_size_diff_dependencies():
 
 def test_diff_no_args(ddev, mock_size_diff_dependencies):
     result = ddev("size", "diff", "commit1", "commit2", "--compressed")
+    print(result.output)
     assert result.exit_code == 0
 
 
@@ -205,6 +207,7 @@ def test_diff_csv(ddev, mock_size_diff_dependencies):
 def test_diff_no_differences(ddev):
     fake_repo = MagicMock()
     fake_repo.repo_dir = "fake_repo"
+    fake_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     with (
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),

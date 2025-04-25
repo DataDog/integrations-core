@@ -131,8 +131,8 @@ def test_get_files_grouped_and_with_versions():
     repo_path = Path("fake_repo")
 
     os_walk_output = [
-        (repo_path / "integration1" / "datadog_checks", [], ["file1.py", "file2.py"]),
-        (repo_path / "integration2" / "datadog_checks", [], ["file3.py"]),
+        (repo_path / "integration1" / "datadog_checks", [], ["__about__.py", "file2.py"]),
+        (repo_path / "integration2" / "datadog_checks", [], ["__about__.py"]),
     ]
 
     def mock_is_valid_integration(path, included_folder, ignored, ignored_files):
@@ -140,9 +140,9 @@ def test_get_files_grouped_and_with_versions():
 
     def mock_getsize(path):
         file_sizes = {
-            repo_path / "integration1" / "datadog_checks" / "file1.py": 1000,
             repo_path / "integration1" / "datadog_checks" / "file2.py": 2000,
-            repo_path / "integration2" / "datadog_checks" / "file3.py": 3000,
+            repo_path / "integration1" / "datadog_checks" / "__about__.py": 1000,
+            repo_path / "integration2" / "datadog_checks" / "__about__.py": 3000,
         }
         return file_sizes[Path(path)]
 
