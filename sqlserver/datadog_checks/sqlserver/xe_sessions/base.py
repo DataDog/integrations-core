@@ -317,6 +317,33 @@ class XESessionBase(DBMAsyncJob):
         """Process the events from the XML data - override in subclasses"""
         raise NotImplementedError
 
+    def _normalize_timestamp(self, timestamp_str):
+        """
+        Normalize timestamp to a consistent format: YYYY-MM-DDTHH:MM:SS.sssZ
+
+        Args:
+            timestamp_str: A timestamp string in various possible formats
+
+        Returns:
+            A normalized timestamp string or empty string if parsing fails
+        """
+        if not timestamp_str:
+            return ""
+
+        try:
+            # Replace Z with +00:00 for consistent parsing
+            if timestamp_str.endswith('Z'):
+                timestamp_str = timestamp_str[:-1] + '+00:00'
+
+            # Parse the timestamp
+            dt = datetime.datetime.fromisoformat(timestamp_str)
+
+            # Format to consistent format with milliseconds precision: YYYY-MM-DDTHH:MM:SS.sssZ
+            return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+        except Exception as e:
+            self._log.debug(f"Error normalizing timestamp {timestamp_str}: {e}")
+            return timestamp_str
+
     def _normalize_event(self, event, numeric_fields, string_fields):
         """
         Generic method to normalize and validate an event data structure.
@@ -331,11 +358,10 @@ class XESessionBase(DBMAsyncJob):
         """
         normalized = {}
 
-        # Required fields with defaults
-        # Rename timestamp to query_complete
-        normalized["query_complete"] = event.get("timestamp", "")
+        # Normalize the query_complete timestamp (from event's timestamp)
+        normalized["query_complete"] = self._normalize_timestamp(event.get("timestamp", ""))
 
-        # Calculate query_start if duration_ms and timestamp are available
+        # Calculate and normalize query_start if duration_ms and timestamp are available
         if (
             "timestamp" in event
             and "duration_ms" in event
@@ -343,8 +369,11 @@ class XESessionBase(DBMAsyncJob):
             and event.get("duration_ms") is not None
         ):
             try:
-                # Parse the timestamp (assuming ISO format)
-                end_datetime = datetime.datetime.fromisoformat(event.get("timestamp").replace('Z', '+00:00'))
+                # Parse the timestamp only once
+                ts = event.get("timestamp")
+                if ts.endswith('Z'):
+                    ts = ts[:-1] + '+00:00'
+                end_datetime = datetime.datetime.fromisoformat(ts)
 
                 # Convert duration_ms (milliseconds) to a timedelta
                 duration_ms = float(event.get("duration_ms", 0))
@@ -352,7 +381,9 @@ class XESessionBase(DBMAsyncJob):
 
                 # Calculate start time
                 start_datetime = end_datetime - duration_delta
-                normalized["query_start"] = start_datetime.isoformat()
+
+                # Format directly to our standard format
+                normalized["query_start"] = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
             except Exception as e:
                 self._log.debug(f"Error calculating query_start time: {e}")
                 normalized["query_start"] = ""
