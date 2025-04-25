@@ -18,7 +18,7 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ### Log collection
 
- 1. [Install the Datadog Agent][1] on a machine that is reachable by the firewall and can connect to the internet. Confirm that log collection is enabled. To enable log collection, change `logs_enabled: false` to `logs_enabled: true` in your Agent’s main configuration file (datadog.yaml). See the [Host Agent Log collection documentation](https://docs.datadoghq.com/agent/logs/) for more information and examples.
+ 1. [Install the Datadog Agent][1] on a machine that is reachable by the firewall and can connect to the internet. Confirm that log collection is enabled. To enable log collection, change `logs_enabled: false` to `logs_enabled: true` in your Agent's main configuration file (datadog.yaml). See the [Host Agent Log collection documentation](https://docs.datadoghq.com/agent/logs/) for more information and examples.
  2. In PanOS, Select Device >> Server Profiles >> Syslog , add a name for the server profile. Follow the Syslog log forwarding [configuration steps][2]. Same steps listed below.
  3. Click Add and provide the following details of the server:
  	* Name of the server
