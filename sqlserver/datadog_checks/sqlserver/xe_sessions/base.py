@@ -531,17 +531,8 @@ class XESessionBase(DBMAsyncJob):
                 # Time the obfuscation
                 obfuscate_start = time()
                 # Obfuscate SQL fields and get the raw statement
-                self._log.debug(f"Obfuscating SQL fields for event: {event.get('event_name', 'unknown')}")
                 obfuscated_event, raw_sql_fields = self._obfuscate_sql_fields(event)
                 obfuscation_time += time() - obfuscate_start
-
-                # Log whether we got raw SQL fields
-                if not raw_sql_fields:
-                    self._log.debug("No raw SQL fields found after obfuscation")
-                else:
-                    self._log.debug(f"Found {len(raw_sql_fields)} raw SQL fields")
-                    # Log field names for debugging
-                    self._log.debug(f"Raw SQL field names: {list(raw_sql_fields.keys())}")
 
                 # Check for ALLEN TEST comment in raw SQL fields
                 if raw_sql_fields:
@@ -581,12 +572,10 @@ class XESessionBase(DBMAsyncJob):
                     # Time RQT creation
                     rqt_start = time()
                     # Pass normalized query details for proper timing fields
-                    self._log.debug("Creating RQT event")
                     rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
                     rqt_time += time() - rqt_start
 
                     if rqt_event:
-                        self._log.debug("Successfully created RQT event")
                         # For now, just log the first RQT event in each batch
                         if event == events[0]:
                             try:
@@ -800,10 +789,10 @@ class XESessionBase(DBMAsyncJob):
         raw_query_signature = raw_sql_fields[primary_signature_field]
 
         # Use rate limiting cache to control how many RQT events we send
-        cache_key = (query_signature, raw_query_signature)
-        if not self._raw_statement_text_cache.acquire(cache_key):
-            self._log.debug(f"Skipping RQT event creation: Rate limited by cache for signature {query_signature}")
-            return None
+        # cache_key = (query_signature, raw_query_signature)
+        # if not self._raw_statement_text_cache.acquire(cache_key):
+        #     self._log.debug(f"Skipping RQT event creation: Rate limited by cache for signature {query_signature}")
+        #     return None
 
         # Create basic db fields structure
         db_fields = {
