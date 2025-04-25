@@ -52,6 +52,10 @@ on:
         required: false
         type: string
         default: ""
+      ddev-fetch-depth:
+        required: false
+        default: 1
+        type: number
 
 jobs:
   jd316aba:
@@ -73,6 +77,7 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
+      fetch-depth: ${{ inputs.ddev-fetch-depth }}
     secrets: inherit
   j6712d43:
     uses: ./.github/workflows/test-target.yml
@@ -93,6 +98,7 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
+      fetch-depth: ${{ inputs.ddev-fetch-depth }}
     secrets: inherit
   jb232c8c:
     uses: ./.github/workflows/test-target.yml
