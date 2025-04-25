@@ -35,7 +35,7 @@ class ErrorEventsHandler(XESessionBase):
                 self._last_processed_event_type = event_name
 
                 # Initialize event data
-                event_data = {"timestamp": timestamp, "name": event_name}
+                event_data = {"timestamp": timestamp, "event_name": event_name}
 
                 # Handle specific event types
                 if event_name == 'xml_deadlock_report':
@@ -45,8 +45,8 @@ class ErrorEventsHandler(XESessionBase):
                 elif event_name == 'attention':
                     self._process_attention_event(event, event_data)
                 else:
-                    # Generic processing for other error events
-                    self._process_generic_error_event(event, event_data)
+                    self._log.debug(f"Unknown event type: {event_name}, skipping")
+                    continue
 
                 events.append(event_data)
             except Exception as e:
@@ -123,20 +123,6 @@ class ErrorEventsHandler(XESessionBase):
                 event_data[action_name] = self._extract_value(action)
             else:
                 event_data[action_name] = self._extract_value(action)
-
-    def _process_generic_error_event(self, event, event_data):
-        """Process other error event types"""
-        # Extract action data
-        for action in event.findall('./action'):
-            action_name = action.get('name')
-            if action_name:
-                event_data[action_name] = self._extract_value(action)
-
-        # Extract data elements
-        for data in event.findall('./data'):
-            data_name = data.get('name')
-            if data_name:
-                event_data[data_name] = self._extract_value(data)
 
     def _normalize_event_impl(self, event):
         """Normalize error event data based on event type"""
