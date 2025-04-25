@@ -510,11 +510,10 @@ class XESessionBase(DBMAsyncJob):
                 f"first={current_first_timestamp}" + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
             )
 
-        total_time = time() - job_start_time
-        self._log.info(
-            f"Found {len(events)} events from {self.session_name} session - "
-            f"Times: query={query_time:.3f}s parse={parse_time:.3f}s process={process_time:.3f}s total={total_time:.3f}s"
-        )
+        # Track obfuscation and RQT creation time
+        obfuscation_start_time = time()
+        obfuscation_time = 0
+        rqt_time = 0
 
         # Log a sample of events (up to 3) for debugging
         sample_size = min(3, len(events))
@@ -529,8 +528,11 @@ class XESessionBase(DBMAsyncJob):
 
         for event in events:
             try:
+                # Time the obfuscation
+                obfuscate_start = time()
                 # Obfuscate SQL fields and get the raw statement
                 obfuscated_event, raw_sql_fields = self._obfuscate_sql_fields(event)
+                obfuscation_time += time() - obfuscate_start
 
                 # Check for ALLEN TEST comment in raw SQL fields
                 if raw_sql_fields:
@@ -567,8 +569,11 @@ class XESessionBase(DBMAsyncJob):
 
                 # Create and send RQT event if applicable
                 if raw_sql_fields:
+                    # Time RQT creation
+                    rqt_start = time()
                     # Pass normalized query details for proper timing fields
                     rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
+                    rqt_time += time() - rqt_start
                     if rqt_event:
                         # For now, just log the first RQT event in each batch
                         if event == events[0]:
@@ -593,6 +598,17 @@ class XESessionBase(DBMAsyncJob):
             except Exception as e:
                 self._log.error(f"Error processing event: {e}")
                 continue
+
+        # Calculate post-processing time (obfuscation + RQT)
+        post_processing_time = time() - obfuscation_start_time
+
+        total_time = time() - job_start_time
+        self._log.info(
+            f"Found {len(events)} events from {self.session_name} session - "
+            f"Times: query={query_time:.3f}s parse={parse_time:.3f}s process={process_time:.3f}s "
+            f"obfuscation={obfuscation_time:.3f}s rqt={rqt_time:.3f}s post_processing={post_processing_time:.3f}s "
+            f"total={total_time:.3f}s"
+        )
 
     def _obfuscate_sql_fields(self, event):
         """
