@@ -70,9 +70,9 @@ class QueryCompletionEventsHandler(XESessionBase):
         super(QueryCompletionEventsHandler, self).__init__(check, config, "datadog_query_completions")
 
         # Register handlers for different event types using the strategy pattern
-        self.register_event_handler('sql_batch_completed', self._process_batch_event)
-        self.register_event_handler('rpc_completed', self._process_rpc_event)
-        self.register_event_handler('module_end', self._process_module_event)
+        self.register_event_handler('sql_batch_completed', self._process_query_event)
+        self.register_event_handler('rpc_completed', self._process_query_event)
+        self.register_event_handler('module_end', self._process_query_event)
 
     def get_numeric_fields(self, event_type=None):
         """Get numeric fields with defaults for given event type"""
@@ -105,40 +105,18 @@ class QueryCompletionEventsHandler(XESessionBase):
         """Process all query completion event types using base implementation"""
         return super()._process_events(xml_data)
 
-    def _process_batch_event(self, event, event_data):
-        """Process sql_batch_completed event"""
-        # Process data elements
-        for data in event.findall('./data'):
-            data_name = data.get('name')
-            if not data_name:
-                continue
+    def _process_query_event(self, event, event_data):
+        """
+        Process any query completion event (batch, RPC, or module).
+        All three event types share the same processing logic.
 
-            # Use unified field extraction
-            self._extract_field(data, event_data, data_name)
+        Args:
+            event: The XML event element
+            event_data: The event data dictionary to populate
 
-        # Process action elements
-        self._process_action_elements(event, event_data)
-
-        return True
-
-    def _process_rpc_event(self, event, event_data):
-        """Process rpc_completed event"""
-        # Process data elements
-        for data in event.findall('./data'):
-            data_name = data.get('name')
-            if not data_name:
-                continue
-
-            # Use unified field extraction
-            self._extract_field(data, event_data, data_name)
-
-        # Process action elements
-        self._process_action_elements(event, event_data)
-
-        return True
-
-    def _process_module_event(self, event, event_data):
-        """Process module_end event (for stored procedures, triggers, functions, etc.)"""
+        Returns:
+            True if processing was successful
+        """
         # Process data elements
         for data in event.findall('./data'):
             data_name = data.get('name')

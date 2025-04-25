@@ -74,7 +74,7 @@ class ErrorEventsHandler(XESessionBase):
         """Process error_reported event"""
         # Store the event type for _get_important_fields
         self._last_processed_event_type = 'error_reported'
-        
+
         # Extract data elements
         for data in event.findall('./data'):
             data_name = data.get('name')
@@ -96,7 +96,7 @@ class ErrorEventsHandler(XESessionBase):
         """Process attention event"""
         # Store the event type for _get_important_fields
         self._last_processed_event_type = 'attention'
-        
+
         # Process data elements
         for data in event.findall('./data'):
             data_name = data.get('name')
