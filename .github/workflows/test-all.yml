@@ -52,6 +52,10 @@ on:
         required: false
         type: string
         default: ""
+      ddev-fetch-depth:
+        required: false
+        default: 1
+        type: number
 
 jobs:
   jd316aba:
