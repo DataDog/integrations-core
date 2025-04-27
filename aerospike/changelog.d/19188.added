@@ -1,5 +1,3 @@
-Sy/slurm user
-
 * Allows all metrics from aerospike-prometheus-exporter to be available in datadog
 * Added various dashboard to cover different types of aerospike metrics like cluster, node, namespace, secondary index, set etc.,
 * Added various use-cases specific dashboard which can be used during specific activities like upgrades, restart etc.,
