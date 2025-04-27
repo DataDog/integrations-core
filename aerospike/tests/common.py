@@ -4,7 +4,7 @@
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-COMPOSE_FILE = os.path.join(HERE, 'docker', os.environ.get('DOCKER_COMPOSE_FILENAME'))
+COMPOSE_FILE = os.path.join(HERE, 'docker', os.environ['DOCKER_COMPOSE_FILENAME'])
 
 # from datadog_checks.dev import get_docker_hostname
 # HOST = get_docker_hostname()
@@ -16,6 +16,7 @@ PORT = 3000
 EXPORTER_PORT = 9145
 VERSION = os.environ.get('AEROSPIKE_VERSION')
 AEROSPIKE_EXPORTER_VERSION = os.environ.get('AEROSPIKE_EXPORTER_VERSION')
+AEROSPIKE_TOOLS_VERSION = os.environ.get('AEROSPIKE_TOOLS_VERSION')
 
 OPENMETRICS_V2_INSTANCE = {
     'openmetrics_endpoint': 'http://{}:{}/metrics'.format(HOST, EXPORTER_PORT),

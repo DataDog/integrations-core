@@ -24,7 +24,7 @@ services:
       AS_PORT: 3000
 
   aerospike-tools-asbench-batch:
-    image: aerospike/aerospike-tools
+    image: aerospike/aerospike-tools:${AEROSPIKE_TOOLS_VERSION}
     container_name: aerospike-tools-asbench-batch
     depends_on:
       aerospike:
