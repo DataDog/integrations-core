@@ -33,11 +33,6 @@ on:
         description: Agent 6 image on Windows
         default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
-      full-fetch:
-        required: false
-        description: Fetch the entire repository for testing (mark if running in a non-release branch)
-        default: false
-        type: boolean
 
 jobs:
   test:
@@ -53,7 +48,6 @@ jobs:
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      ddev-fetch-depth: ${{ !inputs.full-fetch && 1 || 0 }}
     secrets: inherit
 
   submit-traces:

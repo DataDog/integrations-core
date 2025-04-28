@@ -85,10 +85,6 @@ on:
         required: false
         type: string
         default: ""
-      fetch-depth:
-        required: false
-        default: 1
-        type: number
 
 defaults:
   run:
@@ -135,8 +131,6 @@ jobs:
         diskperf -y
 
     - uses: actions/checkout@v4
-      with:
-        fetch-depth: ${{ inputs.fetch-depth }}
 
     - name: Set up Python 2.7
       if: inputs.test-py2
