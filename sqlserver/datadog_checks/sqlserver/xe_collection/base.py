@@ -120,15 +120,28 @@ class XESessionBase(DBMAsyncJob):
         self._check = check
         self._log = check.log
         self._config = config
-        self.collection_interval = 10  # Default for POC
+
+        # Get configuration based on session name
+        xe_config = getattr(self._config, 'xe_collection_config', {})
+        if session_name == "datadog_query_completions":
+            session_config = xe_config.get('query_completions', {})
+        elif session_name == "datadog_query_errors":
+            session_config = xe_config.get('query_errors', {})
+        else:
+            session_config = {}
+
+        # Set collection interval from config or use default
+        self.collection_interval = session_config.get('collection_interval', 10)
+
         self.max_events = 1000 # SQL Server XE sessions will limit 1000 events per ring buffer query
         self._last_event_timestamp = None  # Initialize timestamp tracking
 
         # Configuration for raw query text (RQT) events
-        self._collect_raw_query = True  # Will be configurable in the future
+        self._collect_raw_query = self._config.collect_raw_query_statement.get("enabled", False)
+
         self._raw_statement_text_cache = RateLimitingTTLCache(
-            maxsize=1000,  # Will be configurable in the future
-            ttl=60 * 60 / 10,  # 10 samples per hour per query - will be configurable
+            maxsize=self._config.collect_raw_query_statement["cache_max_size"],
+            ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
 
         # Obfuscator options - use the same options as the main check
@@ -139,10 +152,20 @@ class XESessionBase(DBMAsyncJob):
         # Register event handlers - subclasses will override this
         self._event_handlers = {}
 
+        # Get configuration based on session name - we already know it's enabled since
+        # the registry only creates enabled handlers, but we still need the details
+        self._enabled = True  # We assume it's enabled since the registry only creates enabled handlers
+        
+        # Log configuration details - no need to check if enabled
+        self._log.info(
+            f"Initializing XE session {session_name} with interval={self.collection_interval}s, "
+            f"collect_raw_query={self._collect_raw_query}"
+        )
+
         super(XESessionBase, self).__init__(
             check,
             run_sync=True,
-            enabled=True,  # TODO: ALLEN configuration options, enabled for POC
+            enabled=True,  # Always enabled - registry only creates enabled handlers
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(self.collection_interval),
