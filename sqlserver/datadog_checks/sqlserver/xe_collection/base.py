@@ -717,7 +717,7 @@ class XESessionBase(DBMAsyncJob):
         )
 
     def _obfuscate_sql_fields(self, event):
-        """Simplified SQL field obfuscation"""
+        """SQL field obfuscation and signature creation"""
         obfuscated_event = event.copy()
         raw_sql_fields = {}
 
@@ -748,10 +748,11 @@ class XESessionBase(DBMAsyncJob):
                             obfuscated_event['dd_comments'] = []
                         obfuscated_event['dd_comments'].extend(result['metadata']['comments'])
 
-                    # Set query_signature from the primary field
+                    # Compute query_signature and raw_query_signature from the primary field
                     primary_field = self._get_primary_sql_field(event)
                     if field == primary_field or 'query_signature' not in obfuscated_event:
                         obfuscated_event['query_signature'] = compute_sql_signature(result['query'])
+                        raw_sql_fields['raw_query_signature'] = compute_sql_signature(event[field])
 
                 except Exception as e:
                     self._log.debug(f"Error obfuscating {field}: {e}")
@@ -813,17 +814,6 @@ class XESessionBase(DBMAsyncJob):
             )
             return None
 
-        # Ensure we have a signature for the primary field
-        primary_signature_field = f"{primary_field}_signature"
-        if primary_signature_field not in raw_sql_fields:
-            self._log.debug(
-                f"Skipping RQT event creation: Signature for primary field {primary_field} not found in raw_sql_fields"
-            )
-            return None
-
-        # Use primary field's signature as the raw_query_signature
-        raw_query_signature = raw_sql_fields[primary_signature_field]
-
         # Use rate limiting cache to control how many RQT events we send
         # cache_key = (query_signature, raw_query_signature)
         # if not self._raw_statement_text_cache.acquire(cache_key):
@@ -834,7 +824,7 @@ class XESessionBase(DBMAsyncJob):
         db_fields = {
             "instance": event.get('database_name', None),
             "query_signature": query_signature,
-            "raw_query_signature": raw_query_signature,
+            "raw_query_signature": raw_sql_fields['raw_query_signature'],
             "statement": raw_sql_fields[primary_field],  # Primary field becomes the statement
             "metadata": {
                 "tables": event.get('dd_tables', None),
