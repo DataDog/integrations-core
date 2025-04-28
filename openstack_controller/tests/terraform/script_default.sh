@@ -6,7 +6,7 @@ echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
 cd /opt/stack
 sudo git clone https://opendev.org/openstack/devstack
 cd devstack
-sudo git checkout origin/stable/zed
+sudo git checkout origin/stable/2024.1
 cat <<EOF | sudo tee -a local.conf
 [[local|localrc]]
 DATABASE_PASSWORD=password
