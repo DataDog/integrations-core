@@ -255,7 +255,7 @@ def process_commits(
         gitRepo.sparse_checkout_commit(commit, folder)
         date_str, author, message = gitRepo.get_commit_metadata(commit)
         date, message, commit = format_commit_data(date_str, message, commit, first_commit)
-        if type == "dependency":
+        if type == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
             assert platform is not None
             result = get_dependencies(repo, module, platform, commit, date, author, message, compressed)
             if result:
