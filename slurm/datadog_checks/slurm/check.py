@@ -322,9 +322,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                         metrics[metric] = metric_value
                     except (ValueError, IndexError):
                         continue
-                    break  # Only match one metric per line
+                    break
 
-            # Handle the "Last cycle when" line separately
             if 'Last cycle when' in line:
                 try:
                     match = re.search(r'\((\d+)\)', line)
