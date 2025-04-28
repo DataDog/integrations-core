@@ -164,6 +164,12 @@ class XESessionBase(DBMAsyncJob):
 
     def get_sql_fields(self, event_type=None):
         """Get SQL fields for given event type"""
+        if event_type == "sql_batch_completed":
+            return ["batch_text", "sql_text"]
+        elif event_type == "rpc_completed":
+            return ["statement", "sql_text"]
+        elif event_type == "module_end":
+            return ["statement", "sql_text"]
         return self.BASE_SQL_FIELDS.copy()
 
     def register_event_handler(self, event_name, handler_method):
@@ -741,9 +747,6 @@ class XESessionBase(DBMAsyncJob):
                         if 'dd_comments' not in obfuscated_event:
                             obfuscated_event['dd_comments'] = []
                         obfuscated_event['dd_comments'].extend(result['metadata']['comments'])
-
-                    # Compute signature
-                    raw_sql_fields[f"{field}_signature"] = compute_sql_signature(event[field])
 
                     # Set query_signature from the primary field
                     primary_field = self._get_primary_sql_field(event)

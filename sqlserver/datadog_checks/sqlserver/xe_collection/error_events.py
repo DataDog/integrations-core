@@ -61,7 +61,7 @@ class ErrorEventsHandler(XESessionBase):
 
     def get_sql_fields(self, event_type=None):
         """Get SQL fields for given event type"""
-        return super().get_sql_fields(event_type)
+        return ["sql_text"]
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
