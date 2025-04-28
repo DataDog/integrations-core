@@ -215,8 +215,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge('sinfo.node.enabled', 1)
 
     def process_squeue(self, output):
-        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY # noqa: E501
-        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M # noqa: E501
+        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY | Partition # noqa: E501
+        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M | foo       # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_squeue_stats:
