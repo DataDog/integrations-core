@@ -35,6 +35,9 @@
         "check": "infiniband.VL15_dropped",
         "metadata_path": "metadata.csv"
       }
+    },
+    "dashboards": {
+      "InfiniBand Overview": "assets/dashboards/infiniband_overview.json"
     }
   },
   "author": {
