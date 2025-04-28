@@ -36,6 +36,10 @@
         "metadata_path": "metadata.csv"
       }
     },
+    "monitors": {
+      "port_state": "assets/monitors/port_state.json",
+      "physical_state": "assets/monitors/physical_state.json"
+    },
     "dashboards": {
       "InfiniBand Overview": "assets/dashboards/infiniband_overview.json"
     }
