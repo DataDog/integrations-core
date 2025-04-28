@@ -97,6 +97,8 @@ class PostgreSql(AgentCheck):
     SERVICE_CHECK_NAME = 'postgres.can_connect'
     METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None

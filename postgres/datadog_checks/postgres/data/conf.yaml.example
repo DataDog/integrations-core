@@ -500,12 +500,6 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
-        ## query_samples configured collection_interval.
-        #
-        # collection_interval: 10
-
         ## @param payload_row_limit - number - optional - default: 3500
         ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
         ## than the maximum rows set, then the top N longest running transactions will be reported.

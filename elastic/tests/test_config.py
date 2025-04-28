@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.elastic import ESCheck
-from datadog_checks.elastic.config import from_instance
+from datadog_checks.elastic.config import from_instance, sanitize_url
 
 
 @pytest.mark.unit
@@ -34,6 +34,46 @@ def test_from_instance_defaults():
     assert c.tags == ['url:http://example.com']
     assert c.url == 'http://example.com'
     assert c.pending_task_stats is True
+
+
+@pytest.mark.unit
+def test_from_instance_with_auth_in_url():
+    instance = {
+        "url": "http://user:pass@foo.bar:9200",
+        "tags": ["a", "b:c"],
+    }
+    c = from_instance(instance)
+    assert c.admin_forwarder is False
+    assert c.cluster_stats is False
+    assert c.url == "http://user:pass@foo.bar:9200"  # Original URL preserved for connections
+    assert c.tags == ["url:http://foo.bar:9200", "a", "b:c"]  # Sanitized URL in tags
+    assert c.service_check_tags == ["host:foo.bar", "port:9200", "a", "b:c"]
+
+    # Test without port
+    instance = {
+        "url": "http://user:pass@foo.bar",
+        "tags": ["a", "b:c"],
+    }
+    c = from_instance(instance)
+    assert c.url == "http://user:pass@foo.bar"  # Original URL preserved
+    assert c.tags == ["url:http://foo.bar", "a", "b:c"]  # Sanitized URL without port
+    assert c.service_check_tags == ["host:foo.bar", "port:None", "a", "b:c"]
+
+
+@pytest.mark.unit
+def test_sanitize_url():
+    # Test URLs without credentials
+    assert sanitize_url('http://localhost:9200') == 'http://localhost:9200'
+    assert sanitize_url('https://localhost:9200') == 'https://localhost:9200'
+    assert sanitize_url('http://user@localhost:9200') == 'http://localhost:9200'
+    assert sanitize_url('http://localhost') == 'http://localhost'  # No port
+
+    # Test URLs with credentials
+    assert sanitize_url('http://user:pass@localhost:9200') == 'http://localhost:9200'
+    assert sanitize_url('https://admin:admin@localhost:9200') == 'https://localhost:9200'
+    assert sanitize_url('http://elastic:changeme@localhost:9200/path') == 'http://localhost:9200/path'
+    assert sanitize_url('http://user:pass@localhost') == 'http://localhost'  # With auth but no port
+    assert sanitize_url('http://user:pass@localhost/path') == 'http://localhost/path'  # With auth and path but no port
 
 
 @pytest.mark.unit
