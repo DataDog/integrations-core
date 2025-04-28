@@ -34,6 +34,10 @@
         "prefix": "infiniband.",
         "check": "infiniband.VL15_dropped",
         "metadata_path": "metadata.csv"
+      },
+      "monitors": {
+        "port_state": "assets/configuration/monitors/port_state.json",
+        "physical_state": "assets/configuration/monitors/physical_state.json"
       }
     }
   },
