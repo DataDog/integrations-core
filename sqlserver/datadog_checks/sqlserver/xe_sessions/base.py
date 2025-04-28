@@ -121,7 +121,7 @@ class XESessionBase(DBMAsyncJob):
         self._log = check.log
         self._config = config
         self.collection_interval = 10  # Default for POC
-        self.max_events = 100000  # Temporarily increased to see actual event volume
+        self.max_events = 1000 # SQL Server XE sessions will limit 1000 events per ring buffer query
         self._last_event_timestamp = None  # Initialize timestamp tracking
 
         # Configuration for raw query text (RQT) events
@@ -473,9 +473,9 @@ class XESessionBase(DBMAsyncJob):
         # Add the XE event type to normalized data
         normalized["xe_type"] = event.get("event_name", "")
 
-        # Format the query_complete timestamp for output
+        # Format the event_fire_timestamp (from event's timestamp)
         raw_timestamp = event.get("timestamp", "")
-        normalized["query_complete"] = TimestampHandler.format_for_output(raw_timestamp)
+        normalized["event_fire_timestamp"] = TimestampHandler.format_for_output(raw_timestamp)
 
         # Calculate and format query_start if duration_ms is available
         if raw_timestamp and "duration_ms" in event and event.get("duration_ms") is not None:
@@ -526,13 +526,6 @@ class XESessionBase(DBMAsyncJob):
             self._log.debug(f"Unrecognized session name: {self.session_name}, using default dbm_type")
             return "query_completion"
 
-    def _get_important_fields(self):
-        """
-        Get the list of important fields for this event type - to be overridden by subclasses.
-        Used for formatting events for logging.
-        """
-        return ['query_start', 'query_complete', 'duration_ms']
-
     def _create_event_payload(self, raw_event):
         """
         Create a structured event payload for a single event with consistent format.
@@ -564,31 +557,6 @@ class XESessionBase(DBMAsyncJob):
             "service": self._config.service,
             "query_details": normalized_event,
         }
-
-    def _format_event_for_log(self, event, important_fields):
-        """
-        Format a single event for logging with important fields first
-
-        Args:
-            event: The event data dictionary
-            important_fields: List of field names to prioritize in the output
-
-        Returns:
-            A formatted event dictionary with the most important fields first
-        """
-        formatted_event = {}
-
-        # Include the most important fields first for readability
-        for field in important_fields:
-            if field in event:
-                formatted_event[field] = event[field]
-
-        # Add remaining fields
-        for key, value in event.items():
-            if key not in formatted_event:
-                formatted_event[key] = value
-
-        return formatted_event
 
     def run_job(self):
         """Run the XE session collection job"""
@@ -644,8 +612,7 @@ class XESessionBase(DBMAsyncJob):
 
         # Log a sample of events (up to 3) for debugging
         sample_size = min(3, len(events))
-        important_fields = self._get_important_fields()
-        sample_events = [self._format_event_for_log(event, important_fields) for event in events[:sample_size]]
+        sample_events = events[:sample_size]
 
         try:
             formatted_json = json_module.dumps(sample_events, indent=2, default=str)
@@ -674,7 +641,7 @@ class XESessionBase(DBMAsyncJob):
                                 f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
                                 f"host={self._check.resolved_hostname}, field={field_name}, "
                                 f"session_id={obfuscated_event.get('session_id', 'UNKNOWN')}, "
-                                f"query_complete={obfuscated_event.get('query_complete', 'UNKNOWN')}, "
+                                f"event_fire_timestamp={obfuscated_event.get('event_fire_timestamp', 'UNKNOWN')}, "
                                 f"query_start={obfuscated_event.get('query_start', 'UNKNOWN')}, "
                                 f"duration_ms={obfuscated_event.get('duration_ms', 'UNKNOWN')}, "
                                 f"text={field_value[:100]}, full_event={json_module.dumps(obfuscated_event, default=str)}"
@@ -874,7 +841,7 @@ class XESessionBase(DBMAsyncJob):
             "xe_type": event.get("event_name"),
             "duration_ms": event.get("duration_ms"),
             "query_start": query_details.get("query_start"),
-            "query_complete": query_details.get("query_complete"),
+            "event_fire_timestamp": query_details.get("event_fire_timestamp"),
         }
 
         # Add additional SQL fields to the sqlserver section

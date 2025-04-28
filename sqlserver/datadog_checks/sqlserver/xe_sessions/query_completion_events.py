@@ -149,21 +149,6 @@ class QueryCompletionEventsHandler(XESessionBase):
         # All event types can use the base normalization with type-specific fields
         return self._normalize_event(event)
 
-    def _get_important_fields(self):
-        """Get common important fields for all event types"""
-        return [
-            'timestamp',
-            'event_name',
-            'duration_ms',
-            'object_name',
-            'object_type',
-            'statement',
-            'sql_text',
-            'client_app_name',
-            'database_name',
-            'activity_id',
-        ]
-
     def _get_primary_sql_field(self, event):
         """
         Get the primary SQL field based on the event type.

@@ -66,15 +66,10 @@ class ErrorEventsHandler(XESessionBase):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
         """Process error events from the XML data using base implementation"""
-        # Store the event type for _get_important_fields
-        self._last_processed_event_type = None
         return super()._process_events(xml_data)
 
     def _process_error_reported_event(self, event, event_data):
         """Process error_reported event"""
-        # Store the event type for _get_important_fields
-        self._last_processed_event_type = 'error_reported'
-
         # Extract data elements
         for data in event.findall('./data'):
             data_name = data.get('name')
@@ -94,9 +89,6 @@ class ErrorEventsHandler(XESessionBase):
 
     def _process_attention_event(self, event, event_data):
         """Process attention event"""
-        # Store the event type for _get_important_fields
-        self._last_processed_event_type = 'attention'
-
         # Process data elements
         for data in event.findall('./data'):
             data_name = data.get('name')
@@ -126,18 +118,6 @@ class ErrorEventsHandler(XESessionBase):
         """Normalize error event data based on event type"""
         # All error event types can use the base normalization with type-specific fields
         return self._normalize_event(event)
-
-    def _get_important_fields(self):
-        """Define important fields for logging based on event type"""
-        # Common important fields for all event types
-        important_fields = ['timestamp', 'event_name']
-        # Add event-type specific fields
-        if hasattr(self, '_last_processed_event_type'):
-            if self._last_processed_event_type == 'error_reported':
-                important_fields.extend(['error_number', 'severity', 'message', 'sql_text'])
-            elif self._last_processed_event_type == 'attention':
-                important_fields.extend(['duration_ms', 'session_id', 'sql_text'])
-        return important_fields
 
     def _get_primary_sql_field(self, event):
         """
