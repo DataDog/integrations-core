@@ -53,7 +53,7 @@ from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
-from datadog_checks.sqlserver.xe_sessions.registry import get_xe_session_handlers
+from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 try:
     import datadog_agent
