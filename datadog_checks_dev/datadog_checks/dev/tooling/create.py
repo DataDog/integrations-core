@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from operator import attrgetter
 from uuid import uuid4
 
@@ -175,7 +175,7 @@ To install the {integration_name} check on your host:
         'integration_links': integration_links,
         # Source Type IDs are unique-per-integration integers
         # Based on current timestamp with subtraction to start the IDs at around a few million, allowing room to grow.
-        "source_type_id": int(datetime.utcnow().timestamp()) - 1700000000,
+        "source_type_id": int(datetime.now(timezone.utc).timestamp()) - 1700000000,
     }
     config.update(kwargs)
 

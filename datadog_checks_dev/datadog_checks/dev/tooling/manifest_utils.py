@@ -115,7 +115,7 @@ class ManifestV1:
         return self._manifest_json.get_path("/assets/metrics_metadata")
 
     def get_service_checks_path(self):
-        return self._manifest_json["assets"]["service_checks"]
+        return self._manifest_json.get("assets", {}).get("service_checks")
 
     def get_config_spec(self):
         path = self._manifest_json.get('assets', {}).get('configuration', {}).get('spec', '')
