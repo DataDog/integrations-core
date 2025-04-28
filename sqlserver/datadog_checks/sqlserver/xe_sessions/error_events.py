@@ -116,8 +116,16 @@ class ErrorEventsHandler(XESessionBase):
 
     def _normalize_event_impl(self, event):
         """Normalize error event data based on event type"""
-        # All error event types can use the base normalization with type-specific fields
-        return self._normalize_event(event)
+        # First use the base normalization with type-specific fields
+        normalized = self._normalize_event(event)
+
+        # For error events, remove query_start and duration_ms fields since they're not applicable
+        if 'query_start' in normalized:
+            del normalized['query_start']
+        if 'duration_ms' in normalized:
+            del normalized['duration_ms']
+
+        return normalized
 
     def _get_primary_sql_field(self, event):
         """
