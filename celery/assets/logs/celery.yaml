@@ -53,14 +53,18 @@ pipeline:
         - "[2025-04-23 20:02:25,658: INFO/MainProcess] Task tasks.multiply[c05345e1-cfa5-43cb-9671-30a98115c5db] received"
         - "[2025-04-23 20:02:25,660: INFO/ForkPoolWorker-4] Task tasks.add[c25d9c94-4ef6-4828-a1a7-37f6f5a328da] succeeded in 0.00030375000278581865s: 9"
         - "celery@17133dbfe7a6 [2025-04-01 13:33:33.400755] heartbeat: clock=1452, freq=5, local_received=1743514413.4011424, pid=1, sw_ident=py-celery, sw_sys=Linux, sw_ver=5.4.0, utcoffset=0"
+        - "celery@17133dbfe7a6 [2025-10-01 13:33:34.986589] task succeeded: tasks.add(eaae3cff-f198-4fe3-9f69-ad59b0412bed) args=(4, 5) kwargs={} clock=1458, local_received=1743702814.987442, pid=1, result=9, runtime=0.00012291595339775085, utcoffset=0"
       grok:
         supportRules: |
           _date_standard %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
           _date_worker %{date("yyyy-MM-dd HH:mm:ss.SSS"):timestamp}
-          _status %{word:status}
+          _level %{word:level}
+          _task_name %{word:task_name}
+          _task_id %{notSpace:task_id}
         matchRules: |
-          celery_standard \[%{_date_standard}:\s+%{_status}/%{data}\]\s*%{data:message}
-          celery_worker celery@%{data}\s+\[%{_date_worker}\]\s*%{data:message}
+          celery_standard \[%{_date_standard}:\s+%{_level}/%{data}\]\s*%{data:message}
+          celery_worker celery@%{notSpace:worker_id} \[%{_date_worker}\] heartbeat: clock=%{number:heartbeat.clock}, freq=%{number:heartbeat.freq}, local_received=%{number:heartbeat.local_received}, pid=%{number:heartbeat.pid}, sw_ident=%{word:heartbeat.sw_ident}, sw_sys=%{word:heartbeat.sw_sys}, sw_ver=%{data:heartbeat.sw_ver}, utcoffset=%{number:heartbeat.utcoffset}
+          celery_task_status celery@%{notSpace:worker_id} \[%{_date_worker}\] task %{word:task_status}: %{data:task_name}\(%{notSpace:task_id}\) args=%{data:args} kwargs=%{data:kwargs} clock=%{number:clock}, local_received=%{number:local_received}, pid=%{number:pid}, result=%{data:result}, runtime=%{number:runtime}, utcoffset=%{number:utcoffset}
 
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
@@ -68,10 +72,10 @@ pipeline:
       sources:
         - timestamp
     - type: status-remapper
-      name: Define `status` as the official status of the log
+      name: Define `level` as the official status of the log
       enabled: true
       sources:
-        - status
+        - level
     - type: message-remapper
       name: Define `message` as the official message of the log
       enabled: true
