@@ -1,1 +1,0 @@
-Fix Aurora replication role tags being appended instead of updated during failover events.

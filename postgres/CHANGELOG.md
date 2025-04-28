@@ -2,6 +2,33 @@
 
 <!-- towncrier release notes start -->
 
+## 22.11.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+* Added query call count `calls` to StatementMetrics execution indicators to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20096](https://github.com/DataDog/integrations-core/pull/20096))
+
+## 22.10.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.9.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Postgres: Add checkpoint byte delay metric ([#20017](https://github.com/DataDog/integrations-core/pull/20017))
+* add replication slot information and replication slot type to postgres replication stat metric ([#20035](https://github.com/DataDog/integrations-core/pull/20035))
+
+***Fixed***:
+
+* Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
+* Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
+
 ## 22.8.0 / 2025-03-19
 
 ***Added***:

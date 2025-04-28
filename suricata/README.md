@@ -81,7 +81,7 @@ If you see a **Permission denied** error while monitoring the log files, give th
 For any further assistance, contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://suricata.io/
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install

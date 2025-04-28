@@ -1,0 +1,64 @@
+{
+    "db": "local",
+    "collections": 7,
+    "views": 1,
+    "objects": 6938,
+    "avgObjSize": 214.15696166042088,
+    "dataSize": 1485821.0,
+    "storageSize": 430080.0,
+    "numExtents": 0,
+    "indexes": 6,
+    "indexSize": 98304.0,
+    "indexFreeStorageSize": 8556544.0,
+    "scaleFactor": 1.0,
+    "ok": 1.0,
+    "$gleStats": {
+        "lastOpTime": {
+            "$timestamp": {
+                "t": 0,
+                "i": 0
+            }
+        },
+        "electionId": {
+            "$oid": "7fffffff0000000000000004"
+        }
+    },
+    "lastCommittedOpTime": {
+        "$timestamp": {
+            "t": 1600249681,
+            "i": 1
+        }
+    },
+    "$configServerState": {
+        "opTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600249677,
+                    "i": 1
+                }
+            },
+            "t": 8
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600249681,
+                "i": 1
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600249681,
+            "i": 1
+        }
+    }
+}

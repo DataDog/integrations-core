@@ -246,6 +246,9 @@ def scrape_license_data(urls, app):
                 else:
                     data['licenses'].add(package_license)
 
+            if license_expressions := info.get('license_expression'):
+                data['licenses'].add(license_expressions)
+
             if home_page := info['home_page']:
                 data['home_page'] = home_page
 
@@ -467,7 +470,7 @@ def licenses(app: Application, sync: bool):
         for package_name, package_errors in package_license_errors.items():
             for error in package_errors:
                 error_message += error + '\n'
-            validation_tracker.error((package_name), message=error_message)
+            validation_tracker.error((package_name,), message=error_message)
 
         validation_tracker.display()
         app.abort()

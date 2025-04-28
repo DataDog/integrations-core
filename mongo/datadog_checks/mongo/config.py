@@ -97,6 +97,7 @@ class MongoConfig(object):
         self.custom_queries = instance.get("custom_queries", [])
         self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
         self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
+        self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
 

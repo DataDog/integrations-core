@@ -64,6 +64,26 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
+    ## which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - mysql_sock: The socket path of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
     ## If you specify a socket you dont need to specify a host.
@@ -514,11 +534,6 @@ instances:
         ## Enable collection of active sessions. Requires `dbm: true`.
         #
         # enabled: true
-
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the activity collection interval (in seconds).
-        #
-        # collection_interval: 10
 
         ## @param collect_blocking_queries - boolean - optional - default: false
         ## Enable collection of blocking queries.
