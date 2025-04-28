@@ -35,28 +35,24 @@ class TimestampHandler:
     """Utility class for handling timestamps"""
 
     @staticmethod
-    def normalize(timestamp_str):
+    def format_for_output(timestamp_str):
         """
-        Normalize timestamp to a consistent format: YYYY-MM-DDTHH:MM:SS.sssZ
+        Format a timestamp for output in a consistent format: YYYY-MM-DDTHH:MM:SS.sssZ
+        This is used only for the output payload, not for filtering.
 
         Args:
-            timestamp_str: A timestamp string in various possible formats
-
+            timestamp_str: A timestamp string in ISO format
         Returns:
-            A normalized timestamp string or empty string if parsing fails
+            A formatted timestamp string or empty string if parsing fails
         """
         if not timestamp_str:
             return ""
-
         try:
-            # Replace Z with +00:00 for consistent parsing
+            # Parse the timestamp
             if timestamp_str.endswith('Z'):
                 timestamp_str = timestamp_str[:-1] + '+00:00'
-
-            # Parse the timestamp
             dt = datetime.datetime.fromisoformat(timestamp_str)
-
-            # Format to consistent format with milliseconds precision: YYYY-MM-DDTHH:MM:SS.sssZ
+            # Format to consistent format with milliseconds precision
             return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
         except Exception:
             return timestamp_str
@@ -269,6 +265,7 @@ class XESessionBase(DBMAsyncJob):
                 params = []
                 where_clauses = []
 
+                # Use direct timestamp comparison without normalization
                 if self._last_event_timestamp:
                     where_clauses.append("CAST(xe.event_data AS XML).value('(event/@timestamp)[1]', 'datetime2') > ?")
                     params.append(self._last_event_timestamp)
@@ -336,19 +333,8 @@ class XESessionBase(DBMAsyncJob):
             for _, elem in context:
                 timestamp = elem.get('timestamp')
 
-                # Normalize both timestamps to ensure consistent comparison
-                normalized_timestamp = None
-                if timestamp:
-                    normalized_timestamp = TimestampHandler.normalize(timestamp)
 
-                # Compare normalized timestamps for proper filtering
-                should_include = False
-                if not self._last_event_timestamp:
-                    should_include = True
-                elif normalized_timestamp and normalized_timestamp > self._last_event_timestamp:
-                    should_include = True
-
-                if should_include:
+                if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
                     event_xml = etree.tostring(elem, encoding='unicode')
                     filtered_events.append(event_xml)
 
@@ -487,18 +473,14 @@ class XESessionBase(DBMAsyncJob):
         # Add the XE event type to normalized data
         normalized["xe_type"] = event.get("event_name", "")
 
-        # Normalize the query_complete timestamp (from event's timestamp)
-        normalized["query_complete"] = TimestampHandler.normalize(event.get("timestamp", ""))
+        # Format the query_complete timestamp for output
+        raw_timestamp = event.get("timestamp", "")
+        normalized["query_complete"] = TimestampHandler.format_for_output(raw_timestamp)
 
-        # Calculate and normalize query_start if duration_ms and timestamp are available
-        if (
-            "timestamp" in event
-            and "duration_ms" in event
-            and event.get("timestamp")
-            and event.get("duration_ms") is not None
-        ):
+        # Calculate and format query_start if duration_ms is available
+        if raw_timestamp and "duration_ms" in event and event.get("duration_ms") is not None:
             normalized["query_start"] = TimestampHandler.calculate_start_time(
-                event.get("timestamp"), event.get("duration_ms")
+                raw_timestamp, event.get("duration_ms")
             )
         else:
             normalized["query_start"] = ""
@@ -634,15 +616,15 @@ class XESessionBase(DBMAsyncJob):
             self._log.debug(f"No events processed from {self.session_name} session")
             return
 
-        # Update timestamp tracking with the last event (events are ordered by timestamp)
-        if events and 'query_complete' in events[-1]:
-            self._last_event_timestamp = events[-1]['query_complete']
+        # Update timestamp tracking with the last event's raw timestamp
+        # (events are ordered by timestamp)
+        if events and 'timestamp' in events[-1]:
+            self._last_event_timestamp = events[-1]['timestamp']
             self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
 
-        # Update the timestamp gap detection
-        if events and self._last_event_timestamp and 'query_complete' in events[0]:
-            current_first_timestamp = events[0]['query_complete']
-            # Calculate actual gap in seconds
+        # Timestamp gap detection (use raw timestamps for comparison)
+        if events and self._last_event_timestamp and 'timestamp' in events[0]:
+            current_first_timestamp = events[0]['timestamp']
             try:
                 prev_dt = datetime.datetime.fromisoformat(self._last_event_timestamp.replace('Z', '+00:00'))
                 curr_dt = datetime.datetime.fromisoformat(current_first_timestamp.replace('Z', '+00:00'))
