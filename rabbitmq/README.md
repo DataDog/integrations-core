@@ -45,7 +45,7 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
        unaggregated_endpoint: detailed?family=queue_coarse_metrics&family=queue_consumer_count&family=channel_exchange_metrics&family=channel_queue_exchange_metrics&family=node_coarse_metrics
  ```
-This configuration will collect metrics for each queue, exchange, and node. See the [`/metrics/detailed` API documentation][22] for more information on the metrics provided by each family.
+This configuration collects metrics for each queue, exchange, and node. See the [`/metrics/detailed` API documentation][22] for more information on the metrics provided by each family.
 
 ##### [RabbitMQ Management Plugin][4].
 
