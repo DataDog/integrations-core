@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.sqlserver.xe_sessions.error_events import ErrorEventsHandler
-from datadog_checks.sqlserver.xe_sessions.query_completion_events import QueryCompletionEventsHandler
-from datadog_checks.sqlserver.xe_sessions.sp_statement_events import SpStatementEventsHandler
-from datadog_checks.sqlserver.xe_sessions.sql_statement_events import SqlStatementEventsHandler
+from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
+from datadog_checks.sqlserver.xe_collection.query_completion_events import QueryCompletionEventsHandler
+from datadog_checks.sqlserver.xe_collection.sp_statement_events import SpStatementEventsHandler
+from datadog_checks.sqlserver.xe_collection.sql_statement_events import SqlStatementEventsHandler
 
 
 def get_xe_session_handlers(check, config):

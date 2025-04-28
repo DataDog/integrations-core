@@ -5,18 +5,18 @@
 from lxml import etree
 
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.xe_sessions.base import XESessionBase, agent_check_getter
+from datadog_checks.sqlserver.xe_collection.base import XESessionBase, agent_check_getter
 
 
-class SpStatementEventsHandler(XESessionBase):
-    """Handler for Stored Procedure Statement Completed events"""
+class SqlStatementEventsHandler(XESessionBase):
+    """Handler for SQL Statement Completed events"""
 
     def __init__(self, check, config):
-        super(SpStatementEventsHandler, self).__init__(check, config, "datadog_sp_statement")
+        super(SqlStatementEventsHandler, self).__init__(check, config, "datadog_sql_statement")
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _process_events(self, xml_data):
-        """Process stored procedure statement events from the XML data"""
+        """Process SQL statement completed events from the XML data"""
         try:
             root = etree.fromstring(xml_data.encode('utf-8') if isinstance(xml_data, str) else xml_data)
         except Exception as e:
@@ -31,10 +31,8 @@ class SpStatementEventsHandler(XESessionBase):
                 timestamp = event.get('timestamp')
                 event_data = {"timestamp": timestamp}
 
-                # Define field groups for SP statement events
+                # Define field groups for SQL statement events
                 numeric_fields = [
-                    'source_database_id',
-                    'object_id',
                     'cpu_time',
                     'page_server_reads',
                     'physical_reads',
@@ -43,13 +41,12 @@ class SpStatementEventsHandler(XESessionBase):
                     'spills',
                     'row_count',
                     'last_row_count',
-                    'nest_level',
                     'line_number',
                     'offset',
                     'offset_end',
                 ]
-                string_fields = ['object_name', 'statement']
-                text_fields = ['object_type']
+                string_fields = ['statement']
+                text_fields = []
 
                 # Process data elements
                 for data in event.findall('./data'):
@@ -67,6 +64,11 @@ class SpStatementEventsHandler(XESessionBase):
                         self._extract_string_fields(data, event_data, data_name, string_fields)
                     elif data_name in text_fields:
                         self._extract_text_fields(data, event_data, data_name, text_fields)
+                    # Handle binary data fields
+                    elif data_name == 'parameterized_plan_handle':
+                        # Just note its presence/absence for now
+                        plan_handle = self._extract_value(data)
+                        event_data[data_name] = bool(plan_handle)
                     # Handle all other fields
                     else:
                         event_data[data_name] = self._extract_value(data)
@@ -83,21 +85,18 @@ class SpStatementEventsHandler(XESessionBase):
 
                 events.append(event_data)
             except Exception as e:
-                self._log.error(f"Error processing SP statement event: {e}")
+                self._log.error(f"Error processing SQL statement event: {e}")
                 continue
 
         return events
 
     def _normalize_event_impl(self, event):
         """
-        Implementation of stored procedure statement event normalization with type handling.
+        Implementation of SQL statement event normalization with type handling.
 
         Expected fields:
         - timestamp: ISO8601 timestamp string
         - duration_ms: float (milliseconds)
-        - source_database_id: int
-        - object_id: int
-        - object_type: string (e.g., "PROC")
         - cpu_time: int (microseconds)
         - page_server_reads: int
         - physical_reads: int
@@ -106,24 +105,21 @@ class SpStatementEventsHandler(XESessionBase):
         - spills: int
         - row_count: int
         - last_row_count: int
-        - nest_level: int
         - line_number: int
         - offset: int
         - offset_end: int
-        - object_name: string (name of the stored procedure)
         - statement: string (SQL statement text)
+        - parameterized_plan_handle: bool (presence of plan handle)
         - database_name: string
         - request_id: int
         - session_id: int
         - client_app_name: string
-        - sql_text: string (may be different from statement, showing calling context)
+        - sql_text: string (may be same as statement)
         - activity_id: string (GUID+sequence when using TRACK_CAUSALITY)
         """
         # Define numeric fields with defaults
         numeric_fields = {
             "duration_ms": 0.0,
-            "source_database_id": 0,
-            "object_id": 0,
             "cpu_time": 0,
             "page_server_reads": 0,
             "physical_reads": 0,
@@ -132,7 +128,6 @@ class SpStatementEventsHandler(XESessionBase):
             "spills": 0,
             "row_count": 0,
             "last_row_count": 0,
-            "nest_level": 0,
             "line_number": 0,
             "offset": 0,
             "offset_end": 0,
@@ -142,8 +137,6 @@ class SpStatementEventsHandler(XESessionBase):
 
         # Define string fields
         string_fields = [
-            "object_type",
-            "object_name",
             "statement",
             "database_name",
             "client_app_name",
@@ -155,15 +148,12 @@ class SpStatementEventsHandler(XESessionBase):
         return self._normalize_event(event, numeric_fields, string_fields)
 
     def _get_important_fields(self):
-        """Get the list of important fields for SP statement events logging"""
+        """Get the list of important fields for SQL statement events logging"""
         return [
             'timestamp',
-            'object_name',
-            'object_type',
             'statement',
             'sql_text',
             'duration_ms',
-            'nest_level',
             'cpu_time',
             'logical_reads',
             'client_app_name',

@@ -885,7 +885,9 @@ files:
             display_default: false
     - name: collect_raw_query_statement
       description: |
-        Configure the collection of raw query statements in query activity and execution plans.
+        Configure the collection of raw query statements in query activity, execution plans, and XE events.
+        To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and 
+        `xe_collection.query_errors.enabled` to `true`.
         Raw query statements and execution plans may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
         Enabling this option will allow the collection and ingestion of raw query statements and 
@@ -997,6 +999,49 @@ files:
       value:
         example: false
         type: boolean
+    - name: xe_collection
+      description: |
+        Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
+
+        Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+      options:
+        - name: query_completions
+          description: |
+            Configure the collection of completed queries from the `datadog_query_completions` XE session.
+
+            Set `query_completions.enabled` to `true` to enable the collection of query completion events.
+            Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of 
+            query completion events. Defaults to 10 seconds. If you intend on updating this value,
+            it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: collection_interval
+              type: integer
+              example: 10
+              display_default: 10
+        - name: query_errors
+          description: |
+            Configure the collection of query errors from the `datadog_query_errors` XE session.
+
+            Set `query_errors.enabled` to `true` to enable the collection of query error events.
+            
+            Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of 
+            query error events. Defaults to 10 seconds. If you intend on updating this value,
+            it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: collection_interval
+              type: integer
+              example: 10
+              display_default: 10
     - name: deadlocks_collection
       description: |
         Configure the collection of deadlock data.

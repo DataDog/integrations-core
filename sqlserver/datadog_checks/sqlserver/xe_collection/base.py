@@ -849,6 +849,12 @@ class XESessionBase(DBMAsyncJob):
                 "duration_ms": event.get("duration_ms"),
                 "query_start": query_details.get("query_start"),
             })
+        else:
+            # Include error_number and message for error events
+            sqlserver_fields.update({
+                "error_number": event.get("error_number"),
+                "message": event.get("message"),
+            })
 
         # Add additional SQL fields to the sqlserver section
         # but only if they're not the primary field and not empty
