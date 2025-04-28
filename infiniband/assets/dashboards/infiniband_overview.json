@@ -114,7 +114,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "InfiniBand Overview show a quick summary of all reporting InfiniBand instances and related monitors and their status.",
+                            "content": "InfiniBand Overview shows a quick summary of all reporting InfiniBand instances and related monitors and their status.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
