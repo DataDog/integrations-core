@@ -5,6 +5,7 @@ tests:
   result:
     custom:
       level: "INFO"
+      timestamp: 1761249745658
     message: "Task tasks.multiply[c05345e1-cfa5-43cb-9671-30a98115c5db] received"
     status: "info"
     tags:
@@ -15,6 +16,7 @@ tests:
   result:
     custom:
       level: "INFO"
+      timestamp: 1761249745660
     message: "Task tasks.add[c25d9c94-4ef6-4828-a1a7-37f6f5a328da] succeeded in 0.00030375000278581865s: 9"
     status: "info"
     tags:
@@ -24,17 +26,16 @@ tests:
   sample: "celery@17133dbfe7a6 [2025-10-01 13:33:33.400755] heartbeat: clock=1452, freq=5, local_received=1743702813.4011424, pid=1, sw_ident=py-celery, sw_sys=Linux, sw_ver=5.4.0, utcoffset=0"
   result:
     custom:
-      level: "INFO"
       worker_id: "17133dbfe7a6"
-      heartbeat:
-        clock: 1452
-        freq: 5
-        local_received: 1743702813.4011424
-        pid: 1
-        sw_ident: "py-celery"
-        sw_sys: "Linux"
-        sw_ver: "5.4.0"
-        utcoffset: 0
+      timestamp: 1743702813400
+      clock: 1452
+      freq: 5
+      local_received: 1743702813.4011424
+      pid: 1
+      sw_ident: "py-celery"
+      sw_sys: "Linux"
+      sw_ver: "5.4.0"
+      utcoffset: 0
     message: "heartbeat: clock=1452, freq=5, local_received=1743702813.4011424, pid=1, sw_ident=py-celery, sw_sys=Linux, sw_ver=5.4.0, utcoffset=0"
     status: "info"
     tags:
@@ -44,7 +45,6 @@ tests:
   sample: "celery@17133dbfe7a6 [2025-10-01 13:33:34.982177] task received: tasks.add(eaae3cff-f198-4fe3-9f69-ad59b0412bed) args=(4, 5) kwargs={} clock=1455, eta=None, expires=None, local_received=1743702814.983349, parent_id=None, pid=1, retries=0, root_id=eaae3cff-f198-4fe3-9f69-ad59b0412bed, utcoffset=0"
   result:
     custom:
-      level: "INFO"
       worker_id: "17133dbfe7a6"
       task_status: "received"
       task_name: "tasks.add"
@@ -69,7 +69,6 @@ tests:
   sample: "celery@17133dbfe7a6 [2025-10-01 13:33:34.986589] task succeeded: tasks.add(eaae3cff-f198-4fe3-9f69-ad59b0412bed) args=(4, 5) kwargs={} clock=1458, local_received=1743702814.987442, pid=1, result=9, runtime=0.00012291595339775085, utcoffset=0"
   result:
     custom:
-      level: "INFO"
       worker_id: "17133dbfe7a6"
       task_status: "succeeded"
       task_name: "tasks.add"

@@ -57,14 +57,14 @@ pipeline:
       grok:
         supportRules: |
           _date_standard %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
-          _date_worker %{date("yyyy-MM-dd HH:mm:ss.SSS"):timestamp}
+          _date_worker %{date("yyyy-MM-dd HH:mm:ss.SSSSSS"):timestamp}
           _level %{word:level}
           _task_name %{word:task_name}
           _task_id %{notSpace:task_id}
         matchRules: |
+          celery_heartbeat celery@%{notSpace:worker_id} \[%{_date_worker}\] heartbeat: clock=%{number:clock}, freq=%{number:freq}, local_received=%{number:local_received}, pid=%{number:pid}, sw_ident=%{notSpace:sw_ident}, sw_sys=%{notSpace:sw_sys}, sw_ver=%{data:sw_ver}, utcoffset=%{number:utcoffset}
+          celery_task_status celery@%{notSpace:worker_id} \[%{_date_worker}\] task %{word:task_status}: %{data:task_name}\(%{notSpace:task_id}\) args=%{data:args} kwargs=%{data:kwargs} %{data:keyvalue("=", "", "", " ,")}
           celery_standard \[%{_date_standard}:\s+%{_level}/%{data}\]\s*%{data:message}
-          celery_worker celery@%{notSpace:worker_id} \[%{_date_worker}\] heartbeat: clock=%{number:heartbeat.clock}, freq=%{number:heartbeat.freq}, local_received=%{number:heartbeat.local_received}, pid=%{number:heartbeat.pid}, sw_ident=%{word:heartbeat.sw_ident}, sw_sys=%{word:heartbeat.sw_sys}, sw_ver=%{data:heartbeat.sw_ver}, utcoffset=%{number:heartbeat.utcoffset}
-          celery_task_status celery@%{notSpace:worker_id} \[%{_date_worker}\] task %{word:task_status}: %{data:task_name}\(%{notSpace:task_id}\) args=%{data:args} kwargs=%{data:kwargs} clock=%{number:clock}, local_received=%{number:local_received}, pid=%{number:pid}, result=%{data:result}, runtime=%{number:runtime}, utcoffset=%{number:utcoffset}
 
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
