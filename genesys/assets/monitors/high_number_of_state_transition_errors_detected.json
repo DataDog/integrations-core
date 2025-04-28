@@ -8,7 +8,7 @@
 		"id": 157630544,
 		"name": "High Number of State Transition Errors Detected",
 		"type": "query alert",
-		"query": "sum(last_1d):sum:genesys.callback.state_transition_errors_count{*}.as_count() + sum:genesys.chat.state_transition_errors_count{*}.as_count() + sum:genesys.email.state_transition_errors_count{*}.as_count() + sum:genesys.message.state_transition_errors_count{*}.as_count() + sum:genesys.voice.state_transition_errors_count{*}.as_count() > 100",
+		"query": "sum(last_1d):sum:genesys_cloud.callback.state_transition_errors_count{*}.as_count() + sum:genesys_cloud.chat.state_transition_errors_count{*}.as_count() + sum:genesys_cloud.email.state_transition_errors_count{*}.as_count() + sum:genesys_cloud.message.state_transition_errors_count{*}.as_count() + sum:genesys_cloud.voice.state_transition_errors_count{*}.as_count() > 100",
 		"message": "{{#is_alert}}\nThe state transition errors refer to the number of errors caused by Edge clock skew.\n\nA high number of state transition errors has been detected. Please review and take necessary action.\n{{/is_alert}}",
 		"tags": [
 			"source:genesys"
