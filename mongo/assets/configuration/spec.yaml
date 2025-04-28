@@ -269,7 +269,7 @@ files:
             Enable collection of schemas. Requires `dbm: true`.
           value:
             type: boolean
-            example: true
+            example: false
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents
