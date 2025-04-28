@@ -177,7 +177,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             self._process_metrics(partition_data, PARTITION_MAP, tags)
 
-            self._process_sinfo_cpu_state(partition_data[6], "partition", tags)
+            self._process_sinfo_aiot_state(partition_data[6], "partition", tags)
             self.gauge('partition.info', 1, tags)
 
         self.gauge('sinfo.partition.enabled', 1)
@@ -207,7 +207,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             # Submit metrics
             self._process_metrics(node_data, NODE_MAP, tags)
-            self._process_sinfo_cpu_state(node_data[3], 'node', tags)
+            self._process_sinfo_aiot_state(node_data[3], 'node', tags)
             self.gauge('node.info', 1, tags=tags)
 
         self.gauge('sinfo.node.enabled', 1)
@@ -342,18 +342,23 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # Update the sacct command with the dynamic SACCT_PARAMS
         self.sacct_cmd = self.get_slurm_command('sacct', sacct_params)
 
-    def _process_sinfo_cpu_state(self, cpus_state, namespace, tags):
+    def _process_sinfo_aiot_state(self, cpus_state, namespace, tags):
         # "0/2/0/2"
         try:
             allocated, idle, other, total = cpus_state.split('/')
         except ValueError as e:
             self.log.debug("Invalid CPU state '%s'. Skipping. Error: %s", cpus_state, e)
             return
-
-        self.gauge(f'{namespace}.cpu.allocated', allocated, tags)
-        self.gauge(f'{namespace}.cpu.idle', idle, tags)
-        self.gauge(f'{namespace}.cpu.other', other, tags)
-        self.gauge(f'{namespace}.cpu.total', total, tags)
+        if namespace == "partition":
+            self.gauge(f'{namespace}.node.allocated', allocated, tags)
+            self.gauge(f'{namespace}.node.idle', idle, tags)
+            self.gauge(f'{namespace}.node.other', other, tags)
+            self.gauge(f'{namespace}.node.total', total, tags)
+        elif namespace == "node":
+            self.gauge(f'{namespace}.cpu.allocated', allocated, tags)
+            self.gauge(f'{namespace}.cpu.idle', idle, tags)
+            self.gauge(f'{namespace}.cpu.other', other, tags)
+            self.gauge(f'{namespace}.cpu.total', total, tags)
 
     def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
         used_gpu_used_idx = "null"
