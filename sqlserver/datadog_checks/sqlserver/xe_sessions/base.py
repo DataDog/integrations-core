@@ -814,7 +814,7 @@ class XESessionBase(DBMAsyncJob):
             return None
 
         # Use primary field's signature as the raw_query_signature
-        raw_query_signature = compute_sql_signature(raw_sql_fields[primary_signature_field])
+        raw_query_signature = raw_sql_fields[primary_signature_field]
 
         # Use rate limiting cache to control how many RQT events we send
         # cache_key = (query_signature, raw_query_signature)
@@ -835,14 +835,20 @@ class XESessionBase(DBMAsyncJob):
             },
         }
 
-        # Create the sqlserver section with performance metrics
+        # Create the sqlserver section with appropriate fields based on session type
         sqlserver_fields = {
             "session_id": event.get("session_id"),
             "xe_type": event.get("event_name"),
-            "duration_ms": event.get("duration_ms"),
-            "query_start": query_details.get("query_start"),
             "event_fire_timestamp": query_details.get("event_fire_timestamp"),
         }
+
+        # Only include duration and query_start for non-error events
+        is_error_event = self.session_name == "datadog_query_errors"
+        if not is_error_event:
+            sqlserver_fields.update({
+                "duration_ms": event.get("duration_ms"),
+                "query_start": query_details.get("query_start"),
+            })
 
         # Add additional SQL fields to the sqlserver section
         # but only if they're not the primary field and not empty
