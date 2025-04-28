@@ -8,7 +8,7 @@ SINFO_PARTITION_PARAMS = [
 SINFO_NODE_PARAMS = ["-haNO", "PartitionName:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
 GPU_PARAMS = "|,Gres:|,GresUsed:"
-SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m"]
+SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
 SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
     "-anpo",
@@ -75,6 +75,7 @@ SQUEUE_MAP = {
         {"name": "slurm_job_cpus", "index": 5},
         {"name": "slurm_job_reason", "index": 6},
         {"name": "slurm_job_tres_per_node", "index": 7},
+        {"name": "slurm_partition_name", "index": 8},
     ],
 }
 
@@ -82,6 +83,7 @@ SACCT_MAP = {
     "tags": [
         {"name": "slurm_job_name", "index": 1},
         {"name": "slurm_job_partition", "index": 2},
+        {"name": "slurm_partition_name", "index": 2},
         {"name": "slurm_job_account", "index": 3},
         {"name": "slurm_job_cpus", "index": 4},
         {"name": "slurm_job_tres_per_node", "index": 5},
