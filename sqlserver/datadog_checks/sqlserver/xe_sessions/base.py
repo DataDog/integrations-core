@@ -616,13 +616,8 @@ class XESessionBase(DBMAsyncJob):
             self._log.debug(f"No events processed from {self.session_name} session")
             return
 
-        # Update timestamp tracking with the last event's raw timestamp
-        # (events are ordered by timestamp)
-        if events and 'timestamp' in events[-1]:
-            self._last_event_timestamp = events[-1]['timestamp']
-            self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
-
-        # Timestamp gap detection (use raw timestamps for comparison)
+        # Timestamp gap detection - compare the last event timestamp from previous run
+        # with the first event timestamp from this run
         if events and self._last_event_timestamp and 'timestamp' in events[0]:
             current_first_timestamp = events[0]['timestamp']
             try:
@@ -636,6 +631,11 @@ class XESessionBase(DBMAsyncJob):
                 f"[{self.session_name}] Timestamp gap: last={self._last_event_timestamp} "
                 f"first={current_first_timestamp}" + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
             )
+
+        # Update timestamp tracking with the last event's raw timestamp for next run
+        if events and 'timestamp' in events[-1]:
+            self._last_event_timestamp = events[-1]['timestamp']
+            self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
 
         # Track obfuscation and RQT creation time
         obfuscation_start_time = time()
