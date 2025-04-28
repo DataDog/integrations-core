@@ -500,6 +500,11 @@ class XESessionBase(DBMAsyncJob):
         for field in string_fields:
             normalized[field] = str(event.get(field, "") or "")
 
+        # Add SQL fields (statement, sql_text, batch_text)
+        for field in self.get_sql_fields(event_type):
+            if field in event:
+                normalized[field] = event[field]
+
         # Add query_signature if present
         if "query_signature" in event:
             normalized["query_signature"] = event["query_signature"]
