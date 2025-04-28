@@ -121,6 +121,7 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
     # Patch time.time only for sdiag to make the test deterministic
     if binary == 'sdiag':
         from unittest.mock import patch
+
         # The epoch in sdiag.txt is 1726207912, mocking current time to 1726208912 (diff = 1000)
         with patch('datadog_checks.slurm.check.time') as mock_time:
             mock_time.time.return_value = 1726208912
