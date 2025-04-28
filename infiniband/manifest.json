@@ -37,8 +37,8 @@
       }
     },
     "monitors": {
-      "port_state": "assets/configuration/monitors/port_state.json",
-      "physical_state": "assets/configuration/monitors/physical_state.json"
+      "port_state": "assets/monitors/port_state.json",
+      "physical_state": "assets/monitors/physical_state.json"
     }
   },
   "author": {
