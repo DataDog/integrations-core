@@ -20,9 +20,10 @@ from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handl
 
 CHECK_NAME = 'sqlserver'
 
-# Mock datadog_agent before imports
-sys.modules['datadog_agent'] = Mock()
-sys.modules['datadog_agent'].get_version = Mock(return_value='7.30.0')
+# Mock datadog_agent before imports - ensure it's properly patched at module level
+datadog_agent_mock = Mock()
+datadog_agent_mock.get_version.return_value = '7.30.0'
+sys.modules['datadog_agent'] = datadog_agent_mock
 
 
 # Helper functions
@@ -39,6 +40,7 @@ def mock_check():
     """Create a mock check with necessary attributes"""
     check = Mock()
     check.log = Mock()
+
     # Setup connection context manager properly
     conn_mock = Mock()
     cursor_mock = Mock()
@@ -52,6 +54,9 @@ def mock_check():
     check.connection = Mock()
     check.connection.open_managed_default_connection = Mock(return_value=conn_context)
     check.connection.get_managed_cursor = Mock(return_value=cursor_context)
+
+    # Make debug_stats_kwargs return an empty dictionary for @tracked_method decorator
+    check.debug_stats_kwargs.return_value = {}
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
@@ -478,10 +483,12 @@ class TestXESessionHandlers:
         handler = ErrorEventsHandler(mock_check, mock_config)
         assert handler._determine_dbm_type() == "query_error"
 
+    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     @patch('time.time')
-    def test_create_event_payload(self, mock_time, query_completion_handler):
+    def test_create_event_payload(self, mock_time, mock_agent, query_completion_handler):
         """Test creation of event payload"""
         mock_time.return_value = 1609459200  # 2021-01-01 00:00:00
+        mock_agent.get_version.return_value = '7.30.0'
 
         # Create a raw event
         raw_event = {
@@ -500,7 +507,7 @@ class TestXESessionHandlers:
 
         # Verify payload structure
         assert payload['host'] == 'test-host'
-        assert payload['ddagentversion'] == '7.30.0'  # From mocked module
+        assert payload['ddagentversion'] == '7.30.0'
         assert payload['ddsource'] == 'sqlserver'
         assert payload['dbm_type'] == 'query_completion'
         assert payload['event_source'] == 'datadog_query_completions'
@@ -520,10 +527,12 @@ class TestXESessionHandlers:
         assert query_details['database_name'] == 'TestDB'
         assert query_details['query_signature'] == 'abc123'
 
+    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     @patch('time.time')
-    def test_create_rqt_event(self, mock_time, query_completion_handler):
+    def test_create_rqt_event(self, mock_time, mock_agent, query_completion_handler):
         """Test creation of Raw Query Text event"""
         mock_time.return_value = 1609459200  # 2021-01-01 00:00:00
+        mock_agent.get_version.return_value = '7.30.0'
 
         # Create event with SQL fields
         event = {
@@ -678,10 +687,14 @@ class TestXESessionHandlers:
         """Test run_job when session doesn't exist"""
         # Mock session_exists to return False
         with patch.object(query_completion_handler, 'session_exists', return_value=False):
-            # Run the job - should just log a warning and return
+            # Need to directly patch the check's log to confirm warning is called
+            # Since we're using the real implementation now
             query_completion_handler.run_job()
-            # Directly reference warning method to avoid __call__ issue
-            assert mock_check.log.warning.call_count > 0
+
+            # Verify the warning log message directly
+            mock_check.log.warning.assert_called_once_with(
+                f"XE session {query_completion_handler.session_name} not found or not running"
+            )
 
     def test_run_job_no_data(self, query_completion_handler, mock_check):
         """Test run_job when no data is returned"""
@@ -691,8 +704,10 @@ class TestXESessionHandlers:
             with patch.object(query_completion_handler, '_query_ring_buffer', return_value=(None, 0.1, 0.1)):
                 # Run the job - should log a debug message and return
                 query_completion_handler.run_job()
-                # Directly reference debug method to avoid __call__ issue
-                assert mock_check.log.debug.call_count > 0
+                # Verify the debug message
+                mock_check.log.debug.assert_called_with(
+                    f"No data found for session {query_completion_handler.session_name}"
+                )
 
     def test_check_azure_status(self, mock_check, mock_config):
         """Test Azure SQL Database detection"""
