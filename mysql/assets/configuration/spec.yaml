@@ -624,7 +624,40 @@ files:
                 value:
                   type: string
                   example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+              - name: region
+                description: |
+                  Equal to the region of the instance the agent is connecting to.
+                  This value is used to configure IAM authentication.
+                value:
+                  type: string
+                  example: us-east-1
+              - name: managed_authentication
+                description: |
+                  Configure section used for AWS IAM Authentication with RDS.
 
+                  This supports using IAM database authentication to connect to your database instance.
+
+                  For more information on configuration, see
+                  https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+
+                  For more information on RDS IAM Authentication, see the AWS docs
+                  https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
+
+                  To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+                  If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+                  `aws.region` is required to enable IAM Authentication.
+
+                  Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+                  This can be used to perform cross-account authentication.
+                value:
+                  type: object
+                  properties:
+                  - name: enabled
+                    type: boolean
+                    example: false
+                  - name: role_arn
+                    type: string
+                    example: arn:aws:iam::123456789012:role/MyRole
           - name: gcp
             description: |
               This block defines the configuration for Google Cloud SQL instances.
