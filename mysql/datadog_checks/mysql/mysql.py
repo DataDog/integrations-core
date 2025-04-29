@@ -1224,7 +1224,7 @@ class MySql(AgentCheck):
                 query_exec_time_95th_per = row[0]
 
                 return query_exec_time_95th_per
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+        except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.InterfaceError) as e:
             self.warning("95th percentile performance metrics unavailable at this time: %s", e)
             return None
 
