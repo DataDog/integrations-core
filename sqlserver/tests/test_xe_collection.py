@@ -26,6 +26,15 @@ datadog_agent_mock.get_version.return_value = '7.30.0'
 sys.modules['datadog_agent'] = datadog_agent_mock
 
 
+# Custom time mock that handles mathematical operations
+class TimeMock:
+    def __init__(self, value):
+        self.value = value
+
+    def __mul__(self, other):
+        return self.value * other
+
+
 # Helper functions
 def load_xml_fixture(filename):
     """Load an XML file from the fixtures directory"""
@@ -499,9 +508,9 @@ class TestXESessionHandlers:
     def test_create_event_payload(self, mock_time, mock_agent, query_completion_handler):
         """Test creation of event payload"""
         fixed_timestamp = 1609459200  # 2021-01-01 00:00:00
-        mock_time.time.return_value = fixed_timestamp
-        mock_time.time.return_value.__mul__.return_value = fixed_timestamp * 1000
 
+        # Use our custom time mock
+        mock_time.time.return_value = TimeMock(fixed_timestamp)
         mock_agent.get_version.return_value = '7.30.0'
 
         # Create a raw event
@@ -546,9 +555,9 @@ class TestXESessionHandlers:
     def test_create_rqt_event(self, mock_time, mock_agent, query_completion_handler):
         """Test creation of Raw Query Text event"""
         fixed_timestamp = 1609459200  # 2021-01-01 00:00:00
-        mock_time.time.return_value = fixed_timestamp
-        mock_time.time.return_value.__mul__.return_value = fixed_timestamp * 1000
 
+        # Use our custom time mock
+        mock_time.time.return_value = TimeMock(fixed_timestamp)
         mock_agent.get_version.return_value = '7.30.0'
 
         # Create event with SQL fields
