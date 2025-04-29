@@ -63,7 +63,7 @@ pipeline:
           _task_id %{notSpace:task_id}
         matchRules: |
           celery_heartbeat celery@%{notSpace:worker_id} \[%{_date_worker}\] heartbeat: clock=%{number:clock}, freq=%{number:freq}, local_received=%{number:local_received}, pid=%{number:pid}, sw_ident=%{notSpace:sw_ident}, sw_sys=%{notSpace:sw_sys}, sw_ver=%{data:sw_ver}, utcoffset=%{number:utcoffset}
-          celery_task_status celery@%{notSpace:worker_id} \[%{_date_worker}\] task %{word:task_status}: %{data:task_name}\(%{notSpace:task_id}\) args=%{data:args} kwargs=%{data:kwargs} %{data:keyvalue("=", "", "", " ,")}
+          celery_task_status celery@%{notSpace:worker_id} \[%{_date_worker}\] task %{word:task_status}: %{data:task_name}\(%{notSpace:task_id}\) args=%{data:args} kwargs=%{data:kwargs} %{data::keyvalue("=", "", "", " ,")}
           celery_standard \[%{_date_standard}:\s+%{_level}/%{data}\]\s*%{data:message}
 
     - type: date-remapper
