@@ -65,6 +65,7 @@
                 "title": "Total Connected End Devices",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "query_value",
                 "requests": [
                     {
@@ -73,7 +74,7 @@
                             {
                                 "name": "query1",
                                 "data_source": "metrics",
-                                "query": "avg:wlan.rssi{$ssid,$bssid,$mac_address,$host}",
+                                "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host}",
                                 "aggregator": "sum"
                             }
                         ],
@@ -110,6 +111,7 @@
                 "title": "Total Channel Swaps",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "query_value",
                 "requests": [
                     {
@@ -118,7 +120,7 @@
                             {
                                 "name": "query1",
                                 "data_source": "metrics",
-                                "query": "sum:wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host}.as_count()",
+                                "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host}.as_count()",
                                 "aggregator": "sum"
                             }
                         ],
@@ -155,6 +157,7 @@
                 "title": "Total Roaming Events",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "type": "query_value",
                 "requests": [
                     {
@@ -163,7 +166,7 @@
                             {
                                 "name": "query1",
                                 "data_source": "metrics",
-                                "query": "sum:wlan.roaming_events{$ssid,$bssid,$mac_address,$host}.as_count()",
+                                "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host}.as_count()",
                                 "aggregator": "sum"
                             }
                         ],
@@ -293,6 +296,7 @@
                             "title": "Top Channel Swaps By Device",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -300,7 +304,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address}.as_count()",
+                                            "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address}.as_count()",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -339,6 +343,7 @@
                             "title": "Top Transmit Rate By Device",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -346,7 +351,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:wlan.transmit_rate{$ssid,$bssid,$mac_address,$host} by {host,mac_address}",
+                                            "query": "avg:system.wlan.txrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -392,6 +397,7 @@
                             "title": "Top Roaming Events by Device",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -399,7 +405,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address}.as_count()",
+                                            "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address}.as_count()",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -438,6 +444,7 @@
                             "title": "Bottom RSSI by Device",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -445,7 +452,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address}",
+                                            "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -517,6 +524,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -525,18 +533,18 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                                            "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "custom_unit_label",
                                                     "label": "dBm"
                                                 }
-                                            }
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "style": {
@@ -577,6 +585,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -585,18 +594,18 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:wlan.noise{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                                            "query": "avg:system.wlan.noise{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "custom_unit_label",
                                                     "label": "dB"
                                                 }
-                                            }
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "style": {
@@ -631,6 +640,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -639,7 +649,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
+                                            "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
                                         }
                                     ],
                                     "formulas": [
@@ -679,6 +689,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -687,7 +698,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
+                                            "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
                                         }
                                     ],
                                     "formulas": [
@@ -716,7 +727,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 7,
+                "y": 0,
                 "width": 12,
                 "height": 5,
                 "is_column_break": true
@@ -734,7 +745,7 @@
                     {
                         "id": 2327544501125610,
                         "definition": {
-                            "title": "Transmit Rate",
+                            "title": "Tx Rate",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -755,18 +766,18 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:wlan.transmit_rate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                                            "query": "avg:system.wlan.txrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "custom_unit_label",
                                                     "label": "Mbps"
                                                 }
-                                            }
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "style": {
@@ -789,7 +800,7 @@
                     {
                         "id": 8905572173387450,
                         "definition": {
-                            "title": "Receive Rate",
+                            "title": "Rx Rate",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -810,7 +821,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:wlan.receive_rate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                                            "query": "avg:system.wlan.rxrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
                                         }
                                     ],
                                     "formulas": [
@@ -845,7 +856,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 5,
                 "width": 12,
                 "height": 3
             }

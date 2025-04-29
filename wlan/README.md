@@ -20,7 +20,10 @@ The following settings needs to be enabled
 
 One can quickly check if the Location API is not disabled by running `netsh wlan show interface` command which would fail to report any Wi-Fi interface connection even if you are connected.
 
-An administrator can also enable these settings using Group Policy or InTune Local Settings.
+An administrator can also enable these settings using 
+- [Registry][17]
+- [Group Policy][18]
+- [InTune][19]
 
 ### Installation
 
@@ -52,7 +55,7 @@ wlan does not include any events.
 
 ### Roaming
 
-`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. `Roaming` event is detected when the *BSSID* of the connected Router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the Router or AP is not broadcasted Roaming detection is not possible. When a `Roaming` event is detected then `wlan.roaming_events` metric is incremented. Switch to router with a different *SSID* is not considered `Roaming`.
+`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. `Roaming` event is detected when the *BSSID* of the connected Router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the Router or AP is not broadcasted Roaming detection is not possible. When a `Roaming` event is detected then `system.wlan.roaming_events` metric is incremented. Switch to router with a different *SSID* is not considered `Roaming`.
 
 ### Channel Swap
 
@@ -78,3 +81,6 @@ Need help? Contact [Datadog support][15].
 [14]: https://github.com/DataDog/integrations-core/blob/master/wlan/metadata.csv
 [15]: https://docs.datadoghq.com/help/
 [16]: https://learn.microsoft.com/en-us/windows/win32/nativewifi/wi-fi-access-location-changes
+[17]: https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/cannot-set-timezone-automatically?WT.mc_id=WDIT-MVP-5000497#use-registry-editor
+[18]: https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/cannot-set-timezone-automatically?WT.mc_id=WDIT-MVP-5000497#use-registry-editor
+[19]: https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/cannot-set-timezone-automatically?WT.mc_id=WDIT-MVP-5000497#use-registry-editor
