@@ -37,7 +37,7 @@
     },
     "dashboards": {
       "wi-fi-overview: Wi-Fi Overview": "assets/dashboards/wlan_overview.json"
-    },
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
