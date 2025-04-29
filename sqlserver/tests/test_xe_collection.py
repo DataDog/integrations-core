@@ -10,9 +10,13 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from lxml import etree
 
-
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler, XESessionBase
+from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
+
+# Define a check name constant, similar to test_metrics.py
+CHECK_NAME = 'sqlserver'
 
 
 # Helper functions
@@ -752,3 +756,26 @@ class TestXESessionBase:
         mock_check.static_info_cache = {'engine_edition': 'Azure SQL Database'}
         session = MockXESession(mock_check, mock_config, "datadog_query_completions")
         assert session._is_azure_sql_database is True
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_xe_session_handlers_creation(init_config, instance_docker_metrics):
+    """Test creation of XE session handlers via the SQLServer class"""
+    # Enable XE collection
+    instance = instance_docker_metrics.copy()
+    instance['xe_collection_config'] = {
+        'query_completions': {'enabled': True},
+        'query_errors': {'enabled': True}
+    }
+
+    # Create SQLServer check
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
+
+    # Get XE session handlers
+    handlers = get_xe_session_handlers(sqlserver_check, sqlserver_check._config)
+
+    # Verify that handlers were created
+    assert len(handlers) == 2
+    assert any(h.session_name == 'datadog_query_completions' for h in handlers)
+    assert any(h.session_name == 'datadog_query_errors' for h in handlers)
