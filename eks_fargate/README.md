@@ -927,7 +927,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for monitoring AWS Fargate][32]
 - [How to collect metrics and logs from AWS Fargate workloads][27]
 - [AWS Fargate monitoring with Datadog][28]
-- [Tracing API Gateway][37]
+- [Trace API Gateway when proxying requests to ECS Fargate][37]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
