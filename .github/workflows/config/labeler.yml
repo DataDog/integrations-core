@@ -675,8 +675,6 @@ integration/winkmem:
 - winkmem/**/*
 integration/wlan:
 - wlan/**/*
-integration/wlan3:
-- wlan3/**/*
 integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
