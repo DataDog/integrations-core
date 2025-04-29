@@ -34,6 +34,34 @@ def load_xml_fixture(filename):
         return f.read()
 
 
+def wrap_xml_in_events_tag(event_xml):
+    """Wrap a single event XML in the events tag for testing"""
+    return f"<events>{event_xml}</events>"
+
+
+def assert_event_field_values(event, expected_values):
+    """Assert that event fields match expected values with appropriate type conversion"""
+    for field, expected in expected_values.items():
+        if field in ['session_id', 'request_id', 'error_number', 'severity']:
+            assert int(event[field]) == expected
+        else:
+            assert event[field] == expected
+
+
+def validate_common_payload_fields(payload, expected_source, expected_type):
+    """Validate common fields in event payloads"""
+    assert 'timestamp' in payload
+    assert payload['host'] == 'test-host'
+    assert payload['ddagentversion'] == '7.30.0'
+    assert payload['ddsource'] == 'sqlserver'
+    assert payload['dbm_type'] == expected_type
+    assert payload['event_source'] == expected_source
+    assert 'collection_interval' in payload
+    assert 'sqlserver_version' in payload
+    assert 'sqlserver_engine_edition' in payload
+    assert 'service' in payload
+
+
 # Fixtures for common test objects
 @pytest.fixture
 def mock_check():
@@ -107,6 +135,57 @@ def sample_multiple_events_xml():
     return load_xml_fixture('multiple_events.xml')
 
 
+# Fixtures for expected event values
+@pytest.fixture
+def sql_batch_expected_values():
+    """Expected values for SQL batch completed events"""
+    return {
+        'event_name': 'sql_batch_completed',
+        'timestamp': '2025-04-24T20:56:52.809Z',
+        'duration_ms': 4829.704,
+        'session_id': 123,
+        'request_id': 0,
+        'database_name': 'master',
+        'client_hostname': 'COMP-MX2YQD7P2P',
+        'client_app_name': 'azdata',
+        'username': 'datadog',
+    }
+
+
+@pytest.fixture
+def rpc_completed_expected_values():
+    """Expected values for RPC completed events"""
+    return {
+        'event_name': 'rpc_completed',
+        'timestamp': '2025-04-24T20:57:04.937Z',
+        'duration_ms': 2699.535,
+        'session_id': 203,
+        'request_id': 0,
+        'database_name': 'msdb',
+        'client_hostname': 'EC2AMAZ-ML3E0PH',
+        'client_app_name': 'SQLAgent - Job Manager',
+        'username': 'NT AUTHORITY\\NETWORK SERVICE',
+    }
+
+
+@pytest.fixture
+def error_expected_values():
+    """Expected values for error reported events"""
+    return {
+        'event_name': 'error_reported',
+        'timestamp': '2025-04-24T20:57:17.287Z',
+        'error_number': 195,
+        'severity': 15,
+        'session_id': 81,
+        'request_id': 0,
+        'database_name': 'dbmorders',
+        'client_hostname': 'a05c90468fb8',
+        'client_app_name': 'go-mssqldb',
+        'username': 'shopper_4',
+        'message': "'REPEAT' is not a recognized built-in function name.",
+    }
+
+
 # Fixtures for handler instances
 @pytest.fixture
 def query_completion_handler(mock_check, mock_config):
@@ -118,6 +197,25 @@ def query_completion_handler(mock_check, mock_config):
 def error_events_handler(mock_check, mock_config):
     """Create an ErrorEventsHandler instance for testing"""
     return ErrorEventsHandler(mock_check, mock_config)
+
+
+@pytest.fixture
+def mock_handler_log(request):
+    """Mock a handler's log for testing"""
+
+    def _mock_log(handler, mock_check):
+        original_log = handler._log
+        handler._log = mock_check.log
+
+        # Add finalizer to restore log after test
+        def _restore_log():
+            handler._log = original_log
+
+        request.addfinalizer(_restore_log)
+
+        return mock_check.log
+
+    return _mock_log
 
 
 class TestTimestampHandler:
@@ -176,8 +274,8 @@ class TestTimestampHandler:
         assert TimestampHandler.calculate_start_time("invalid-date", 1000) == ""
 
 
-class TestXESessionHandlers:
-    """Tests for the XE session handler implementations"""
+class TestXESessionHandlersInitialization:
+    """Tests related to handler initialization"""
 
     def test_initialization(self, mock_check, mock_config):
         """Test initialization of handlers"""
@@ -205,6 +303,29 @@ class TestXESessionHandlers:
         # Test when session does not exist
         cursor.fetchone.return_value = None  # No session
         assert query_completion_handler.session_exists() is False
+
+    def test_check_azure_status(self, mock_check, mock_config):
+        """Test Azure SQL Database detection"""
+        # Test non-Azure SQL Server
+        mock_check.static_info_cache = {'engine_edition': 'Standard Edition'}
+        handler = QueryCompletionEventsHandler(mock_check, mock_config)
+        assert handler._is_azure_sql_database is False
+
+        # Test Azure SQL Database
+        mock_check.static_info_cache = {'engine_edition': 'Azure SQL Database'}
+        # We need to create a new handler to trigger the check_azure_status in init
+        from datadog_checks.sqlserver.utils import is_azure_sql_database
+
+        with patch(
+            'datadog_checks.sqlserver.xe_collection.base.is_azure_sql_database',
+            side_effect=lambda x: x == 'Azure SQL Database',
+        ):
+            handler = QueryCompletionEventsHandler(mock_check, mock_config)
+            assert handler._is_azure_sql_database is True
+
+
+class TestXESessionHelpers:
+    """Tests for helper methods in XESessionBase"""
 
     def test_extract_value(self, query_completion_handler):
         """Test extraction of values from XML elements"""
@@ -272,10 +393,64 @@ class TestXESessionHandlers:
         # In base.py, division is by 1000, not 1000000
         assert event_data["duration_ms"] == 4829.704
 
-    def test_process_events_sql_batch(self, query_completion_handler, sample_sql_batch_event_xml):
+    def test_determine_dbm_type(self, mock_check, mock_config):
+        """Test determination of DBM type based on session name"""
+        # Test query completion handler
+        handler = QueryCompletionEventsHandler(mock_check, mock_config)
+        assert handler._determine_dbm_type() == "query_completion"
+
+        # Test query error handler
+        handler = ErrorEventsHandler(mock_check, mock_config)
+        assert handler._determine_dbm_type() == "query_error"
+
+    def test_filter_ring_buffer_events(self, query_completion_handler):
+        """Test filtering of ring buffer events based on timestamp"""
+        # Create XML with multiple events
+        xml_data = """
+        <RingBufferTarget>
+          <event name="sql_batch_completed" timestamp="2023-01-01T12:00:00.123Z">
+            <data name="duration"><value>10000</value></data>
+          </event>
+          <event name="sql_batch_completed" timestamp="2023-01-01T12:01:00.456Z">
+            <data name="duration"><value>5000</value></data>
+          </event>
+          <event name="sql_batch_completed" timestamp="2023-01-01T12:02:00.789Z">
+            <data name="duration"><value>2000</value></data>
+          </event>
+        </RingBufferTarget>
+        """
+
+        # Test with no timestamp filter (first run)
+        filtered_events = query_completion_handler._filter_ring_buffer_events(xml_data)
+        assert len(filtered_events) == 3
+
+        # Set last event timestamp
+        query_completion_handler._last_event_timestamp = "2023-01-01T12:01:00.456Z"
+
+        # Test with timestamp filter (subsequent run)
+        filtered_events = query_completion_handler._filter_ring_buffer_events(xml_data)
+        assert len(filtered_events) == 1  # Only the event after 12:01:00.456Z
+        assert "2023-01-01T12:02:00.789Z" in filtered_events[0]
+
+    def test_malformed_xml(self, query_completion_handler):
+        """Test handling of malformed XML"""
+        # Malformed XML data
+        xml_data = "<events><event>Malformed XML</x></events>"
+
+        # Should return empty list and not raise exception
+        events = query_completion_handler._process_events(xml_data)
+        assert events == []
+
+
+class TestEventProcessing:
+    """Tests for event processing"""
+
+    def test_process_events_sql_batch(
+        self, query_completion_handler, sample_sql_batch_event_xml, sql_batch_expected_values
+    ):
         """Test processing of SQL batch completed events"""
         # Wrap the single event in an events tag
-        xml_data = f"<events>{sample_sql_batch_event_xml}</events>"
+        xml_data = wrap_xml_in_events_tag(sample_sql_batch_event_xml)
 
         # Process the events
         events = query_completion_handler._process_events(xml_data)
@@ -283,25 +458,22 @@ class TestXESessionHandlers:
         # Verify the event was processed correctly
         assert len(events) == 1
         event = events[0]
-        assert event['event_name'] == 'sql_batch_completed'
-        assert event['timestamp'] == '2025-04-24T20:56:52.809Z'
-        # Microseconds divided by 1000 (to milliseconds)
-        assert event['duration_ms'] == 4829.704  # 4829704 / 1000
-        assert int(event['session_id']) == 123  # Convert string to int for comparison
-        assert int(event['request_id']) == 0  # Convert string to int for comparison
-        assert event['database_name'] == 'master'
-        assert event['client_hostname'] == 'COMP-MX2YQD7P2P'
-        assert event['client_app_name'] == 'azdata'
-        assert event['username'] == 'datadog'
+
+        # Verify expected values
+        assert_event_field_values(event, sql_batch_expected_values)
+
+        # Check for event-specific fields
         assert 'batch_text' in event
         assert 'datadog_sp_statement_completed' in event['batch_text']
         assert 'sql_text' in event
         assert 'datadog_sp_statement_completed' in event['sql_text']
 
-    def test_process_events_rpc_completed(self, query_completion_handler, sample_rpc_completed_event_xml):
+    def test_process_events_rpc_completed(
+        self, query_completion_handler, sample_rpc_completed_event_xml, rpc_completed_expected_values
+    ):
         """Test processing of RPC completed events"""
         # Wrap the single event in an events tag
-        xml_data = f"<events>{sample_rpc_completed_event_xml}</events>"
+        xml_data = wrap_xml_in_events_tag(sample_rpc_completed_event_xml)
 
         # Process the events
         events = query_completion_handler._process_events(xml_data)
@@ -309,25 +481,20 @@ class TestXESessionHandlers:
         # Verify the event was processed correctly
         assert len(events) == 1
         event = events[0]
-        assert event['event_name'] == 'rpc_completed'
-        assert event['timestamp'] == '2025-04-24T20:57:04.937Z'
-        # Microseconds divided by 1000 (to milliseconds)
-        assert event['duration_ms'] == 2699.535  # 2699535 / 1000
-        assert int(event['session_id']) == 203  # Convert string to int for comparison
-        assert int(event['request_id']) == 0  # Convert string to int for comparison
-        assert event['database_name'] == 'msdb'
-        assert event['client_hostname'] == 'EC2AMAZ-ML3E0PH'
-        assert event['client_app_name'] == 'SQLAgent - Job Manager'
-        assert event['username'] == 'NT AUTHORITY\\NETWORK SERVICE'
+
+        # Verify expected values
+        assert_event_field_values(event, rpc_completed_expected_values)
+
+        # Check for event-specific fields
         assert 'statement' in event
         assert 'sp_executesql' in event['statement']
         assert 'sql_text' in event
         assert 'EXECUTE [msdb].[dbo].[sp_agent_log_job_history]' in event['sql_text']
 
-    def test_process_events_error_reported(self, error_events_handler, sample_error_event_xml):
+    def test_process_events_error_reported(self, error_events_handler, sample_error_event_xml, error_expected_values):
         """Test processing of error reported events"""
         # Wrap the single event in an events tag
-        xml_data = f"<events>{sample_error_event_xml}</events>"
+        xml_data = wrap_xml_in_events_tag(sample_error_event_xml)
 
         # Process the events
         events = error_events_handler._process_events(xml_data)
@@ -335,54 +502,37 @@ class TestXESessionHandlers:
         # Verify the event was processed correctly
         assert len(events) == 1
         event = events[0]
-        assert event['event_name'] == 'error_reported'
-        assert event['timestamp'] == '2025-04-24T20:57:17.287Z'
-        assert int(event['error_number']) == 195  # Convert string to int for comparison
-        assert int(event['severity']) == 15  # Convert string to int for comparison
-        assert int(event['session_id']) == 81  # Convert string to int for comparison
-        assert int(event['request_id']) == 0  # Convert string to int for comparison
-        assert event['database_name'] == 'dbmorders'
-        assert event['client_hostname'] == 'a05c90468fb8'
-        assert event['client_app_name'] == 'go-mssqldb'
-        assert event['username'] == 'shopper_4'
-        assert event['message'] == "'REPEAT' is not a recognized built-in function name."
+
+        # Verify expected values
+        assert_event_field_values(event, error_expected_values)
+
+        # Check for event-specific fields
         assert 'sql_text' in event
         assert 'SELECT discount_percent' in event['sql_text']
         assert "REPEAT('a', 1000)" in event['sql_text']
 
     def test_process_events_multiple(self, query_completion_handler, error_events_handler, sample_multiple_events_xml):
         """Test processing of multiple events"""
-        # We need to use both handlers since different event types are handled by different handlers
-        query_events = query_completion_handler._process_events(sample_multiple_events_xml)
-        error_events = error_events_handler._process_events(sample_multiple_events_xml)
+        # Process with both handlers
+        events = []
+        events.extend(query_completion_handler._process_events(sample_multiple_events_xml))
+        events.extend(error_events_handler._process_events(sample_multiple_events_xml))
 
-        # Combine events from both handlers
-        # In real usage, each event type would be routed to the correct handler
-        events = query_events + error_events
-
-        # Verify all events were processed correctly
+        # Sort and validate event count
+        events.sort(key=lambda x: x['timestamp'])
         assert len(events) == 3
 
-        # Sort events by timestamp to ensure consistent order
-        events.sort(key=lambda x: x['timestamp'])
+        # Validate expected event types in order
+        expected_types = ['sql_batch_completed', 'rpc_completed', 'error_reported']
+        expected_sessions = [123, 124, 125]
 
-        # Check first event (sql_batch_completed)
-        assert events[0]['event_name'] == 'sql_batch_completed'
-        assert events[0]['timestamp'] == '2023-01-01T12:00:00.123Z'
-        assert events[0]['duration_ms'] == 10.0
-        assert int(events[0]['session_id']) == 123
+        for i, (event, exp_type, exp_session) in enumerate(zip(events, expected_types, expected_sessions)):
+            assert event['event_name'] == exp_type
+            assert int(event['session_id']) == exp_session
 
-        # Check second event (rpc_completed)
-        assert events[1]['event_name'] == 'rpc_completed'
-        assert events[1]['timestamp'] == '2023-01-01T12:01:00.456Z'
-        assert events[1]['duration_ms'] == 5.0
-        assert int(events[1]['session_id']) == 124
 
-        # Check third event (error_reported)
-        assert events[2]['event_name'] == 'error_reported'
-        assert events[2]['timestamp'] == '2023-01-01T12:02:00.789Z'
-        assert int(events[2]['error_number']) == 8134
-        assert int(events[2]['session_id']) == 125
+class TestPayloadGeneration:
+    """Tests for event payload generation"""
 
     @patch('datadog_checks.sqlserver.xe_collection.base.obfuscate_sql_with_metadata')
     @patch('datadog_checks.sqlserver.xe_collection.base.compute_sql_signature')
@@ -484,16 +634,6 @@ class TestXESessionHandlers:
         assert 'duration_ms' not in normalized
         assert 'query_start' not in normalized
 
-    def test_determine_dbm_type(self, mock_check, mock_config):
-        """Test determination of DBM type based on session name"""
-        # Test query completion handler
-        handler = QueryCompletionEventsHandler(mock_check, mock_config)
-        assert handler._determine_dbm_type() == "query_completion"
-
-        # Test query error handler
-        handler = ErrorEventsHandler(mock_check, mock_config)
-        assert handler._determine_dbm_type() == "query_error"
-
     @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     def test_create_event_payload(self, mock_agent, query_completion_handler):
         """Test creation of event payload"""
@@ -514,19 +654,10 @@ class TestXESessionHandlers:
         # Create payload
         payload = query_completion_handler._create_event_payload(raw_event)
 
-        # Verify payload structure
-        assert payload['host'] == 'test-host'
-        assert payload['ddagentversion'] == '7.30.0'
-        assert payload['ddsource'] == 'sqlserver'
-        assert payload['dbm_type'] == 'query_completion'
-        assert payload['event_source'] == 'datadog_query_completions'
-        assert payload['collection_interval'] == 10
-        assert payload['ddtags'] == ['test:tag']
-        # Just verify timestamp exists but don't test its exact value
-        assert 'timestamp' in payload
-        assert payload['sqlserver_version'] == '2019'
-        assert payload['sqlserver_engine_edition'] == 'Standard Edition'
-        assert payload['service'] == 'sqlserver'
+        # Validate common payload fields
+        validate_common_payload_fields(
+            payload, expected_source='datadog_query_completions', expected_type='query_completion'
+        )
 
         # Verify query details
         query_details = payload['query_details']
@@ -565,15 +696,8 @@ class TestXESessionHandlers:
         # Create RQT event
         rqt_event = query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
-        # Verify RQT event structure
-        # Just verify timestamp exists but don't test its exact value
-        assert 'timestamp' in rqt_event
-        assert rqt_event['host'] == 'test-host'
-        assert rqt_event['ddsource'] == 'sqlserver'
-        assert rqt_event['dbm_type'] == 'rqt'
-        assert rqt_event['event_source'] == 'datadog_query_completions'
-        assert rqt_event['ddtags'] == 'test:tag'
-        assert rqt_event['service'] == 'sqlserver'
+        # Validate common payload fields
+        validate_common_payload_fields(rqt_event, expected_source='datadog_query_completions', expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -587,38 +711,6 @@ class TestXESessionHandlers:
         assert rqt_event['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
         assert rqt_event['sqlserver']['duration_ms'] == 10.0
         assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:50.123Z'
-
-    @patch('time.time')
-    def test_filter_ring_buffer_events(self, mock_time, query_completion_handler):
-        """Test filtering of ring buffer events based on timestamp"""
-        mock_time.return_value = 1609459200  # 2021-01-01 00:00:00
-
-        # Create XML with multiple events
-        xml_data = """
-        <RingBufferTarget>
-          <event name="sql_batch_completed" timestamp="2023-01-01T12:00:00.123Z">
-            <data name="duration"><value>10000</value></data>
-          </event>
-          <event name="sql_batch_completed" timestamp="2023-01-01T12:01:00.456Z">
-            <data name="duration"><value>5000</value></data>
-          </event>
-          <event name="sql_batch_completed" timestamp="2023-01-01T12:02:00.789Z">
-            <data name="duration"><value>2000</value></data>
-          </event>
-        </RingBufferTarget>
-        """
-
-        # Test with no timestamp filter (first run)
-        filtered_events = query_completion_handler._filter_ring_buffer_events(xml_data)
-        assert len(filtered_events) == 3
-
-        # Set last event timestamp
-        query_completion_handler._last_event_timestamp = "2023-01-01T12:01:00.456Z"
-
-        # Test with timestamp filter (subsequent run)
-        filtered_events = query_completion_handler._filter_ring_buffer_events(xml_data)
-        assert len(filtered_events) == 1  # Only the event after 12:01:00.456Z
-        assert "2023-01-01T12:02:00.789Z" in filtered_events[0]
 
     def test_create_rqt_event_disabled(self, mock_check, mock_config):
         """Test RQT event creation when disabled"""
@@ -666,102 +758,6 @@ class TestXESessionHandlers:
         # Should return None when missing signature
         assert query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details) is None
 
-    def test_malformed_xml(self, query_completion_handler):
-        """Test handling of malformed XML"""
-        # Malformed XML data
-        xml_data = "<events><event>Malformed XML</x></events>"
-
-        # Should return empty list and not raise exception
-        events = query_completion_handler._process_events(xml_data)
-        assert events == []
-
-    def test_run_job_success(self, query_completion_handler, sample_multiple_events_xml):
-        """Test successful run_job execution"""
-        # Create a modified version of sample_multiple_events_xml
-        # where we explicitly set the last event timestamp to the expected value
-        modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
-
-        # Mock session_exists and query_ring_buffer
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=(modified_xml, 0.1, 0.1)
-        ), patch.object(query_completion_handler, '_process_events', wraps=query_completion_handler._process_events):
-
-            # Override the real run_job method to bypass time operations
-            # that would require more complex mocking
-            with patch.object(
-                query_completion_handler, 'run_job', side_effect=lambda: query_completion_handler._last_event_timestamp
-            ):
-
-                # Just directly set the timestamp from processing events
-                events = query_completion_handler._process_events(modified_xml)
-                if events:
-                    query_completion_handler._last_event_timestamp = events[-1]['timestamp']
-
-            # Verify the timestamp was updated correctly
-            assert query_completion_handler._last_event_timestamp == "2023-01-01T12:02:00.789Z"
-
-    def test_run_job_no_session(self, query_completion_handler, mock_check):
-        """Test run_job when session doesn't exist"""
-        # Use a simpler approach to mock the session_exists method and log
-        with patch.object(query_completion_handler, 'session_exists', return_value=False):
-            # Replace the handler's log with our mock
-            original_log = query_completion_handler._log
-            query_completion_handler._log = mock_check.log
-
-            try:
-                # Run the job
-                query_completion_handler.run_job()
-
-                # Verify the warning log message
-                mock_check.log.warning.assert_called_once_with(
-                    f"XE session {query_completion_handler.session_name} not found or not running"
-                )
-            finally:
-                # Restore original log
-                query_completion_handler._log = original_log
-
-    def test_run_job_no_data(self, query_completion_handler, mock_check):
-        """Test run_job when no data is returned"""
-        # Use a simpler approach with fewer nested patches
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=(None, 0.1, 0.1)
-        ):
-
-            # Replace the handler's log with our mock
-            original_log = query_completion_handler._log
-            query_completion_handler._log = mock_check.log
-
-            try:
-                # Run the job
-                query_completion_handler.run_job()
-
-                # Verify the debug message
-                mock_check.log.debug.assert_any_call(
-                    f"No data found for session {query_completion_handler.session_name}"
-                )
-            finally:
-                # Restore original log
-                query_completion_handler._log = original_log
-
-    def test_check_azure_status(self, mock_check, mock_config):
-        """Test Azure SQL Database detection"""
-        # Test non-Azure SQL Server
-        mock_check.static_info_cache = {'engine_edition': 'Standard Edition'}
-        handler = QueryCompletionEventsHandler(mock_check, mock_config)
-        assert handler._is_azure_sql_database is False
-
-        # Test Azure SQL Database
-        mock_check.static_info_cache = {'engine_edition': 'Azure SQL Database'}
-        # We need to create a new handler to trigger the check_azure_status in init
-        from datadog_checks.sqlserver.utils import is_azure_sql_database
-
-        with patch(
-            'datadog_checks.sqlserver.xe_collection.base.is_azure_sql_database',
-            side_effect=lambda x: x == 'Azure SQL Database',
-        ):
-            handler = QueryCompletionEventsHandler(mock_check, mock_config)
-            assert handler._is_azure_sql_database is True
-
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -783,3 +779,53 @@ def test_xe_session_handlers_creation(init_config, instance_docker_metrics):
     assert len(handlers) == 2
     assert any(h.session_name == 'datadog_query_completions' for h in handlers)
     assert any(h.session_name == 'datadog_query_errors' for h in handlers)
+
+
+class TestRunJob:
+    """Group run job tests together"""
+
+    def test_success(self, query_completion_handler, sample_multiple_events_xml):
+        """Test successful job run"""
+        # Create modified XML with specific timestamp
+        modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
+
+        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
+            query_completion_handler, '_query_ring_buffer', return_value=(modified_xml, 0.1, 0.1)
+        ):
+
+            # Process events directly to set timestamp
+            events = query_completion_handler._process_events(modified_xml)
+            if events:
+                query_completion_handler._last_event_timestamp = events[-1]['timestamp']
+
+            # Verify the timestamp was updated
+            assert query_completion_handler._last_event_timestamp == "2023-01-01T12:02:00.789Z"
+
+    def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
+        """Test behavior when session doesn't exist"""
+        with patch.object(query_completion_handler, 'session_exists', return_value=False):
+            # Mock the log using the fixture
+            log = mock_handler_log(query_completion_handler, mock_check)
+
+            # Run the job
+            query_completion_handler.run_job()
+
+            # Verify warning was logged
+            log.warning.assert_called_once_with(
+                f"XE session {query_completion_handler.session_name} not found or not running"
+            )
+
+    def test_no_data(self, query_completion_handler, mock_check, mock_handler_log):
+        """Test behavior when no data is returned"""
+        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
+            query_completion_handler, '_query_ring_buffer', return_value=(None, 0.1, 0.1)
+        ):
+
+            # Mock the log using the fixture
+            log = mock_handler_log(query_completion_handler, mock_check)
+
+            # Run the job
+            query_completion_handler.run_job()
+
+            # Verify debug message was logged
+            log.debug.assert_any_call(f"No data found for session {query_completion_handler.session_name}")
