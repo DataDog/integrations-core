@@ -15,6 +15,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Windows",
+      "Category::Metrics",
+      "Submitted Data Type::Metrics",
       "Offering::Integration"
     ],
     "resources": [
