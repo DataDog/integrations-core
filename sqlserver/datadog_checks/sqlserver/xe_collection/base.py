@@ -155,8 +155,8 @@ class XESessionBase(DBMAsyncJob):
         # Get configuration based on session name - we already know it's enabled since
         # the registry only creates enabled handlers, but we still need the details
         self._enabled = True  # We assume it's enabled since the registry only creates enabled handlers
-        
-        # Log configuration details - no need to check if enabled
+
+        # Log configuration details
         self._log.info(
             f"Initializing XE session {session_name} with interval={self.collection_interval}s, "
             f"collect_raw_query={self._collect_raw_query}"
