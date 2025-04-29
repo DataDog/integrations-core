@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor Wi-Fi metrics such as signal strength, connection status, and more.",
     "title": "wlan (Wi-Fi)",
     "media": [],
     "classifier_tags": [
@@ -16,11 +16,18 @@
       "Supported OS::macOS",
       "Category::Windows",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/wlan/"
+      }
     ]
   },
   "assets": {
     "metrics": {
-      "prefix": "system.wlan",
+      "prefix": "system.wlan.",
+      "check": "system.wlan.rssi",
       "metadata_path": "metadata.csv"
     },
     "dashboards": {
