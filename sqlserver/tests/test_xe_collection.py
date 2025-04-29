@@ -56,10 +56,19 @@ def validate_common_payload_fields(payload, expected_source, expected_type):
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
     assert payload['event_source'] == expected_source
-    assert 'collection_interval' in payload
-    assert 'sqlserver_version' in payload
-    assert 'sqlserver_engine_edition' in payload
     assert 'service' in payload
+
+    # Fields that only exist in regular events (non-RQT)
+    if expected_type != 'rqt':
+        assert 'collection_interval' in payload
+        assert 'sqlserver_version' in payload
+        assert 'sqlserver_engine_edition' in payload
+        assert 'query_details' in payload
+
+    # Fields that only exist in RQT events
+    if expected_type == 'rqt':
+        assert 'db' in payload
+        assert 'sqlserver' in payload
 
 
 # Fixtures for common test objects
