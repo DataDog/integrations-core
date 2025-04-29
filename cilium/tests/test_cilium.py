@@ -21,7 +21,7 @@ from .common import (
 pytestmark = [requires_new_environment, pytest.mark.unit]
 
 
-@pytest.mark.parametrize('use_openmetrics', [True, False])
+@pytest.mark.parametrize("use_openmetrics", [True, False])
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check, use_openmetrics):
     c = check(agent_instance_use_openmetrics(use_openmetrics))
     dd_run_check(c)
