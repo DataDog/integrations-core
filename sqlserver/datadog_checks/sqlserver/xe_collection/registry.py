@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
-from datadog_checks.sqlserver.xe_collection.query_completion_events import QueryCompletionEventsHandler
+from .error_events import ErrorEventsHandler
+from .query_completion_events import QueryCompletionEventsHandler
 
 def get_xe_session_handlers(check, config):
     """Get the enabled XE session handlers based on configuration"""

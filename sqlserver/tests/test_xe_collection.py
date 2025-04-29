@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from lxml import etree
 
-from datadog_checks.sqlserver.xe_collection.base import TimestampHandler, XESessionBase
+from sqlserver.datadog_checks.sqlserver.xe_collection.base import TimestampHandler, XESessionBase
 
 
 # Helper functions

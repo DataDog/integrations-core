@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 from lxml import etree
 
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.xe_collection.base import XESessionBase, agent_check_getter
+from .base import XESessionBase, agent_check_getter
 
 
 class ErrorEventsHandler(XESessionBase):
