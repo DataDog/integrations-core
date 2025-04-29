@@ -1,7 +1,6 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
-  # We apply no-changelog label for PRs that release integrations by bumping __about__.py.
 - any:
   - requirements-agent-release.txt
   - '**/__about__.py'
@@ -674,6 +673,10 @@ integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
 - winkmem/**/*
+integration/wlan:
+- wlan/**/*
+integration/wlan3:
+- wlan3/**/*
 integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
