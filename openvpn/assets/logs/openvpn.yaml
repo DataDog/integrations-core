@@ -130,14 +130,14 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              rule1 \[%{regex("(.*?)(?=])")}\](\s+)?%{regex("AUTH
+              rule1 (\[\-\])(\s+)?%{regex("AUTH
               SUCCESS"):log_type}\s+\{%{data::keyvalue(": ",", ")}, 'auth
               method': '%{regex("(.*?)(?=\\')"):auth_method}',
               %{data::keyvalue(": ",", ")}
               cli='%{word:os}'/'%{regex("(.*?)(?=\\')")}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
 
 
-              rule2 \[%{regex("(.*?)(?=])")}\](\s+)?%{regex("AUTH SUCCESS"):log_type}\s+\{%{data::keyvalue(": ",", ")} cli='%{word:os}'/'%{regex("(.*?)(?=\\')"):data}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
+              rule2 (\[\-\])(\s+)?%{regex("AUTH SUCCESS"):log_type}\s+\{%{data::keyvalue(": ",", ")} cli='%{word:os}'/'%{regex("(.*?)(?=\\')"):data}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
         - type: grok-parser
           name: Parsing VPN Logs
           enabled: true
@@ -154,8 +154,8 @@ pipeline:
               first before you are allowed to retrieve a connection profile.']"
           grok:
             supportRules: ""
-            matchRules: "rule \\[%{regex(\"(.*?)(?=])\")}\\](\\s+)?%{regex(\"VPN Auth
-              Failed\"):log_type}: '%{regex(\"(.*?)(?=\\\\')\"):reason}'%{data}"
+            matchRules: "rule (\\[\\-\\])(\\s+)?%{regex(\"VPN Auth Failed\"):log_type}:
+              '%{regex(\"(.*?)(?=\\\\')\"):reason}'%{data}"
         - type: grok-parser
           name: Parsing Web Portal Login Authentication Failed Logs
           enabled: true
