@@ -33,7 +33,7 @@
         "prefix": "system.wlan.",
         "check": "system.wlan.rssi",
         "metadata_path": "metadata.csv"
-      },
+      }
     },
     "dashboards": {
       "wi-fi-overview: Wi-Fi Overview": "assets/dashboards/wlan_overview.json"
