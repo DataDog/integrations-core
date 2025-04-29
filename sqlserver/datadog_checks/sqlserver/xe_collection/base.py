@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.stubs import datadog_agent
 
 
 def agent_check_getter(self):

@@ -15,7 +15,6 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler, XESessionBase
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
-# Define a check name constant, similar to test_metrics.py
 CHECK_NAME = 'sqlserver'
 
 
