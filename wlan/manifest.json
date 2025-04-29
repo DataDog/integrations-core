@@ -27,16 +27,24 @@
     ]
   },
   "assets": {
-    "metrics": {
-      "prefix": "system.wlan.",
-      "check": "system.wlan.rssi",
-      "metadata_path": "metadata.csv"
-    },
-    "dashboards": {
+    "integration": {
+      "source_type_name": "wlan",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.wlan.",
+        "check": "system.wlan.rssi",
+        "metadata_path": "metadata.csv"
+      },
+
+      "dashboards": {
         "wi-fi-overview: Wi-Fi Overview": "assets/dashboards/wlan_overview.json"
-    },
-    "monitors": {},
-    "saved_views": {}
+      },
+      "monitors": {},
+      "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
