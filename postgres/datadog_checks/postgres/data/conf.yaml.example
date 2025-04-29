@@ -104,6 +104,17 @@ instances:
     #   - alloydbadmin
     #   - alloydbmetadata
 
+    ## @param ignore_schemas_owned_by - list of strings - optional
+    ## A list of database users which own schemas to ignore.
+    ## No metrics or statement samples will be collected for these schemas.
+    ## Each value can be a plain string or a Postgres pattern.
+    #
+    # ignore_schemas_owned_by:
+    #   - user1
+    #   - user2
+    #   - rdsadmin
+    #   - alloydbadmin
+
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
