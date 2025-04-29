@@ -133,7 +133,7 @@ class XESessionBase(DBMAsyncJob):
         # Set collection interval from config or use default
         self.collection_interval = session_config.get('collection_interval', 10)
 
-        self.max_events = 1000 # SQL Server XE sessions will limit 1000 events per ring buffer query
+        self.max_events = 1000  # SQL Server XE sessions will limit 1000 events per ring buffer query
         self._last_event_timestamp = None  # Initialize timestamp tracking
 
         # Configuration for raw query text (RQT) events
@@ -362,7 +362,6 @@ class XESessionBase(DBMAsyncJob):
             for _, elem in context:
                 timestamp = elem.get('timestamp')
 
-
                 if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
                     event_xml = etree.tostring(elem, encoding='unicode')
                     filtered_events.append(event_xml)
@@ -508,9 +507,7 @@ class XESessionBase(DBMAsyncJob):
 
         # Calculate and format query_start if duration_ms is available
         if raw_timestamp and "duration_ms" in event and event.get("duration_ms") is not None:
-            normalized["query_start"] = TimestampHandler.calculate_start_time(
-                raw_timestamp, event.get("duration_ms")
-            )
+            normalized["query_start"] = TimestampHandler.calculate_start_time(raw_timestamp, event.get("duration_ms"))
         else:
             normalized["query_start"] = ""
 
@@ -866,16 +863,20 @@ class XESessionBase(DBMAsyncJob):
         # Only include duration and query_start for non-error events
         is_error_event = self.session_name == "datadog_query_errors"
         if not is_error_event:
-            sqlserver_fields.update({
-                "duration_ms": event.get("duration_ms"),
-                "query_start": query_details.get("query_start"),
-            })
+            sqlserver_fields.update(
+                {
+                    "duration_ms": event.get("duration_ms"),
+                    "query_start": query_details.get("query_start"),
+                }
+            )
         else:
             # Include error_number and message for error events
-            sqlserver_fields.update({
-                "error_number": event.get("error_number"),
-                "message": event.get("message"),
-            })
+            sqlserver_fields.update(
+                {
+                    "error_number": event.get("error_number"),
+                    "message": event.get("message"),
+                }
+            )
 
         # Add additional SQL fields to the sqlserver section
         # but only if they're not the primary field and not empty

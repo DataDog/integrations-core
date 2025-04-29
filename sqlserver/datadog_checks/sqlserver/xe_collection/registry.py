@@ -5,6 +5,7 @@
 from .error_events import ErrorEventsHandler
 from .query_completion_events import QueryCompletionEventsHandler
 
+
 def get_xe_session_handlers(check, config):
     """Get the enabled XE session handlers based on configuration"""
     handlers = []

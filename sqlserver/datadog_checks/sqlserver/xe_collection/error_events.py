@@ -7,6 +7,7 @@ import re
 from lxml import etree
 
 from datadog_checks.base.utils.tracking import tracked_method
+
 from .base import XESessionBase, agent_check_getter
 
 
