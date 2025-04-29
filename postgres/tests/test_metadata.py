@@ -54,12 +54,21 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert statement_timeout_setting['setting'] == '10000'
 
 
-def test_collect_schemas(integration_check, dbm_instance, aggregator):
+@pytest.mark.parametrize(
+    "use_default_ignore_schemas_owned_by",
+    [
+        pytest.param(True, id="default_ignore_schemas_owned_by"),
+        pytest.param(False, id="custom_ignore_schemas_owned_by"),
+    ]
+)
+def test_collect_schemas(integration_check, dbm_instance, aggregator, use_default_ignore_schemas_owned_by):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600}
     dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
     check = integration_check(dbm_instance)
+    if not use_default_ignore_schemas_owned_by:
+        check._config.ignore_schemas_owned_by = ['rds_superuser']
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
@@ -82,7 +91,6 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         "pg_newtable",
         "cities",
         "sample_foreign_d73a8c",
-        "rds_admin_misc",
     }
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
@@ -94,8 +102,11 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     schemas_want = {
         'public',
         'public2',
-        'rdsadmin_test'
     }
+
+    if not use_default_ignore_schemas_owned_by:
+        schemas_want.add('rdsadmin_test')
+        tables_set.add('rds_admin_misc')
 
     schemas_got = set()
 
