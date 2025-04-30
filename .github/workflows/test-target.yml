@@ -412,8 +412,8 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5.4.2
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        use_oidc: true
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"

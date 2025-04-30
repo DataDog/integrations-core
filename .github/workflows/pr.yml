@@ -22,3 +22,7 @@ jobs:
     with:
       repo: core
     secrets: inherit
+
+    # needed for codecov in test-target.yml
+    permissions:
+      id-token: write
