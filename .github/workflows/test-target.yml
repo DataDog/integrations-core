@@ -412,8 +412,8 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v5.4.2
       with:
-        use_oidc: true
+        use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"
