@@ -942,12 +942,9 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
 @pytest.mark.usefixtures('dd_environment')
 def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_docker, caplog):
     """Test that XE sessions collect and process events properly."""
-    # Configure instance to enable XE collection with debug mode
+    # Configure instance to enable XE collection
     instance = copy(instance_docker)
-    instance['debug'] = True  # Enable debug logging
     instance['dbm'] = True
-
-    # Make sure the XE config is specific and correct - use 'xe_collection' key
     instance['xe_collection'] = {
         'query_completions': {
             'enabled': True,
@@ -958,9 +955,6 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             'collection_interval': 0.1,
         },
     }
-
-    # Set log level to DEBUG to capture all logs
-    caplog.set_level(logging.DEBUG)
 
     check = SQLServer(CHECK_NAME, {}, [instance])
 
@@ -986,54 +980,22 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Run check again to collect the events
     dd_run_check(check)
 
-    # Print captured debug logs
-    print("\n--- DEBUG LOGS ---")
-    xe_logs = [record for record in caplog.records if "XE" in record.message or "Extended Event" in record.message]
-    for record in xe_logs:
-        print(f"{record.levelname}: {record.name}: {record.message}")
-
-    if not xe_logs:
-        print("No XE-related logs found! Showing all debug logs:")
-        debug_logs = [record for record in caplog.records if record.levelname == "DEBUG"]
-        for record in debug_logs[:20]:  # Limit to first 20 to avoid overwhelming output
-            print(f"{record.name}: {record.message}")
-
-    # Get events using the platform events API - try multiple event types
-    event_platform_types = ["dbm-samples", "dbm-activity", "dbm-query-samples", "dbm-monitoring"]
-    all_events = {}
-
-    for event_type in event_platform_types:
-        events = aggregator.get_event_platform_events(event_type)
-        all_events[event_type] = events
-        print(f"Events in {event_type}: {len(events)}")
-        if events:
-            print(f"  Event types: {set(e.get('dbm_type', 'unknown') for e in events)}")
-
-    # Use the platform with the most events
-    most_events_type = max(all_events.items(), key=lambda x: len(x[1]))[0]
-    dbm_events = all_events[most_events_type]
-    print(f"Using events from {most_events_type}: {len(dbm_events)}")
+    # Get events from the platform events API
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
     # Filter completion events
     query_completion_events = [
         e
-        for e in dbm_events
+        for e in dbm_activity
         if e.get('dbm_type') == 'query_completion' and 'datadog_query_completions' in str(e.get('event_source', ''))
     ]
 
     # Filter error events
     error_events = [
         e
-        for e in dbm_events
+        for e in dbm_activity
         if e.get('dbm_type') == 'query_error' and 'datadog_query_errors' in str(e.get('event_source', ''))
     ]
-
-    print(f"Query completion events found: {len(query_completion_events)}")
-    print(f"Error events found: {len(error_events)}")
-
-    # Print event types for debugging
-    for evt in dbm_events:
-        print(f"Event type: {evt.get('dbm_type')}, source: {evt.get('event_source')}")
 
     # We should have at least one query completion event
     assert len(query_completion_events) > 0, "No query completion events collected"
