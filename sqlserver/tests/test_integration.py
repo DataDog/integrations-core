@@ -975,7 +975,7 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
 
     # Get events using the platform events API instead of directly checking aggregator.events
     # This follows the pattern used in test_activity.py
-    dbm_events = aggregator.get_event_platform_events("dbm-monitoring")
+    dbm_events = aggregator.get_event_platform_events("dbm-activity")
     print(f"Total platform events collected: {len(dbm_events)}")
 
     # Filter completion events
