@@ -150,7 +150,7 @@ jobs:
       if: >
         !github.event.repository.private &&
         always()
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5.4.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
