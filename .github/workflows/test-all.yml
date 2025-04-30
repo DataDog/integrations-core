@@ -396,9 +396,6 @@ jobs:
     secrets: inherit
   jacbd843:
     uses: ./.github/workflows/test-target.yml
-    # needed for codecov
-    permissions:
-      id-token: write
 
     with:
       job-name: ArangoDB

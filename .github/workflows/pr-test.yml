@@ -42,10 +42,6 @@ jobs:
 
     uses: ./.github/workflows/test-target.yml
 
-    # needed for codecov
-    permissions:
-      id-token: write
-
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"
