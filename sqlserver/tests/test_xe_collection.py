@@ -150,6 +150,12 @@ def sample_multiple_events_xml():
     return load_xml_fixture('multiple_events.xml')
 
 
+@pytest.fixture
+def sample_attention_event_xml():
+    """Load a sample attention event XML"""
+    return load_xml_fixture('attention.xml')
+
+
 # Fixtures for expected event values
 @pytest.fixture
 def sql_batch_expected_values():
@@ -225,6 +231,22 @@ def module_end_expected_values():
         'offset_end': 372,
         'source_database_id': 9,
         'object_id': 2002300576,
+    }
+
+
+@pytest.fixture
+def attention_expected_values():
+    """Expected values for attention events"""
+    return {
+        'event_name': 'attention',
+        'timestamp': '2025-04-24T20:37:47.978Z',
+        'duration_ms': 328.677,
+        'session_id': 123,
+        'request_id': 0,
+        'database_name': 'master',
+        'client_hostname': 'COMP-MX2YQD7P2P',
+        'client_app_name': 'azdata',
+        'username': 'datadog',
     }
 
 
@@ -600,6 +622,30 @@ class TestEventProcessing:
         for i, (event, exp_type, exp_session) in enumerate(zip(events, expected_types, expected_sessions)):
             assert event['event_name'] == exp_type
             assert int(event['session_id']) == exp_session
+
+    def test_process_events_attention(
+        self, query_completion_handler, sample_attention_event_xml, attention_expected_values
+    ):
+        """Test processing of attention events"""
+        # Wrap the single event in an events tag
+        xml_data = wrap_xml_in_events_tag(sample_attention_event_xml)
+
+        # Need to register a handler for attention events since it may not be registered by default
+        query_completion_handler.register_event_handler('attention', query_completion_handler._process_generic_event)
+
+        # Process the events
+        events = query_completion_handler._process_events(xml_data)
+
+        # Verify the event was processed correctly
+        assert len(events) == 1
+        event = events[0]
+
+        # Verify expected values
+        assert_event_field_values(event, attention_expected_values)
+
+        # Check for event-specific fields
+        assert 'sql_text' in event
+        assert 'DECLARE @session_name NVARCHAR(100) = \'datadog_sql_statement\'' in event['sql_text']
 
 
 class TestPayloadGeneration:
