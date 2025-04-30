@@ -11,7 +11,7 @@
   - remove them from integration scaffolding templates
   - add a warning to the method docstring ([#19831](https://github.com/DataDog/integrations-core/pull/19831))
 * Stop using the uptime library ([#19842](https://github.com/DataDog/integrations-core/pull/19842))
-* Bump Python version to 3.12 for templates for new integrations. ([#19970](https://github.com/DataDog/integrations-core/pull/19970))
+* Bump Python version to 3.12 for new integration templates. ([#19970](https://github.com/DataDog/integrations-core/pull/19970))
 * Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
 
 ## 35.0.0 / 2025-02-26
