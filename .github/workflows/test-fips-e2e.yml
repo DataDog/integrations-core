@@ -45,6 +45,10 @@ jobs:
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
 
+    # needed for codecov
+    permissions:
+        id-token: write
+
     steps:
 
     - name: Set environment variables with sanitized paths
@@ -147,8 +151,6 @@ jobs:
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
-      permissions:
-        id-token: write
       if: >
         !github.event.repository.private &&
         always()
