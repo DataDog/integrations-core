@@ -1,0 +1,1689 @@
+{
+  "title": "KubeVirt Overview",
+  "description": "This dashboard provides an overview of your KubeVirt deployment. You can use this dashboard to:\n\n- Monitor the health of your KubeVirt deployment (virt-api, virt-controller, virt-handler)\n  \n- Track the resource utilization of your VirtualMachines (VM) and VirtualMachineInstances (VMI)\n  \n- Track the performance and resource utilization of your VMIs\\",
+  "widgets": [
+    {
+      "id": 8821438356580436,
+      "definition": {
+        "title": "Introduction",
+        "banner_img": "/static/images/logos/kubevirt_api_large.svg",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 961616527714708,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard provides an overview of your KubeVirt deployment. You can use this dashboard to:\n\n- Monitor the health of your KubeVirt deployment (virt-api, virt-controller, virt-handler)\n  \n- Track the resource utilization of your VirtualMachines (VM) and VirtualMachineInstances (VMI)\n  \n- Track the performance and resource utilization of your VMIs\\",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 6 }
+    },
+    {
+      "id": 6545239185140116,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4046242726958760,
+            "definition": {
+              "title": "Virt API Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.can_connect{$kube_cluster_name, $kube_namespace, $kube_node}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 1,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": { "yaxis": {}, "type": "bars" }
+            },
+            "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
+          },
+          {
+            "id": 3927195080394182,
+            "definition": {
+              "title": "Virt Controller Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.can_connect{$kube_cluster_name,$kube_namespace,$kube_node}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 1,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": { "yaxis": {}, "type": "bars" }
+            },
+            "layout": { "x": 2, "y": 0, "width": 2, "height": 2 }
+          },
+          {
+            "id": 2135884642084220,
+            "definition": {
+              "title": "Total VMI",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.vmi.phase_count{$kube_cluster_name, $kube_namespace}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": { "yaxis": {}, "type": "bars" }
+            },
+            "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
+          },
+          {
+            "id": 1011026894125822,
+            "definition": {
+              "title": "VMI Phase Count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubevirt_controller.vmi.phase_count{$kube_cluster_name, $kube_namespace, $kube_node} by {phase,node}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 6 }
+    },
+    {
+      "id": 4004341915348100,
+      "definition": {
+        "title": "KubeVirt Deployment",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6128058587662604,
+            "definition": {
+              "title": "VMIs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.vmi.count{vmi_nodename:$kube_node.value ,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,vmi_size,vmi_phase,vmi_domain,vmi_nodename}.fill(zero)",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "instances",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 6981156000768796,
+            "definition": {
+              "title": "Virt Controllers",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubevirt_controller.virt_controller.ready_status{$kube_cluster_name,$kube_namespace,$kube_node} by {pod_name,cluster_name,kube_namespace,kube_node}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:kubevirt_controller.virt_controller.leading_status{$kube_cluster_name,$kube_namespace,$kube_node} by {pod_name,cluster_name,kube_namespace,kube_node}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "group",
+                        "name": "cluster_name",
+                        "order": "asc"
+                      }
+                    ],
+                    "count": 500
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "is_ready",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 1,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 1,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "is_leading",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 1,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 7350343274911936,
+            "definition": {
+              "title": "CPU intensive Pods",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubernetes.cpu.usage.total{$kube_node,$kube_namespace,kube_app_managed_by:virt-operator,$kube_cluster_name} by {pod_name,container_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked" },
+                "scaling": "absolute"
+              }
+            },
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 3 }
+          },
+          {
+            "id": 6452671849747216,
+            "definition": {
+              "title": "Memory intensive Pods",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubernetes.memory.usage{$kube_node,$kube_namespace,kube_app_managed_by:virt-operator,$kube_cluster_name} by {pod_name,container_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked" },
+                "scaling": "absolute"
+              }
+            },
+            "layout": { "x": 3, "y": 3, "width": 3, "height": 3 }
+          },
+          {
+            "id": 3919153715753972,
+            "definition": {
+              "title": "CPU Intensive VMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubernetes.cpu.usage.total{$kube_node,$kube_namespace,$kube_cluster_name, short_image:virt-launcher} by {kube_ownerref_name,pod_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked" },
+                "scaling": "absolute"
+              }
+            },
+            "layout": { "x": 6, "y": 3, "width": 3, "height": 3 }
+          },
+          {
+            "id": 2562937275431994,
+            "definition": {
+              "title": "Memory Intensive VMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubernetes.memory.usage{$kube_node,$kube_namespace,$kube_cluster_name,short_image:virt-launcher} by {kube_ownerref_name,pod_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked" },
+                "scaling": "absolute"
+              }
+            },
+            "layout": { "x": 9, "y": 3, "width": 3, "height": 3 }
+          },
+          {
+            "id": 2317454915271064,
+            "definition": {
+              "title": "Network Rate by Pod",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "alias": "Received Bytes", "formula": "query1" },
+                    { "alias": "Transmitted Bytes", "formula": "query2" }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace, kube_app_managed_by:virt-operator} by {pod_name}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace, kube_app_managed_by:virt-operator} by {pod_name}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 6, "width": 6, "height": 3 }
+          },
+          {
+            "id": 1159678583240,
+            "definition": {
+              "title": "Network Errors by Pod",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": ["max", "value", "avg"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "alias": "Received Errors", "formula": "query1" },
+                    { "alias": "Transmitted Errors", "formula": "query2" }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.network.rx_errors{$kube_cluster_name,$kube_namespace, kube_app_managed_by:virt-operator} by {pod_name}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:kubernetes.network.tx_errors{$kube_cluster_name,$kube_namespace, kube_deployment:virt-operator} by {pod_name}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 6, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 6, "width": 12, "height": 10 }
+    },
+    {
+      "id": 7379952250923574,
+      "definition": {
+        "title": "Virt API",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2420530717831910,
+            "definition": {
+              "title": "Health Check",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.can_connect{$kube_node, $kube_namespace, $kube_cluster_name} by {pod_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 277188141827086,
+            "definition": {
+              "title": "CPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "requested",
+                      "formula": "query1"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "limits",
+                      "formula": "query2"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "used",
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubernetes.cpu.requests{kube_service:virt-api,cluster_name:$kube_cluster_name.value,$kube_namespace} by {pod_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kubernetes.cpu.limits{kube_service:virt-api,cluster_name:$kube_cluster_name.value,$kube_namespace} by {pod_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:kubernetes.cpu.usage.total{kube_service:virt-api,cluster_name:$kube_cluster_name.value,$kube_namespace} by {pod_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:kubernetes_state.pod.age{pod_name:virt-api*,$kube_namespace} by {pod_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 4202418486572868,
+            "definition": {
+              "title": "Resident Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.process.resident_memory_bytes{$pod_name,$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,kube_cluster_name,kube_namespace,kube_node}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": { "include_zero": true, "scale": "linear" },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5590012604986928,
+            "definition": {
+              "title": "Virtual Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.process.virtual_memory_bytes{$pod_name,$kube_namespace,$kube_cluster_name,$kube_node} by {endpoint}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 6883424002287788,
+            "definition": {
+              "title": "Number of Prometheus Requests",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.promhttp.metric_handler_requests.count{$pod_name,$kube_namespace,$kube_cluster_name,$kube_node} by {code,endpoint}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 2792005871439898,
+            "definition": {
+              "title": "Prometheus Requests In-Flight",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.promhttp.metric_handler_requests_in_flight{$pod_name,$kube_namespace,$kube_cluster_name,$kube_node} by {endpoint}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 6817125937570288,
+            "definition": {
+              "title": "Open File Descriptors",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.process.open_fds{$pod_name,$kube_namespace,$kube_cluster_name,$kube_node} by {endpoint}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1533858067572002,
+            "definition": {
+              "title": "Max Virtual Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "bytes"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:kubevirt_api.process.virtual_memory_max_bytes{$pod_name,$kube_namespace,$kube_cluster_name,$kube_node} by {endpoint}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 9, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 7377454437648792,
+            "definition": {
+              "title": "Client Requests Writes",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query2" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kubevirt_api.rest.client_requests.count{$kube_cluster_name AND $kube_namespace AND $kube_node AND method:post OR method:patch OR method:put OR method:delete} by {code,verb,resource}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+          },
+          {
+            "id": 2815527376794272,
+            "definition": {
+              "title": "Client Requests Reads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.rest.client_requests.count{$kube_cluster_name AND $kube_namespace AND $kube_node AND method:get OR method:list} by {code,verb,resource}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 4, "width": 6, "height": 2 }
+          },
+          {
+            "id": 588357441214822,
+            "definition": {
+              "title": "Client Rate Limiter Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "rate_limiter_duration",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.rest.client_rate_limiter_duration_seconds.count{$kube_cluster_name,$kube_namespace}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
+          },
+          {
+            "id": 8013055653110924,
+            "definition": {
+              "title": "Client Request Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "request_latency",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_api.rest.client_request_latency_seconds.count{$kube_cluster_name,$kube_namespace} by {verb,url}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 6, "width": 6, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 16, "width": 12, "height": 9 }
+    },
+    {
+      "id": 8367852636334852,
+      "definition": {
+        "title": "Virt Controller",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7924435271541442,
+            "definition": {
+              "title": "Workqueue Add Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.workqueue.adds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 7727342508901616,
+            "definition": {
+              "title": "Workqueue Depth",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.workqueue.depth{$kube_namespace, $kube_cluster_name, $kube_node} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 7339295485522408,
+            "definition": {
+              "title": "Workqueue Queue Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.workqueue.queue_duration_seconds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
+          },
+          {
+            "id": 7745035203706264,
+            "definition": {
+              "title": "Workqueue Unfinished Work",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.workqueue.unfinished_work_seconds{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 4335911748047578,
+            "definition": {
+              "title": "Workqueue Retries",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.workqueue.retries.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 4299605490024220,
+            "definition": {
+              "title": "Workqueue Work Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.workqueue.work_duration_seconds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
+          },
+          {
+            "id": 3060405394959416,
+            "definition": {
+              "title": "Workqueue Longest Running Processor",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubevirt_controller.workqueue.longest_running_processor_seconds{$kube_cluster_name,$kube_namespace} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+          },
+          {
+            "id": 4286606026080584,
+            "definition": {
+              "title": "Outdated VMIs",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubevirt_controller.vmi.number_of_outdated{$kube_cluster_name,$kube_namespace} by {phase}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 4, "width": 3, "height": 2 }
+          },
+          {
+            "id": 2778186305791428,
+            "definition": {
+              "title": "Non Evictable VMIs",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_controller.vmi.non_evictable{$kube_cluster_name, $kube_namespace, $kube_node} by {name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 9, "y": 4, "width": 3, "height": 2 }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 25,
+        "width": 12,
+        "height": 7,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 239904209946238,
+      "definition": {
+        "title": "Virt Handler",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5703785089249894,
+            "definition": {
+              "title": "Workqueue Add Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.adds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 2806655813300116,
+            "definition": {
+              "title": "Workqueue Depth",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.depth{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 6817919317573044,
+            "definition": {
+              "title": "Workqueue Queue Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.queue_duration_seconds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5109294262350614,
+            "definition": {
+              "title": "Workqueue Work Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.work_duration_seconds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1283819053231866,
+            "definition": {
+              "title": "Workqueue Unfinished Work",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.unfinished_work_seconds{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5751484418557652,
+            "definition": {
+              "title": "Workqueue Retries",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.retries.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 8742120090105740,
+            "definition": {
+              "title": "Workqueue Longest Running Processor",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubevirt_handler.workqueue.longest_running_processor_seconds{$kube_cluster_name,$kube_namespace} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 32, "width": 12, "height": 5 }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "kube_cluster_name",
+      "prefix": "kube_cluster_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_namespace",
+      "prefix": "kube_namespace",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_node",
+      "prefix": "kube_node",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "pod_name",
+      "prefix": "pod_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
