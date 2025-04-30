@@ -19,11 +19,6 @@ CREATE LOGIN fred WITH PASSWORD = 'Password12!';
 CREATE USER fred FOR LOGIN fred;
 GO
 
--- Grant permissions to bob to view XE session data
-USE master;
-GO
-GRANT VIEW SERVER STATE TO bob;
-GO
 
 -- note that we deliberately don't grant "CONNECT ANY DATABASE" to the agent user here because that
 -- permission is not supported in SQL Server 2012. This is OK for the integration tests because in
