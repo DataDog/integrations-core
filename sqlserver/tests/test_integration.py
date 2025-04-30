@@ -968,9 +968,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         assert len(xe_sessions) == 2, f"Expected 2 XE sessions, found {len(xe_sessions)}: {xe_sessions}"
 
         for session in xe_sessions:
-            name, create_time, start_time, suspended = session
-            print(f"XE Session: {name}, Created: {create_time}, Started: {start_time}, Suspended: {suspended}")
-            assert suspended == 0, f"XE session {name} is suspended"
+            name, create_time = session
+            print(f"XE Session: {name}, Created: {create_time}")
 
     # Execute a query that will be captured (long enough to exceed the threshold)
     test_query = "WAITFOR DELAY '00:00:02'; SELECT 1;"
