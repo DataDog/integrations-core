@@ -1,1 +1,1 @@
-Include schemas owned by rdsadmin in schema collection
+Make owner of schemas to be ignored during collection configurable
