@@ -8,7 +8,6 @@ GO
 CREATE LOGIN datadog WITH PASSWORD = 'Password12!';
 CREATE USER datadog FOR LOGIN datadog;
 GRANT SELECT on sys.dm_os_performance_counters to datadog;
-GRANT SELECT on sys.dm_xe_sessions to datadog;
 GRANT VIEW SERVER STATE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
@@ -18,6 +17,12 @@ CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;
 CREATE LOGIN fred WITH PASSWORD = 'Password12!';
 CREATE USER fred FOR LOGIN fred;
+GO
+
+-- Grant permissions to bob to view XE session data
+USE master;
+GO
+GRANT VIEW SERVER STATE TO bob;
 GO
 
 -- note that we deliberately don't grant "CONNECT ANY DATABASE" to the agent user here because that
