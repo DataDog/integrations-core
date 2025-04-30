@@ -25,5 +25,5 @@ def get_xe_session_handlers(check, config):
         handlers.append(ErrorEventsHandler(check, config))
         check.log.debug("Query errors XE session handler enabled")
 
-    check.log.info(f"Created {len(handlers)} enabled XE session handlers")
+    check.log.info("Created %d enabled XE session handlers", len(handlers))
     return handlers

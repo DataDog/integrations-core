@@ -2,22 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import datetime
 import json
 import os
 import sys
-from io import BytesIO
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from lxml import etree
 
-from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
 from datadog_checks.sqlserver.xe_collection.query_completion_events import QueryCompletionEventsHandler
-from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 CHECK_NAME = 'sqlserver'
 
@@ -222,7 +218,9 @@ def module_end_expected_values():
         'client_app_name': 'go-mssqldb',
         'username': 'shopper_4',
         'statement': 'EXEC SelectAndProcessOrderItem',
-        'sql_text': "/*dddbs='orders-app',ddps='orders-app',ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',dddb='dbmorders',ddprs='orders-sqlserver'*/ EXEC SelectAndProcessOrderItem",
+        'sql_text': """/*dddbs='orders-app',ddps='orders-app',
+ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',
+dddb='dbmorders',ddprs='orders-sqlserver'*/ EXEC SelectAndProcessOrderItem""",
         # Module-specific fields
         'object_name': 'SelectAndProcessOrderItem',
         'object_type': 'P',  # P for stored procedure
@@ -422,7 +420,7 @@ class TestXESessionHelpers:
         # Test invalid integer
         xml = '<data name="test"><value>not_a_number</value></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_int_value(element) == None
+        assert query_completion_handler._extract_int_value(element) is None
         assert query_completion_handler._extract_int_value(element, 0) == 0
 
         # Test empty element
@@ -618,7 +616,7 @@ class TestEventProcessing:
         expected_types = ['sql_batch_completed', 'rpc_completed', 'error_reported']
         expected_sessions = [123, 124, 125]
 
-        for (event, exp_type, exp_session) in enumerate(zip(events, expected_types, expected_sessions)):
+        for event, exp_type, exp_session in zip(events, expected_types, expected_sessions):
             assert event['event_name'] == exp_type
             assert int(event['session_id']) == exp_session
 

@@ -5,7 +5,7 @@
 import datetime
 import json as json_module
 from abc import abstractmethod
-from io import BytesIO, StringIO
+from io import BytesIO
 from time import time
 
 from lxml import etree
@@ -675,7 +675,8 @@ class XESessionBase(DBMAsyncJob):
                                 f"event_fire_timestamp={obfuscated_event.get('event_fire_timestamp', 'UNKNOWN')}, "
                                 f"query_start={obfuscated_event.get('query_start', 'UNKNOWN')}, "
                                 f"duration_ms={obfuscated_event.get('duration_ms', 'UNKNOWN')}, "
-                                f"text={field_value[:100]}, full_event={json_module.dumps(obfuscated_event, default=str)}"
+                                f"text={field_value[:100]}, "
+                                f"full_event={json_module.dumps(obfuscated_event, default=str)}"
                             )
                             break
 
