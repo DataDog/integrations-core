@@ -114,6 +114,9 @@ jobs:
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
 
+    permissions:
+        id-token: write
+
     steps:
 
     - name: Set environment variables with sanitized paths

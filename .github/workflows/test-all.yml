@@ -56,8 +56,6 @@ on:
 jobs:
   jd316aba:
     # needed for codecov
-    permissions:
-      id-token: write
     uses: ./.github/workflows/test-target.yml
     with:
       job-name: ddev on Linux
