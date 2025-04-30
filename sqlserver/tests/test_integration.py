@@ -936,3 +936,84 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
     assert sqlserver_check.static_info_cache is not None
     assert len(sqlserver_check.static_info_cache.keys()) == 6
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_docker):
+    """Test that XE sessions collect and process events properly."""
+    # Configure instance to enable XE collection
+    instance = copy(instance_docker)
+    instance['xe_collection_config'] = {
+        'query_completions': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
+        'query_errors': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
+    }
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+
+    # Run check once to initialize sessions if needed
+    dd_run_check(check)
+
+    # Execute a query that will be captured (long enough to exceed the threshold)
+    test_query = "WAITFOR DELAY '00:00:02'; SELECT 1;"
+    bob_conn.execute_with_retries(test_query)
+
+    # Execute a query that will generate an error
+    error_query = "SELECT 1/0;"  # Division by zero error
+    try:
+        bob_conn.execute_with_retries(error_query)
+    except:
+        pass  # We expect this to fail
+
+    # Run check again to collect the events
+    dd_run_check(check)
+
+    # Verify that events were collected through aggregator
+    query_completion_events = [
+        e for e in aggregator.events if "Extended Events" in e['msg_title'] and "sql_batch_completed" in e['msg_text']
+    ]
+
+    error_events = [
+        e for e in aggregator.events if "Extended Events" in e['msg_title'] and "error_reported" in e['msg_text']
+    ]
+
+    # We should have at least one query completion event
+    assert len(query_completion_events) > 0, "No query completion events collected"
+
+    # We should have at least one error event
+    assert len(error_events) > 0, "No error events collected"
+
+    # Check for specific tags in events
+    for event in query_completion_events:
+        assert 'source:sqlserver' in event['tags']
+        assert 'event_source:datadog_query_completions' in event['tags']
+
+    for event in error_events:
+        assert 'source:sqlserver' in event['tags']
+        assert 'event_source:datadog_query_errors' in event['tags']
+
+    # Verify specific query completion event details
+    found_test_query = False
+    for event in query_completion_events:
+        if "WAITFOR DELAY" in event['msg_text'] and "SELECT 1" in event['msg_text']:
+            found_test_query = True
+            # Check for expected properties
+            assert "bob" in event['msg_text'], "Username 'bob' not found in event"
+            assert "duration_ms" in event['msg_text'], "Duration not found in event"
+            # The duration should be at least 2000ms (2 seconds)
+            duration_text = re.search(r'duration_ms["\s:]+([0-9.]+)', event['msg_text'])
+            if duration_text:
+                duration = float(duration_text.group(1))
+                assert duration >= 1900, f"Expected duration >= 2000ms, but got {duration}ms"
+    assert found_test_query, "Could not find our specific test query in the completion events"
+
+    # Verify specific error event details
+    found_error_query = False
+    for event in error_events:
+        if "SELECT 1/0" in event['msg_text']:
+            found_error_query = True
+            # Check for expected properties
+            assert "bob" in event['msg_text'], "Username 'bob' not found in error event"
+            assert "Divide by zero" in event['msg_text'], "Expected error message not found"
+            assert "error_number: 8134" in event['msg_text'], "Expected error number 8134 not found"
+    assert found_error_query, "Could not find our specific error query in the error events"
