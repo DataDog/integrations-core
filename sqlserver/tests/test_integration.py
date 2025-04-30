@@ -987,8 +987,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         # Check query completions session
         cursor.execute(
             """
-        SELECT target_data 
-        FROM sys.dm_xe_session_targets xst 
+        SELECT target_data
+        FROM sys.dm_xe_session_targets xst
         JOIN sys.dm_xe_sessions xs ON xs.address = xst.event_session_address
         WHERE xs.name = 'datadog_query_completions' AND xst.target_name = 'ring_buffer';
         """
@@ -1005,8 +1005,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         # Check error session
         cursor.execute(
             """
-        SELECT target_data 
-        FROM sys.dm_xe_session_targets xst 
+        SELECT target_data
+        FROM sys.dm_xe_session_targets xst
         JOIN sys.dm_xe_sessions xs ON xs.address = xst.event_session_address
         WHERE xs.name = 'datadog_query_errors' AND xst.target_name = 'ring_buffer';
         """
@@ -1030,8 +1030,7 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         print(f"Number of info log calls: {len(info_calls)}")
 
         # Print any XE-related log messages
-        xe_logs = [call for call in debug_calls if 'XE' in str(call) or 'Extended Event' in str(call)]
-        for log_call in xe_logs:
+        for log_call in debug_calls:
             print(f"XE Log: {log_call}")
 
     # Verify that events were collected through aggregator
