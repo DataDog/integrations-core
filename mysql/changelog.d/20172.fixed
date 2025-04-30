@@ -1,1 +1,1 @@
-Fixes the query for replica counts when setting `replication_non_blocking_status:true`
+Fixes incorrect replica counts when querying from performance_schema.threads
