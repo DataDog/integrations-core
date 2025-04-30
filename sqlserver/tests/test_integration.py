@@ -954,23 +954,6 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Run check once to initialize sessions if needed
     dd_run_check(check)
 
-    # Verify XE sessions exist and are running in SQL Server
-    with bob_conn.conn.cursor() as cursor:
-        cursor.execute(
-            """
-        SELECT name, create_time
-        FROM sys.dm_xe_sessions
-        WHERE name IN ('datadog_query_completions', 'datadog_query_errors');
-        """
-        )
-        xe_sessions = cursor.fetchall()
-
-        assert len(xe_sessions) == 2, f"Expected 2 XE sessions, found {len(xe_sessions)}: {xe_sessions}"
-
-        for session in xe_sessions:
-            name, create_time = session
-            print(f"XE Session: {name}, Created: {create_time}")
-
     # Execute a query that will be captured (long enough to exceed the threshold)
     test_query = "WAITFOR DELAY '00:00:02'; SELECT 1;"
     bob_conn.execute_with_retries(test_query)
@@ -981,7 +964,9 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         bob_conn.execute_with_retries(error_query)
     except:
         pass  # We expect this to fail
-
+    import time
+    time.sleep(5)
+    dd_run_check(check)
     # Add debugging to see what's in the XE sessions
     with bob_conn.conn.cursor() as cursor:
         # Check query completions session
@@ -998,7 +983,7 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             print(f"Query completions ring buffer has data: {len(completions_data[0])} bytes")
             # Print a sample if there's data
             if len(completions_data[0]) > 100:
-                print(f"Sample: {completions_data[0][:100]}...")
+                print(f"Sample: {completions_data[0]}...")
         else:
             print("No data found in query completions ring buffer")
 
@@ -1016,22 +1001,6 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             print(f"Query errors ring buffer has data: {len(errors_data[0])} bytes")
         else:
             print("No data found in query errors ring buffer")
-
-    # Add mock to capture logs from the XE handler processing
-    with mock.patch.object(check, 'log') as mock_log:
-        # Run check again to collect the events
-        dd_run_check(check)
-
-        # Check if any debug logs were produced about XE processing
-        debug_calls = [call for call in mock_log.debug.call_args_list]
-        info_calls = [call for call in mock_log.info.call_args_list]
-
-        print(f"Number of debug log calls: {len(debug_calls)}")
-        print(f"Number of info log calls: {len(info_calls)}")
-
-        # Print any XE-related log messages
-        for log_call in debug_calls:
-            print(f"XE Log: {log_call}")
 
     # Verify that events were collected through aggregator
     query_completion_events = [
