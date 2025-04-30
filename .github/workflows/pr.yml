@@ -22,3 +22,6 @@ jobs:
     with:
       repo: core
     secrets: inherit
+    # needed for codecov
+    permissions:
+      id-token: write
