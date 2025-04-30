@@ -260,16 +260,6 @@ class SqlserverActivity(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        # Check if any raw statement contains 'ALLEN TEST'
-        for row in rows:
-            if row.get('statement_text') and '-- ALLEN TEST' in row.get('statement_text'):
-                self.log.info(
-                    "ALLEN TEST QUERY FOUND in raw activity data (pre-obfuscation): host=%s, session_id=%s, query_start=%s, statement=%s",
-                    self._check.resolved_hostname,
-                    row.get('id', 'UNKNOWN'),
-                    row.get('query_start', 'UNKNOWN'),
-                    row.get('statement_text', '')[:100],
-                )
         # construct set of unique session ids
         session_ids = {r['id'] for r in rows}
         # construct set of blocking session ids

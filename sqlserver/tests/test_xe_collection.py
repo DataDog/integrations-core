@@ -378,8 +378,6 @@ class TestXESessionHandlersInitialization:
 
         # Test Azure SQL Database
         mock_check.static_info_cache = {'engine_edition': 'Azure SQL Database'}
-        # We need to create a new handler to trigger the check_azure_status in init
-        from datadog_checks.sqlserver.utils import is_azure_sql_database
 
         with patch(
             'datadog_checks.sqlserver.xe_collection.base.is_azure_sql_database',
@@ -407,11 +405,11 @@ class TestXESessionHelpers:
         # Test empty element
         xml = '<data name="test"></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_value(element) == None
+        assert query_completion_handler._extract_value(element) is None
         assert query_completion_handler._extract_value(element, 'default') == 'default'
 
         # Test None element
-        assert query_completion_handler._extract_value(None) == None
+        assert query_completion_handler._extract_value(None) is None
         assert query_completion_handler._extract_value(None, 'default') == 'default'
 
     def test_extract_int_value(self, query_completion_handler):
@@ -430,7 +428,7 @@ class TestXESessionHelpers:
         # Test empty element
         xml = '<data name="test"></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_int_value(element) == None
+        assert query_completion_handler._extract_int_value(element) is None
         assert query_completion_handler._extract_int_value(element, 0) == 0
 
     def test_extract_text_representation(self, query_completion_handler):
@@ -443,7 +441,7 @@ class TestXESessionHelpers:
         # Test without text element
         xml = '<data name="test"><value>123</value></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_text_representation(element) == None
+        assert query_completion_handler._extract_text_representation(element) is None
         assert query_completion_handler._extract_text_representation(element, 'default') == 'default'
 
     def test_extract_duration(self, query_completion_handler):
@@ -620,7 +618,7 @@ class TestEventProcessing:
         expected_types = ['sql_batch_completed', 'rpc_completed', 'error_reported']
         expected_sessions = [123, 124, 125]
 
-        for i, (event, exp_type, exp_session) in enumerate(zip(events, expected_types, expected_sessions)):
+        for (event, exp_type, exp_session) in enumerate(zip(events, expected_types, expected_sessions)):
             assert event['event_name'] == exp_type
             assert int(event['session_id']) == exp_session
 
