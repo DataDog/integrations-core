@@ -946,13 +946,31 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     instance = copy(instance_docker)
     instance['xe_collection_config'] = {
         'query_completions': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
-        'query_errors': {'enabled': True, 'collection_interval': 0.1},
+        'query_errors': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
     }
 
     check = SQLServer(CHECK_NAME, {}, [instance])
 
-    # Run check once to initialize sessions
+    # Run check once to initialize sessions if needed
     dd_run_check(check)
+
+    # Verify XE sessions exist and are running in SQL Server
+    with bob_conn.conn.cursor() as cursor:
+        cursor.execute(
+            """
+        SELECT name, create_time, start_time, suspended 
+        FROM sys.dm_xe_sessions 
+        WHERE name IN ('datadog_query_completions', 'datadog_query_errors');
+        """
+        )
+        xe_sessions = cursor.fetchall()
+
+        assert len(xe_sessions) == 2, f"Expected 2 XE sessions, found {len(xe_sessions)}: {xe_sessions}"
+
+        for session in xe_sessions:
+            name, create_time, start_time, suspended = session
+            print(f"XE Session: {name}, Created: {create_time}, Started: {start_time}, Suspended: {suspended}")
+            assert suspended == 0, f"XE session {name} is suspended"
 
     # Execute a query that will be captured (long enough to exceed the threshold)
     test_query = "WAITFOR DELAY '00:00:02'; SELECT 1;"
@@ -964,10 +982,58 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         bob_conn.execute_with_retries(error_query)
     except:
         pass  # We expect this to fail
-    import time
-    time.sleep(0.2)
-    # Run check again to collect the events
-    dd_run_check(check)
+
+    # Add debugging to see what's in the XE sessions
+    with bob_conn.conn.cursor() as cursor:
+        # Check query completions session
+        cursor.execute(
+            """
+        SELECT target_data 
+        FROM sys.dm_xe_session_targets xst 
+        JOIN sys.dm_xe_sessions xs ON xs.address = xst.event_session_address
+        WHERE xs.name = 'datadog_query_completions' AND xst.target_name = 'ring_buffer';
+        """
+        )
+        completions_data = cursor.fetchone()
+        if completions_data:
+            print(f"Query completions ring buffer has data: {len(completions_data[0])} bytes")
+            # Print a sample if there's data
+            if len(completions_data[0]) > 100:
+                print(f"Sample: {completions_data[0][:100]}...")
+        else:
+            print("No data found in query completions ring buffer")
+
+        # Check error session
+        cursor.execute(
+            """
+        SELECT target_data 
+        FROM sys.dm_xe_session_targets xst 
+        JOIN sys.dm_xe_sessions xs ON xs.address = xst.event_session_address
+        WHERE xs.name = 'datadog_query_errors' AND xst.target_name = 'ring_buffer';
+        """
+        )
+        errors_data = cursor.fetchone()
+        if errors_data:
+            print(f"Query errors ring buffer has data: {len(errors_data[0])} bytes")
+        else:
+            print("No data found in query errors ring buffer")
+
+    # Add mock to capture logs from the XE handler processing
+    with mock.patch.object(check, 'log') as mock_log:
+        # Run check again to collect the events
+        dd_run_check(check)
+
+        # Check if any debug logs were produced about XE processing
+        debug_calls = [call for call in mock_log.debug.call_args_list]
+        info_calls = [call for call in mock_log.info.call_args_list]
+
+        print(f"Number of debug log calls: {len(debug_calls)}")
+        print(f"Number of info log calls: {len(info_calls)}")
+
+        # Print any XE-related log messages
+        xe_logs = [call for call in debug_calls if 'XE' in str(call) or 'Extended Event' in str(call)]
+        for log_call in xe_logs:
+            print(f"XE Log: {log_call}")
 
     # Verify that events were collected through aggregator
     query_completion_events = [
@@ -977,6 +1043,12 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     error_events = [
         e for e in aggregator.events if "Extended Events" in e['msg_title'] and "error_reported" in e['msg_text']
     ]
+
+    # Print all events for debugging
+    print(f"Total events in aggregator: {len(aggregator.events)}")
+    print("Event titles:")
+    for event in aggregator.events:
+        print(f"  - {event.get('msg_title')}: {event.get('msg_text', '')[:50]}...")
 
     # We should have at least one query completion event
     assert len(query_completion_events) > 0, "No query completion events collected"
