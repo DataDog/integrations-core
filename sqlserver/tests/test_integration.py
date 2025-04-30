@@ -945,9 +945,18 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Configure instance to enable XE collection with debug mode
     instance = copy(instance_docker)
     instance['debug'] = True  # Enable debug logging
-    instance['xe_collection_config'] = {
-        'query_completions': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
-        'query_errors': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
+    instance['dbm'] = True
+
+    # Make sure the XE config is specific and correct - use 'xe_collection' key
+    instance['xe_collection'] = {
+        'query_completions': {
+            'enabled': True,
+            'collection_interval': 0.1,
+        },
+        'query_errors': {
+            'enabled': True,
+            'collection_interval': 0.1,
+        },
     }
 
     # Set log level to DEBUG to capture all logs
