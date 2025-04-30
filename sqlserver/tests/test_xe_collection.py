@@ -139,6 +139,12 @@ def sample_error_event_xml():
 
 
 @pytest.fixture
+def sample_module_end_event_xml():
+    """Load a sample module end event XML"""
+    return load_xml_fixture('module_end.xml')
+
+
+@pytest.fixture
 def sample_multiple_events_xml():
     """Load a sample with multiple events XML"""
     return load_xml_fixture('multiple_events.xml')
@@ -192,6 +198,33 @@ def error_expected_values():
         'client_app_name': 'go-mssqldb',
         'username': 'shopper_4',
         'message': "'REPEAT' is not a recognized built-in function name.",
+    }
+
+
+@pytest.fixture
+def module_end_expected_values():
+    """Expected values for module end events"""
+    return {
+        'event_name': 'module_end',
+        'timestamp': '2025-04-24T20:56:25.313Z',
+        'duration_ms': 1239.182,  # 1239182 / 1000
+        'session_id': 115,
+        'request_id': 0,
+        'database_name': 'dbmorders',
+        'client_hostname': 'a05c90468fb8',
+        'client_app_name': 'go-mssqldb',
+        'username': 'shopper_4',
+        'statement': 'EXEC SelectAndProcessOrderItem',
+        'sql_text': "/*dddbs='orders-app',ddps='orders-app',ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',dddb='dbmorders',ddprs='orders-sqlserver'*/ EXEC SelectAndProcessOrderItem",
+        # Module-specific fields
+        'object_name': 'SelectAndProcessOrderItem',
+        'object_type': 'P',  # P for stored procedure
+        'row_count': 2,
+        'line_number': 1,
+        'offset': 314,
+        'offset_end': 372,
+        'source_database_id': 9,
+        'object_id': 2002300576,
     }
 
 
@@ -519,6 +552,35 @@ class TestEventProcessing:
         assert 'sql_text' in event
         assert 'SELECT discount_percent' in event['sql_text']
         assert "REPEAT('a', 1000)" in event['sql_text']
+
+    def test_process_events_module_end(
+        self, query_completion_handler, sample_module_end_event_xml, module_end_expected_values
+    ):
+        """Test processing of module end events"""
+        # Wrap the single event in an events tag
+        xml_data = wrap_xml_in_events_tag(sample_module_end_event_xml)
+
+        # Process the events
+        events = query_completion_handler._process_events(xml_data)
+
+        # Verify the event was processed correctly
+        assert len(events) == 1
+        event = events[0]
+
+        # Verify expected values
+        assert_event_field_values(event, module_end_expected_values)
+
+        # Check for event-specific fields
+        assert 'statement' in event
+        assert 'EXEC SelectAndProcessOrderItem' in event['statement']
+        assert 'sql_text' in event
+        assert 'EXEC SelectAndProcessOrderItem' in event['sql_text']
+        assert 'object_name' in event
+        assert event['object_name'] == 'SelectAndProcessOrderItem'
+        assert 'object_type' in event
+        assert event['object_type'] == 'P'  # P for stored procedure
+        assert 'row_count' in event
+        assert int(event['row_count']) == 2
 
     def test_process_events_multiple(self, query_completion_handler, error_events_handler, sample_multiple_events_xml):
         """Test processing of multiple events"""
