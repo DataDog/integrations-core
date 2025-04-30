@@ -3,6 +3,6 @@ set -euo pipefail
 
 set +x
 
-echo "SINGLESTORE_LICENSETEST=$SINGLESTORE_LICENSE" >> "${GITHUB_ENV:-/tmp/gh-output}"
+echo "SINGLESTORE_LICENSE=$SINGLESTORE_LICENSE" >> "${GITHUB_ENV:-/tmp/gh-output}"
 
 set -x

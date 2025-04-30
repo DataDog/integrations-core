@@ -30,6 +30,7 @@ class SinglestoreCheck(AgentCheck):
     SERVICE_CHECK_NAME = "can_connect"
     __NAMESPACE__ = "singlestore"
 
+    # test
     def __init__(self, name, init_config, instances):
         # type: (AnyStr, Dict[AnyStr, Any], List[Dict[AnyStr, Any]]) -> None
         super(SinglestoreCheck, self).__init__(name, init_config, instances)
