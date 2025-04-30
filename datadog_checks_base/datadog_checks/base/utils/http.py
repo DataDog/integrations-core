@@ -534,6 +534,7 @@ class RequestsWrapper(object):
 
     @property
     def session(self):
+        # TODO: modify the session object to use the same context and ciphers for all requests
         if self._session is None:
             self._session = requests.Session()
 
