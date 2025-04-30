@@ -40,7 +40,7 @@
     },
     "monitors": {
       "Many channel swap events detected": "assets/monitors/wlan_excessive_channel_swap.json"
-    },
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
