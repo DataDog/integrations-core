@@ -624,17 +624,14 @@ class TestEventProcessing:
             assert int(event['session_id']) == exp_session
 
     def test_process_events_attention(
-        self, query_completion_handler, sample_attention_event_xml, attention_expected_values
+        self, error_events_handler, sample_attention_event_xml, attention_expected_values
     ):
         """Test processing of attention events"""
         # Wrap the single event in an events tag
         xml_data = wrap_xml_in_events_tag(sample_attention_event_xml)
 
-        # Need to register a handler for attention events since it may not be registered by default
-        query_completion_handler.register_event_handler('attention', query_completion_handler._process_generic_event)
-
         # Process the events
-        events = query_completion_handler._process_events(xml_data)
+        events = error_events_handler._process_events(xml_data)
 
         # Verify the event was processed correctly
         assert len(events) == 1
