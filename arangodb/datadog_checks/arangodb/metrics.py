@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = [
     {
-        # agency metrics
-        'arangodb_agency_cache_callback_numbe': {'name': 'agency.cache.callback'},
+        # agency metrics 
+        'arangodb_agency_cache_callback_number': {'name': 'agency.cache.callback'},
         'arangodb_agency_callback_number': {'name': 'agency.callback'},
         'arangodb_agency_callback_registered': {'name': 'agency.callback.registered'},
         'arangodb_agency_client_lookup_table_size': {'name': 'agency.client.lookup.table_size'},
