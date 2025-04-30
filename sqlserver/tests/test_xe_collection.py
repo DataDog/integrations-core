@@ -898,8 +898,8 @@ def test_xe_session_handlers_creation(init_config, instance_docker_metrics):
 class TestRunJob:
     """Group run job tests together"""
 
-    def test_success(self, query_completion_handler, sample_multiple_events_xml):
-        """Test successful job run"""
+    def test_last_event_timestamp_updates_correctly(self, query_completion_handler, sample_multiple_events_xml):
+        """Test that the handler correctly updates its last event timestamp after processing events"""
         # Create modified XML with specific timestamp
         modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
 
@@ -914,6 +914,35 @@ class TestRunJob:
 
             # Verify the timestamp was updated
             assert query_completion_handler._last_event_timestamp == "2023-01-01T12:02:00.789Z"
+
+    def test_run_job_success_path(self, query_completion_handler, sample_multiple_events_xml):
+        """Test the complete happy path of run_job - session exists, events are queried, processed and submitted"""
+
+        # Mock all necessary methods
+        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
+            query_completion_handler, '_query_ring_buffer', return_value=(sample_multiple_events_xml, 0.1, 0.1)
+        ), patch.object(query_completion_handler, '_submit_event') as mock_submit:
+
+            # Run the job
+            query_completion_handler.run_job()
+
+            # Verify events were processed and submitted
+            call_count = mock_submit.call_count
+            assert call_count > 0, "No events were submitted"
+
+            # Verify the submitted events match what we expect
+            for args, kwargs in mock_submit.call_args_list:
+                event = args[0]
+                assert 'event_name' in event
+                assert 'timestamp' in event
+                # Check for specific event types
+                assert event['event_name'] in [
+                    'sql_batch_completed',
+                    'rpc_completed',
+                    'error_reported',
+                    'module_end',
+                    'attention',
+                ], f"Unexpected event type: {event['event_name']}"
 
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
