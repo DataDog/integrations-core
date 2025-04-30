@@ -117,10 +117,10 @@ files:
         items:
           type: string
         example:
-          - 'user1'
-          - 'user2'
+          - rds_superuser
           - rdsadmin
-          - alloydbadmin
+          - user123
+          - 'dev_%_owner'
         default:
           - rds_superuser
           - rdsadmin
