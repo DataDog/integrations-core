@@ -709,18 +709,15 @@ class XESessionBase(DBMAsyncJob):
                             except Exception as e:
                                 self._log.error(f"Error serializing RQT payload for logging: {e}")
 
-                        # Log that we created an RQT event but are not sending it yet
                         self._log.debug(
-                            f"Created RQT event for query_signature={obfuscated_event.get('query_signature')} (not sending)"
+                            f"Created RQT event for query_signature={obfuscated_event.get('query_signature')}"
                         )
 
-                        # Uncomment to enable sending the RQT event in the future:
-                        # rqt_payload = json.dumps(rqt_event, default=default_json_event_encoding)
-                        # self._check.database_monitoring_query_sample(rqt_payload)
+                        rqt_payload = json.dumps(rqt_event, default=default_json_event_encoding)
+                        self._check.database_monitoring_query_sample(rqt_payload)
 
-                # Uncomment to enable sending the main event in the future:
-                # serialized_payload = json.dumps(payload, default=default_json_event_encoding)
-                # self._check.database_monitoring_query_activity(serialized_payload)
+                serialized_payload = json.dumps(payload, default=default_json_event_encoding)
+                self._check.database_monitoring_query_activity(serialized_payload)
             except Exception as e:
                 self._log.error(f"Error processing event: {e}")
                 continue
