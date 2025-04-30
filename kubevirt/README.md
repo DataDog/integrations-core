@@ -59,6 +59,8 @@ The KubeVirt integration does not include any events at this time.
 
 The KubeVirt integration includes service checks to verify connectivity to each component.
 
+## Troubleshooting
+
 Need help? Contact [Datadog support][9].
 
 [1]: https://docs.datadoghq.com/integrations/kubevirt_api/
