@@ -116,6 +116,8 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._is_aurora = None
+        self._performance_schema_enabled = None
+        self._events_wait_current_enabled = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
         self.add_core_tags()
@@ -128,9 +130,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self.performance_schema_enabled = None
         self.userstat_enabled = None
-        self.events_wait_current_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -216,6 +216,20 @@ class MySql(AgentCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
+    @property
+    def performance_schema_enabled(self):
+        # type: () -> bool
+        if self._performance_schema_enabled is None:
+            self._check_performance_schema_enabled(self._conn)
+        return self._performance_schema_enabled
+
+    @property
+    def events_wait_current_enabled(self):
+        # type: () -> bool
+        if self._events_wait_current_enabled is None:
+            self._check_events_wait_current_enabled(self._conn)
+        return self._events_wait_current_enabled
+
     def add_core_tags(self):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
@@ -283,9 +297,9 @@ class MySql(AgentCheck):
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
             results = dict(cursor.fetchall())
-            self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+            self._performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
 
-        return self.performance_schema_enabled
+        return self._performance_schema_enabled
 
     def check_userstat_enabled(self, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -299,11 +313,11 @@ class MySql(AgentCheck):
         if not self._config.dbm_enabled or not self._config.activity_config.get("enabled", True):
             self.log.debug("skipping _check_events_wait_current_enabled because dbm activity collection is not enabled")
             return
-        if not self._check_performance_schema_enabled(db):
+        if not self.performance_schema_enabled:
             # set events_wait_current_enabled to False if performance_schema is not enabled
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
-            self.events_wait_current_enabled = False
-            return self.events_wait_current_enabled
+            self._events_wait_current_enabled = False
+            return self._events_wait_current_enabled
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(
                 """\
@@ -317,11 +331,11 @@ class MySql(AgentCheck):
             events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
             self.log.debug(
                 '`events_wait_current_enabled` was %s. Setting it to %s',
-                self.events_wait_current_enabled,
+                self._events_wait_current_enabled,
                 events_wait_current_enabled,
             )
-            self.events_wait_current_enabled = events_wait_current_enabled
-        return self.events_wait_current_enabled
+            self._events_wait_current_enabled = events_wait_current_enabled
+        return self._events_wait_current_enabled
 
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
