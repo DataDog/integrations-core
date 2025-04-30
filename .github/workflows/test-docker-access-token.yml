@@ -1,0 +1,25 @@
+name: Docker Push Test
+
+on:
+  pull_request:
+    paths-ignore:
+    - datadog_checks_base/datadog_checks/**
+    - datadog_checks_dev/datadog_checks/dev/*.py
+
+jobs:
+  push-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (optional for this test)
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Build test image
+        run: |
+          echo -e "FROM alpine\nCMD echo Hello World" > Dockerfile
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-image:testpush .
+
+      - name: Push test image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/test-image:testpush
