@@ -147,10 +147,12 @@ jobs:
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
+      permissions:
+        id-token: write
       if: >
         !github.event.repository.private &&
         always()
-      uses: codecov/codecov-action@v5.4.0
+      uses: codecov/codecov-action@v5.4.2
       with:
         use_oidc: true
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
