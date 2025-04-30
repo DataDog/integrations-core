@@ -972,11 +972,6 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     except:
         pass  # We expect this to fail
 
-    # Wait a bit to ensure events are properly captured
-    import time
-
-    time.sleep(1)
-
     # Run check again to collect the events
     dd_run_check(check)
 
@@ -1017,7 +1012,7 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             assert 'duration_ms' in query_details, "Duration not found in event"
             # The duration should be at least 2000ms (2 seconds)
             duration = float(query_details.get('duration_ms', 0))
-            assert duration >= 1900, f"Expected duration >= 1900ms, but got {duration}ms"
+            assert duration >= 2000, f"Expected duration >= 2000ms, but got {duration}ms"
 
     assert found_test_query, "Could not find our specific test query in the completion events"
 
