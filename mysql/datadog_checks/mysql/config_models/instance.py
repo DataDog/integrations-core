@@ -126,7 +126,6 @@ class Options(BaseModel):
     galera_cluster: Optional[bool] = None
     replication: Optional[bool] = None
     replication_channel: Optional[str] = None
-    replication_non_blocking_status: Optional[bool] = None
     schema_size_metrics: Optional[bool] = None
     system_table_size_metrics: Optional[bool] = None
     table_rows_stats_metrics: Optional[bool] = None

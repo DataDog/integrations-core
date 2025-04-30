@@ -731,8 +731,7 @@ class MySql(AgentCheck):
         # Get replica stats
         replication_channel = self._config.options.get('replication_channel')
         results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
-        nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
-        results.update(self._get_replica_status(db, above_560, nonblocking))
+        results.update(self._get_replica_status(db, above_560))
         return REPLICA_VARS
 
     def _collect_group_replica_metrics(self, db, results):
@@ -1186,7 +1185,7 @@ class MySql(AgentCheck):
 
         return replica_results
 
-    def _get_replica_status(self, db, above_560, nonblocking):
+    def _get_replica_status(self, db, above_560):
         """
         Retrieve the replicas statuses using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
@@ -1194,7 +1193,7 @@ class MySql(AgentCheck):
         """
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
-                if above_560 and nonblocking:
+                if above_560 and self.performance_schema_enabled:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
                     cursor.execute(SQL_REPLICA_WORKER_THREADS)
