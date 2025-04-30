@@ -964,58 +964,40 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         bob_conn.execute_with_retries(error_query)
     except:
         pass  # We expect this to fail
+
+    # Wait a bit to ensure events are properly captured
     import time
-    time.sleep(5)
+
+    time.sleep(1)
+
+    # Run check again to collect the events
     dd_run_check(check)
-    # Add debugging to see what's in the XE sessions
-    with bob_conn.conn.cursor() as cursor:
-        # Check query completions session
-        cursor.execute(
-            """
-        SELECT target_data
-        FROM sys.dm_xe_session_targets xst
-        JOIN sys.dm_xe_sessions xs ON xs.address = xst.event_session_address
-        WHERE xs.name = 'datadog_query_completions' AND xst.target_name = 'ring_buffer';
-        """
-        )
-        completions_data = cursor.fetchone()
-        if completions_data:
-            print(f"Query completions ring buffer has data: {len(completions_data[0])} bytes")
-            # Print a sample if there's data
-            if len(completions_data[0]) > 100:
-                print(f"Sample: {completions_data[0]}...")
-        else:
-            print("No data found in query completions ring buffer")
 
-        # Check error session
-        cursor.execute(
-            """
-        SELECT target_data
-        FROM sys.dm_xe_session_targets xst
-        JOIN sys.dm_xe_sessions xs ON xs.address = xst.event_session_address
-        WHERE xs.name = 'datadog_query_errors' AND xst.target_name = 'ring_buffer';
-        """
-        )
-        errors_data = cursor.fetchone()
-        if errors_data:
-            print(f"Query errors ring buffer has data: {len(errors_data[0])} bytes")
-        else:
-            print("No data found in query errors ring buffer")
+    # Get events using the platform events API instead of directly checking aggregator.events
+    # This follows the pattern used in test_activity.py
+    dbm_events = aggregator.get_event_platform_events("dbm-monitoring")
+    print(f"Total platform events collected: {len(dbm_events)}")
 
-    # Verify that events were collected through aggregator
+    # Filter completion events
     query_completion_events = [
-        e for e in aggregator.events if "Extended Events" in e['msg_title'] and "sql_batch_completed" in e['msg_text']
+        e
+        for e in dbm_events
+        if e.get('dbm_type') == 'query_completion' and 'datadog_query_completions' in str(e.get('event_source', ''))
     ]
 
+    # Filter error events
     error_events = [
-        e for e in aggregator.events if "Extended Events" in e['msg_title'] and "error_reported" in e['msg_text']
+        e
+        for e in dbm_events
+        if e.get('dbm_type') == 'query_error' and 'datadog_query_errors' in str(e.get('event_source', ''))
     ]
 
-    # Print all events for debugging
-    print(f"Total events in aggregator: {len(aggregator.events)}")
-    print("Event titles:")
-    for event in aggregator.events:
-        print(f"  - {event.get('msg_title')}: {event.get('msg_text', '')[:50]}...")
+    print(f"Query completion events found: {len(query_completion_events)}")
+    print(f"Error events found: {len(error_events)}")
+
+    # Print event types for debugging
+    for evt in dbm_events:
+        print(f"Event type: {evt.get('dbm_type')}, source: {evt.get('event_source')}")
 
     # We should have at least one query completion event
     assert len(query_completion_events) > 0, "No query completion events collected"
@@ -1023,37 +1005,36 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # We should have at least one error event
     assert len(error_events) > 0, "No error events collected"
 
-    # Check for specific tags in events
-    for event in query_completion_events:
-        assert 'source:sqlserver' in event['tags']
-        assert 'event_source:datadog_query_completions' in event['tags']
-
-    for event in error_events:
-        assert 'source:sqlserver' in event['tags']
-        assert 'event_source:datadog_query_errors' in event['tags']
-
     # Verify specific query completion event details
     found_test_query = False
     for event in query_completion_events:
-        if "WAITFOR DELAY" in event['msg_text'] and "SELECT 1" in event['msg_text']:
+        # Look at query_details field which contains the XE event info
+        query_details = event.get('query_details', {})
+        sql_text = query_details.get('sql_text', '')
+
+        if "WAITFOR DELAY" in sql_text and "SELECT 1" in sql_text:
             found_test_query = True
             # Check for expected properties
-            assert "bob" in event['msg_text'], "Username 'bob' not found in event"
-            assert "duration_ms" in event['msg_text'], "Duration not found in event"
+            assert "bob" in query_details.get('username', ''), "Username 'bob' not found in event"
+            assert 'duration_ms' in query_details, "Duration not found in event"
             # The duration should be at least 2000ms (2 seconds)
-            duration_text = re.search(r'duration_ms["\s:]+([0-9.]+)', event['msg_text'])
-            if duration_text:
-                duration = float(duration_text.group(1))
-                assert duration >= 1900, f"Expected duration >= 2000ms, but got {duration}ms"
+            duration = float(query_details.get('duration_ms', 0))
+            assert duration >= 1900, f"Expected duration >= 1900ms, but got {duration}ms"
+
     assert found_test_query, "Could not find our specific test query in the completion events"
 
     # Verify specific error event details
     found_error_query = False
     for event in error_events:
-        if "SELECT 1/0" in event['msg_text']:
+        # Look at query_details field which contains the XE event info
+        query_details = event.get('query_details', {})
+        sql_text = query_details.get('sql_text', '')
+
+        if "SELECT 1/0" in sql_text:
             found_error_query = True
             # Check for expected properties
-            assert "bob" in event['msg_text'], "Username 'bob' not found in error event"
-            assert "Divide by zero" in event['msg_text'], "Expected error message not found"
-            assert "error_number: 8134" in event['msg_text'], "Expected error number 8134 not found"
+            assert "bob" in query_details.get('username', ''), "Username 'bob' not found in error event"
+            assert "Divide by zero" in query_details.get('message', ''), "Expected error message not found"
+            assert query_details.get('error_number') == 8134, "Expected error number 8134 not found"
+
     assert found_error_query, "Could not find our specific error query in the error events"
