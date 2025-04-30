@@ -474,9 +474,8 @@ class PostgresMetadata(DBMAsyncJob):
 
         if len(self._config.ignore_schemas_owned_by) > 0:
             schema_query_ = schema_query_.format(
-                " AND " + " AND ".join(
-                    "r.rolname not ilike '{}'".format(db) for db in self._config.ignore_schemas_owned_by
-                )
+                " AND "
+                + " AND ".join("r.rolname not ilike '{}'".format(db) for db in self._config.ignore_schemas_owned_by)
             )
         else:
             schema_query_ = schema_query_.format("")

@@ -22,10 +22,7 @@ DEFAULT_IGNORE_DATABASES = [
     'postgres',
 ]
 
-DEFAULT_IGNORED_SCHEMAS_OWNED_BY = [
-    'rdsadmin',
-    'rds_superuser'
-]
+DEFAULT_IGNORED_SCHEMAS_OWNED_BY = ['rdsadmin', 'rds_superuser']
 
 
 class PostgresConfig:

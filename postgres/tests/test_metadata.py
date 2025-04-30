@@ -59,7 +59,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     [
         pytest.param(True, id="default_ignore_schemas_owned_by"),
         pytest.param(False, id="custom_ignore_schemas_owned_by"),
-    ]
+    ],
 )
 def test_collect_schemas(integration_check, dbm_instance, aggregator, use_default_ignore_schemas_owned_by):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600}
