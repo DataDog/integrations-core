@@ -26,9 +26,7 @@
       "auto_install": true,
       "source_type_id": 46027487,
       "source_type_name": "kubevirt",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
+      "configuration": {},
       "events": {
         "creates_events": false
       },
