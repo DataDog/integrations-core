@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2022-present
-# All rights reserved 
+# All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = [
     {
-        # agency metrics
+        # agency
         'arangodb_agency_cache_callback_number': {'name': 'agency.cache.callback'},
         'arangodb_agency_callback_number': {'name': 'agency.callback'},
         'arangodb_agency_callback_registered': {'name': 'agency.callback.registered'},
