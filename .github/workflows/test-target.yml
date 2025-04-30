@@ -195,7 +195,7 @@ jobs:
             "DOCKER_USERNAME": "{0}",
             "DOCKER_ACCESS_TOKEN": "{1}",
             "ORACLE_DOCKER_USERNAME": "{2}",
-            "ORACLE_DOCKER_PASSWORD_2": "{3}",
+            "ORACLE_DOCKER_PASSWORD": "{3}",
             "SINGLESTORE_LICENSE": "{4}",
             "DD_GITHUB_USER": "{5}",
             "DD_GITHUB_TOKEN": "{6}"
