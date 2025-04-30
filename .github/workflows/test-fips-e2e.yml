@@ -152,6 +152,5 @@ jobs:
         always()
       uses: codecov/codecov-action@v5.4.1
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
         flags: "${{ inputs.target || 'tls' }}"
