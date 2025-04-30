@@ -31,7 +31,7 @@ def dd_environment():
     # if not license_key:
     #   raise Exception("Please set SINGLESTORE_LICENSE environment variable to a valid base64-encoded license.")
 
-    with docker_run(compose_file, env_vars={'LICENSE_KEY': ''}, log_patterns=r'Listening on 0\.0\.0\.0'):
+    with docker_run(compose_file, env_vars={'LICENSE_KEY': 'test'}, log_patterns=r'Listening on 0\.0\.0\.0'):
         yield {
             'host': get_docker_hostname(),
             'username': 'root',
