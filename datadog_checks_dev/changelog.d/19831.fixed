@@ -1,3 +1,0 @@
-Soft deprecation of service check submission:
-- remove them from integration scaffolding templates
-- add a warning to the method docstring
