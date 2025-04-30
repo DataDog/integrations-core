@@ -370,7 +370,7 @@
                                 ],
                                 "isVisible": true,
                                 "size": "sm",
-                                "title": "Pipeline cancled"
+                                "title": "Pipeline canceled"
                             },
                             "type": "modal"
                         },
