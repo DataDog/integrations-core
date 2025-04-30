@@ -27,7 +27,7 @@ def _mock_execute(query):
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    license_key = os.environ.get('SINGLESTORE_LICENSE')
+    license_key = os.environ.get('SINGLESTORE_LICENSETEST')
     if not license_key:
         raise Exception("Please set SINGLESTORE_LICENSE environment variable to a valid base64-encoded license.")
 
