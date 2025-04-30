@@ -259,7 +259,7 @@ jobs:
     - name: Run E2E tests with latest base package
       if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -297,7 +297,7 @@ jobs:
     - name: Run E2E tests
       if: inputs.standard && inputs.repo != 'core'
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -343,7 +343,7 @@ jobs:
     - name: Run E2E tests for the latest version
       if: inputs.latest
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided

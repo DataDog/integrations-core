@@ -18,7 +18,7 @@ jobs:
         ports:
         - "8126:8126"
         env:
-          DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+          DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
           DD_HOSTNAME: "none"
           DD_INSIDE_CI: "true"
           DD_LOG_LEVEL: "warn"
