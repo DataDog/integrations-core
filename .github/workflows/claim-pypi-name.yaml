@@ -46,4 +46,4 @@ jobs:
         # Only uploading the missing wheels makes this job idempotent and reduces its complexity.
         skip-existing: true
         user: __token__
-        password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}
+        password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM_2 }}
