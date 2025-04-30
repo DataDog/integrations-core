@@ -33,9 +33,11 @@
       "metadata_path": "metadata.csv"
     },
     "dashboards": {
-        "wi-fi-overview: Wi-Fi Overview": "assets/dashboards/wlan_overview.json"
+        "Wi-Fi Overview": "assets/dashboards/wlan_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "Many channel swap events detected": "assets/monitors/wlan_excessive_channel_swap.json"
+    },
     "saved_views": {}
   },
   "author": {
