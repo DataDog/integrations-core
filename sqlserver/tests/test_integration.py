@@ -946,12 +946,12 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     instance = copy(instance_docker)
     instance['xe_collection_config'] = {
         'query_completions': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
-        'query_errors': {'enabled': True, 'collection_interval': 0.1},  # Use small interval for test reliability
+        'query_errors': {'enabled': True, 'collection_interval': 0.1},
     }
 
     check = SQLServer(CHECK_NAME, {}, [instance])
 
-    # Run check once to initialize sessions if needed
+    # Run check once to initialize sessions
     dd_run_check(check)
 
     # Execute a query that will be captured (long enough to exceed the threshold)
@@ -964,7 +964,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
         bob_conn.execute_with_retries(error_query)
     except:
         pass  # We expect this to fail
-
+    import time
+    time.sleep(0.2)
     # Run check again to collect the events
     dd_run_check(check)
 
