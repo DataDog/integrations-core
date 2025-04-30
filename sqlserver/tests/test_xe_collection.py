@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import datetime
+import json
 import os
 import sys
 from io import BytesIO
@@ -921,7 +922,7 @@ class TestRunJob:
         # Mock all necessary methods
         with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
             query_completion_handler, '_query_ring_buffer', return_value=(sample_multiple_events_xml, 0.1, 0.1)
-        ), patch.object(query_completion_handler, '_submit_event') as mock_submit:
+        ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit:
 
             # Run the job
             query_completion_handler.run_job()
@@ -930,19 +931,20 @@ class TestRunJob:
             call_count = mock_submit.call_count
             assert call_count > 0, "No events were submitted"
 
-            # Verify the submitted events match what we expect
-            for args, kwargs in mock_submit.call_args_list:
-                event = args[0]
-                assert 'event_name' in event
-                assert 'timestamp' in event
-                # Check for specific event types
-                assert event['event_name'] in [
-                    'sql_batch_completed',
-                    'rpc_completed',
-                    'error_reported',
-                    'module_end',
-                    'attention',
-                ], f"Unexpected event type: {event['event_name']}"
+            # Verify the payloads have the expected structure
+            for call_args in mock_submit.call_args_list:
+                # Extract the serialized payload from the call
+                serialized_payload = call_args[0][0]
+
+                # Deserialize to verify content
+                payload = json.loads(serialized_payload)
+
+                # Check essential payload properties
+                assert 'ddsource' in payload, "Missing 'ddsource' in payload"
+                assert payload['ddsource'] == 'sqlserver', "Incorrect ddsource value"
+                assert 'dbm_type' in payload, "Missing 'dbm_type' in payload"
+                assert 'query_details' in payload, "Missing 'query_details' in payload"
+                assert 'timestamp' in payload, "Missing 'timestamp' in payload"
 
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
