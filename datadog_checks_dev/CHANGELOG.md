@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Fix `ddev validate dep` command to support deps with git urls ([#19743](https://github.com/DataDog/integrations-core/pull/19743))
+* Fix `ddev validate dep` command to support dependencies with Git urls ([#19743](https://github.com/DataDog/integrations-core/pull/19743))
 * Soft deprecation of service check submission:
   - remove them from integration scaffolding templates
   - add a warning to the method docstring ([#19831](https://github.com/DataDog/integrations-core/pull/19831))
