@@ -110,10 +110,10 @@ instances:
     ## Each value can be a plain string or a Postgres pattern.
     #
     # ignore_schemas_owned_by:
-    #   - user1
-    #   - user2
+    #   - rds_superuser
     #   - rdsadmin
-    #   - alloydbadmin
+    #   - user123
+    #   - dev_%_owner
 
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
