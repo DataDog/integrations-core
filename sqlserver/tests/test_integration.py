@@ -958,8 +958,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     with bob_conn.conn.cursor() as cursor:
         cursor.execute(
             """
-        SELECT name, create_time, start_time, suspended 
-        FROM sys.dm_xe_sessions 
+        SELECT name, create_time
+        FROM sys.dm_xe_sessions
         WHERE name IN ('datadog_query_completions', 'datadog_query_errors');
         """
         )
