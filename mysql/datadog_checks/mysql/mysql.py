@@ -69,14 +69,14 @@ from .queries import (
     SQL_GROUP_REPLICATION_METRICS_8_0_2,
     SQL_GROUP_REPLICATION_PLUGIN_STATUS,
     SQL_INNODB_ENGINES,
-    SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
     SQL_QUERY_SYSTEM_TABLE_SIZE,
     SQL_QUERY_TABLE_ROWS_STATS,
     SQL_QUERY_TABLE_SIZE,
+    SQL_REPLICA_PROCESS_LIST,
+    SQL_REPLICA_WORKER_THREADS,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
-    SQL_WORKER_THREADS,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -1183,9 +1183,9 @@ class MySql(AgentCheck):
                 if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
-                    cursor.execute(SQL_WORKER_THREADS)
+                    cursor.execute(SQL_REPLICA_WORKER_THREADS)
                 else:
-                    cursor.execute(SQL_PROCESS_LIST)
+                    cursor.execute(SQL_REPLICA_PROCESS_LIST)
                 replica_results = cursor.fetchall()
                 replicas = 0
                 for _ in replica_results:
