@@ -21,7 +21,7 @@ class TrafficServerCheck(AgentCheck):
         self.traffic_server_url = self.instance.get("traffic_server_url")
         if self.traffic_server_url is None:
             raise ConfigurationError('Must specify a traffic_server_url')
-
+        print("Traffic Server URL: {}".format(self.traffic_server_url))
         self.tags = self.instance.get("tags", [])
         self.tags.append("traffic_server_url:{}".format(self.traffic_server_url))
 
