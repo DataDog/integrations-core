@@ -204,7 +204,7 @@ jobs:
           secrets.DOCKER_ACCESS_TOKEN_2,
           secrets.ORACLE_DOCKER_USERNAME,
           secrets.ORACLE_DOCKER_PASSWORD_2,
-          secrets.SINGLESTORE_LICENSE,
+          secrets.SINGLESTORE_LICENSE_2,
           github.actor,
           secrets.GITHUB_TOKEN
         ))}}
