@@ -27,7 +27,7 @@ def _mock_execute(query):
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    with docker_run(compose_file):
+    with docker_run(compose_file, sleep=30):
         yield {
             'host': get_docker_hostname(),
             'username': 'root',
