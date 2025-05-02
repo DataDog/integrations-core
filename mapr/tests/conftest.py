@@ -27,7 +27,7 @@ E2E_METADATA = {
         "https://packages.confluent.io/clients/deb $(lsb_release -cs) main\" "
         "> /etc/apt/sources.list.d/confluent.list'",
         'apt-get update',
-        'apt-get install -y librdkafka-dev',
+        'apt-get install -y librdkafka-dev=2.6.0',
         # Finally, we can install the package
         '/opt/datadog-agent/embedded/bin/pip install mapr-streams-python',
     ]
