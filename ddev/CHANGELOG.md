@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 11.4.0 / 2025-05-02
+
+***Added***:
+
+* Add ZillizCloud requested metric units ([#20195](https://github.com/DataDog/integrations-core/pull/20195))
+
 ## 11.3.0 / 2025-04-30
 
 ***Added***:
