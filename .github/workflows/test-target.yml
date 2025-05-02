@@ -114,6 +114,9 @@ jobs:
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
 
+    # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+    permissions:
+        id-token: write
     steps:
 
     - name: Set environment variables with sanitized paths
@@ -412,8 +415,8 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        use_oidc: true
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"
