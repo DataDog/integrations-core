@@ -19,15 +19,15 @@ tests:
         resrc: "port"
         tcontext: "system_u:object_r:mysqld_port_t:s0"
         terminal: "?"
-      msg_raw: "'resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=? res=success'"
+      msg_raw: ""
       network:
         client:
           geoip:
             invalidAddress: "?"
           ip: "?"
       pid: 381980
-      post_msg_kv: "UID=\"root\" AUID=\"root\""
-      pre_msg_kv: "pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
+      post_msg_kv: ""
+      pre_msg_kv: ""
       ses: 138
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
@@ -60,14 +60,14 @@ tests:
          - "PAM:authentication"
         res: "success"
         terminal: "ssh"
-      msg_raw: "'op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'"
+      msg_raw: ""
       network:
         client:
           geoip: {}
           ip: "10.10.10.10"
       pid: 155615
-      post_msg_kv: "UID=\"root\" AUID=\"unset\""
-      pre_msg_kv: "pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023"
+      post_msg_kv: ""
+      pre_msg_kv: ""
       ses: 4294967295
       status: "ok"
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
@@ -91,9 +91,11 @@ tests:
       lsm: "selinux"
       msg:
         res: "success"
+      msg_raw: ""
       old-enabled: 1
       old_enforcing: 1
-      post_msg_kv: "enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
+      post_msg_kv: ""
+      pre_msg_kv: ""
       res: 1
       ses: 36
       status: "ok"
@@ -115,12 +117,14 @@ tests:
       dev: "proc"
       event_id: 182
       ino: 1
+      msg_raw: ""
       name: "/"
       operation: "getattr"
       outcome: "DENIED"
       permissive: 0
       pid: 16660
-      post_msg_kv: "avc:  denied  { getattr } for  pid=16660 comm=\"groupadd\" name=\"/\" dev=\"proc\" ino=1 scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023 tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0"
+      post_msg_kv: ""
+      pre_msg_kv: ""
       scontext: "unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023"
       tclass: "filesystem"
       tcontext: "system_u:object_r:proc_t:s0"
@@ -144,15 +148,15 @@ tests:
         hostname: "?"
         sauid: 0
         terminal: "?"
-      msg_raw: "'Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=? addr=? terminal=?'"
+      msg_raw: ""
       network:
         client:
           geoip:
             invalidAddress: "?"
           ip: "?"
       pid: 1
-      post_msg_kv: "UID=\"root\" AUID=\"unset\" SAUID=\"root\""
-      pre_msg_kv: "pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0"
+      post_msg_kv: ""
+      pre_msg_kv: ""
       ses: 4294967295
       subj: "system_u:system_r:init_t:s0"
       timestamp: 1.669714331555E12
@@ -178,14 +182,14 @@ tests:
         res: "success"
         selected-context: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
         terminal: "ssh"
-      msg_raw: "'pam: default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'"
+      msg_raw: ""
       network:
         client:
           geoip: {}
           ip: "10.10.10.10"
       pid: 60958
-      post_msg_kv: "UID=\"root\" AUID=\"devuser\""
-      pre_msg_kv: "pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023"
+      post_msg_kv: ""
+      pre_msg_kv: ""
       ses: 64
       status: "ok"
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
@@ -206,9 +210,10 @@ tests:
       event_id: 121
       linux_audit_logs:
         bool: "virt_use_nfs"
+      msg_raw: ""
       old_val: 0
-      post_msg_kv: "AUID=\"serviceuser\""
-      pre_msg_kv: "bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1"
+      post_msg_kv: ""
+      pre_msg_kv: ""
       ses: 1
       timestamp: 1.678360880644E12
       type: "MAC_CONFIG_CHANGE"
@@ -222,4 +227,39 @@ tests:
     timestamp: 1678360880644
  -
   sample: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=? terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
-  result: null
+  result:
+    custom:
+      AUID: "serviceuser"
+      ID: "demo"
+      auid: 1001
+      event_id: 5766
+      msg:
+        exe: "/usr/sbin/groupadd"
+        hostname: "ub10-10-10-10"
+        id: 1004
+        op:
+         - "adding group to /etc/group"
+        res: "success"
+        terminal: "pts/3"
+      msg_raw: ""
+      network:
+        client:
+          geoip:
+            invalidAddress: "?"
+          ip: "?"
+      pid: 12258
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      ses: 535
+      status: "ok"
+      subj: "unconfined"
+      timestamp: 1.740980591704E12
+      type: "ADD_GROUP"
+      usr:
+        id: 0
+        name: "root"
+    message: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=? terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740980591704
