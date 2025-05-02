@@ -290,8 +290,8 @@ jobs:
       uses: actions/create-github-app-token@v1
       id: token-generator
       with:
-        app-id: ${{ vars.DD_GITHUB_TOKEN_GENERATOR_APP_ID }}
-        private-key: ${{ secrets.DD_GITHUB_TOKEN_GENERATOR_PRIVATE_KEY }}
+        app-id: ${{ vars.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
         repositories: integrations-core
 
     - name: Create pull request
@@ -303,7 +303,7 @@ jobs:
         branch: bot/update-dependency-resolution
         branch-suffix: timestamp
         delete-branch: true
-        labels: bot,qa/skip-qa
+        labels: bot,qa/skip-qa,bot/resolve-build-deps
         body: |-
           ### Motivation
 
