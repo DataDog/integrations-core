@@ -417,3 +417,6 @@ jobs:
         use_oidc: true
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"
+
+      permissions:
+        id-token: write
