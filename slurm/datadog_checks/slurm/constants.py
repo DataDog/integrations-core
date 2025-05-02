@@ -5,11 +5,11 @@ SINFO_PARTITION_PARAMS = [
     "-ahO",
     "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:",
 ]
-GPU_PARAMS = "|,Gres:|,GresUsed:"
 SINFO_NODE_PARAMS = ["-haNO", "PartitionName:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
-SSHARE_PARAMS = ["-alnPU"]
+GPU_PARAMS = "|,Gres:|,GresUsed:"
 SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
+SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
     "-anpo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
