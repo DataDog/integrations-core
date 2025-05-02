@@ -93,7 +93,7 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
         DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN_2 }}
         ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
-        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD_2 }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
         SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE_2 }}
         DD_GITHUB_USER: ${{ github.actor }}
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
