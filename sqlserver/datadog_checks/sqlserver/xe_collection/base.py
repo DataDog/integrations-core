@@ -575,6 +575,7 @@ class XESessionBase(DBMAsyncJob):
 
         return {
             "host": self._check.resolved_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": self._determine_dbm_type(),
@@ -885,6 +886,7 @@ class XESessionBase(DBMAsyncJob):
         return {
             "timestamp": time() * 1000,
             "host": self._check.resolved_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "rqt",

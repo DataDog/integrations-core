@@ -218,9 +218,9 @@ def module_end_expected_values():
         'client_app_name': 'go-mssqldb',
         'username': 'shopper_4',
         'statement': 'EXEC SelectAndProcessOrderItem',
-        'sql_text': "/*dddbs='orders-app',ddps='orders-app'," + 
-                    "ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com'," + 
-                    "dddb='dbmorders',ddprs='orders-sqlserver'*/ EXEC SelectAndProcessOrderItem",
+        'sql_text': "/*dddbs='orders-app',ddps='orders-app',"
+        + "ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',"
+        + "dddb='dbmorders',ddprs='orders-sqlserver'*/ EXEC SelectAndProcessOrderItem",
         # Module-specific fields
         'object_name': 'SelectAndProcessOrderItem',
         'object_type': 'P',  # P for stored procedure
