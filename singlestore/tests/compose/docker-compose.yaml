@@ -4,7 +4,7 @@ services:
     ports:
       - 3306:3306
       - 8080:8080
-
+    # follow these steps if running on m1: https://github.com/singlestore-labs/singlestoredb-dev-image?tab=readme-ov-file#how-to-run-the-docker-image-on-apple-silicon-m1m2-chips
     platform: linux/amd64
     environment:
       ROOT_PASSWORD: 'password'
