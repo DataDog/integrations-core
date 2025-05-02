@@ -68,6 +68,7 @@ def test_parse_connection_string_properties(cs, parsed):
         pytest.param('host=A;Trusted_Connection=true', "bob", "password123", True),
         pytest.param('host=A;Trusted_Connection=true', None, None, False),
         pytest.param('host=A;', "bob", "password123", False),
+        pytest.param('host=A;', "dne", "pwd124", False),
     ],
 )
 def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, username, password, expect_warning):
