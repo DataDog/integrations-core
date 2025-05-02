@@ -98,7 +98,6 @@ jobs:
         DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
         ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
         ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
-        SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
         DD_GITHUB_USER: ${{ github.actor }}
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: ddev ci setup ${{ inputs.target || 'tls' }}
