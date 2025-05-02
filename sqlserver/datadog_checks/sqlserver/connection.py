@@ -638,7 +638,16 @@ class Connection(object):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
-            conn_str += 'PWD={};'.format(password)
+            escaped_password = password
+            escaped_password = password.replace(
+                '{', '{{'
+            ).replace(
+                '}', '}}'
+            ).replace(
+                '"', '""'
+            ) 
+            conn_str += 'PWD="{}";'.format(escaped_password)
+
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
