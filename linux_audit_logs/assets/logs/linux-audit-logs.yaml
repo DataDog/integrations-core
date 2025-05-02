@@ -129,6 +129,8 @@ pipeline:
           tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\"
           exe=\"/usr/libexec/platform-python3.6\" hostname=? addr=? terminal=?
           res=success'"
+        - "'op=adding group acct=\"demo\" exe=\"/usr/sbin/useradd\"
+          hostname=ub10-10-10-10 addr=? terminal=pts/3 res=success'"
       grok:
         supportRules: ""
         matchRules: parse_msg_raw_rule '%{data:msg:keyvalue("=",":?/\"|*<>, ")}'
@@ -143,7 +145,7 @@ pipeline:
           pid=838 comm="rsyslogd" capability=12  capname="net_admin"
       grok:
         supportRules: >-
-          extract_kv_pair %{data::keyvalue("=",":?/\"|*<>, ")}
+          extract_kv_pair %{data::keyvalue("=",":?/\"|*<>,")}
 
           extract_UID_or_OUID_or_FSUID_or_SAUID_SUID (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}"|SAUID="%{regex("[^\"]*"):SAUID}"|SUID="%{regex("[^\"]*"):SUID}")
 
@@ -174,9 +176,9 @@ pipeline:
             supportRules: _space \s*
             matchRules: user_selinux_err_rule
               '%{data:error}%{_space}exe="%{regex("[^\"]+"):exe}"
-              %{data:msg:keyvalue("=",":?/\"|*<>, ")}'
+              %{data:msg:keyvalue("=",":?/\"|*<>,")}'
     - type: pipeline
-      name: Parsing User Role Change  logs
+      name: Parsing User Role Change logs
       enabled: true
       filter:
         query: "@type:USER_ROLE_CHANGE"
@@ -195,10 +197,9 @@ pipeline:
           grok:
             supportRules: _space \s*
             matchRules: user_role_change_rule
-              '(%{regex("[^:]*"):})?:%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,
-              ")}'
+              '(%{regex("[^:]*"):})?:%{_space}%{data:msg:keyvalue("=",":?/\"|*<>,")}'
     - type: pipeline
-      name: Parsing AVC  logs
+      name: Parsing AVC logs
       enabled: true
       filter:
         query: "@type:AVC"
@@ -355,6 +356,24 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+    - type: string-builder-processor
+      name: Reset `pre_msg_kv` attribute
+      enabled: true
+      template: "%{resolve_to_empty_string}"
+      target: pre_msg_kv
+      replaceMissing: true
+    - type: string-builder-processor
+      name: Reset `msg_raw` attribute
+      enabled: true
+      template: "%{resolve_to_empty_string}"
+      target: msg_raw
+      replaceMissing: true
+    - type: string-builder-processor
+      name: Reset `post_msg_kv` attribute
+      enabled: true
+      template: "%{resolve_to_empty_string}"
+      target: post_msg_kv
+      replaceMissing: true
     - name: Lookup on `res` to `msg.res` Field
       enabled: true
       source: res

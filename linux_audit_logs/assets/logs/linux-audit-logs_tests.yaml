@@ -220,3 +220,6 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1678360880644
+ -
+  sample: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=? terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
+  result: null
