@@ -92,6 +92,8 @@ integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
 - boundary/**/*
+integration/box:
+- box/**/*
 integration/brevo:
 - brevo/**/*
 integration/btrfs:
