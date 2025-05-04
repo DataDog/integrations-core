@@ -1,0 +1,69 @@
+otel,dd,description,filter
+mysql.buffer_pool.data_pages,mysql.innodb.buffer_pool_pages_data,The number of data pages in the InnoDB buffer pool.,
+mysql.buffer_pool.data_pages,mysql.innodb.buffer_pool_pages_dirty,The number of data pages in the InnoDB buffer pool.,`status`: `dirty`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_read_ahead_rnd,The number of operations on the InnoDB buffer pool.,`operation`: `read_ahead_rnd`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_write_requests,The number of operations on the InnoDB buffer pool.,`operation`: `write_requests`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_read_ahead,The number of operations on the InnoDB buffer pool.,`operation`: `read_ahead`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_read_ahead_evicted,The number of operations on the InnoDB buffer pool.,`operation`: `read_ahead_evicted`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_wait_free,The number of operations on the InnoDB buffer pool.,`operation`: `wait_free`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_read_requests,The number of operations on the InnoDB buffer pool.,`operation`: `read_requests`
+mysql.buffer_pool.operations,mysql.innodb.buffer_pool_reads,The number of operations on the InnoDB buffer pool.,`operation`: `reads`
+mysql.buffer_pool.page_flushes,mysql.innodb.buffer_pool_pages_flushed,The number of requests to flush pages from the InnoDB buffer pool.,
+mysql.buffer_pool.pages,mysql.innodb.buffer_pool_pages_free,The number of pages in the InnoDB buffer pool.,`kind`: `free`
+mysql.buffer_pool.pages,mysql.innodb.buffer_pool_pages_total,The number of pages in the InnoDB buffer pool.,
+mysql.buffer_pool.usage,mysql.innodb.buffer_pool_data,The number of bytes in the InnoDB buffer pool.,
+mysql.buffer_pool.usage,mysql.innodb.buffer_pool_dirty,The number of bytes in the InnoDB buffer pool.,`status`: `dirty`
+mysql.client.network.io,mysql.performance.bytes_sent,The number of transmitted bytes between server and clients.,`kind`: `sent`
+mysql.client.network.io,mysql.performance.bytes_received,The number of transmitted bytes between server and clients.,`kind`: `received`
+mysql.commands,mysql.performance.com_update,The number of times each type of command has been executed.,`kind`: `update`
+mysql.commands,mysql.performance.com_insert,The number of times each type of command has been executed.,`kind`: `insert`
+mysql.commands,mysql.performance.com_delete,The number of times each type of command has been executed.,`kind`: `delete`
+mysql.commands,mysql.performance.com_select,The number of times each type of command has been executed.,`kind`: `select`
+mysql.double_writes,mysql.innodb.dblwr_writes,The number of writes to the InnoDB doublewrite buffer.,`kind`: `writes`
+mysql.double_writes,mysql.innodb.dblwr_pages_written,The number of writes to the InnoDB doublewrite buffer.,`kind`: `pages_written`
+mysql.handlers,mysql.performance.handler_delete,The number of requests to various MySQL handlers.,`kind`: `delete`
+mysql.handlers,mysql.performance.handler_commit,The number of requests to various MySQL handlers.,`kind`: `commit`
+mysql.handlers,mysql.performance.handler_read_key,The number of requests to various MySQL handlers.,`kind`: `read_key`
+mysql.handlers,mysql.performance.handler_read_prev,The number of requests to various MySQL handlers.,`kind`: `read_prev`
+mysql.handlers,mysql.performance.handler_read_rnd,The number of requests to various MySQL handlers.,`kind`: `read_rnd`
+mysql.handlers,mysql.performance.handler_read_rnd_next,The number of requests to various MySQL handlers.,`kind`: `read_rnd_next`
+mysql.handlers,mysql.performance.handler_rollback,The number of requests to various MySQL handlers.,`kind`: `rollback`
+mysql.handlers,mysql.performance.handler_prepare,The number of requests to various MySQL handlers.,`kind`: `prepare`
+mysql.handlers,mysql.performance.handler_read_next,The number of requests to various MySQL handlers.,`kind`: `read_next`
+mysql.handlers,mysql.performance.handler_write,The number of requests to various MySQL handlers.,`kind`: `write`
+mysql.handlers,mysql.performance.handler_update,The number of requests to various MySQL handlers.,`kind`: `update`
+mysql.handlers,mysql.performance.handler_read_first,The number of requests to various MySQL handlers.,`kind`: `read_first`
+mysql.joins,mysql.performance.select_full_join,The number of joins that perform table scans.,`kind`: `full`
+mysql.joins,mysql.performance.select_full_range_join,The number of joins that perform table scans.,`kind`: `full_range`
+mysql.joins,mysql.performance.select_range,The number of joins that perform table scans.,`kind`: `range`
+mysql.joins,mysql.performance.select_range_check,The number of joins that perform table scans.,`kind`: `range_check`
+mysql.joins,mysql.performance.select_scan,The number of joins that perform table scans.,`kind`: `scan`
+mysql.locks,mysql.performance.table_locks_immediate,The number of MySQL locks.,`kind`: `immediate`
+mysql.locks,mysql.performance.table_locks_waited,The number of MySQL locks.,`kind`: `waited`
+mysql.log_operations,mysql.innodb.log_write_requests,The number of InnoDB log operations.,`operation`: `write_requests`
+mysql.log_operations,mysql.innodb.log_writes,The number of InnoDB log operations.,`operation`: `writes`
+mysql.log_operations,mysql.innodb.log_waits,The number of InnoDB log operations.,`operation`: `waits`
+mysql.operations,mysql.innodb.data_fsyncs,The number of InnoDB operations.,`operation`: `fsyncs`
+mysql.page_operations,mysql.innodb.pages_created,The number of InnoDB page operations.,`operation`: `created`
+mysql.page_operations,mysql.innodb.pages_read,The number of InnoDB page operations.,`operation`: `read`
+mysql.page_operations,mysql.innodb.pages_written,The number of InnoDB page operations.,`operation`: `written`
+mysql.replica.time_behind_source,mysql.replication.seconds_behind_source,This field is an indication of how “late” the replica is.,
+mysql.row_locks,mysql.innodb.current_row_locks,The number of InnoDB row locks.,
+mysql.row_locks,mysql.innodb.row_lock_current_waits,The number of InnoDB row locks.,`kind`: `waits`
+mysql.row_operations,mysql.innodb.rows_updated,The number of InnoDB row operations.,`operation`: `updated`
+mysql.row_operations,mysql.innodb.rows_read,The number of InnoDB row operations.,`operation`: `read`
+mysql.row_operations,mysql.innodb.rows_inserted,The number of InnoDB row operations.,`operation`: `inserted`
+mysql.row_operations,mysql.innodb.rows_deleted,The number of InnoDB row operations.,`operation`: `deleted`
+mysql.sorts,mysql.performance.sort_scan,The number of MySQL sorts.,`kind`: `scan`
+mysql.sorts,mysql.performance.sort_rows,The number of MySQL sorts.,`kind`: `rows`
+mysql.sorts,mysql.performance.sort_merge_passes,The number of MySQL sorts.,`kind`: `merge_passes`
+mysql.sorts,mysql.performance.sort_range,The number of MySQL sorts.,`kind`: `range`
+mysql.table_open_cache,mysql.performance.table_cache_hits,"The number of hits, misses or overflows for open tables cache lookups.",`status`: `hit`
+mysql.table_open_cache,mysql.performance.table_cache_misses,"The number of hits, misses or overflows for open tables cache lookups.",`status`: `miss`
+mysql.threads,mysql.performance.threads_running,The state of MySQL threads.,`kind`: `running`
+mysql.threads,mysql.performance.threads_cached,The state of MySQL threads.,`kind`: `cached`
+mysql.threads,mysql.performance.threads_connected,The state of MySQL threads.,`kind`: `connected`
+mysql.threads,mysql.performance.threads_created,The state of MySQL threads.,`kind`: `created`
+mysql.tmp_resources,mysql.performance.created_tmp_tables,The number of created temporary resources.,`resource`: `tables`
+mysql.tmp_resources,mysql.performance.created_tmp_disk_tables,The number of created temporary resources.,`resource`: `disk_tables`
+mysql.tmp_resources,mysql.performance.created_tmp_files,The number of created temporary resources.,`resource`: `files`
