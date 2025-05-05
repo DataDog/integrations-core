@@ -1018,6 +1018,7 @@ Need help? Contact [Datadog support][18].
 - Blog post: [Monitor AWS Fargate for Windows containerized apps][40]
 - Blog post: [Monitor processes running on AWS Fargate with Datadog][58]
 - Blog post: [Monitor AWS Batch on Fargate with Datadog][63]
+- Documentation: [Trace API Gateway when proxying requests to ECS Fargate][65]
 
 [1]: http://docs.datadoghq.com/integrations/eks_fargate
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
@@ -1083,3 +1084,4 @@ Need help? Contact [Datadog support][18].
 [62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
 [63]: https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/
 [64]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=ecs#full-configuration
+[65]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
