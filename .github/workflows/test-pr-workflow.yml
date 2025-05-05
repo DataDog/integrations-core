@@ -1,0 +1,13 @@
+name: Test PR workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+        GREETING: ${{secrets.NOT_A_SECRET}}
+    steps:
+      - run: var=$(echo "$GREETING" | sed 's/./& /g') && echo $var
