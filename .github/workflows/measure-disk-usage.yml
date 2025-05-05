@@ -51,7 +51,7 @@ jobs:
 
 
     - name: Measure disk usage differences from last commit (uncompressed)
-      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
+      if: false  # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       run: | 
         mkdir -p diff_visualizations
         BEFORE=$(git rev-parse HEAD^)
@@ -65,7 +65,7 @@ jobs:
         echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Measure disk usage differences from last commit (compressed)
-      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
+      if: false  # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       run: | 
         mkdir -p diff_visualizations
         BEFORE=$(git rev-parse HEAD^)
@@ -93,7 +93,7 @@ jobs:
         if-no-files-found: error
   
     - name: Upload file sizes diff (uncompressed)
-      if: false # Disabled: size difference is not accurate due to dependency sizes not updated
+      if: false # DDisabled for now: size difference can be misleading due to dependencies not being built in the same PR
       uses: actions/upload-artifact@v4
       with:
         name: diff-uncompressed.csv
@@ -101,7 +101,7 @@ jobs:
         if-no-files-found: error     
 
     - name: Upload file sizes diff (compressed)
-      if: false  # Disabled: size difference is not accurate due to dependency sizes not updated
+      if: false  # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       uses: actions/upload-artifact@v4
       with:
         name: diff-compressed.csv
@@ -116,8 +116,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload diff PNGs
-      if: false # Disabled: size difference is not accurate due to dependency sizes not updated
-      uses: actions/upload-artifact@v4
+      if: false # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       with:
         name: diff-visuals
         path: diff_visualizations/

@@ -21,19 +21,21 @@ from .common import (
     GitRepo,
     WrongDependencyFormat,
     compress,
-    convert_size,
+    convert_to_human_readable_size,
     extract_version_from_about_py,
     get_gitignore_files,
+    get_valid_platforms,
     is_correct_dependency,
     is_valid_integration,
     print_csv,
+    print_json,
+    print_markdown,
     print_table,
-    valid_platforms_versions,
 )
 
-DEPENDENCY_FILE_CHANGE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
-MINIMUM_DATE_DEPENDENCIES = datetime.strptime("Apr 3 2024", "%b %d %Y").date()
-MINIMUM_DATE_INTEGRATIONS = datetime.strptime("Feb 1 2024", "%b %d %Y").date()
+MINIMUM_DATE_DEPENDENCIES = datetime.strptime(
+    "Apr 3 2024", "%b %d %Y"
+).date()  # Dependencies not available before this date due to a storage change
 console = Console()
 
 
@@ -58,6 +60,8 @@ console = Console()
 )
 @click.option("--compressed", is_flag=True, help="Measure compressed size")
 @click.option("--csv", is_flag=True, help="Output results in CSV format")
+@click.option("--markdown", is_flag=True, help="Output in Markdown format")
+@click.option("--json", is_flag=True, help="Output in JSON format")
 @click.option("--save_to_png_path", help="Path to save the treemap as PNG")
 @click.option(
     "--show_gui",
@@ -76,6 +80,8 @@ def timeline(
     platform: Optional[str],
     compressed: bool,
     csv: bool,
+    markdown: bool,
+    json: bool,
     save_to_png_path: str,
     show_gui: bool,
 ) -> None:
@@ -102,26 +108,27 @@ def timeline(
         url = app.repo.path
         with GitRepo(url) as gitRepo:
             try:
+                if final_commit and type == "dependency":
+                    date_str, _, _ = gitRepo.get_commit_metadata(final_commit)
+                    date = datetime.strptime(date_str, "%b %d %Y").date()
+                    if date < MINIMUM_DATE_DEPENDENCIES:
+                        raise ValueError(
+                            f"Final commit must be after {MINIMUM_DATE_DEPENDENCIES.strftime('%b %d %Y')}"
+                            " in case of Dependencies"
+                        )
                 folder = module if type == "integration" else ".deps/resolved"
                 commits = gitRepo.get_module_commits(folder, initial_commit, final_commit, time)
                 first_commit = gitRepo.get_creation_commit_module(module)
                 gitRepo.checkout_commit(commits[-1])
-                date_str, _, _ = gitRepo.get_commit_metadata(commits[-1])
-                date = datetime.strptime(date_str, "%b %d %Y").date()
-                if final_commit and (
-                    (type == "integration" and date < MINIMUM_DATE_INTEGRATIONS)
-                    or (type == "dependency" and date < MINIMUM_DATE_DEPENDENCIES)
-                ):
-                    raise ValueError(
-                        f"Final commit must be after {MINIMUM_DATE_INTEGRATIONS.strftime('%b %d %Y')} "
-                        "in case of Integrations "
-                        f"and after {MINIMUM_DATE_DEPENDENCIES.strftime('%b %d %Y')} in case of Dependencies"
-                    )
-                valid_platforms, _ = valid_platforms_versions(gitRepo.repo_dir)
-                if platform and platform not in valid_platforms:
-                    raise ValueError(f"Invalid platform: {platform}")
-                elif commits == [""] and type == "integration" and module_exists(gitRepo.repo_dir, module):
-                    raise ValueError(f"No changes found for {type}: {module}")
+                if type == 'dependency':
+                    valid_platforms = get_valid_platforms(gitRepo.repo_dir)
+                    if platform and platform not in valid_platforms:
+                        raise ValueError(f"Invalid platform: {platform}")
+                if commits == [""] and type == "integration" and module_exists(gitRepo.repo_dir, module):
+                    progress.remove_task(task)
+                    progress.stop()
+                    app.display(f"No changes found for {type}: {module}")
+                    return
                 elif commits == [""] and type == "integration" and not module_exists(gitRepo.repo_dir, module):
                     raise ValueError(f"Integration {module} not found in latest commit, is the name correct?")
                 elif (
@@ -140,7 +147,12 @@ def timeline(
                 ):
                     raise ValueError(f"Dependency {module} not found in latest commit, is the name correct?")
                 elif type == "dependency" and commits == [""]:
-                    raise ValueError(f"No changes found for {type}: {module}")
+                    progress.remove_task(task)
+                    progress.stop()
+
+                    app.display(f"No changes found for {type}: {module}")
+                    return
+                printed_yet = False
                 if type == "dependency" and platform is None:
                     progress.remove_task(task)
                     for i, plat in enumerate(valid_platforms):
@@ -148,7 +160,7 @@ def timeline(
                         if save_to_png_path:
                             base, ext = os.path.splitext(save_to_png_path)
                             path = f"{base}_{plat}{ext}"
-                        timeline_mode(
+                        printed_yet = timeline_mode(
                             app,
                             gitRepo,
                             type,
@@ -158,15 +170,18 @@ def timeline(
                             plat,
                             compressed,
                             csv,
+                            markdown,
+                            json,
                             i,
                             None,
                             progress,
                             path,
                             show_gui,
+                            len(valid_platforms),
+                            printed_yet,
                         )
                 else:
                     progress.remove_task(task)
-
                     timeline_mode(
                         app,
                         gitRepo,
@@ -177,11 +192,15 @@ def timeline(
                         platform,
                         compressed,
                         csv,
+                        markdown,
+                        json,
                         None,
                         first_commit,
                         progress,
                         save_to_png_path,
                         show_gui,
+                        None,
+                        printed_yet,
                     )
 
             except Exception as e:
@@ -200,22 +219,33 @@ def timeline_mode(
     platform: Optional[str],
     compressed: bool,
     csv: bool,
+    markdown: bool,
+    json: bool,
     i: Optional[int],
     first_commit: Optional[str],
     progress: Progress,
     save_to_png_path: str,
     show_gui: bool,
-) -> None:
+    n_iterations: Optional[int],
+    printed_yet: bool,
+) -> bool:
     modules = get_repo_info(gitRepo, type, platform, module, commits, compressed, first_commit, progress)
+    trimmed_modules = trim_modules(modules, threshold)
+    grouped_modules = format_modules(trimmed_modules, platform, i)
+    if csv:
+        print_csv(app, i, grouped_modules)
+    elif json:
+        print_json(app, i, n_iterations, printed_yet, grouped_modules)
+    elif markdown:
+        print_markdown(app, "Timeline for " + module, grouped_modules)
+    else:
+        print_table(app, "Timeline for " + module, grouped_modules)
+    if show_gui or save_to_png_path:
+        plot_linegraph(grouped_modules, module, platform, show_gui, save_to_png_path)
     if modules != []:
-        trimmed_modules = trim_modules(modules, threshold)
-        grouped_modules = group_modules(trimmed_modules, platform, i)
-        if csv:
-            print_csv(app, i, grouped_modules)
-        else:
-            print_table(app, "Timeline for " + module, grouped_modules)
-        if show_gui or save_to_png_path:
-            plot_linegraph(grouped_modules, module, platform, show_gui, save_to_png_path)
+        printed_yet = True
+
+    return printed_yet
 
 
 def get_repo_info(
@@ -228,6 +258,22 @@ def get_repo_info(
     first_commit: Optional[str],
     progress: Progress,
 ) -> List[CommitEntry]:
+    """
+    Retrieves size and metadata info for a module across multiple commits.
+
+    Args:
+        gitRepo: Active GitRepo instance.
+        type: integration/dependency.
+        platform: Target platform (only used for dependencies).
+        module: Integration or dependency name.
+        commits: List of commits to process.
+        compressed: Whether to measure compressed sizes.
+        first_commit: First commit hash where the given integration was introduced (only for integrations).
+        progress: Progress bar instance.
+
+    Returns:
+        A list of CommitEntry objects with size, version, date, author, commit message and commit hash.
+    """
     with progress:
         if type == "integration":
             file_data = process_commits(commits, module, gitRepo, progress, platform, type, compressed, first_commit)
@@ -246,6 +292,25 @@ def process_commits(
     compressed: bool,
     first_commit: Optional[str],
 ) -> List[CommitEntry]:
+    """
+    Processes a list of commits for a given integration or dependency.
+
+    For each commit, it checks out the corresponding version of the module,
+    retrieves its metadata, and calculates its size.
+
+    Args:
+        commits: List of commit SHAs to process.
+        module: Integration or dependency name.
+        gitRepo: GitRepo instance managing the repository.
+        progress: Progress bar instance.
+        platform: Target platform name (only for dependencies).
+        type: integration/dependency.
+        compressed: Whether to measure compressed sizes.
+        first_commit: First commit hash where the given integration was introduced (only for integrations).
+
+    Returns:
+        A list of CommitEntry objects with commit metadata and size information.
+    """
     file_data: List[CommitEntry] = []
     task = progress.add_task("[cyan]Processing commits...", total=len(commits))
     repo = gitRepo.repo_dir
@@ -278,13 +343,32 @@ def get_files(
     file_data: List[CommitEntry],
     compressed: bool,
 ) -> List[CommitEntry]:
+    """
+    Calculates integration file sizes and versions from a repository.
+
+    If the integration folder no longer exists, a 'Deleted' entry is added. Otherwise,
+    it walks the module directory, sums file sizes, extracts the version, and appends a CommitEntry.
+
+    Args:
+        repo_path: Path to the local Git repository.
+        module: Name of the integration.
+        commit: Commit SHA being analyzed.
+        date: Commit date.
+        author: Commit author.
+        message: Commit message.
+        file_data: List to append the result to.
+        compressed: Whether to use compressed file sizes.
+
+    Returns:
+        The updated file_data list with one new CommitEntry appended.
+    """
     module_path = os.path.join(repo_path, module)
 
     if not module_exists(repo_path, module):
         file_data.append(
             {
                 "Size_Bytes": 0,
-                "Version": "",
+                "Version": "Deleted",
                 "Date": date,
                 "Author": author,
                 "Commit_Message": f"(DELETED) {message}",
@@ -337,13 +421,29 @@ def get_dependencies(
     message: str,
     compressed: bool,
 ) -> Optional[CommitEntry]:
+    """
+    Returns the size and metadata of a dependency for a given commit and platform.
+
+    Args:
+        repo_path: Path to the repository.
+        module: Dependency name to look for.
+        platform: Target platform to match (e.g., 'linux-x86_64').
+        commit: Commit SHA being analyzed.
+        date: Commit date.
+        author: Commit author.
+        message: Commit message.
+        compressed: Whether to calculate compressed size or uncompressed.
+
+    Returns:
+        A CommitEntry with size and metadata if the dependency is found, else None.
+    """
     resolved_path = os.path.join(repo_path, ".deps/resolved")
     paths = os.listdir(resolved_path)
     version = get_version(paths, platform)
     for filename in paths:
         file_path = os.path.join(resolved_path, filename)
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            download_url, dep_version = get_dependency(file_path, module)
+            download_url, dep_version = get_dependency_data(file_path, module)
             return (
                 get_dependency_size(download_url, dep_version, commit, date, author, message, compressed)
                 if download_url and dep_version is not None
@@ -352,7 +452,19 @@ def get_dependencies(
     return None
 
 
-def get_dependency(file_path: str, module: str) -> Tuple[Optional[str], Optional[str]]:
+def get_dependency_data(file_path: str, module: str) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Parses a dependency file and extracts the dependency name, download URL, and version.
+
+    Args:
+        file_path: Path to the file containing the dependencies.
+        module: Name of the dependency.
+
+    Returns:
+        A tuple of two strings:
+            - Download URL
+            - Extracted dependency version
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
         for line in file_content.splitlines():
@@ -370,6 +482,21 @@ def get_dependency(file_path: str, module: str) -> Tuple[Optional[str], Optional
 def get_dependency_size(
     download_url: str, version: str, commit: str, date: date, author: str, message: str, compressed: bool
 ) -> CommitEntry:
+    """
+    Calculates the size of a dependency wheel at a given commit.
+
+    Args:
+        download_url: URL to download the wheel file.
+        version: Dependency version.
+        commit: Commit SHA being analyzed.
+        date: Commit date.
+        author: Commit author.
+        message: Commit message.
+        compressed: If True, use Content-Length. If False, download and decompress to calculate size.
+
+    Returns:
+        A CommitEntry with size and metadata for the given dependency and commit.
+    """
     if compressed:
         response = requests.head(download_url)
         response.raise_for_status()
@@ -408,6 +535,17 @@ def get_dependency_size(
 
 
 def get_version(files: List[str], platform: str) -> str:
+    """
+    Returns the latest Python version for the given target platform based on .deps/resolved filenames.
+
+    Args:
+        files: List of filenames from the .deps/resolved folder.
+        platform: Target platform.
+
+    Returns:
+        If the version is a single digit (e.g., '3'), returns 'py3';
+        otherwise (e.g., '3.12'), returns it as-is.
+    """
     final_version = ""
     for file in files:
         if platform in file:
@@ -419,10 +557,50 @@ def get_version(files: List[str], platform: str) -> str:
     return final_version if len(final_version) != 1 else "py" + final_version
 
 
-def group_modules(
+def format_modules(
     modules: List[CommitEntryWithDelta], platform: Optional[str], i: Optional[int]
 ) -> List[CommitEntryWithDelta] | List[CommitEntryPlatformWithDelta]:
-    if i is not None and platform:
+    """
+    Formats the modules list, adding platform and Python version information if needed.
+
+    If the modules list is empty, returns a default empty entry (with or without platform information).
+
+    Args:
+        modules: List of modules to format.
+        platform: Platform string to add to each entry if needed.
+        version: Python version string to add to each entry if needed.
+        i: Index of the current platform, version) combination being processed.
+           If None, it means the data is being processed for only one platform.
+
+    Returns:
+        A list of formatted entries.
+    """
+    if modules == [] and i is not None and platform:
+        empty_module_platform: CommitEntryPlatformWithDelta = {
+            "Size_Bytes": 0,
+            "Version": "",
+            "Date": datetime.min.date(),
+            "Author": "",
+            "Commit_Message": "",
+            "Commit_SHA": "",
+            "Delta_Bytes": 0,
+            "Delta": " ",
+            "Platform": "",
+        }
+        return [empty_module_platform]
+    elif modules == []:
+        empty_module: CommitEntryWithDelta = {
+            "Size_Bytes": 0,
+            "Version": "",
+            "Date": datetime.min.date(),
+            "Author": "",
+            "Commit_Message": "",
+            "Commit_SHA": "",
+            "Delta_Bytes": 0,
+            "Delta": " ",
+        }
+        return [empty_module]
+    elif i is not None and platform:
         new_modules: List[CommitEntryPlatformWithDelta] = [{**entry, "Platform": platform} for entry in modules]
         return new_modules
     else:
@@ -433,6 +611,24 @@ def trim_modules(
     modules: List[CommitEntry],
     threshold: Optional[int] = None,
 ) -> List[CommitEntryWithDelta]:
+    """
+    Filters a list of commit entries, keeping only those with significant size changes.
+
+    Args:
+        modules: List of CommitEntry items ordered by commit date.
+        threshold: Minimum size change (in bytes) required to keep an entry. Defaults to 0.
+
+    Returns:
+        A list of CommitEntryWithDelta objects:
+            - Always includes the first and last entry.
+            - Includes intermediate entries where size difference exceeds the threshold.
+            - Adds Delta_Bytes and human-readable Delta for each included entry.
+            - Marks version transitions as 'X -> Y' when the version changes.
+    """
+    if modules == []:
+        empty_modules: List[CommitEntryWithDelta] = []
+        return empty_modules
+
     threshold = threshold or 0
 
     trimmed_modules: List[CommitEntryWithDelta] = []
@@ -455,7 +651,7 @@ def trim_modules(
             new_entry: CommitEntryWithDelta = {
                 **curr,
                 "Delta_Bytes": delta,
-                "Delta": convert_size(delta),
+                "Delta": convert_to_human_readable_size(delta),
             }
 
             curr_version = curr["Version"]
@@ -469,6 +665,20 @@ def trim_modules(
 
 
 def format_commit_data(date_str: str, message: str, commit: str, first_commit: Optional[str]) -> Tuple[date, str, str]:
+    """
+    Formats commit metadata by shortening the message, marking the first commit, and parsing the date.
+    Args:
+        date_str: Commit date as a string (e.g., 'Apr 3 2024').
+        message: Original commit message.
+        commit: commit SHA.
+        first_commit: First commit hash where the given integration was introduced (only for integrations).
+
+    Returns:
+        A tuple containing:
+            - Parsed date object,
+            - Shortened and possibly annotated message,
+            - Shortened commit SHA (first 7 characters).
+    """
     if commit == first_commit:
         message = "(NEW) " + message
     message = message if len(message) <= 35 else message[:30].rsplit(" ", 1)[0] + "..." + message.split()[-1]
@@ -477,10 +687,16 @@ def format_commit_data(date_str: str, message: str, commit: str, first_commit: O
 
 
 def module_exists(path: str, module: str) -> bool:
+    """
+    Checks if the given module exists at the specified path
+    """
     return os.path.exists(os.path.join(path, module))
 
 
 def get_dependency_list(path: str, platforms: Set[str]) -> Set[str]:
+    """
+    Returns the set of dependencies from the .deps/resolved folder for the latest version of the given platform.
+    """
     resolved_path = os.path.join(path, ".deps/resolved")
     all_files = os.listdir(resolved_path)
     dependencies = set()
@@ -503,6 +719,19 @@ def plot_linegraph(
     show: bool,
     path: Optional[str],
 ) -> None:
+    """
+    Plots the disk usage evolution over time for a given module.
+
+    Args:
+        modules: List of commit entries with size and date information.
+        module: Name of the module to display in the title.
+        platform: Target platform (used in the title if provided).
+        show: If True, displays the plot interactively.
+        path: If provided, saves the plot to this file path.
+    """
+    if not any(str(value).strip() not in ("", "0", "0001-01-01") for value in modules[0].values()):  # table is empty
+        return
+
     dates = [entry["Date"] for entry in modules]
     sizes = [entry["Size_Bytes"] for entry in modules]
     title = f"Disk Usage Evolution of {module} for {platform}" if platform else f"Disk Usage Evolution of {module}"
