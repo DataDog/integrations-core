@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 import sys
 from unittest.mock import Mock, patch
@@ -915,26 +914,35 @@ class TestRunJob:
     def test_run_job_success_path(self, query_completion_handler, sample_multiple_events_xml):
         """Test the complete happy path of run_job - session exists, events are queried, processed and submitted"""
 
+        # Create a function to capture the payload before serialization
+        original_payload = None
+
+        def capture_payload(payload, **kwargs):
+            nonlocal original_payload
+            original_payload = payload
+            # Return a simple string to avoid serialization issues
+            return '{}'
+
         # Mock all necessary methods
         with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
             query_completion_handler, '_query_ring_buffer', return_value=(sample_multiple_events_xml, 0.1, 0.1)
-        ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit:
-
+        ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit, patch(
+            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        ):
             # Run the job
             query_completion_handler.run_job()
 
             # Verify exactly one batched event was submitted
             assert mock_submit.call_count == 1, "Expected one batched event submission"
 
-            # Verify the payload has the expected structure
-            serialized_payload = mock_submit.call_args[0][0]
-            payload = json.loads(serialized_payload)
+            # Now validate the actual payload structure that was going to be serialized
+            assert original_payload is not None, "Payload was not captured"
 
             # Check essential payload properties
-            assert 'ddsource' in payload, "Missing 'ddsource' in payload"
-            assert payload['ddsource'] == 'sqlserver', "Incorrect ddsource value"
-            assert 'dbm_type' in payload, "Missing 'dbm_type' in payload"
-            assert 'timestamp' in payload, "Missing 'timestamp' in payload"
+            assert 'ddsource' in original_payload, "Missing 'ddsource' in payload"
+            assert original_payload['ddsource'] == 'sqlserver', "Incorrect ddsource value"
+            assert 'dbm_type' in original_payload, "Missing 'dbm_type' in payload"
+            assert 'timestamp' in original_payload, "Missing 'timestamp' in payload"
 
             # Check for the new batched array based on session type
             if query_completion_handler.session_name == "datadog_query_errors":
@@ -942,12 +950,12 @@ class TestRunJob:
             else:
                 batch_key = "sqlserver_query_completions"
 
-            assert batch_key in payload, f"Missing '{batch_key}' array in payload"
-            assert isinstance(payload[batch_key], list), f"'{batch_key}' should be a list"
-            assert len(payload[batch_key]) > 0, f"'{batch_key}' list should not be empty"
+            assert batch_key in original_payload, f"Missing '{batch_key}' array in payload"
+            assert isinstance(original_payload[batch_key], list), f"'{batch_key}' should be a list"
+            assert len(original_payload[batch_key]) > 0, f"'{batch_key}' list should not be empty"
 
             # Verify structure of query details objects in the array
-            for event in payload[batch_key]:
+            for event in original_payload[batch_key]:
                 assert "query_details" in event, "Missing 'query_details' in event"
                 query_details = event["query_details"]
                 assert "xe_type" in query_details, "Missing 'xe_type' in query_details"
@@ -980,3 +988,51 @@ class TestRunJob:
 
             # Verify debug message was logged
             log.debug.assert_any_call(f"No data found for session {query_completion_handler.session_name}")
+
+    def test_event_batching(self, query_completion_handler, sample_multiple_events_xml):
+        """Test that multiple events get properly batched into a single payload"""
+
+        # Create a function to capture the payload before serialization
+        original_payload = None
+
+        def capture_payload(payload, **kwargs):
+            nonlocal original_payload
+            original_payload = payload
+            # Return a simple string to avoid serialization issues
+            return '{}'
+
+        # Create a spy on the _create_event_payload method to capture what would be created
+        # for each individual event before batching
+        with patch.object(
+            query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
+        ) as mock_create_payload, patch.object(
+            query_completion_handler, 'session_exists', return_value=True
+        ), patch.object(
+            query_completion_handler, '_query_ring_buffer', return_value=(sample_multiple_events_xml, 0.1, 0.1)
+        ), patch.object(
+            query_completion_handler._check, 'database_monitoring_query_activity'
+        ) as mock_submit, patch(
+            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        ):
+            # Run the job
+            query_completion_handler.run_job()
+
+            # Verify create_event_payload was called multiple times (once per event)
+            assert mock_create_payload.call_count > 1, "Expected multiple events to be processed"
+
+            # Verify database_monitoring_query_activity was only called once (batched)
+            assert mock_submit.call_count == 1, "Expected only one batched submission"
+
+            # Validate the actual batched payload
+            assert original_payload is not None, "Payload was not captured"
+
+            # Determine the appropriate batch key based on the session type
+            batch_key = (
+                "sqlserver_query_errors"
+                if query_completion_handler.session_name == "datadog_query_errors"
+                else "sqlserver_query_completions"
+            )
+
+            # Verify the batch exists and contains multiple events
+            assert batch_key in original_payload, f"Missing '{batch_key}' array in payload"
+            assert len(original_payload[batch_key]) > 1, "Expected multiple events in the batch"

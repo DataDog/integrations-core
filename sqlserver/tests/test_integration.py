@@ -1001,14 +1001,16 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Extract all individual completion events from batches
     query_completion_events = []
     for batch in query_completion_batches:
-        if 'sqlserver_query_completions' in batch:
-            query_completion_events.extend(batch['sqlserver_query_completions'])
+        events = batch.get('sqlserver_query_completions', [])
+        if events:
+            query_completion_events.extend(events)
 
     # Extract all individual error events from batches
     error_events = []
     for batch in error_batches:
-        if 'sqlserver_query_errors' in batch:
-            error_events.extend(batch['sqlserver_query_errors'])
+        events = batch.get('sqlserver_query_errors', [])
+        if events:
+            error_events.extend(events)
 
     # We should have at least one query completion event
     assert len(query_completion_events) > 0, "No query completion events collected"
