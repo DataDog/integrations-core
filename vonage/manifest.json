@@ -18,13 +18,8 @@
       },
       {
         "media_type": "image",
-        "caption": "Overview of Messaging Logs",
-        "image_url": "images/message.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Overview of Voice Logs",
-        "image_url": "images/voice.png"
+        "caption": "Overview of Audit Logs",
+        "image_url": "images/audit.png"
       }
     ],
     "classifier_tags": [

@@ -1,88 +1,43 @@
-id: vonage
+id: REPLACE_WITH_APP_ID
 # See app_id in your integration's manifest.json file to learn more:
 # https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-metric_id: vonage
+metric_id: REPLACE_WITH_APP_ID
 # If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank
+# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - description: Date/Time when the message was delivered/failed to deliver.
-    groups:
-      - Vonage
-    name: date_end
-    path: date_end
-    source: log
-    type: string
-  - description: Start date for an initiated call
-    groups:
-      - Vonage
-    name: date_start
-    path: date_start
-    source: log
-    type: double
   - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - description: ""
+    facetType: list
+    groups:
       - Vonage
     name: error_code
     path: error_code
     source: log
     type: string
-  - groups:
-      - Vonage
-    name: id
-    path: log_id
-    source: log
-    type: string
-  - groups:
-      - Vonage
-    name: Log Level
-    path: log_level
-    source: log
-    type: string
-  - groups:
-      - Vonage
-    name: message
-    path: message
-    source: log
-    type: string
-  - groups:
-      - Vonage
-    name: product
-    path: vonage_product
-    source: log
-    type: string
-  - groups:
-      - Vonage
-    name: role
-    path: role
-    source: log
-    type: string
-  - groups:
+  - description: ""
+    facetType: list
+    groups:
       - Vonage
     name: status
     path: status
     source: log
     type: string
-  - groups:
+  - description: ""
+    facetType: list
+    groups:
       - Vonage
-    name: Threads
-    path: message_thread
-    source: log
-    type: double
-  - groups:
-      - Web Access
-    name: Client IP
-    path: network.client.ip
-    source: log
-  - groups:
-      - Vonage
-    name: URL
-    path: http.url_1
-    source: log
-    type: string
-  - groups:
-      - Vonage
-    name: UserRole
-    path: UserRole
+    name: vonage_product
+    path: product
     source: log
     type: string
 pipeline:
@@ -90,45 +45,50 @@ pipeline:
   name: vonage_mapper
   enabled: true
   filter:
-    query: "source:vonage"
+    query: "source:vonage_logs "
   processors:
     - type: attribute-remapper
-      name: Map tag `latency` to an attribute
+      name: Map `country` to `network.client.geoip.country.iso_code`
       enabled: true
       sources:
-        - latency
-      sourceType: tag
-      target: latency
+        - country
+      sourceType: attribute
+      target: network.client.geoip.country.iso_code
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map tag `product` to attribute `vonage_product`
+      name: Map `user_email` to `usr.email`
       enabled: true
       sources:
-        - product
-      sourceType: tag
-      target: vonage_product
+        - user_email
+      sourceType: attribute
+      target: usr.email
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map tag `error_code_description` to an attribute
+      name: Map `event_type` to `type`
       enabled: true
       sources:
-        - error_code_description
-      sourceType: tag
-      target: error_code_description
+        - event_type
+      sourceType: attribute
+      target: type
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map tag `error_code` to an attribute
+      name: Map `created_at` to `timestamp`
       enabled: true
       sources:
-        - error_code
-      sourceType: tag
-      target: error_code
+        - created_at
+      sourceType: attribute
+      target: timestamp
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp

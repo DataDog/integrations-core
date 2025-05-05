@@ -781,14 +781,6 @@
               "title_align": "left",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "order": "desc"
-                      }
-                    }
-                  ],
                   "queries": [
                     {
                       "data_source": "logs",
@@ -818,6 +810,20 @@
                   "response_format": "scalar",
                   "style": {
                     "palette": "semantic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
                   }
                 }
               ],
@@ -834,9 +840,9 @@
             }
           },
           {
-            "id": 8470901075596972,
+            "id": 1748553349074390,
             "definition": {
-              "title": "Messages Successfully Delivered",
+              "title": "Total SMS logs",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -849,17 +855,17 @@
                   ],
                   "queries": [
                     {
-                      "data_source": "logs",
                       "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS"
+                      },
                       "indexes": [
                         "*"
                       ],
+                      "group_by": [],
                       "compute": {
                         "aggregation": "count"
-                      },
-                      "group_by": [],
-                      "search": {
-                        "query": "source:vonage_logs @error_code:0 @product:SMS"
                       },
                       "storage": "hot"
                     }
@@ -966,7 +972,7 @@
             "id": 5139340397364240,
             "definition": {
               "type": "note",
-              "content": "Status of Messages\n- 0 :  `Success`\n- 1 :  `Throttled`\n- 2 :  `Missing Parameters`\n- 3 :  `Invalid Parameters`\n- 4 :  `Invalid Credentials`\n- 5 :  `Internal Error`\n- 6 :  `Invalid Message`\n- 7 :  `Number Barred`\n- 8 :  `Partner Account Barred`\n- 9 :  `Partner Quota Violation`\n- 10 :  `Too Many Existing Binds`\n- 11 :  `Account Not Enabled For HTTP`\n- 12 :  `Message Too Long`\n- 14 :  `Invalid Signature`\n - 15 :  `Invalid Sender Address`\n - 22 :  `Invalid Network Code`\n - 23 :  `Invalid Callback URL`\n - 29 :  `Non-Whitelisted Destination`\n - 32 :  `Signature And API Secret Disallowed`\n - 33 :  `Number Deactivated`",
+              "content": "Status of Messages\n-    `Success`\n-   `Throttled`\n- `Missing Parameters`\n-  `Invalid Parameters`\n-  `Invalid Credentials`\n-   `Internal Error`\n-   `Invalid Message`\n-  `Number Barred`\n-   `Partner Account Barred`\n-  `Partner Quota Violation`\n-   `Too Many Existing Binds`\n-   `Account Not Enabled For HTTP`\n-   `Message Too Long`\n-  `Invalid Signature`\n -   `Invalid Sender Address`\n -   `Invalid Network Code`\n -  `Invalid Callback URL`\n -  `Non-Whitelisted Destination`\n -   `Signature And API Secret Disallowed`\n -  `Number Deactivated`",
               "background_color": "yellow",
               "font_size": "14",
               "text_align": "left",
@@ -979,7 +985,7 @@
             "layout": {
               "x": 0,
               "y": 5,
-              "width": 4,
+              "width": 3,
               "height": 5
             }
           },
@@ -1021,6 +1027,484 @@
               "type": "list_stream"
             },
             "layout": {
+              "x": 3,
+              "y": 5,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 283541546185734,
+            "definition": {
+              "title": "Messages logs Status Across Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Sent Messages",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@status",
+                          "limit": 100,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 3,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 4818989667178904,
+            "definition": {
+              "title": "Messages sent across Countries.",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS @country:*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 250,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 7,
+              "y": 8,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 8470901075596972,
+            "definition": {
+              "title": "Messages Successfully Delivered",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @error_code:0 @product:SMS"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 20,
+        "width": 12,
+        "height": 13,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7761428847564640,
+      "definition": {
+        "title": "Audit Details",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 945697867189378,
+            "definition": {
+              "title": "Audit events by Event types",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@event_type",
+                          "limit": 30,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 30,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 6737361086114530,
+            "definition": {
+              "title": "Total number of Audit events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @event_type:*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5973293464439264,
+            "definition": {
+              "title": "Audit logs Sent Across Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@event_type",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 6698243798229426,
+            "definition": {
+              "type": "note",
+              "content": "The Vonage Audit API enables you to monitor your account using events and get a series of audit events describing changes made to your Vonage API account over time.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 3143202353455626,
+            "definition": {
+              "type": "note",
+              "content": "Types of Events\n- 0 :  `USER_STATUS`\n- 1 :  `USER_UPDATE`\n- 2 :  `USER_BILLING_UPDATE`\n- 3 :  `USER_CREATE`\n- 4 :  `USER_LOGIN`\n- 5 :  `USER_LOGOUT`\n- 6 :  `USER_PRODUCT_SEARCH`\n- 7 :  `USER_API_KEYS_UPDATE`\n- 8 :  `ACCOUNT_SECRET_DELETE`\n- 9 :  `ACCOUNT_SECRET_CREATE`\n- 10 :  `ACCOUNT_UPDATE_SPAMMER`\n- 11 :  `ACCOUNT_UPDATE_SETTINGS_API`\n- 12 :  `NUMBER_ASSIGN`\n- 13 :  `NUMBER_UPDATED`\n - 14 :  `NUMBER_LINKED`\n - 15 :  `NUMBER_UNLINKED`\n - 16 :  `APP_CREATE`\n - 17 :  `APP_UPDATE`\n - 18 :  `APP_DELETE`\n - 19 :  `APP_DISABLE`\n - 20 :  'APP_ENABLE'\n - 21 :  'IP_WHITELIST_CREATE'\n - 22 :  'IP_WHITELIST_DELETE'\n - 23 :  'AUTORELOAD_ENABLE'",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 2452079115315648,
+            "definition": {
+              "title": "Audit Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:vonage_logs @event_type:*",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "asc"
+                    },
+                    "data_source": "logs_stream",
+                    "storage": "hot",
+                    "indexes": []
+                  },
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
               "x": 4,
               "y": 5,
               "width": 8,
@@ -1031,10 +1515,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 20,
+        "y": 33,
         "width": 12,
-        "height": 11,
-        "is_column_break": true
+        "height": 11
       }
     }
   ],

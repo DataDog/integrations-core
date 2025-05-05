@@ -37,7 +37,7 @@ Configure the Datadog endpoint to forward Vonage logs to Datadog.
 
 ### Logs
 
-Logs are designed to collect and manage logs of SMS messages and voice calls. They capture essential details such as timestamps, sender and recipient information, message content, call duration, and call status.
+Logs are designed to collect and manage logs of SMS messages, voice calls and Audit logs. They capture essential details such as timestamps, sender and recipient information, message content, call duration, call status and types of audit events in the Vonage account.
 
 ## Troubleshooting
 
