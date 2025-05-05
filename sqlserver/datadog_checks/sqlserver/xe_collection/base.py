@@ -652,6 +652,15 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error formatting events for logging: {e}")
 
+        # Determine the key for the batched events array based on session name
+        batch_key = (
+            "sqlserver_query_errors" if self.session_name == "datadog_query_errors" else "sqlserver_query_completions"
+        )
+
+        # Create a list to collect all query details
+        all_query_details = []
+
+        # Process all events and collect them for batching
         for event in events:
             try:
                 # Time the obfuscation
@@ -681,21 +690,15 @@ class XESessionBase(DBMAsyncJob):
                             )
                             break
 
-                # Create a properly structured payload for the main event
+                # Create a properly structured payload for the individual event
                 payload = self._create_event_payload(obfuscated_event)
-                # Extract normalized query details for use in RQT event
+
+                # Extract query details to add to the batch
                 query_details = payload.get("query_details", {})
+                all_query_details.append({"query_details": query_details})
 
-                # Log the first event payload in each batch for validation
-                if event == events[0]:
-                    try:
-                        payload_json = json_module.dumps(payload, default=str, indent=2)
-                        self._log.debug(f"Sample {self.session_name} event payload:\n{payload_json}")
-                    except Exception as e:
-                        self._log.error(f"Error serializing payload for logging: {e}")
-
-                # Create and send RQT event if applicable
-                if raw_sql_fields:
+                # Process RQT events individually as before
+                if self._collect_raw_query and raw_sql_fields:
                     # Time RQT creation
                     rqt_start = time()
                     # Pass normalized query details for proper timing fields
@@ -718,11 +721,49 @@ class XESessionBase(DBMAsyncJob):
                         rqt_payload = json.dumps(rqt_event, default=default_json_event_encoding)
                         self._check.database_monitoring_query_sample(rqt_payload)
 
-                serialized_payload = json.dumps(payload, default=default_json_event_encoding)
-                self._check.database_monitoring_query_activity(serialized_payload)
             except Exception as e:
                 self._log.error(f"Error processing event: {e}")
                 continue
+
+        # Create a single batched payload for all events if we have any
+        if all_query_details:
+            # Create base payload from the common fields (using the same structure as _create_event_payload)
+            batched_payload = {
+                "host": self._check.resolved_hostname,
+                "database_instance": self._check.database_identifier,
+                "ddagentversion": datadog_agent.get_version(),
+                "ddsource": "sqlserver",
+                "dbm_type": self._determine_dbm_type(),
+                "event_source": self.session_name,
+                "collection_interval": self.collection_interval,
+                "ddtags": self.tags,
+                "timestamp": time() * 1000,
+                "sqlserver_version": self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                "cloud_metadata": self._config.cloud_metadata,
+                "service": self._config.service,
+                # Add the array of query details with the appropriate key
+                batch_key: all_query_details,
+            }
+
+            # Log the batched payload for debugging (truncated for brevity)
+            try:
+                # Only include up to 3 events in the log for brevity
+                log_payload = batched_payload.copy()
+                if len(all_query_details) > 3:
+                    log_payload[batch_key] = all_query_details[:3]
+                    log_payload[batch_key].append({"truncated": f"...and {len(all_query_details) - 3} more events"})
+
+                payload_json = json_module.dumps(log_payload, default=str, indent=2)
+                self._log.debug(
+                    f"Batched {self.session_name} payload with {len(all_query_details)} events:\n{payload_json}"
+                )
+            except Exception as e:
+                self._log.error(f"Error serializing batched payload for logging: {e}")
+
+            # Send the batched payload
+            serialized_payload = json.dumps(batched_payload, default=default_json_event_encoding)
+            self._check.database_monitoring_query_activity(serialized_payload)
 
         # Calculate post-processing time (obfuscation + RQT)
         post_processing_time = time() - obfuscation_start_time

@@ -978,19 +978,37 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Get events from the platform events API
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
-    # Filter completion events
-    query_completion_events = [
+    # Filter completion events (now each event may contain multiple query details)
+    query_completion_batches = [
         e
         for e in dbm_activity
         if e.get('dbm_type') == 'query_completion' and 'datadog_query_completions' in str(e.get('event_source', ''))
     ]
 
-    # Filter error events
-    error_events = [
+    # Filter error events (now each event may contain multiple query details)
+    error_batches = [
         e
         for e in dbm_activity
         if e.get('dbm_type') == 'query_error' and 'datadog_query_errors' in str(e.get('event_source', ''))
     ]
+
+    # We should have at least one batch of completion events
+    assert len(query_completion_batches) > 0, "No query completion batches collected"
+
+    # We should have at least one batch of error events
+    assert len(error_batches) > 0, "No error event batches collected"
+
+    # Extract all individual completion events from batches
+    query_completion_events = []
+    for batch in query_completion_batches:
+        if 'sqlserver_query_completions' in batch:
+            query_completion_events.extend(batch['sqlserver_query_completions'])
+
+    # Extract all individual error events from batches
+    error_events = []
+    for batch in error_batches:
+        if 'sqlserver_query_errors' in batch:
+            error_events.extend(batch['sqlserver_query_errors'])
 
     # We should have at least one query completion event
     assert len(query_completion_events) > 0, "No query completion events collected"

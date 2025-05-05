@@ -923,24 +923,34 @@ class TestRunJob:
             # Run the job
             query_completion_handler.run_job()
 
-            # Verify events were processed and submitted
-            call_count = mock_submit.call_count
-            assert call_count > 0, "No events were submitted"
+            # Verify exactly one batched event was submitted
+            assert mock_submit.call_count == 1, "Expected one batched event submission"
 
-            # Verify the payloads have the expected structure
-            for call_args in mock_submit.call_args_list:
-                # Extract the serialized payload from the call
-                serialized_payload = call_args[0][0]
+            # Verify the payload has the expected structure
+            serialized_payload = mock_submit.call_args[0][0]
+            payload = json.loads(serialized_payload)
 
-                # Deserialize to verify content
-                payload = json.loads(serialized_payload)
+            # Check essential payload properties
+            assert 'ddsource' in payload, "Missing 'ddsource' in payload"
+            assert payload['ddsource'] == 'sqlserver', "Incorrect ddsource value"
+            assert 'dbm_type' in payload, "Missing 'dbm_type' in payload"
+            assert 'timestamp' in payload, "Missing 'timestamp' in payload"
 
-                # Check essential payload properties
-                assert 'ddsource' in payload, "Missing 'ddsource' in payload"
-                assert payload['ddsource'] == 'sqlserver', "Incorrect ddsource value"
-                assert 'dbm_type' in payload, "Missing 'dbm_type' in payload"
-                assert 'query_details' in payload, "Missing 'query_details' in payload"
-                assert 'timestamp' in payload, "Missing 'timestamp' in payload"
+            # Check for the new batched array based on session type
+            if query_completion_handler.session_name == "datadog_query_errors":
+                batch_key = "sqlserver_query_errors"
+            else:
+                batch_key = "sqlserver_query_completions"
+
+            assert batch_key in payload, f"Missing '{batch_key}' array in payload"
+            assert isinstance(payload[batch_key], list), f"'{batch_key}' should be a list"
+            assert len(payload[batch_key]) > 0, f"'{batch_key}' list should not be empty"
+
+            # Verify structure of query details objects in the array
+            for event in payload[batch_key]:
+                assert "query_details" in event, "Missing 'query_details' in event"
+                query_details = event["query_details"]
+                assert "xe_type" in query_details, "Missing 'xe_type' in query_details"
 
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
