@@ -34,6 +34,7 @@ Proceed with the following steps in this guide only if you are installing the st
 
     ```SQL
         CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
+        USE master;
         CREATE USER datadog FOR LOGIN datadog;
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
         GRANT VIEW SERVER STATE to datadog;
