@@ -295,7 +295,10 @@ class MySQLActivity(DBMAsyncJob):
         # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
         filtered_rows = []
         for row in rows:
-            if row["thread_id"] in second_pass and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]:
+            if (
+                row["thread_id"] in second_pass
+                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            ):
                 continue
             filtered_rows.append(row)
         return filtered_rows
