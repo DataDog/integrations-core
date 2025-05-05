@@ -24,7 +24,7 @@ ddtrace,PyPI,BSD-3-Clause,"Copyright 2016 Datadog, Inc."
 dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
-foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
+foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB Team <fdb-dist@apple.com>
 hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2023, Hazelcast, Inc. All Rights Reserved."
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
@@ -74,7 +74,7 @@ requests-ntlm,PyPI,ISC,Copyright (c) 2013 Ben Toews
 requests-oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2014 Kenneth Reitz.
 requests-oauthlib,PyPI,ISC,Copyright (c) 2014 Kenneth Reitz.
 requests-toolbelt,PyPI,Apache-2.0,"Copyright 2014 Ian Cordasco, Cory Benfield"
-requests-unixsocket2,PyPI,ISC,Copyright (c) 2024 - 2024 thelab
+requests-unixsocket2,PyPI,ISC,Copyright (c) 2024 - 2025 thelab
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
