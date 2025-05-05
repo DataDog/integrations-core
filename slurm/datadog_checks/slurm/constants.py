@@ -6,7 +6,7 @@ SINFO_PARTITION_PARAMS = [
     "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:",
 ]
 SINFO_NODE_PARAMS = ["-haNO", "PartitionName:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
-SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
+SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,Features_act:|,Threads:|,AllocMem:"
 GPU_PARAMS = "|,Gres:|,GresUsed:"
 SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m"]
 SSHARE_PARAMS = ["-alnPU"]
@@ -45,11 +45,14 @@ NODE_MAP = {
         {"name": "slurm_node_state_reason", "index": 10},
         {"name": "slurm_node_active_features", "index": 11},
         {"name": "slurm_node_threads", "index": 12},
+        {"name": "slurm_node_alloc_mem", "index": 13},
     ],
     "metrics": [
+        {"name": "node.memory", "index": 4},
         {"name": "node.cpu_load", "index": 6},
         {"name": "node.free_mem", "index": 7},
         {"name": "node.tmp_disk", "index": 8},
+        {"name": "node.alloc_mem", "index": 13},
     ],
 }
 
