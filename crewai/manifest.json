@@ -25,6 +25,7 @@
     "integration": {
       "auto_install": false,
       "source_type_name": "CrewAI",
+      "source_type_id": 40374142,
       "events": {
         "creates_events": false
       },
