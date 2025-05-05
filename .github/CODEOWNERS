@@ -9,7 +9,7 @@
 /docs/                @DataDog/documentation @DataDog/agent-integrations
 *.md                  @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
-conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-metrics-logs
+conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/assets             @DataDog/documentation @DataDog/agent-integrations
@@ -228,6 +228,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /brevo/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 /brevo/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
 /brevo/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/checkpoint_harmony_email_and_collaboration/                         @DataDog/saas-integrations
+/checkpoint_harmony_email_and_collaboration/*.md                     @DataDog/saas-integrations @DataDog/documentation
+/checkpoint_harmony_email_and_collaboration/manifest.json            @DataDog/saas-integrations @DataDog/documentation
+/checkpoint_harmony_email_and_collaboration/assets/logs/             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /cisco_umbrella_dns/                                                 @DataDog/saas-integrations
 /cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
@@ -509,6 +514,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
 /gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
 
+/openvpn/                                                           @DataDog/agent-integrations
+/openvpn/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/openvpn/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/openvpn/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
@@ -516,7 +526,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
-/.github/workflows/build-deps.yml                                     @DataDog/agent-delivery
+/.github/workflows/resolve-build-deps.yml                             @DataDog/agent-delivery
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.github/CODEOWNERS                                                   @DataDog/agent-integrations @DataDog/saas-integrations
 /.github/workflows/config/labeler.yml                                 @DataDog/agent-integrations @DataDog/saas-integrations

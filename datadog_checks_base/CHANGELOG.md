@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 37.10.1 / 2025-04-30
+
+***Fixed***:
+
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
+## 37.10.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Added execution indicators to StatementMetrics to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20037](https://github.com/DataDog/integrations-core/pull/20037))
+
+***Fixed***:
+
+* Fix a spike in monotonic counter values after a failed openmetrics scrape ([#20063](https://github.com/DataDog/integrations-core/pull/20063))
+
 ## 37.9.0 / 2025-03-27
 
 ***Security***:

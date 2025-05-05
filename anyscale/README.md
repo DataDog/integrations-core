@@ -17,7 +17,7 @@ See the [Ray integration's Data Collected section][4].
 Need help? Contact [Datadog support][3].
 
 [1]: https://docs.anyscale.com/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.datadoghq.com/integrations/ray/?tab=host#data-collected
 [5]: https://docs.ray.io/en/latest/

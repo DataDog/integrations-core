@@ -255,6 +255,8 @@ def test_procedure_metrics(
 
     instance_tags = dbm_instance.get('tags', [])
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags.add("database_hostname:stubbed.hostname")
+    expected_instance_tags.add("database_instance:stubbed.hostname")
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")

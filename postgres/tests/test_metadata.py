@@ -54,12 +54,21 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert statement_timeout_setting['setting'] == '10000'
 
 
-def test_collect_schemas(integration_check, dbm_instance, aggregator):
+@pytest.mark.parametrize(
+    "use_default_ignore_schemas_owned_by",
+    [
+        pytest.param(True, id="default_ignore_schemas_owned_by"),
+        pytest.param(False, id="custom_ignore_schemas_owned_by"),
+    ],
+)
+def test_collect_schemas(integration_check, dbm_instance, aggregator, use_default_ignore_schemas_owned_by):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600}
     dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
     check = integration_check(dbm_instance)
+    if not use_default_ignore_schemas_owned_by:
+        check._config.ignore_schemas_owned_by = ['rds_superuser']
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
@@ -81,6 +90,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         "pgtable",
         "pg_newtable",
         "cities",
+        "sample_foreign_d73a8c",
     }
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
@@ -88,6 +98,17 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
     tables_got = []
+
+    schemas_want = {
+        'public',
+        'public2',
+    }
+
+    if not use_default_ignore_schemas_owned_by:
+        schemas_want.add('rdsadmin_test')
+        tables_set.add('rds_admin_misc')
+
+    schemas_got = set()
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         assert schema_event.get("timestamp") is not None
@@ -99,8 +120,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
         schema_name = schema['name']
-        assert schema_name in ['public', 'public2', 'datadog']
-        if schema_name == 'public':
+        assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test']
+        schemas_got.add(schema_name)
+        if schema_name in ['public', 'rdsadmin_test']:
             for table in schema['tables']:
                 tables_got.append(table['name'])
 
@@ -150,6 +172,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
                         assert_fields(keys, ["num_partitions", "partition_key"])
                         assert table['num_partitions'] == 0
 
+    assert schemas_want == schemas_got
     assert_fields(tables_got, tables_set)
     assert_not_fields(tables_got, tables_not_reported_set)
 
@@ -307,7 +330,7 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
             database_metadata = schema_event['metadata']
             schema = database_metadata[0]['schemas'][0]
             schema_name = schema['name']
-            assert schema_name in ['public', 'public2', 'datadog']
+            assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test']
             if schema_name == 'public':
                 for table in schema['tables']:
                     tables_got.append(table['name'])
