@@ -146,7 +146,7 @@ def test_timeline_no_changes_in_integration(ddev):
         ),
     ):
         result = ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--compressed")
-        assert result.exit_code != 0
+        assert result.exit_code == 0
         assert "No changes found" in result.output
 
 

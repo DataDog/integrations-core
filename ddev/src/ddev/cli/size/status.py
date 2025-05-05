@@ -79,6 +79,7 @@ def status(
                 status_mode(
                     app, repo_path, plat, ver, compressed, csv, markdown, json, i, path, show_gui, len(combinations)
                 )
+
         else:
             status_mode(
                 app,
