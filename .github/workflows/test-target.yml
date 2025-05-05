@@ -202,8 +202,8 @@ jobs:
             "DD_GITHUB_USER": "{4}",
             "DD_GITHUB_TOKEN": "{5}"
           }}',
-          secrets.DOCKER_USERNAME_2,
-          secrets.DOCKER_ACCESS_TOKEN_2,
+          secrets.DOCKER_USERNAME,
+          secrets.DOCKER_ACCESS_TOKEN,
           secrets.ORACLE_DOCKER_USERNAME,
           secrets.ORACLE_DOCKER_PASSWORD_2,
           github.actor,
