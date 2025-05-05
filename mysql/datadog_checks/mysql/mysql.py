@@ -25,6 +25,7 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 
 from .__about__ import __version__
@@ -103,8 +104,6 @@ class MySql(AgentCheck):
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
     GROUP_REPLICATION_SERVICE_CHECK_NAME = 'mysql.replication.group.status'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
-
-    HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
@@ -494,6 +493,20 @@ class MySql(AgentCheck):
             return connection_args
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
+        if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
+            # if we are running on AWS, check if IAM auth is enabled
+            aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+            if aws_managed_authentication['enabled']:
+                # if IAM auth is enabled, region must be set. Validation is done in the config
+                region = self.cloud_metadata['aws']['region']
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    region=region,
+                    role_arn=aws_managed_authentication.get('role_arn'),
+                )
+                connection_args.update({'user': self._config.user, 'passwd': password})
         if self._config.mysql_sock != '':
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
