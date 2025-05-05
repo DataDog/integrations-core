@@ -29,7 +29,7 @@ E2E_METADATA = {
         'apt-get update',
         'apt-get install -y librdkafka-dev',
         # Finally, we can install the package
-        '/opt/datadog-agent/embedded/bin/pip install mapr-streams-python',
+        '/opt/datadog-agent/embedded/bin/pip install mapr-streams-python==0.11.0.2',
     ]
 }
 

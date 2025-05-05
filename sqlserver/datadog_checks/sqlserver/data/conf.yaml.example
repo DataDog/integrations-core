@@ -437,14 +437,6 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the activity collection interval in seconds. Each collection involves querying several
-        ## different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
-        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
-        ## Running different instances with different collection intervals is not supported.
-        #
-        # collection_interval: 10
-
     ## @param stored_procedure_characters_limit - integer - optional - default: 500
     ## Limit the number of characters of the text of a stored procedure that is collected.
     ## The characters limit is applicable to both query metrics and query samples.

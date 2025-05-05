@@ -17,6 +17,11 @@ concurrency:
 jobs:
   test:
     uses: ./.github/workflows/test-all.yml
+
+    # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+    permissions:
+      id-token: write
+
     with:
       repo: core
 

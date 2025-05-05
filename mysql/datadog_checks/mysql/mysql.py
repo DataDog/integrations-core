@@ -25,6 +25,7 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 
 from .__about__ import __version__
@@ -69,14 +70,14 @@ from .queries import (
     SQL_GROUP_REPLICATION_METRICS_8_0_2,
     SQL_GROUP_REPLICATION_PLUGIN_STATUS,
     SQL_INNODB_ENGINES,
-    SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
     SQL_QUERY_SYSTEM_TABLE_SIZE,
     SQL_QUERY_TABLE_ROWS_STATS,
     SQL_QUERY_TABLE_SIZE,
+    SQL_REPLICA_PROCESS_LIST,
+    SQL_REPLICA_WORKER_THREADS,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
-    SQL_WORKER_THREADS,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -104,8 +105,6 @@ class MySql(AgentCheck):
     GROUP_REPLICATION_SERVICE_CHECK_NAME = 'mysql.replication.group.status'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
-    HA_SUPPORTED = True
-
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
@@ -116,6 +115,8 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._is_aurora = None
+        self._performance_schema_enabled = None
+        self._events_wait_current_enabled = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
         self.add_core_tags()
@@ -128,9 +129,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self.performance_schema_enabled = None
         self.userstat_enabled = None
-        self.events_wait_current_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -216,6 +215,20 @@ class MySql(AgentCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
+    @property
+    def performance_schema_enabled(self):
+        # type: () -> bool
+        if self._performance_schema_enabled is None:
+            self._check_performance_schema_enabled(self._conn)
+        return self._performance_schema_enabled
+
+    @property
+    def events_wait_current_enabled(self):
+        # type: () -> bool
+        if self._events_wait_current_enabled is None:
+            self._check_events_wait_current_enabled(self._conn)
+        return self._events_wait_current_enabled
+
     def add_core_tags(self):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
@@ -283,9 +296,9 @@ class MySql(AgentCheck):
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
             results = dict(cursor.fetchall())
-            self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+            self._performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
 
-        return self.performance_schema_enabled
+        return self._performance_schema_enabled
 
     def check_userstat_enabled(self, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -299,11 +312,11 @@ class MySql(AgentCheck):
         if not self._config.dbm_enabled or not self._config.activity_config.get("enabled", True):
             self.log.debug("skipping _check_events_wait_current_enabled because dbm activity collection is not enabled")
             return
-        if not self._check_performance_schema_enabled(db):
+        if not self.performance_schema_enabled:
             # set events_wait_current_enabled to False if performance_schema is not enabled
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
-            self.events_wait_current_enabled = False
-            return self.events_wait_current_enabled
+            self._events_wait_current_enabled = False
+            return self._events_wait_current_enabled
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(
                 """\
@@ -317,11 +330,11 @@ class MySql(AgentCheck):
             events_wait_current_enabled = self._get_variable_enabled(results, 'events_waits_current')
             self.log.debug(
                 '`events_wait_current_enabled` was %s. Setting it to %s',
-                self.events_wait_current_enabled,
+                self._events_wait_current_enabled,
                 events_wait_current_enabled,
             )
-            self.events_wait_current_enabled = events_wait_current_enabled
-        return self.events_wait_current_enabled
+            self._events_wait_current_enabled = events_wait_current_enabled
+        return self._events_wait_current_enabled
 
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
@@ -480,6 +493,20 @@ class MySql(AgentCheck):
             return connection_args
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
+        if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
+            # if we are running on AWS, check if IAM auth is enabled
+            aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+            if aws_managed_authentication['enabled']:
+                # if IAM auth is enabled, region must be set. Validation is done in the config
+                region = self.cloud_metadata['aws']['region']
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    region=region,
+                    role_arn=aws_managed_authentication.get('role_arn'),
+                )
+                connection_args.update({'user': self._config.user, 'passwd': password})
         if self._config.mysql_sock != '':
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
@@ -717,8 +744,7 @@ class MySql(AgentCheck):
         # Get replica stats
         replication_channel = self._config.options.get('replication_channel')
         results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
-        nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
-        results.update(self._get_replica_status(db, above_560, nonblocking))
+        results.update(self._get_replica_status(db, above_560))
         return REPLICA_VARS
 
     def _collect_group_replica_metrics(self, db, results):
@@ -1172,7 +1198,7 @@ class MySql(AgentCheck):
 
         return replica_results
 
-    def _get_replica_status(self, db, above_560, nonblocking):
+    def _get_replica_status(self, db, above_560):
         """
         Retrieve the replicas statuses using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
@@ -1180,12 +1206,12 @@ class MySql(AgentCheck):
         """
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
-                if above_560 and nonblocking:
+                if above_560 and self.performance_schema_enabled:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
-                    cursor.execute(SQL_WORKER_THREADS)
+                    cursor.execute(SQL_REPLICA_WORKER_THREADS)
                 else:
-                    cursor.execute(SQL_PROCESS_LIST)
+                    cursor.execute(SQL_REPLICA_PROCESS_LIST)
                 replica_results = cursor.fetchall()
                 replicas = 0
                 for _ in replica_results:

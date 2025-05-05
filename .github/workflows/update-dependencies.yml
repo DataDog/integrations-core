@@ -32,7 +32,7 @@ jobs:
       id: token-generator
       with:
         app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY_2 }}
         repositories: integrations-core
     - name: Update dependencies
       run: |-

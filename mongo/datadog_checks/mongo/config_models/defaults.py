@@ -40,6 +40,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_free_storage_metrics():
+    return True
+
+
 def instance_min_collection_interval():
     return 15
 
