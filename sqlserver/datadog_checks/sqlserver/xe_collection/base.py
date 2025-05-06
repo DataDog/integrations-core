@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db.utils import (
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database
 
@@ -112,7 +113,8 @@ class XESessionBase(DBMAsyncJob):
     ]
 
     # Fields that should use text representation when available
-    TEXT_FIELDS = ["result", "data_stream"]
+    # Both rpc_completed and batch_completed use the result field
+    TEXT_FIELDS = ["result"]
 
     def __init__(self, check, config, session_name):
         self.session_name = session_name
@@ -144,17 +146,11 @@ class XESessionBase(DBMAsyncJob):
             ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
         )
 
-        # Obfuscator options - use the same options as the main check
-        self._obfuscator_options = getattr(
-            self._config, 'obfuscator_options', {'dbms': 'mssql', 'obfuscation_mode': 'replace'}
-        )
-
         # Register event handlers - subclasses will override this
         self._event_handlers = {}
 
-        # Get configuration based on session name - we already know it's enabled since
-        # the registry only creates enabled handlers, but we still need the details
-        self._enabled = True  # We assume it's enabled since the registry only creates enabled handlers
+        # We already know it's enabled since the registry only creates enabled handlers
+        self._enabled = True
 
         # Log configuration details
         self._log.info(
@@ -165,7 +161,7 @@ class XESessionBase(DBMAsyncJob):
         super(XESessionBase, self).__init__(
             check,
             run_sync=True,
-            enabled=True,  # Always enabled - registry only creates enabled handlers
+            enabled=True,
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(self.collection_interval),
@@ -223,6 +219,7 @@ class XESessionBase(DBMAsyncJob):
 
                 return cursor.fetchone() is not None
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_ring_buffer(self):
         """
         Query the ring buffer data and parse the XML on the client side.
@@ -261,7 +258,7 @@ class XESessionBase(DBMAsyncJob):
         if not raw_xml:
             return None, query_time, 0
 
-        # Time the XML parsing separately
+        # Time the XML parsing
         parse_start_time = time()
         filtered_events = self._filter_ring_buffer_events(raw_xml)
         if not filtered_events:
@@ -275,6 +272,7 @@ class XESessionBase(DBMAsyncJob):
 
         return combined_xml, query_time, parse_time
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_event_file(self):
         """Query the event file for this XE session with timestamp filtering"""
         query_start_time = time()
@@ -344,6 +342,7 @@ class XESessionBase(DBMAsyncJob):
                     query_time = time() - query_start_time
                     return None, query_time, 0
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _filter_ring_buffer_events(self, xml_data):
         """
         Parse and filter ring buffer XML data using lxml.etree.iterparse.
@@ -406,7 +405,7 @@ class XESessionBase(DBMAsyncJob):
         try:
             return int(value)
         except (ValueError, TypeError) as e:
-            self._log.debug(f"Error converting to int: {e}")
+            self._log.warning(f"Error converting to int: {e}")
             return default
 
     def _extract_text_representation(self, element, default=None):
@@ -442,6 +441,7 @@ class XESessionBase(DBMAsyncJob):
         else:
             event_data["duration_ms"] = None
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _process_events(self, xml_data):
         """Template method for processing events with standardized XML parsing"""
         try:
@@ -542,19 +542,13 @@ class XESessionBase(DBMAsyncJob):
         Determine the dbm_type based on the session name.
         Returns the appropriate dbm_type for the current session.
         """
-        # Sessions that produce query_completion events
-        query_completion_sessions = [
-            "datadog_query_completions",
-            "datadog_sql_statement",
-            "datadog_sp_statement",
-        ]
 
         if self.session_name == "datadog_query_errors":
             return "query_error"
-        elif self.session_name in query_completion_sessions:
+        elif self.session_name == "datadog_query_completions":
             return "query_completion"
         else:
-            self._log.debug(f"Unrecognized session name: {self.session_name}, using default dbm_type")
+            self._log.warning(f"Unrecognized session name: {self.session_name}, using default dbm_type")
             return "query_completion"
 
     def _create_event_payload(self, raw_event):
@@ -590,12 +584,13 @@ class XESessionBase(DBMAsyncJob):
             "query_details": normalized_event,
         }
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def run_job(self):
         """Run the XE session collection job"""
         job_start_time = time()
         self._log.info(f"Running job for {self.session_name} session")
         if not self.session_exists():
-            self._log.warning(f"XE session {self.session_name} not found or not running")
+            self._log.warning(f"XE session {self.session_name} not found or not running.")
             return
 
         # Get the XML data and timing info
@@ -626,7 +621,6 @@ class XESessionBase(DBMAsyncJob):
                 gap_seconds = (curr_dt - prev_dt).total_seconds()
             except Exception:
                 gap_seconds = None
-            # Log session name, timestamps, and gap
             self._log.debug(
                 f"[{self.session_name}] Timestamp gap: last={self._last_event_timestamp} "
                 f"first={current_first_timestamp}" + (f" gap_seconds={gap_seconds}" if gap_seconds is not None else "")
@@ -643,14 +637,15 @@ class XESessionBase(DBMAsyncJob):
         rqt_time = 0
 
         # Log a sample of events (up to 3) for debugging
-        sample_size = min(3, len(events))
-        sample_events = events[:sample_size]
+        if self._log.isEnabledFor(self._log.debug_level):
+            sample_size = min(3, len(events))
+            sample_events = events[:sample_size]
 
-        try:
-            formatted_json = json_module.dumps(sample_events, indent=2, default=str)
-            self._log.info(f"Sample events from {self.session_name} session:\n{formatted_json}")
-        except Exception as e:
-            self._log.error(f"Error formatting events for logging: {e}")
+            try:
+                formatted_json = json_module.dumps(sample_events, indent=2, default=str)
+                self._log.debug(f"Sample events from {self.session_name} session:\n{formatted_json}")
+            except Exception as e:
+                self._log.error(f"Error formatting events for logging: {e}")
 
         # Determine the key for the batched events array based on session name
         batch_key = (
@@ -669,27 +664,6 @@ class XESessionBase(DBMAsyncJob):
                 obfuscated_event, raw_sql_fields = self._obfuscate_sql_fields(event)
                 obfuscation_time += time() - obfuscate_start
 
-                # Check for ALLEN TEST comment in raw SQL fields
-                if raw_sql_fields:
-                    # Check each field for ALLEN TEST comment
-                    for field_name, field_value in raw_sql_fields.items():
-                        if (
-                            field_name in ['statement', 'sql_text', 'batch_text']
-                            and field_value
-                            and '-- ALLEN TEST' in field_value
-                        ):
-                            self._log.info(
-                                f"ALLEN TEST QUERY FOUND in XE session {self.session_name}: "
-                                f"host={self._check.resolved_hostname}, field={field_name}, "
-                                f"session_id={obfuscated_event.get('session_id', 'UNKNOWN')}, "
-                                f"event_fire_timestamp={obfuscated_event.get('event_fire_timestamp', 'UNKNOWN')}, "
-                                f"query_start={obfuscated_event.get('query_start', 'UNKNOWN')}, "
-                                f"duration_ms={obfuscated_event.get('duration_ms', 'UNKNOWN')}, "
-                                f"text={field_value[:100]}, "
-                                f"full_event={json_module.dumps(obfuscated_event, default=str)}"
-                            )
-                            break
-
                 # Create a properly structured payload for the individual event
                 payload = self._create_event_payload(obfuscated_event)
 
@@ -707,7 +681,7 @@ class XESessionBase(DBMAsyncJob):
 
                     if rqt_event:
                         # For now, just log the first RQT event in each batch
-                        if event == events[0]:
+                        if event == events[0] and self._log.isEnabledFor(self._log.debug_level):
                             try:
                                 rqt_payload_json = json_module.dumps(rqt_event, default=str, indent=2)
                                 self._log.debug(f"Sample {self.session_name} RQT event payload:\n{rqt_payload_json}")
@@ -746,20 +720,21 @@ class XESessionBase(DBMAsyncJob):
                 batch_key: all_query_details,
             }
 
-            # Log the batched payload for debugging (truncated for brevity)
-            try:
-                # Only include up to 3 events in the log for brevity
-                log_payload = batched_payload.copy()
-                if len(all_query_details) > 3:
-                    log_payload[batch_key] = all_query_details[:3]
-                    log_payload[batch_key].append({"truncated": f"...and {len(all_query_details) - 3} more events"})
+            # Log the batched payload for debugging
+            if self._log.isEnabledFor(self._log.debug_level):
+                try:
+                    # Only include up to 3 events in the log for brevity
+                    log_payload = batched_payload.copy()
+                    if len(all_query_details) > 3:
+                        log_payload[batch_key] = all_query_details[:3]
+                        log_payload[batch_key].append({"truncated": f"...and {len(all_query_details) - 3} more events"})
 
-                payload_json = json_module.dumps(log_payload, default=str, indent=2)
-                self._log.debug(
-                    f"Batched {self.session_name} payload with {len(all_query_details)} events:\n{payload_json}"
-                )
-            except Exception as e:
-                self._log.error(f"Error serializing batched payload for logging: {e}")
+                    payload_json = json_module.dumps(log_payload, default=str, indent=2)
+                    self._log.debug(
+                        f"Batched {self.session_name} payload with {len(all_query_details)} events:\n{payload_json}"
+                    )
+                except Exception as e:
+                    self._log.error(f"Error serializing batched payload for logging: {e}")
 
             # Send the batched payload
             serialized_payload = json.dumps(batched_payload, default=default_json_event_encoding)
@@ -776,6 +751,7 @@ class XESessionBase(DBMAsyncJob):
             f"total={total_time:.3f}s"
         )
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _obfuscate_sql_fields(self, event):
         """SQL field obfuscation and signature creation"""
         obfuscated_event = event.copy()
@@ -792,7 +768,7 @@ class XESessionBase(DBMAsyncJob):
                 try:
                     # Obfuscate the SQL
                     result = obfuscate_sql_with_metadata(
-                        event[field], self._obfuscator_options, replace_null_character=True
+                        event[field], self._config.obfuscator_options, replace_null_character=True
                     )
 
                     # Store the obfuscated SQL
@@ -844,6 +820,7 @@ class XESessionBase(DBMAsyncJob):
                 return field
         return None
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _create_rqt_event(self, event, raw_sql_fields, query_details):
         """
         Create a Raw Query Text (RQT) event for a raw SQL statement.
