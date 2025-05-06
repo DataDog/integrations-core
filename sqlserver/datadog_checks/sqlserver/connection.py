@@ -639,13 +639,7 @@ class Connection(object):
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             escaped_password = password
-            escaped_password = password.replace(
-                '{', '{{'
-            ).replace(
-                '}', '}}'
-            ).replace(
-                '"', '""'
-            ) 
+            escaped_password = password.replace('{', '{{').replace('}', '}}').replace('"', '""')
             conn_str += 'PWD="{}";'.format(escaped_password)
 
         return conn_str
