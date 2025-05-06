@@ -6,7 +6,7 @@ Get metrics from KubeVirt in real time to:
 
 - Visualize and monitor KubeVirt states
 - Monitor virtual machines running on Kubernetes
-- Be notified about KubeVirt failovers and events.
+- Receive notifications about KubeVirt failovers and events
 
 The Datadog KubeVirt integration monitors the various components of KubeVirt to provide comprehensive visibility into
 your virtualized workloads running on Kubernetes.
