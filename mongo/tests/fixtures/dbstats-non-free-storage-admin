@@ -1,0 +1,77 @@
+{
+    "raw": {
+        "shard01/shard01a:27018,shard01b:27018": {
+            "db": "admin",
+            "collections": 1,
+            "views": 0,
+            "objects": 2,
+            "avgObjSize": 111.0,
+            "dataSize": 222.0,
+            "storageSize": 32768.0,
+            "numExtents": 0,
+            "indexes": 1,
+            "indexSize": 32768.0,
+            "scaleFactor": 1.0,
+            "ok": 1.0
+        },
+        "shard03/shard03a:27020,shard03b:27020": {
+            "db": "admin",
+            "collections": 1,
+            "views": 0,
+            "objects": 2,
+            "avgObjSize": 111.0,
+            "dataSize": 222.0,
+            "storageSize": 32768.0,
+            "numExtents": 0,
+            "indexes": 1,
+            "indexSize": 32768.0,
+            "scaleFactor": 1.0,
+            "ok": 1.0
+        },
+        "shard02/shard02a:27019,shard02b:27019": {
+            "db": "admin",
+            "collections": 1,
+            "views": 0,
+            "objects": 2,
+            "avgObjSize": 111.0,
+            "dataSize": 222.0,
+            "storageSize": 32768.0,
+            "numExtents": 0,
+            "indexes": 1,
+            "indexSize": 32768.0,
+            "scaleFactor": 1.0,
+            "ok": 1.0
+        }
+    },
+    "objects": 6,
+    "avgObjSize": 111.0,
+    "dataSize": 666,
+    "storageSize": 98304,
+    "numExtents": 0,
+    "indexes": 3,
+    "indexSize": 98304,
+    "scaleFactor": 1,
+    "fileSize": 0,
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600245945,
+            "i": 21
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600245948,
+                "i": 1
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    }
+}

@@ -100,6 +100,10 @@ def instance_ignore_databases():
     ]
 
 
+def instance_ignore_schemas_owned_by():
+    return ['rds_superuser', 'rdsadmin']
+
+
 def instance_log_unobfuscated_plans():
     return False
 

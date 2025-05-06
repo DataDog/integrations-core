@@ -261,6 +261,7 @@ class InstanceConfig(BaseModel):
     host: str
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
+    ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None
