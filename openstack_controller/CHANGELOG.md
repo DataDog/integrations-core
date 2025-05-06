@@ -9,7 +9,7 @@
 * Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
 * Add failover support with Agent High Availability feature. ([#19992](https://github.com/DataDog/integrations-core/pull/19992))
 
-## 8.3.1 / 2025-03-19
+## 8.3.1 / 2025-03-19 / Agent 7.65.0
 
 ***Fixed***:
 
