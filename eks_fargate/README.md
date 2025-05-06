@@ -927,6 +927,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for monitoring AWS Fargate][32]
 - [How to collect metrics and logs from AWS Fargate workloads][27]
 - [AWS Fargate monitoring with Datadog][28]
+- [Trace API Gateway when proxying requests to ECS Fargate][37]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
@@ -936,18 +937,18 @@ Additional helpful documentation, links, and articles:
 [6]: http://docs.datadoghq.com/integrations/amazon_eks/#setup
 [7]: http://docs.datadoghq.com/agent/kubernetes
 [8]: http://docs.datadoghq.com/agent/kubernetes/daemonset_setup
-[9]: https://app.datadoghq.com/account/settings#integrations/kubernetes
-[10]: https://app.datadoghq.com/account/settings#integrations/amazon-web-services
-[11]: https://app.datadoghq.com/account/settings#integrations/amazon-eks
-[12]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
+[9]: /account/settings#integrations/kubernetes
+[10]: /account/settings#integrations/amazon-web-services
+[11]: /account/settings#integrations/amazon-eks
+[12]: /account/settings#integrations/amazon-ec2
 [13]: http://docs.datadoghq.com/integrations/kubernetes
-[14]: https://app.datadoghq.com/organization-settings/api-keys
+[14]: /organization-settings/api-keys
 [15]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [16]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
-[17]: https://app.datadoghq.com/containers
+[17]: /containers
 [18]: http://docs.datadoghq.com/tracing/setup
-[19]: https://app.datadoghq.com/containers
-[20]: https://app.datadoghq.com/process
+[19]: /containers
+[20]: /process
 [21]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
 [22]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
 [23]: https://docs.datadoghq.com/serverless/libraries_integrations/forwarder/
@@ -964,3 +965,4 @@ Additional helpful documentation, links, and articles:
 [34]: https://docs.datadoghq.com/containers/guide/clustercheckrunners
 [35]: http://docs.datadoghq.com/agent/cluster_agent
 [36]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[37]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway

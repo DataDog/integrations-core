@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.1.0 / 2025-04-25
+
+***Added***:
+
+* [mongo] Provide a way to optionally disable collecting free storage metrics ([#20135](https://github.com/DataDog/integrations-core/pull/20135))
+
 ## 9.0.1 / 2025-04-17
 
 ***Fixed***:

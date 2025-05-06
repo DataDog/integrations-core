@@ -109,6 +109,8 @@ def test_e2e(dd_agent_check, master_instance):
         aggregator.assert_metric('redis.mem.vm_eval', count=2, tags=tags)
         aggregator.assert_metric('redis.mem.vm_functions', count=2, tags=tags)
         aggregator.assert_metric('redis.mem.vm_total', count=2, tags=tags)
+        aggregator.assert_metric('redis.replication.input_total_bytes', count=2, tags=tags)
+        aggregator.assert_metric('redis.replication.output_total_bytes', count=2, tags=tags)
 
     assert_optional_slowlog_metrics(aggregator)
     aggregator.assert_all_metrics_covered()

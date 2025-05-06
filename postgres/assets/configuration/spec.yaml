@@ -107,6 +107,23 @@ files:
           - cloudsqladmin
           - alloydbadmin
           - alloydbmetadata
+    - name: ignore_schemas_owned_by
+      description: |
+        A list of database users which own schemas to ignore.
+        No metrics or statement samples will be collected for these schemas.
+        Each value can be a plain string or a Postgres pattern.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - rds_superuser
+          - rdsadmin
+          - user123
+          - 'dev_%_owner'
+        default:
+          - rds_superuser
+          - rdsadmin
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -553,6 +570,7 @@ files:
           value:
             type: number
             example: 10
+          hidden: true
         - name: payload_row_limit
           description: |
             Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger

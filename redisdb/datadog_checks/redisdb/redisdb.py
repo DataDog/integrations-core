@@ -107,6 +107,8 @@ class Redis(AgentCheck):
         'repl_backlog_histlen': 'redis.replication.backlog_histlen',
         'master_repl_offset': 'redis.replication.master_repl_offset',
         'slave_repl_offset': 'redis.replication.slave_repl_offset',
+        'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
+        'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
     }
 
     RATE_KEYS = {

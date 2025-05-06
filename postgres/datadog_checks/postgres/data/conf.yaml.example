@@ -104,6 +104,17 @@ instances:
     #   - alloydbadmin
     #   - alloydbmetadata
 
+    ## @param ignore_schemas_owned_by - list of strings - optional
+    ## A list of database users which own schemas to ignore.
+    ## No metrics or statement samples will be collected for these schemas.
+    ## Each value can be a plain string or a Postgres pattern.
+    #
+    # ignore_schemas_owned_by:
+    #   - rds_superuser
+    #   - rdsadmin
+    #   - user123
+    #   - dev_%_owner
+
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
@@ -499,12 +510,6 @@ instances:
         ## Enable collection of query activity. Requires `dbm: true`.
         #
         # enabled: true
-
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
-        ## query_samples configured collection_interval.
-        #
-        # collection_interval: 10
 
         ## @param payload_row_limit - number - optional - default: 3500
         ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
