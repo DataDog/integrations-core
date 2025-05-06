@@ -32,9 +32,8 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## The hostname to connect to.
-    ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
-    ## provide a value for the sock key.
+    ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
+    ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
     #
   - host: localhost
 
@@ -65,6 +64,25 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
+    ## which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
     ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
@@ -85,6 +103,17 @@ instances:
     #   - cloudsqladmin
     #   - alloydbadmin
     #   - alloydbmetadata
+
+    ## @param ignore_schemas_owned_by - list of strings - optional
+    ## A list of database users which own schemas to ignore.
+    ## No metrics or statement samples will be collected for these schemas.
+    ## Each value can be a plain string or a Postgres pattern.
+    #
+    # ignore_schemas_owned_by:
+    #   - rds_superuser
+    #   - rdsadmin
+    #   - user123
+    #   - dev_%_owner
 
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -482,12 +511,6 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
-        ## query_samples configured collection_interval.
-        #
-        # collection_interval: 10
-
         ## @param payload_row_limit - number - optional - default: 3500
         ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
         ## than the maximum rows set, then the top N longest running transactions will be reported.
@@ -831,6 +854,23 @@ instances:
         ## Set to `true` to keep JSON path expressions (e.g. `data->'key'`) in your normalized SQL statements.
         #
         # keep_json_path: false
+
+    ## Configure the collection of raw query statements in query activity and execution plans.
+    ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+    ## or personally identifiable information in query text.
+    ## Enabling this option will allow the collection and ingestion of raw query statements and 
+    ## execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+    ## This option is disabled by default.
+    ## Note: Collection of raw query statements is currently in preview.
+    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
+    ## This option only applies when dbm is enabled.
+    #
+    # collect_raw_query_statement:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Set to `true` to collect the raw query statements.
+        #
+        # enabled: false
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.

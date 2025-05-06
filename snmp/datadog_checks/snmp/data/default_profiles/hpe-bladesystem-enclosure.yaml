@@ -1,5 +1,4 @@
 extends:
-  - _generic-if.yaml
   - _generic-ucd.yaml
   - _hp.yaml
   - _hp-base.yaml

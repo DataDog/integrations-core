@@ -26,7 +26,7 @@ If you don't specify through [AWS Fargate Profile][5] that your pods should run 
 
 ### Installation
 
-To get the best observability coverage monitoring workloads in AWS EKS Fargate, install the Datadog integrations for:
+To get the best observability coverage monitoring workloads in Amazon EKS Fargate, install the Datadog integrations for:
 
 - [Kubernetes][9]
 - [AWS][10]
@@ -43,17 +43,17 @@ If the Agent is running as a sidecar, it can communicate only with containers on
 
 ### Configuration
 
-To collect data from your applications running in AWS EKS Fargate over a Fargate node, follow these setup steps:
+To collect data from your applications running in Amazon EKS Fargate over a Fargate node, follow these setup steps:
 
-- [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
+- [Set up Amazon EKS Fargate RBAC rules](#amazon-eks-fargate-rbac).
 - [Deploy the Agent as a sidecar](#running-the-agent-as-a-sidecar).
 - Set up Datadog [metrics](#metrics-collection), [logs](#log-collection), [events](#events-collection), and [traces](#traces-collection) collection.
 
 To have EKS Fargate containers in the Datadog Live Container View, enable `shareProcessNamespace` on your pod spec. See [Process Collection](#process-collection).
 
-#### AWS EKS Fargate RBAC
+#### Amazon EKS Fargate RBAC
 
-Use the following Agent RBAC when deploying the Agent as a sidecar in AWS EKS Fargate:
+Use the following Agent RBAC when deploying the Agent as a sidecar in Amazon EKS Fargate:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -119,9 +119,9 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 **Prerequisites**
 
-* Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
+* Set up RBAC in the application namespace(s). See the [Amazon EKS Fargate RBAC](#amazon-eks-fargate-rbac) section on this page.
 * Bind above RBAC to application pod by setting Service Account name.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
+* Create a Kubernetes secret `datadog-secret` containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
    kubectl create secret generic datadog-secret -n datadog-agent \
@@ -130,6 +130,8 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    ```
    For more information how these secrets are used, see the [Cluster Agent Setup][35].
+
+**Note**: You cannot change the name of the secret containing the Datadog API key and Cluster Agent token. It must be `datadog-secret` for the Agent in the sidecar to connect to Datadog.
 
 ###### Setup
 
@@ -291,9 +293,9 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 **Prerequisites**
 
-* Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
+* Set up RBAC in the application namespace(s). See the [Amazon EKS Fargate RBAC](#amazon-eks-fargate-rbac) section on this page.
 * Bind above RBAC to application pod by setting Service Account name.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
+* Create a Kubernetes secret `datadog-secret` containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
    kubectl create secret generic datadog-secret -n datadog-agent \
@@ -302,6 +304,8 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    ```
    For more information how these secrets are used, see the [Cluster Agent Setup][35].
+
+**Note**: You cannot change the name of the secret containing the Datadog API key and Cluster Agent token. It must be `datadog-secret` for the Agent in the sidecar to connect to Datadog.
 
 ###### Setup
 
@@ -793,7 +797,7 @@ spec:
 
 ## Events collection
 
-To collect events from your AWS EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
+To collect events from your Amazon EKS Fargate API server, run a [Datadog Cluster Agent within your EKS cluster](#running-the-cluster-agent-or-the-cluster-checks-runner) and [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
@@ -831,6 +835,89 @@ eks_fargate does not include any events.
 
 ## Troubleshooting
 
+### Datadog Agent Container Security Context
+
+The Datadog Agent container is designed to run as the dd-agent user (UID: 100). If you override the default security context by setting, for example, `runAsUser: 1000` in your pod spec, the container fails to start due to insufficient permissions. You may see errors such as:
+
+```log
+[s6-init] making user provided files available at /var/run/s6/etc...exited 0.
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-ecs.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-eks.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/60-network-check.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/59-defaults.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/60-sysprobe-check.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-ci.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/89-copy-customfiles.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/01-check-apikey.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/51-docker.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-kubernetes.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/cont-init.d/50-mesos.sh: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/trace/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/security/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/sysprobe/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/agent/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/process/run: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/security/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/trace/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/sysprobe/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/agent/finish: Operation not permitted
+s6-chown: fatal: unable to chown /var/run/s6/etc/services.d/process/finish: Operation not permitted
+[s6-init] ensuring user provided files have correct perms...exited 0.
+[fix-attrs.d] applying ownership & permissions fixes...
+[fix-attrs.d] done.
+[cont-init.d] executing container initialization scripts...
+[cont-init.d] 01-check-apikey.sh: executing... 
+[cont-init.d] 01-check-apikey.sh: exited 0.
+[cont-init.d] 50-ci.sh: executing... 
+[cont-init.d] 50-ci.sh: exited 0.
+[cont-init.d] 50-ecs.sh: executing... 
+[cont-init.d] 50-ecs.sh: exited 0.
+[cont-init.d] 50-eks.sh: executing... 
+ln: failed to create symbolic link '/etc/datadog-agent/datadog.yaml': Permission denied
+[cont-init.d] 50-eks.sh: exited 0.
+[cont-init.d] 50-kubernetes.sh: executing... 
+[cont-init.d] 50-kubernetes.sh: exited 0.
+[cont-init.d] 50-mesos.sh: executing... 
+[cont-init.d] 50-mesos.sh: exited 0.
+[cont-init.d] 51-docker.sh: executing... 
+[cont-init.d] 51-docker.sh: exited 0.
+[cont-init.d] 59-defaults.sh: executing... 
+touch: cannot touch '/etc/datadog-agent/datadog.yaml': Permission denied
+[cont-init.d] 59-defaults.sh: exited 1.
+```
+
+Since Datadog Cluster Agent v7.62+, overriding the security context for the Datadog Agent sidecar allows you to maintain consistent security standards across your Kubernetes deployments. Whether using the DatadogAgent custom resource or Helm values, you can ensure that the Agent container runs with the appropriate user, dd-agent (UID 100), as needed by your environment.
+
+By following the examples, you can deploy the Agent sidecar in environments where the default Pod security context must be overridden.
+
+Datadog Operator
+
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
+        - securityContext:
+            runAsUser: 100
+```
+
+Helm
+
+```yaml
+clusterAgent:
+  admissionController:
+    agentSidecarInjection:
+      profiles:
+        - securityContext:
+            runAsUser: 100
+```
+
 Need help? Contact [Datadog support][20].
 
 ## Further Reading
@@ -840,6 +927,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for monitoring AWS Fargate][32]
 - [How to collect metrics and logs from AWS Fargate workloads][27]
 - [AWS Fargate monitoring with Datadog][28]
+- [Trace API Gateway when proxying requests to ECS Fargate][37]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
@@ -849,18 +937,18 @@ Additional helpful documentation, links, and articles:
 [6]: http://docs.datadoghq.com/integrations/amazon_eks/#setup
 [7]: http://docs.datadoghq.com/agent/kubernetes
 [8]: http://docs.datadoghq.com/agent/kubernetes/daemonset_setup
-[9]: https://app.datadoghq.com/account/settings#integrations/kubernetes
-[10]: https://app.datadoghq.com/account/settings#integrations/amazon-web-services
-[11]: https://app.datadoghq.com/account/settings#integrations/amazon-eks
-[12]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
+[9]: /account/settings#integrations/kubernetes
+[10]: /account/settings#integrations/amazon-web-services
+[11]: /account/settings#integrations/amazon-eks
+[12]: /account/settings#integrations/amazon-ec2
 [13]: http://docs.datadoghq.com/integrations/kubernetes
-[14]: https://app.datadoghq.com/organization-settings/api-keys
+[14]: /organization-settings/api-keys
 [15]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [16]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
-[17]: https://app.datadoghq.com/containers
+[17]: /containers
 [18]: http://docs.datadoghq.com/tracing/setup
-[19]: https://app.datadoghq.com/containers
-[20]: https://app.datadoghq.com/process
+[19]: /containers
+[20]: /process
 [21]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
 [22]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
 [23]: https://docs.datadoghq.com/serverless/libraries_integrations/forwarder/
@@ -877,3 +965,4 @@ Additional helpful documentation, links, and articles:
 [34]: https://docs.datadoghq.com/containers/guide/clustercheckrunners
 [35]: http://docs.datadoghq.com/agent/cluster_agent
 [36]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[37]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway

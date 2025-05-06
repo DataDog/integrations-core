@@ -96,6 +96,8 @@ class MongoConfig(object):
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
         self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
+        self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
+        self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
 
@@ -180,6 +182,7 @@ class MongoConfig(object):
             'enabled': enabled,
             'collection_interval': self._operation_samples_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
+            'explain_verbosity': self._operation_samples_config.get('explain_verbosity', 'queryPlanner'),
             'explained_operations_cache_maxsize': int(
                 self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -199,6 +202,7 @@ class MongoConfig(object):
             'collection_interval': self._slow_operations_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
             'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
+            'explain_verbosity': self._slow_operations_config.get('explain_verbosity', 'queryPlanner'),
             'explained_operations_cache_maxsize': int(
                 self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
             ),
@@ -267,10 +271,10 @@ class MongoConfig(object):
         '''
         return {
             # $collStats and $indexStats are collected on every check run but they can get expensive on large databases
-            'collection': int(self._metrics_collection_interval.get('collection', self.min_collection_interval)),
-            'collections_indexes_stats': int(
-                self._metrics_collection_interval.get('collections_indexes_stats', self.min_collection_interval)
-            ),
+            'collection': int(self._metrics_collection_interval.get('collection', 300)),
+            'collections_indexes_stats': int(self._metrics_collection_interval.get('collections_indexes_stats', 300)),
             # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
             'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
+            'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
+            'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
         }

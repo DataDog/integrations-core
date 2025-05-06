@@ -39,7 +39,8 @@ from .common import (
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_io_metrics,
-    check_stat_replication,
+    check_stat_replication_no_slot,
+    check_stat_replication_physical_slot,
     check_stat_wal_metrics,
     check_uptime_metrics,
     check_wal_receiver_metrics,
@@ -81,7 +82,8 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_conflict_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
-    check_stat_replication(aggregator, expected_tags=expected_tags)
+    check_stat_replication_physical_slot(aggregator, expected_tags=expected_tags)
+    check_stat_replication_no_slot(aggregator, expected_tags=expected_tags)
     if is_aurora is False:
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
         check_file_wal_metrics(aggregator, expected_tags=expected_tags)
@@ -690,6 +692,15 @@ def test_pg_control(aggregator, integration_check, pg_instance):
     assert_metric_at_least(
         aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
     )
+    # After a checkpoint, we have the CHECKPOINT_ONLINE record (114 bytes) and also
+    # likely receive RUNNING_XACTS (50 bytes) record
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay_bytes', count=1, higher_bound=250, tags=dd_agent_tags
+    )
+    # And restart should be slightly more than checkpoint delay
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
+    )
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
@@ -1080,7 +1091,8 @@ def assert_state_clean(check):
 
 def assert_state_set(check):
     assert check.metrics_cache.instance_metrics
-    assert check.metrics_cache.bgw_metrics
+    if float(POSTGRES_VERSION) < 17.0:
+        assert check.metrics_cache.bgw_metrics
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics

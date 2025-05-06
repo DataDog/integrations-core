@@ -44,6 +44,6 @@ Logs are designed to collect and manage logs of SMS messages and voice calls. Th
 Need help? Contact [Datadog support][3].
 
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
 

@@ -1,0 +1,1151 @@
+{
+  "title": "Forcepoint Security Service Edge - Access Logs",
+  "description": "This dashboard provides a detailed overview of application access activity, enabling the analysis of user behavior. It includes insights into access activity trends, user details, and more.",
+  "widgets": [
+    {
+      "id": 4527699612106676,
+      "definition": {
+        "type": "image",
+        "url": "https://live-forcepoint-drupal.pantheonsite.io/sites/default/files/forcepoint.svg",
+        "url_dark_theme": "https://images.contentstack.io/v3/assets/blt36c2e63521272fdc/blt96f6ceb1b44d0e83/637242a8fa033a109b5d57e8/Forcepoint-Logo-2C-RGB-Rev-for-screen.png",
+        "sizing": "contain",
+        "margin": "sm",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 8966478528863332,
+      "definition": {
+        "type": "note",
+        "content": "**Dashboard Overview**\n\nThis dashboard provides a detailed overview of application access activity, enabling the analysis of user behavior. It includes insights into access activity trends, user details, and more.\n\nFor more information, see the [Forcepoint Security Service Edge Integration Documentation](https://docs.datadoghq.com/integrations/forcepoint_security_service_edge/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 3439200366155414,
+      "definition": {
+        "title": "Total Access Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "black_on_light_green"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 3,
+        "height": 4
+      }
+    },
+    {
+      "id": 7349152316405610,
+      "definition": {
+        "title": "Access Logs Over Time",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "alias": "LOG COUNT",
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 4,
+        "width": 9,
+        "height": 4
+      }
+    },
+    {
+      "id": 5779299512476922,
+      "definition": {
+        "title": "Top 10 Users",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@usr.name:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@usr.name",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 8174318284387742,
+      "definition": {
+        "title": "Top 10 IPs",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {},
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@network.client.ip:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@network.client.ip",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 8,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 2853292556512890,
+      "definition": {
+        "title": "Top 10 Applications",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@application:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@application",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 358857205238504,
+      "definition": {
+        "title": "Top 10 URLs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@http.url:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@http.url",
+                    "limit": 250,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 12,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 8213191674454922,
+      "definition": {
+        "title": "Top 10 Actions",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@action:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@action",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          },
+          "palette": "datadog16"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 660904109141514,
+      "definition": {
+        "title": "Top 10 Activities Performed",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@activity:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@activity",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 16,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 3097113513430876,
+      "definition": {
+        "title": "Top 10 Instance Names",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@instancename:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@instancename",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 20,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 3718179751951662,
+      "definition": {
+        "title": "Top 10 Devices",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@device:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@device",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          },
+          "palette": "datadog16"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 20,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 3950015239249476,
+      "definition": {
+        "title": "Top 10 DLP Patterns",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@dlppattern:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@dlppattern",
+                    "limit": 250,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 24,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 4195335660401256,
+      "definition": {
+        "title": "User Activity Details",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -@activity:\"\" $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@usr.name",
+                    "limit": 50,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@usr.email",
+                    "limit": 2,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@activity",
+                    "limit": 5,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@device",
+                    "limit": 2,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@network.client.ip",
+                    "limit": 5,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@location",
+                    "limit": 2,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 10000,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "cell_display_mode": "bar",
+                "alias": "LOG COUNT",
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      },
+      "layout": {
+        "x": 0,
+        "y": 28,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 7650249704123194,
+      "definition": {
+        "title": "Email Details",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access -(@emailfrom:\"\" AND @emailto:\"\") $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@emailfrom",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@emailto",
+                    "limit": 10,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@emailsubject",
+                    "limit": 5,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@emailcc",
+                    "limit": 5,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@emailbcc",
+                    "limit": 2,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  },
+                  {
+                    "facet": "@emailsenttime",
+                    "limit": 2,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 10000,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "cell_display_mode": "number",
+                "alias": "LOG COUNT",
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      },
+      "layout": {
+        "x": 0,
+        "y": 33,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 6334542784804958,
+      "definition": {
+        "title": "Geo Distribution of Client IPs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "geomap",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:forcepoint-security-service-edge service:forcepoint-sse-access $Client_IP $User_Name $URL"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@network.client.geoip.country.iso_code",
+                    "limit": 250,
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc",
+                      "metric": "count"
+                    },
+                    "should_exclude_missing": true
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "palette": "hostmap_blues",
+          "palette_flip": false
+        },
+        "view": {
+          "focus": "WORLD"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 38,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 6196036504822458,
+      "definition": {
+        "title": "Access Log Details",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {},
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "source:forcepoint-security-service-edge service:forcepoint-sse-access $Client_IP $User_Name $URL",
+              "indexes": [],
+              "storage": "hot"
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "syslog.hostname",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "compact"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 43,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Client_IP",
+      "prefix": "@network.client.ip",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "URL",
+      "prefix": "@http.url",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "User_Name",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

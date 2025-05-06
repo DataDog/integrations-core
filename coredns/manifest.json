@@ -52,7 +52,11 @@
       },
       "metrics": {
         "prefix": "coredns.",
-        "check": "coredns.request_count",
+        "check": [
+          "coredns.request_count",
+          "coredns.request_count.count",
+          "coredns.build_info"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

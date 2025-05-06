@@ -41,9 +41,11 @@ FROM performance_schema.events_statements_summary_by_digest
 WHERE schema_name IS NOT NULL
 GROUP BY schema_name"""
 
-SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'"
+SQL_REPLICA_WORKER_THREADS = (
+    "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE PROCESSLIST_COMMAND LIKE 'Binlog dump%'"
+)
 
-SQL_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
+SQL_REPLICA_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE 'Binlog dump%'"
 
 SQL_INNODB_ENGINES = """\
 SELECT engine
@@ -161,19 +163,32 @@ WHERE table_schema = %s AND table_name IN ({});
 
 SQL_FOREIGN_KEYS = """\
 SELECT
-    constraint_schema as `constraint_schema`,
-    constraint_name as `name`,
-    table_name as `table_name`,
-    group_concat(column_name order by ordinal_position asc) as column_names,
-    referenced_table_schema as `referenced_table_schema`,
-    referenced_table_name as `referenced_table_name`,
-    group_concat(referenced_column_name) as referenced_column_names
+    kcu.constraint_schema as constraint_schema,
+    kcu.constraint_name as name,
+    kcu.table_name as table_name,
+    group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
+    kcu.referenced_table_schema as referenced_table_schema,
+    kcu.referenced_table_name as referenced_table_name,
+    group_concat(kcu.referenced_column_name) as referenced_column_names,
+    rc.update_rule as update_action,
+    rc.delete_rule as delete_action
 FROM
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+LEFT JOIN
+    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+    ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+    AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
 WHERE
-    table_schema = %s AND table_name in ({})
-    AND referenced_table_name is not null
-GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
+    kcu.table_schema = %s AND kcu.table_name in ({})
+    AND kcu.referenced_table_name is not null
+GROUP BY
+    kcu.constraint_schema,
+    kcu.constraint_name,
+    kcu.table_name,
+    kcu.referenced_table_schema,
+    kcu.referenced_table_name,
+    rc.update_rule,
+    rc.delete_rule
 """
 
 SQL_PARTITION = """\

@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 11.3.0 / 2025-04-30
+
+***Added***:
+
+* Add support for license-expression when retrieving licenses from PyPi ([#20117](https://github.com/DataDog/integrations-core/pull/20117))
+
+***Fixed***:
+
+* Diasble tag signing in unit tests for release agent CLI command ([#19971](https://github.com/DataDog/integrations-core/pull/19971))
+
+## 11.2.0 / 2025-02-26
+
+***Added***:
+
+* Update version spec for datadog_checks_dev. This adds the new tls_ciphers configuration field and some fixes. ([#19720](https://github.com/DataDog/integrations-core/pull/19720))
+
+***Fixed***:
+
+* Validation error for unknown licenses says how to fix the validation. ([#19566](https://github.com/DataDog/integrations-core/pull/19566))
+* Recreate release branch if it already exists. ([#19670](https://github.com/DataDog/integrations-core/pull/19670))
+
 ## 11.1.0 / 2025-01-21
 
 ***Security***:

@@ -179,6 +179,18 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param explain_verbosity - string - optional - default: queryPlanner
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+        ## Use 'executionStats' to collect the execution details of the winning plan.
+        ## Use 'allPlansExecution' to include partial execution data captured during plan selection.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        ##
+        ## NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+        ## as it requires the execution of the query to collect additional execution and plan data.
+        #
+        # explain_verbosity: queryPlanner
+
     ## Configure collection of MongoDB slow operations.
     #
     # slow_operations:
@@ -198,6 +210,18 @@ instances:
         ## Set the maximum number of slow operations to collect per interval.
         #
         # max_operations: 1000
+
+        ## @param explain_verbosity - string - optional - default: queryPlanner
+        ## Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+        ## 'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+        ## Use 'executionStats' to collect the execution details of the winning plan.
+        ## Use 'allPlansExecution' to include partial execution data captured during plan selection.
+        ## To disable explain plans completely, set this option to 'disabled'.
+        ##
+        ## NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+        ## as it requires the execution of the query to collect additional execution and plan data.
+        #
+        # explain_verbosity: queryPlanner
 
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #
@@ -326,6 +350,25 @@ instances:
     ## the 'collections' list. This is available starting MongoDB 3.2.
     #
     # collections_indexes_stats: false
+
+    ## @param system_database_stats - boolean - optional - default: true
+    ## Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+    ## (`admin`, `local`, and `config`).
+    ## By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+    ## Set to `false` to disable collection of stats for all system databases.
+    #
+    # system_database_stats: true
+
+    ## @param free_storage_metrics - boolean - optional - default: true
+    ## Enabled or disable the collection of free storage metrics.
+    ## By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+    ## Set to `false` to disable collection of free storage metrics.
+    ##
+    ## Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+    ## processing delays and high CPU usage on the instance.
+    ## https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+    #
+    # free_storage_metrics: true
 
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo

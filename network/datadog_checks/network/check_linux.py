@@ -329,7 +329,7 @@ class LinuxNetwork(Network):
 
     def _get_iface_sys_metrics(self, custom_tags):
         sys_net_location = '/sys/class/net'
-        sys_net_metrics = ['mtu', 'tx_queue_len']
+        sys_net_metrics = ['mtu', 'tx_queue_len', 'up']
         try:
             ifaces = os.listdir(sys_net_location)
         except OSError as e:
@@ -337,7 +337,10 @@ class LinuxNetwork(Network):
             return None
         for iface in ifaces:
             for metric_name in sys_net_metrics:
-                metric_file_location = os.path.join(sys_net_location, iface, metric_name)
+                metric_file_name = metric_name
+                if metric_name == 'up':
+                    metric_file_name = 'carrier'
+                metric_file_location = os.path.join(sys_net_location, iface, metric_file_name)
                 value = self._read_int_file(metric_file_location)
                 if value is not None:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])

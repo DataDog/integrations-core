@@ -81,13 +81,24 @@ class Redis(AgentCheck):
         'rdb_changes_since_last_save': 'redis.rdb.changes_since_last',
         'rdb_last_bgsave_time_sec': 'redis.rdb.last_bgsave_time',
         # memory
+        'mem_fragmentation_bytes': 'redis.mem.fragmentation',
         'mem_fragmentation_ratio': 'redis.mem.fragmentation_ratio',
+        'mem_total_replication_buffers': 'redis.mem.total_replication_buffers',
+        'mem_clients_slaves': 'redis.mem.clients_slaves',
+        'mem_clients_normal': 'redis.mem.clients_normal',
         'used_memory': 'redis.mem.used',
         'used_memory_lua': 'redis.mem.lua',
         'used_memory_peak': 'redis.mem.peak',
         'used_memory_rss': 'redis.mem.rss',
         'used_memory_startup': 'redis.mem.startup',
         'used_memory_overhead': 'redis.mem.overhead',
+        'used_memory_dataset': 'redis.mem.dataset',
+        'used_memory_vm_eval': 'redis.mem.vm_eval',
+        'used_memory_vm_functions': 'redis.mem.vm_functions',
+        'used_memory_vm_total': 'redis.mem.vm_total',
+        'used_memory_functions': 'redis.mem.functions',
+        'used_memory_scripts_eval': 'redis.mem.scripts_eval',
+        'used_memory_scripts': 'redis.mem.scripts',
         'maxmemory': 'redis.mem.maxmemory',
         # replication
         'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',
@@ -96,6 +107,8 @@ class Redis(AgentCheck):
         'repl_backlog_histlen': 'redis.replication.backlog_histlen',
         'master_repl_offset': 'redis.replication.master_repl_offset',
         'slave_repl_offset': 'redis.replication.slave_repl_offset',
+        'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
+        'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
     }
 
     RATE_KEYS = {

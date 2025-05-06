@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import re
 from copy import copy, deepcopy
 
 import mock
@@ -56,7 +57,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
             'connection_host:{}'.format(instance_docker.get('host')),
         ]
         + sqlserver_check._config.tags,
-        message=str(excinfo.value),
+        message=re.escape(str(excinfo.value)),
     )
 
 
@@ -614,7 +615,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/datadog_test-1',
+            'stubbed.hostname',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -631,7 +632,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/datadog_test-1',
+            'stubbed.hostname',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -648,7 +649,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost',
+            'stubbed.hostname',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -666,7 +667,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/master',
+            'stubbed.hostname',
             {},
             [],
         ),
@@ -675,7 +676,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/master',
+            'stubbed.hostname',
             {},
             [],
         ),
@@ -684,7 +685,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             '',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/master',
+            'stubbed.hostname',
             {
                 'aws': {
                     'instance_endpoint': 'foo.aws.com',
@@ -790,9 +791,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "sqlserver"
-    assert len(event['tags']) == 2
+    assert len(event['tags']) == 5
     assert event['tags'][0] == 'optional:tag1'
-    assert event['tags'][1].startswith('sqlserver_servername:')
+    assert any(tag.startswith('sqlserver_servername:') for tag in event['tags'])
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {

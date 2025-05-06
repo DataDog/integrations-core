@@ -29,6 +29,14 @@ def mock_output(filename):
         return f.read().strip()
 
 
+"""
+These expected values below are really strict and are hardcoded. I opted for this approach because this whole check
+relies on the output and proper parsing of each field. I believe that the most accurate way was to ensure we know
+exactly what is being parsed out and what is being submitted to the agent.
+
+If the fixtures are ever updated, then these expected results below will need to be updated as well.
+"""
+
 SINFO_MAP = {
     'metrics': [
         {
@@ -809,8 +817,8 @@ SQUEUE_MAP = {
             'value': 1,
             'tags': [],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |300M        # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |300M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -823,10 +831,11 @@ SQUEUE_MAP = {
                 'slurm_job_state:RUNNING',
                 'slurm_job_tres_per_node:300M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    44 |root |wrap    |RUNNING |c2       |   1 |c2               |400M       # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    44 |root |wrap    |RUNNING |c2       |   1 |c2               |400M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -839,10 +848,11 @@ SQUEUE_MAP = {
                 'slurm_job_state:RUNNING',
                 'slurm_job_tres_per_node:400M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    45 |root |test.py |PENDING |         |   1 |(Resources)      |100M      # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    45 |root |test.py |PENDING |         |   1 |(Resources)      |100M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -855,10 +865,11 @@ SQUEUE_MAP = {
                 'slurm_job_state:PENDING',
                 'slurm_job_tres_per_node:100M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    46 |root |test.py |PENDING |         |   1 |(Priority)       |200M     # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    46 |root |test.py |PENDING |         |   1 |(Priority)       |200M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -871,6 +882,7 @@ SQUEUE_MAP = {
                 'slurm_job_state:PENDING',
                 'slurm_job_tres_per_node:200M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
     ]
@@ -897,6 +909,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -913,6 +926,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -929,6 +943,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -945,6 +960,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -961,6 +977,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -977,6 +994,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -996,6 +1014,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1013,6 +1032,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1030,6 +1050,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1047,6 +1068,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1064,6 +1086,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1081,6 +1104,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1130,6 +1154,11 @@ SDIAG_MAP = {
         {'name': 'slurm.sdiag.backfill.depth_mean_try_depth', 'value': 27, 'tags': []},
         {'name': 'slurm.sdiag.backfill.queue_length_mean', 'value': 28, 'tags': []},
         {'name': 'slurm.sdiag.backfill.mean_table_size', 'value': 29, 'tags': []},
+        {
+            'name': 'slurm.sdiag.last_cycle_seconds_ago',
+            'value': 1000,
+            'tags': [],
+        },  # mocked to be 1000 seconds in the test
     ]
 }
 
@@ -1210,6 +1239,59 @@ SSHARE_MAP = {
                 'slurm_group_tres_mins:null',
                 'slurm_tres_run_mins:cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0',
                 'slurm_user:root',
+            ],
+        },
+    ]
+}
+
+SCONTROL_MAP = {
+    # PID      JOBID    STEPID   LOCALID GLOBALID
+    # 3771     14       batch    0       0
+    # 3772     14       batch    -       -
+    'metrics': [
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3771",
+                "slurm_global_id:0",
+                "slurm_job_id:14",
+                "slurm_local_id:0",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
+            ],
+        },
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3772",
+                "slurm_global_id:-",
+                "slurm_job_id:14",
+                "slurm_local_id:-",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
+            ],
+        },
+        {
+            'name': 'slurm.scontrol.jobs.info',
+            'value': 1,
+            'tags': [
+                "pid:3773",
+                "slurm_global_id:0",
+                "slurm_job_id:15",
+                "slurm_local_id:0",
+                "slurm_node_name:c1",
+                "slurm_step_id:batch",
+                "slurm_job_name:my_job2",
+                "slurm_job_state:RUNNING",
+                "slurm_job_user:root",
             ],
         },
     ]
