@@ -497,8 +497,8 @@ def test_database_identifier(template, expected, tags):
     check = MySql(common.CHECK_NAME, {}, instances=[config])
 
     assert check.database_identifier == expected
-    
-    
+
+
 def test__eliminate_duplicate_rows():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     rows = [
@@ -506,4 +506,6 @@ def test__eliminate_duplicate_rows():
         {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
     ]
     second_pass = {1: {'event_timer_start': 2001}}
-    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [{'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},]
+    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [
+        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+    ]
