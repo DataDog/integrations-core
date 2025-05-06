@@ -73,7 +73,7 @@ metadata:
     # (...)
 spec:
   containers:
-    - name: 'controller'
+    - name: '<CONTAINER_NAME>'
 # (...)
 ```
 
