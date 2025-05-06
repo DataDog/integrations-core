@@ -4,6 +4,7 @@
 
 import datetime
 import json as json_module
+import logging
 from abc import abstractmethod
 from io import BytesIO
 from time import time
@@ -637,7 +638,7 @@ class XESessionBase(DBMAsyncJob):
         rqt_time = 0
 
         # Log a sample of events (up to 3) for debugging
-        if self._log.isEnabledFor(self._log.debug_level):
+        if self._log.isEnabledFor(logging.DEBUG):
             sample_size = min(3, len(events))
             sample_events = events[:sample_size]
 
@@ -681,7 +682,7 @@ class XESessionBase(DBMAsyncJob):
 
                     if rqt_event:
                         # For now, just log the first RQT event in each batch
-                        if event == events[0] and self._log.isEnabledFor(self._log.debug_level):
+                        if event == events[0] and self._log.isEnabledFor(logging.DEBUG):
                             try:
                                 rqt_payload_json = json_module.dumps(rqt_event, default=str, indent=2)
                                 self._log.debug(f"Sample {self.session_name} RQT event payload:\n{rqt_payload_json}")
@@ -721,7 +722,7 @@ class XESessionBase(DBMAsyncJob):
             }
 
             # Log the batched payload for debugging
-            if self._log.isEnabledFor(self._log.debug_level):
+            if self._log.isEnabledFor(logging.DEBUG):
                 try:
                     # Only include up to 3 events in the log for brevity
                     log_payload = batched_payload.copy()
