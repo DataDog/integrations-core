@@ -169,6 +169,7 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
     with pytest.raises(ConfigurationError, match=re.escape(match)):
         connection._connection_options_validation('somekey', 'somedb')
 
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "name,managed_identity_config,should_fail,expected_err",
