@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import annotations
-
 import copy
 import functools
 import importlib
+import inspect
 import logging
 import os
 import re
+import traceback
+import unicodedata
 from collections import deque
 from os.path import basename
 from typing import (  # noqa: F401
@@ -26,10 +27,10 @@ from typing import (  # noqa: F401
     Union,
 )
 
-import lazy_loader
+import yaml
+from pydantic import BaseModel, ValidationError
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
-from datadog_checks.base.utils.format import json
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -45,8 +46,14 @@ from ..types import (
 )
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
+from ..utils.diagnose import Diagnosis
 from ..utils.fips import enable_fips
+from ..utils.limiter import Limiter
+from ..utils.metadata import MetadataManager
+from ..utils.secrets import SecretsSanitizer
+from ..utils.serialization import from_json, to_json
 from ..utils.tagging import GENERIC_TAGS
+from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
 
 if AGENT_RUNNING:
@@ -79,18 +86,7 @@ if is_affirmative(datadog_agent.get_config('integration_profiling')):
     prof.start()
 
 if TYPE_CHECKING:
-    import inspect as _module_inspect
     import ssl  # noqa: F401
-    import traceback as _module_traceback
-    import unicodedata as _module_unicodedata
-
-    from datadog_checks.base.utils.diagnose import Diagnosis
-    from datadog_checks.base.utils.http import RequestsWrapper
-    from datadog_checks.base.utils.metadata import MetadataManager
-
-inspect: _module_inspect = lazy_loader.load('inspect')
-traceback: _module_traceback = lazy_loader.load('traceback')
-unicodedata: _module_unicodedata = lazy_loader.load('unicodedata')
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
@@ -345,9 +341,6 @@ class AgentCheck(object):
         limit = self._get_metric_limit(instance=instance)
 
         if limit > 0:
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.limiter import Limiter
-
             return Limiter(name, 'metrics', limit, self.warning)
 
         return None
@@ -392,22 +385,20 @@ class AgentCheck(object):
         """
         Convenience wrapper to ease programmatic use of this class from the C API.
         """
-        # See Performance Optimizations in this package's README.md.
-        import yaml
-
         return yaml.safe_load(yaml_str)
 
     @property
-    def http(self) -> RequestsWrapper:
+    def http(self):
+        # type: () -> RequestsWrapper
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
-        if not hasattr(self, '_http'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
+        # See Performance Optimizations in this package's README.md.
+        from ..utils.http import RequestsWrapper
 
+        if not hasattr(self, '_http'):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
@@ -443,14 +434,12 @@ class AgentCheck(object):
         return self.__formatted_tags
 
     @property
-    def diagnosis(self) -> Diagnosis:
+    def diagnosis(self):
+        # type: () -> Diagnosis
         """
         A Diagnosis object to register explicit diagnostics and record diagnoses.
         """
         if not hasattr(self, '_diagnosis'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.diagnose import Diagnosis
-
             self._diagnosis = Diagnosis(sanitize=self.sanitize)
         return self._diagnosis
 
@@ -464,9 +453,6 @@ class AgentCheck(object):
         Since: Agent 7.24
         """
         if not hasattr(self, '_tls_context_wrapper'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.tls import TlsContextWrapper
-
             self._tls_context_wrapper = TlsContextWrapper(
                 self.instance or {}, self.TLS_CONFIG_REMAPPER, overrides=overrides
             )
@@ -477,16 +463,14 @@ class AgentCheck(object):
         return self._tls_context_wrapper.tls_context
 
     @property
-    def metadata_manager(self) -> MetadataManager:
+    def metadata_manager(self):
+        # type: () -> MetadataManager
         """
         Used for sending metadata via Go bindings.
         """
         if not hasattr(self, '_metadata_manager'):
             if not self.check_id and AGENT_RUNNING:
                 raise RuntimeError('Attribute `check_id` must be set')
-
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.metadata import MetadataManager
 
             self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
 
@@ -516,9 +500,8 @@ class AgentCheck(object):
         return False
 
     def log_typos_in_options(self, user_config, models_config, level):
-        # See Performance Optimizations in this package's README.md.
+        # only import it when running in python 3
         from jellyfish import jaro_winkler_similarity
-        from pydantic import BaseModel
 
         user_configs = user_config or {}  # type: Dict[str, Any]
         models_config = models_config or {}
@@ -589,8 +572,6 @@ class AgentCheck(object):
 
         model = getattr(package, model_name, None)
         if model is not None:
-            from pydantic import ValidationError
-
             try:
                 config_model = model.model_validate(config, context=context)
             except ValidationError as e:
@@ -619,14 +600,12 @@ class AgentCheck(object):
     def _get_config_model_context(self, config):
         return {'logger': self.log, 'warning': self.warning, 'configured_fields': frozenset(config)}
 
-    def register_secret(self, secret: str) -> None:
+    def register_secret(self, secret):
+        # type: (str) -> None
         """
         Register a secret to be scrubbed by `.sanitize()`.
         """
         if not hasattr(self, '_sanitizer'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.secrets import SecretsSanitizer
-
             # Configure lazily so that checks that don't use sanitization aren't affected.
             self._sanitizer = SecretsSanitizer()
             self.log.setup_sanitization(sanitize=self.sanitize)
@@ -1032,15 +1011,15 @@ class AgentCheck(object):
             # convert seconds to milliseconds
             attributes['timestamp'] = int(timestamp * 1000)
 
-        datadog_agent.send_log(json.encode(attributes), self.check_id)
+        datadog_agent.send_log(to_json(attributes), self.check_id)
         if cursor is not None:
-            self.write_persistent_cache('log_cursor_{}'.format(stream), json.encode(cursor))
+            self.write_persistent_cache('log_cursor_{}'.format(stream), to_json(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
         data = self.read_persistent_cache('log_cursor_{}'.format(stream))
-        return json.decode(data) if data else None
+        return from_json(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
         # type: (str, *str) -> None
@@ -1211,11 +1190,7 @@ class AgentCheck(object):
         The agent calls this method to retrieve diagnostics from integrations. This method
         runs explicit diagnostics if available.
         """
-        return json.encode([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
-
-    def _clear_diagnosis(self) -> None:
-        if hasattr(self, '_diagnosis'):
-            self._diagnosis.clear()
+        return to_json([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
@@ -1299,7 +1274,7 @@ class AgentCheck(object):
     def run(self):
         # type: () -> str
         try:
-            self._clear_diagnosis()
+            self.diagnosis.clear()
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
                 from ..utils.replay.execute import run_with_isolation
@@ -1335,7 +1310,7 @@ class AgentCheck(object):
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            error_report = json.encode([{'message': message, 'traceback': tb}])
+            error_report = to_json([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
