@@ -169,31 +169,6 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
     with pytest.raises(ConfigurationError, match=re.escape(match)):
         connection._connection_options_validation('somekey', 'somedb')
 
-# need to use instance_docker from `test_collect_load_activity`
-def test_xyz_123(
-    instance_docker,
-):
-    fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=True)
-
-    def run_test_query(c, q):
-        cur = c.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
-        # 0xFF can't be decoded to Unicode, which makes it good test data,
-        # since Unicode is a default format
-        cur.execute("SET CONTEXT_INFO 0xff")
-        cur.execute(q)
-
-    run_test_query(fred_conn, "SELECT * FROM sys.dm_exec_requests")
-
-def _get_conn_for_user(instance_docker, user, _autocommit=False):
-    # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
-        instance_docker['driver'], instance_docker['host'], user, "Password12!"
-    )
-    conn = pyodbc.connect(conn_str, timeout=30, autocommit=_autocommit)
-    conn.timeout = 30
-    return conn
-
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "name,managed_identity_config,should_fail,expected_err",
