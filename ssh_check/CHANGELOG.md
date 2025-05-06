@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.2.1 / 2025-04-17
+
+***Fixed***:
+
+* SSH service will report OK only if it is fully authenticated ([#20050](https://github.com/DataDog/integrations-core/pull/20050))
+
+## 4.2.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
 ## 4.1.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:

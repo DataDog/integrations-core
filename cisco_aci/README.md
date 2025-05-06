@@ -58,6 +58,16 @@ To configure this check for an Agent running on a host:
         ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
         #
         # send_ndm_metadata: false
+
+        ## @param send_faultinst_faults - boolean - optional - default: false
+        ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
+        #
+        # send_faultinst_faults: false
+
+        ## @param send_faultdelegate_faults - boolean - optional - default: false
+        ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
+        #
+        # send_faultdelegate_faults: false
    ```
    
    *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
@@ -131,7 +141,7 @@ Because this check queries all the tenants, apps, and endpoints listed before re
 
 Need help? Contact [Datadog support][9].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -1,6 +1,6 @@
 {
     "title": "OpenTelemetry Collector Metrics Dashboard",
-    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nNote: To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nNote: To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).\n\nNote the 2 sections `Datadog Exporter: Traffic Sent` and `Datadog Connector: Stats Sent` have the `equiv_otel` function in some graphs. If you need to use `equiv_otel` in other queries, monitors or alerts, please opt in to the [Preview](http://docs.datadoghq.com/opentelemetry/guide/combining_otel_and_datadog_metrics/).",
     "widgets": [
         {
             "id": 7581494098406438,
@@ -15,7 +15,7 @@
                         "id": 6416205973430436,
                         "definition": {
                             "type": "note",
-                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. [These metrics](https://app.datadoghq.com/metric/summary?filter=otelcol) are scraped by the Prometheus receiver.\n\n## To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. [These metrics](https://app.datadoghq.com/metric/summary?filter=otelcol) are scraped by the Prometheus receiver.\n\n## To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).\n\nNote the 2 sections `Datadog Exporter: Traffic Sent` and `Datadog Connector: Stats Sent` have the `equiv_otel` function in some graphs. If you need to use `equiv_otel` in other queries, monitors or alerts, please opt in to the [Preview](http://docs.datadoghq.com/opentelemetry/guide/combining_otel_and_datadog_metrics/).",
                             "background_color": "transparent",
                             "font_size": "18",
                             "text_align": "left",
@@ -1994,12 +1994,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_traces{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_traces{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2039,12 +2039,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_spans{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_spans{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2106,21 +2106,21 @@
                                     "formulas": [
                                         {
                                             "alias": "Max",
-                                            "formula": "query1"
+                                            "formula": "equiv_otel(query1)"
                                         },
                                         {
                                             "alias": "Avg",
-                                            "formula": "query2"
+                                            "formula": "equiv_otel(query2)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "max:otelcol_datadog_trace_agent_trace_writer_flush_duration_max{$host,$service}",
+                                            "query": "max:otelcol_datadog_trace_agent_trace_writer_flush_duration_max{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "avg:otelcol_datadog_trace_agent_trace_writer_flush_duration_avg{$host,$service}",
+                                            "query": "avg:otelcol_datadog_trace_agent_trace_writer_flush_duration_avg{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         }
@@ -2167,12 +2167,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_bytes{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_bytes{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2219,12 +2219,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_payloads{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_payloads{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2292,12 +2292,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "equiv_otel(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_errors{$host,$service}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_errors{source:datadogexporter,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2358,12 +2358,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{$host,source:datadogexporter,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2410,12 +2410,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{$host,source:datadogexporter,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2483,12 +2483,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "equiv_otel(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_retries{$host,$service}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_retries{source:datadogexporter,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2538,15 +2538,14 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{$host,$service}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{source:datadogexporter,$service}.as_count()",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "avg"
+                                            "name": "query1"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "reduce(equiv_otel(query1), 'avg')"
                                         }
                                     ]
                                 }
@@ -2592,7 +2591,7 @@
                         "id": 3312471392848186,
                         "definition": {
                             "type": "note",
-                            "content": "Traces and spans ingested/s represents the rate of OTLP traces received and processed by the trace API. The trace API receives data from both the Datadog Exporter and the Datadog Connector, which can be grouped by the `source` tag.",
+                            "content": "**Deprecated**: When feature gate `connector.datadogconnector.NativeIngest` is enabled (default is enabled since OTel collector v0.107.0), the Datadog connector uses a different code path that does not emit these metrics. Traces and spans ingested/s represents the rate of OTLP traces received and processed by the legacy trace API. The trace API receives data from both the Datadog Exporter and the Datadog Connector, which can be grouped by the `source` tag.",
                             "background_color": "white",
                             "font_size": "12",
                             "text_align": "left",
@@ -2627,12 +2626,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{$host,source:datadogconnector,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{source:datadogconnector,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2679,12 +2678,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{$host,source:datadogconnector,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{source:datadogconnector,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2731,12 +2730,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_payloads{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_payloads{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2776,12 +2775,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_bytes{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_bytes{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2842,12 +2841,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "equiv_otel(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_retries{$host,$service}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_retries{source:datadogexporter,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2887,12 +2886,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "per_second(equiv_otel(query1))"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{$host,$service}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{source:datadogexporter,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2932,12 +2931,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "equiv_otel(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_buckets{$host,$service}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_buckets{source:datadogexporter,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2998,12 +2997,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "equiv_otel(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_errors{$host,$service}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_errors{source:datadogexporter,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }

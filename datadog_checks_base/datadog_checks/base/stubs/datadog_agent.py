@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import re
 from collections import defaultdict
 
-from datadog_checks.base.utils.serialization import from_json, to_json
+from datadog_checks.base.utils.format import json
 
 
 class DatadogAgentStub(object):
@@ -30,7 +29,7 @@ class DatadogAgentStub(object):
         self._sent_telemetry = defaultdict(list)
 
     def get_default_config(self):
-        return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
+        return {'enable_metadata_collection': True}
 
     def reset(self):
         self._sent_logs.clear()
@@ -102,7 +101,7 @@ class DatadogAgentStub(object):
         return self._host_tags
 
     def _set_host_tags(self, tags_dict):
-        self._host_tags = json.dumps(tags_dict)
+        self._host_tags = json.encode(tags_dict)
 
     def _reset_host_tags(self):
         self._host_tags = "{}"
@@ -120,7 +119,7 @@ class DatadogAgentStub(object):
         self._metadata[(check_id, name)] = value
 
     def send_log(self, log_line, check_id):
-        self._sent_logs[check_id].append(from_json(log_line))
+        self._sent_logs[check_id].append(json.decode(log_line))
 
     def set_external_tags(self, external_tags):
         self._external_tags = external_tags
@@ -139,8 +138,8 @@ class DatadogAgentStub(object):
         if options:
             # Options provided is a JSON string because the Go stub requires it, whereas
             # the python stub does not for things such as testing.
-            if from_json(options).get('return_json_metadata', False):
-                return to_json({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
+            if json.decode(options).get('return_json_metadata', False):
+                return json.encode({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
         return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):

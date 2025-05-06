@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import mock
 import pytest
@@ -698,7 +698,7 @@ def test__should_cache(instance):
 
 
 def migrated_event():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     vm = MockedMOR(spec='VirtualMachine', name='vm1')
     vm_arg = vim.event.VmEventArgument(vm=vm)
     host = MockedMOR(spec='HostSystem')

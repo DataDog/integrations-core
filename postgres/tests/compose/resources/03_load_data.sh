@@ -4,7 +4,9 @@ set -e
 # Create extensions for settings testing
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE EXTENSION IF NOT EXISTS pg_trgm;
-    CREATE EXTENSION IF NOT EXISTS hstore;
+    -- Create an extension in a non-standard schema to test that behavior
+    CREATE SCHEMA hstore;
+    CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA hstore;
     CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 EOSQL
@@ -40,6 +42,30 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
+EOSQL
+
+# Create a foreign table
+echo -e "id,name\n1,Alice\n2,Bob" > /tmp/sample.csv
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE EXTENSION IF NOT EXISTS file_fdw;
+    
+    CREATE SERVER file_server FOREIGN DATA WRAPPER file_fdw;
+    
+    CREATE FOREIGN TABLE sample_foreign_d73a8c (id INTEGER, name TEXT) SERVER file_server OPTIONS (filename '/tmp/sample.csv', format 'csv', header 'true');
+
+    SELECT * FROM sample_foreign_d73a8c;
+EOSQL
+
+# Create schema for rdsadmin
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE USER rdsadmin WITH PASSWORD 'supersecret';
+    CREATE SCHEMA rdsadmin_test AUTHORIZATION rdsadmin;
+    CREATE TABLE rdsadmin_test.rds_admin_misc (
+        id SERIAL PRIMARY KEY,
+        key TEXT NOT NULL,
+        value TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 EOSQL
 
 # Create publication for logical replication tests

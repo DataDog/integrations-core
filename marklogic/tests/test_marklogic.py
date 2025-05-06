@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from typing import Any  # noqa: F401
 
 import mock
@@ -168,7 +169,7 @@ def test_submit_health_service_checks(aggregator, caplog):
             'marklogic.database.health',
             MarklogicCheck.UNKNOWN,
             tags=['foo:bar', 'database_name:Fab'],
-            message='UNKNOWN (unknown): No message.',
+            message=re.escape('UNKNOWN (unknown): No message.'),
             count=1,
         )
         aggregator.assert_service_check(

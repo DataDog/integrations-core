@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Collect telemetry for autoscaling local fallback ([#19522](https://github.com/DataDog/integrations-core/pull/19522))
+
 ## 5.4.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:

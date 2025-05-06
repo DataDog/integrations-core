@@ -54,7 +54,7 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://docs.vllm.ai/en/stable/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/vllm/datadog_checks/vllm/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

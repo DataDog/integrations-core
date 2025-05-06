@@ -32,6 +32,14 @@ def instance_collect_response_time():
     return True
 
 
+def instance_days_critical():
+    return 7
+
+
+def instance_days_warning():
+    return 14
+
+
 def instance_disable_generic_tags():
     return False
 

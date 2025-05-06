@@ -71,6 +71,7 @@ SERVICE_CHECK_NAME = 'can_connect'
 
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
+    HA_SUPPORTED = True
 
     def __new__(cls, name, init_config, instances):
         # type: (Type[VSphereCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
@@ -784,12 +785,16 @@ class VSphereCheck(AgentCheck):
                 self.log.debug(
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
+                event_default_hostname = (
+                    "AGENT_INT_EMPTY_HOSTNAME" if self._config.empty_default_hostname else self._hostname
+                )
                 normalized_event = VSphereEvent(
                     event,
                     event_config,
                     self._config.base_tags,
                     self._config.event_resource_filters,
                     self._config.exclude_filters,
+                    event_default_hostname,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
@@ -1035,7 +1040,7 @@ class VSphereCheck(AgentCheck):
         # type: (...) -> None
         resource_metric_suffix = MOR_TYPE_AS_STRING[resource_type]
         mor_name = to_string(mor_props.get('name', 'unknown'))
-        hostname = mor_props.get('hostname', 'unknown')
+        hostname = mor_props.get('hostname')
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:

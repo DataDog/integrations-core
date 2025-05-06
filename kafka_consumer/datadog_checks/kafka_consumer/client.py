@@ -172,15 +172,9 @@ class KafkaClient:
             offsets.append((response_offset_info.group_id, tpo))
         return offsets
 
-    def describe_consumer_groups(self, consumer_group):
-        """
-        :returns: A dict of futures for each group, keyed by the group_id.
-                  The future result() method returns :class:`ConsumerGroupDescription`.
-
-        :rtype: dict[str, future]
-        """
+    def describe_consumer_group(self, consumer_group):
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()
-        return (desc.group_id, desc.state.value)
+        return desc.state.name
 
     def close_admin_client(self):
         self._kafka_client = None

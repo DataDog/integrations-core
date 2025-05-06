@@ -9,12 +9,39 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
-MOCKED_INSTANCE = {
-    'url': 'mocked',
-    'username': 'datadog',
-    'password': 'password',
-    'tags': ['foo:bar'],
-}
+
+# Instances defined to validate that we can read both valid and broken json.
+#
+# Tests must succeed independently of what kind of payload is being received.
+#
+# More info: https://github.com/DataDog/integrations-core/pull/19936
+MOCKED_INSTANCES = [
+    {
+        'url': 'valid_json',
+        'username': 'datadog',
+        'password': 'password',
+        'tags': ['foo:bar'],
+    },
+    {
+        'url': 'broken_json',
+        'username': 'datadog',
+        'password': 'password',
+        'tags': ['foo:bar'],
+    },
+]
+MOCKED_INSTANCE_IDS = [
+    'valid_json',
+    'broken_json',
+]
+
+# E2E instances are also defined for broken and valid json to ensure that the real
+# requests.get does not run any validation that can break reading invalid jsons.
+#
+# This could be done by modifying the dd_environment fixture to run compose with different
+# environment variables but the datadog_checks pytest plugin loads it with getfixturevalue and does not
+# support parametrization.
+#
+# These correspond to the one defined in the compose file.
 E2E_INSTANCE = [
     {
         'url': 'http://{}:8081'.format(HOST),
@@ -31,7 +58,31 @@ E2E_INSTANCE = [
         'username': 'datadog',
         'password': 'password',
     },
+    {
+        'url': 'http://{}:9081'.format(HOST),
+        'username': 'datadog',
+        'password': 'password',
+    },
+    {
+        'url': 'http://{}:9082'.format(HOST),
+        'username': 'datadog',
+        'password': 'password',
+    },
+    {
+        'url': 'http://{}:9083'.format(HOST),
+        'username': 'datadog',
+        'password': 'password',
+    },
 ]
+E2E_INSTANCE_IDS = [
+    'standalone-valid-json',
+    'pool-slave-valid-json',
+    'pool-master-valid-json',
+    'standalone-broken-json',
+    'pool-slave-broken-json',
+    'pool-master-broken-json',
+]
+
 COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
 SESSION_MASTER = {

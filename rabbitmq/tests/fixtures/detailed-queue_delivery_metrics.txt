@@ -1,0 +1,51 @@
+# TYPE rabbitmq_identity_info untyped
+# HELP rabbitmq_identity_info RabbitMQ node & cluster identity info
+rabbitmq_identity_info{rabbitmq_node="rabbit@54cfac2199f1",rabbitmq_cluster="rabbit@54cfac2199f1",rabbitmq_cluster_permanent_id="rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw"} 1
+# TYPE rabbitmq_build_info untyped
+# HELP rabbitmq_build_info RabbitMQ & Erlang/OTP version info
+rabbitmq_build_info{rabbitmq_version="4.0.7",prometheus_plugin_version="4.0.7",prometheus_client_version="4.11.0",erlang_version="27.3.1"} 1
+# TYPE rabbitmq_detailed_queue_get_ack_total counter
+# HELP rabbitmq_detailed_queue_get_ack_total Total number of messages fetched from a queue with basic.get in manual acknowledgement mode
+rabbitmq_detailed_queue_get_ack_total{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_get_ack_total{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_get_ack_total{vhost="/",queue="queue2"} 2
+# TYPE rabbitmq_detailed_queue_get_total counter
+# HELP rabbitmq_detailed_queue_get_total Total number of messages fetched from a queue with basic.get in automatic acknowledgement mode
+rabbitmq_detailed_queue_get_total{vhost="/",queue="queue1"} 3
+rabbitmq_detailed_queue_get_total{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_get_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_detailed_queue_messages_delivered_ack_total counter
+# HELP rabbitmq_detailed_queue_messages_delivered_ack_total Total number of messages delivered from a queue to consumers in manual acknowledgement mode
+rabbitmq_detailed_queue_messages_delivered_ack_total{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages_delivered_ack_total{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages_delivered_ack_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_detailed_queue_messages_delivered_total counter
+# HELP rabbitmq_detailed_queue_messages_delivered_total Total number of messages delivered from a queue to consumers in automatic acknowledgement mode
+rabbitmq_detailed_queue_messages_delivered_total{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages_delivered_total{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages_delivered_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_detailed_queue_messages_redelivered_total counter
+# HELP rabbitmq_detailed_queue_messages_redelivered_total Total number of messages redelivered from a queue to consumers
+rabbitmq_detailed_queue_messages_redelivered_total{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages_redelivered_total{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages_redelivered_total{vhost="/",queue="queue2"} 1
+# TYPE rabbitmq_detailed_queue_messages_acked_total counter
+# HELP rabbitmq_detailed_queue_messages_acked_total Total number of messages acknowledged by consumers on a queue
+rabbitmq_detailed_queue_messages_acked_total{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages_acked_total{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages_acked_total{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_detailed_queue_get_empty_total counter
+# HELP rabbitmq_detailed_queue_get_empty_total Total number of times basic.get operations fetched no message on a queue
+rabbitmq_detailed_queue_get_empty_total{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_get_empty_total{vhost="/",queue="queue3"} 1
+rabbitmq_detailed_queue_get_empty_total{vhost="/",queue="queue2"} 0
+# TYPE telemetry_scrape_encoded_size_bytes summary
+# HELP telemetry_scrape_encoded_size_bytes Scrape size, encoded
+# TYPE telemetry_scrape_duration_seconds summary
+# HELP telemetry_scrape_duration_seconds Scrape duration
+telemetry_scrape_duration_seconds_count{registry="detailed",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_duration_seconds_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 0.003794368
+# TYPE telemetry_scrape_size_bytes summary
+# HELP telemetry_scrape_size_bytes Scrape size, not encoded
+telemetry_scrape_size_bytes_count{registry="detailed",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_size_bytes_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 2726

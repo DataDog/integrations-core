@@ -65,7 +65,9 @@ GO
 -- Create table with a foreign key
 CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
 GO
-ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas.test_schema.cities(id);
+ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id)
+REFERENCES datadog_test_schemas.test_schema.cities(id)
+ON DELETE SET NULL;
 GO
 
 -- Create table with unique constraint
@@ -82,7 +84,10 @@ CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
     RestaurantName VARCHAR(255),
     District VARCHAR(100),
     Review VARCHAR(MAX),
-    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District) REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
+    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
+        REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
+        ON DELETE CASCADE
+        ON UPDATE SET NULL
 );
 GO
 
@@ -98,6 +103,12 @@ CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON datadog_test_schemas_second.dbo.ϑings (name);
 GO
+
+-- Create an alternate collation database to test handling of case sensitivity
+CREATE DATABASE datadog_test_collation
+    COLLATE Latin1_General_100_BIN2;
+GO
+
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database

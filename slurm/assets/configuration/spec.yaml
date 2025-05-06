@@ -39,6 +39,13 @@ files:
       value:
         type: boolean
         example: True
+    - name: collect_scontrol_stats
+      description: |
+        Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
+        node to collect the list of running jobs along with their PIDs.
+      value:
+        type: boolean
+        example: True
     - name: collect_gpu_stats
       description: Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
       value:
@@ -78,6 +85,11 @@ files:
       value:
         type: string
         example: /usr/bin/squeue
+    - name: scontrol_path
+      description: Full path to the scontrol binary.
+      value:
+        type: string
+        example: /usr/bin/scontrol
     - name: debug_sinfo_stats
       description: |
         Whether or not to enable debug logging for the sinfo command. This logs the output of the sinfo command
@@ -113,6 +125,14 @@ files:
     - name: debug_sacct_stats
       description: |
         Whether or not to enable debug logging for the sacct command. This logs the output of the sacct command
+        to the Agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_scontrol_stats
+      description: |
+        Whether or not to enable debug logging for the scontrol command. This logs the output of the scontrol command
         to the Agent log.
       value:
         type: boolean
