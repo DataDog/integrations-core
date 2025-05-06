@@ -31,7 +31,7 @@ For more information on installing the Datadog Agent on your Kubernetes clusters
 
 ### Configuration
 
-For configuration instructions, refer to the documentation of each integration:
+For configuration instructions, see to the documentation of each integration:
 
 - [KubeVirt API][1]
 - [KubeVirt Controller][2]
