@@ -500,7 +500,6 @@ def test_database_identifier(template, expected, tags):
 
 
 def test__eliminate_duplicate_rows():
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     rows = [
         {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
         {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
