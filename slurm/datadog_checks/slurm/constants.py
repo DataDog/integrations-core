@@ -45,7 +45,6 @@ NODE_MAP = {
         {"name": "slurm_node_state_reason", "index": 10},
         {"name": "slurm_node_active_features", "index": 11},
         {"name": "slurm_node_threads", "index": 12},
-        {"name": "slurm_node_alloc_mem", "index": 13},
     ],
     "metrics": [
         {"name": "node.memory", "index": 4},
