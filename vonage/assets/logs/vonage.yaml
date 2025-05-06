@@ -32,20 +32,12 @@ facets:
     path: status
     source: log
     type: string
-  - description: ""
-    facetType: list
-    groups:
-      - Vonage
-    name: vonage_product
-    path: product
-    source: log
-    type: string
 pipeline:
   type: pipeline
   name: vonage_mapper
   enabled: true
   filter:
-    query: "source:vonage_logs "
+    query: "source:vonage "
   processors:
     - type: attribute-remapper
       name: Map `country` to `network.client.geoip.country.iso_code`
