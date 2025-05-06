@@ -226,8 +226,6 @@ class XESessionBase(DBMAsyncJob):
         Query the ring buffer data and parse the XML on the client side.
         This avoids expensive server-side XML parsing for better performance.
         """
-        # Time just the database query
-        query_start_time = time()
         raw_xml = None
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
@@ -254,36 +252,29 @@ class XESessionBase(DBMAsyncJob):
                 except Exception as e:
                     self._log.error(f"Error querying ring buffer: {e}")
 
-        query_time = time() - query_start_time
-
         if not raw_xml:
-            return None, query_time, 0
+            return None
 
-        # Time the XML parsing
-        parse_start_time = time()
         filtered_events = self._filter_ring_buffer_events(raw_xml)
         if not filtered_events:
-            return None, query_time, time() - parse_start_time
+            return None
 
         combined_xml = "<events>"
         for event_xml in filtered_events:
             combined_xml += event_xml
         combined_xml += "</events>"
-        parse_time = time() - parse_start_time
 
-        return combined_xml, query_time, parse_time
+        return combined_xml
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_event_file(self):
         """Query the event file for this XE session with timestamp filtering"""
-        query_start_time = time()
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 # Azure SQL Database doesn't support file targets
                 if self._is_azure_sql_database:
                     self._log.warning("Event file target is not supported on Azure SQL Database")
-                    query_time = time() - query_start_time
-                    return None, query_time, 0
+                    return None
 
                 # Define the file path pattern
                 file_path = f"d:\\rdsdbdata\\log\\{self.session_name}*.xel"
@@ -323,10 +314,9 @@ class XESessionBase(DBMAsyncJob):
 
                     # Combine all results into one XML document
                     rows = cursor.fetchall()
-                    query_time = time() - query_start_time
 
                     if not rows:
-                        return None, query_time, 0
+                        return None
 
                     combined_xml = "<events>"
                     for row in rows:
@@ -337,11 +327,10 @@ class XESessionBase(DBMAsyncJob):
                     if rows:
                         self._log.debug(f"Sample XML from event file: {str(rows[0][0])[:200]}...")
 
-                    return combined_xml, query_time, 0
+                    return combined_xml
                 except Exception as e:
                     self._log.error(f"Error querying event file: {e}")
-                    query_time = time() - query_start_time
-                    return None, query_time, 0
+                    return None
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _filter_ring_buffer_events(self, xml_data):
@@ -588,25 +577,22 @@ class XESessionBase(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def run_job(self):
         """Run the XE session collection job"""
-        job_start_time = time()
         self._log.info(f"Running job for {self.session_name} session")
         if not self.session_exists():
             self._log.warning(f"XE session {self.session_name} not found or not running.")
             return
 
-        # Get the XML data and timing info
-        xml_data, query_time, parse_time = self._query_ring_buffer()
+        # Get the XML data
+        xml_data = self._query_ring_buffer()
         # Eventually we will use this to get events from an event file, controlled by config
-        # xml_data, query_time, parse_time = self._query_event_file()
+        # xml_data = self._query_event_file()
 
         if not xml_data:
             self._log.debug(f"No data found for session {self.session_name}")
             return
 
-        # Time the event processing
-        process_start_time = time()
+        # Process the events
         events = self._process_events(xml_data)
-        process_time = time() - process_start_time
 
         if not events:
             self._log.debug(f"No events processed from {self.session_name} session")
@@ -632,11 +618,6 @@ class XESessionBase(DBMAsyncJob):
             self._last_event_timestamp = events[-1]['timestamp']
             self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
 
-        # Track obfuscation and RQT creation time
-        obfuscation_start_time = time()
-        obfuscation_time = 0
-        rqt_time = 0
-
         # Log a sample of events (up to 3) for debugging
         if self._log.isEnabledFor(logging.DEBUG):
             sample_size = min(3, len(events))
@@ -659,11 +640,8 @@ class XESessionBase(DBMAsyncJob):
         # Process all events and collect them for batching
         for event in events:
             try:
-                # Time the obfuscation
-                obfuscate_start = time()
                 # Obfuscate SQL fields and get the raw statement
                 obfuscated_event, raw_sql_fields = self._obfuscate_sql_fields(event)
-                obfuscation_time += time() - obfuscate_start
 
                 # Create a properly structured payload for the individual event
                 payload = self._create_event_payload(obfuscated_event)
@@ -672,13 +650,10 @@ class XESessionBase(DBMAsyncJob):
                 query_details = payload.get("query_details", {})
                 all_query_details.append({"query_details": query_details})
 
-                # Process RQT events individually as before
+                # Process RQT events individually
                 if self._collect_raw_query and raw_sql_fields:
-                    # Time RQT creation
-                    rqt_start = time()
-                    # Pass normalized query details for proper timing fields
+                    # Create RQT event
                     rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
-                    rqt_time += time() - rqt_start
 
                     if rqt_event:
                         # For now, just log the first RQT event in each batch
@@ -741,15 +716,8 @@ class XESessionBase(DBMAsyncJob):
             serialized_payload = json.dumps(batched_payload, default=default_json_event_encoding)
             self._check.database_monitoring_query_activity(serialized_payload)
 
-        # Calculate post-processing time (obfuscation + RQT)
-        post_processing_time = time() - obfuscation_start_time
-
-        total_time = time() - job_start_time
         self._log.info(
-            f"Found {len(events)} events from {self.session_name} session - "
-            f"Times: query={query_time:.3f}s parse={parse_time:.3f}s process={process_time:.3f}s "
-            f"obfuscation={obfuscation_time:.3f}s rqt={rqt_time:.3f}s post_processing={post_processing_time:.3f}s "
-            f"total={total_time:.3f}s"
+            f"Found {len(events)} events from {self.session_name} session"
         )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
