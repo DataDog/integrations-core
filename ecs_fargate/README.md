@@ -203,7 +203,8 @@ partial -->
 
 ```hcl
 module "ecs_fargate_task" {
-  source = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  version = "1.0.0"
 
   # Configure Datadog
   dd_api_key = <DATADOG_API_KEY>
@@ -1037,7 +1038,8 @@ To enable logging through the [Datadog ECS Fargate Terraform][71] module, config
 
 ```hcl
 module "ecs_fargate_task" {
-  source = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  version = "1.0.0"
 
   # Configure Datadog
   dd_api_key = <DATADOG_API_KEY>
@@ -1179,7 +1181,7 @@ Need help? Contact [Datadog support][18].
 - Blog post: [Monitor AWS Fargate for Windows containerized apps][40]
 - Blog post: [Monitor processes running on AWS Fargate with Datadog][58]
 - Blog post: [Monitor AWS Batch on Fargate with Datadog][63]
-- Documentation: [Trace API Gateway when proxying requests to ECS Fargate][65]
+- Documentation: [Trace API Gateway when proxying requests to ECS Fargate][73]
 
 [1]: http://docs.datadoghq.com/integrations/eks_fargate
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
