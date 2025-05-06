@@ -637,6 +637,9 @@ class XESessionBase(DBMAsyncJob):
         # Create a list to collect all query details
         all_query_details = []
 
+        # Track if we've logged an RQT sample for this batch
+        rqt_sample_logged = False
+
         # Process all events and collect them for batching
         for event in events:
             try:
@@ -656,11 +659,12 @@ class XESessionBase(DBMAsyncJob):
                     rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
 
                     if rqt_event:
-                        # For now, just log the first RQT event in each batch
-                        if event == events[0] and self._log.isEnabledFor(logging.DEBUG):
+                        # Log the first successful RQT event we encounter in this batch
+                        if not rqt_sample_logged and self._log.isEnabledFor(logging.DEBUG):
                             try:
                                 rqt_payload_json = json_module.dumps(rqt_event, default=str, indent=2)
                                 self._log.debug(f"Sample {self.session_name} RQT event payload:\n{rqt_payload_json}")
+                                rqt_sample_logged = True
                             except Exception as e:
                                 self._log.error(f"Error serializing RQT payload for logging: {e}")
 
@@ -716,9 +720,7 @@ class XESessionBase(DBMAsyncJob):
             serialized_payload = json.dumps(batched_payload, default=default_json_event_encoding)
             self._check.database_monitoring_query_activity(serialized_payload)
 
-        self._log.info(
-            f"Found {len(events)} events from {self.session_name} session"
-        )
+        self._log.info(f"Found {len(events)} events from {self.session_name} session")
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _obfuscate_sql_fields(self, event):
