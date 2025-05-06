@@ -37,7 +37,7 @@ pipeline:
   name: vonage_mapper
   enabled: true
   filter:
-    query: "source:vonage "
+    query: "source:vonage"
   processors:
     - type: attribute-remapper
       name: Map `country` to `network.client.geoip.country.iso_code`

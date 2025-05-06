@@ -50,7 +50,11 @@ tests:
       id: "56379def-5102-4357-8677-572ca1a892b1"
       latency: ""
       message_id: "56379def-5102-4357-8677-572ca1a892b1"
-      network: "405862"
+      network:
+        client:
+          geoip:
+            country:
+              iso_code: "IN"
       network_name: "Reliance Jio Infocomm Limited - Karnataka"
       status: "rejected"
       to: "91636365187"
@@ -87,3 +91,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
