@@ -31,6 +31,8 @@ Configure the Datadog endpoint to forward Vonage logs to Datadog.
 |----------|----------|
 | API key | API Key of the Vonage account. |
 | API secret | API Secret of the Vonage account. |
+| Include Message | Include boy of the messages in logs. (True or False) |
+
 
 
 ## Data Collected
