@@ -142,7 +142,7 @@ Create a `ClusterRole` for the necessary permissions and bind it to the `Service
    This creates a `ServiceAccount` named `datadog-agent` in the `fargate` namespace that is referenced in the `ClusterRoleBinding`. Adjust this for your Fargate pods' namespace and set this as the `serviceAccountName` in your pod spec.
 
    #### If you are using multiple ServiceAccounts across namespaces
-   If you are using multiple `ServiceAccounts` across namespaces, use the following:
+   If you are using multiple `ServiceAccounts` across namespaces for your Fargate pods, use the following:
 
    ```yaml
    apiVersion: rbac.authorization.k8s.io/v1
@@ -198,6 +198,7 @@ Manual configuration requires that you modify every workload manifest when addin
       name: datadog
     spec:
       global:
+        clusterName: <CLUSTER_NAME>
         clusterAgentTokenSecret:
           secretName: datadog-secret
           keyName: token
@@ -267,7 +268,7 @@ spec:
         memory: 256Mi
 {{< /highlight >}}
 
-##### Further configuration: sidecar profiles and custom selectors
+##### Custom configuration with sidecar profiles and custom selectors - Datadog Operator
 
 To further configure the Agent or its container resources, use the following properties in your `DatadogAgent` resource:
 
@@ -369,21 +370,17 @@ The environment variables and resource settings are automatically applied based 
 
 3.  Create a `datadog-values.yaml` with Admission Controller and Fargate injection enabled:
 
-   ```yaml
-   datadog:
-     apiKeyExistingSecret: datadog-secret
-     clusterName: <CLUSTER_NAME>
-   agents:
-     enabled: false
-   clusterAgent:
-     tokenExistingSecret: datadog-secret
-     admissionController:
-       agentSidecarInjection:
-         enabled: true
-         provider: fargate
-   ```
-    
-    **Note**: Set `agents.enabled=true` if you have a mixed cluster. On a Fargate-only cluster, setting `agents.enabled=false` skips creating the traditional DaemonSet for monitoring workloads on EC2 instances.
+    ```yaml
+    datadog:
+      apiKeyExistingSecret: datadog-secret
+      clusterName: <CLUSTER_NAME>
+    clusterAgent:
+      tokenExistingSecret: datadog-secret
+      admissionController:
+        agentSidecarInjection:
+          enabled: true
+          provider: fargate
+    ```
 
 4.  Deploy the chart in your desired namespace:
     
@@ -394,6 +391,8 @@ The environment variables and resource settings are automatically applied based 
 5.  After the Cluster Agent reaches a running state and registers Admission Controller's mutating webhooks, add the label `agent.datadoghq.com/sidecar: fargate` to your desired pods (not the parent workload) to trigger the injection of the Datadog Agent sidecar container.
 
 **Note**: The Admission Controller only mutates new pods, not pods that are already created. It does not adjust your `serviceAccountName`. If you have not set the RBAC for this pod, the Agent cannot connect to Kubernetes.
+
+On a Fargate-only cluster, you can set `agents.enabled=false` to skip creating the traditional DaemonSet for monitoring workloads on EC2 instances.
 
 **Example**
 
@@ -441,7 +440,7 @@ spec:
         memory: 256Mi
  {{< /highlight >}}
 
-##### Further configuration: sidecar profiles and custom selectors
+##### Custom configuration with sidecar profiles and custom selectors - Helm
 
 To further configure the Agent or its container resources, use the following properties in your Helm configuration:
 
@@ -550,8 +549,8 @@ spec:
       serviceAccountName: datadog-agent
       containers:
         # Your original container
-        - name: "<APPLICATION_NAME>"
-          image: "<APPLICATION_IMAGE>"
+        - name: "<CONTAINER_NAME>"
+          image: "<CONTAINER_IMAGE>"
 
         # Running the Agent as a side-car
         - name: datadog-agent
@@ -776,13 +775,94 @@ To collect Kubernetes resource views, you need a [Cluster Agent setup][17] and a
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
 
-TK: Operator instructions
+Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13] to collect all processes running on your Fargate pod. To set the `shareProcessNamespace: true` configuration see the sample below:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "<APPLICATION_NAME>"
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "<APPLICATION_NAME>"
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+        agent.datadoghq.com/sidecar: fargate
+    spec:
+      serviceAccountName: datadog-agent
+      shareProcessNamespace: true
+      containers:
+      # Your original container
+      - name: "<CONTAINER_NAME>"
+        image: "<CONTAINER_IMAGE>"
+```
+
+To set this environment variable add a [custom sidecar profile in your Operator's `DatadogAgent` configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---datadog-operator).
+
+```yaml
+#(...)
+spec:
+  #(...)
+  features:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
+        profiles:
+          - env:
+            - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+              value: "true"
+```
 
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "Admission Controller - Helm" xxx -->
 
-TK: Helm instructions
+Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13] to collect all processes running on your Fargate pod. To set the `shareProcessNamespace: true` configuration see the sample below:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "<APPLICATION_NAME>"
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "<APPLICATION_NAME>"
+  template:
+    metadata:
+      labels:
+        app: "<APPLICATION_NAME>"
+        agent.datadoghq.com/sidecar: fargate
+    spec:
+      serviceAccountName: datadog-agent
+      shareProcessNamespace: true
+      containers:
+      # Your original container
+      - name: "<CONTAINER_NAME>"
+        image: "<CONTAINER_IMAGE>"
+```
+
+To set this environment variable add a [custom sidecar profile in your Helm configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---helm).
+
+```yaml
+clusterAgent:
+  admissionController:
+    agentSidecarInjection:
+      enabled: true
+      provider: fargate
+      profiles:
+        - env:
+          - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+            value: "true"
+```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Manual" xxx -->
