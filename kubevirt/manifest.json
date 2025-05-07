@@ -44,7 +44,7 @@
       }
     },
     "dashboards": {
-      "KubeVirt Overview": "assets/dashboards/kubevirt_overview.json"
+      "KubeVirt - Overview": "assets/dashboards/kubevirt_overview.json"
     }
   },
   "author": {
