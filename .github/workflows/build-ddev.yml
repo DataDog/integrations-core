@@ -545,11 +545,19 @@ jobs:
 
     - name: Sign PKG
       run: >-
-        rcodesign sign -vv
+        rcodesign sign -vvv --deep --strict
         --pem-source /tmp/certificate-installer.pem
         --pem-source /tmp/private-key-installer.pem
         "staged/${{ steps.pkg.outputs.path }}"
         "signed/${{ steps.pkg.outputs.path }}"
+
+    - name: pkgutil check signature
+      run: >-
+        pkgutil --check-signature "signed/${{ steps.pkg.outputs.path }}"
+
+    - name: check timestamp
+      run: >-
+        codesign -dvv "signed/${{ steps.pkg.outputs.path }}
 
     - name: Notarize PKG
       run: >-
