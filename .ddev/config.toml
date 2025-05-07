@@ -119,6 +119,7 @@ exclude = [
     "kube_controller_manager",
     "kube_scheduler",
     "openmetrics",
+    "kubevirt",
 ]
 
 [overrides.validate.labeler]
