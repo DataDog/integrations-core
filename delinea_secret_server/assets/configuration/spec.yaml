@@ -1,0 +1,10 @@
+name: Delinea Secret Server
+files:
+- name: delinea_secret_server.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp/udp
+      port: <PORT>
+      source: delinea-secret-server
+      service: delinea-secret-server

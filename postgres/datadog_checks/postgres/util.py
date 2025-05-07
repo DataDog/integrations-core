@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import string
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
@@ -128,6 +129,43 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+SET_TRIM_PATTERN = re.compile(
+    r"""
+    ^(?:
+        # match one leading comment
+        (?:
+            \s*
+            /\*
+            .*?
+            \*/
+        )?
+        # match leading SET commands
+        \s*SET\b
+        (?:
+            [^';]*? | # keywords, integer literals, etc.
+            (?:'[^']*?')* # single-quoted strings
+        )+
+        ;
+    )+
+    \s*(.+?)$ # actual non-SET cmds
+    """,
+    flags=(re.I | re.X),
+)
+
+
+# Expects one or more SQL statements in a string. If the string
+# begins with any SET statements, they are removed and the rest
+# of the string is returned. Otherwise, the string is returned
+# as it was received.
+def trim_leading_set_stmts(sql):
+    match = SET_TRIM_PATTERN.match(sql)
+
+    if match:
+        return match.group(1)
+    else:
+        return sql
 
 
 fmt = PartialFormatter()
@@ -381,37 +419,34 @@ SELECT {metrics_columns}
 }
 
 # Requires postgres 10+
-REPLICATION_STATS_METRICS = {
-    'descriptors': [
-        ('application_name', 'wal_app_name'),
-        ('state', 'wal_state'),
-        ('sync_state', 'wal_sync_state'),
-        ('client_addr', 'wal_client_addr'),
-    ],
-    'metrics': {
-        'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
-            'replication.wal_write_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
-            'replication.wal_flush_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
-            'replication.wal_replay_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, age(backend_xmin)) as backend_xmin_age': (
-            'replication.backend_xmin_age',
-            AgentCheck.gauge,
-        ),
-    },
-    'relation': False,
-    'query': """
-SELECT application_name, state, sync_state, client_addr, {metrics_columns}
-FROM pg_stat_replication
-""",
+QUERY_PG_REPLICATION_STATS_METRICS = {
     'name': 'replication_stats_metrics',
+    'query': """
+SELECT
+    pg_stat_replication.application_name,
+    pg_stat_replication.state,
+    pg_stat_replication.sync_state,
+    pg_stat_replication.client_addr,
+    pg_stat_replication_slot.slot_name,
+    pg_stat_replication_slot.slot_type,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag,
+    GREATEST (0, age(pg_stat_replication.backend_xmin)) AS backend_xmin_age
+FROM pg_stat_replication as pg_stat_replication
+LEFT JOIN pg_replication_slots as pg_stat_replication_slot
+ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
+""".strip(),
+    'columns': [
+        {'name': 'wal_app_name', 'type': 'tag'},
+        {'name': 'wal_state', 'type': 'tag'},
+        {'name': 'wal_sync_state', 'type': 'tag'},
+        {'name': 'wal_client_addr', 'type': 'tag'},
+        {'name': 'slot_name', 'type': 'tag_not_null'},
+        {'name': 'slot_type', 'type': 'tag_not_null'},
+        {'name': 'wal_write_lag', 'type': 'gauge'},
+        {'name': 'wal_flush_lag', 'type': 'gauge'},
+        {'name': 'wal_replay_lag', 'type': 'gauge'},
+    ],
 }
 
 

@@ -45,8 +45,8 @@ SINFO_MAP = {
             'tags': [],
         },
         # Node metrics
-        # PARTITION  |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES        |GRES_USED    # noqa: E501
-        # normal*    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.46 |    4076 |       0 |idle  |none   |(null)          |      1 |gpu:tesla:4 |gpu:tesla:3(IDX:0,2-3)   # noqa: E501
+        # PARTITION  |AVAIL |NODELIST |CPUSTATE(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |ALLOCMEM|GRES        |GRES_USED    # noqa: E501
+        # normal*    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.46 |    4076 |       0 |idle  |none   |(null)          |      1 |0       |gpu:tesla:4 |gpu:tesla:3(IDX:0,2-3)   # noqa: E501
         {
             'name': 'slurm.node.cpu.allocated',
             'value': 0,
@@ -140,6 +140,42 @@ SINFO_MAP = {
         {
             'name': 'slurm.node.free_mem',
             'value': 4076,
+            'tags': [
+                'slurm_node_active_features:null',
+                'slurm_node_availability:up',
+                'slurm_node_cluster:N/A',
+                'slurm_node_memory:1000',
+                'slurm_node_name:c1',
+                'slurm_node_state_reason:none',
+                'slurm_node_state:idle',
+                'slurm_node_threads:1',
+                'slurm_partition_name:normal',
+                'slurm_partition_gpu_type:tesla',
+                'slurm_partition_gpu_used_idx:0,2-3',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.memory',
+            'value': 1000,
+            'tags': [
+                'slurm_node_active_features:null',
+                'slurm_node_availability:up',
+                'slurm_node_cluster:N/A',
+                'slurm_node_memory:1000',
+                'slurm_node_name:c1',
+                'slurm_node_state_reason:none',
+                'slurm_node_state:idle',
+                'slurm_node_threads:1',
+                'slurm_partition_name:normal',
+                'slurm_partition_gpu_type:tesla',
+                'slurm_partition_gpu_used_idx:0,2-3',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.alloc_mem',
+            'value': 0,
             'tags': [
                 'slurm_node_active_features:null',
                 'slurm_node_availability:up',
@@ -227,8 +263,8 @@ SINFO_MAP = {
                 'slurm_default_partition:true',
             ],
         },
-        # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE  |REASON |ACTIVE_FEATURES |THREADS |GRES        |GRES_USED    # noqa: E501
-        # normal*   |up    |c2       |0/1/0/1        |  1000 |N/A     |    1.46 |    4076 |       0 |idle#  |none   |(null)          |      1 |gpu:tesla:4 |gpu:tesla:4(IDX:0-3) # noqa: E501
+        # PARTITION |AVAIL |NODELIST |CPUSTATE(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE  |REASON |ACTIVE_FEATURES |THREADS |ALLOCMEM|GRES        |GRES_USED    # noqa: E501
+        # normal*   |up    |c2       |0/1/0/1        |  1000 |N/A     |    1.46 |    4076 |       0 |idle#  |none   |(null)          |      1 |0       |gpu:tesla:4 |gpu:tesla:4(IDX:0-3) # noqa: E501
         {
             'name': 'slurm.node.cpu.allocated',
             'value': 0,
@@ -344,6 +380,44 @@ SINFO_MAP = {
             ],
         },
         {
+            'name': 'slurm.node.memory',
+            'value': 1000,
+            'tags': [
+                'slurm_node_active_features:null',
+                'slurm_node_availability:up',
+                'slurm_node_cluster:N/A',
+                'slurm_node_memory:1000',
+                'slurm_node_name:c2',
+                'slurm_node_state_reason:none',
+                'slurm_node_state:idle',
+                'slurm_node_threads:1',
+                'slurm_partition_name:normal',
+                'slurm_partition_gpu_type:tesla',
+                'slurm_partition_gpu_used_idx:0-3',
+                'sinfo_state_code:powering_up_configured',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.alloc_mem',
+            'value': 0,
+            'tags': [
+                'slurm_node_active_features:null',
+                'slurm_node_availability:up',
+                'slurm_node_cluster:N/A',
+                'slurm_node_memory:1000',
+                'slurm_node_name:c2',
+                'slurm_node_state_reason:none',
+                'slurm_node_state:idle',
+                'slurm_node_threads:1',
+                'slurm_partition_name:normal',
+                'slurm_partition_gpu_type:tesla',
+                'slurm_partition_gpu_used_idx:0-3',
+                'sinfo_state_code:powering_up_configured',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
             'name': 'slurm.node.gpu_total',
             'value': 4,
             'tags': [
@@ -419,8 +493,8 @@ SINFO_MAP = {
                 'slurm_default_partition:true',
             ],
         },
-        # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE  |REASON |ACTIVE_FEATURES |THREADS |GRES        |GRES_USED    # noqa: E501
-        # buz       |up    |c3       |1/2/3/4        |  5000 |bar     |    2.46 |    5076 |       5 |idle$  |test   |foo             |      6 |(null)      |(null)   # noqa: E501
+        # PARTITION |AVAIL |NODELIST |CPUSTATE(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE  |REASON |ACTIVE_FEATURES |THREADS |ALLOCMEM|GRES        |GRES_USED    # noqa: E501
+        # buz       |up    |c3       |1/2/3/4        |  5000 |bar     |    2.46 |    5076 |       5 |idle$  |test   |foo             |      6 |0       |(null)      |(null)   # noqa: E501
         {
             'name': 'slurm.node.cpu.allocated',
             'value': 1,
@@ -514,6 +588,42 @@ SINFO_MAP = {
         {
             'name': 'slurm.node.free_mem',
             'value': 5076,
+            'tags': [
+                'slurm_node_active_features:foo',
+                'slurm_node_availability:up',
+                'slurm_node_cluster:bar',
+                'slurm_node_memory:5000',
+                'slurm_node_name:c3',
+                'slurm_node_state_reason:test',
+                'slurm_node_state:idle',
+                'slurm_node_threads:6',
+                'slurm_partition_name:buz',
+                'slurm_partition_gpu_type:null',
+                'slurm_partition_gpu_used_idx:null',
+                'sinfo_state_code:maintenance',
+            ],
+        },
+        {
+            'name': 'slurm.node.memory',
+            'value': 5000,
+            'tags': [
+                'slurm_node_active_features:foo',
+                'slurm_node_availability:up',
+                'slurm_node_cluster:bar',
+                'slurm_node_memory:5000',
+                'slurm_node_name:c3',
+                'slurm_node_state_reason:test',
+                'slurm_node_state:idle',
+                'slurm_node_threads:6',
+                'slurm_partition_name:buz',
+                'slurm_partition_gpu_type:null',
+                'slurm_partition_gpu_used_idx:null',
+                'sinfo_state_code:maintenance',
+            ],
+        },
+        {
+            'name': 'slurm.node.alloc_mem',
+            'value': 0,
             'tags': [
                 'slurm_node_active_features:foo',
                 'slurm_node_availability:up',
@@ -817,8 +927,8 @@ SQUEUE_MAP = {
             'value': 1,
             'tags': [],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |300M        # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |300M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -831,10 +941,11 @@ SQUEUE_MAP = {
                 'slurm_job_state:RUNNING',
                 'slurm_job_tres_per_node:300M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    44 |root |wrap    |RUNNING |c2       |   1 |c2               |400M       # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    44 |root |wrap    |RUNNING |c2       |   1 |c2               |400M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -847,10 +958,11 @@ SQUEUE_MAP = {
                 'slurm_job_state:RUNNING',
                 'slurm_job_tres_per_node:400M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    45 |root |test.py |PENDING |         |   1 |(Resources)      |100M      # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    45 |root |test.py |PENDING |         |   1 |(Resources)      |100M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -863,10 +975,11 @@ SQUEUE_MAP = {
                 'slurm_job_state:PENDING',
                 'slurm_job_tres_per_node:100M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
-        #    46 |root |test.py |PENDING |         |   1 |(Priority)       |200M     # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
+        #    46 |root |test.py |PENDING |         |   1 |(Priority)       |200M       | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -879,6 +992,7 @@ SQUEUE_MAP = {
                 'slurm_job_state:PENDING',
                 'slurm_job_tres_per_node:200M',
                 'slurm_job_user:root',
+                'slurm_partition_name:foo',
             ],
         },
     ]
@@ -905,6 +1019,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -921,6 +1036,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -937,6 +1053,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -953,6 +1070,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -969,6 +1087,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -985,6 +1104,7 @@ SACCT_MAP = {
                 'slurm_job_name:wrap',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:normal',
+                'slurm_partition_name:normal',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:billing=1,cpu=1,mem=500M,node=1',
             ],
@@ -1004,6 +1124,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1021,6 +1142,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1038,6 +1160,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1055,6 +1178,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1072,6 +1196,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1089,6 +1214,7 @@ SACCT_MAP = {
                 'slurm_job_name:batch',
                 'slurm_job_node_list:c1',
                 'slurm_job_partition:null',
+                'slurm_partition_name:null',
                 'slurm_job_state:COMPLETED',
                 'slurm_job_tres_per_node:cpu=1,mem=500M,node=1',
             ],
@@ -1138,6 +1264,11 @@ SDIAG_MAP = {
         {'name': 'slurm.sdiag.backfill.depth_mean_try_depth', 'value': 27, 'tags': []},
         {'name': 'slurm.sdiag.backfill.queue_length_mean', 'value': 28, 'tags': []},
         {'name': 'slurm.sdiag.backfill.mean_table_size', 'value': 29, 'tags': []},
+        {
+            'name': 'slurm.sdiag.last_cycle_seconds_ago',
+            'value': 1000,
+            'tags': [],
+        },  # mocked to be 1000 seconds in the test
     ]
 }
 

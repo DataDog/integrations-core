@@ -501,10 +501,10 @@ Additional helpful documentation, links, and articles:
 [6]: https://www.datadoghq.com/blog/monitor-openai-with-datadog/
 [7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/
 [10]: https://platform.openai.com/
-[11]: https://app.datadoghq.com/integrations/openai
-[12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
+[11]: /integrations/openai
+[12]: /monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
-[14]: https://app.datadoghq.com/cost
+[14]: /cost
 [15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
 [16]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
 [17]: https://platform.openai.com/docs/

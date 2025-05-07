@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2025-03-19
+## 3.2.1 / 2025-04-17
+
+***Fixed***:
+
+* Honor `tags` instance configuration in FoundationDB integration ([#19771](https://github.com/DataDog/integrations-core/pull/19771))
+
+## 3.2.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:
 

@@ -93,6 +93,19 @@ class FoundationdbCheck(AgentCheck):
             return
         tags = self._tags + ["fdb_process:" + process["address"]]
 
+        if "class_type" in process:
+            tags.append("fdb_process_class:" + process["class_type"])
+
+        if "roles" in process:
+            # First, report role-specific metrics before we add role tags to the list…
+            for role in process["roles"]:
+                self.report_role(role, tags)
+
+            # …then add role tags so we can associate process metrics with roles.
+            for role in process["roles"]:
+                if "role" in role:
+                    tags.append("fdb_role:" + role["role"])
+
         if "cpu" in process:
             self.maybe_gauge("process.cpu.usage_cores", process["cpu"], "usage_cores", tags)
         if "disk" in process:
@@ -121,10 +134,6 @@ class FoundationdbCheck(AgentCheck):
             self.maybe_hz_counter("process.network.megabits_received", network, "megabits_received", tags)
             self.maybe_hz_counter("process.network.megabits_sent", network, "megabits_sent", tags)
             self.maybe_hz_counter("process.network.tls_policy_failures", network, "tls_policy_failures", tags)
-
-        if "roles" in process:
-            for role in process["roles"]:
-                self.report_role(role, tags)
 
     def report_role(self, role, process_tags):
         if "role" not in role:
@@ -224,19 +233,46 @@ class FoundationdbCheck(AgentCheck):
             )
 
             role_counts = {}
+            process_counts_by_tag_set = {}
 
             for process_key in processes:
                 process = processes[process_key]
 
                 self.report_process(process)
+
+                process_tags = tags.copy()
+
+                if "class_type" in process:
+                    process_tags.append("fdb_process_class:" + process["class_type"])
+
                 if "roles" in process:
                     for role in process["roles"]:
                         if "role" in role:
                             rolename = role["role"]
+                            process_tags.append("fdb_role:" + rolename)
                             if rolename in role_counts:
                                 role_counts[rolename] += 1
                             else:
                                 role_counts[rolename] = 1
+
+                process_tags.sort()
+
+                # Packing and unpacking tags into sorted, comma-separated strings is a little hacky, but allows us to
+                # keep a map of role sets to counts; lists/sets aren't hashable and won't work as dictionary keys.
+                tags_string = ",".join(process_tags)
+
+                if tags_string in process_counts_by_tag_set:
+                    process_counts_by_tag_set[tags_string] += 1
+                else:
+                    process_counts_by_tag_set[tags_string] = 1
+
+            for tags_string in process_counts_by_tag_set:
+                process_tags = tags_string.split(",")
+                self.gauge(
+                    "processes_per_role",
+                    process_counts_by_tag_set[tags_string],
+                    process_tags if process_tags else None,
+                )
 
             for role in role_counts:
                 self.gauge("processes_per_role." + role, role_counts[role], tags)

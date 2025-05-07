@@ -119,7 +119,7 @@ If the service is present in the output, permissions are the issue. To give the 
 - [How to collect Windows Server 2012 metrics][9]
 - [Monitoring Windows Server 2012 with Datadog][10]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/windows_service/datadog_checks/windows_service/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -136,4 +136,4 @@ If the service is present in the output, permissions are the issue. To give the 
 [15]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/
 [16]: https://learn.microsoft.com/en-US/troubleshoot/windows-server/group-policy/configure-group-policies-set-security
 [17]: https://learn.microsoft.com/en-us/windows/win32/services/service-trigger-events
-[18]: https://app.datadoghq.com/integrations/windows-service?search=windows%20service
+[18]: /integrations/windows-service?search=windows%20service

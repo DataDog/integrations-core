@@ -328,7 +328,11 @@ metadata:
     ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
       {
         "airflow": {
-          "instances": ["url": "http://airflow-ui.%%kube_namespace%%.svc.cluster.local:8080"]
+          "instances": [
+            {
+              "url": "http://airflow-ui.%%kube_namespace%%.svc.cluster.local:8080"
+            }
+          ]
         }
       }
     # (...)
@@ -428,7 +432,7 @@ Need help? Contact [Datadog support][11].
 [1]: https://airflow.apache.org/docs/stable/metrics.html
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://docs.datadoghq.com/agent/
-[4]: https://app.datadoghq.com/account/settings/agent/latest
+[4]: /account/settings/agent/latest
 [5]: https://github.com/DataDog/integrations-core/blob/master/airflow/datadog_checks/airflow/data/conf.yaml.example
 [6]: https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html
 [7]: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#metrics
