@@ -81,7 +81,7 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8000/metrics"
+              "openmetrics_endpoint": "http://%%host%%:8080/metrics"
             }
           ]
         }
@@ -130,7 +130,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://keda.sh/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/keda/datadog_checks/keda/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

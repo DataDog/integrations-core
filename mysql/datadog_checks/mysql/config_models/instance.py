@@ -12,12 +12,21 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class ManagedAuthentication(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
@@ -26,6 +35,8 @@ class Aws(BaseModel):
         frozen=True,
     )
     instance_endpoint: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication] = None
+    region: Optional[str] = None
 
 
 class Azure(BaseModel):
@@ -58,6 +69,14 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -74,6 +93,7 @@ class IndexMetrics(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
@@ -117,7 +137,6 @@ class Options(BaseModel):
     galera_cluster: Optional[bool] = None
     replication: Optional[bool] = None
     replication_channel: Optional[str] = None
-    replication_non_blocking_status: Optional[bool] = None
     schema_size_metrics: Optional[bool] = None
     system_table_size_metrics: Optional[bool] = None
     table_rows_stats_metrics: Optional[bool] = None
@@ -129,6 +148,7 @@ class QueryActivity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_blocking_queries: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
 
@@ -198,6 +218,7 @@ class InstanceConfig(BaseModel):
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None

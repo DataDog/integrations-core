@@ -64,6 +64,26 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance,
+    ## which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - mysql_sock: The socket path of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
     ## If you specify a socket you dont need to specify a host.
@@ -260,11 +280,6 @@ instances:
         #
         # replication_channel: <REPLICATION_CHANNEL>
 
-        ## @param replication_non_blocking_status - boolean - optional - default: false
-        ## Set to `true` to grab slave count in a non-blocking manner (requires `performance_schema`);
-        #
-        # replication_non_blocking_status: false
-
         ## @param galera_cluster - boolean - optional - default: false
         ## Set to `true` to collect Galera cluster metrics.
         #
@@ -395,7 +410,7 @@ instances:
         # collection_interval: 600
 
         ## @param max_execution_time - number - optional - default: 60
-        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds. 
+        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
         ## Capped by `schemas_collection.collection_interval`
         #
         # max_execution_time: 60
@@ -515,10 +530,10 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
-        ## Set the activity collection interval (in seconds).
+        ## @param collect_blocking_queries - boolean - optional - default: false
+        ## Enable collection of blocking queries.
         #
-        # collection_interval: 10
+        # collect_blocking_queries: false
 
     ## Configure collection of index metrics.
     ## Metrics provided by the options:
@@ -526,8 +541,8 @@ instances:
     ##   - mysql.index.reads (per index)
     ##   - mysql.index.updates (per index)
     ##   - mysql.index.deletes (per index)
-    ## Note that the index size metric requires the user defined for this instance to have 
-    ## SELECT privileges. Take a look at 
+    ## Note that the index size metric requires the user defined for this instance to have
+    ## SELECT privileges. Take a look at
     ## https://docs.datadoghq.com/integrations/mysql/?tab=host#prepare-mysql for further instructions.
     #
     # index_metrics:
@@ -536,6 +551,12 @@ instances:
         ## Enable collection of index metrics.
         #
         # enabled: true
+
+        ## @param limit - integer - optional - default: 1000
+        ## Set the maximum number of unique (by combination of database, table, and index name)
+        ## indexes to collect. Defaults to 1000.
+        #
+        # limit: 1000
 
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
@@ -555,6 +576,32 @@ instances:
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
         # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+        ## @param region - string - optional - default: us-east-1
+        ## Equal to the region of the instance the agent is connecting to.
+        ## This value is used to configure IAM authentication.
+        #
+        # region: us-east-1
+
+        ## @param managed_authentication - mapping - optional
+        ## Configure section used for AWS IAM Authentication with RDS.
+        ##
+        ## This supports using IAM database authentication to connect to your database instance.
+        ##
+        ## For more information on configuration, see
+        ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
+        ##
+        ## For more information on RDS IAM Authentication, see the AWS docs
+        ## https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
+        ##
+        ## To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
+        ## If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
+        ## `aws.region` is required to enable IAM Authentication.
+        ##
+        ## Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+        ## This can be used to perform cross-account authentication.
+        #
+        # managed_authentication: {}
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
