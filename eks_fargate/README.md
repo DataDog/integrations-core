@@ -730,99 +730,102 @@ To collect Kubernetes resource views, you need a [Cluster Agent setup][17] and a
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
 
-Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13] to collect all processes running on your Fargate pod. To set the `shareProcessNamespace: true` configuration see the sample below:
+To collect all processes running on your Fargate pod:
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: "<APPLICATION_NAME>"
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: "<APPLICATION_NAME>"
-  template:
-    metadata:
-      labels:
-        app: "<APPLICATION_NAME>"
-        agent.datadoghq.com/sidecar: fargate
-    spec:
-      serviceAccountName: datadog-agent
-      shareProcessNamespace: true
-      containers:
-      # Your original container
-      - name: "<CONTAINER_NAME>"
-        image: "<CONTAINER_IMAGE>"
-```
+1. [Set `shareProcessNamespace: true` on your pod spec][13]. For example:
 
-To set this environment variable add a [custom sidecar profile in your Operator's `DatadogAgent` configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---datadog-operator).
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: "<APPLICATION_NAME>"
+     namespace: default
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: "<APPLICATION_NAME>"
+     template:
+       metadata:
+         labels:
+           app: "<APPLICATION_NAME>"
+           agent.datadoghq.com/sidecar: fargate
+       spec:
+         serviceAccountName: datadog-agent
+         shareProcessNamespace: true
+         containers:
+         # Your original container
+         - name: "<CONTAINER_NAME>"
+           image: "<CONTAINER_IMAGE>"
+   ```
 
-```yaml
-#(...)
-spec:
-  #(...)
-  features:
-    admissionController:
-      agentSidecarInjection:
-        enabled: true
-        provider: fargate
-        profiles:
-          - env:
-            - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
-              value: "true"
-```
+2. Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` by adding a [custom sidecar profile in your Operator's `DatadogAgent` configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---datadog-operator):
+
+   ```yaml
+   #(...)
+   spec:
+     #(...)
+     features:
+       admissionController:
+         agentSidecarInjection:
+           enabled: true
+           provider: fargate
+           profiles:
+             - env:
+               - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+                 value: "true"
+   ```
 
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "Admission Controller - Helm" xxx -->
 
-Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13] to collect all processes running on your Fargate pod. To set the `shareProcessNamespace: true` configuration see the sample below:
+To collect all processes running on your Fargate pod:
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: "<APPLICATION_NAME>"
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: "<APPLICATION_NAME>"
-  template:
-    metadata:
-      labels:
-        app: "<APPLICATION_NAME>"
-        agent.datadoghq.com/sidecar: fargate
-    spec:
-      serviceAccountName: datadog-agent
-      shareProcessNamespace: true
-      containers:
-      # Your original container
-      - name: "<CONTAINER_NAME>"
-        image: "<CONTAINER_IMAGE>"
-```
+1. [Set `shareProcessNamespace: true` on your pod spec][13]. For example:
 
-To set this environment variable add a [custom sidecar profile in your Helm configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---helm).
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: "<APPLICATION_NAME>"
+     namespace: default
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: "<APPLICATION_NAME>"
+     template:
+       metadata:
+         labels:
+           app: "<APPLICATION_NAME>"
+           agent.datadoghq.com/sidecar: fargate
+       spec:
+         serviceAccountName: datadog-agent
+         shareProcessNamespace: true
+         containers:
+         # Your original container
+         - name: "<CONTAINER_NAME>"
+           image: "<CONTAINER_IMAGE>"
+   ```
+   
+2. Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` by adding a [custom sidecar profile in your Helm configuration](#custom-configuration-with-sidecar-profiles-and-custom-selectors---helm):
 
-```yaml
-clusterAgent:
-  admissionController:
-    agentSidecarInjection:
-      enabled: true
-      provider: fargate
-      profiles:
-        - env:
-          - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
-            value: "true"
-```
-
+   ```yaml
+   clusterAgent:
+     admissionController:
+       agentSidecarInjection:
+         enabled: true
+         provider: fargate
+         profiles:
+           - env:
+             - name: DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED
+               value: "true"
+   ```
 <!-- xxz tab xxx -->
 <!-- xxx tab "Manual" xxx -->
 
-Set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13] to collect all processes running on your Fargate pod.
+To collect all processes running on your Fargate pod, set the Agent environment variable `DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED=true` and [set `shareProcessNamespace: true` on your pod spec][13].
 
 For example:
 
@@ -902,9 +905,9 @@ Monitor EKS Fargate logs by using [Fluent Bit][14] to route EKS logs to CloudWat
    ```
 2. Use the [Datadog Forwarder][15] to collect logs from CloudWatch and send them to Datadog.
 
-## Traces collection
+## Trace collection
 
-In EKS Fargate your application container will send its traces to the Datadog Agent sidecar container. The Agent accepts these traces by default over the port `8126`.
+In EKS Fargate, your application container sends its traces to the Datadog Agent sidecar container. The Agent accepts these traces over port `8126` by default.
 
 You do not have to set the `DD_AGENT_HOST` address in your application container when sending these metrics. Let this default to `localhost`.
 
