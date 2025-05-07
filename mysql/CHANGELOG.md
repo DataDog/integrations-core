@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.3.1 / 2025-05-07
+
+***Fixed***:
+
+* Remove duplicate idle MySQL activity rows ([#20222](https://github.com/DataDog/integrations-core/pull/20222))
+
 ## 15.3.0 / 2025-04-22
 
 ***Added***:
