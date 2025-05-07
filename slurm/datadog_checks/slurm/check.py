@@ -235,9 +235,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge('squeue.enabled', 1)
 
     def process_sacct(self, output):
-        # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList    # noqa: E501
-        # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1          # noqa: E501
-        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1          # noqa: E501
+        # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList   | AveDiskRead | MaxDiskRead # noqa: E501
+        # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | 0.000000    | 0.000000     # noqa: E501
+        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | 0.000000    | 0.000000     # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_sacct_stats:
@@ -264,11 +264,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self._process_metrics(job_data, SACCT_MAP, tags)
 
             duration = parse_duration(job_data[6])
+            ave_cpu = parse_duration(job_data[10])
             if not duration:
                 self.log.debug("Invalid duration for job '%s'. Skipping. Assigning duration as 0.", job_id)
                 duration = 0
 
             self.gauge('sacct.job.duration', duration, tags=tags)
+            self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
 
         self.gauge('sacct.enabled', 1)
@@ -449,8 +451,17 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 self.log.debug("Empty metric value for '%s'. Skipping.", metric_info["name"])
                 continue
 
+            value = metric_value_str.strip().upper()
+            multiplier = 1
+            if value.endswith('K'):
+                multiplier = 1000
+                value = value[:-1]
+            elif value.endswith('M'):
+                multiplier = 1000000
+                value = value[:-1]
+
             try:
-                metric_value = float(metric_value_str)
+                metric_value = float(value) * multiplier
             except ValueError:
                 self.log.debug("Invalid metric value '%s' for '%s'. Skipping.", metric_value_str, metric_info["name"])
                 continue
