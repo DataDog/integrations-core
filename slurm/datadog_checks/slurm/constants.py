@@ -13,7 +13,7 @@ SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
     "-anpo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList,AveDiskRead,MaxDiskRead",
-    "--units==K",
+    "--units=K",
 ]
 SCONTROL_PARAMS = ["listpid"]
 
