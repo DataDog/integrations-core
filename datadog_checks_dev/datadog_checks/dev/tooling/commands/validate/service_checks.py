@@ -77,6 +77,10 @@ def service_checks(check, sync):
 
         manifest_file = get_manifest_file(check_name)
         service_check_relative = manifest.get_service_checks_path()
+        if service_check_relative is None:
+            echo_success(f"Skipping {check_name} - This check does not have service checks.")
+            continue
+
         service_checks_file = os.path.join(root, check_name, *service_check_relative.split('/'))
 
         if not file_exists(service_checks_file):

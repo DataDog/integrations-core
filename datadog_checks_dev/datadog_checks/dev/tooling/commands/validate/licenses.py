@@ -68,8 +68,6 @@ EXPLICIT_LICENSES = {
     'simplejson': ['MIT'],
     # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
     'supervisor': ['BSD-3-Clause-Modification'],
-    # https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
-    'uptime': ['BSD-2-Clause'],
     # https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
     'win-inet-pton': ['Unlicense'],
 }

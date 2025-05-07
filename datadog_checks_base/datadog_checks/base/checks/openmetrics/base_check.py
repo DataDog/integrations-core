@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+import requests
+
 from ...errors import CheckException
 from ...utils.tracing import traced_class
 from .. import AgentCheck
@@ -72,9 +74,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         """
         The base class for any Prometheus-based integration.
         """
-        # See Performance Optimizations in this package's README.md.
-        import requests
-
         args = list(args)
         default_instances = kwargs.pop('default_instances', None) or {}
         default_namespace = kwargs.pop('default_namespace', None)

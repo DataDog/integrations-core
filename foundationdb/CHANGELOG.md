@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2025-02-20
+## 3.2.1 / 2025-04-17
+
+***Fixed***:
+
+* Honor `tags` instance configuration in FoundationDB integration ([#19771](https://github.com/DataDog/integrations-core/pull/19771))
+
+## 3.2.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Add more FoundationDB metrics ([#19681](https://github.com/DataDog/integrations-core/pull/19681))
+
+***Fixed***:
+
+* Use `__NAMESPACE__` in the FoundationDB integration ([#19770](https://github.com/DataDog/integrations-core/pull/19770))
+
+## 3.1.0 / 2025-02-20 / Agent 7.64.0
 
 ***Added***:
 

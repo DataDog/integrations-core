@@ -1,1 +1,0 @@
-Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes.

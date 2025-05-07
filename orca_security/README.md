@@ -27,9 +27,7 @@ The Orca Security integration seamlessly ingests alert logs data using the built
 6. Click **Configure** on the Datadog Integration and enable the integration.
 7. Go to **Automations** and click **+ Create Automation**.
 8. In the **Automation Details** section, provide **Automation Name**.
-9. In the **Trigger Query** section, select all the values for alert state in the query. The query should look as below:
-
-    ```When an alert Alert State is open,in_progress,snoozed,dismissed,closed```
+9. In the **Trigger Query** section, select all the values for alert state in the query. The query should look like this: `When an alert Alert State is open,in_progress,snoozed,dismissed,closed`
 10. In the **Define Results** section, enable **Apply to Existing Alerts** if existing alerts in the Orca Security platform need to be forwarded to Datadog, or disable it to forward newly generated/updated alerts.  
 **Note**: Alerts that were updated more than 18 hours ago cannot be ingested into Datadog.
 11. In the **SIEM/SOAR** section under the **Define Results** section, check **Datadog** and select **Logs** as the Datadog type.

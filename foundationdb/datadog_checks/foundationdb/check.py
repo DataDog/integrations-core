@@ -16,6 +16,7 @@ class FoundationdbCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(FoundationdbCheck, self).__init__(name, init_config, instances)
+        self._tags = self.instance.get('tags', [])
         self._db = None
 
     def construct_database(self):
@@ -67,10 +68,10 @@ class FoundationdbCheck(AgentCheck):
             if not query_type:
                 self.log.error("custom query field `query_type` is required for metric_prefix `%s`", metric_prefix)
                 continue
-            query_tags = query['tags']
-            if not query_tags:
+            if not query['tags']:
                 self.log.error("custom query field `tags` is required for metric_prefix `%s`", metric_prefix)
                 continue
+            query_tags = self._tags + query['tags']
             result = self._db[query_key.encode('UTF-8')]
             if not result:
                 raise ValueError("No result for " + query_key)
@@ -90,12 +91,26 @@ class FoundationdbCheck(AgentCheck):
     def report_process(self, process):
         if "address" not in process:
             return
-        tags = ["fdb_process:" + process["address"]]
+        tags = self._tags + ["fdb_process:" + process["address"]]
+
+        if "class_type" in process:
+            tags.append("fdb_process_class:" + process["class_type"])
+
+        if "roles" in process:
+            # First, report role-specific metrics before we add role tags to the list…
+            for role in process["roles"]:
+                self.report_role(role, tags)
+
+            # …then add role tags so we can associate process metrics with roles.
+            for role in process["roles"]:
+                if "role" in role:
+                    tags.append("fdb_role:" + role["role"])
 
         if "cpu" in process:
             self.maybe_gauge("process.cpu.usage_cores", process["cpu"], "usage_cores", tags)
         if "disk" in process:
             disk = process["disk"]
+            self.maybe_gauge("process.disk.busy", disk, "busy", tags)
             self.maybe_gauge("process.disk.free_bytes", disk, "free_bytes", tags)
             self.maybe_gauge("process.disk.total_bytes", disk, "total_bytes", tags)
             if "reads" in disk:
@@ -120,14 +135,10 @@ class FoundationdbCheck(AgentCheck):
             self.maybe_hz_counter("process.network.megabits_sent", network, "megabits_sent", tags)
             self.maybe_hz_counter("process.network.tls_policy_failures", network, "tls_policy_failures", tags)
 
-        if "roles" in process:
-            for role in process["roles"]:
-                self.report_role(role, tags)
-
     def report_role(self, role, process_tags):
         if "role" not in role:
             return
-        tags = process_tags + ["fdb_role:" + role["role"]]
+        tags = self._tags + process_tags + ["fdb_role:" + role["role"]]
 
         self.maybe_hz_counter("process.role.input_bytes", role, "input_bytes", tags)
         self.maybe_hz_counter("process.role.durable_bytes", role, "durable_bytes", tags)
@@ -150,6 +161,8 @@ class FoundationdbCheck(AgentCheck):
         self.maybe_gauge("process.role.kvstore_total_nodes", role, "kvstore_total_nodes", tags)
         self.maybe_gauge("process.role.kvstore_total_size", role, "kvstore_total_size", tags)
         self.maybe_gauge("process.role.kvstore_used_bytes", role, "kvstore_used_bytes", tags)
+        self.maybe_gauge("process.role.queue_disk_available_bytes", role, "queue_disk_available_bytes", tags)
+        self.maybe_gauge("process.role.queue_disk_total_bytes", role, "queue_disk_total_bytes", tags)
 
         if "data_lag" in role:
             self.maybe_gauge("process.role.data_lag.seconds", role["data_lag"], "seconds", tags)
@@ -182,77 +195,193 @@ class FoundationdbCheck(AgentCheck):
         if "cluster" not in status:
             raise ValueError("JSON Status data doesn't include cluster data")
 
+        tags = self._tags
+
+        if "client" in status:
+            client = status["client"]
+
+            if "coordinators" in client:
+                if "coordinators" in client["coordinators"]:
+                    coordinators = client["coordinators"]["coordinators"]
+
+                    reachable_coordinators = sum([1 for coordinator in coordinators if coordinator["reachable"]])
+                    unreachable_coordinators = len(coordinators) - reachable_coordinators
+
+                    self.gauge("coordinators", reachable_coordinators, tags + ["reachable:true"])
+                    self.gauge("coordinators", unreachable_coordinators, tags + ["reachable:false"])
+
         cluster = status["cluster"]
         if "machines" in cluster:
-            self.gauge("machines", len(cluster["machines"]))
+            machines = cluster["machines"]
+
+            self.gauge("machines", len(machines), tags)
+            self.gauge(
+                "excluded_machines", sum([1 for machine_key in machines if machines[machine_key]["excluded"]]), tags
+            )
         if "processes" in cluster:
-            self.gauge("processes", len(cluster["processes"]))
+            processes = cluster["processes"]
+
+            self.gauge("processes", len(processes), tags)
+            self.gauge(
+                "excluded_processes", sum([1 for process_key in processes if processes[process_key]["excluded"]]), tags
+            )
 
             self.count(
                 "instances",
-                sum((len(p["roles"]) if "roles" in p else 0 for p in cluster["processes"].values())),
+                sum((len(p["roles"]) if "roles" in p else 0 for p in processes.values())),
+                tags,
             )
 
             role_counts = {}
-            for process_key in cluster["processes"]:
-                process = cluster["processes"][process_key]
+            process_counts_by_tag_set = {}
+
+            for process_key in processes:
+                process = processes[process_key]
+
                 self.report_process(process)
+
+                process_tags = tags.copy()
+
+                if "class_type" in process:
+                    process_tags.append("fdb_process_class:" + process["class_type"])
+
                 if "roles" in process:
                     for role in process["roles"]:
                         if "role" in role:
                             rolename = role["role"]
+                            process_tags.append("fdb_role:" + rolename)
                             if rolename in role_counts:
                                 role_counts[rolename] += 1
                             else:
                                 role_counts[rolename] = 1
 
+                process_tags.sort()
+
+                # Packing and unpacking tags into sorted, comma-separated strings is a little hacky, but allows us to
+                # keep a map of role sets to counts; lists/sets aren't hashable and won't work as dictionary keys.
+                tags_string = ",".join(process_tags)
+
+                if tags_string in process_counts_by_tag_set:
+                    process_counts_by_tag_set[tags_string] += 1
+                else:
+                    process_counts_by_tag_set[tags_string] = 1
+
+            for tags_string in process_counts_by_tag_set:
+                process_tags = tags_string.split(",")
+                self.gauge(
+                    "processes_per_role",
+                    process_counts_by_tag_set[tags_string],
+                    process_tags if process_tags else None,
+                )
+
             for role in role_counts:
-                self.gauge("processes_per_role." + role, role_counts[role])
+                self.gauge("processes_per_role." + role, role_counts[role], tags)
 
         if "data" in cluster:
             data = cluster["data"]
-            self.maybe_gauge("data.system_kv_size_bytes", data, "system_kv_size_bytes")
-            self.maybe_gauge("data.total_disk_used_bytes", data, "total_disk_used_bytes")
-            self.maybe_gauge("data.total_kv_size_bytes", data, "total_kv_size_bytes")
+            self.maybe_gauge("data.system_kv_size_bytes", data, "system_kv_size_bytes", tags)
+            self.maybe_gauge("data.total_disk_used_bytes", data, "total_disk_used_bytes", tags)
+            self.maybe_gauge("data.total_kv_size_bytes", data, "total_kv_size_bytes", tags)
             self.maybe_gauge(
                 "data.least_operating_space_bytes_log_server",
                 data,
                 "least_operating_space_bytes_log_server",
+                tags,
             )
 
+            self.maybe_gauge("data.average_partition_size_bytes", data, "average_partition_size_bytes", tags)
+            self.maybe_gauge("data.partitions_count", data, "partitions_count", tags)
+
             if "moving_data" in data:
-                self.maybe_gauge("data.moving_data.in_flight_bytes", data["moving_data"], "in_flight_bytes")
-                self.maybe_gauge("data.moving_data.in_queue_bytes", data["moving_data"], "in_queue_bytes")
-                self.maybe_gauge("data.moving_data.total_written_bytes", data["moving_data"], "total_written_bytes")
+                self.maybe_gauge("data.moving_data.in_flight_bytes", data["moving_data"], "in_flight_bytes", tags)
+                self.maybe_gauge("data.moving_data.in_queue_bytes", data["moving_data"], "in_queue_bytes", tags)
+                self.maybe_gauge(
+                    "data.moving_data.total_written_bytes",
+                    data["moving_data"],
+                    "total_written_bytes",
+                    tags,
+                )
 
         if "datacenter_lag" in cluster:
-            self.gauge("datacenter_lag.seconds", cluster["datacenter_lag"]["seconds"])
+            self.gauge("datacenter_lag.seconds", cluster["datacenter_lag"]["seconds"], tags)
 
         if "workload" in cluster:
             workload = cluster["workload"]
             if "transactions" in workload:
                 transactions = workload["transactions"]
                 for k in transactions:
-                    self.maybe_hz_counter("workload.transactions." + k, transactions, k)
+                    self.maybe_hz_counter("workload.transactions." + k, transactions, k, tags)
 
             if "operations" in workload:
                 operations = workload["operations"]
                 for k in operations:
-                    self.maybe_hz_counter("workload.operations." + k, operations, k)
+                    self.maybe_hz_counter("workload.operations." + k, operations, k, tags)
+
+            if "keys" in workload:
+                keys = workload["keys"]
+                for k in keys:
+                    self.maybe_hz_counter("workload.keys." + k, keys, k, tags)
+
+            if "bytes" in workload:
+                bytes = workload["bytes"]
+                for k in bytes:
+                    self.maybe_hz_counter("workload.bytes." + k, bytes, k, tags)
 
         if "latency_probe" in cluster:
             for k, v in cluster["latency_probe"].items():
-                self.gauge("latency_probe." + k, v)
+                self.gauge("latency_probe." + k, v, tags)
+
+        if "clients" in cluster:
+            clients = cluster["clients"]
+
+            if "supported_versions" in clients:
+                for supported_version in clients["supported_versions"]:
+                    if "count" in supported_version and "client_version" in supported_version:
+                        client_version_tag = ["fdb_client_version:" + supported_version["client_version"]]
+                        self.gauge("clients.connected", supported_version["count"], tags + client_version_tag)
+            else:
+                self.maybe_gauge("clients.connected", clients, "count", tags)
 
         degraded_processes = 0
         if "degraded_processes" in cluster:
-            self.gauge("degraded_processes", cluster["degraded_processes"])
+            self.gauge("degraded_processes", cluster["degraded_processes"], tags)
             degraded_processes = cluster["degraded_processes"]
 
         if degraded_processes > 0:
-            self.service_check("can_connect", AgentCheck.WARNING, message="There are degraded processes")
+            self.service_check("can_connect", AgentCheck.WARNING, message="There are degraded processes", tags=tags)
         else:
-            self.service_check("can_connect", AgentCheck.OK)
+            self.service_check("can_connect", AgentCheck.OK, tags)
+
+        if "fault_tolerance" in cluster:
+            fault_tolerance = cluster["fault_tolerance"]
+
+            self.maybe_gauge(
+                "fault_tolerance.max_zone_failures_without_losing_availability",
+                fault_tolerance,
+                "max_zone_failures_without_losing_availability",
+                tags,
+            )
+
+            self.maybe_gauge(
+                "fault_tolerance.max_zone_failures_without_losing_data",
+                fault_tolerance,
+                "max_zone_failures_without_losing_data",
+                tags,
+            )
+
+        self.maybe_gauge("maintenance_seconds_remaining", cluster, "maintenance_seconds_remaining", tags)
+        self.maybe_gauge("cluster_generation", cluster, "generation", tags)
+
+        if "qos" in cluster:
+            qos = cluster["qos"]
+
+            self.maybe_gauge("qos.transactions_per_second_limit", qos, "transactions_per_second_limit", tags)
+            self.maybe_gauge(
+                "qos.batch_transactions_per_second_limit", qos, "batch_transactions_per_second_limit", tags
+            )
+            self.maybe_gauge("qos.released_transactions_per_second", qos, "released_transactions_per_second", tags)
+            self.maybe_gauge("qos.worst_queue_bytes_storage_server", qos, "worst_queue_bytes_storage_server", tags)
+            self.maybe_gauge("qos.worst_queue_bytes_log_server", qos, "worst_queue_bytes_log_server", tags)
 
     def maybe_gauge(self, metric, obj, key, tags=None):
         if key in obj:

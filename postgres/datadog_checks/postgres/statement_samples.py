@@ -32,7 +32,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, DBExplainError, warning_with_tags
+from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -330,7 +330,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                             self._config.dbname,
                             self._config.pg_stat_activity_view,
                             str(e),
-                            host=self._check.resolved_hostname,
+                            host=self._check.reported_hostname,
                             dbname=self._config.dbname,
                             code=DatabaseConfigurationError.undefined_activity_view.value,
                         ),
@@ -376,7 +376,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 insufficient_privilege_count,
                 tags=self.tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
         return normalized_rows
@@ -406,7 +406,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
         normalized_row['statement'] = obfuscated_query
@@ -432,14 +432,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             "dd.postgres.{}.time".format(method_name),
             (time.time() - start_time) * 1000,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.histogram(
             "dd.postgres.{}.rows".format(method_name),
             row_len,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         datadog_agent.emit_agent_telemetry(
@@ -473,7 +473,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self.tags + ["error:explain-no_plans_possible"] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
             return
@@ -510,35 +510,35 @@ class PostgresStatementSamples(DBMAsyncJob):
             "dd.postgres.collect_statement_samples.time",
             elapsed_ms,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count",
             submitted_count,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explain_errors_cache.len",
             len(self._explain_errors_cache),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         datadog_agent.emit_agent_telemetry(
@@ -602,7 +602,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         raw_query_event = {
             "timestamp": time.time() * 1000,
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "rqt",
@@ -676,7 +677,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     self._explain_function,
                     DatabaseConfigurationError.undefined_explain_function.value,
                     str(e),
-                    host=self._check.resolved_hostname,
+                    host=self._check.reported_hostname,
                     dbname=dbname,
                     code=DatabaseConfigurationError.undefined_explain_function.value,
                 ),
@@ -720,7 +721,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "dd.postgres.run_explain.time",
                     (time.time() - start_time) * 1000,
                     tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                     raw=True,
                 )
                 if not result or len(result) < 1 or len(result[0]) < 1:
@@ -740,7 +741,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
         return plan_dict, explain_err_code, err_msg
@@ -748,15 +749,22 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
+
+        orig_statement = statement
+
+        # remove leading SET statements from our SQL
+        if obfuscated_statement[:3].lower() == "set":
+            statement = trim_leading_set_stmts(statement)
+            obfuscated_statement = trim_leading_set_stmts(obfuscated_statement)
+
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
         track_activity_query_size = self._get_track_activity_query_size()
 
-        if (
-            self._get_truncation_state(track_activity_query_size, statement, query_signature)
-            == StatementTruncationState.truncated
-        ):
+        # truncation check is on the original query, not the trimmed version
+        stmt_trunc = self._get_truncation_state(track_activity_query_size, orig_statement, query_signature)
+        if stmt_trunc == StatementTruncationState.truncated:
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -772,7 +780,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return cached_error_response
 
         try:
-            # if the statement is a parameteredzied query, then we can't explain it directly
+            # if the statement is a parameterized query, then we can't explain it directly
             # we should directly jump into self._explain_parameterized_queries.explain_statement
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
@@ -797,6 +805,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
+        except psycopg2.errors.UndefinedFunction as e:
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
+            error_response = None, DBExplainError.undefined_function, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.undefined_function, e)
+            return error_response
+        except psycopg2.errors.IndeterminateDatatype as e:
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
+            error_response = None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.indeterminate_datatype, e)
+            return error_response
         except psycopg2.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
@@ -818,7 +838,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             1,
             tags=self._dbtags(dbname, "error:explain-{}-{}".format(err_code.value, type(err)))
             + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
 
@@ -860,13 +880,14 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             obfuscated_plan_event = {
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self._check.cloud_metadata,
                 'service': self._config.service,
                 "network": {
                     "client": {
@@ -937,7 +958,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "dd.postgres.statement_samples.error",
                     1,
                     tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                     raw=True,
                 )
 
@@ -950,14 +971,15 @@ class PostgresStatementSamples(DBMAsyncJob):
             row = {key: val for key, val in row.items() if val is not None and key != 'query'}
             active_sessions.append(row)
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             'service': self._config.service,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,

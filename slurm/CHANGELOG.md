@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.1.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Add metric collection from scontrol for worker nodes ([#19715](https://github.com/DataDog/integrations-core/pull/19715))
+
 ## 1.0.3 / 2024-12-06 / Agent 7.61.0
 
 ***Fixed***:

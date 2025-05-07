@@ -9,12 +9,17 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+from requests.exceptions import ConnectionError
+
 from datadog_checks.base.agent import datadog_agent
 
 from ....config import is_affirmative
 from ....constants import ServiceCheck
 from ....errors import ConfigurationError
 from ....utils.functions import no_op, return_true
+from ....utils.http import RequestsWrapper
 from .first_scrape_handler import first_scrape_handler
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
@@ -45,9 +50,6 @@ class OpenMetricsScraper:
         """
         The base class for any scraper overrides.
         """
-        # See Performance Optimizations in this package's README.md.
-        from ....utils.http import RequestsWrapper
-
         self.config = config
 
         # Save a reference to the check instance
@@ -228,13 +230,13 @@ class OpenMetricsScraper:
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
         # Used for monotonic counts
-        self.flush_first_value = False
+        self.flush_first_value = None
 
-    def scrape(self):
+    def _scrape(self):
         """
         Execute a scrape, and for each metric collected, transform the metric.
         """
-        runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
+        runtime_data = {'flush_first_value': bool(self.flush_first_value), 'static_tags': self.static_tags}
 
         # Determine which consume method to use based on target_info config
         if self.target_info:
@@ -249,7 +251,18 @@ class OpenMetricsScraper:
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
-        self.flush_first_value = True
+    def scrape(self):
+        try:
+            self._scrape()
+            self.flush_first_value = True
+        except:
+            # Don't flush new monotonic counts on next scrape:
+            # 1. Previous value may have expired in the aggregator, causing a spike
+            # 2. New counter itself may be too old and large when we discover it next time.
+            # If we didn't have a successful scrape yet, keep the initial value (use process_start_time to decide).
+            if self.flush_first_value:
+                self.flush_first_value = False
+            raise
 
     def consume_metrics(self, runtime_data):
         """
@@ -258,7 +271,7 @@ class OpenMetricsScraper:
 
         metric_parser = self.parse_metrics()
 
-        if not self.flush_first_value and self.use_process_start_time:
+        if self.flush_first_value is None and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
@@ -281,7 +294,7 @@ class OpenMetricsScraper:
 
         metric_parser = self.parse_metrics()
 
-        if not self.flush_first_value and self.use_process_start_time:
+        if self.flush_first_value is None and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
@@ -330,10 +343,6 @@ class OpenMetricsScraper:
 
     @property
     def parse_metric_families(self):
-        # See Performance Optimizations in this package's README.md.
-        from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
-        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-
         media_type = self._content_type.split(';')[0]
         # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
         # the format will be chosen based on the media type specified in the response's content-header.
@@ -394,9 +403,6 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
-        # See Performance Optimizations in this package's README.md.
-        from requests.exceptions import ConnectionError
-
         try:
             with self.get_connection() as connection:
                 # Media type will be used to select parser dynamically

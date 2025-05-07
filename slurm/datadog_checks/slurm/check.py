@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import subprocess
+import time
 from datetime import timedelta
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -15,6 +17,8 @@ from .constants import (
     PARTITION_MAP,
     SACCT_MAP,
     SACCT_PARAMS,
+    SCONTROL_PARAMS,
+    SCONTROL_TAG_MAPPING,
     SDIAG_MAP,
     SINFO_ADDITIONAL_NODE_PARAMS,
     SINFO_NODE_PARAMS,
@@ -62,6 +66,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sdiag_stats = is_affirmative(self.instance.get('collect_sdiag_stats', True))
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
+        self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
@@ -95,6 +100,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if self.collect_sshare_stats:
             self.sshare_cmd = self.get_slurm_command('sshare', SSHARE_PARAMS)
 
+        if self.collect_scontrol_stats:
+            self.scontrol_cmd = self.get_slurm_command('scontrol', SCONTROL_PARAMS)
+            self.squeue_enrich_cmd = self.get_slurm_command('squeue', ["-j"])
+
         # Metric and Tag configuration
         self.last_run_time = None
         self.tags = self.instance.get('tags', [])
@@ -106,6 +115,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.debug_sdiag_stats = is_affirmative(self.instance.get('debug_sdiag_stats', False))
         self.debug_sshare_stats = is_affirmative(self.instance.get('debug_sshare_stats', False))
         self.debug_sacct_stats = is_affirmative(self.instance.get('debug_sacct_stats', False))
+        self.debug_scontrol_stats = is_affirmative(self.instance.get('debug_scontrol_stats', False))
 
     def check(self, _):
         self.collect_metadata()
@@ -133,6 +143,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             # Set timestamp here so we can use it for the next run and collect sacct stats only
             # between the 2 runs.
             self.last_run_time = get_timestamp()
+
+        if self.collect_scontrol_stats:
+            commands.append(('scontrol', self.scontrol_cmd, self.process_scontrol))
 
         for name, cmd, process_func in commands:
             self.log.debug("Running %s command: %s", name, cmd)
@@ -202,8 +215,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge('sinfo.node.enabled', 1)
 
     def process_squeue(self, output):
-        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY # noqa: E501
-        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M # noqa: E501
+        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY | Partition # noqa: E501
+        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M | foo       # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_squeue_stats:
@@ -300,6 +313,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             # we see the 'Backfilling stats' line.
             current_map = SDIAG_MAP['backfill_stats'] if backfill_section else SDIAG_MAP['main_stats']
 
+            # Try to match known metrics
             for metric, pattern in current_map.items():
                 if pattern in line:
                     try:
@@ -309,6 +323,17 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     except (ValueError, IndexError):
                         continue
                     break
+
+            if 'Last cycle when' in line:
+                try:
+                    match = re.search(r'\((\d+)\)', line)
+                    if match:
+                        last_cycle_epoch = int(match.group(1))
+                        now = int(time.time())
+                        diff = now - last_cycle_epoch
+                        self.gauge('sdiag.last_cycle_seconds_ago', diff, tags=self.tags)
+                except Exception as e:
+                    self.log.debug("Failed to parse last cycle epoch from line '%s': %s", line, e)
 
         for name, value in metrics.items():
             self.gauge(f'sdiag.{name}', value, tags=self.tags)
@@ -431,6 +456,63 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 continue
 
             self.gauge(metric_info["name"], metric_value, tags)
+
+    def process_scontrol(self, output):
+        # This is for worker nodes only. The local PID of the job isn't available in the slurm controller output.
+        # It's only available where the job is running.
+        # PID      JOBID    STEPID   LOCALID GLOBALID
+        # 3771     14       batch    0       0
+        # 3772     14       batch    -       -
+        base_cmd = self.scontrol_cmd[:-1]
+        hostname = os.uname()[1]
+        slurm_node, _, _ = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
+        lines = output.strip().splitlines()
+        headers = lines[0].split()
+
+        # Cache for job details to avoid duplicate calls
+        job_details_cache = {}
+
+        for line in lines[1:]:
+            tags = [f"slurm_node_name:{slurm_node.strip()}"]
+            fields = line.split()
+            job_id = None
+
+            for header, value in zip(headers, fields):
+                new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
+                tags.append(f"{new_header}:{value}")
+
+                if header == "JOBID" and value.isdigit():
+                    job_id = value
+
+            if job_id:
+                # Only fetch job details if we haven't seen this job ID before
+                if job_id not in job_details_cache:
+                    job_details_cache[job_id] = self._enrich_scontrol_tags(job_id)
+                tags.extend(job_details_cache[job_id])
+
+            self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
+
+    def _enrich_scontrol_tags(self, job_id):
+        # Tries to enrich the scontrol job with additional details from squeue.
+        try:
+            cmd = self.get_slurm_command('squeue', ["-j", job_id, "-ho", "%u %T %j"])
+            res, err, code = get_subprocess_output(cmd)
+
+            if code == 0 and res.strip():
+                output_line = res.strip()
+                parts = output_line.split()
+
+                if len(parts) == 3:
+                    user, state, job_name = parts
+                    return [f"slurm_job_user:{user}", f"slurm_job_state:{state}", f"slurm_job_name:{job_name}"]
+                else:
+                    self.log.debug("Unexpected number of parts in squeue output for job %s: %s", job_id, output_line)
+            else:
+                self.log.debug("Error fetching squeue details for job %s: %s", job_id, err)
+        except Exception as e:
+            self.log.debug("Error fetching squeue details for job %s: %s", job_id, e)
+
+        return []
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
