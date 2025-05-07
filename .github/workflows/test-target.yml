@@ -202,10 +202,10 @@ jobs:
             "DD_GITHUB_USER": "{4}",
             "DD_GITHUB_TOKEN": "{5}"
           }}',
-          secrets.DOCKER_USERNAME_2,
-          secrets.DOCKER_ACCESS_TOKEN_2,
+          secrets.DOCKER_USERNAME,
+          secrets.DOCKER_ACCESS_TOKEN,
           secrets.ORACLE_DOCKER_USERNAME,
-          secrets.ORACLE_DOCKER_PASSWORD_2,
+          secrets.ORACLE_DOCKER_PASSWORD,
           github.actor,
           secrets.GITHUB_TOKEN
         ))}}
@@ -260,7 +260,7 @@ jobs:
     - name: Run E2E tests with latest base package
       if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -298,7 +298,7 @@ jobs:
     - name: Run E2E tests
       if: inputs.standard && inputs.repo != 'core'
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -344,7 +344,7 @@ jobs:
     - name: Run E2E tests for the latest version
       if: inputs.latest
       env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided

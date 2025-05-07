@@ -94,10 +94,10 @@ jobs:
     - name: Prepare for testing
       env:
         PYTHONUNBUFFERED: "1"
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN_2 }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
         ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
-        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD_2 }}
+        ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
         DD_GITHUB_USER: ${{ github.actor }}
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: ddev ci setup ${{ inputs.target || 'tls' }}
@@ -112,14 +112,14 @@ jobs:
     - name: Run E2E tests with FIPS disabled
       env:
         DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-py3' }}"
-        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
     - name: Run E2E tests with FIPS enabled
       env:
         DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'datadog/agent-dev:master-fips' }}"
-        DD_API_KEY: "${{ secrets.DD_API_KEY_2 }}"
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
 
