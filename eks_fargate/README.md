@@ -606,7 +606,7 @@ clusterAgent:
   tokenExistingSecret: datadog-secret
 ```
 
-Set `agents.enabled=false` if you are not using standard non-Fargate workloads.
+Set `agents.enabled=false` to disable the standard node Agent if you are using *only* Fargate workloads.
 
 ##### Operator
 ```yaml
@@ -712,55 +712,10 @@ spec:
 
 ### DogStatsD
 
-Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][10] from your application container to Datadog.
+In EKS Fargate your application container will send the [DogStatsD metrics][10] to the Datadog Agent sidecar container. The Agent accepts these metrics by default over the port `8125`.
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: "<APPLICATION_NAME>"
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: "<APPLICATION_NAME>"
-  template:
-    metadata:
-      labels:
-        app: "<APPLICATION_NAME>"
-    spec:
-      serviceAccountName: datadog-agent
-      containers:
-      # Your original container
-      - name: "<CONTAINER_NAME>"
-        image: "<CONTAINER_IMAGE>"
+You do not have to set the `DD_AGENT_HOST` address in your application container when sending these metrics. Let this default to `localhost`.
 
-      # Running the Agent as a side-car
-      - name: datadog-agent
-        image: gcr.io/datadoghq/agent:7
-        ports:
-          - name: dogstatsdport
-            containerPort: 8125
-            protocol: UDP
-        env:
-          - name: DD_API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: api-key
-                name: datadog-secret
-          - name: DD_SITE
-            value: "<DATADOG_SITE>"
-          - name: DD_EKS_FARGATE
-            value: "true"
-          - name: DD_KUBERNETES_KUBELET_NODENAME
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: spec.nodeName
-          # (...)
-
-```
 
 ### Live containers
 
@@ -949,9 +904,11 @@ Monitor EKS Fargate logs by using [Fluent Bit][14] to route EKS logs to CloudWat
 
 ## Traces collection
 
-Set up the container port `8126` over your Agent container to collect traces from your application container. As well as set the [`shareProcessNamespace: true` in the pod spec][13] to assist the Agent for origin detection.
+In EKS Fargate your application container will send its traces to the Datadog Agent sidecar container. The Agent accepts these traces by default over the port `8126`.
 
-[Read more about how to set up tracing][16].
+You do not have to set the `DD_AGENT_HOST` address in your application container when sending these metrics. Let this default to `localhost`.
+
+Set [`shareProcessNamespace: true` in the pod spec][13] to assist the Agent for origin detection.
 
 ```yaml
 apiVersion: apps/v1
@@ -979,29 +936,10 @@ spec:
       # Running the Agent as a side-car
       - name: datadog-agent
         image: gcr.io/datadoghq/agent:7
-        ports:
-          - name: traceport
-            containerPort: 8126
-            protocol: TCP
-        env:
-          - name: DD_API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: api-key
-                name: datadog-secret
-          - name: DD_SITE
-            value: "<DATADOG_SITE>"
-          - name: DD_EKS_FARGATE
-            value: "true"
-          - name: DD_KUBERNETES_KUBELET_NODENAME
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: spec.nodeName
-          # (...)
+        # (...)
 ```
 
-In EKS Fargate you do not have to set the `DD_AGENT_HOST` address in your application container. Let this default to `localhost`.
+[Read more about how to set up tracing][16].
 
 ## Events collection
 
