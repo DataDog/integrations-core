@@ -55,9 +55,7 @@ def main():
         try:
             temporal_type = temporal_metric_types[temporal_name]
         except KeyError:
-            print(
-                f"WARNING: skipping metric `{temporal_name}` as it's not present in input data"
-            )
+            print(f"WARNING: skipping metric `{temporal_name}` as it's not present in input data")
             continue
 
         if temporal_type == "counter":
