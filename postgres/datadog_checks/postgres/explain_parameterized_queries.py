@@ -22,7 +22,7 @@ PARAM_TYPES_COUNT_QUERY = '''\
 SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
 
-EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
+EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}{parameters}'
 
 EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
 
@@ -145,11 +145,16 @@ class ExplainParameterizedQueries:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        null_parameter = ','.join(
-            'null' for _ in range(self._get_number_of_parameters_for_prepared_statement(dbname, query_signature))
-        )
+        num_params = self._get_number_of_parameters_for_prepared_statement(dbname, query_signature)
+
+        parameters = ""
+
+        if num_params > 0:
+            null_parameters = ','.join('null' for _ in range(num_params))
+            parameters = f"({null_parameters})"
+
         execute_prepared_statement_query = EXECUTE_PREPARED_STATEMENT_QUERY.format(
-            prepared_statement=query_signature, generic_values=null_parameter
+            prepared_statement=query_signature, parameters=parameters
         )
         try:
             return self._execute_query_and_fetch_rows(
