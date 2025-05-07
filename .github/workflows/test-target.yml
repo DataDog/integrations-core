@@ -117,6 +117,7 @@ jobs:
     # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
     permissions:
         id-token: write
+        contents: read
     steps:
 
     - name: Set environment variables with sanitized paths
