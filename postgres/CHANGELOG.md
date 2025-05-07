@@ -29,7 +29,7 @@
 * Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
 * Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
 
-## 22.8.0 / 2025-03-19
+## 22.8.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:
 

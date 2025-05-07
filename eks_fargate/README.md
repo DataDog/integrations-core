@@ -1073,6 +1073,7 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for monitoring AWS Fargate][24]
 - [How to collect metrics and logs from AWS Fargate workloads][19]
 - [AWS Fargate monitoring with Datadog][20]
+- [Trace API Gateway when proxying requests to ECS Fargate][28]
 
 [1]: http://docs.datadoghq.com/integrations/system
 [2]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/
@@ -1101,3 +1102,4 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
 [26]: https://kubernetes.io/docs/concepts/configuration/secret/
 [27]: https://helm.sh/docs/intro/install/
+[28]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway

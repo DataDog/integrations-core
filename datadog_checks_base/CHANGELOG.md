@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.10.1 / 2025-04-30
+
+***Fixed***:
+
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
 ## 37.10.0 / 2025-04-17
 
 ***Added***:
@@ -23,7 +29,7 @@
 
 * Remove unnecessary `pyyaml` usage ([#19863](https://github.com/DataDog/integrations-core/pull/19863))
 
-## 37.8.0 / 2025-03-19
+## 37.8.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:
 
