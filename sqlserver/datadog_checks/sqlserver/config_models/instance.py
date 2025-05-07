@@ -352,7 +352,7 @@ class QueryCompletions(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int] = Field(None, examples=[10])
+    collection_interval: Optional[float] = Field(None, examples=[10])
     enabled: Optional[bool] = Field(None, examples=[False])
 
 
@@ -361,7 +361,7 @@ class QueryErrors(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int] = Field(None, examples=[10])
+    collection_interval: Optional[float] = Field(None, examples=[10])
     enabled: Optional[bool] = Field(None, examples=[False])
 
 

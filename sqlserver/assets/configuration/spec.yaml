@@ -1001,6 +1001,7 @@ files:
         type: boolean
     - name: xe_collection
       description: |
+        Available for Agent 7.67 and newer.
         Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
 
         Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
@@ -1020,7 +1021,7 @@ files:
               type: boolean
               example: false
             - name: collection_interval
-              type: integer
+              type: number
               example: 10
               display_default: 10
         - name: query_errors
@@ -1039,7 +1040,7 @@ files:
               type: boolean
               example: false
             - name: collection_interval
-              type: integer
+              type: number
               example: 10
               display_default: 10
     - name: deadlocks_collection

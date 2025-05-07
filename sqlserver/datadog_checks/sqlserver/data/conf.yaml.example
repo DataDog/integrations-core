@@ -799,6 +799,7 @@ instances:
     #
     # propagate_agent_tags: false
 
+    ## Available for Agent 7.67 and newer.
     ## Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
     ##
     ## Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
