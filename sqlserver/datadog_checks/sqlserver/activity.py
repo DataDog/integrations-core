@@ -413,7 +413,6 @@ class SqlserverActivity(DBMAsyncJob):
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = comments
-
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             if row.get('procedure_name') and row.get('schema_name'):
                 row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
