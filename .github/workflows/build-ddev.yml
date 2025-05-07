@@ -555,6 +555,9 @@ jobs:
       run: >-
         pkgutil --check-signature "signed/${{ steps.pkg.outputs.path }}"
 
+    - name: rcodesign print-signature-info
+      run: >-
+        rcodesign print-signature-info "signed/${{ steps.pkg.outputs.path }}"
     # codesign thinks the pkg file isn't signed at all
     # https://github.com/DataDog/integrations-core/actions/runs/14882554334/job/41794332393?pr=20234#step:28:15
     # - name: check timestamp
