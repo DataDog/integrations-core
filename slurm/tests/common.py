@@ -214,7 +214,12 @@ SINFO_MAP = {
             'value': 3,
             'tags': [
                 'slurm_node_active_features:null',
-	@@ -223,48 +187,48 @@
+                'slurm_node_availability:up',
+                'slurm_node_cluster:N/A',
+                'slurm_node_memory:1000',
+                'slurm_node_name:c1',
+                'slurm_node_state_reason:none',
+                'slurm_node_state:idle',
                 'slurm_node_threads:1',
                 'slurm_partition_name:normal',
                 'slurm_partition_gpu_type:tesla',
