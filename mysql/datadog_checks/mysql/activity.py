@@ -266,8 +266,19 @@ class MySQLActivity(DBMAsyncJob):
         # type: (List[Dict[str]]) -> List[Dict[str]]
         rows = sorted(rows, key=lambda r: self._sort_key(r))
         normalized_rows = []
+        seen = {}
+        second_pass = {}
         estimated_size = 0
         for row in rows:
+            if row["thread_id"] in seen:
+                # `performance_schema.events_statements_current` can contain previous statements
+                # for the same thread. We only want the most recent one.
+                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                    continue
+                else:
+                    second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
+            else:
+                seen[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
             if row["sql_text"] is not None:
                 row["query_truncated"] = get_truncation_state(row["sql_text"]).value
             row = self._obfuscate_and_sanitize_row(row)
@@ -275,7 +286,22 @@ class MySQLActivity(DBMAsyncJob):
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
                 return normalized_rows
             normalized_rows.append(row)
+        if second_pass:
+            normalized_rows = self._eliminate_duplicate_rows(normalized_rows, second_pass)
         return normalized_rows
+
+    @staticmethod
+    def _eliminate_duplicate_rows(rows, second_pass):
+        # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
+        filtered_rows = []
+        for row in rows:
+            if (
+                row["thread_id"] in second_pass
+                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            ):
+                continue
+            filtered_rows.append(row)
+        return filtered_rows
 
     @staticmethod
     def _sort_key(row):
