@@ -12,7 +12,7 @@ SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
 SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
     "-anpo",
-    "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
+    "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList,AveDiskRead,MaxDiskRead",
     "--units==K",
 ]
 SCONTROL_PARAMS = ["listpid"]
@@ -96,6 +96,8 @@ SACCT_MAP = {
         {"name": "sacct.slurm_job_maxrss", "index": 8},
         {"name": "sacct.slurm_job_maxvm", "index": 9},
         {"name": "sacct.slurm_job_avgrss", "index": 11},
+        {"name": "sacct.slurm_job_ave_disk_read", "index": 17},
+        {"name": "sacct.slurm_job_max_disk_read", "index": 18},
     ],
 }
 
