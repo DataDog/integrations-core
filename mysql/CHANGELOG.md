@@ -2,6 +2,61 @@
 
 <!-- towncrier release notes start -->
 
+## 15.3.0 / 2025-04-22
+
+***Added***:
+
+* Print permission mySQL warning ([#20090](https://github.com/DataDog/integrations-core/pull/20090))
+
+***Fixed***:
+
+* Include database_instance for MySQL schema data ([#20089](https://github.com/DataDog/integrations-core/pull/20089))
+
+## 15.2.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+
+## 15.1.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 15.0.0 / 2025-04-17
+
+***Changed***:
+
+* Warning for missing explain_plan function ([#19908](https://github.com/DataDog/integrations-core/pull/19908))
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Add blocking queries support for MySQL 8 ([#20008](https://github.com/DataDog/integrations-core/pull/20008))
+* added configurable limit to index metric collection ([#20012](https://github.com/DataDog/integrations-core/pull/20012))
+* Blocking queries for older MySQL 5.7 ([#20068](https://github.com/DataDog/integrations-core/pull/20068))
+* Add blocking queries support for MariaDB ([#20074](https://github.com/DataDog/integrations-core/pull/20074))
+
+***Fixed***:
+
+* Fix Aurora replication role tags being appended instead of updated during failover events. ([#20048](https://github.com/DataDog/integrations-core/pull/20048))
+
+## 14.8.0 / 2025-03-26
+
+***Added***:
+
+* Add schema collection configuration ([#19910](https://github.com/DataDog/integrations-core/pull/19910))
+
+## 14.7.0 / 2025-03-19
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Collect MySQL foreign key delete_rule and update_rule from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS.
+  Note: On MariaDB 10.5+, REFERENCES privilege is required to access this information. ([#19797](https://github.com/DataDog/integrations-core/pull/19797))
+
 ## 14.6.0 / 2025-02-20 / Agent 7.64.0
 
 ***Added***:

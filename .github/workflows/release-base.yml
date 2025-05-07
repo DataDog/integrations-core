@@ -34,4 +34,4 @@ jobs:
       run: ddev release upload -s datadog_checks_base
       env:
         TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN_BASE }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN_BASE_2 }}

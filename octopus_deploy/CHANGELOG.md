@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.2 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Update logs configuration example. ([#19543](https://github.com/DataDog/integrations-core/pull/19543))
+
 ## 1.0.1 / 2025-02-20 / Agent 7.64.0
 
 ***Fixed***:

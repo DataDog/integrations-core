@@ -54,7 +54,7 @@ The Windows Registry integration does not include any service checks.
 
 Need help? Contact [Datadog support][9] with an [Agent Flare][10].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest?platform=windows
+[1]: /account/settings/agent/latest?platform=windows
 [2]: https://docs.datadoghq.com/metrics/#overview
 [3]: https://docs.datadoghq.com/logs/
 [4]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory

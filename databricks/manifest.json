@@ -57,6 +57,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "source_type_id": 10152,
+      "supports_ddr_coordinated_failover": true,
       "auto_install": true
     },
     "dashboards": {

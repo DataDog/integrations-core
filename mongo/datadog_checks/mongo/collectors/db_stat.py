@@ -18,6 +18,7 @@ class DbStatCollector(MongoCollector):
         self.db_name = db_name
         self.dbstats_tag_dbname = dbstats_tag_dbname
         self._collection_interval = check._config.metrics_collection_interval['db_stats']
+        self.free_storage_metrics = check._config.free_storage_metrics
         self._collector_key = (self.__class__.__name__, db_name)  # db_name is part of collector key
 
     def compatible_with(self, deployment):
@@ -32,7 +33,9 @@ class DbStatCollector(MongoCollector):
                 return False
             return True
         else:
-            return isinstance(deployment, (StandaloneDeployment, MongosDeployment)) or deployment.is_primary
+            return isinstance(deployment, (StandaloneDeployment, MongosDeployment)) or (
+                deployment.is_primary and not deployment.use_shards
+            )
 
     @collection_interval_checker
     def collect(self, api):
@@ -46,5 +49,7 @@ class DbStatCollector(MongoCollector):
             ]
         else:
             additional_tags = None
-        stats = {'stats': db.command({'dbStats': 1, 'freeStorage': 1})}
+
+        collect_free_storage_metrics = 1 if self.free_storage_metrics else 0
+        stats = {'stats': db.command({'dbStats': 1, 'freeStorage': collect_free_storage_metrics})}
         return self._submit_payload(stats, additional_tags)

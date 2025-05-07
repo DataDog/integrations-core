@@ -604,7 +604,7 @@ jobs:
       with:
         skip-existing: true
         user: __token__
-        password: ${{ secrets.PYPI_TOKEN_DDEV }}
+        password: ${{ secrets.PYPI_TOKEN_DDEV_2 }}
 
     - name: Add assets to current release
       uses: softprops/action-gh-release@v2

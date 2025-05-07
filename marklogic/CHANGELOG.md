@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Bump base check dependency to use new assert method functionality. ([#19763](https://github.com/DataDog/integrations-core/pull/19763))
+
 ## 6.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

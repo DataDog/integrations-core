@@ -57,6 +57,9 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "listCollections",
         "listDatabases",
         'dbStats',
+        'createIndexes',
+        'shardCollection',
+        'serverStatus',
     ]
 )
 

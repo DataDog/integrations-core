@@ -359,6 +359,17 @@ instances:
     #
     # system_database_stats: true
 
+    ## @param free_storage_metrics - boolean - optional - default: true
+    ## Enabled or disable the collection of free storage metrics.
+    ## By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+    ## Set to `false` to disable collection of free storage metrics.
+    ##
+    ## Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+    ## processing delays and high CPU usage on the instance.
+    ## https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+    #
+    # free_storage_metrics: true
+
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.

@@ -53,7 +53,7 @@ For more information, see the [API Key and Authentication Reference Document][3]
 ### Configure a webhook in Datadog
 1. In Datadog, navigate to the **Integrations** tab, and search for the Bitdefender integration.
 2. Click the **Bitdefender** integration. The integration window opens. On the **Configure** tab, select an existing API key, or create a new one.
-3. After selecting an API key, click **Add API key**, then click **Click Here to Copy URL**.
+3. After selecting an API key, click **Add API key**, then **Click Here to Copy URL**.
 4. Make a curl request. Use the template below, putting values into the following fields: 
     - **\<control_center_apis_access_url>**: The URL from the previous section
     - **\<bitdefender-encoded-api-key>**: Your encoded API key

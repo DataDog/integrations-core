@@ -2,6 +2,33 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2025-04-17
+
+***Changed***:
+
+* Bump the version of datadog-checks-base to 37.9.0 ([#20021](https://github.com/DataDog/integrations-core/pull/20021))
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+## 9.2.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Improve HP SNMP profiles.
+
+  PR: https://github.com/DataDog/integrations-core/pull/19711
+  Jira: https://datadoghq.atlassian.net/browse/NDMII-3342
+
+  - Fixed cpqHeTemperatureIndex OID typo in _hp-compaq-health.yaml.
+
+  - Make _hp-base.yaml extend _generic-if.yaml and _generic-host-resources.yaml and removed useless extends in child profiles of _hp-base.yaml.
+
+  - Tagged cpqHeFltTolPowerSupplyTable table with cpqHeFltTolPowerSupplyBay in _hp-compaq-health.yaml according to the MIB.
+
+  - Add a comment to precise that HP iLO5 devices support only a maximum bulk size of 5. ([#19711](https://github.com/DataDog/integrations-core/pull/19711))
+
 ## 9.2.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
