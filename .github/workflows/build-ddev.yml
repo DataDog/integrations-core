@@ -557,7 +557,7 @@ jobs:
 
     - name: check timestamp
       run: >-
-        codesign -dvv "signed/${{ steps.pkg.outputs.path }}
+        codesign -dvv "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
       run: >-
