@@ -347,6 +347,33 @@ class SchemasCollection(BaseModel):
     max_execution_time: Optional[float] = None
 
 
+class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class QueryErrors(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
+class XeCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -406,6 +433,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
+    xe_collection: Optional[XeCollection] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
