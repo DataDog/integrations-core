@@ -142,26 +142,27 @@ class ExplainParameterizedQueries:
             dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
         )
         return rows[0][0] if rows else 0
-
+    
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        num_params = self._get_number_of_parameters_for_prepared_statement(dbname, query_signature)
-
+    def _generate_prepared_statement_query(self, dbname: str, query_signature: str) -> str:
         parameters = ""
+        num_params = self._get_number_of_parameters_for_prepared_statement(dbname, query_signature)
 
         if num_params > 0:
             null_parameters = ','.join('null' for _ in range(num_params))
             parameters = f"({null_parameters})"
 
-        execute_prepared_statement_query = EXECUTE_PREPARED_STATEMENT_QUERY.format(
-            prepared_statement=query_signature, parameters=parameters
-        )
+        return EXECUTE_PREPARED_STATEMENT_QUERY.format(prepared_statement=query_signature, parameters=parameters)
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
+        prepared_statement_query = self._generate_prepared_statement_query(dbname, query_signature)
         try:
             return self._execute_query_and_fetch_rows(
                 dbname,
                 EXPLAIN_QUERY.format(
                     explain_function=self._explain_function,
-                    statement=execute_prepared_statement_query,
+                    statement=prepared_statement_query,
                 ),
             )
         except Exception as e:
