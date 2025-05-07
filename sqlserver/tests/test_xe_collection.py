@@ -900,7 +900,7 @@ class TestRunJob:
         modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
 
         with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=(modified_xml, 0.1, 0.1)
+            query_completion_handler, '_query_ring_buffer', return_value=modified_xml
         ):
 
             # Process events directly to set timestamp
@@ -925,7 +925,7 @@ class TestRunJob:
 
         # Mock all necessary methods
         with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=(sample_multiple_events_xml, 0.1, 0.1)
+            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
         ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit, patch(
             'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
         ):
@@ -971,23 +971,8 @@ class TestRunJob:
 
             # Verify warning was logged
             log.warning.assert_called_once_with(
-                f"XE session {query_completion_handler.session_name} not found or not running"
+                f"XE session {query_completion_handler.session_name} not found or not running."
             )
-
-    def test_no_data(self, query_completion_handler, mock_check, mock_handler_log):
-        """Test behavior when no data is returned"""
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=(None, 0.1, 0.1)
-        ):
-
-            # Mock the log using the fixture
-            log = mock_handler_log(query_completion_handler, mock_check)
-
-            # Run the job
-            query_completion_handler.run_job()
-
-            # Verify debug message was logged
-            log.debug.assert_any_call(f"No data found for session {query_completion_handler.session_name}")
 
     def test_event_batching(self, query_completion_handler, sample_multiple_events_xml):
         """Test that multiple events get properly batched into a single payload"""
@@ -1008,7 +993,7 @@ class TestRunJob:
         ) as mock_create_payload, patch.object(
             query_completion_handler, 'session_exists', return_value=True
         ), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=(sample_multiple_events_xml, 0.1, 0.1)
+            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
         ), patch.object(
             query_completion_handler._check, 'database_monitoring_query_activity'
         ) as mock_submit, patch(
