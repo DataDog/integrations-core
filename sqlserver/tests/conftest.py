@@ -218,7 +218,7 @@ class SelfHealingConnection:
                     return
             except Exception:
                 tracebacks.append(",".join(traceback.format_exception(*sys.exc_info())))
-                logging.exception("failed to execute query attempt=%s", attempt)
+                logging.exception("failed to execute query: %s, attempt=%s", query, attempt)
                 time.sleep(sleep)
                 self.reconnect()
 
