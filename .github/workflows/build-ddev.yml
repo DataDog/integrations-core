@@ -545,7 +545,7 @@ jobs:
 
     - name: Sign PKG
       run: >-
-        rcodesign sign -vvv --deep --strict
+        rcodesign sign -vvv
         --pem-source /tmp/certificate-installer.pem
         --pem-source /tmp/private-key-installer.pem
         "staged/${{ steps.pkg.outputs.path }}"
