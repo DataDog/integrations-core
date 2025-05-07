@@ -17,7 +17,7 @@ The Agent sidecar is responsible for monitoring the other containers in the same
 - Run [Autodiscovery][2]-based Agent integrations against the containers in the same pod
 - Collect APM and DogStatsD metrics for containers in the same pod
 
-If you have a mixed cluster of traditional EKS nodes and Fargate pods, you can manage the EKS nodes with the [standard Datadog Kubernetes installation][5] (Helm chart or Datadog Operator) — and manage the Fargate pods separately.
+If you have a mixed cluster of traditional EKS nodes and Fargate pods, you can manage the EKS nodes with the [standard Datadog Kubernetes installation][5] (Helm chart or Datadog Operator) - and manage the Fargate pods separately.
 
 **Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
 
