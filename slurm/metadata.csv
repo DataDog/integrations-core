@@ -26,7 +26,7 @@ slurm.partition.nodes.count,gauge,,node,,Number of nodes in the partition.,1,slu
 slurm.sacct.enabled,gauge,,,,Shows whether we're collecting sacct metrics or not for this host.,1,slurm,slurm_sacct_enabled,,
 slurm.sacct.job.duration,gauge,,second,,Duration of the job in seconds.,1,slurm,slurm_sacct_job_duration,,
 slurm.sacct.job.info,gauge,,,,Information about the Slurm job in sacct.,1,slurm,slurm_sacct_job_info,,
-slurm.sacct.slurm_job_ave_disk_read,gauge,,byte,,Average number of bytes read from disk by a job or step.,1,slurm,slurm_sacct_slurm_job_avgdiskread,,urm
+slurm.sacct.slurm_job_ave_disk_read,gauge,,byte,,Average number of bytes read from disk by a job or step.,1,slurm,slurm_sacct_slurm_job_avgdiskread,,
 slurm.sacct.slurm_job_avgcpu,gauge,,second,,Average (system + user) CPU time of all tasks in job.,1,slurm,slurm_sacct_slurm_job_avgcpu,,
 slurm.sacct.slurm_job_avgrss,gauge,,byte,,Average resident set size of all tasks in job.,1,slurm,slurm_sacct_slurm_job_avgrss,,
 slurm.sacct.slurm_job_cputime,gauge,,second,,Time used (Elapsed time * CPU count) by a job or step in cpu-seconds.,1,slurm,slurm_sacct_slurm_job_cputime,,
