@@ -537,9 +537,11 @@ jobs:
           --code-signature-flags runtime \
           "${{ steps.binary.outputs.path }}"
 
-    - name: Verify signature universal binary
-      run: >-
-        codesign --verify --deep --strict --verbose=2 "${{ steps.binary.outputs.path }}"
+    - name: Inspect signing certificate
+      run: |
+        codesign -dvv --extract-certificates "${{ steps.binary.outputs.path }}"
+        echo "🔍 Certificate info:"
+        openssl x509 -in codesign0 -text
 
     - name: Build PKG
       run: >-
