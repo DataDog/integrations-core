@@ -142,7 +142,7 @@ class ExplainParameterizedQueries:
             dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
         )
         return rows[0][0] if rows else 0
-    
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _generate_prepared_statement_query(self, dbname: str, query_signature: str) -> str:
         parameters = ""
