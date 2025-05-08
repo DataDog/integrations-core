@@ -228,7 +228,7 @@ module "ecs_fargate_task" {
 
 Lastly, include your other application containers within the `ContainerDefinitions` and deploy through Terraform.
 
-For more information on the Terraform module, see the [Datadog ECS Fargate Terraform documentation][43].
+For more information on the Terraform module, see the [Datadog ECS Fargate Terraform documentation][74].
 
 <!-- xxz tab xxx -->
 
@@ -1256,3 +1256,4 @@ Need help? Contact [Datadog support][18].
 [71]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest
 [72]: https://github.com/datadog/datadog-cdk-constructs/
 [73]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
+[74]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest/submodules/ecs_fargate
