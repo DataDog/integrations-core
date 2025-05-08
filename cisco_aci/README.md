@@ -119,15 +119,22 @@ The Cisco ACI config `.yaml` file can be set up to collect one or both of the fo
 | [send_faultinst_faults][13]     | Set to `true` to enable collection of Cisco ACI `faultInst` faults as logs. |
 | [send_faultdelegate_faults][14] | Set to `true` to enable collection of Cisco ACI `faultDelegate` faults as logs. |
 
-If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure logging is enabled and add the following configuration to the logs section of your `.yaml` file:
+#### Setup
 
-```yaml
-logs_enabled: true
-logs:
-  - type: integration
-    source: cisco-aci
-    service: cisco-aci
-```
+1. If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure [logging is enabled][17] in your Datgadog `.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Additionally, add the following configuration to the logs section of your `cisco_aci.d/conf.yaml` file:
+
+   ```yaml
+   logs:
+     - type: integration
+       source: cisco-aci
+       service: cisco-aci
+   ```
 
 ### Events
 
@@ -183,3 +190,4 @@ Contact [Datadog support][9].
 [14]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L116-L122  
 [15]: https://app.datadoghq.com/dash/integration/242/cisco-aci---overview
 [16]: https://app.datadoghq.com/logs
+[17]: https://docs.datadoghq.com/logs/log_collection/?tab=host#setup
