@@ -525,6 +525,10 @@ class XESessionBase(DBMAsyncJob):
         if "query_signature" in event:
             normalized["query_signature"] = event["query_signature"]
 
+        # Add raw_query_signature if present and raw query collection is enabled
+        if self._collect_raw_query and "raw_query_signature" in event:
+            normalized["raw_query_signature"] = event["raw_query_signature"]
+
         return normalized
 
     def _determine_dbm_type(self):
@@ -759,7 +763,10 @@ class XESessionBase(DBMAsyncJob):
                     primary_field = self._get_primary_sql_field(event)
                     if field == primary_field or 'query_signature' not in obfuscated_event:
                         obfuscated_event['query_signature'] = compute_sql_signature(result['query'])
-                        raw_sql_fields['raw_query_signature'] = compute_sql_signature(event[field])
+                        raw_signature = compute_sql_signature(event[field])
+                        raw_sql_fields['raw_query_signature'] = raw_signature
+                        if self._collect_raw_query:
+                            obfuscated_event['raw_query_signature'] = raw_signature
 
                 except Exception as e:
                     self._log.debug(f"Error obfuscating {field}: {e}")

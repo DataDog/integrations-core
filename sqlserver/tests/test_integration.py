@@ -955,6 +955,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             'collection_interval': 0.1,
         },
     }
+    # Ensure raw query collection is enabled
+    instance['collect_raw_query_statement'] = {"enabled": True, "cache_max_size": 100, "samples_per_hour_per_query": 10}
 
     check = SQLServer(CHECK_NAME, {}, [instance])
 
@@ -968,7 +970,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Execute a query that will generate an error
     error_query = "SELECT 1/0;"  # Division by zero error
     try:
-        bob_conn.execute_with_retries(error_query)
+        cursor = bob_conn.cursor()
+        cursor.execute(error_query)
     except:
         pass  # We expect this to fail
 
@@ -1033,6 +1036,9 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             # The duration should be at least 2000ms (2 seconds)
             duration = float(query_details.get('duration_ms', 0))
             assert duration >= 2000, f"Expected duration >= 2000ms, but got {duration}ms"
+            # Verify raw_query_signature is present when collect_raw_query is enabled
+            assert 'raw_query_signature' in query_details, "raw_query_signature not found in query details"
+            assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
 
     assert found_test_query, "Could not find our specific test query in the completion events"
 
@@ -1049,5 +1055,8 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             assert "bob" in query_details.get('username', ''), "Username 'bob' not found in error event"
             assert "Divide by zero" in query_details.get('message', ''), "Expected error message not found"
             assert query_details.get('error_number') == 8134, "Expected error number 8134 not found"
+            # Verify raw_query_signature is present when collect_raw_query is enabled
+            assert 'raw_query_signature' in query_details, "raw_query_signature not found in error query details"
+            assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
 
     assert found_error_query, "Could not find our specific error query in the error events"

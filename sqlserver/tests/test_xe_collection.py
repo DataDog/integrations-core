@@ -676,6 +676,10 @@ class TestPayloadGeneration:
         assert raw_sql_fields['sql_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert raw_sql_fields['raw_query_signature'] == 'abc123'
 
+        # Verify raw_query_signature is added to the obfuscated event when collect_raw_query is enabled
+        assert 'raw_query_signature' in obfuscated_event
+        assert obfuscated_event['raw_query_signature'] == 'abc123'
+
     def test_normalize_event(self, query_completion_handler):
         """Test event normalization"""
         # Test event with all fields
@@ -692,6 +696,7 @@ class TestPayloadGeneration:
             'batch_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
             'sql_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
             'query_signature': 'abc123',
+            'raw_query_signature': 'def456',
         }
 
         normalized = query_completion_handler._normalize_event_impl(event)
@@ -709,6 +714,7 @@ class TestPayloadGeneration:
         assert normalized['batch_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert normalized['sql_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert normalized['query_signature'] == 'abc123'
+        assert normalized['raw_query_signature'] == 'def456'
 
     def test_normalize_error_event(self, error_events_handler):
         """Test error event normalization"""
