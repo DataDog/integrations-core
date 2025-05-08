@@ -970,8 +970,7 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # Execute a query that will generate an error
     error_query = "SELECT 1/0;"  # Division by zero error
     try:
-        cursor = bob_conn.cursor()
-        cursor.execute(error_query)
+        bob_conn.execute_with_retries(error_query)
     except:
         pass  # We expect this to fail
 
