@@ -67,7 +67,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
         self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
-        self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', True))
+        self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', False))
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
