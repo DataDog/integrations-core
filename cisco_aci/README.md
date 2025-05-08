@@ -104,6 +104,30 @@ Specific supported vendor profiles for this integration can be found on the [net
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+### Cisco ACI faults
+
+<div class="alert alert-info">Billing impact callout</div>
+
+Cisco ACI faults are collected by the Agent and stored in Datadog as logs. They can be viewed from the [Cisco ACI dashboard][15], or by filtering for `source:cisco-aci` in the [Log Explorer][16].
+
+There are two types of Cisco ACI faults: `fault:Inst` and `fault:Delegate`. See [fault objects and records][12] for more information.
+ 
+The Cisco ACI config `.yaml` file can be configured to collect one of the following fault types:
+
+| Fault Type          | Description                                                                 |
+|---------------------|-----------------------------------------------------------------------------|
+| [send_faultinst_faults][13]     | Set to `true` to enable collection of Cisco ACI `faultInst` faults as logs. |
+| [send_faultdelegate_faults][14] | Set to `true` to enable collection of Cisco ACI `faultDelegate` faults as logs. |
+
+If you have enabled either `send_faultinst_faults` or `send_faultdelegate_faults`, add the following configuration to the logs section of your `.yaml` file:
+
+```yaml
+logs:
+  - type: integration
+    source: cisco-aci
+    service: cisco-aci
+```
+
 ### Events
 
 The Cisco ACI check sends tenant faults as events.
@@ -139,7 +163,8 @@ Because this check queries all the tenants, apps, and endpoints listed before re
     Last Successful Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
   ```
 
-Need help? Contact [Datadog support][9].
+### Need help 
+Contact [Datadog support][9].
 
 [1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -151,4 +176,9 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
-[11]: https://www.datadoghq.com/product/network-monitoring/network-device-monitoring/
+[11]: https://www.datadoghq.com/product/network-monitoring/#ndm
+[12]: https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/all/faults/guide/b_APIC_Faults_Errors/b_IFC_Faults_Errors_chapter_01.html
+[13]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L109-L115
+[14]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L116-L122  
+[15]: https://app.datadoghq.com/dash/integration/242/cisco-aci---overview
+[16]: https://app.datadoghq.com/logs
