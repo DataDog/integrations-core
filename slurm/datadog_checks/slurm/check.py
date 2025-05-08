@@ -291,10 +291,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.log.debug("Running seff command: %s", cmd)
         out, err, ret = get_subprocess_output(cmd)
         if ret != 0 or not out:
-            self.log.debug(f"seff command failed for job {job_id}: {err}")
+            self.log.debug("seff command failed for job %s: %s", job_id, err)
             return
 
-        # Patterns for metrics
         cpu_utilized = None
         cpu_eff = None
         mem_utilized = None
@@ -330,6 +329,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('seff.memory_utilized_mb', mem_utilized, tags)
         if mem_eff is not None:
             self.gauge('seff.memory_efficiency', mem_eff, tags)
+
+        self.gauge('seff.enabled', 1)
 
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
@@ -556,8 +557,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 if job_id not in job_details_cache:
                     job_details_cache[job_id] = self._enrich_scontrol_tags(job_id)
                 tags.extend(job_details_cache[job_id])
-
-            self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 
     def _enrich_scontrol_tags(self, job_id):
         # Tries to enrich the scontrol job with additional details from squeue.
