@@ -1,0 +1,1 @@
+Fixes incorrect replica counts when querying from performance_schema.threads
