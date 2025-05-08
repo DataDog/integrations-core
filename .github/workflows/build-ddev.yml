@@ -530,12 +530,12 @@ jobs:
         echo "path=$binary" >> "$GITHUB_OUTPUT"
         
     - name: Sign universal binary
-      run: >-
+      run: |
         rcodesign sign -vv \
-        --pem-source /tmp/certificate-application.pem \
-        --pem-source /tmp/private-key-application.pem \
-        --code-signature-flags runtime \
-        "${{ steps.binary.outputs.path }}"
+          --pem-source /tmp/certificate-application.pem \
+          --pem-source /tmp/private-key-application.pem \
+          --code-signature-flags runtime \
+          "${{ steps.binary.outputs.path }}"
 
     - name: Verify signature universal binary
       run: >-
