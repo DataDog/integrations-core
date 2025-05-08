@@ -7,7 +7,7 @@ The Cisco ACI Integration lets you:
 - Track the state and health of your network
 - Track the capacity of your ACI
 - Monitor the switches and controllers themselves
-- The ability to monitor devices via [Network Devices Monitoring][11]
+- The ability to monitor devices with [Network Device Monitoring][11]
 
 ## Setup
 
