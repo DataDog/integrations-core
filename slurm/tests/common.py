@@ -161,7 +161,7 @@ SINFO_MAP = {
             'tags': [
                 'slurm_node_active_features:null',
                 'slurm_node_availability:up',
-                'slurm_node_cluster:N/A',
+                'slurm_cluster_name:N/A',
                 'slurm_node_memory:1000',
                 'slurm_node_name:c1',
                 'slurm_node_state_reason:none',
@@ -179,7 +179,7 @@ SINFO_MAP = {
             'tags': [
                 'slurm_node_active_features:null',
                 'slurm_node_availability:up',
-                'slurm_node_cluster:N/A',
+                'slurm_cluster_name:N/A',
                 'slurm_node_memory:1000',
                 'slurm_node_name:c1',
                 'slurm_node_state_reason:none',
@@ -385,7 +385,7 @@ SINFO_MAP = {
             'tags': [
                 'slurm_node_active_features:null',
                 'slurm_node_availability:up',
-                'slurm_node_cluster:N/A',
+                'slurm_cluster_name:N/A',
                 'slurm_node_memory:1000',
                 'slurm_node_name:c2',
                 'slurm_node_state_reason:none',
@@ -404,7 +404,7 @@ SINFO_MAP = {
             'tags': [
                 'slurm_node_active_features:null',
                 'slurm_node_availability:up',
-                'slurm_node_cluster:N/A',
+                'slurm_cluster_name:N/A',
                 'slurm_node_memory:1000',
                 'slurm_node_name:c2',
                 'slurm_node_state_reason:none',
@@ -609,7 +609,7 @@ SINFO_MAP = {
             'tags': [
                 'slurm_node_active_features:foo',
                 'slurm_node_availability:up',
-                'slurm_node_cluster:bar',
+                'slurm_cluster_name:bar',
                 'slurm_node_memory:5000',
                 'slurm_node_name:c3',
                 'slurm_node_state_reason:test',
@@ -627,7 +627,7 @@ SINFO_MAP = {
             'tags': [
                 'slurm_node_active_features:foo',
                 'slurm_node_availability:up',
-                'slurm_node_cluster:bar',
+                'slurm_cluster_name:bar',
                 'slurm_node_memory:5000',
                 'slurm_node_name:c3',
                 'slurm_node_state_reason:test',
