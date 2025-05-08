@@ -536,6 +536,9 @@ jobs:
           --pem-source /tmp/private-key-application.pem \
           --code-signature-flags runtime \
           "${{ steps.binary.outputs.path }}"
+    
+        echo "Verifying..."
+        codesign --verify --deep --strict --verbose=2 "${{ steps.binary.outputs.path }}"
 
     - name: Build PKG
       run: >-
