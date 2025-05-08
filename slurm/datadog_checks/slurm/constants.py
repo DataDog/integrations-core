@@ -148,7 +148,6 @@ SDIAG_MAP = {
         'backfill.total_jobs_since_cycle_start': 'Total backfilled jobs (since last stats cycle start):',
         'backfill.total_heterogeneous_components': 'Total backfilled heterogeneous job components:',
         'backfill.total_cycles': 'Total cycles:',
-        'backfill.last_cycle_when': 'Last cycle when:',
         'backfill.last_cycle': 'Last cycle:',
         'backfill.max_cycle': 'Max cycle:',
         'backfill.mean_cycle': 'Mean cycle:',
