@@ -234,17 +234,33 @@ class XESessionBase(DBMAsyncJob):
                 if self._is_azure_sql_database:
                     level = "database_"
 
-                # Get raw XML data without server-side parsing
-                query = f"""
-                    SELECT CAST(t.target_data AS XML) AS target_xml
-                    FROM sys.dm_xe_{level}sessions s
-                    JOIN sys.dm_xe_{level}session_targets t
-                        ON s.address = t.event_session_address
-                    WHERE s.name = ?
-                    AND t.target_name = 'ring_buffer'
-                """
+                # Determine if we need to use CONVERT based on connector type
+                use_convert = False
+                if self._check.connection.connector == "adodbapi":
+                    use_convert = True
+                    self._log.debug("Using CONVERT syntax for Windows/adodbapi compatibility")
 
                 try:
+                    # Choose the appropriate query based on connector type
+                    if use_convert:
+                        query = f"""
+                            SELECT CONVERT(NVARCHAR(MAX), t.target_data) AS target_xml
+                            FROM sys.dm_xe_{level}sessions s
+                            JOIN sys.dm_xe_{level}session_targets t
+                                ON s.address = t.event_session_address
+                            WHERE s.name = ?
+                            AND t.target_name = 'ring_buffer'
+                        """
+                    else:
+                        query = f"""
+                            SELECT CAST(t.target_data AS XML) AS target_xml
+                            FROM sys.dm_xe_{level}sessions s
+                            JOIN sys.dm_xe_{level}session_targets t
+                                ON s.address = t.event_session_address
+                            WHERE s.name = ?
+                            AND t.target_name = 'ring_buffer'
+                        """
+
                     cursor.execute(query, (self.session_name,))
                     row = cursor.fetchone()
                     if row and row[0]:
