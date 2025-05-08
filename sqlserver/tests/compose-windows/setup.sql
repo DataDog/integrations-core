@@ -370,8 +370,6 @@ GO
 ALTER EVENT SESSION datadog ON SERVER STATE = START;
 GO
 
-ALTER EVENT SESSION datadog ON SERVER STATE = START;
-GO
 -- 1. Query completions (grouped)
 -- Includes RPC completions, batch completions, and stored procedure completions
 IF EXISTS (
