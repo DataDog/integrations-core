@@ -528,6 +528,18 @@ jobs:
         binary=$(echo build/*/release/*/${{ env.APP_NAME }})
         chmod +x "$binary"
         echo "path=$binary" >> "$GITHUB_OUTPUT"
+        
+    - name: Sign universal binary
+      run: >-
+        rcodesign sign -vv \
+        --pem-source /tmp/certificate-application.pem \
+        --pem-source /tmp/private-key-application.pem \
+        --code-signature-flags runtime \
+        "${{ steps.binary.outputs.path }}"
+
+    - name: Verify signature universal binary
+      run: >-
+        codesign --verify --deep --strict --verbose=2 "${{ steps.binary.outputs.path }}"
 
     - name: Build PKG
       run: >-
