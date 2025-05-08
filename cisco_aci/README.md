@@ -112,16 +112,17 @@ Cisco ACI faults are collected by the Agent and stored in Datadog as logs. They 
 
 There are two types of Cisco ACI faults: `fault:Inst` and `fault:Delegate`. See [fault objects and records][12] for more information.
  
-The Cisco ACI config `.yaml` file can be configured to collect one of the following fault types:
+The Cisco ACI config `.yaml` file can be set up to collect one or both of the following fault types:
 
 | Fault Type          | Description                                                                 |
 |---------------------|-----------------------------------------------------------------------------|
 | [send_faultinst_faults][13]     | Set to `true` to enable collection of Cisco ACI `faultInst` faults as logs. |
 | [send_faultdelegate_faults][14] | Set to `true` to enable collection of Cisco ACI `faultDelegate` faults as logs. |
 
-If you have enabled either `send_faultinst_faults` or `send_faultdelegate_faults`, add the following configuration to the logs section of your `.yaml` file:
+If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure logging is enabled and add the following configuration to the logs section of your `.yaml` file:
 
 ```yaml
+logs_enabled: true
 logs:
   - type: integration
     source: cisco-aci
