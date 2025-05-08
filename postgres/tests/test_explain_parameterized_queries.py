@@ -191,7 +191,7 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
         assert err is None
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
@@ -206,11 +206,15 @@ def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_
         return_value=0,
     ):
 
-        prepared_statement_query = check.statement_samples._generate_prepared_statement_query(DB_NAME, test_query_signature)
-        assert prepared_statement_query == f"dd_{test_query_signature}"
+        prepared_statement_query = (
+            check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
+                DB_NAME, test_query_signature
+            )
+        )
+        assert prepared_statement_query == f"EXECUTE dd_{test_query_signature}"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_generate_prepared_statement_query_three_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
@@ -225,8 +229,12 @@ def test_generate_prepared_statement_query_three_parameters(integration_check, d
         return_value=3,
     ):
 
-        prepared_statement_query = check.statement_samples._generate_prepared_statement_query(DB_NAME, test_query_signature)
-        assert prepared_statement_query == f"dd_{test_query_signature}(null, null, null)"
+        prepared_statement_query = (
+            check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
+                DB_NAME, test_query_signature
+            )
+        )
+        assert prepared_statement_query == f"EXECUTE dd_{test_query_signature}(null,null,null)"
 
 
 @pytest.mark.integration
