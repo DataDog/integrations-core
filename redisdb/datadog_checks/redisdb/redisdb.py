@@ -23,7 +23,7 @@ DEFAULT_CLIENT_NAME = "unknown"
 
 
 class Redis(AgentCheck):
-    db_key_pattern = re.compile(r'^db\d+')
+    db_key_pattern = re.compile(r'^db\d+$')
     slave_key_pattern = re.compile(r'^slave\d+')
     subkeys = ['keys', 'expires']
 

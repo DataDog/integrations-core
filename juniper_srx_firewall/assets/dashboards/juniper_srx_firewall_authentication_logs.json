@@ -1,0 +1,898 @@
+{
+    "title": "Juniper SRX Firewall - Authentication Logs",
+    "description": "- This dashboard provides an overview of authentication activity, tracking successful and failed login attempts. It highlights authentication trends, top failing users and IPs, geo-location data, and failure reasons to enhance security monitoring and threat detection.",
+    "experience_type": "default",
+    "widgets": [
+        {
+            "id": 3098264915522038,
+            "definition": {
+                "type": "image",
+                "url": "https://juniper-prod.scene7.com/is/image/junipernetworks/juniper_black-rgb-header?fmt=png8-alpha&dpr=off",
+                "url_dark_theme": "https://www.juniper.net/content/dam/www/assets/images/global/juniper_white-rgb-footer.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 495983273354694,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard offers a comprehensive summary of authentication activities on the Juniper SRX Firewall, tracking successful and failed login attempts. It provides insights into authentication trends, top failing users and IPs, geo-location data, and failure reasons to enhance security monitoring and threat detection.\n\nThis centralized overview streamlines analysis and helps detect potential issues or patterns for proactive system management.\n\nFor more information, see the [Juniper SRX Firewall Integration Documentation](https://docs.datadoghq.com/integrations/juniper_srx_firewall).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 7822594049283508,
+            "definition": {
+                "title": "Authentication Logs",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 740034796599106,
+                        "definition": {
+                            "title": "Total Failed Logins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#db4343"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2582817946954042,
+                        "definition": {
+                            "title": "Failed Logins by Category over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "order_by": "values",
+                                        "color_order": "monotonic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2243202168003744,
+                        "definition": {
+                            "title": "Total Successful Logins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green",
+                                            "custom_bg_color": "#db4343"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6128717263246190,
+                        "definition": {
+                            "title": "Successful Logins by Category over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "green",
+                                        "order_by": "values",
+                                        "color_order": "monotonic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 68482487258244,
+                        "definition": {
+                            "title": "Top Users with Failed Logins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1185699557300620,
+                        "definition": {
+                            "title": "Distribution by Category",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL OR REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3560372487066734,
+                        "definition": {
+                            "title": "Top IPs with Failed Logins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2746863721009926,
+                        "definition": {
+                            "title": "Geo-Location of Failed Login Attempts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 10,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4284411461867030,
+                        "definition": {
+                            "title": "Top Reasons for JADE Auth Failure",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:JADE_AUTH_FAILURE $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@error-message",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2110825981746498,
+                        "definition": {
+                            "title": "Top Reasons for VPN Auth Failure",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR REMOTE_ACCESS_VPN_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@error-message",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 14,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 403429590286798,
+                        "definition": {
+                            "title": "Top Hosts for VPN Auth Failure",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR REMOTE_ACCESS_VPN_AUTH_FAIL) $Client-IP $User-Name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@hostname",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 14,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 416534017691312,
+                        "definition": {
+                            "title": "Failed Login Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(DYNAMIC_VPN_AUTH_FAIL OR JADE_AUTH_FAILURE OR FWAUTH_FTP_USER_AUTH_FAIL OR FWAUTH_HTTPS_USER_AUTH_FAIL OR FWAUTH_HTTP_USER_AUTH_FAIL OR FWAUTH_TELNET_USER_AUTH_FAIL OR FWAUTH_WEBAUTH_FAIL OR LOGIN_FAILED OR SSHD_LOGIN_FAILED OR REMOTE_ACCESS_VPN_AUTH_FAIL OR WEB_WEBAUTH_AUTH_FAIL OR WEB_AUTH_FAIL) $Client-IP $User-Name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8800175875991554,
+                        "definition": {
+                            "title": "Successful Login Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:juniper-srx-firewall service:juniper-srx-firewall @syslog.msgid:(REMOTE_ACCESS_VPN_AUTH_OK OR DYNAMIC_VPN_AUTH_OK OR JADE_AUTH_SUCCESS OR WEB_WEBAUTH_AUTH_OK OR WEB_AUTH_SUCCESS OR FWAUTH_FTP_USER_AUTH_ACCEPTED OR FWAUTH_HTTPS_USER_AUTH_ACCEPTED OR FWAUTH_HTTP_USER_AUTH_ACCEPTED OR FWAUTH_TELNET_USER_AUTH_ACCEPTED OR FWAUTH_WEBAUTH_SUCCESS OR LOGIN_INFORMATION) $Client-IP $User-Name",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 27
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "User-Name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
