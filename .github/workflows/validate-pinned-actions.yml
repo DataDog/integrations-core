@@ -1,6 +1,9 @@
 name: Validate Pinned Actions
 on:
   pull_request: {}
+  push:
+    branches:
+      - master
   merge_group:
     # Test requested to pass before merging
     # needs to trigger in merge queues
