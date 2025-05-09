@@ -50,9 +50,9 @@ E2E_TLS_CONFIG = {'init_config': {}, 'instances': [E2E_TLS_INSTANCE]}
 
 E2E_METADATA = {
     'start_commands': [
-        'curl -o foundationdb-clients_6.3.23-1_amd64.deb '
-        '-L https://github.com/apple/foundationdb/releases/download/6.3.23/foundationdb-clients_6.3.23-1_amd64.deb',
-        'dpkg -i foundationdb-clients_6.3.23-1_amd64.deb',
+        'curl -o foundationdb-clients_6.3.25-1_amd64.deb '
+        '-L https://github.com/apple/foundationdb/releases/download/6.3.25/foundationdb-clients_6.3.25-1_amd64.deb',
+        'dpkg -i foundationdb-clients_6.3.25-1_amd64.deb',
     ],
     'docker_volumes': [
         '{}:/fdb/fdb.cluster'.format(CLUSTER_FILE),
