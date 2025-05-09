@@ -278,9 +278,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
             if self.collect_seff_stats:
-                # State is at index 12 in sacct output
                 job_state = job_data[12].strip().upper()
-                if not has_suffix and job_state not in ('RUNNING', 'PENDING'):
+                # Run on Completed Jobs only https://wiki.rcs.huji.ac.il/hurcs/guides/resource-utilization
+                if not has_suffix and job_state is 'COMPLETED':
                     self.log.debug("Processing seff for job %s", job_id)
                     self.process_seff(job_id, tags)
 
