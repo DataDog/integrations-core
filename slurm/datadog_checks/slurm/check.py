@@ -67,6 +67,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
         self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
+        self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', False))
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
@@ -96,6 +97,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         if self.collect_sdiag_stats:
             self.sdiag_cmd = self.get_slurm_command('sdiag', [])
+
+        if self.collect_seff_stats:
+            self.seff_cmd = self.get_slurm_command('seff', [])
 
         if self.collect_sshare_stats:
             self.sshare_cmd = self.get_slurm_command('sshare', SSHARE_PARAMS)
@@ -250,7 +254,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             # Process the JobID
             job_id_full = job_data[0].strip()
-            if '.' in job_id_full:
+            has_suffix = '.' in job_id_full
+            if has_suffix:
                 job_id, job_id_suffix = job_id_full.split('.', 1)
                 tags.append(f"slurm_job_id:{job_id}")
                 tags.append(f"slurm_job_id_suffix:{job_id_suffix}")
@@ -272,8 +277,60 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('sacct.job.duration', duration, tags=tags)
             self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
+            if self.collect_seff_stats:
+                # State is at index 12 in sacct output
+                job_state = job_data[12].strip().upper()
+                if not has_suffix and job_state not in ('RUNNING', 'PENDING'):
+                    self.log.debug("Processing seff for job %s", job_id)
+                    self.process_seff(job_id, tags)
 
         self.gauge('sacct.enabled', 1)
+
+    def process_seff(self, job_id, tags):
+        cmd = self.seff_cmd + [str(job_id)]
+        self.log.debug("Running seff command: %s", cmd)
+        out, err, ret = get_subprocess_output(cmd)
+        if ret != 0 or not out:
+            self.log.debug("seff command failed for job %s: %s", job_id, err)
+            return
+
+        cpu_utilized = None
+        cpu_eff = None
+        mem_utilized = None
+        mem_eff = None
+
+        for line in out.splitlines():
+            line = line.strip()
+            if line.startswith('CPU Utilized:'):
+                # CPU Utilized: 00:00:01
+                value = line.split(':', 1)[1].strip()
+                cpu_utilized = parse_duration(value)
+            elif line.startswith('CPU Efficiency:'):
+                # CPU Efficiency: 20.00% of 00:00:05 core-walltime
+                match = re.match(r'CPU Efficiency: ([\d.]+)%', line)
+                if match:
+                    cpu_eff = float(match.group(1))
+            elif line.startswith('Memory Utilized:'):
+                # Memory Utilized: 0.00 MB (estimated maximum)
+                match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
+                if match:
+                    mem_utilized = float(match.group(1))
+            elif line.startswith('Memory Efficiency:'):
+                # Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)
+                match = re.match(r'Memory Efficiency: ([\d.]+)%', line)
+                if match:
+                    mem_eff = float(match.group(1))
+
+        if cpu_utilized is not None:
+            self.gauge('seff.cpu_utilized', cpu_utilized, tags)
+        if cpu_eff is not None:
+            self.gauge('seff.cpu_efficiency', cpu_eff, tags)
+        if mem_utilized is not None:
+            self.gauge('seff.memory_utilized_mb', mem_utilized, tags)
+        if mem_eff is not None:
+            self.gauge('seff.memory_efficiency', mem_eff, tags)
+
+        self.gauge('seff.enabled', 1)
 
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
@@ -505,8 +562,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 if job_id not in job_details_cache:
                     job_details_cache[job_id] = self._enrich_scontrol_tags(job_id)
                 tags.extend(job_details_cache[job_id])
-
-            self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 
     def _enrich_scontrol_tags(self, job_id):
         # Tries to enrich the scontrol job with additional details from squeue.
