@@ -11,6 +11,8 @@ The Cisco ACI Integration lets you:
 
 ## Setup
 
+<div class="alert alert-info">Enabling send_ndm_metadata to send metadata from this integration has potential billing implications. See the <a href="https://www.datadoghq.com/pricing/?product=network-monitoring&tab=ndm#products"> pricing page </a> for more information.</div>
+
 ### Installation
 
 The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1] on a server within your network.
@@ -59,20 +61,38 @@ To configure this check for an Agent running on a host:
         #
         # send_ndm_metadata: false
 
+        #Enable collection of Cisco ACI fault logs
+
         ## @param send_faultinst_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
-        #
-        # send_faultinst_faults: false
+        
+        send_faultinst_faults: true
 
         ## @param send_faultdelegate_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
-        #
-        # send_faultdelegate_faults: false
-   ```
-   
-   *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
 
-2. [Restart the Agent][4] to begin sending Cisco ACI metrics to Datadog.
+       send_faultdelegate_faults: true
+          
+   ```
+
+2. If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure [logging is enabled][17] in your Datgadog `.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+3. Additionally, to receive [ACI faults](#cisco-aci-faults) as logs, add the following configuration to the logs section of your `cisco_aci.d/conf.yaml` file:
+
+   ```yaml
+   logs:
+     - type: integration
+       source: cisco-aci
+       service: cisco-aci
+   ```
+
+4. [Restart the Agent][4] to begin sending Cisco ACI metrics and optionally ACI fault logs to Datadog.
+
+   **Note**: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, for example.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -106,8 +126,6 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Cisco ACI faults
 
-<div class="alert alert-info">Billing impact callout</div>
-
 Cisco ACI faults are collected by the Agent and stored in Datadog as logs. They can be viewed from the [Cisco ACI dashboard][15], or by filtering for `source:cisco-aci` in the [Log Explorer][16].
 
 There are two types of Cisco ACI faults: `fault:Inst` and `fault:Delegate`. See [fault objects and records][12] for more information.
@@ -118,23 +136,6 @@ The Cisco ACI config `.yaml` file can be set up to collect one or both of the fo
 |---------------------|-----------------------------------------------------------------------------|
 | [send_faultinst_faults][13]     | Set to `true` to enable collection of Cisco ACI `faultInst` faults as logs. |
 | [send_faultdelegate_faults][14] | Set to `true` to enable collection of Cisco ACI `faultDelegate` faults as logs. |
-
-#### Setup
-
-1. If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure [logging is enabled][17] in your Datgadog `.yaml` file:
-
-   ```yaml
-   logs_enabled: true
-   ```
-
-2. Additionally, add the following configuration to the logs section of your `cisco_aci.d/conf.yaml` file:
-
-   ```yaml
-   logs:
-     - type: integration
-       source: cisco-aci
-       service: cisco-aci
-   ```
 
 ### Events
 
