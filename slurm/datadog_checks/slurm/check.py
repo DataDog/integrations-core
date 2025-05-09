@@ -558,6 +558,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     job_details_cache[job_id] = self._enrich_scontrol_tags(job_id)
                 tags.extend(job_details_cache[job_id])
 
+        self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
+
     def _enrich_scontrol_tags(self, job_id):
         # Tries to enrich the scontrol job with additional details from squeue.
         try:
