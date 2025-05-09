@@ -1351,7 +1351,7 @@ SDIAG_MAP = {
         {'name': 'slurm.sdiag.backfill.queue_length_mean', 'value': 28, 'tags': []},
         {'name': 'slurm.sdiag.backfill.mean_table_size', 'value': 29, 'tags': []},
         {
-            'name': 'slurm.sdiag.last_cycle_seconds_ago',
+            'name': 'slurm.sdiag.backfill.last_cycle_seconds_ago',
             'value': 1000,
             'tags': [],
         },  # mocked to be 1000 seconds in the test

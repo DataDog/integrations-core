@@ -333,7 +333,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                         last_cycle_epoch = int(match.group(1))
                         now = int(time.time())
                         diff = now - last_cycle_epoch
-                        self.gauge('sdiag.last_cycle_seconds_ago', diff, tags=self.tags)
+                        self.gauge('sdiag.backfill.last_cycle_seconds_ago', diff, tags=self.tags)
                 except Exception as e:
                     self.log.debug("Failed to parse last cycle epoch from line '%s': %s", line, e)
 
