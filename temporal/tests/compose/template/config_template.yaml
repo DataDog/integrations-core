@@ -6,7 +6,7 @@ log:
 persistence:
     numHistoryShards: {{ default .Env.NUM_HISTORY_SHARDS "4" }}
     defaultStore: default
-    visibilityStore: visibility
+    visibilityStore: es-visibility
     {{- $es := default .Env.ENABLE_ES "false" | lower -}}
     {{- if eq $es "true" }}
     advancedVisibilityStore: es-visibility
@@ -127,10 +127,10 @@ persistence:
                     keyFile: {{ default .Env.SQL_CERT_KEY "" }}
                     enableHostVerification: {{ default .Env.SQL_HOST_VERIFICATION "false" }}
                     serverName: {{ default .Env.SQL_HOST_NAME "" }}
-        {{- else if eq $db "postgresql" }}
+        {{- else if eq $db "postgres12" }}
         default:
             sql:
-                pluginName: "postgres"
+                pluginName: "postgres12_pgx"
                 databaseName: "{{ default .Env.DBNAME "temporal" }}"
                 connectAddr: "{{ default .Env.POSTGRES_SEEDS "" }}:{{ default .Env.DB_PORT "5432" }}"
                 connectProtocol: "tcp"
@@ -156,7 +156,7 @@ persistence:
                 {{ $visibility_user := default .Env.VISIBILITY_POSTGRES_USER $visibility_user_default }}
                 {{ $visibility_pwd_default := default .Env.POSTGRES_PWD "" }}
                 {{ $visibility_pwd := default .Env.VISIBILITY_POSTGRES_PWD $visibility_pwd_default }}
-                pluginName: "postgres"
+                pluginName: "postgres12_pgx"
                 databaseName: "{{ default .Env.VISIBILITY_DBNAME "temporal_visibility" }}"
                 connectAddr: "{{ $visibility_seeds }}:{{ $visibility_port }}"
                 connectProtocol: "tcp"
