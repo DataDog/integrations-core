@@ -8,7 +8,7 @@ import fdb
 
 from datadog_checks.base import AgentCheck
 
-fdb.api_version(600)
+fdb.api_version(700)
 
 
 class FoundationdbCheck(AgentCheck):
