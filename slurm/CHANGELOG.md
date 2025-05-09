@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0-beta.1 / 2025-05-09
+
+***Changed***:
+
+* Change tagging logic for node and partition metrics ([#20257](https://github.com/DataDog/integrations-core/pull/20257))
+
+***Added***:
+
+* Collect post job efficiency data from seff output ([#20254](https://github.com/DataDog/integrations-core/pull/20254))
+
 ## 1.2.0 / 2025-05-08
 
 ***Added***:
