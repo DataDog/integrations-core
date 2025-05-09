@@ -180,6 +180,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self._process_metrics(partition_data, PARTITION_MAP, tags)
 
             self._process_sinfo_aiot_state(partition_data[6], "partition", tags)
+
+            tags = self._process_tags(partition_data, PARTITION_MAP["info_tags"], tags)
             self.gauge('partition.info', 1, tags)
 
         self.gauge('sinfo.partition.enabled', 1)
@@ -200,16 +202,19 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             tags = self._process_tags(node_data, NODE_MAP["tags"], tags)
 
-            if self.sinfo_collection_level > 2:
-                tags = self._process_tags(node_data, NODE_MAP["extended_tags"], tags)
-
             if self.gpu_stats:
                 gpu_tags = self._process_sinfo_gpu(node_data[-2], node_data[-1], "node", tags)
                 tags.extend(gpu_tags)
 
-            # Submit metrics
-            self._process_metrics(node_data, NODE_MAP, tags)
             self._process_sinfo_aiot_state(node_data[3], 'node', tags)
+
+            if self.sinfo_collection_level > 2:
+                tags = self._process_tags(node_data, NODE_MAP["extended_tags"], tags)
+
+
+            # Submit metrics
+            tags = self._process_tags(node_data, NODE_MAP["info_tags"], tags)
+            self._process_metrics(node_data, NODE_MAP, tags)
             self.gauge('node.info', 1, tags=tags)
 
         self.gauge('sinfo.node.enabled', 1)
