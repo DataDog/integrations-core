@@ -69,7 +69,7 @@ instances:
     #
     # exclude_hostname: false
 
-    ## Controls how the database is identified. The default value is the resolved hostname for the instance,
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
     ## which respects the `reported_hostname` option.
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
