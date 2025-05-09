@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2025-04-30",
 	"last_updated_at": "2025-04-30",
-	"title": "<REPLACE_WITH_TITLE>",
-	"description": "<REPLACE_WITH_DESCRIPTION>",
+	"title": "Many channel swap events detected",
+	"description": "Wi-Fi channel swap events occur when devices or access points switch channels. An increase in channel swaps may indicate interference or connectivity issues. This monitor triggers when many channel swaps are detected in a short period.",
 	"definition": {
 		"id": 170785984,
 		"name": "Many channel swap events detected on {{host.name}}",
