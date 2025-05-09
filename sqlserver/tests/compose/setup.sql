@@ -16,6 +16,7 @@ USE master;
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;
 GRANT CONNECT ANY DATABASE to bob;
+GRANT VIEW SERVER STATE TO bob;
 CREATE LOGIN fred WITH PASSWORD = 'Password12!';
 CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
@@ -338,6 +339,8 @@ GO
 GRANT EXECUTE on conditionalPlanTest to bob;
 GO
 
+-- create Extended event (XE) sessions 
+-- session for deadlock detection 
 CREATE EVENT SESSION datadog
 ON SERVER
 ADD EVENT sqlserver.xml_deadlock_report 
@@ -352,3 +355,109 @@ GO
 
 ALTER EVENT SESSION datadog ON SERVER STATE = START;
 GO
+-- 1. Query completions (grouped)
+-- Includes RPC completions, batch completions, and stored procedure completions
+IF EXISTS (
+    SELECT * FROM sys.server_event_sessions WHERE name = 'datadog_query_completions'
+)
+    DROP EVENT SESSION datadog_query_completions ON SERVER;
+GO
+
+CREATE EVENT SESSION datadog_query_completions ON SERVER
+ADD EVENT sqlserver.rpc_completed (
+    ACTION (
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE (
+        sql_text <> '' AND
+        duration > 1000000 -- in microseconds, 1 second
+    )
+),
+ADD EVENT sqlserver.sql_batch_completed(
+    ACTION (
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE (
+        sql_text <> '' AND
+        duration > 1000000
+    )
+),
+ADD EVENT sqlserver.module_end(
+    SET collect_statement = (1)
+    ACTION (
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE (
+        sql_text <> '' AND
+        duration > 1000000
+    )
+)
+ADD TARGET package0.ring_buffer
+WITH (
+    MAX_MEMORY = 2048 KB,
+    TRACK_CAUSALITY = ON,
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS,
+    MAX_DISPATCH_LATENCY = 3 SECONDS,
+    STARTUP_STATE = ON
+);
+GO
+
+-- 2. Errors and Attentions (grouped)
+IF EXISTS (
+    SELECT * FROM sys.server_event_sessions WHERE name = 'datadog_query_errors'
+)
+    DROP EVENT SESSION datadog_query_errors ON SERVER;
+GO
+CREATE EVENT SESSION datadog_query_errors ON SERVER
+-- Low-frequency events: send to ring_buffer
+ADD EVENT sqlserver.error_reported(
+    ACTION(
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+    WHERE severity >= 11
+),
+ADD EVENT sqlserver.attention(
+    ACTION(
+        sqlserver.sql_text,
+        sqlserver.database_name,
+        sqlserver.username,
+        sqlserver.client_app_name,
+        sqlserver.client_hostname,
+        sqlserver.session_id,
+        sqlserver.request_id
+    )
+)
+ADD TARGET package0.ring_buffer
+WITH (
+    MAX_MEMORY = 2048 KB,
+    EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS,
+    MAX_DISPATCH_LATENCY = 30 SECONDS,
+    STARTUP_STATE = ON
+);
+
+ALTER EVENT SESSION datadog_query_completions ON SERVER STATE = START;
+ALTER EVENT SESSION datadog_query_errors ON SERVER STATE = START;
