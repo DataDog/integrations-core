@@ -4,7 +4,7 @@
 
 import os
 from datetime import datetime
-from typing import List, Literal, Optional, Tuple, cast, overload
+from typing import Literal, Optional, overload
 
 import click
 from rich.console import Console
@@ -105,7 +105,7 @@ def diff(
                 elif version and version not in valid_versions:
                     raise ValueError(f"Invalid version: {version}")
                 if platform is None or version is None:
-                    modules_plat_ver: List[FileDataEntryPlatformVersion] = []
+                    modules_plat_ver: list[FileDataEntryPlatformVersion] = []
                     platforms = valid_platforms if platform is None else [platform]
                     versions = valid_versions if version is None else [version]
                     progress.remove_task(task)
@@ -143,7 +143,7 @@ def diff(
                         print_json(app, modules_plat_ver)
                 else:
                     progress.remove_task(task)
-                    modules: List[FileDataEntry] = []
+                    modules: list[FileDataEntry] = []
                     multiple_plat_and_ver: Literal[False] = False
                     base_parameters: Parameters = {
                         "app": app,
@@ -184,7 +184,7 @@ def diff_mode(
     params: Parameters,
     progress: Progress,
     multiple_plats_and_vers: Literal[True],
-) -> List[FileDataEntryPlatformVersion]: ...
+) -> list[FileDataEntryPlatformVersion]: ...
 @overload
 def diff_mode(
     gitRepo: GitRepo,
@@ -193,7 +193,7 @@ def diff_mode(
     params: Parameters,
     progress: Progress,
     multiple_plats_and_vers: Literal[False],
-) -> List[FileDataEntry]: ...
+) -> list[FileDataEntry]: ...
 def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
@@ -201,7 +201,7 @@ def diff_mode(
     params: Parameters,
     progress: Progress,
     multiple_plats_and_vers: bool,
-) -> List[FileDataEntryPlatformVersion] | List[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
         gitRepo, params["platform"], params["version"], first_commit, second_commit, params["compressed"], progress
     )
@@ -209,15 +209,18 @@ def diff_mode(
     integrations = get_diff(files_b, files_a, "Integration")
     dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
 
-    if integrations + dependencies == [] and not params["csv"] and not params["json"]:
-        params["app"].display(
+    if integrations + dependencies == []:
+        params["app"].display_error(
             f"No size differences were detected between the selected commits for {params['platform']}"
+        )
+        formatted_modules = format_modules(
+            integrations + dependencies, params["platform"], params["version"], multiple_plats_and_vers
         )
     else:
         formatted_modules = format_modules(
             integrations + dependencies, params["platform"], params["version"], multiple_plats_and_vers
         )
-        formatted_modules.sort(key=lambda x: abs(cast(int, x["Size_Bytes"])), reverse=True)
+        formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
         for module in formatted_modules:
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
@@ -236,9 +239,7 @@ def diff_mode(
                 params["save_to_png_path"],
             )
 
-        return formatted_modules
-
-    return []
+    return formatted_modules
 
 
 def get_repo_info(
@@ -249,7 +250,7 @@ def get_repo_info(
     second_commit: str,
     compressed: bool,
     progress: Progress,
-) -> Tuple[List[FileDataEntry], List[FileDataEntry], List[FileDataEntry], List[FileDataEntry]]:
+) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
     with progress:
         """
         Retrieves integration and dependency sizes for two commits in the repo.
@@ -288,8 +289,8 @@ def get_repo_info(
 
 
 def get_diff(
-    size_first_commit: List[FileDataEntry], size_second_commit: List[FileDataEntry], type: str
-) -> List[FileDataEntry]:
+    size_first_commit: list[FileDataEntry], size_second_commit: list[FileDataEntry], type: str
+) -> list[FileDataEntry]:
     """
     Computes size differences between two sets of integrations or dependencies.
 
@@ -307,7 +308,7 @@ def get_diff(
     second_commit = {entry["Name"]: entry for entry in size_second_commit}
 
     all_names = set(first_commit) | set(second_commit)
-    diffs: List[FileDataEntry] = []
+    diffs: list[FileDataEntry] = []
 
     for name in all_names:
         b = first_commit.get(name)

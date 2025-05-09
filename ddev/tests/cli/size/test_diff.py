@@ -58,31 +58,67 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.diff.get_files", side_effect=get_compressed_files_side_effect),
         patch("ddev.cli.size.diff.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
         patch("ddev.cli.size.diff.format_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.size.common.print_csv"),
-        patch("ddev.cli.size.common.print_table"),
-        patch("ddev.cli.size.common.plot_treemap"),
+        patch("matplotlib.pyplot.show"),
+        patch("matplotlib.pyplot.savefig"),
     ):
         yield
 
 
 def test_diff_no_args(ddev, mock_size_diff_dependencies):
-    result = ddev("size", "diff", "commit1", "commit2", "--compressed")
-    assert result.exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--csv").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--markdown").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--json").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--save_to_png_path", "out.png").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--show_gui").exit_code == 0
 
 
 def test_diff_with_platform_and_version(ddev, mock_size_diff_dependencies):
-    result = ddev(
-        "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"
+    assert ddev("size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12").exit_code == 0
+    assert (
+        ddev(
+            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"
+        ).exit_code
+        == 0
     )
-    assert result.exit_code == 0
-
-
-def test_diff_csv(ddev, mock_size_diff_dependencies):
-    result = ddev(
-        "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed", "--csv"
+    assert (
+        ddev("size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--csv").exit_code
+        == 0
     )
-    print(result.output)
-    assert result.exit_code == 0
+    assert (
+        ddev(
+            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--markdown"
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--json"
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size",
+            "diff",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-aarch64",
+            "--python",
+            "3.12",
+            "--save_to_png_path",
+            "out.png",
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--show_gui"
+        ).exit_code
+        == 0
+    )
 
 
 def test_diff_no_differences(ddev):
@@ -121,14 +157,23 @@ def test_diff_no_differences(ddev):
                 {"Name": "dep2.whl", "Version": "2.0.0", "Size_Bytes": 1000},
             ],
         ),
+        patch("matplotlib.pyplot.show"),
+        patch("matplotlib.pyplot.savefig"),
     ):
         result = ddev(
             "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"
         )
 
-        print(result.output)
         assert result.exit_code == 0, result.output
         assert "No size differences were detected" in result.output
+
+        assert ddev("size", "diff", "commit1", "commit2").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--csv").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--markdown").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--json").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--save_to_png_path", "out.png").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--show_gui").exit_code == 0
 
 
 def test_diff_invalid_platform(ddev):

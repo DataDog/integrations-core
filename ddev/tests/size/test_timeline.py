@@ -77,7 +77,7 @@ def test_format_commit_data():
         "Apr 4 2025", "this is a very long commit message that should be trimmed (#1234)", "abc1234def", "abc1234def"
     )
     expected_date = datetime.strptime("Apr 4 2025", "%b %d %Y").date()
-    expected_message = "(NEW) this is a very long...(#1234)"
+    expected_message = "(NEW) this is a very long commit...(#1234)"
     expected_commit = "abc1234"
     assert date == expected_date
     assert message == expected_message
