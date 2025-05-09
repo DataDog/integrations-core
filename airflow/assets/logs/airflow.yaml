@@ -103,8 +103,7 @@ pipeline:
           enabled: true
           source: dirname
           samples:
-            - path/to/airflow/logs/dag_id_airflow_dag_0/run_id_scheduled__2025-02-18T14_46_00+00_00/task_id_print_task_0/attempt_1.log
+            - /airflow_logs/dag_id_log_heavy_test_dag/run_id_manual__2025-05-09t13:51:47.462683_00:00/task_id_generate_logs_1
           grok:
             supportRules: ""
-            matchRules: default
-              (.*dag_id_%{word:airflow.dagRun.dag_id}/run_id_%{data:airflow.dagRun.run_id}/task_id_%{word:airflow.task.task_id}/attempt_%{word:airflow.task.attempt_id}.log)
+            matchRules: default (.*dag_id_%{data:airflow.dagRun.dag_id}/run_id_%{data:airflow.dagRun.run_id}/task_id_%{data:airflow.task.task_id})
