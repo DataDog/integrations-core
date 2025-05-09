@@ -1,0 +1,7 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+system.wlan.channel_swap_events,count,,,,The number of times the Wi-Fi channel used by the device changes,0,wlan,wlan_channel_swap_events,,
+system.wlan.noise,gauge,,,,The noise measurement (dBm) for the interface,0,wlan,wlan_signal_noise,,
+system.wlan.roaming_events,count,,,,The number of times a device switched between different access points within the same network,0,wlan,wlan_roaming_events,,
+system.wlan.rssi,gauge,,,,The received signal strength indication (RSSI) measurement (dBm) for the interface,0,wlan,wlan_signal_strength,,
+system.wlan.rxrate,gauge,,mebibyte,,The receive rate/max bandwith (Mbps) for the interface,0,wlan,wlan_rx_rate,,
+system.wlan.txrate,gauge,,mebibyte,,The transmit rate/max bandwith (Mbps) for the interface,0,wlan,wlan_tx_rate,,
