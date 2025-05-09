@@ -11,6 +11,7 @@ import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
 from datadog_checks.mysql.version_utils import get_version
 
@@ -304,6 +305,7 @@ def test__get_is_aurora():
             {
                 'port:unix_socket',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -314,6 +316,7 @@ def test__get_is_aurora():
                 'port:unix_socket',
                 'server:localhost',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -323,6 +326,7 @@ def test__get_is_aurora():
             {
                 'port:unix_socket',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -333,6 +337,7 @@ def test__get_is_aurora():
                 'port:unix_socket',
                 'server:foo',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
@@ -471,3 +476,35 @@ def test_update_runtime_aurora_tags():
     assert 'replication_role:writer' not in mysql_check._non_internal_tags
     assert len([t for t in mysql_check.tags if t.startswith('replication_role:')]) == 1
     assert len([t for t in mysql_check._non_internal_tags if t.startswith('replication_role:')]) == 1
+
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:5432', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+    ],
+)
+def test_database_identifier(template, expected, tags):
+    """
+    Test functionality of calculating database_identifier
+    """
+    config = {'host': 'stubbed.hostname', 'user': 'datadog', 'port': 5432, 'tags': tags}
+    config['database_identifier'] = {'template': template}
+    check = MySql(common.CHECK_NAME, {}, instances=[config])
+
+    assert check.database_identifier == expected
+
+
+def test__eliminate_duplicate_rows():
+    rows = [
+        {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+    ]
+    second_pass = {1: {'event_timer_start': 2001}}
+    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [
+        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+    ]

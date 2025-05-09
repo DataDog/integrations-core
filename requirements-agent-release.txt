@@ -57,7 +57,7 @@ datadog-druid==4.1.0
 datadog-duckdb==1.0.0
 datadog-ecs-fargate==6.1.0
 datadog-eks-fargate==6.1.0
-datadog-elastic==8.1.0
+datadog-elastic==8.2.0
 datadog-envoy==5.1.0
 datadog-esxi==3.0.1
 datadog-etcd==8.1.0
@@ -129,8 +129,8 @@ datadog-mcache==6.1.0; sys_platform != 'win32'
 datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
 datadog-milvus==1.2.0
-datadog-mongo==9.0.1
-datadog-mysql==15.0.0
+datadog-mongo==9.1.0
+datadog-mysql==15.3.1
 datadog-nagios==3.0.0
 datadog-network==5.2.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
@@ -152,7 +152,7 @@ datadog-pgbouncer==8.1.2; sys_platform != 'win32'
 datadog-php-fpm==5.1.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.9.0
+datadog-postgres==22.11.0
 datadog-powerdns-recursor==4.1.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
@@ -160,7 +160,7 @@ datadog-prometheus==5.0.0
 datadog-proxysql==7.1.0
 datadog-pulsar==3.2.0
 datadog-quarkus==1.1.0
-datadog-rabbitmq==7.1.0
+datadog-rabbitmq==7.2.0
 datadog-ray==2.2.0
 datadog-redisdb==7.2.0
 datadog-rethinkdb==5.1.0
@@ -180,7 +180,7 @@ datadog-sonarqube==5.2.1
 datadog-sonatype-nexus==1.1.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.0.0
 datadog-spark==6.3.0
-datadog-sqlserver==22.1.0
+datadog-sqlserver==22.3.1
 datadog-squid==4.1.0
 datadog-ssh-check==4.2.1
 datadog-statsd==3.0.0

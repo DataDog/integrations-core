@@ -97,6 +97,7 @@ files:
                   - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
                   - host: The provided host of the instance.
                   - port: The port number of the instance.
+                  - mysql_sock: The socket path of the instance.
                   In addition, you can use any key from the `tags` section of the configuration.
                 default: "$resolved_hostname"
           - name: sock
