@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import os
 import sys
 from unittest.mock import Mock, patch
@@ -13,6 +14,13 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
 from datadog_checks.sqlserver.xe_collection.query_completion_events import QueryCompletionEventsHandler
+from datadog_checks.sqlserver.xe_collection.xml_tools import (
+    extract_duration,
+    extract_field,
+    extract_int_value,
+    extract_text_representation,
+    extract_value,
+)
 
 CHECK_NAME = 'sqlserver'
 
@@ -385,73 +393,129 @@ class TestXESessionHandlersInitialization:
 
 
 class TestXESessionHelpers:
-    """Tests for helper methods in XESessionBase"""
+    """Tests for XML parsing tools"""
 
-    def test_extract_value(self, query_completion_handler):
+    def test_extract_value(self):
         """Test extraction of values from XML elements"""
         # Test extracting value from element with value element
         xml = '<data name="test"><value>test_value</value></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_value(element) == 'test_value'
+        assert extract_value(element) == 'test_value'
 
         # Test extracting value from element with text
         xml = '<data name="test">test_value</data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_value(element) == 'test_value'
+        assert extract_value(element) == 'test_value'
 
         # Test empty element
         xml = '<data name="test"></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_value(element) is None
-        assert query_completion_handler._extract_value(element, 'default') == 'default'
+        assert extract_value(element) is None
+        assert extract_value(element, 'default') == 'default'
 
         # Test None element
-        assert query_completion_handler._extract_value(None) is None
-        assert query_completion_handler._extract_value(None, 'default') == 'default'
+        assert extract_value(None) is None
+        assert extract_value(None, 'default') == 'default'
 
-    def test_extract_int_value(self, query_completion_handler):
+    def test_extract_int_value(self):
         """Test extraction of integer values"""
         # Test valid integer
         xml = '<data name="test"><value>123</value></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_int_value(element) == 123
+        assert extract_int_value(element) == 123
 
         # Test invalid integer
         xml = '<data name="test"><value>not_a_number</value></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_int_value(element) is None
-        assert query_completion_handler._extract_int_value(element, 0) == 0
+        assert extract_int_value(element) is None
+        assert extract_int_value(element, 0) == 0
 
         # Test empty element
         xml = '<data name="test"></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_int_value(element) is None
-        assert query_completion_handler._extract_int_value(element, 0) == 0
+        assert extract_int_value(element) is None
+        assert extract_int_value(element, 0) == 0
 
-    def test_extract_text_representation(self, query_completion_handler):
+    def test_extract_text_representation(self):
         """Test extraction of text representation"""
         # Test with text element
         xml = '<data name="test"><value>123</value><text>text_value</text></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_text_representation(element) == 'text_value'
+        assert extract_text_representation(element) == 'text_value'
 
         # Test without text element
         xml = '<data name="test"><value>123</value></data>'
         element = etree.fromstring(xml)
-        assert query_completion_handler._extract_text_representation(element) is None
-        assert query_completion_handler._extract_text_representation(element, 'default') == 'default'
+        assert extract_text_representation(element) is None
+        assert extract_text_representation(element, 'default') == 'default'
 
-    def test_extract_duration(self, query_completion_handler):
+    def test_extract_duration(self):
         """Test duration extraction specifically"""
         # Test with valid duration
         xml = '<data name="duration"><value>4829704</value></data>'
         element = etree.fromstring(xml)
 
-        # Directly call the extract_duration method
+        # Test direct function
         event_data = {}
-        query_completion_handler._extract_duration(element, event_data)
-        # In base.py, division is by 1000, not 1000000
+        extract_duration(element, event_data)
         assert event_data["duration_ms"] == 4829.704
+
+        # Test with invalid duration
+        xml = '<data name="duration"><value>not_a_number</value></data>'
+        element = etree.fromstring(xml)
+
+        # Test direct function
+        event_data = {}
+        extract_duration(element, event_data)
+        assert event_data["duration_ms"] is None
+
+    def test_extract_field(self, query_completion_handler):
+        """Test field extraction based on its type"""
+        # Get TEXT_FIELDS and numeric_fields for testing
+        text_fields = query_completion_handler.TEXT_FIELDS
+        numeric_fields = query_completion_handler.get_numeric_fields('test_event')
+
+        # For duration field
+        xml = '<data name="duration"><value>4829704</value></data>'
+        element = etree.fromstring(xml)
+
+        # Test direct function
+        event_data = {'event_name': 'test_event'}
+        extract_field(element, event_data, 'duration', numeric_fields, text_fields)
+        assert event_data["duration_ms"] == 4829.704
+
+        # For numeric field
+        xml = '<data name="session_id"><value>123</value></data>'
+        element = etree.fromstring(xml)
+
+        # Test direct function
+        event_data = {'event_name': 'test_event'}
+        extract_field(element, event_data, 'session_id', numeric_fields, text_fields)
+        assert event_data["session_id"] == 123
+
+        # For text field (create a test logger)
+        log = logging.getLogger('test')
+
+        # Define a test text field
+        test_text_fields = ['result']
+
+        # For text field
+        xml = '<data name="result"><value>123</value><text>Success</text></data>'
+        element = etree.fromstring(xml)
+
+        # Test direct function
+        event_data = {'event_name': 'test_event'}
+        extract_field(element, event_data, 'result', numeric_fields, test_text_fields, log)
+        assert event_data["result"] == 'Success'
+
+        # For regular field
+        xml = '<data name="database_name"><value>TestDB</value></data>'
+        element = etree.fromstring(xml)
+
+        # Test direct function
+        event_data = {'event_name': 'test_event'}
+        extract_field(element, event_data, 'database_name', numeric_fields, text_fields, log)
+        assert event_data["database_name"] == 'TestDB'
 
     def test_determine_dbm_type(self, mock_check, mock_config):
         """Test determination of DBM type based on session name"""

@@ -370,6 +370,7 @@ class XeCollection(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    debug_sample_events: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None
     query_errors: Optional[QueryErrors] = None
 

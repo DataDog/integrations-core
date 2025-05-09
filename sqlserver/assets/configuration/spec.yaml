@@ -1001,11 +1001,19 @@ files:
         type: boolean
     - name: xe_collection
       description: |
-        Available for Agent 7.67 and newer.
         Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
 
         Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
       options:
+        - name: debug_sample_events
+          description: |
+            Set the maximum number of XE events to log in debug mode per collection. Used for troubleshooting.
+            This only affects logging when debug mode is enabled. Defaults to 3.
+          hidden: true
+          value:
+            type: integer
+            example: 3
+            display_default: 3
         - name: query_completions
           description: |
             Configure the collection of completed queries from the `datadog_query_completions` XE session.

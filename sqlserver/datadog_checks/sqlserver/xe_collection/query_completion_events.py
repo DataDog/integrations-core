@@ -5,6 +5,10 @@
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .base import XESessionBase, agent_check_getter
+from .xml_tools import (
+    extract_field,
+    extract_value,
+)
 
 
 class QueryCompletionEventsHandler(XESessionBase):
@@ -123,7 +127,14 @@ class QueryCompletionEventsHandler(XESessionBase):
                 continue
 
             # Use unified field extraction
-            self._extract_field(data, event_data, data_name)
+            extract_field(
+                data,
+                event_data,
+                data_name,
+                self.get_numeric_fields(event_data.get('event_name')),
+                self.TEXT_FIELDS,
+                self._log,
+            )
 
         # Process action elements
         self._process_action_elements(event, event_data)
@@ -137,9 +148,9 @@ class QueryCompletionEventsHandler(XESessionBase):
             if action_name:
                 # Add activity_id support
                 if action_name == 'attach_activity_id':
-                    event_data['activity_id'] = self._extract_value(action)
+                    event_data['activity_id'] = extract_value(action)
                 else:
-                    event_data[action_name] = self._extract_value(action)
+                    event_data[action_name] = extract_value(action)
 
     def _normalize_event_impl(self, event):
         """

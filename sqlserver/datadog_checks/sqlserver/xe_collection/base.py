@@ -9,6 +9,7 @@ from abc import abstractmethod
 from io import BytesIO
 from time import time
 
+from dateutil import parser
 from lxml import etree
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -50,12 +51,8 @@ class TimestampHandler:
         if not timestamp_str:
             return ""
         try:
-            # Parse the timestamp
-            if timestamp_str.endswith('Z'):
-                timestamp_str = timestamp_str[:-1] + '+00:00'
-            dt = datetime.datetime.fromisoformat(timestamp_str)
-            # Format to consistent format with milliseconds precision
-            return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+            dt = parser.isoparse(timestamp_str)
+            return dt.isoformat(timespec='milliseconds').replace('+00:00', 'Z')
         except Exception:
             return timestamp_str
 
@@ -74,17 +71,10 @@ class TimestampHandler:
         if not end_timestamp or duration_ms is None:
             return ""
         try:
-            # Parse end time
-            if end_timestamp.endswith('Z'):
-                end_timestamp = end_timestamp[:-1] + '+00:00'
-            end_datetime = datetime.datetime.fromisoformat(end_timestamp)
-
-            # Calculate start time
+            end_dt = parser.isoparse(end_timestamp)
             duration_delta = datetime.timedelta(milliseconds=float(duration_ms))
-            start_datetime = end_datetime - duration_delta
-
-            # Format consistently
-            return start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
+            start_dt = end_dt - duration_delta
+            return start_dt.isoformat(timespec='milliseconds').replace('+00:00', 'Z')
         except Exception:
             return ""
 
@@ -135,6 +125,9 @@ class XESessionBase(DBMAsyncJob):
 
         # Set collection interval from config or use default
         self.collection_interval = session_config.get('collection_interval', 10)
+
+        # Set debug sample size from global XE config
+        self.debug_sample_events = xe_config.get('debug_sample_events', 3)
 
         self.max_events = 1000  # SQL Server XE sessions will limit 1000 events per ring buffer query
         self._last_event_timestamp = None  # Initialize timestamp tracking
@@ -284,7 +277,10 @@ class XESessionBase(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_event_file(self):
-        """Query the event file for this XE session with timestamp filtering"""
+        """
+        Query the event file for this XE session with timestamp filtering
+        This is not used yet, but will be used in the future to get events from an event file, controlled by config
+        """
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 # Azure SQL Database doesn't support file targets
@@ -292,7 +288,7 @@ class XESessionBase(DBMAsyncJob):
                     self._log.warning("Event file target is not supported on Azure SQL Database")
                     return None
 
-                # Define the file path pattern
+                # Define the file path pattern, this will be configurable in the future
                 file_path = f"d:\\rdsdbdata\\log\\{self.session_name}*.xel"
                 self._log.debug(f"Reading events from file path: {file_path}")
 
@@ -358,8 +354,11 @@ class XESessionBase(DBMAsyncJob):
             return []
         filtered_events = []
         try:
-            # Convert string to bytes for lxml
-            xml_stream = BytesIO(xml_data.encode('utf-8'))
+            try:
+                xml_stream = BytesIO(xml_data.encode('utf-8'))
+            except UnicodeEncodeError:
+                self._log.debug("UTF-8 encoding failed, falling back to UTF-16")
+                xml_stream = BytesIO(xml_data.encode('utf-16'))
 
             # Only parse 'end' events for <event> tags
             context = etree.iterparse(xml_stream, events=('end',), tag='event')
@@ -386,72 +385,19 @@ class XESessionBase(DBMAsyncJob):
             self._log.error(f"Error filtering ring buffer events: {e}")
             return []
 
-    def _extract_value(self, element, default=None):
-        """Helper method to extract values from XML elements with consistent handling"""
-        if element is None:
-            return default
-
-        # First try to get from value element
-        value_elem = element.find('./value')
-        if value_elem is not None and value_elem.text:
-            return value_elem.text.strip()
-
-        # If no value element or empty, try the element's text directly
-        if element.text:
-            return element.text.strip()
-
-        return default
-
-    def _extract_int_value(self, element, default=None):
-        """Helper method to extract integer values with error handling"""
-        value = self._extract_value(element, default)
-        if value is None:
-            return default
-
-        try:
-            return int(value)
-        except (ValueError, TypeError) as e:
-            self._log.warning(f"Error converting to int: {e}")
-            return default
-
-    def _extract_text_representation(self, element, default=None):
-        """Get the text representation when both value and text are available"""
-        text_elem = element.find('./text')
-        if text_elem is not None and text_elem.text:
-            return text_elem.text.strip()
-        return default
-
-    def _extract_field(self, data, event_data, field_name):
-        """Extract field value based on its type"""
-        if field_name == 'duration':
-            self._extract_duration(data, event_data)
-        elif field_name in self.get_numeric_fields(event_data.get('event_name')):
-            value = self._extract_int_value(data)
-            if value is not None:
-                event_data[field_name] = value
-        elif field_name in self.TEXT_FIELDS:
-            # Try to get text representation first
-            text_value = self._extract_text_representation(data)
-            if text_value is not None:
-                event_data[field_name] = text_value
-            else:
-                event_data[field_name] = self._extract_value(data)
-        else:
-            event_data[field_name] = self._extract_value(data)
-
-    def _extract_duration(self, data, event_data):
-        """Extract duration value and convert to milliseconds"""
-        duration_value = self._extract_int_value(data)
-        if duration_value is not None:
-            event_data["duration_ms"] = duration_value / 1000
-        else:
-            event_data["duration_ms"] = None
-
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _process_events(self, xml_data):
         """Template method for processing events with standardized XML parsing"""
         try:
-            root = etree.fromstring(xml_data.encode('utf-8') if isinstance(xml_data, str) else xml_data)
+            # Try UTF-8 first, which is more common, but fall back to UTF-16 if needed
+            # SQL Server traditionally uses UTF-16 (UCS-2) internally
+            try:
+                xml_bytes = xml_data.encode('utf-8') if isinstance(xml_data, str) else xml_data
+            except UnicodeEncodeError:
+                self._log.debug("UTF-8 encoding failed in _process_events, falling back to UTF-16")
+                xml_bytes = xml_data.encode('utf-16') if isinstance(xml_data, str) else xml_data
+
+            root = etree.fromstring(xml_bytes)
         except Exception as e:
             self._log.error(f"Error parsing XML data: {e}")
             return []
@@ -623,8 +569,8 @@ class XESessionBase(DBMAsyncJob):
         if events and self._last_event_timestamp and 'timestamp' in events[0]:
             current_first_timestamp = events[0]['timestamp']
             try:
-                prev_dt = datetime.datetime.fromisoformat(self._last_event_timestamp.replace('Z', '+00:00'))
-                curr_dt = datetime.datetime.fromisoformat(current_first_timestamp.replace('Z', '+00:00'))
+                prev_dt = parser.isoparse(self._last_event_timestamp)
+                curr_dt = parser.isoparse(current_first_timestamp)
                 gap_seconds = (curr_dt - prev_dt).total_seconds()
             except Exception:
                 gap_seconds = None
@@ -638,14 +584,17 @@ class XESessionBase(DBMAsyncJob):
             self._last_event_timestamp = events[-1]['timestamp']
             self._log.debug(f"Updated checkpoint to {self._last_event_timestamp}")
 
-        # Log a sample of events (up to 3) for debugging
+        # Log a sample of events (up to max configured limit) for debugging
         if self._log.isEnabledFor(logging.DEBUG):
-            sample_size = min(3, len(events))
+            sample_size = min(self.debug_sample_events, len(events))
             sample_events = events[:sample_size]
 
             try:
                 formatted_json = json_module.dumps(sample_events, indent=2, default=str)
-                self._log.debug(f"Sample events from {self.session_name} session:\n{formatted_json}")
+                self._log.debug(
+                    f"Sample events from {self.session_name} session (limit={self.debug_sample_events}):\n"
+                    f"{formatted_json}"
+                )
             except Exception as e:
                 self._log.error(f"Error formatting events for logging: {e}")
 
@@ -723,15 +672,17 @@ class XESessionBase(DBMAsyncJob):
             # Log the batched payload for debugging
             if self._log.isEnabledFor(logging.DEBUG):
                 try:
-                    # Only include up to 3 events in the log for brevity
+                    # Only include up to max configured limit events in the log
                     log_payload = batched_payload.copy()
-                    if len(all_query_details) > 3:
-                        log_payload[batch_key] = all_query_details[:3]
-                        log_payload[batch_key].append({"truncated": f"...and {len(all_query_details) - 3} more events"})
+                    if len(all_query_details) > self.debug_sample_events:
+                        log_payload[batch_key] = all_query_details[: self.debug_sample_events]
+                        remaining_events = len(all_query_details) - self.debug_sample_events
+                        log_payload[batch_key].append({"truncated": f"...and {remaining_events} more events"})
 
                     payload_json = json_module.dumps(log_payload, default=str, indent=2)
                     self._log.debug(
-                        f"Batched {self.session_name} payload with {len(all_query_details)} events:\n{payload_json}"
+                        f"Batched {self.session_name} payload with {len(all_query_details)} events "
+                        f"(showing {self.debug_sample_events}):\n{payload_json}"
                     )
                 except Exception as e:
                     self._log.error(f"Error serializing batched payload for logging: {e}")

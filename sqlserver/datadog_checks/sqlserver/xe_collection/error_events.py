@@ -5,6 +5,11 @@
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .base import XESessionBase, agent_check_getter
+from .xml_tools import (
+    extract_field,
+    extract_int_value,
+    extract_value,
+)
 
 
 class ErrorEventsHandler(XESessionBase):
@@ -75,14 +80,21 @@ class ErrorEventsHandler(XESessionBase):
             if not data_name:
                 continue
 
-            # Use unified field extraction
-            self._extract_field(data, event_data, data_name)
+            # Use field extraction from xml_tools
+            extract_field(
+                data,
+                event_data,
+                data_name,
+                self.get_numeric_fields(event_data.get('event_name')),
+                self.TEXT_FIELDS,
+                self._log,
+            )
 
         # Extract action elements
         for action in event.findall('./action'):
             action_name = action.get('name')
             if action_name:
-                event_data[action_name] = self._extract_value(action)
+                event_data[action_name] = extract_value(action)
 
         return True
 
@@ -95,7 +107,14 @@ class ErrorEventsHandler(XESessionBase):
                 continue
 
             # Use unified field extraction
-            self._extract_field(data, event_data, data_name)
+            extract_field(
+                data,
+                event_data,
+                data_name,
+                self.get_numeric_fields(event_data.get('event_name')),
+                self.TEXT_FIELDS,
+                self._log,
+            )
 
         # Extract action elements
         for action in event.findall('./action'):
@@ -105,11 +124,11 @@ class ErrorEventsHandler(XESessionBase):
 
             if action_name == 'session_id' or action_name == 'request_id':
                 # These are numeric values in the actions
-                value = self._extract_int_value(action)
+                value = extract_int_value(action)
                 if value is not None:
                     event_data[action_name] = value
             else:
-                event_data[action_name] = self._extract_value(action)
+                event_data[action_name] = extract_value(action)
 
         return True
 
