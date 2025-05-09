@@ -7,6 +7,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
+  permissions: # These permissions need to match the ones in the included workflow, see pr-quick-check.yml for details
+    pull-requests: write
+    contents: read
 
 jobs:
   run:
