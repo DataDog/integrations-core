@@ -160,6 +160,8 @@ integration/couch:
 - couch/**/*
 integration/couchbase:
 - couchbase/**/*
+integration/crewai:
+- crewai/**/*
 integration/cri:
 - cri/**/*
 integration/crio:
