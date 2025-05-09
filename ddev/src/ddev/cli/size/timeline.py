@@ -4,7 +4,7 @@ import tempfile
 import zipfile
 from datetime import date, datetime
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Literal, Optional, Set, Tuple, overload
 
 import click
 import matplotlib.pyplot as plt
@@ -19,6 +19,8 @@ from .common import (
     CommitEntryPlatformWithDelta,
     CommitEntryWithDelta,
     GitRepo,
+    ParametersTimelineDependency,
+    ParametersTimelineIntegration,
     WrongDependencyFormat,
     compress,
     convert_to_human_readable_size,
@@ -36,7 +38,7 @@ from .common import (
 MINIMUM_DATE_DEPENDENCIES = datetime.strptime(
     "Apr 3 2024", "%b %d %Y"
 ).date()  # Dependencies not available before this date due to a storage change
-console = Console()
+console = Console(stderr=True)
 
 
 @click.command()
@@ -94,9 +96,12 @@ def timeline(
         BarColumn(),
         TimeElapsedColumn(),
         transient=True,
+        console=console,
     ) as progress:
         module = name  # module is the name of the integration or the dependency
-        if initial_commit and final_commit and len(initial_commit) < 7 and len(final_commit) < 7:
+        if sum([csv, markdown, json]) > 1:
+            raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
+        elif initial_commit and final_commit and len(initial_commit) < 7 and len(final_commit) < 7:
             raise click.BadParameter("Commit hashes must be at least 7 characters long")
         elif initial_commit and len(initial_commit) < 7:
             raise click.BadParameter("Initial commit hash must be at least 7 characters long.", param_hint="initial")
@@ -106,6 +111,7 @@ def timeline(
             raise click.BadParameter("Commit hashes must be different")
         task = progress.add_task("[cyan]Calculating timeline...", total=None)
         url = app.repo.path
+
         with GitRepo(url) as gitRepo:
             try:
                 if final_commit and type == "dependency":
@@ -120,14 +126,14 @@ def timeline(
                 commits = gitRepo.get_module_commits(folder, initial_commit, final_commit, time)
                 first_commit = gitRepo.get_creation_commit_module(module)
                 gitRepo.checkout_commit(commits[-1])
-                if type == 'dependency':
+                if type == "dependency":
                     valid_platforms = get_valid_platforms(gitRepo.repo_dir)
                     if platform and platform not in valid_platforms:
                         raise ValueError(f"Invalid platform: {platform}")
                 if commits == [""] and type == "integration" and module_exists(gitRepo.repo_dir, module):
                     progress.remove_task(task)
                     progress.stop()
-                    app.display(f"No changes found for {type}: {module}")
+                    app.display_error(f"No changes found for {type}: {module}")
                     return
                 elif commits == [""] and type == "integration" and not module_exists(gitRepo.repo_dir, module):
                     raise ValueError(f"Integration {module} not found in latest commit, is the name correct?")
@@ -149,113 +155,197 @@ def timeline(
                 elif type == "dependency" and commits == [""]:
                     progress.remove_task(task)
                     progress.stop()
-
-                    app.display(f"No changes found for {type}: {module}")
+                    app.display_error(f"No changes found for {type}: {module}")
                     return
-                printed_yet = False
-                if type == "dependency" and platform is None:
+                if type == "dependency":
+                    modules_plat: List[CommitEntryPlatformWithDelta] = []
+                    multiple_plats_and_vers: Literal[True] = True
                     progress.remove_task(task)
-                    for i, plat in enumerate(valid_platforms):
-                        path = save_to_png_path
-                        if save_to_png_path:
-                            base, ext = os.path.splitext(save_to_png_path)
-                            path = f"{base}_{plat}{ext}"
-                        printed_yet = timeline_mode(
-                            app,
-                            gitRepo,
-                            type,
-                            module,
-                            commits,
-                            threshold,
-                            plat,
-                            compressed,
-                            csv,
-                            markdown,
-                            json,
-                            i,
-                            None,
-                            progress,
-                            path,
-                            show_gui,
-                            len(valid_platforms),
-                            printed_yet,
+                    dep_parameters: ParametersTimelineDependency
+                    if not platform:
+                        for plat in valid_platforms:
+                            path = None
+                            if save_to_png_path:
+                                base, ext = os.path.splitext(save_to_png_path)
+                                path = f"{base}_{plat}{ext}"
+                            dep_parameters = {
+                                "app": app,
+                                "type": "dependency",
+                                "module": module,
+                                "threshold": threshold,
+                                "platform": plat,
+                                "compressed": compressed,
+                                "csv": csv,
+                                "markdown": markdown,
+                                "json": json,
+                                "save_to_png_path": path,
+                                "show_gui": show_gui,
+                                "first_commit": None,
+                            }
+                            modules_plat.extend(
+                                timeline_mode(
+                                    gitRepo,
+                                    commits,
+                                    dep_parameters,
+                                    multiple_plats_and_vers,
+                                    progress,
+                                )
+                            )
+                    else:
+                        dep_parameters = {
+                            "app": app,
+                            "type": "dependency",
+                            "module": module,
+                            "threshold": threshold,
+                            "platform": platform,
+                            "compressed": compressed,
+                            "csv": csv,
+                            "markdown": markdown,
+                            "json": json,
+                            "save_to_png_path": save_to_png_path,
+                            "show_gui": show_gui,
+                            "first_commit": None,
+                        }
+                        modules_plat.extend(
+                            timeline_mode(
+                                gitRepo,
+                                commits,
+                                dep_parameters,
+                                multiple_plats_and_vers,
+                                progress,
+                            )
                         )
+                    if csv:
+                        print_csv(app, modules_plat)
+                    elif json:
+                        print_json(app, modules_plat)
                 else:
+                    modules: List[CommitEntryWithDelta] = []
+                    multiple_plat_and_ver: Literal[False] = False
+                    int_parameters: ParametersTimelineIntegration = {
+                        "app": app,
+                        "type": "integration",
+                        "module": module,
+                        "threshold": threshold,
+                        "platform": None,
+                        "compressed": compressed,
+                        "csv": csv,
+                        "markdown": markdown,
+                        "json": json,
+                        "save_to_png_path": save_to_png_path,
+                        "show_gui": show_gui,
+                        "first_commit": first_commit,
+                    }
                     progress.remove_task(task)
-                    timeline_mode(
-                        app,
-                        gitRepo,
-                        type,
-                        module,
-                        commits,
-                        threshold,
-                        platform,
-                        compressed,
-                        csv,
-                        markdown,
-                        json,
-                        None,
-                        first_commit,
-                        progress,
-                        save_to_png_path,
-                        show_gui,
-                        None,
-                        printed_yet,
+                    modules.extend(
+                        timeline_mode(
+                            gitRepo,
+                            commits,
+                            int_parameters,
+                            multiple_plat_and_ver,
+                            progress,
+                        )
                     )
+                    if csv:
+                        print_csv(app, modules)
+                    elif json:
+                        print_json(app, modules)
 
             except Exception as e:
                 progress.stop()
-
                 app.abort(str(e))
 
 
+@overload
 def timeline_mode(
-    app: Application,
     gitRepo: GitRepo,
-    type: str,
-    module: str,
     commits: List[str],
-    threshold: Optional[int],
-    platform: Optional[str],
-    compressed: bool,
-    csv: bool,
-    markdown: bool,
-    json: bool,
-    i: Optional[int],
-    first_commit: Optional[str],
+    params: ParametersTimelineDependency,
+    multiple_plats_and_vers: Literal[True],
     progress: Progress,
-    save_to_png_path: str,
-    show_gui: bool,
-    n_iterations: Optional[int],
-    printed_yet: bool,
-) -> bool:
-    modules = get_repo_info(gitRepo, type, platform, module, commits, compressed, first_commit, progress)
-    trimmed_modules = trim_modules(modules, threshold)
-    grouped_modules = format_modules(trimmed_modules, platform, i)
-    if csv:
-        print_csv(app, i, grouped_modules)
-    elif json:
-        print_json(app, i, n_iterations, printed_yet, grouped_modules)
-    elif markdown:
-        print_markdown(app, "Timeline for " + module, grouped_modules)
-    else:
-        print_table(app, "Timeline for " + module, grouped_modules)
-    if show_gui or save_to_png_path:
-        plot_linegraph(grouped_modules, module, platform, show_gui, save_to_png_path)
-    if modules != []:
-        printed_yet = True
+) -> List[CommitEntryPlatformWithDelta]: ...
 
-    return printed_yet
+
+@overload
+def timeline_mode(
+    gitRepo: GitRepo,
+    commits: List[str],
+    params: ParametersTimelineIntegration,
+    multiple_plats_and_vers: Literal[False],
+    progress: Progress,
+) -> List[CommitEntryWithDelta]: ...
+
+
+@overload
+def timeline_mode(
+    gitRepo: GitRepo,
+    commits: List[str],
+    params: ParametersTimelineDependency,
+    multiple_plats_and_vers: Literal[False],
+    progress: Progress,
+) -> List[CommitEntryWithDelta]: ...
+
+
+def timeline_mode(
+    gitRepo: GitRepo,
+    commits: List[str],
+    params: ParametersTimelineIntegration | ParametersTimelineDependency,
+    multiple_plats_and_vers: bool,
+    progress: Progress,
+) -> List[CommitEntryWithDelta] | List[CommitEntryPlatformWithDelta]:
+    if params["type"] == "integration":
+        modules = get_repo_info(
+            gitRepo,
+            params,
+            commits,
+            progress,
+        )
+    else:
+        modules = get_repo_info(
+            gitRepo,
+            params,
+            commits,
+            progress,
+        )
+
+    trimmed_modules = trim_modules(modules, params["threshold"])
+    formatted_modules = format_modules(trimmed_modules, params["platform"], multiple_plats_and_vers)
+
+    if params["markdown"]:
+        print_markdown(params["app"], "Timeline for " + params["module"], formatted_modules)
+    elif not params["csv"] and not params["json"]:
+        print_table(params["app"], "Timeline for " + params["module"], formatted_modules)
+
+    if params["show_gui"] or params["save_to_png_path"]:
+        plot_linegraph(
+            formatted_modules, params["module"], params["platform"], params["show_gui"], params["save_to_png_path"]
+        )
+
+    return formatted_modules
+
+
+@overload
+def get_repo_info(
+    gitRepo: GitRepo,
+    params: ParametersTimelineIntegration,
+    commits: List[str],
+    progress: Progress,
+) -> List[CommitEntry]: ...
+
+
+@overload
+def get_repo_info(
+    gitRepo: GitRepo,
+    params: ParametersTimelineDependency,
+    commits: List[str],
+    progress: Progress,
+) -> List[CommitEntry]: ...
 
 
 def get_repo_info(
     gitRepo: GitRepo,
-    type: str,
-    platform: Optional[str],
-    module: str,
+    params: ParametersTimelineIntegration | ParametersTimelineDependency,
     commits: List[str],
-    compressed: bool,
-    first_commit: Optional[str],
     progress: Progress,
 ) -> List[CommitEntry]:
     """
@@ -263,11 +353,8 @@ def get_repo_info(
 
     Args:
         gitRepo: Active GitRepo instance.
-        type: integration/dependency.
-        platform: Target platform (only used for dependencies).
-        module: Integration or dependency name.
+        params: Parameters Typed Dictionary containing module name, type, platform, and other configuration options.
         commits: List of commits to process.
-        compressed: Whether to measure compressed sizes.
         first_commit: First commit hash where the given integration was introduced (only for integrations).
         progress: Progress bar instance.
 
@@ -275,21 +362,39 @@ def get_repo_info(
         A list of CommitEntry objects with size, version, date, author, commit message and commit hash.
     """
     with progress:
-        if type == "integration":
-            file_data = process_commits(commits, module, gitRepo, progress, platform, type, compressed, first_commit)
+        if params["type"] == "integration":
+            file_data = process_commits(commits, params, gitRepo, progress, params["first_commit"])
         else:
-            file_data = process_commits(commits, module, gitRepo, progress, platform, type, compressed, None)
+            file_data = process_commits(commits, params, gitRepo, progress, params["first_commit"])
+
     return file_data
+
+
+@overload
+def process_commits(
+    commits: List[str],
+    params: ParametersTimelineIntegration,
+    gitRepo: GitRepo,
+    progress: Progress,
+    first_commit: str,
+) -> List[CommitEntry]: ...
+
+
+@overload
+def process_commits(
+    commits: List[str],
+    params: ParametersTimelineDependency,
+    gitRepo: GitRepo,
+    progress: Progress,
+    first_commit: None,
+) -> List[CommitEntry]: ...
 
 
 def process_commits(
     commits: List[str],
-    module: str,
+    params: ParametersTimelineIntegration | ParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
-    platform: Optional[str],
-    type: str,
-    compressed: bool,
     first_commit: Optional[str],
 ) -> List[CommitEntry]:
     """
@@ -300,12 +405,9 @@ def process_commits(
 
     Args:
         commits: List of commit SHAs to process.
-        module: Integration or dependency name.
+        params: ParametersTimeline dict containing module name, type, platform, and other configuration options.
         gitRepo: GitRepo instance managing the repository.
         progress: Progress bar instance.
-        platform: Target platform name (only for dependencies).
-        type: integration/dependency.
-        compressed: Whether to measure compressed sizes.
         first_commit: First commit hash where the given integration was introduced (only for integrations).
 
     Returns:
@@ -315,21 +417,43 @@ def process_commits(
     task = progress.add_task("[cyan]Processing commits...", total=len(commits))
     repo = gitRepo.repo_dir
 
-    folder = module if type == "integration" else ".deps/resolved"
+    folder = params["module"] if params["type"] == "integration" else ".deps/resolved"
+
     for commit in commits:
         gitRepo.sparse_checkout_commit(commit, folder)
         date_str, author, message = gitRepo.get_commit_metadata(commit)
         date, message, commit = format_commit_data(date_str, message, commit, first_commit)
-        if type == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
-            assert platform is not None
-            result = get_dependencies(repo, module, platform, commit, date, author, message, compressed)
+
+        if params["type"] == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
+            assert params["platform"] is not None
+            result = get_dependencies(
+                repo,
+                params["module"],
+                params["platform"],
+                commit,
+                date,
+                author,
+                message,
+                params["compressed"],
+            )
             if result:
                 file_data.append(result)
-        elif type == "integration":
-            file_data = get_files(repo, module, commit, date, author, message, file_data, compressed)
-        progress.advance(task)
-    progress.remove_task(task)
 
+        elif params["type"] == "integration":
+            file_data = get_files(
+                repo,
+                params["module"],
+                commit,
+                date,
+                author,
+                message,
+                file_data,
+                params["compressed"],
+            )
+
+        progress.advance(task)
+
+    progress.remove_task(task)
     return file_data
 
 
@@ -558,7 +682,9 @@ def get_version(files: List[str], platform: str) -> str:
 
 
 def format_modules(
-    modules: List[CommitEntryWithDelta], platform: Optional[str], i: Optional[int]
+    modules: List[CommitEntryWithDelta],
+    platform: Optional[str],
+    multiple_plats_and_vers: bool,
 ) -> List[CommitEntryWithDelta] | List[CommitEntryPlatformWithDelta]:
     """
     Formats the modules list, adding platform and Python version information if needed.
@@ -575,7 +701,7 @@ def format_modules(
     Returns:
         A list of formatted entries.
     """
-    if modules == [] and i is not None and platform:
+    if modules == [] and multiple_plats_and_vers and platform:
         empty_module_platform: CommitEntryPlatformWithDelta = {
             "Size_Bytes": 0,
             "Version": "",
@@ -600,7 +726,7 @@ def format_modules(
             "Delta": " ",
         }
         return [empty_module]
-    elif i is not None and platform:
+    elif multiple_plats_and_vers and platform:
         new_modules: List[CommitEntryPlatformWithDelta] = [{**entry, "Platform": platform} for entry in modules]
         return new_modules
     else:

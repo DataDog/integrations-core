@@ -67,7 +67,6 @@ def mock_size_diff_dependencies():
 
 def test_diff_no_args(ddev, mock_size_diff_dependencies):
     result = ddev("size", "diff", "commit1", "commit2", "--compressed")
-    print(result.output)
     assert result.exit_code == 0
 
 
@@ -95,11 +94,11 @@ def test_diff_no_differences(ddev):
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=fake_repo),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch(
-            "ddev.cli.size.status.get_valid_platforms",
+            "ddev.cli.size.diff.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.size.status.get_valid_versions",
+            "ddev.cli.size.diff.get_valid_versions",
             return_value=({'3.12'}),
         ),
         patch.object(fake_repo, "checkout_commit"),

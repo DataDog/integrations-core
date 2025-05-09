@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+import os  # noqa: I001
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, Literal, overload
 
 import click
 from rich.console import Console
@@ -12,6 +12,9 @@ from rich.console import Console
 from ddev.cli.application import Application
 
 from .common import (
+    FileDataEntry,
+    FileDataEntryPlatformVersion,
+    Parameters,
     format_modules,
     get_dependencies,
     get_files,
@@ -24,7 +27,7 @@ from .common import (
     print_table,
 )
 
-console = Console()
+console = Console(stderr=True)
 
 
 @click.command()
@@ -67,72 +70,107 @@ def status(
             raise ValueError(f"Invalid platform: {platform}")
         elif version and version not in valid_versions:
             raise ValueError(f"Invalid version: {version}")
+
         if platform is None or version is None:
+            modules_plat_ver: List[FileDataEntryPlatformVersion] = []
             platforms = valid_platforms if platform is None else [platform]
             versions = valid_versions if version is None else [version]
             combinations = [(p, v) for p in platforms for v in versions]
-            for i, (plat, ver) in enumerate(combinations):
+            for plat, ver in combinations:
+                multiple_plats_and_vers: Literal[True] = True
                 path = None
                 if save_to_png_path:
                     base, ext = os.path.splitext(save_to_png_path)
                     path = f"{base}_{plat}_{ver}{ext}"
-                status_mode(
-                    app, repo_path, plat, ver, compressed, csv, markdown, json, i, path, show_gui, len(combinations)
+                parameters: Parameters = {
+                    "app": app,
+                    "platform": plat,
+                    "version": ver,
+                    "compressed": compressed,
+                    "csv": csv,
+                    "markdown": markdown,
+                    "json": json,
+                    "save_to_png_path": path,
+                    "show_gui": show_gui,
+                }
+                modules_plat_ver.extend(
+                    status_mode(
+                        repo_path,
+                        parameters,
+                        multiple_plats_and_vers,
+                    )
                 )
-
+            if csv:
+                print_csv(app, modules_plat_ver)
+            elif json:
+                print_json(app, modules_plat_ver)
         else:
-            status_mode(
-                app,
-                repo_path,
-                platform,
-                version,
-                compressed,
-                csv,
-                markdown,
-                json,
-                None,
-                save_to_png_path,
-                show_gui,
-                None,
+            modules: List[FileDataEntry] = []
+            multiple_plat_and_ver: Literal[False] = False
+            base_parameters: Parameters = {
+                "app": app,
+                "platform": platform,
+                "version": version,
+                "compressed": compressed,
+                "csv": csv,
+                "markdown": markdown,
+                "json": json,
+                "save_to_png_path": save_to_png_path,
+                "show_gui": show_gui,
+            }
+            modules.extend(
+                status_mode(
+                    repo_path,
+                    base_parameters,
+                    multiple_plat_and_ver,
+                )
             )
+            if csv:
+                print_csv(app, modules)
+            elif json:
+                print_json(app, modules)
 
     except Exception as e:
         app.abort(str(e))
 
 
+@overload
 def status_mode(
-    app: Application,
     repo_path: Path,
-    platform: str,
-    version: str,
-    compressed: bool,
-    csv: bool,
-    markdown: bool,
-    json: bool,
-    i: Optional[int],
-    save_to_png_path: Optional[str],
-    show_gui: bool,
-    n_iterations: Optional[int],
-) -> None:
+    params: Parameters,
+    multiple_plats_and_vers: Literal[True],
+) -> List[FileDataEntryPlatformVersion]: ...
+@overload
+def status_mode(
+    repo_path: Path,
+    params: Parameters,
+    multiple_plats_and_vers: Literal[False],
+) -> List[FileDataEntry]: ...
+def status_mode(
+    repo_path: Path,
+    params: Parameters,
+    multiple_plats_and_vers: bool,
+) -> List[FileDataEntryPlatformVersion] | List[FileDataEntry]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
-        modules = get_files(repo_path, compressed) + get_dependencies(repo_path, platform, version, compressed)
-    formated_modules = format_modules(modules, platform, version, i)
-    formated_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
-
-    if csv:
-        print_csv(app, i, formated_modules)
-    elif json:
-        print_json(app, i, n_iterations, False, formated_modules)
-    elif markdown:
-        print_markdown(app, "Status", formated_modules)
-    else:
-        print_table(app, "Status", formated_modules)
-
-    if show_gui or save_to_png_path:
-        plot_treemap(
-            formated_modules,
-            f"Disk Usage Status for {platform} and Python version {version}",
-            show_gui,
-            "status",
-            save_to_png_path,
+        modules = get_files(repo_path, params["compressed"]) + get_dependencies(
+            repo_path, params["platform"], params["version"], params["compressed"]
         )
+
+    formatted_modules = format_modules(modules, params["platform"], params["version"], multiple_plats_and_vers)
+    formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
+
+    if params["markdown"]:
+        print_markdown(params["app"], "Status", formatted_modules)
+    elif not params["csv"] and not params["json"]:
+        print_table(params["app"], "Status", formatted_modules)
+
+    if params["show_gui"] or params["save_to_png_path"]:
+        plot_treemap(
+            formatted_modules,
+            f"Disk Usage Status for {params['platform']} and Python version {params['version']}",
+            params["show_gui"],
+            "status",
+            params["save_to_png_path"],
+        )
+
+    return formatted_modules

@@ -122,7 +122,7 @@ def test_get_dependencies_sizes():
     ]
 
 
-def test_format_modules():
+def test_format_modules_multiple_platform():
     modules = [
         {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
         {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
@@ -147,7 +147,31 @@ def test_format_modules():
         },
     ]
 
-    assert format_modules(modules, platform, version, 0) == expected_output
+    assert format_modules(modules, platform, version, True) == expected_output
+
+
+def test_format_modules_one_plat():
+    modules = [
+        {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
+        {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
+    ]
+    platform = "linux-aarch64"
+    version = "3.12"
+
+    expected_output = [
+        {
+            "Name": "module1",
+            "Type": "A",
+            "Size_Bytes": 1500,
+        },
+        {
+            "Name": "module2",
+            "Type": "B",
+            "Size_Bytes": 3000,
+        },
+    ]
+
+    assert format_modules(modules, platform, version, False) == expected_output
 
 
 def test_get_files_grouped_and_with_versions():
@@ -229,7 +253,7 @@ def test_print_csv():
         {"Name": "module,with,comma", "Size B": 456, "Size": "2 B"},
     ]
 
-    print_csv(mock_app, i=0, modules=modules)
+    print_csv(mock_app, modules=modules)
 
     expected_calls = [
         (("Name,Size B",),),
@@ -241,21 +265,15 @@ def test_print_csv():
     assert actual_calls == expected_calls
 
 
-def test_print_json_multiple_calls():
+def test_print_json():
     mock_app = MagicMock()
-    printed_yet = False
-    n_iterations = 3
 
-    modules_list = [
-        [{"name": "mod1", "size": "100"}],
-        [{"name": "mod2", "size": "200"}],
-        [{"name": "mod3", "size": "300"}],
+    modules = [
+        {"name": "mod1", "size": "100"},
+        {"name": "mod2", "size": "200"},
+        {"name": "mod3", "size": "300"},
     ]
-
-    for i, modules in enumerate(modules_list):
-        if i != 0:
-            printed_yet = True
-        print_json(mock_app, i, n_iterations, printed_yet, modules)
+    print_json(mock_app, modules)
 
     expected_calls = [
         (("[",),),
@@ -277,78 +295,6 @@ def test_print_json_multiple_calls():
         {"name": "mod1", "size": "100"},
         {"name": "mod2", "size": "200"},
         {"name": "mod3", "size": "300"},
-    ]
-
-
-def test_print_json_no_first():
-    mock_app = MagicMock()
-    printed_yet = False
-    n_iterations = 3
-
-    modules_list = [
-        [{"name": "", "size": ""}],
-        [{"name": "mod2", "size": "200"}],
-        [{"name": "mod3", "size": "300"}],
-    ]
-
-    for i, modules in enumerate(modules_list):
-        print_json(mock_app, i, n_iterations, printed_yet, modules)
-        if i == 1:
-            printed_yet = True
-
-    expected_calls = [
-        (("[",),),
-        (('{"name": "mod2", "size": "200"}',),),
-        ((",",),),
-        (('{"name": "mod3", "size": "300"}',),),
-        (("]",),),
-    ]
-
-    actual_calls = mock_app.display.call_args_list
-    print(actual_calls)
-    assert actual_calls == expected_calls
-
-    result = "".join(call[0][0] for call in actual_calls)
-    parsed = json.loads(result)
-    assert parsed == [
-        {"name": "mod2", "size": "200"},
-        {"name": "mod3", "size": "300"},
-    ]
-
-
-def test_print_json_no_last():
-    mock_app = MagicMock()
-    printed_yet = False
-    n_iterations = 3
-
-    modules_list = [
-        [{"name": "mod1", "size": "100"}],
-        [{"name": "mod2", "size": "200"}],
-        [{"name": "", "size": ""}],
-    ]
-
-    for i, modules in enumerate(modules_list):
-        if i != 0:
-            printed_yet = True
-        print_json(mock_app, i, n_iterations, printed_yet, modules)
-
-    expected_calls = [
-        (("[",),),
-        (('{"name": "mod1", "size": "100"}',),),
-        ((",",),),
-        (('{"name": "mod2", "size": "200"}',),),
-        (("]",),),
-    ]
-
-    actual_calls = mock_app.display.call_args_list
-    print(actual_calls)
-    assert actual_calls == expected_calls
-
-    result = "".join(call[0][0] for call in actual_calls)
-    parsed = json.loads(result)
-    assert parsed == [
-        {"name": "mod1", "size": "100"},
-        {"name": "mod2", "size": "200"},
     ]
 
 

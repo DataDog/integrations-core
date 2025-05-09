@@ -42,6 +42,7 @@ def app():
 
 def test_timeline_integration_compressed(ddev, mock_timeline_gitrepo, app):
     result = ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--compressed", obj=app)
+    print(result.output)
     assert result.exit_code == 0
 
 
@@ -128,7 +129,7 @@ def test_timeline_invalid_platform(ddev):
     assert result.exit_code != 0
 
 
-def test_timeline_no_changes_in_integration(ddev):
+def test_timeline_integration_no_changes(ddev):
     mock_git_repo = MagicMock()
     mock_git_repo.repo_dir = "fake_repo"
     mock_git_repo.get_module_commits.return_value = [""]
