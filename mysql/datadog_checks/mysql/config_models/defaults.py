@@ -32,6 +32,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_exclude_hostname():
+    return False
+
+
 def instance_log_unobfuscated_plans():
     return False
 
