@@ -1,3 +1,44 @@
+## Datadog Agent version [7.65.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7651)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.65.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7650)
+
+* Amazon Kafka [6.4.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Avi Vantage [5.3.0](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
+* Ceph [4.1.0](https://github.com/DataDog/integrations-core/blob/master/ceph/CHANGELOG.md)
+* cert-manager [5.3.0](https://github.com/DataDog/integrations-core/blob/master/cert_manager/CHANGELOG.md)
+* Datadog Checks Base [37.8.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [4.4.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* Cisco Secure Web Appliance [1.0.0](https://github.com/DataDog/integrations-core/blob/master/cisco_secure_web_appliance/CHANGELOG.md)
+* CouchDB [8.3.0](https://github.com/DataDog/integrations-core/blob/master/couch/CHANGELOG.md)
+* FoundationDB [3.2.0](https://github.com/DataDog/integrations-core/blob/master/foundationdb/CHANGELOG.md)
+* HTTP [11.2.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* Infiniband [1.0.0](https://github.com/DataDog/integrations-core/blob/master/infiniband/CHANGELOG.md)
+* Kafka Consumer [6.5.1](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* KubeVirt API [1.2.0](https://github.com/DataDog/integrations-core/blob/master/kubevirt_api/CHANGELOG.md)
+* MarkLogic [6.1.1](https://github.com/DataDog/integrations-core/blob/master/marklogic/CHANGELOG.md)
+* MongoDB [9.0.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md) **BREAKING CHANGE**
+* MySQL [14.9.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Network [5.2.0](https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md)
+* Octopus Deploy [1.0.2](https://github.com/DataDog/integrations-core/blob/master/octopus_deploy/CHANGELOG.md)
+* OpenStack Controller [8.3.1](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* PGBouncer [8.1.2](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
+* Postgres [22.8.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Redis [7.2.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* RiakCS [4.3.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
+* Silverstripe CMS [1.0.0](https://github.com/DataDog/integrations-core/blob/master/silverstripe_cms/CHANGELOG.md)
+* Slurm [1.1.0](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
+* SNMP [9.2.1](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* SonarQube [5.2.1](https://github.com/DataDog/integrations-core/blob/master/sonarqube/CHANGELOG.md)
+* sonatype_nexus [1.1.0](https://github.com/DataDog/integrations-core/blob/master/sonatype_nexus/CHANGELOG.md)
+* Spark [6.3.0](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [22.0.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md) **BREAKING CHANGE**
+* TLS [4.3.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* Velero [2.0.0](https://github.com/DataDog/integrations-core/blob/master/velero/CHANGELOG.md)
+* vSphere [8.2.1](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+* Windows Event Log [5.1.1](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/CHANGELOG.md)
+
 ## Datadog Agent version [7.64.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7642)
 
 * MongoDB [8.6.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
