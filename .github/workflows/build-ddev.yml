@@ -447,6 +447,7 @@ jobs:
         cd ../notarize-bin
         for f in *; do
           rcodesign notary-submit -vv \
+          --wait \
           --api-key-path /tmp/app-store-connect.json \
           "$f"
         done
