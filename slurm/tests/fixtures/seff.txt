@@ -1,7 +1,7 @@
 Job ID: 101
 Cluster: foo-test-bar
 User/Group: foo/foo
-State: FAILED (exit code 137)
+State: COMPLETED (exit code 0)
 Cores: 1
 CPU Utilized: 00:00:01
 CPU Efficiency: 20.00% of 00:00:05 core-walltime
