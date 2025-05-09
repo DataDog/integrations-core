@@ -2,7 +2,7 @@
 
 [envs.default]
 dependencies = [
-  "foundationdb==7.4.1",
+  "foundationdb==6.3.25",
 ]
 e2e-env = false
 
