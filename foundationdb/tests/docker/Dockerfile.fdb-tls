@@ -1,4 +1,4 @@
-FROM foundationdb/foundationdb:6.3.13
+FROM foundationdb/foundationdb:7.4.1
 WORKDIR /var/fdb/tmp
 COPY fdb.bash /var/fdb/scripts/fdb-new.bash
 COPY tls/cert.crt /var/fdb/cert.crt

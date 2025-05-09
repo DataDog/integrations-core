@@ -1,6 +1,6 @@
 services:
   fdb-coordinator:
-    image: foundationdb/foundationdb:6.3.13
+    image: foundationdb/foundationdb:7.4.1
     environment:
       FDB_COORDINATOR: fdb-coordinator
       FDB_NETWORKING_MODE: container
@@ -11,7 +11,7 @@ services:
     container_name: fdb-0
     depends_on:
       - fdb-coordinator
-    image: foundationdb/foundationdb:6.3.13
+    image: foundationdb/foundationdb:7.4.1
     environment:
       FDB_COORDINATOR: fdb-coordinator
       FDB_NETWORKING_MODE: container
@@ -20,7 +20,7 @@ services:
     container_name: fdb-1
     depends_on:
       - fdb-coordinator
-    image: foundationdb/foundationdb:6.3.13
+    image: foundationdb/foundationdb:7.4.1
     environment:
       FDB_COORDINATOR: fdb-coordinator
       FDB_NETWORKING_MODE: container
