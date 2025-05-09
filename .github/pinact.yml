@@ -1,0 +1,8 @@
+# Configuration file for pinact used to validate that no
+# GitHub actions are left unpined: .github/workflows/validate-pinned-actions.yml
+# Used to exclude specific actions from the pin check
+version: 3
+ignore_actions:
+  # Lets keep static analyzer action updated as much as possible
+  - name: DataDog/datadog-static-analyzer-github-action
+    ref: .*
