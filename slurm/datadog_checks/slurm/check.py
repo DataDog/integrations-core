@@ -330,8 +330,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if mem_eff is not None:
             self.gauge('seff.memory_efficiency', mem_eff, tags)
 
-        self.gauge('seff.enabled', 1)
-
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
         # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0  # noqa: E501
