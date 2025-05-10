@@ -20,12 +20,14 @@ SCONTROL_PARAMS = ["listpid"]
 PARTITION_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},
-        {"name": "slurm_partition_node_list", "index": 1},
-        {"name": "slurm_partition_cpus_assigned", "index": 2},
-        {"name": "slurm_partition_availability", "index": 3},
-        {"name": "slurm_partition_memory_assigned", "index": 4},
         {"name": "slurm_cluster_name", "index": 5},
+    ],
+    "info_tags": [
+        {"name": "slurm_partition_node_list", "index": 1},
+        {"name": "slurm_partition_memory_assigned", "index": 4},
         {"name": "slurm_partition_state", "index": 7},
+        {"name": "slurm_partition_availability", "index": 3},
+        {"name": "slurm_partition_cpus_assigned", "index": 2},
     ],
     "metrics": [
         {"name": "partition.nodes.count", "index": 8},
@@ -35,10 +37,12 @@ PARTITION_MAP = {
 NODE_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},
-        {"name": "slurm_node_availability", "index": 1},
         {"name": "slurm_node_name", "index": 2},
-        {"name": "slurm_node_memory", "index": 4},
         {"name": "slurm_cluster_name", "index": 5},
+    ],
+    "info_tags": [
+        {"name": "slurm_node_availability", "index": 1},
+        {"name": "slurm_node_memory", "index": 4},
     ],
     "extended_tags": [
         {"name": "slurm_node_state", "index": 9},
