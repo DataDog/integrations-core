@@ -202,3 +202,22 @@ def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, insta
     mock_get_subprocess_output.return_value = ("root RUNNING", "", 0)
     result = check._enrich_scontrol_tags("123")
     assert result == []
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_process_seff_metric_submission(mock_get_subprocess_output, instance, aggregator):
+    # Load the seff fixture
+    with open('tests/fixtures/seff.txt') as f:
+        seff_output = f.read()
+
+    mock_get_subprocess_output.return_value = (seff_output, '', 0)
+    instance['collect_seff_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    tags = ["slurm_job_id:101", "custom:tag"]
+    check.process_seff("101", tags)
+
+    aggregator.assert_metric('slurm.seff.cpu_utilized', value=1.0, tags=tags)
+    aggregator.assert_metric('slurm.seff.cpu_efficiency', value=20.0, tags=tags)
+    aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.0, tags=tags)
+    aggregator.assert_metric('slurm.seff.memory_efficiency', value=0.0, tags=tags)
+    aggregator.assert_all_metrics_covered()

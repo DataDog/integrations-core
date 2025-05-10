@@ -56,6 +56,11 @@ instances:
     #
     # collect_gpu_stats: false
 
+    ## @param collect_seff_stats - boolean - optional - default: false
+    ## Whether or not to collect seff statistics.
+    #
+    # collect_seff_stats: false
+
     ## @param sinfo_collection_level - integer - optional - default: 1
     ## The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
     ## 3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
