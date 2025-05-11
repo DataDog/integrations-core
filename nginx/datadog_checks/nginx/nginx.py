@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import re
 from datetime import datetime
 from itertools import chain
 from urllib.parse import urljoin, urlparse
-
-import simplejson as json
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
