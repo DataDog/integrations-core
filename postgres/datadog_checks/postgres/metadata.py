@@ -81,7 +81,7 @@ SELECT c.oid                 AS id,
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'p' )
+WHERE  c.relkind IN ( 'r', 'p', 'f' )
        AND c.relispartition != 't'
        AND c.relnamespace = {schema_oid}
        {filter};
@@ -96,7 +96,7 @@ SELECT c.oid                 AS id,
 FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r' )
+WHERE  c.relkind IN ( 'r', 'f' )
        AND c.relnamespace = {schema_oid}
        {filter};
 """
@@ -110,9 +110,7 @@ FROM   pg_namespace nsp
        LEFT JOIN pg_roles r on nsp.nspowner = r.oid
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
        AND nspname NOT LIKE 'pg_toast%'
-       AND nspname NOT LIKE 'pg_temp_%'
-       AND r.rolname  !=       'rds_superuser'
-       AND r.rolname  !=       'rdsadmin';
+       AND nspname NOT LIKE 'pg_temp_%'{};
 """
 
 PG_INDEXES_QUERY = """
@@ -472,7 +470,17 @@ class PostgresMetadata(DBMAsyncJob):
             name: str
             owner: str
         """
-        cursor.execute(SCHEMA_QUERY)
+        schema_query_ = SCHEMA_QUERY
+
+        if len(self._config.ignore_schemas_owned_by) > 0:
+            schema_query_ = schema_query_.format(
+                " AND "
+                + " AND ".join("r.rolname not ilike '{}'".format(db) for db in self._config.ignore_schemas_owned_by)
+            )
+        else:
+            schema_query_ = schema_query_.format("")
+
+        cursor.execute(schema_query_)
         rows = cursor.fetchall()
         schemas = []
         for row in rows:

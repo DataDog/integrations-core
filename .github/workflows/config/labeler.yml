@@ -110,6 +110,8 @@ integration/ceph:
 - ceph/**/*
 integration/cert_manager:
 - cert_manager/**/*
+integration/checkpoint_harmony_email_and_collaboration:
+- checkpoint_harmony_email_and_collaboration/**/*
 integration/checkpoint_quantum_firewall:
 - checkpoint_quantum_firewall/**/*
 integration/cilium:
@@ -174,6 +176,8 @@ integration/dcgm:
 - dcgm/**/*
 integration/delinea_privilege_manager:
 - delinea_privilege_manager/**/*
+integration/delinea_secret_server:
+- delinea_secret_server/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -312,6 +316,8 @@ integration/jmeter:
 - jmeter/**/*
 integration/journald:
 - journald/**/*
+integration/juniper_srx_firewall:
+- juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
 integration/kafka_consumer:
@@ -388,6 +394,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_sysmon:
+- microsoft_sysmon/**/*
 integration/milvus:
 - milvus/**/*
 integration/mimecast:
@@ -438,6 +446,8 @@ integration/openstack:
 - openstack/**/*
 integration/openstack_controller:
 - openstack_controller/**/*
+integration/openvpn:
+- openvpn/**/*
 integration/oracle:
 - oracle/**/*
 integration/orca_security:
