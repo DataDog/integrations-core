@@ -54,7 +54,6 @@ deps = [
     # make use of in a few places
     "urllib3==2.3.0",
     "wrapt==1.17.2",
-    "setuptools==80.3.1",
 ]
 http = [
     "aws-requests-auth==0.4.3",
