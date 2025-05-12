@@ -25,7 +25,7 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.plt.show"),
         patch("ddev.cli.size.timeline.plt.savefig"),
@@ -79,7 +79,7 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
         patch("os.path.exists", return_value=True),
@@ -103,7 +103,6 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.timeline.plt.show"),
         patch("ddev.cli.size.timeline.plt.savefig"),
     ):
-
         yield
 
 
@@ -204,8 +203,9 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         "out_dep.png",
         obj=app,
     )
-    print(result.stderr)
-    print(result.exception)
+    print("❌ Exception raised during CLI call:")
+    print(f"Type: {type(result.exception).__name__}")
+    print(f"Message: {result.exception}")
 
     assert result.exit_code == 0
 
@@ -243,10 +243,9 @@ def test_timeline_invalid_platform(ddev):
         patch("ddev.cli.size.timeline.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
     ):
-
         result = ddev(
             "size",
             "timeline",
@@ -276,7 +275,7 @@ def test_timeline_integration_no_changes(ddev):
         patch("os.listdir", return_value=[]),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
     ):
         assert (
@@ -347,7 +346,7 @@ def test_timeline_integration_not_found(ddev):
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.module_exists", return_value=False),
         patch("matplotlib.pyplot.show"),
@@ -371,7 +370,7 @@ def test_timeline_dependency_missing_no_platform(ddev):
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
     ):
@@ -393,11 +392,10 @@ def test_timeline_dependency_missing_for_platform(ddev, app):
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
     ):
-
         result = ddev(
             "size",
             "timeline",
@@ -429,11 +427,10 @@ def test_timeline_dependency_no_changes(ddev, app):
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
     ):
-
         result = ddev(
             "size",
             "timeline",
