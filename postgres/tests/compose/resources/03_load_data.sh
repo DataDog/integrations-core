@@ -56,6 +56,18 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM sample_foreign_d73a8c;
 EOSQL
 
+# Create schema for rdsadmin
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE USER rdsadmin WITH PASSWORD 'supersecret';
+    CREATE SCHEMA rdsadmin_test AUTHORIZATION rdsadmin;
+    CREATE TABLE rdsadmin_test.rds_admin_misc (
+        id SERIAL PRIMARY KEY,
+        key TEXT NOT NULL,
+        value TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+EOSQL
+
 # Create publication for logical replication tests
 if [[ !("$PG_MAJOR" == 9.*) ]]; then
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -p5432 datadog_test <<-EOSQL

@@ -28,7 +28,7 @@ datadog-celery==1.0.0
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==5.3.0
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.10.0
+datadog-checks-base==37.10.1
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==7.1.0
 datadog-cilium==5.2.0
@@ -130,7 +130,7 @@ datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
 datadog-milvus==1.2.0
 datadog-mongo==9.1.0
-datadog-mysql==15.3.0
+datadog-mysql==15.3.1
 datadog-nagios==3.0.0
 datadog-network==5.2.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
@@ -172,7 +172,7 @@ datadog-sidekiq==3.0.0
 datadog-silk==4.1.0
 datadog-silverstripe-cms==1.0.0
 datadog-singlestore==4.1.0
-datadog-slurm==1.1.0; sys_platform == 'linux2'
+datadog-slurm==1.2.0; sys_platform == 'linux2'
 datadog-snmp==10.0.0
 datadog-snowflake==7.5.0
 datadog-solr==2.1.0

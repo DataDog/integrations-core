@@ -17,6 +17,13 @@ concurrency:
 jobs:
   test:
     uses: ./.github/workflows/test-all.yml
+
+    permissions:
+       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       id-token: write
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
     with:
       repo: core
 
