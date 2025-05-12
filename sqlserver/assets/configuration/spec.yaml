@@ -1019,9 +1019,14 @@ files:
             Configure the collection of completed queries from the `datadog_query_completions` XE session.
 
             Set `query_completions.enabled` to `true` to enable the collection of query completion events.
+            
             Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of 
             query completion events. Defaults to 10 seconds. If you intend on updating this value,
             it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+            
+            Use `query_completions.max_events` to set the maximum number of query completion events to process 
+            per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query, 
+            so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
           value:
             type: object
             properties:
@@ -1033,10 +1038,6 @@ files:
               example: 10
               display_default: 10
             - name: max_events
-              description: |
-                Set the maximum number of query completion events to process per collection. Note that SQL Server's ring buffer 
-                has a maximum of 1000 events per query, so values above 1000 will still be capped at 1000 
-                by the database engine. Defaults to 1000.
               type: integer
               example: 1000
               display_default: 1000
@@ -1049,6 +1050,10 @@ files:
             Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of 
             query error events. Defaults to 10 seconds. If you intend on updating this value,
             it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+            
+            Use `query_errors.max_events` to set the maximum number of query error events to process 
+            per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query, 
+            so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
           value:
             type: object
             properties:
@@ -1060,10 +1065,6 @@ files:
               example: 10
               display_default: 10
             - name: max_events
-              description: |
-                Set the maximum number of query error events to process per collection. Note that SQL Server's ring buffer 
-                has a maximum of 1000 events per query, so values above 1000 will still be capped at 1000 
-                by the database engine. Defaults to 1000.
               type: integer
               example: 1000
               display_default: 1000

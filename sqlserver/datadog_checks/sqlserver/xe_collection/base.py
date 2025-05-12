@@ -318,7 +318,9 @@ class XESessionBase(DBMAsyncJob):
 
                 # Stop if we've reached the maximum number of events
                 if len(processed_events) >= self.max_events:
-                    self._log.debug(f"Processed {len(processed_events)} events from ring buffer (reached configured max_events limit of {self.max_events})")
+                    self._log.debug(
+                        f"Processed {len(processed_events)} events from ring buffer (limit of {self.max_events})"
+                    )
                     break
 
             return processed_events

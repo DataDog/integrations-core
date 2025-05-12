@@ -354,11 +354,7 @@ class QueryCompletions(BaseModel):
     )
     collection_interval: Optional[float] = Field(None, examples=[10])
     enabled: Optional[bool] = Field(None, examples=[False])
-    max_events: Optional[int] = Field(
-        None,
-        description="Set the maximum number of query completion events to process per collection. Note that SQL Server's ring buffer \nhas a maximum of 1000 events per query, so values above 1000 will still be capped at 1000 \nby the database engine. Defaults to 1000.\n",
-        examples=[1000],
-    )
+    max_events: Optional[int] = Field(None, examples=[1000])
 
 
 class QueryErrors(BaseModel):
@@ -368,11 +364,7 @@ class QueryErrors(BaseModel):
     )
     collection_interval: Optional[float] = Field(None, examples=[10])
     enabled: Optional[bool] = Field(None, examples=[False])
-    max_events: Optional[int] = Field(
-        None,
-        description="Set the maximum number of query error events to process per collection. Note that SQL Server's ring buffer \nhas a maximum of 1000 events per query, so values above 1000 will still be capped at 1000 \nby the database engine. Defaults to 1000.\n",
-        examples=[1000],
-    )
+    max_events: Optional[int] = Field(None, examples=[1000])
 
 
 class XeCollection(BaseModel):
