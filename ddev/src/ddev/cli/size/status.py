@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os  # noqa: I001
+import os
 from pathlib import Path
-from typing import List, Optional, Literal, overload
+from typing import Literal, Optional, overload
 
 import click
 from rich.console import Console
@@ -72,7 +72,7 @@ def status(
             raise ValueError(f"Invalid version: {version}")
 
         if platform is None or version is None:
-            modules_plat_ver: List[FileDataEntryPlatformVersion] = []
+            modules_plat_ver: list[FileDataEntryPlatformVersion] = []
             platforms = valid_platforms if platform is None else [platform]
             versions = valid_versions if version is None else [version]
             combinations = [(p, v) for p in platforms for v in versions]
@@ -105,7 +105,7 @@ def status(
             elif json:
                 print_json(app, modules_plat_ver)
         else:
-            modules: List[FileDataEntry] = []
+            modules: list[FileDataEntry] = []
             multiple_plat_and_ver: Literal[False] = False
             base_parameters: Parameters = {
                 "app": app,
@@ -139,18 +139,18 @@ def status_mode(
     repo_path: Path,
     params: Parameters,
     multiple_plats_and_vers: Literal[True],
-) -> List[FileDataEntryPlatformVersion]: ...
+) -> list[FileDataEntryPlatformVersion]: ...
 @overload
 def status_mode(
     repo_path: Path,
     params: Parameters,
     multiple_plats_and_vers: Literal[False],
-) -> List[FileDataEntry]: ...
+) -> list[FileDataEntry]: ...
 def status_mode(
     repo_path: Path,
     params: Parameters,
     multiple_plats_and_vers: bool,
-) -> List[FileDataEntryPlatformVersion] | List[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
         modules = get_files(repo_path, params["compressed"]) + get_dependencies(
             repo_path, params["platform"], params["version"], params["compressed"]
