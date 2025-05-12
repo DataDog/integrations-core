@@ -1,3 +1,4 @@
+import os
 from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -40,7 +41,7 @@ def app():
     return mock_app
 
 
-def test_timeline_integration_compressed(ddev, mock_timeline, app):
+def test_timeline_integration(ddev, mock_timeline, app):
     assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--compressed", obj=app).exit_code == 0
     assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--csv", obj=app).exit_code == 0
     assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--markdown", obj=app).exit_code == 0
@@ -178,7 +179,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "--platform",
             "linux-x86_64",
             "--save_to_png_path",
-            "out.png",
+            os.sep + "out.png",
             obj=app,
         ).exit_code
         == 0

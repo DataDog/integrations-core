@@ -588,7 +588,6 @@ def plot_diff_treemap(
     return rects, colors, legend_handles
 
 
-# Map normalized values to color intensity
 def scale_colors_treemap(area: float, max_area: float) -> float:
     vmin = 0.3
     vmax = 0.65
