@@ -175,7 +175,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         ).exit_code
         == 0
     )
-    # assert (
+    # assert ( a
     #     ddev(
     #         "size",
     #         "timeline",
