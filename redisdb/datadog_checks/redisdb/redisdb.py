@@ -176,8 +176,6 @@ class Redis(AgentCheck):
                     'password',
                     'socket_timeout',
                     'connection_pool',
-                    'charset',
-                    'errors',
                     'unix_socket_path',
                     'ssl',
                     'ssl_certfile',
