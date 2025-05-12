@@ -167,22 +167,38 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         ).exit_code
         == 0
     )
-    assert (
-        ddev(
-            "size",
-            "timeline",
-            "dependency",
-            "dep1",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-x86_64",
-            "--save_to_png_path",
-            "out2.png",
-            obj=app,
-        ).exit_code
-        == 0
+    # assert (
+    #     ddev(
+    #         "size",
+    #         "timeline",
+    #         "dependency",
+    #         "dep1",
+    #         "commit1",
+    #         "commit2",
+    #         "--platform",
+    #         "linux-x86_64",
+    #         "--save_to_png_path",
+    #         "out2.png",
+    #         obj=app,
+    #     ).exit_code
+    #     == 0
+    # )
+    result = ddev(
+        "size",
+        "timeline",
+        "dependency",
+        "dep1",
+        "commit1",
+        "commit2",
+        "--platform",
+        "linux-x86_64",
+        "--save_to_png_path",
+        "out.png",
+        obj=app,
     )
+    print(result.output)
+    assert result.exit_code == 0
+
     assert (
         ddev(
             "size",
