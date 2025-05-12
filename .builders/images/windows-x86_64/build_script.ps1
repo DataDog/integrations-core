@@ -12,7 +12,7 @@ Write-Host "Will build librdkafka $kafka_version"
 Get-RemoteFile `
   -Uri "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${kafka_version}.tar.gz" `
   -Path "librdkafka-${kafka_version}.tar.gz" `
-  -Hash '004b1cc2685d1d6d416b90b426a0a9d27327a214c6b807df6f9ea5887346ba3a'
+  -Hash '5bd1c46f63265f31c6bfcedcde78703f77d28238eadf23821c2b43fc30be3e25'
 7z x "librdkafka-${kafka_version}.tar.gz" -o"C:\"
 7z x "C:\librdkafka-${kafka_version}.tar" -o"C:\librdkafka"
 Remove-Item "librdkafka-${kafka_version}.tar.gz"
