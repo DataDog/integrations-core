@@ -27,8 +27,8 @@ def mock_timeline():
             "ddev.cli.size.timeline.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
         ),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
+        patch("ddev.cli.size.timeline.plt.show"),
+        patch("ddev.cli.size.timeline.plt.savefig"),
     ):
         yield
 
@@ -47,7 +47,7 @@ def test_timeline_integration(ddev, mock_timeline, app):
     assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--json", obj=app).exit_code == 0
     assert (
         ddev(
-            "size", "timeline", "integration", "int1", "commit1", "commit2", "--save_to_png_path", "out.png", obj=app
+            "size", "timeline", "integration", "int1", "commit1", "commit2", "--save_to_png_path", "out_int.png", obj=app
         ).exit_code
         == 0
     )
@@ -92,8 +92,8 @@ def mock_timeline_dependencies():
         ),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
+        patch("ddev.cli.size.timeline.plt.show"),
+        patch("ddev.cli.size.timeline.plt.savefig"),
     ):
 
         yield
@@ -193,7 +193,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         "--platform",
         "linux-x86_64",
         "--save_to_png_path",
-        "out.png",
+        "out_dep.png",
         obj=app,
     )
     print(result.output)
