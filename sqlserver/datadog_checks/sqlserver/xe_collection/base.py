@@ -129,7 +129,8 @@ class XESessionBase(DBMAsyncJob):
         # Set debug sample size from global XE config
         self.debug_sample_events = xe_config.get('debug_sample_events', 3)
 
-        self.max_events = 1000  # SQL Server XE sessions will limit 1000 events per ring buffer query
+        # Set max events from session-specific config (capped at 1000 by SQL Server)
+        self.max_events = min(session_config.get('max_events', 1000), 1000)
         self._last_event_timestamp = None  # Initialize timestamp tracking
 
         # Configuration for raw query text (RQT) events
@@ -149,7 +150,7 @@ class XESessionBase(DBMAsyncJob):
         # Log configuration details
         self._log.info(
             f"Initializing XE session {session_name} with interval={self.collection_interval}s, "
-            f"collect_raw_query={self._collect_raw_query}"
+            f"max_events={self.max_events}, collect_raw_query={self._collect_raw_query}"
         )
 
         super(XESessionBase, self).__init__(
@@ -317,7 +318,7 @@ class XESessionBase(DBMAsyncJob):
 
                 # Stop if we've reached the maximum number of events
                 if len(processed_events) >= self.max_events:
-                    self._log.debug(f"Processed {len(processed_events)} events from ring buffer (reached max limit)")
+                    self._log.debug(f"Processed {len(processed_events)} events from ring buffer (reached configured max_events limit of {self.max_events})")
                     break
 
             return processed_events
@@ -544,6 +545,8 @@ class XESessionBase(DBMAsyncJob):
                         )
 
                         rqt_payload = json.dumps(rqt_event, default=default_json_event_encoding)
+                        # Log RQT payload size
+                        self._log.debug(f"RQT event payload size: {len(rqt_payload)} bytes")
                         self._check.database_monitoring_query_sample(rqt_payload)
 
             except Exception as e:
@@ -591,6 +594,8 @@ class XESessionBase(DBMAsyncJob):
 
             # Send the batched payload
             serialized_payload = json.dumps(batched_payload, default=default_json_event_encoding)
+            # Log payload size
+            self._log.debug(f"Batched {self.session_name} payload size: {len(serialized_payload)} bytes")
             self._check.database_monitoring_query_activity(serialized_payload)
 
         self._log.info(f"Found {len(events)} events from {self.session_name} session")
