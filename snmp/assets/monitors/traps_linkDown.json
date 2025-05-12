@@ -8,7 +8,7 @@
   ],
   "description": "An SNMP trap is an event dispatched by a device. This monitor tracks instances where the interface of any network device within a specified namespace reports a shutdown (via linkDown trap). You can use this monitor as a template for setting up any traps monitor.",
   "definition": {
-    "message": "{{#is_alert}} \nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is reporting CRITICAL and can't be monitored anymore.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{snmp_device.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{snmp_device.name}}).",
+    "message": "{{#is_alert}} \nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is reporting CRITICAL and can't be monitored anymore.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{snmp_device.name}}](/devices?inspectedDevice={{device_namespace.name}}%3A{{snmp_device.name}}).",
     "name": "[SNMP-Traps] Interface went down on device {{snmp_device.name}}",
     "options": {
       "enable_logs_sample": true,
