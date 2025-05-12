@@ -264,26 +264,22 @@ class XESessionBase(DBMAsyncJob):
         if not raw_xml:
             return None
 
-        filtered_events = self._filter_ring_buffer_events(raw_xml)
-        if not filtered_events:
-            return None
 
-        combined_xml = "<events>"
-        for event_xml in filtered_events:
-            combined_xml += event_xml
-        combined_xml += "</events>"
-
-        return combined_xml
+        return raw_xml
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _filter_ring_buffer_events(self, xml_data):
+    def _process_events(self, xml_data):
         """
-        Parse and filter ring buffer XML data using lxml.etree.iterparse.
-        Returns a list of event XML strings that match the timestamp filter.
+        Parse and process ring buffer XML data in a single pass using lxml.etree.iterparse.
+        Filters events by timestamp and processes them directly.
+
+        Returns:
+            List of processed event dictionaries
         """
         if not xml_data:
             return []
-        filtered_events = []
+
+        processed_events = []
         try:
             try:
                 xml_stream = BytesIO(xml_data.encode('utf-8'))
@@ -295,63 +291,41 @@ class XESessionBase(DBMAsyncJob):
             context = etree.iterparse(xml_stream, events=('end',), tag='event')
 
             for _, elem in context:
-                timestamp = elem.get('timestamp')
+                try:
+                    # Get basic timestamp for filtering
+                    timestamp = elem.get('timestamp')
 
-                if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
-                    event_xml = etree.tostring(elem, encoding='unicode')
-                    filtered_events.append(event_xml)
+                    # Filter by timestamp
+                    if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
+                        # Extract event attributes
+                        event_data = {"timestamp": timestamp, "event_name": elem.get('name', '')}
+
+                        # Process the event using appropriate handler
+                        event_name = event_data["event_name"]
+                        if event_name in self._event_handlers:
+                            handler = self._event_handlers[event_name]
+                            if handler(elem, event_data):
+                                processed_events.append(event_data)
+                        else:
+                            self._log.debug(f"No handler for event type: {event_name}")
+                except Exception as e:
+                    self._log.error(f"Error processing event {elem.get('name', 'unknown')}: {e}")
 
                 # Free memory for processed elements
                 elem.clear()
                 while elem.getprevious() is not None:
                     del elem.getparent()[0]
 
-                if len(filtered_events) >= self.max_events:
-                    self._log.debug(f"Filtered {len(filtered_events)} events from ring buffer")
+                # Stop if we've reached the maximum number of events
+                if len(processed_events) >= self.max_events:
+                    self._log.debug(f"Processed {len(processed_events)} events from ring buffer (reached max limit)")
                     break
 
-            return filtered_events
+            return processed_events
 
         except Exception as e:
-            self._log.error(f"Error filtering ring buffer events: {e}")
+            self._log.error(f"Error processing ring buffer events: {e}")
             return []
-
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _process_events(self, xml_data):
-        """Template method for processing events with standardized XML parsing"""
-        try:
-            # Try UTF-8 first, which is more common, but fall back to UTF-16 if needed
-            # SQL Server traditionally uses UTF-16 (UCS-2) internally
-            try:
-                xml_bytes = xml_data.encode('utf-8') if isinstance(xml_data, str) else xml_data
-            except UnicodeEncodeError:
-                self._log.debug("UTF-8 encoding failed in _process_events, falling back to UTF-16")
-                xml_bytes = xml_data.encode('utf-16') if isinstance(xml_data, str) else xml_data
-
-            root = etree.fromstring(xml_bytes)
-        except Exception as e:
-            self._log.error(f"Error parsing XML data: {e}")
-            return []
-
-        events = []
-        for event in root.findall('./event')[: self.max_events]:
-            try:
-                # Basic common info from event attributes
-                event_data = {"timestamp": event.get('timestamp'), "event_name": event.get('name', '')}
-
-                # Use the strategy pattern to process events
-                event_name = event_data["event_name"]
-                if event_name in self._event_handlers:
-                    handler = self._event_handlers[event_name]
-                    if handler(event, event_data):
-                        events.append(event_data)
-                else:
-                    self._log.debug(f"No handler for event type: {event_name}")
-            except Exception as e:
-                self._log.error(f"Error processing event {event.get('name', 'unknown')}: {e}")
-                continue
-
-        return events
 
     @abstractmethod
     def _normalize_event_impl(self, event):
@@ -479,7 +453,7 @@ class XESessionBase(DBMAsyncJob):
             self._log.warning(f"XE session {self.session_name} not found or not running.")
             return
 
-        # Get the XML data
+        # Get the raw XML data
         xml_data = self._query_ring_buffer()
 
         if not xml_data:

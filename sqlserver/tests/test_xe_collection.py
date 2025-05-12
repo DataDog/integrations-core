@@ -527,8 +527,8 @@ class TestXESessionHelpers:
         handler = ErrorEventsHandler(mock_check, mock_config)
         assert handler._determine_dbm_type() == "query_error"
 
-    def test_filter_ring_buffer_events(self, query_completion_handler):
-        """Test filtering of ring buffer events based on timestamp"""
+    def test_process_events_filtering(self, query_completion_handler):
+        """Test filtering and processing of ring buffer events based on timestamp"""
         # Create XML with multiple events
         xml_data = """
         <RingBufferTarget>
@@ -544,17 +544,24 @@ class TestXESessionHelpers:
         </RingBufferTarget>
         """
 
-        # Test with no timestamp filter (first run)
-        filtered_events = query_completion_handler._filter_ring_buffer_events(xml_data)
-        assert len(filtered_events) == 3
+        # Mock event handler to always return True
+        mock_handler = Mock(return_value=True)
+        query_completion_handler._event_handlers = {'sql_batch_completed': mock_handler}
 
-        # Set last event timestamp
+        # Test with no timestamp filter (first run)
+        processed_events = query_completion_handler._process_events(xml_data)
+        assert len(processed_events) == 3
+        assert mock_handler.call_count == 3
+
+        # Reset mock and set last event timestamp
+        mock_handler.reset_mock()
         query_completion_handler._last_event_timestamp = "2023-01-01T12:01:00.456Z"
 
         # Test with timestamp filter (subsequent run)
-        filtered_events = query_completion_handler._filter_ring_buffer_events(xml_data)
-        assert len(filtered_events) == 1  # Only the event after 12:01:00.456Z
-        assert "2023-01-01T12:02:00.789Z" in filtered_events[0]
+        processed_events = query_completion_handler._process_events(xml_data)
+        assert len(processed_events) == 1  # Only the event after 12:01:00.456Z
+        assert processed_events[0]['timestamp'] == "2023-01-01T12:02:00.789Z"
+        assert mock_handler.call_count == 1
 
     def test_malformed_xml(self, query_completion_handler):
         """Test handling of malformed XML"""
