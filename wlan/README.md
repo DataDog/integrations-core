@@ -28,7 +28,9 @@ An administrator can also enable these settings using
 
 #### macOS
 
-Just like on Windows, Wi-Fi telemetry collection on macOS requires user consent through location services. However, unlike Windows, macOS does not provide a well-defined mechanism for administrators to enable location access for specific processes - such as the Datadog Agent—at scale. To work around this, customers can adapt the script provided (below)[#Appendix] to grant location access to the Agent process. This script can be deployed across an enterprise Mac fleet using an MDM solution like Jamf.
+Just like on Windows, Wi-Fi telemetry collection on macOS requires user consent through location services. However, unlike Windows, macOS does not provide a well-defined mechanism for administrators to enable location access for specific processes - such as the Datadog Agent-at scale.
+
+To work around this, customers can adapt the script provided in **Appendix** to grant location access to the Agent process. This script can be deployed across an enterprise Mac fleet using an MDM solution like Jamf.
 
 ### Installation
 
@@ -72,9 +74,9 @@ Need help? Contact [Datadog support][15].
 
 ## Appendix
 
-add_datadog_agent_to_plist.sh
+**add_datadog_agent_to_plist.sh**
 
-<pre><code>```bash
+<pre><code>
 #!/usr/bin/env bash
 # Script to add/update the Authorized key in locationd clients.plist for Datadog agent
 
@@ -178,7 +180,7 @@ sudo plutil -convert binary1 "$PLIST_PATH"
 echo "[INFO] Changes applied successfully."
 echo "[INFO] To apply changes, either reboot or run: sudo killall locationd"
 trap - ERR
-```</code></pre>
+</code></pre>
 
 [1]: https://en.wikipedia.org/wiki/IEEE_802.11
 [2]: https://en.wikipedia.org/wiki/Service_set_(802.11_network)#SSID
