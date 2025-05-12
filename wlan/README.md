@@ -25,6 +25,11 @@ An administrator can also enable these settings using
 - [Group Policy][18]
 - [InTune][19]
 
+
+#### macOS
+
+Just like on Windows, Wi-Fi telemetry collection on macOS requires user consent through location services. However, unlike Windows, macOS does not provide a well-defined mechanism for administrators to enable location access for specific processes - such as the Datadog Agent—at scale. To work around this, customers can adapt the script provided (below)[#Appendix] to grant location access to the Agent process. This script can be deployed across an enterprise Mac fleet using an MDM solution like Jamf.
+
 ### Installation
 
 The wlan check is included in the [Datadog Agent][8], but is not configured. Please see the next section to configure the check.
@@ -64,6 +69,116 @@ wlan does not include any events.
 ## Troubleshooting
 
 Need help? Contact [Datadog support][15].
+
+## Appendix
+
+add_datadog_agent_to_plist.sh
+
+<pre><code>```bash
+#!/usr/bin/env bash
+# Script to add/update the Authorized key in locationd clients.plist for Datadog agent
+
+# Configuration
+PLIST_PATH="/var/db/locationd/clients.plist"
+DEFAULT_PATTERN="/opt/datadog-agent/bin/agent/agent"
+BACKUP_PATH="${PLIST_PATH}.bak"
+
+# Function to restore backup if something goes wrong
+restore_backup() {
+  echo "[ERROR] Restoring backup..."
+  sudo cp "$BACKUP_PATH" "$PLIST_PATH"
+  sudo plutil -convert binary1 "$PLIST_PATH"
+  echo "[INFO] Backup restored. Exiting."
+  exit 1
+}
+
+# Set up error handling
+trap restore_backup ERR
+
+# Check if an argument was provided
+if [ -n "$1" ]; then
+  PATTERN="$1"
+  echo "[INFO] Using provided pattern via CLI argument: $PATTERN"
+else
+  # Prompt for pattern to search for
+  read -p "Enter the pattern to search for [${DEFAULT_PATTERN}]: " PATTERN
+  PATTERN=${PATTERN:-$DEFAULT_PATTERN}
+fi
+
+# Backup the original file
+echo "[INFO] Backing up $PLIST_PATH to $BACKUP_PATH"
+sudo cp "$PLIST_PATH" "$BACKUP_PATH"
+
+# Convert plist to XML for easier parsing
+sudo plutil -convert xml1 "$PLIST_PATH"
+
+echo "[INFO] Searching for entry containing: $PATTERN"
+
+# Find the first key whose block contains the pattern, xargs removes leading and trailing whitespaces
+KEY_LINE=$(grep "$PATTERN" "$PLIST_PATH" | grep "<key>" | head -n1 | xargs)
+if [ -z "$KEY_LINE" ]; then
+  echo "[ERROR] No entry found containing pattern: $PATTERN"
+  restore_backup
+fi
+
+# Extract the key from the line
+KEY=${KEY_LINE#<key>}
+KEY=${KEY%</key>}
+
+if [ -z "$KEY" ]; then
+  echo "[ERROR] Could not determine the key for the matching entry."
+  restore_backup
+fi
+
+echo "[INFO] Processing key: $KEY"
+
+# Get the line number containing <key>$KEY</key>
+key_line=$(grep -n "<key>$KEY</key>" "$PLIST_PATH" | cut -d: -f1 | head -n1)
+if [ -z "$key_line" ]; then
+  echo "[ERROR] Key not found."
+  restore_backup
+fi
+
+# Get the line number of the <dict> after the key
+dict_start=$(tail -n +$((key_line + 1)) "$PLIST_PATH" | grep -n "<dict>" | head -n1 | cut -d: -f1)
+dict_start=$((key_line + dict_start))
+
+# Get the line number of the matching </dict>
+dict_end=$(tail -n +$((dict_start + 1)) "$PLIST_PATH" | grep -n "</dict>" | head -n1 | cut -d: -f1)
+dict_end=$((dict_start + dict_end))
+
+echo "[INFO] Found block from line $dict_start to $dict_end"
+
+# Check if <key>Authorized</key> exists in the block
+auth_line=$(sed -n "${dict_start},${dict_end}p" "$PLIST_PATH" | grep -n "<key>Authorized</key>" | cut -d: -f1)
+
+if [ -z "$auth_line" ]; then
+  # <key>Authorized</key> not found, add it before </dict>
+  echo "[INFO] Adding <key>Authorized</key><true/> to the block"
+  sed -i "" "${dict_end}i\\
+		<key>Authorized</key>\\
+		<true/>\\
+" "$PLIST_PATH"
+else
+  # <key>Authorized</key> found, check the next line for its value
+  auth_line=$((dict_start + auth_line - 1))
+  value_line=$((auth_line + 1))
+  
+  # Check if the next line contains <false/>
+  if grep -q "<false/>" <(sed -n "${value_line}p" "$PLIST_PATH"); then
+    echo "[INFO] Changing <false/> to <true/>"
+    sed -i "" "${value_line}s/<false\/>/<true\/>/" "$PLIST_PATH"
+  else
+    echo "[INFO] <key>Authorized</key> already exists with correct value"
+  fi
+fi
+
+# Convert plist back to binary for system use
+sudo plutil -convert binary1 "$PLIST_PATH"
+echo "[INFO] Changes applied successfully."
+echo "[INFO] To apply changes, either reboot or run: sudo killall locationd"
+trap - ERR
+```</code></pre>
 
 [1]: https://en.wikipedia.org/wiki/IEEE_802.11
 [2]: https://en.wikipedia.org/wiki/Service_set_(802.11_network)#SSID
