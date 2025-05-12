@@ -14,7 +14,6 @@ from pathlib import Path
 from types import TracebackType
 from typing import Literal, Optional, Type, TypedDict
 
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import requests
 import squarify
@@ -511,8 +510,8 @@ def plot_status_treemap(
     rects = squarify.squarify(norm_sizes, 0, 0, 100, 100)
 
     # Define the colors for each type
-    cmap_int = cm.get_cmap("Purples")
-    cmap_dep = cm.get_cmap("Reds")
+    cmap_int = plt.get_cmap("Purples")
+    cmap_dep = plt.get_cmap("Reds")
 
     # Assign colors based on type and normalized size
     colors = []
@@ -527,8 +526,8 @@ def plot_status_treemap(
             colors.append("#999999")
     # Define the legend
     legend_handles = [
-        Patch(color=cm.get_cmap("Purples")(0.6), label="Integration"),
-        Patch(color=cm.get_cmap("Reds")(0.6), label="Dependency"),
+        Patch(color=plt.get_cmap("Purples")(0.6), label="Integration"),
+        Patch(color=plt.get_cmap("Reds")(0.6), label="Dependency"),
     ]
     return rects, colors, legend_handles
 
@@ -537,8 +536,8 @@ def plot_diff_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
     # Define the colors for each type
-    cmap_pos = cm.get_cmap("Oranges")
-    cmap_neg = cm.get_cmap("Blues")
+    cmap_pos = plt.get_cmap("Oranges")
+    cmap_neg = plt.get_cmap("Blues")
 
     # Separate in negative and positive differences
     positives = [mod for mod in modules if mod["Size_Bytes"] > 0]
@@ -582,8 +581,8 @@ def plot_diff_treemap(
         colors.append(cmap_pos(intensity))
 
     legend_handles = [
-        Patch(color=cm.get_cmap("Oranges")(0.7), label="Increase"),
-        Patch(color=cm.get_cmap("Blues")(0.7), label="Decrease"),
+        Patch(color=plt.get_cmap("Oranges")(0.7), label="Increase"),
+        Patch(color=plt.get_cmap("Blues")(0.7), label="Decrease"),
     ]
 
     return rects, colors, legend_handles

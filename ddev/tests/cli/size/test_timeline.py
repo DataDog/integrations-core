@@ -92,8 +92,9 @@ def mock_timeline_dependencies():
         ),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
+        patch("ddev.cli.size.timeline.plt.show"),
+        patch("ddev.cli.size.timeline.plt.savefig")
+,
     ):
 
         yield
