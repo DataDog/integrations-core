@@ -47,7 +47,15 @@ def test_timeline_integration(ddev, mock_timeline, app):
     assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--json", obj=app).exit_code == 0
     assert (
         ddev(
-            "size", "timeline", "integration", "int1", "commit1", "commit2", "--save_to_png_path", "out_int.png", obj=app
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "commit1",
+            "commit2",
+            "--save_to_png_path",
+            "out_int.png",
+            obj=app,
         ).exit_code
         == 0
     )
