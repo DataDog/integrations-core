@@ -9,15 +9,16 @@ import subprocess
 import tempfile
 import zipfile
 import zlib
-from datetime import date
+from datetime import date, time
 from pathlib import Path
 from types import TracebackType
-from typing import Dict, List, Literal, Optional, Set, Tuple, Type, TypedDict, Union, cast
+from typing import Literal, Optional, Type, TypedDict
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import requests
 import squarify
+from datadog import api, initialize
 from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
@@ -90,7 +91,7 @@ class ParametersTimelineDependency(ParametersTimeline):
     platform: str
 
 
-def get_valid_platforms(repo_path: Union[Path, str]) -> Set[str]:
+def get_valid_platforms(repo_path: Path | str) -> set[str]:
     """
     Extracts the platforms we support from the .deps/resolved file names.
     """
@@ -101,7 +102,7 @@ def get_valid_platforms(repo_path: Union[Path, str]) -> Set[str]:
     return set(platforms)
 
 
-def get_valid_versions(repo_path: Union[Path, str]) -> Set[str]:
+def get_valid_versions(repo_path: Path | str) -> set[str]:
     """
     Extracts the Python versions we support from the .deps/resolved file names.
     """
@@ -118,7 +119,7 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def is_valid_integration(path: str, included_folder: str, ignored_files: Set[str], git_ignore: List[str]) -> bool:
+def is_valid_integration(path: str, included_folder: str, ignored_files: set[str], git_ignore: list[str]) -> bool:
     # It is not an integration
     if path.startswith("."):
         return False
@@ -135,7 +136,7 @@ def is_valid_integration(path: str, included_folder: str, ignored_files: Set[str
         return True
 
 
-def get_gitignore_files(repo_path: str | Path) -> List[str]:
+def get_gitignore_files(repo_path: str | Path) -> list[str]:
     gitignore_path = os.path.join(repo_path, ".gitignore")
     with open(gitignore_path, "r", encoding="utf-8") as file:
         gitignore_content = file.read()
@@ -165,7 +166,7 @@ def compress(file_path: str) -> int:
     return compressed_size
 
 
-def get_files(repo_path: str | Path, compressed: bool) -> List[FileDataEntry]:
+def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
     """
     Calculates integration file sizes and versions from a repository.
     """
@@ -173,8 +174,8 @@ def get_files(repo_path: str | Path, compressed: bool) -> List[FileDataEntry]:
     git_ignore = get_gitignore_files(repo_path)
     included_folder = "datadog_checks/"
 
-    integration_sizes: Dict[str, int] = {}
-    integration_versions: Dict[str, str] = {}
+    integration_sizes: dict[str, int] = {}
+    integration_versions: dict[str, str] = {}
 
     for root, _, files in os.walk(repo_path):
         for file in files:
@@ -222,7 +223,7 @@ def extract_version_from_about_py(path: str) -> str:
     return ""
 
 
-def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> List[FileDataEntry]:
+def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version.
     Each FileDataEntry includes: Name, Version, Size_Bytes, Size, and Type.
@@ -247,7 +248,7 @@ def get_dependencies(repo_path: str | Path, platform: str, version: str, compres
     return []
 
 
-def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str], List[str]]:
+def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
     """
@@ -273,19 +274,19 @@ def get_dependencies_list(file_path: str) -> Tuple[List[str], List[str], List[st
 
 
 def get_dependencies_sizes(
-    deps: List[str], download_urls: List[str], versions: List[str], compressed: bool
-) -> List[FileDataEntry]:
+    deps: list[str], download_urls: list[str], versions: list[str], compressed: bool
+) -> list[FileDataEntry]:
     """
     Calculates the sizes of dependencies, either compressed or uncompressed.
 
     Args:
-        deps: List of dependency names.
+        deps: list of dependency names.
         download_urls: Corresponding download URLs for the dependencies.
         versions: Corresponding version strings for the dependencies.
         compressed: If True, use the Content-Length from the HTTP headers.
                     If False, download, extract, and compute actual uncompressed size.
     """
-    file_data: List[FileDataEntry] = []
+    file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
         if compressed:
             response = requests.head(url)
@@ -327,18 +328,18 @@ def get_dependencies_sizes(
 
 
 def format_modules(
-    modules: List[FileDataEntry],
+    modules: list[FileDataEntry],
     platform: str,
     py_version: str,
     multiple_plats_and_vers: bool,
-) -> List[FileDataEntryPlatformVersion] | List[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
     """
     Formats the modules list, adding platform and Python version information if needed.
 
     If the modules list is empty, returns a default empty entry (with or without platform information).
 
     Args:
-        modules: List of modules to format.
+        modules: list of modules to format.
         platform: Platform string to add to each entry if needed.
         version: Python version string to add to each entry if needed.
         i: Index of the current (platform, version) combination being processed.
@@ -368,7 +369,7 @@ def format_modules(
         }
         return [empty_entry_with_platform]
     elif multiple_plats_and_vers:
-        new_modules: List[FileDataEntryPlatformVersion] = [
+        new_modules: list[FileDataEntryPlatformVersion] = [
             {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
         ]
         return new_modules
@@ -379,10 +380,10 @@ def format_modules(
 def print_json(
     app: Application,
     modules: (
-        List[FileDataEntry]
-        | List[FileDataEntryPlatformVersion]
-        | List[CommitEntryWithDelta]
-        | List[CommitEntryPlatformWithDelta]
+        list[FileDataEntry]
+        | list[FileDataEntryPlatformVersion]
+        | list[CommitEntryWithDelta]
+        | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
     printed_yet = False
@@ -400,10 +401,10 @@ def print_json(
 def print_csv(
     app: Application,
     modules: (
-        List[FileDataEntry]
-        | List[FileDataEntryPlatformVersion]
-        | List[CommitEntryWithDelta]
-        | List[CommitEntryPlatformWithDelta]
+        list[FileDataEntry]
+        | list[FileDataEntryPlatformVersion]
+        | list[CommitEntryWithDelta]
+        | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
     headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
@@ -425,10 +426,10 @@ def print_markdown(
     app: Application,
     title: str,
     modules: (
-        List[FileDataEntry]
-        | List[FileDataEntryPlatformVersion]
-        | List[CommitEntryWithDelta]
-        | List[CommitEntryPlatformWithDelta]
+        list[FileDataEntry]
+        | list[FileDataEntryPlatformVersion]
+        | list[CommitEntryWithDelta]
+        | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
     if any(str(value).strip() not in ("", "0", "0001-01-01") for value in modules[0].values()):  # table is not empty
@@ -445,14 +446,14 @@ def print_table(
     app: Application,
     mode: str,
     modules: (
-        List[FileDataEntry]
-        | List[FileDataEntryPlatformVersion]
-        | List[CommitEntryWithDelta]
-        | List[CommitEntryPlatformWithDelta]
+        list[FileDataEntry]
+        | list[FileDataEntryPlatformVersion]
+        | list[CommitEntryWithDelta]
+        | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
     columns = [col for col in modules[0].keys() if "Bytes" not in col]
-    modules_table: Dict[str, Dict[int, str]] = {col: {} for col in columns}
+    modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
     for i, row in enumerate(modules):
         if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
             for key in columns:
@@ -462,7 +463,7 @@ def print_table(
 
 
 def plot_treemap(
-    modules: List[FileDataEntry] | List[FileDataEntryPlatformVersion],
+    modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
     mode: Literal["status", "diff"] = "status",
@@ -480,7 +481,7 @@ def plot_treemap(
     - A legend is added depending on the selected mode.
 
     Args:
-        modules: List of module entries. Each entry must contain at least:
+        modules: list of module entries. Each entry must contain at least:
             - 'Name': The module name,
             - 'Size_Bytes': Module size in bytes (can be negative in 'diff' mode),
             - 'Size': Human-readable size string,
@@ -554,8 +555,8 @@ def plot_treemap(
         cmap_pos = cm.get_cmap("Oranges")
         cmap_neg = cm.get_cmap("Blues")
 
-        positives = [mod for mod in modules if cast(int, mod["Size_Bytes"]) > 0]
-        negatives = [mod for mod in modules if cast(int, mod["Size_Bytes"]) < 0]
+        positives = [mod for mod in modules if mod["Size_Bytes"] > 0]
+        negatives = [mod for mod in modules if mod["Size_Bytes"] < 0]
 
         sizes_pos = [mod["Size_Bytes"] for mod in positives]
         sizes_neg = [abs(mod["Size_Bytes"]) for mod in negatives]
@@ -667,6 +668,42 @@ def plot_treemap(
         plt.savefig(path, bbox_inches="tight", format="png")
 
 
+def send_metrics_to_dd(modules: list[FileDataEntryPlatformVersion], compressed: bool):
+    metric_name = (
+        "datadog.agent_integrations.size_analyzer.compressed"
+        if compressed
+        else "datadog.agent_integrations.size_analyzer.uncompressed"
+    )
+
+    timestamp = time.time()
+    metrics = []
+
+    for item in modules:
+        metrics.append(
+            {
+                "metric": metric_name,
+                "type": "gauge",
+                "points": [(timestamp, item["Size_Bytes"])],
+                "tags": [
+                    f"name:{item['Name']}",
+                    f"type:{item['Type']}",
+                    f"name_type:{item['Name']}({item['Type']})",
+                    f"version:{item['Version']}",
+                    f"platform:{item['Platform']}",
+                    "team:agent-integrations",
+                ],
+            }
+        )
+
+    initialize(
+        api_key="",
+        app_key="",
+        api_host="https://api.datadoghq.eu",
+    )
+
+    api.Metric.send(metrics=metrics)
+
+
 class WrongDependencyFormat(Exception):
     def __init__(self, mensaje: str) -> None:
         super().__init__(mensaje)
@@ -677,7 +714,7 @@ class GitRepo:
     Clones the repo to a temp folder and deletes the folder on exit.
     """
 
-    def __init__(self, url: Union[Path, str]) -> None:
+    def __init__(self, url: Path | str) -> None:
         self.url = url
         self.repo_dir: str
 
@@ -690,13 +727,13 @@ class GitRepo:
             self._run(f"git clone --quiet {self.url} {self.repo_dir}")
         return self
 
-    def _run(self, command: str) -> List[str]:
+    def _run(self, command: str) -> list[str]:
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True, cwd=self.repo_dir)
         return result.stdout.strip().split("\n")
 
     def get_module_commits(
         self, module_path: str, initial: Optional[str], final: Optional[str], time: Optional[str]
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Returns the list of commits (SHA) that modified a given module, filtered by time or commit range.
 
@@ -707,7 +744,7 @@ class GitRepo:
             time: Optional time filter (e.g. '2 weeks ago').
 
         Returns:
-            List of commit SHAs (oldest to newest).
+            list of commit SHAs (oldest to newest).
         """
         self._run("git fetch origin --quiet")
         self._run("git checkout origin/HEAD")
@@ -748,7 +785,7 @@ class GitRepo:
         self._run(f"git sparse-checkout set {module}")
         self._run(f"git checkout {commit_sha}")
 
-    def get_commit_metadata(self, commit: str) -> Tuple[str, str, str]:
+    def get_commit_metadata(self, commit: str) -> tuple[str, str, str]:
         result = self._run(f'git log -1 --date=format:"%b %d %Y" --pretty=format:"%ad\n%an\n%s" {commit}')
         date, author, message = result
         return date, author, message
