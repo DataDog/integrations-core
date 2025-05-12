@@ -70,6 +70,13 @@ files:
               and can be useful to set a custom hostname when connecting to a remote database through a proxy.
             value:
               type: string
+          - name: exclude_hostname
+            description: |
+              Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+            value:
+              type: boolean
+              example: false
+            default: false
           - name: database_identifier
             description: |
               Controls how the database is identified. The default value is the resolved hostname for the instance, 

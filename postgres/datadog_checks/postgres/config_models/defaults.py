@@ -84,6 +84,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_exclude_hostname():
+    return False
+
+
 def instance_idle_connection_timeout():
     return 60000
 
