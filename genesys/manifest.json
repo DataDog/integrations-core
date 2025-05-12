@@ -66,7 +66,7 @@
       },
       "metrics": {
         "prefix": "genesys_cloud.",
-        "check": ["genesys_cloud.voice.total_conversations", "genesys_cloud.callback.wait_time_avg"],
+        "check": [],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
