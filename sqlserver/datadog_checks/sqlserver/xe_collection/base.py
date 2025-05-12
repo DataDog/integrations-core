@@ -264,7 +264,6 @@ class XESessionBase(DBMAsyncJob):
         if not raw_xml:
             return None
 
-
         return raw_xml
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
