@@ -204,7 +204,9 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         "out_dep.png",
         obj=app,
     )
-    print(result.output)
+    print(result.stderr)
+    print(result.exception)
+
     assert result.exit_code == 0
 
     assert (
