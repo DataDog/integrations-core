@@ -64,8 +64,8 @@ See the [sample nginx_ingress_controller.d/conf.yaml][3] for all available confi
     }
 ```
 
-**Note2**: Histogram metrics (like `nginx_ingress.controller.response.*` metrics) will not be collected by default and will require the additionnal [collect_nginx_histograms][12] instance config parameter
-to be set to `true`. The parameter defauls to `false` because the histogram metrics are known to have high tag cardinality.
+**Note**: Histogram metrics (like `nginx_ingress.controller.response.*` metrics) are not collected by default and require the additional [collect_nginx_histograms][12] instance config parameter
+to be set to `true`. The parameter defaults to `false` because the histogram metrics are known to have high tag cardinality.
 
 | Parameter            | Value                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
