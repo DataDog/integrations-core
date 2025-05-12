@@ -179,7 +179,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "--platform",
             "linux-x86_64",
             "--save_to_png_path",
-            os.sep + "out.png",
+            "." + os.sep + "out.png",
             obj=app,
         ).exit_code
         == 0
