@@ -1,3 +1,4 @@
+import traceback
 from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -203,9 +204,12 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         "out_dep.png",
         obj=app,
     )
-    print("❌ Exception raised during CLI call:")
-    print(f"Type: {type(result.exception).__name__}")
-    print(f"Message: {result.exception}")
+    if result.exception:
+        print("❌ Exception raised during CLI call:")
+        print(f"Type: {type(result.exception).__name__}")
+        print(f"Message: {result.exception}")
+        print("--- Traceback ---")
+        traceback.print_exception(type(result.exception), result.exception, result.exception.__traceback__)
 
     assert result.exit_code == 0
 
