@@ -130,6 +130,7 @@ exclude = [
     'go-metro',
     'http_check',
     'kubelet',
+    'kubevirt',
     'kubernetes_state',
     'network',
     'ntp',
