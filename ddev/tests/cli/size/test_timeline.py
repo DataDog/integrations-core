@@ -93,8 +93,8 @@ def mock_timeline_dependencies():
         ),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.size.timeline.plt.show"),
-        patch("ddev.cli.size.timeline.plt.savefig"),
+        patch("matplotlib.pyplot.show"),
+        patch("matplotlib.pyplot.savefig"),
     ):
 
         yield
@@ -179,7 +179,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "--platform",
             "linux-x86_64",
             "--save_to_png_path",
-            "." + os.sep + "out.png",
+            "out2.png",
             obj=app,
         ).exit_code
         == 0
