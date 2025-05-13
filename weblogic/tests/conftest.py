@@ -25,7 +25,6 @@ def dd_environment(instance):
         sleep=60,
         build=True,
         attempts=2,
-        pull_always=True,
     ):
         yield instance, {'use_jmx': True}
 
