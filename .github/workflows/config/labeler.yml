@@ -375,6 +375,8 @@ integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
+integration/linux_audit_logs:
+- linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/mailchimp:
