@@ -1,15 +1,15 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "6b760149-4a9f-4ec7-a5bf-081fcd1d75b0",
-  "app_id": "kubevirt-api",
-  "display_on_public_website": true,
+  "app_uuid": "fe7df7db-b889-46f1-a191-e115fabec22a",
+  "app_id": "kubevirt",
+  "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect key metrics to monitor the health of your KubeVirt API service.",
-    "title": "KubeVirt API",
+    "description": "Collect key metrics to monitor the health of your KubeVirt components.",
+    "title": "KubeVirt",
     "media": [],
     "classifier_tags": [
       "Category::Containers",
@@ -24,26 +24,27 @@
   "assets": {
     "integration": {
       "auto_install": true,
-      "source_type_id": 21556836,
-      "source_type_name": "KubeVirt API",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
+      "source_type_id": 46027487,
+      "source_type_name": "kubevirt",
+      "configuration": {},
       "events": {
         "creates_events": false
       },
       "metrics": {
-        "prefix": "kubevirt_api.",
+        "prefix": "kubevirt",
         "check": [
           "kubevirt_api.process.cpu_seconds.count",
-          "kubevirt_api.process.open_fds"
+          "kubevirt_handler.vmi.cpu_system_usage_seconds.count",
+          "kubevirt_controller.virt_controller.ready_status"
         ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      },
-      "process_signatures": ["virt-api"]
+      }
+    },
+    "dashboards": {
+      "KubeVirt - Overview": "assets/dashboards/kubevirt_overview.json"
     }
   },
   "author": {
