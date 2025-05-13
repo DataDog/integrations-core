@@ -28,9 +28,6 @@ services:
       args:
         - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
     hostname: ms1
-    depends_on:
-      weblogic-admin-server:
-        condition: service_healthy
     ports:
       - '8001:8001'
       - '9091:9091'
@@ -56,9 +53,6 @@ services:
       args:
         - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
     hostname: ms2
-    depends_on:
-      weblogic-admin-server:
-        condition: service_healthy
     ports:
       - '8002:8001'
       - '9092:9092'

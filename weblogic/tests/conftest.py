@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import CheckDockerLogs, docker_run
 from datadog_checks.dev.utils import load_jmx_config
 
 from .common import HERE
@@ -21,8 +21,9 @@ def dd_environment(instance):
     compose_file = os.path.join(HERE, 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
+        conditions=[CheckDockerLogs(compose_file, ['WebLogic Server has started'])],
         env_vars={'PROPERTIES_DIR': properties_dir},
-        sleep=300,
+        sleep=60,
         build=True,
         attempts=2,
     ):
