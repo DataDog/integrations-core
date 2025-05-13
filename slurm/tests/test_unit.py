@@ -74,7 +74,7 @@ def test_acct_command_params(instance):
 def test_sinfo_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sinfo_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
-    # sinfo has 4 subprocess calls now: metadata, partition_cluster, partition_info, and node data. 
+    # sinfo has 4 subprocess calls now: metadata, partition_cluster, partition_info, and node data.
     # So I'm mocking all of them.
     mock_output_metadata = ("", "", 1)
     mock_output_partition_cluster = (mock_output('sinfo_partition_cluster.txt'), "", 0)
