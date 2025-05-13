@@ -1121,12 +1121,7 @@ partial -->
 
 <div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
 
-You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the [`PidMode` parameter][57] in the Task Definition and set it to `task` as follows:
-
-```text
-"pidMode": "task"
-```
-To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `fargate:ecs` in the search query on the Live Processes page.
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. For more information configuring Process Collection, see [Live Process documentation][75].
 
 ## Out-of-the-box tags
 
@@ -1257,3 +1252,4 @@ Need help? Contact [Datadog support][18].
 [72]: https://github.com/datadog/datadog-cdk-constructs/
 [73]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
 [74]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest/submodules/ecs_fargate
+[75]: https://docs.datadoghq.com/infrastructure/process/?tab=awsecsfargate#installation
