@@ -246,7 +246,6 @@ class ComposeFileUp(LazyFunction):
         self.build = build
         self.service_name = service_name
         self.capture = capture
-        self.pull_always = pull_always
         self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
 
         if self.build:
@@ -256,7 +255,7 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
         if self.pull_always:
-            self.command.append('--pull=always')
+            self.command.append('--pull-always')
 
     def __call__(self):
         args = {'check': True}
