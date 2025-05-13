@@ -55,7 +55,8 @@ To configure this check for an Agent running on a host:
         #   - <TENANT_2>
 
         ## @param send_ndm_metadata - boolean - optional - default: false
-        ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+        ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent
+        ## and to allow Cisco ACI fault collection to be enabled.
         #
         # send_ndm_metadata: false
 

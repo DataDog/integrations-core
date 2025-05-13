@@ -32,10 +32,15 @@ class Faults:
         self.send_log = check.send_log
         self.write_persistent_cache = check.write_persistent_cache
 
+        # Config for submitting device/interface metadata to NDM
+        self.send_ndm_metadata = self.instance.get('send_ndm_metadata', False)
         # Config for submitting faultInst faults as logs
         self.send_faultinst_faults = self.instance.get('send_faultinst_faults', False)
         # Config for submitting faultDelegate faults as logs
         self.send_faultdelegate_faults = self.instance.get('send_faultdelegate_faults', False)
+
+    def ndm_metadata_enabled(self):
+        return self.send_ndm_metadata
 
     def faultinst_faults_enabled(self):
         return self.send_faultinst_faults
@@ -44,6 +49,10 @@ class Faults:
         return self.send_faultdelegate_faults
 
     def collect(self):
+        if self.faultinst_faults_enabled() or self.faultdelegate_faults_enabled():
+            if not self.ndm_metadata_enabled():
+                self.log.warning("NDM metadata must be enabled (send_ndm_metadata) to collect faults")
+                return
         if self.faultinst_faults_enabled():
             data = self.read_persistent_cache("max_timestamp_{}".format(Faults.FAULTINST_KEY))
             max_timestamp = from_json(data) if data else None
