@@ -1,6 +1,6 @@
 {
   "title": "RabbitMQ Overview (Management Version)",
-  "description": "## RabbitMQ Integration\n\nThis dashboard provides an overview of your RabbitMQ (Management plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup. \n\n*Note:* If you are using the Prometheus plugin version of RabbitMQ, please use the alternate dashboard.\n\nFor more information, please refer to:\n* [RabbitMQ Integration Doc](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)",
+  "description": "## RabbitMQ Integration\n\nThis dashboard provides an overview of your RabbitMQ (Management plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup. \n\n*Note:* If you are using the Prometheus plugin version of RabbitMQ, use the alternate dashboard.\n\nFor more information, refer to:\n* [RabbitMQ Integration Doc](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)",
   "widgets": [
     {
       "id": 539814910975430,
@@ -215,7 +215,7 @@
             "id": 218491216894336,
             "definition": {
               "type": "note",
-              "content": "Average resource utilization by node is shown below. Assign the variable *rabbitmq_node* to see the resource use of specific nodes.",
+              "content": "Average resource utilization by node is shown below. Assign the variable *rabbitmq_node* to see the resource usage of specific nodes.",
               "background_color": "orange",
               "font_size": "18",
               "text_align": "center",
@@ -391,12 +391,13 @@
           {
             "id": 7060139447561090,
             "definition": {
-              "title": "What nodes are running (value of 1 == running, 0 == not running)",
+              "title": "Running Nodes (value of 1 == running, 0 == not running)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -453,7 +454,7 @@
           {
             "id": 5665980405118174,
             "definition": {
-              "title": "Queue depth",
+              "title": "Queue Depth",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -493,12 +494,13 @@
           {
             "id": 8226130195909571,
             "definition": {
-              "title": "Ready messages in queue",
+              "title": "Ready Messages in Queue",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -532,12 +534,13 @@
           {
             "id": 5400177659458891,
             "definition": {
-              "title": "Message publish rate",
+              "title": "Message Publish Rate",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -571,12 +574,13 @@
           {
             "id": 8017202802489965,
             "definition": {
-              "title": "Message deliver rate",
+              "title": "Message Deliver Rate",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -595,7 +599,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "bars"
+                  "display_type": "line"
                 }
               ],
               "custom_links": [
@@ -610,12 +614,13 @@
           {
             "id": 1072734466801837,
             "definition": {
-              "title": "Delivery/Get rate",
+              "title": "Delivery/Get Rate",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -727,12 +732,13 @@
           {
             "id": 817903928845329,
             "definition": {
-              "title": "Messages with redelivered flag set",
+              "title": "Messages with Redelivered Flag Set",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -766,12 +772,13 @@
           {
             "id": 8596640016062888,
             "definition": {
-              "title": "Memory used by queue",
+              "title": "Memory Used by Queue",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -805,12 +812,13 @@
           {
             "id": 943079815223087,
             "definition": {
-              "title": "Consumers per queue",
+              "title": "Consumers per Queue",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -844,12 +852,13 @@
           {
             "id": 8469490487892440,
             "definition": {
-              "title": "Queue consumers' ability to take new mesages",
+              "title": "Queue Consumers' Ability to Take New Messages",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -884,7 +893,7 @@
             "id": 3747886321792865,
             "definition": {
               "type": "note",
-              "content": "Get insights into your queues' producers and consumers by instrumenting with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/sns/?tab=rabbitmq&referrer=rabbitmq_management)",
+              "content": "Get insights into your queues' producers and consumers by instrumenting them with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/sns/?tab=rabbitmq&referrer=rabbitmq_management)",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -899,7 +908,7 @@
           {
             "id": 1004918787475990,
             "definition": {
-              "title": "Top 10 max time in queue by env for $rabbitmq_queue",
+              "title": "Top 10 Max Time in Queue by env",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -944,12 +953,13 @@
           {
             "id": 4857249869480403,
             "definition": {
-              "title": "Incoming messages by env, producing service for $rabbitmq_queue",
+              "title": "Incoming Messages by env, Producing Service",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -994,12 +1004,13 @@
           {
             "id": 4843650565249063,
             "definition": {
-              "title": "Outgoing messages by env, consuming service for $rabbitmq_queue",
+              "title": "Outgoing Messages by env, Consuming Service",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1044,12 +1055,13 @@
           {
             "id": 5940920806415761,
             "definition": {
-              "title": "Top 10 p95 message size by env, $rabbitmq_queue",
+              "title": "Top 10 p95 Message Size by env",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1091,10 +1103,11 @@
           {
             "id": 8291016456385819,
             "definition": {
-              "title": "Distribution of message size for $rabbitmq_queue",
+              "title": "Distribution of Message Size",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
+              "time": {},
               "type": "distribution",
               "xaxis": {
                 "scale": "linear",
@@ -1160,7 +1173,7 @@
           {
             "id": 8311364853057600,
             "definition": {
-              "title": "Messages published to exchanges",
+              "title": "Messages Published to Exchanges",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1200,7 +1213,7 @@
           {
             "id": 7202744465466862,
             "definition": {
-              "title": "Messages routed from exchanges",
+              "title": "Messages Routed from Exchanges",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
