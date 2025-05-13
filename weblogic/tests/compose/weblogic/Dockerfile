@@ -54,11 +54,11 @@ ENV APP_NAME="${APPLICATION_NAME}" \
 # Retrieve the files required to build this image
 
 # https://github.com/oracle/docker-images/tree/d64e2b42e81ef036057de0d03f7561e1fb5192bb/OracleWebLogic/samples/12213-deploy-application
-RUN cd /u01/oracle & curl -L https://github.com/oracle/docker-images/archive/refs/heads/main.tar.gz | tar xz --strip=4 "docker-images-main/OracleWebLogic/samples/12213-deploy-application/sample" "docker-images-main/OracleWebLogic/samples/12213-deploy-application/build-archive.sh"
+RUN cd /u01/oracle & curl -L https://github.com/oracle/docker-images/archive/108b7a61b45cfc6b87d42283d1358238f2b3808a.tar.gz | tar xz --strip=4 "docker-images-108b7a61b45cfc6b87d42283d1358238f2b3808a/OracleWebLogic/samples/12213-deploy-application/sample" "docker-images-108b7a61b45cfc6b87d42283d1358238f2b3808a/OracleWebLogic/samples/12213-deploy-application/build-archive.sh"
 
 # https://github.com/oracle/docker-images/tree/1e26820b44c393944b20f0ae069670538a2e37ef/OracleWebLogic/samples/12213-domain-home-in-image/container-scripts
 
-RUN curl -L https://github.com/oracle/docker-images/archive/refs/heads/main.tar.gz | tar xz --strip=5 "docker-images-main/OracleWebLogic/samples/12213-domain-home-in-image/container-scripts" "docker-images-main/OracleWebLogic/samples/12213-deploy-application/container-scripts"
+RUN curl -L https://github.com/oracle/docker-images/archive/108b7a61b45cfc6b87d42283d1358238f2b3808a.tar.gz | tar xz --strip=5 "docker-images-108b7a61b45cfc6b87d42283d1358238f2b3808a/OracleWebLogic/samples/12213-domain-home-in-image/container-scripts" "docker-images-108b7a61b45cfc6b87d42283d1358238f2b3808a/OracleWebLogic/samples/12213-deploy-application/container-scripts"
 
 
 COPY --chown=oracle:root setup_scripts/* /u01/oracle/
@@ -83,6 +83,7 @@ RUN /u01/oracle/createWLSDomain.sh && \
 
 
 RUN /u01/oracle/build-archive.sh
+# TODO this fails with awk: fatal: cannot open file `/u01/oracle/properties/docker-build/domain.properties' for reading (No such file or directory)
 # RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
 
 # Expose ports for admin, managed server, and debug
