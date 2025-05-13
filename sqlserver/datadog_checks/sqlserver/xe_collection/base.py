@@ -789,42 +789,21 @@ class XESessionBase(DBMAsyncJob):
     def _get_primary_sql_field(self, event):
         """
         Get the primary SQL field for this event type.
-        This is the field that will be used for the main query signature and as db.statement.
+        This is the field that will be used for the main query signature.
+
+        Subclasses should override this method to return their primary field.
 
         Args:
             event: The event data dictionary
 
         Returns:
-            Name of the primary SQL field or None if no suitable field is found
+            Name of the primary SQL field
         """
-        event_type = event.get('event_name', '')
-
-        # Define priority order for each event type
-        field_priority = {
-            'sql_batch_completed': ['batch_text', 'sql_text', 'statement'],
-            'rpc_completed': ['statement', 'sql_text', 'batch_text'],
-            'module_end': ['statement', 'sql_text', 'batch_text'],
-            'error_reported': ['sql_text', 'batch_text', 'statement'],
-            'attention': ['batch_text', 'sql_text', 'statement'],
-            'sp_statement_completed': ['statement', 'sql_text', 'batch_text'],
-        }
-
-        # Use type-specific priority if available, otherwise use a default priority
-        priority_list = field_priority.get(event_type, ['statement', 'sql_text', 'batch_text'])
-
-        # Try fields in priority order
-        for field in priority_list:
+        # Default implementation - will be overridden by subclasses
+        # Try statement first, then sql_text, then batch_text
+        for field in self.get_sql_fields(event.get('event_name', '')):
             if field in event and event[field]:
-                self._log.debug(f"Using {field} as primary SQL field for {event_type}")
                 return field
-
-        # Fallback to any non-empty SQL field if none of the priority fields are found
-        for field in self.get_sql_fields(event_type):
-            if field in event and event[field]:
-                self._log.debug(f"Fallback to {field} as primary SQL field for {event_type}")
-                return field
-
-        self._log.debug(f"No primary SQL field found for {event_type}")
         return None
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
