@@ -301,23 +301,29 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         for line in out.splitlines():
             line = line.strip()
+
+            # CPU Utilized: 00:00:01
             if line.startswith('CPU Utilized:'):
-                # CPU Utilized: 00:00:01
-                value = line.split(':', 1)[1].strip()
-                cpu_utilized = parse_duration(value)
-            if re.match(r'CPU Efficiency: ([\d.]+)%', line):
-                # CPU Efficiency: 20.00% of 00:00:05 core-walltime
+                cpu_utilized = parse_duration(line.split(':', 1)[1].strip())
+                continue
+
+            # CPU Efficiency: 20.00% of 00:00:05 core-walltime
+            match = re.match(r'CPU Efficiency: ([\d.]+)%', line)
+            if match:
                 cpu_eff = float(match.group(1))
-            elif line.startswith('Memory Utilized:'):
-                # Memory Utilized: 0.00 MB (estimated maximum)
-                match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
-                if match:
-                    mem_utilized = float(match.group(1))
-            elif line.startswith('Memory Efficiency:'):
-                # Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)
-                match = re.match(r'Memory Efficiency: ([\d.]+)%', line)
-                if match:
-                    mem_eff = float(match.group(1))
+                continue
+
+            # Memory Utilized: 0.00 MB (estimated maximum)
+            match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
+            if match:
+                mem_utilized = float(match.group(1))
+                continue
+
+            # Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)
+            match = re.match(r'Memory Efficiency: ([\d.]+)%', line)
+            if match:
+                mem_eff = float(match.group(1))
+                continue
 
         if cpu_utilized is not None:
             self.gauge('seff.cpu_utilized', cpu_utilized, tags)
