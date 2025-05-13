@@ -172,7 +172,7 @@ datadog-sidekiq==3.0.0
 datadog-silk==4.1.0
 datadog-silverstripe-cms==1.0.0
 datadog-singlestore==4.1.0
-datadog-slurm==2.0.0-beta.1; sys_platform == 'linux2'
+datadog-slurm==2.0.0-beta.2; sys_platform == 'linux2'
 datadog-snmp==10.0.0
 datadog-snowflake==7.5.0
 datadog-solr==2.1.0

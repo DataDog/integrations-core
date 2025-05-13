@@ -2,6 +2,10 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0-beta.2 / 2025-05-13
+
+No significant changes.
+
 ## 2.0.0-beta.1 / 2025-05-09
 
 ***Changed***:
