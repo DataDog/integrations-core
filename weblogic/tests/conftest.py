@@ -24,7 +24,7 @@ def dd_environment(instance):
         compose_file=compose_file,
         conditions=[CheckDockerLogs(compose_file, ['WebLogic Server has started'])],
         env_vars={'PROPERTIES_DIR': properties_dir},
-        sleep=60,
+        sleep=200,
         build=True,
         attempts=2,
     ):
