@@ -469,9 +469,7 @@ class XESessionBase(DBMAsyncJob):
         network_section = {
             "client": {
                 "hostname": normalized_event.get("client_hostname", ""),
-                # Placeholders for future implementation
-                "ip": "",  # To be populated later
-                "port": None,  # To be populated later
+                # TODO: Populate ip and port by joining our XE events with sys.dm_exec_connections using the session ID
             }
         }
 
@@ -524,7 +522,6 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "service": self._config.service,
-            # New structure fields
             "db": db_section,
             "network": network_section,
             "sqlserver": sqlserver_section,
