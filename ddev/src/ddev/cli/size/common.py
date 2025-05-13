@@ -7,14 +7,15 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
+import tomllib
 import zipfile
 import zlib
-from datetime import date, time
+from datetime import date
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Optional, Type, TypedDict
 
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import requests
 import squarify
@@ -157,9 +158,9 @@ def convert_to_human_readable_size(size_bytes: float) -> str:
 def compress(file_path: str) -> int:
     compressor = zlib.compressobj()
     compressed_size = 0
-    # original_size = os.path.getsize(file_path)
+    chunk_size = 8192
     with open(file_path, "rb") as f:
-        while chunk := f.read(8192):  # Read in 8KB chunks
+        while chunk := f.read(chunk_size):
             compressed_chunk = compressor.compress(chunk)
             compressed_size += len(compressed_chunk)
         compressed_size += len(compressor.flush())
@@ -469,194 +470,29 @@ def plot_treemap(
     mode: Literal["status", "diff"] = "status",
     path: Optional[str] = None,
 ) -> None:
-    """
-    Generates and displays or saves a treemap visualization of module sizes.
-
-    The plot layout is computed using the size of each module (in bytes), and color is used to
-    encode either the type of module or the direction/magnitude of size change, depending on the mode.
-
-    - Modules with very small area may not show labels to avoid overlap.
-    - Labels display module name and size if space allows.
-    - Color intensity reflects relative size (or change) within its group.
-    - A legend is added depending on the selected mode.
-
-    Args:
-        modules: list of module entries. Each entry must contain at least:
-            - 'Name': The module name,
-            - 'Size_Bytes': Module size in bytes (can be negative in 'diff' mode),
-            - 'Size': Human-readable size string,
-            - 'Type': Either 'Integration' or 'Dependency'.
-        title: Title to display at the top of the plot.
-        show: If True, the plot is shown interactively using matplotlib.
-        mode:
-            - 'status': Shows the current sizes of modules.
-              Integrations and dependencies are grouped and colored separately (Purples/Reds),
-              with size intensity mapped to color darkness.
-            - 'diff': Shows the size change between two commits.
-              Positive changes are colored in Oranges, negative changes in Blues.
-              The plot is split in half: left for decreases, right for increases.
-        path: Optional path to save the plot as a PNG file. If not provided, nothing is saved.
-    """
-    if not any(str(value).strip() not in ("", "0") for value in modules[0].values()):  # table is empty
+    if not any(str(value).strip() not in ("", "0") for value in modules[0].values()):
+        # table is empty
         return
-
-    # Convert sizes to absolute values for layout computation
-    sizes = [abs(mod["Size_Bytes"]) for mod in modules]
 
     # Initialize figure and axis
     plt.figure(figsize=(12, 8))
     ax = plt.gca()
     ax.set_axis_off()
 
-    # Compute layout rectangles based on size
-    rects = squarify.normalize_sizes(sizes, 100, 100)
-    rects = squarify.squarify(rects, 0, 0, 100, 100)
-
-    colors = []
-
+    # Calculate the rectangles
     if mode == "status":
-        # Separate modules by type
-        integrations = [mod for mod in modules if mod["Type"] == "Integration"]
-        dependencies = [mod for mod in modules if mod["Type"] == "Dependency"]
+        rects, colors, legend_handles = plot_status_treemap(modules)
 
-        # Normalize sizes within each group
-        def normalize(mods):
-            if not mods:
-                return []
-            sizes = [mod["Size_Bytes"] for mod in mods]
-            min_size = min(sizes)
-            max_size = max(sizes)
-            range_size = max_size - min_size or 1
-            return [(s - min_size) / range_size for s in sizes]
+    if mode == "diff":
+        rects, colors, legend_handles = plot_diff_treemap(modules)
 
-        norm_int = normalize(integrations)
-        norm_dep = normalize(dependencies)
-
-        # Map normalized values to color intensity
-        def scale(val, vmin=0.3, vmax=0.85):
-            return vmin + val * (vmax - vmin)
-
-        cmap_int = cm.get_cmap("Purples")
-        cmap_dep = cm.get_cmap("Reds")
-
-        # Assign colors based on type and normalized size
-        for mod in modules:
-            if mod["Type"] == "Integration":
-                idx = integrations.index(mod)
-                colors.append(cmap_int(scale(norm_int[idx], 0.3, 0.6)))
-            elif mod["Type"] == "Dependency":
-                idx = dependencies.index(mod)
-                colors.append(cmap_dep(scale(norm_dep[idx], 0.3, 0.85)))
-            else:
-                colors.append("#999999")
-
-    elif mode == "diff":
-        # Separate modules by positive and negative size change
-        cmap_pos = cm.get_cmap("Oranges")
-        cmap_neg = cm.get_cmap("Blues")
-
-        positives = [mod for mod in modules if mod["Size_Bytes"] > 0]
-        negatives = [mod for mod in modules if mod["Size_Bytes"] < 0]
-
-        sizes_pos = [mod["Size_Bytes"] for mod in positives]
-        sizes_neg = [abs(mod["Size_Bytes"]) for mod in negatives]
-
-        sum_pos = sum(sizes_pos)
-        sum_neg = sum(sizes_neg)
-
-        canvas_area = 50 * 100
-
-        # Determine dominant side and scale layout accordingly
-        if sum_pos >= sum_neg:
-            norm_sizes_pos = [s / sum_pos * canvas_area for s in sizes_pos]
-            norm_sizes_neg = [s / sum_pos * canvas_area for s in sizes_neg]
-            rects_pos = squarify.squarify(norm_sizes_pos, 50, 0, 50, 100)
-            rects_neg = squarify.squarify(norm_sizes_neg, 0, 0, 50, 100)
-        else:
-            norm_sizes_neg = [s / sum_neg * canvas_area for s in sizes_neg]
-            norm_sizes_pos = [s / sum_neg * canvas_area for s in sizes_pos]
-            rects_neg = squarify.squarify(norm_sizes_neg, 0, 0, 50, 100)
-            rects_pos = squarify.squarify(norm_sizes_pos, 50, 0, 50, 100)
-
-        # Merge layout and module lists for unified drawing
-        rects = rects_neg + rects_pos
-        modules = negatives + positives
-
-        # Compute color intensity for each module
-        def rescale_intensity(val, min_val=0.3, max_val=0.8):
-            return min_val + (max_val - min_val) * val
-
-        max_size = max(sizes_pos + sizes_neg) or 1
-        colors = []
-
-        for mod in negatives:
-            raw = abs(mod["Size_Bytes"]) / max_size
-            intensity = rescale_intensity(raw)
-            colors.append(cmap_neg(intensity))
-
-        for mod in positives:
-            raw = mod["Size_Bytes"] / max_size
-            intensity = rescale_intensity(raw)
-            colors.append(cmap_pos(intensity))
-
-    # Manual treemap layout and coloring to personalize labels
-    for rect, mod, color in zip(rects, modules, colors, strict=False):
-        x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
-        ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
-
-        # Determine font size based on rectangle area
-        MIN_FONT_SIZE = 6
-        MAX_FONT_SIZE = 12
-        FONT_SIZE_SCALE = 0.4
-        AVG_SIDE = (dx * dy) ** 0.5
-        font_size = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, AVG_SIDE * FONT_SIZE_SCALE))
-        name = mod["Name"]
-        size_str = f"({mod['Size']})"
-
-        # Check whether text fits inside the rectangle
-        CHAR_WIDTH_FACTOR = 0.1
-        CHAR_HEIGHT_FACTOR = 0.5
-        name_fits = (len(name) + 2) * font_size * CHAR_WIDTH_FACTOR < dx and dy > font_size * CHAR_HEIGHT_FACTOR
-        size_fits = (len(size_str) + 2) * font_size * CHAR_WIDTH_FACTOR < dx
-        both_fit = dy > font_size * CHAR_HEIGHT_FACTOR * 2
-
-        # Possibly truncate name if it doesn't fit
-        if dx < 5 or dy < 5:
-            label = None
-        elif not name_fits and dx > 5:
-            max_chars = int(dx / (font_size * CHAR_WIDTH_FACTOR)) - 2
-            if 4 <= max_chars:
-                name = name[: max_chars - 3] + "..."
-                name_fits = True
-
-        # Construct label if there's space
-        if name_fits and size_fits and both_fit:
-            label = f"{name}\n{size_str}"
-        elif name_fits:
-            label = name
-        else:
-            label = None
-
-        # Draw label
-        if label:
-            ax.text(x + dx / 2, y + dy / 2, label, va="center", ha="center", fontsize=font_size, color="black")
+    draw_treemap_rects_with_labels(ax, rects, modules, colors)
 
     # Finalize layout and show/save plot
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
 
     plt.title(title, fontsize=16)
-
-    if mode == "status":
-        legend_handles = [
-            Patch(color=cm.get_cmap("Purples")(0.6), label="Integration"),
-            Patch(color=cm.get_cmap("Reds")(0.6), label="Dependency"),
-        ]
-    elif mode == "diff":
-        legend_handles = [
-            Patch(color=cm.get_cmap("Oranges")(0.7), label="Increase"),
-            Patch(color=cm.get_cmap("Blues")(0.7), label="Decrease"),
-        ]
 
     plt.legend(handles=legend_handles, title="Type", loc="center left", bbox_to_anchor=(1.0, 0.5))
     plt.subplots_adjust(right=0.8)
@@ -668,12 +504,178 @@ def plot_treemap(
         plt.savefig(path, bbox_inches="tight", format="png")
 
 
-def send_metrics_to_dd(modules: list[FileDataEntryPlatformVersion], compressed: bool):
+def plot_status_treemap(
+    modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
+) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    # Calculate the area of the rectangles
+    sizes = [mod["Size_Bytes"] for mod in modules]
+    norm_sizes = squarify.normalize_sizes(sizes, 100, 100)
+    rects = squarify.squarify(norm_sizes, 0, 0, 100, 100)
+
+    # Define the colors for each type
+    cmap_int = plt.get_cmap("Purples")
+    cmap_dep = plt.get_cmap("Reds")
+
+    # Assign colors based on type and normalized size
+    colors = []
+    max_area = max(norm_sizes) or 1
+    for mod, area in zip(modules, norm_sizes, strict=False):
+        intensity = scale_colors_treemap(area, max_area)
+        if mod["Type"] == "Integration":
+            colors.append(cmap_int(intensity))
+        elif mod["Type"] == "Dependency":
+            colors.append(cmap_dep(intensity))
+        else:
+            colors.append("#999999")
+    # Define the legend
+    legend_handles = [
+        Patch(color=plt.get_cmap("Purples")(0.6), label="Integration"),
+        Patch(color=plt.get_cmap("Reds")(0.6), label="Dependency"),
+    ]
+    return rects, colors, legend_handles
+
+
+def plot_diff_treemap(
+    modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
+) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    # Define the colors for each type
+    cmap_pos = plt.get_cmap("Oranges")
+    cmap_neg = plt.get_cmap("Blues")
+
+    # Separate in negative and positive differences
+    positives = [mod for mod in modules if mod["Size_Bytes"] > 0]
+    negatives = [mod for mod in modules if mod["Size_Bytes"] < 0]
+
+    sizes_pos = [mod["Size_Bytes"] for mod in positives]
+    sizes_neg = [abs(mod["Size_Bytes"]) for mod in negatives]
+
+    sum_pos = sum(sizes_pos)
+    sum_neg = sum(sizes_neg)
+
+    canvas_area = 50 * 100
+
+    # Determine dominant side and scale layout accordingly
+    if sum_pos >= sum_neg:
+        norm_sizes_pos = [s / sum_pos * canvas_area for s in sizes_pos]
+        norm_sizes_neg = [s / sum_pos * canvas_area for s in sizes_neg]
+        rects_neg = squarify.squarify(norm_sizes_neg, 0, 0, 50, 100)
+        rects_pos = squarify.squarify(norm_sizes_pos, 50, 0, 50, 100)
+
+    else:
+        norm_sizes_neg = [s / sum_neg * canvas_area for s in sizes_neg]
+        norm_sizes_pos = [s / sum_neg * canvas_area for s in sizes_pos]
+        rects_neg = squarify.squarify(norm_sizes_neg, 0, 0, 50, 100)
+        rects_pos = squarify.squarify(norm_sizes_pos, 50, 0, 50, 100)
+
+    # Merge layout and module lists
+    rects = rects_neg + rects_pos
+    modules = negatives + positives
+
+    # Assign colors based on type and normalized size
+    colors = []
+    max_area = max(norm_sizes_pos + norm_sizes_neg) or 1
+
+    for area in norm_sizes_neg:
+        intensity = scale_colors_treemap(area, max_area)
+        colors.append(cmap_neg(intensity))
+
+    for area in norm_sizes_pos:
+        intensity = scale_colors_treemap(area, max_area)
+        colors.append(cmap_pos(intensity))
+
+    legend_handles = [
+        Patch(color=plt.get_cmap("Oranges")(0.7), label="Increase"),
+        Patch(color=plt.get_cmap("Blues")(0.7), label="Decrease"),
+    ]
+
+    return rects, colors, legend_handles
+
+
+def scale_colors_treemap(area: float, max_area: float) -> float:
+    vmin = 0.3
+    vmax = 0.65
+    return vmin + (area / max_area) * (vmax - vmin)
+
+
+def draw_treemap_rects_with_labels(
+    ax: plt.Axes,
+    rects: list[dict],
+    modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
+    colors: list[tuple[float, float, float, float]],
+) -> None:
+    """
+    Draw treemap rectangles with their assigned colors and optional text labels.
+
+    Args:
+        ax: Matplotlib Axes to draw on.
+        rects: List of rectangle dicts from squarify, each with 'x', 'y', 'dx', 'dy'.
+        modules: List of modules associated with each rectangle (same order).
+        colors: List of colors for each module (same order).
+    """
+    for rect, mod, color in zip(rects, modules, colors, strict=False):
+        x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
+
+        # Draw the rectangle with a white border
+        ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
+
+        # Determine font size based on rectangle area
+        MIN_FONT_SIZE = 6
+        MAX_FONT_SIZE = 12
+        FONT_SIZE_SCALE = 0.4
+        AVG_SIDE = (dx * dy) ** 0.5  # Geometric mean
+        font_size = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, AVG_SIDE * FONT_SIZE_SCALE))
+
+        # Determine the info for the labels
+        name = mod["Name"]
+        size_str = f"({mod['Size']})"
+
+        # Estimate if there's enough space for text
+        CHAR_WIDTH_FACTOR = 0.1  # Width of each character relative to font size
+        CHAR_HEIGHT_FACTOR = 0.5  # Minimum height for readable text
+
+        name_fits = (len(name) + 2) * font_size * CHAR_WIDTH_FACTOR < dx and dy > font_size * CHAR_HEIGHT_FACTOR
+        size_fits = (len(size_str) + 2) * font_size * CHAR_WIDTH_FACTOR < dx
+        both_fit = dy > font_size * CHAR_HEIGHT_FACTOR * 2  # Enough room for two lines
+
+        # If the rectangle is too small, skip the label
+        if dx < 5 or dy < 5:
+            label = None
+
+        # If the name doesn't fit, truncate it with "..."
+        elif not name_fits and dx > 5:
+            max_chars = int(dx / (font_size * CHAR_WIDTH_FACTOR)) - 2
+            if max_chars >= 4:
+                name = name[: max_chars - 3] + "..."
+                name_fits = True
+
+        # Build the label based on available space
+        if name_fits and size_fits and both_fit:
+            label = f"{name}\n{size_str}"  # Two-line label
+        elif name_fits:
+            label = name
+        else:
+            label = None
+
+        # Draw label centered inside the rectangle
+        if label:
+            ax.text(
+                x + dx / 2,
+                y + dy / 2,
+                label,
+                va="center",
+                ha="center",
+                fontsize=font_size,
+                color="black",
+            )
+
+
+def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool):
     metric_name = (
         "datadog.agent_integrations.size_analyzer.compressed"
         if compressed
         else "datadog.agent_integrations.size_analyzer.uncompressed"
     )
+    config_file_info = get_org(app, org)
 
     timestamp = time.time()
     metrics = []
@@ -696,12 +698,29 @@ def send_metrics_to_dd(modules: list[FileDataEntryPlatformVersion], compressed: 
         )
 
     initialize(
-        api_key="",
-        app_key="",
-        api_host="https://api.datadoghq.eu",
+        api_key=config_file_info["api_key"],
+        app_key=config_file_info["app_key"],
+        api_host=f"https://api.{config_file_info['site']}",
     )
 
     api.Metric.send(metrics=metrics)
+
+
+def get_org(app: Application, org: Optional[str] = "default") -> tuple[str, str, str]:
+    config_path = app.config_file.path
+
+    with config_path.open(mode="rb") as f:
+        data = tomllib.load(f)
+
+    org_config = data.get("orgs", {}).get(org)
+    if not org_config:
+        raise ValueError(f"Organization '{org}' not found in config")
+
+    return {
+        "api_key": org_config["api_key"],
+        "app_key": org_config["app_key"],
+        "site": org_config.get("site"),
+    }
 
 
 class WrongDependencyFormat(Exception):

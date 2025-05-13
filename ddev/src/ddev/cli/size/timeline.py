@@ -4,7 +4,7 @@ import tempfile
 import zipfile
 from datetime import date, datetime
 from pathlib import Path
-from typing import List, Literal, Optional, Set, Tuple, overload
+from typing import Literal, Optional, overload
 
 import click
 import matplotlib.pyplot as plt
@@ -38,6 +38,7 @@ from .common import (
 MINIMUM_DATE_DEPENDENCIES = datetime.strptime(
     "Apr 3 2024", "%b %d %Y"
 ).date()  # Dependencies not available before this date due to a storage change
+MINIMUM_LENGTH_COMMIT = 7
 console = Console(stderr=True)
 
 
@@ -101,12 +102,21 @@ def timeline(
         module = name  # module is the name of the integration or the dependency
         if sum([csv, markdown, json]) > 1:
             raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
-        elif initial_commit and final_commit and len(initial_commit) < 7 and len(final_commit) < 7:
-            raise click.BadParameter("Commit hashes must be at least 7 characters long")
-        elif initial_commit and len(initial_commit) < 7:
-            raise click.BadParameter("Initial commit hash must be at least 7 characters long.", param_hint="initial")
-        elif final_commit and len(final_commit) < 7:
-            raise click.BadParameter("Final commit hash must be at least 7 characters long.", param_hint="final")
+        elif (
+            initial_commit
+            and final_commit
+            and len(initial_commit) < MINIMUM_LENGTH_COMMIT
+            and len(final_commit) < MINIMUM_LENGTH_COMMIT
+        ):
+            raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
+        elif initial_commit and len(initial_commit) < MINIMUM_LENGTH_COMMIT:
+            raise click.BadParameter(
+                f"Initial commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.", param_hint="initial"
+            )
+        elif final_commit and len(final_commit) < MINIMUM_LENGTH_COMMIT:
+            raise click.BadParameter(
+                f"Final commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.", param_hint="final"
+            )
         elif final_commit and initial_commit and final_commit == initial_commit:
             raise click.BadParameter("Commit hashes must be different")
         task = progress.add_task("[cyan]Calculating timeline...", total=None)
@@ -125,7 +135,10 @@ def timeline(
                 folder = module if type == "integration" else ".deps/resolved"
                 commits = gitRepo.get_module_commits(folder, initial_commit, final_commit, time)
                 first_commit = gitRepo.get_creation_commit_module(module)
-                gitRepo.checkout_commit(commits[-1])
+                if final_commit and commits == []:
+                    gitRepo.checkout_commit(final_commit)
+                elif commits != []:
+                    gitRepo.checkout_commit(commits[-1])
                 if type == "dependency":
                     valid_platforms = get_valid_platforms(gitRepo.repo_dir)
                     if platform and platform not in valid_platforms:
@@ -158,7 +171,7 @@ def timeline(
                     app.display_error(f"No changes found for {type}: {module}")
                     return
                 if type == "dependency":
-                    modules_plat: List[CommitEntryPlatformWithDelta] = []
+                    modules_plat: list[CommitEntryPlatformWithDelta] = []
                     multiple_plats_and_vers: Literal[True] = True
                     progress.remove_task(task)
                     dep_parameters: ParametersTimelineDependency
@@ -182,6 +195,7 @@ def timeline(
                                 "show_gui": show_gui,
                                 "first_commit": None,
                             }
+
                             modules_plat.extend(
                                 timeline_mode(
                                     gitRepo,
@@ -191,6 +205,7 @@ def timeline(
                                     progress,
                                 )
                             )
+
                     else:
                         dep_parameters = {
                             "app": app,
@@ -215,12 +230,13 @@ def timeline(
                                 progress,
                             )
                         )
+
                     if csv:
                         print_csv(app, modules_plat)
                     elif json:
                         print_json(app, modules_plat)
                 else:
-                    modules: List[CommitEntryWithDelta] = []
+                    modules: list[CommitEntryWithDelta] = []
                     multiple_plat_and_ver: Literal[False] = False
                     int_parameters: ParametersTimelineIntegration = {
                         "app": app,
@@ -259,40 +275,40 @@ def timeline(
 @overload
 def timeline_mode(
     gitRepo: GitRepo,
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineDependency,
     multiple_plats_and_vers: Literal[True],
     progress: Progress,
-) -> List[CommitEntryPlatformWithDelta]: ...
+) -> list[CommitEntryPlatformWithDelta]: ...
 
 
 @overload
 def timeline_mode(
     gitRepo: GitRepo,
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineIntegration,
     multiple_plats_and_vers: Literal[False],
     progress: Progress,
-) -> List[CommitEntryWithDelta]: ...
+) -> list[CommitEntryWithDelta]: ...
 
 
 @overload
 def timeline_mode(
     gitRepo: GitRepo,
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineDependency,
     multiple_plats_and_vers: Literal[False],
     progress: Progress,
-) -> List[CommitEntryWithDelta]: ...
+) -> list[CommitEntryWithDelta]: ...
 
 
 def timeline_mode(
     gitRepo: GitRepo,
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineIntegration | ParametersTimelineDependency,
     multiple_plats_and_vers: bool,
     progress: Progress,
-) -> List[CommitEntryWithDelta] | List[CommitEntryPlatformWithDelta]:
+) -> list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]:
     if params["type"] == "integration":
         modules = get_repo_info(
             gitRepo,
@@ -307,7 +323,6 @@ def timeline_mode(
             commits,
             progress,
         )
-
     trimmed_modules = trim_modules(modules, params["threshold"])
     formatted_modules = format_modules(trimmed_modules, params["platform"], multiple_plats_and_vers)
 
@@ -328,26 +343,26 @@ def timeline_mode(
 def get_repo_info(
     gitRepo: GitRepo,
     params: ParametersTimelineIntegration,
-    commits: List[str],
+    commits: list[str],
     progress: Progress,
-) -> List[CommitEntry]: ...
+) -> list[CommitEntry]: ...
 
 
 @overload
 def get_repo_info(
     gitRepo: GitRepo,
     params: ParametersTimelineDependency,
-    commits: List[str],
+    commits: list[str],
     progress: Progress,
-) -> List[CommitEntry]: ...
+) -> list[CommitEntry]: ...
 
 
 def get_repo_info(
     gitRepo: GitRepo,
     params: ParametersTimelineIntegration | ParametersTimelineDependency,
-    commits: List[str],
+    commits: list[str],
     progress: Progress,
-) -> List[CommitEntry]:
+) -> list[CommitEntry]:
     """
     Retrieves size and metadata info for a module across multiple commits.
 
@@ -366,37 +381,36 @@ def get_repo_info(
             file_data = process_commits(commits, params, gitRepo, progress, params["first_commit"])
         else:
             file_data = process_commits(commits, params, gitRepo, progress, params["first_commit"])
-
     return file_data
 
 
 @overload
 def process_commits(
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineIntegration,
     gitRepo: GitRepo,
     progress: Progress,
     first_commit: str,
-) -> List[CommitEntry]: ...
+) -> list[CommitEntry]: ...
 
 
 @overload
 def process_commits(
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
     first_commit: None,
-) -> List[CommitEntry]: ...
+) -> list[CommitEntry]: ...
 
 
 def process_commits(
-    commits: List[str],
+    commits: list[str],
     params: ParametersTimelineIntegration | ParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
     first_commit: Optional[str],
-) -> List[CommitEntry]:
+) -> list[CommitEntry]:
     """
     Processes a list of commits for a given integration or dependency.
 
@@ -413,7 +427,7 @@ def process_commits(
     Returns:
         A list of CommitEntry objects with commit metadata and size information.
     """
-    file_data: List[CommitEntry] = []
+    file_data: list[CommitEntry] = []
     task = progress.add_task("[cyan]Processing commits...", total=len(commits))
     repo = gitRepo.repo_dir
 
@@ -423,7 +437,6 @@ def process_commits(
         gitRepo.sparse_checkout_commit(commit, folder)
         date_str, author, message = gitRepo.get_commit_metadata(commit)
         date, message, commit = format_commit_data(date_str, message, commit, first_commit)
-
         if params["type"] == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
             assert params["platform"] is not None
             result = get_dependencies(
@@ -438,7 +451,6 @@ def process_commits(
             )
             if result:
                 file_data.append(result)
-
         elif params["type"] == "integration":
             file_data = get_files(
                 repo,
@@ -464,9 +476,9 @@ def get_files(
     date: date,
     author: str,
     message: str,
-    file_data: List[CommitEntry],
+    file_data: list[CommitEntry],
     compressed: bool,
-) -> List[CommitEntry]:
+) -> list[CommitEntry]:
     """
     Calculates integration file sizes and versions from a repository.
 
@@ -576,7 +588,7 @@ def get_dependencies(
     return None
 
 
-def get_dependency_data(file_path: str, module: str) -> Tuple[Optional[str], Optional[str]]:
+def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Optional[str]]:
     """
     Parses a dependency file and extracts the dependency name, download URL, and version.
 
@@ -658,7 +670,7 @@ def get_dependency_size(
     return commit_entry
 
 
-def get_version(files: List[str], platform: str) -> str:
+def get_version(files: list[str], platform: str) -> str:
     """
     Returns the latest Python version for the given target platform based on .deps/resolved filenames.
 
@@ -682,10 +694,10 @@ def get_version(files: List[str], platform: str) -> str:
 
 
 def format_modules(
-    modules: List[CommitEntryWithDelta],
+    modules: list[CommitEntryWithDelta],
     platform: Optional[str],
     multiple_plats_and_vers: bool,
-) -> List[CommitEntryWithDelta] | List[CommitEntryPlatformWithDelta]:
+) -> list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]:
     """
     Formats the modules list, adding platform and Python version information if needed.
 
@@ -727,16 +739,16 @@ def format_modules(
         }
         return [empty_module]
     elif multiple_plats_and_vers and platform:
-        new_modules: List[CommitEntryPlatformWithDelta] = [{**entry, "Platform": platform} for entry in modules]
+        new_modules: list[CommitEntryPlatformWithDelta] = [{**entry, "Platform": platform} for entry in modules]
         return new_modules
     else:
         return modules
 
 
 def trim_modules(
-    modules: List[CommitEntry],
+    modules: list[CommitEntry],
     threshold: Optional[int] = None,
-) -> List[CommitEntryWithDelta]:
+) -> list[CommitEntryWithDelta]:
     """
     Filters a list of commit entries, keeping only those with significant size changes.
 
@@ -752,12 +764,12 @@ def trim_modules(
             - Marks version transitions as 'X -> Y' when the version changes.
     """
     if modules == []:
-        empty_modules: List[CommitEntryWithDelta] = []
+        empty_modules: list[CommitEntryWithDelta] = []
         return empty_modules
 
     threshold = threshold or 0
 
-    trimmed_modules: List[CommitEntryWithDelta] = []
+    trimmed_modules: list[CommitEntryWithDelta] = []
 
     first: CommitEntryWithDelta = {
         **modules[0],
@@ -790,7 +802,7 @@ def trim_modules(
     return trimmed_modules
 
 
-def format_commit_data(date_str: str, message: str, commit: str, first_commit: Optional[str]) -> Tuple[date, str, str]:
+def format_commit_data(date_str: str, message: str, commit: str, first_commit: Optional[str]) -> tuple[date, str, str]:
     """
     Formats commit metadata by shortening the message, marking the first commit, and parsing the date.
     Args:
@@ -803,13 +815,20 @@ def format_commit_data(date_str: str, message: str, commit: str, first_commit: O
         A tuple containing:
             - Parsed date object,
             - Shortened and possibly annotated message,
-            - Shortened commit SHA (first 7 characters).
+            - Shortened commit SHA .
     """
     if commit == first_commit:
         message = "(NEW) " + message
-    message = message if len(message) <= 35 else message[:30].rsplit(" ", 1)[0] + "..." + message.split()[-1]
+    # Truncates the commit message if it's too long, keeping the first words and the PR number within the allowed length
+    MAX_LENGTH_COMMIT = 45
+    PR_NUMBER_LENGTH = 8
+    message = (
+        message
+        if len(message) <= MAX_LENGTH_COMMIT
+        else message[: MAX_LENGTH_COMMIT - PR_NUMBER_LENGTH - 3].rsplit(" ", 1)[0] + "..." + message.split()[-1]
+    )
     date = datetime.strptime(date_str, "%b %d %Y").date()
-    return date, message, commit[:7]
+    return date, message, commit[:MINIMUM_LENGTH_COMMIT]
 
 
 def module_exists(path: str, module: str) -> bool:
@@ -819,7 +838,7 @@ def module_exists(path: str, module: str) -> bool:
     return os.path.exists(os.path.join(path, module))
 
 
-def get_dependency_list(path: str, platforms: Set[str]) -> Set[str]:
+def get_dependency_list(path: str, platforms: set[str]) -> set[str]:
     """
     Returns the set of dependencies from the .deps/resolved folder for the latest version of the given platform.
     """
@@ -839,7 +858,7 @@ def get_dependency_list(path: str, platforms: Set[str]) -> Set[str]:
 
 
 def plot_linegraph(
-    modules: List[CommitEntryWithDelta] | List[CommitEntryPlatformWithDelta],
+    modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     module: str,
     platform: Optional[str],
     show: bool,

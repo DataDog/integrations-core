@@ -62,25 +62,32 @@ def mock_size_status():
         patch("os.walk", return_value=mock_walk),
         patch("os.listdir", return_value=["fake_dep.whl"]),
         patch("os.path.isfile", return_value=True),
+        patch("matplotlib.pyplot.show"),
+        patch("matplotlib.pyplot.savefig"),
     ):
         yield mock_app
 
 
 def test_status_no_args(ddev, mock_size_status):
-    result = ddev("size", "status", "--compressed")
-    assert result.exit_code == 0
+    assert ddev("size", "status").exit_code == 0
+    assert ddev("size", "status", "--compressed").exit_code == 0
+    assert ddev("size", "status", "--csv").exit_code == 0
+    assert ddev("size", "status", "--markdown").exit_code == 0
+    assert ddev("size", "status", "--json").exit_code == 0
+    assert ddev("size", "status", "--save_to_png_path", "out.png").exit_code == 0
+    assert ddev("size", "status", "--show_gui").exit_code == 0
 
 
 def test_status(ddev, mock_size_status):
-    result = ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--compressed")
-    print(result.output)
-    assert result.exit_code == 0
-
-
-def test_status_csv(ddev, mock_size_status):
-    result = ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--compressed", "--csv")
-    print(result.output)
-    assert result.exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12")).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--compressed")).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--csv")).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--markdown")).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--json")).exit_code == 0
+    assert (
+        ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--save_to_png_path", "out.png")
+    ).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--show_gui")).exit_code == 0
 
 
 def test_status_wrong_platform(ddev):

@@ -25,6 +25,7 @@ from .common import (
     print_json,
     print_markdown,
     print_table,
+    send_metrics_to_dd,
 )
 
 console = Console(stderr=True)
@@ -45,6 +46,7 @@ console = Console(stderr=True)
     is_flag=True,
     help="Display a pop-up window with a treemap showing the current size distribution of modules.",
 )
+@click.option("--send_metrics_to_dd_org", type=str, default=None, help="")
 @click.pass_obj
 def status(
     app: Application,
@@ -56,6 +58,7 @@ def status(
     json: bool,
     save_to_png_path: Optional[str],
     show_gui: bool,
+    send_metrics_to_dd_org: str,
 ) -> None:
     """
     Show the current size of all integrations and dependencies.
@@ -104,6 +107,8 @@ def status(
                 print_csv(app, modules_plat_ver)
             elif json:
                 print_json(app, modules_plat_ver)
+            if send_metrics_to_dd_org:
+                send_metrics_to_dd(app, modules_plat_ver, send_metrics_to_dd_org, compressed)
         else:
             modules: list[FileDataEntry] = []
             multiple_plat_and_ver: Literal[False] = False
@@ -129,6 +134,8 @@ def status(
                 print_csv(app, modules)
             elif json:
                 print_json(app, modules)
+            if send_metrics_to_dd_org:
+                send_metrics_to_dd(app, modules, send_metrics_to_dd_org, compressed)
 
     except Exception as e:
         app.abort(str(e))
