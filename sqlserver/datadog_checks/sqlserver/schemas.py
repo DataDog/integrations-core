@@ -407,12 +407,12 @@ class Schemas(DBMAsyncJob):
         sql = ""
         if len(includes) > 0:
             sql += " AND ("
-            sql += " OR ".join("name LIKE '{r}'".format(r=r.replace("'", "''")) for r in includes)
+            sql += " OR ".join("name REGEXP_LIKE '{r}'".format(r=r.replace("'", "''")) for r in includes)
             sql += ")"
 
         if len(excludes) > 0:
             sql += " AND NOT ("
-            sql += " OR ".join("name LIKE '{r}'".format(r=r.replace("'", "''")) for r in excludes)
+            sql += " OR ".join("name REGEXP_LIKE '{r}'".format(r=r.replace("'", "''")) for r in excludes)
             sql += ")"
 
         return sql
