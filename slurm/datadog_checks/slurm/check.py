@@ -167,7 +167,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 self.log.debug("No output from %s", name)
 
     def process_sinfo_partition(self, output):
-        # test-queue*|N/A|0/3/0/3
+        # PARTITION   | CLUSTER | NODES(A/I/O/T)
+        # test-queue* | N/A     | 1/2/0/3       
         lines = output.strip().split('\n')
 
         if self.debug_sinfo_stats:
@@ -188,7 +189,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self._process_sinfo_aiot_state(partition_data[2], "partition", tags)
 
     def process_sinfo_partition_info(self, output):
-        # normal*|c1|1|up|1000|N/A|allocated|1
+        # PARTITION    | CLUSTER | NODELIST | AVAIL | CPUS | MEMORY | STATE     | NODES 
+        # test-queue*  | N/A     | c[1-2]   | up    | 1    | 972    | allocated | 10    
         lines = output.strip().split('\n')
 
         if self.debug_sinfo_stats:
