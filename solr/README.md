@@ -210,7 +210,7 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 - Start the collection of metrics based on your current configuration and display them in the console:
   `sudo datadog-agent jmx collect`
 
-Need help? Contact [Datadog support](https://docs.datadoghq.com/help/).
+Need help? Contact [Datadog support][15].
 
 ## Further Reading
 
@@ -250,3 +250,4 @@ attribute:
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
 [14]: https://github.com/DataDog/integrations-core/blob/master/solr/assets/service_checks.json
+[15]: https://docs.datadoghq.com/help/
