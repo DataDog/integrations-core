@@ -210,6 +210,8 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 - Start the collection of metrics based on your current configuration and display them in the console:
   `sudo datadog-agent jmx collect`
 
+Need help? Contact [Datadog support](https://docs.datadoghq.com/help/).
+
 ## Further Reading
 
 ### Parsing a string value into a number
