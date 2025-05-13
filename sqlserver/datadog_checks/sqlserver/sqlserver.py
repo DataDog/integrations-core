@@ -45,6 +45,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
+    SqlserverTableSizeMetrics,
     SQLServerXESessionMetrics,
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks
@@ -878,6 +879,7 @@ class SQLServer(AgentCheck):
             SqlserverIndexUsageMetrics,
             SqlserverDBFragmentationMetrics,
             SqlserverDatabaseFilesMetrics,
+            SqlserverTableSizeMetrics,
         ]
 
     @property
