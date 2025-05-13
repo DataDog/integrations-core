@@ -1,10 +1,11 @@
 services:
   singlestore:
-    image: 'singlestore/cluster-in-a-box:centos-7.5.9-a8744b5453-3.2.11-1.12.1'
+    image: ghcr.io/singlestore-labs/singlestoredb-dev:0.2.51
     ports:
       - 3306:3306
       - 8080:8080
+    # follow these steps if running on m1: https://github.com/singlestore-labs/singlestoredb-dev-image?tab=readme-ov-file#how-to-run-the-docker-image-on-apple-silicon-m1m2-chips
+    platform: linux/amd64
     environment:
-      LICENSE_KEY: ${LICENSE_KEY}
       ROOT_PASSWORD: 'password'
       START_AFTER_INIT: 'Y'
