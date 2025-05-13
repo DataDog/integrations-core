@@ -32,7 +32,7 @@ def dd_environment(instance):
             )
         ],
         env_vars={'PROPERTIES_DIR': properties_dir},
-        sleep=60,
+        sleep=250,
         build=True,
         attempts=2,
     ):
