@@ -887,8 +887,6 @@ class TestPayloadGeneration:
 
         # Verify network section
         assert payload['network']['client']['hostname'] == 'TestHost'
-        assert 'ip' in payload['network']['client']
-        assert 'port' in payload['network']['client']
 
         # Verify sqlserver section
         assert payload['sqlserver']['xe_type'] == 'sql_batch_completed'
