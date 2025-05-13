@@ -430,6 +430,86 @@ class XESessionBase(DBMAsyncJob):
         if 'query_signature' in raw_event:
             normalized_event['query_signature'] = raw_event['query_signature']
 
+        # Determine primary SQL field for statement in db section
+        primary_field = self._get_primary_sql_field(raw_event)
+
+        # Create the new structure with db, network, and sqlserver sections
+        db_section = {
+            "application": normalized_event.get("client_app_name", ""),
+            "instance": normalized_event.get("database_name", ""),
+            "user": normalized_event.get("username", ""),
+            "query_signature": normalized_event.get("query_signature", ""),
+            "metadata": {
+                "tables": raw_event.get("dd_tables", []),
+                "commands": raw_event.get("dd_commands", []),
+                "comments": raw_event.get("dd_comments", []),
+            },
+        }
+
+        # Add raw_query_signature to db section if applicable
+        if self._collect_raw_query and "raw_query_signature" in normalized_event:
+            db_section["raw_query_signature"] = normalized_event.get("raw_query_signature", "")
+
+        # Add statement from primary SQL field if available
+        if primary_field and primary_field in normalized_event:
+            db_section["statement"] = normalized_event.get(primary_field, "")
+        else:
+            # Fallback to any available SQL field if primary not found
+            for field in self.get_sql_fields(raw_event.get("event_name", "")):
+                if field in normalized_event and normalized_event[field]:
+                    db_section["statement"] = normalized_event[field]
+                    self._log.debug(f"Using {field} as statement field instead of primary field {primary_field}")
+                    break
+            else:
+                # If we still don't have a statement, set it to empty string
+                db_section["statement"] = ""
+                self._log.debug(f"No SQL field found for statement in event type {raw_event.get('event_name', '')}")
+
+        # Create network section
+        network_section = {
+            "client": {
+                "hostname": normalized_event.get("client_hostname", ""),
+                # Placeholders for future implementation
+                "ip": "",  # To be populated later
+                "port": None,  # To be populated later
+            }
+        }
+
+        # Create sqlserver section with all remaining fields
+        sqlserver_section = {
+            "xe_type": normalized_event.get("xe_type", ""),
+            "event_fire_timestamp": normalized_event.get("event_fire_timestamp", ""),
+            "query_start": normalized_event.get("query_start", ""),
+            "session_id": normalized_event.get("session_id", 0),
+        }
+
+        # Add all the remaining fields to sqlserver section
+        for field, value in normalized_event.items():
+            # Skip fields that have been moved to other sections
+            if field in [
+                "client_app_name",
+                "database_name",
+                "username",
+                "query_signature",
+                "raw_query_signature",
+                "client_hostname",
+                "xe_type",
+                "event_fire_timestamp",
+                "query_start",
+                "session_id",
+            ]:
+                continue
+
+            # Add SQL fields to sqlserver section
+            if field in self.get_sql_fields(raw_event.get("event_name", "")):
+                sqlserver_section[field] = value
+            # Add remaining fields that don't belong elsewhere
+            elif field not in ["dd_tables", "dd_commands", "dd_comments"]:
+                sqlserver_section[field] = value
+
+        # Add duration as a top-level field
+        duration = normalized_event.get("duration_ms", 0)
+
         return {
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
@@ -444,7 +524,11 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "service": self._config.service,
-            "query_details": normalized_event,
+            # New structure fields
+            "db": db_section,
+            "network": network_section,
+            "sqlserver": sqlserver_section,
+            "duration": duration,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -508,8 +592,8 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_query_errors" if self.session_name == "datadog_query_errors" else "sqlserver_query_completions"
         )
 
-        # Create a list to collect all query details
-        all_query_details = []
+        # Create a list to collect all events
+        all_events = []
 
         # Track if we've logged an RQT sample for this batch
         rqt_sample_logged = False
@@ -523,14 +607,19 @@ class XESessionBase(DBMAsyncJob):
                 # Create a properly structured payload for the individual event
                 payload = self._create_event_payload(obfuscated_event)
 
-                # Extract query details to add to the batch
-                query_details = payload.get("query_details", {})
-                all_query_details.append({"query_details": query_details})
+                # Extract the structured event data to add to the batch
+                batched_event = {
+                    "db": payload.get("db", {}),
+                    "network": payload.get("network", {}),
+                    "sqlserver": payload.get("sqlserver", {}),
+                    "duration": payload.get("duration", 0),
+                }
+                all_events.append(batched_event)
 
                 # Process RQT events individually
                 if self._collect_raw_query and raw_sql_fields:
                     # Create RQT event
-                    rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
+                    rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, payload.get("sqlserver", {}))
 
                     if rqt_event:
                         # Log the first successful RQT event we encounter in this batch
@@ -556,7 +645,7 @@ class XESessionBase(DBMAsyncJob):
                 continue
 
         # Create a single batched payload for all events if we have any
-        if all_query_details:
+        if all_events:
             # Create base payload from the common fields (using the same structure as _create_event_payload)
             batched_payload = {
                 "host": self._check.resolved_hostname,
@@ -572,8 +661,8 @@ class XESessionBase(DBMAsyncJob):
                 "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 "cloud_metadata": self._config.cloud_metadata,
                 "service": self._config.service,
-                # Add the array of query details with the appropriate key
-                batch_key: all_query_details,
+                # Add the array of events with the appropriate key
+                batch_key: all_events,
             }
 
             # Log the batched payload for debugging
@@ -581,14 +670,14 @@ class XESessionBase(DBMAsyncJob):
                 try:
                     # Only include up to max configured limit events in the log
                     log_payload = batched_payload.copy()
-                    if len(all_query_details) > self.debug_sample_events:
-                        log_payload[batch_key] = all_query_details[: self.debug_sample_events]
-                        remaining_events = len(all_query_details) - self.debug_sample_events
+                    if len(all_events) > self.debug_sample_events:
+                        log_payload[batch_key] = all_events[: self.debug_sample_events]
+                        remaining_events = len(all_events) - self.debug_sample_events
                         log_payload[batch_key].append({"truncated": f"...and {remaining_events} more events"})
 
                     payload_json = json_module.dumps(log_payload, default=str, indent=2)
                     self._log.debug(
-                        f"Batched {self.session_name} payload with {len(all_query_details)} events "
+                        f"Batched {self.session_name} payload with {len(all_events)} events "
                         f"(showing {self.debug_sample_events}):\n{payload_json}"
                     )
                 except Exception as e:
@@ -652,37 +741,66 @@ class XESessionBase(DBMAsyncJob):
         if 'dd_comments' in obfuscated_event:
             obfuscated_event['dd_comments'] = list(set(obfuscated_event['dd_comments']))
 
+        # Ensure metadata fields are always present, even if empty
+        if 'dd_commands' not in obfuscated_event:
+            obfuscated_event['dd_commands'] = []
+        if 'dd_tables' not in obfuscated_event:
+            obfuscated_event['dd_tables'] = []
+        if 'dd_comments' not in obfuscated_event:
+            obfuscated_event['dd_comments'] = []
+
         return obfuscated_event, raw_sql_fields if raw_sql_fields else None
 
     def _get_primary_sql_field(self, event):
         """
         Get the primary SQL field for this event type.
-        This is the field that will be used for the main query signature.
-
-        Subclasses should override this method to return their primary field.
+        This is the field that will be used for the main query signature and as db.statement.
 
         Args:
             event: The event data dictionary
 
         Returns:
-            Name of the primary SQL field
+            Name of the primary SQL field or None if no suitable field is found
         """
-        # Default implementation - will be overridden by subclasses
-        # Try statement first, then sql_text, then batch_text
-        for field in self.get_sql_fields(event.get('event_name', '')):
+        event_type = event.get('event_name', '')
+
+        # Define priority order for each event type
+        field_priority = {
+            'sql_batch_completed': ['batch_text', 'sql_text', 'statement'],
+            'rpc_completed': ['statement', 'sql_text', 'batch_text'],
+            'module_end': ['statement', 'sql_text', 'batch_text'],
+            'error_reported': ['sql_text', 'batch_text', 'statement'],
+            'attention': ['batch_text', 'sql_text', 'statement'],
+            'sp_statement_completed': ['statement', 'sql_text', 'batch_text'],
+        }
+
+        # Use type-specific priority if available, otherwise use a default priority
+        priority_list = field_priority.get(event_type, ['statement', 'sql_text', 'batch_text'])
+
+        # Try fields in priority order
+        for field in priority_list:
             if field in event and event[field]:
+                self._log.debug(f"Using {field} as primary SQL field for {event_type}")
                 return field
+
+        # Fallback to any non-empty SQL field if none of the priority fields are found
+        for field in self.get_sql_fields(event_type):
+            if field in event and event[field]:
+                self._log.debug(f"Fallback to {field} as primary SQL field for {event_type}")
+                return field
+
+        self._log.debug(f"No primary SQL field found for {event_type}")
         return None
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _create_rqt_event(self, event, raw_sql_fields, query_details):
+    def _create_rqt_event(self, event, raw_sql_fields, sqlserver_section):
         """
         Create a Raw Query Text (RQT) event for a raw SQL statement.
 
         Args:
             event: The event data dictionary with obfuscated SQL fields
             raw_sql_fields: Dictionary containing the original SQL fields
-            query_details: Dictionary containing normalized query details with timing information
+            sqlserver_section: Dictionary containing sqlserver section with timing information
 
         Returns:
             Dictionary with the RQT event payload or None if the event should be skipped
@@ -728,7 +846,7 @@ class XESessionBase(DBMAsyncJob):
         sqlserver_fields = {
             "session_id": event.get("session_id"),
             "xe_type": event.get("event_name"),
-            "event_fire_timestamp": query_details.get("event_fire_timestamp"),
+            "event_fire_timestamp": sqlserver_section.get("event_fire_timestamp"),
         }
 
         # Only include duration and query_start for non-error events
@@ -737,7 +855,7 @@ class XESessionBase(DBMAsyncJob):
             sqlserver_fields.update(
                 {
                     "duration_ms": event.get("duration_ms"),
-                    "query_start": query_details.get("query_start"),
+                    "query_start": sqlserver_section.get("query_start"),
                 }
             )
         else:

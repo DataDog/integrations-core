@@ -67,7 +67,30 @@ def validate_common_payload_fields(payload, expected_source, expected_type):
         assert 'collection_interval' in payload
         assert 'sqlserver_version' in payload
         assert 'sqlserver_engine_edition' in payload
-        assert 'query_details' in payload
+
+        # Check for new structure fields in regular events
+        assert 'db' in payload
+        assert 'network' in payload
+        assert 'sqlserver' in payload
+        assert 'duration' in payload
+
+        # Check db section structure
+        assert 'application' in payload['db']
+        assert 'instance' in payload['db']
+        assert 'user' in payload['db']
+        assert 'query_signature' in payload['db']
+        assert 'metadata' in payload['db']
+        assert 'tables' in payload['db']['metadata']
+        assert 'commands' in payload['db']['metadata']
+        assert 'comments' in payload['db']['metadata']
+
+        # Check network section structure
+        assert 'client' in payload['network']
+        assert 'hostname' in payload['network']['client']
+
+        # Check sqlserver section has essential fields
+        assert 'xe_type' in payload['sqlserver']
+        assert 'event_fire_timestamp' in payload['sqlserver']
 
     # Fields that only exist in RQT events
     if expected_type == 'rqt':
@@ -834,8 +857,14 @@ class TestPayloadGeneration:
             'session_id': 123,
             'request_id': 456,
             'database_name': 'TestDB',
+            'client_app_name': 'TestApp',
+            'username': 'TestUser',
+            'client_hostname': 'TestHost',
             'batch_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
             'query_signature': 'abc123',
+            'dd_tables': ['Customers'],
+            'dd_commands': ['SELECT'],
+            'dd_comments': ['Test comment'],
         }
 
         # Create payload
@@ -846,14 +875,30 @@ class TestPayloadGeneration:
             payload, expected_source='datadog_query_completions', expected_type='query_completion'
         )
 
-        # Verify query details
-        query_details = payload['query_details']
-        assert query_details['xe_type'] == 'sql_batch_completed'
-        assert query_details['duration_ms'] == 10.0
-        assert query_details['session_id'] == 123
-        assert query_details['request_id'] == 456
-        assert query_details['database_name'] == 'TestDB'
-        assert query_details['query_signature'] == 'abc123'
+        # Verify db section
+        assert payload['db']['application'] == 'TestApp'
+        assert payload['db']['instance'] == 'TestDB'
+        assert payload['db']['user'] == 'TestUser'
+        assert payload['db']['query_signature'] == 'abc123'
+        assert payload['db']['statement'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
+        assert payload['db']['metadata']['tables'] == ['Customers']
+        assert payload['db']['metadata']['commands'] == ['SELECT']
+        assert payload['db']['metadata']['comments'] == ['Test comment']
+
+        # Verify network section
+        assert payload['network']['client']['hostname'] == 'TestHost'
+        assert 'ip' in payload['network']['client']
+        assert 'port' in payload['network']['client']
+
+        # Verify sqlserver section
+        assert payload['sqlserver']['xe_type'] == 'sql_batch_completed'
+        assert payload['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
+        assert payload['sqlserver']['session_id'] == 123
+        assert payload['sqlserver']['request_id'] == 456
+        assert payload['sqlserver']['batch_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
+
+        # Verify duration
+        assert payload['duration'] == 10.0
 
     @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     def test_create_rqt_event(self, mock_agent, query_completion_handler):
@@ -1031,11 +1076,29 @@ class TestRunJob:
             assert isinstance(original_payload[batch_key], list), f"'{batch_key}' should be a list"
             assert len(original_payload[batch_key]) > 0, f"'{batch_key}' list should not be empty"
 
-            # Verify structure of query details objects in the array
+            # Verify structure of events in the array
             for event in original_payload[batch_key]:
-                assert "query_details" in event, "Missing 'query_details' in event"
-                query_details = event["query_details"]
-                assert "xe_type" in query_details, "Missing 'xe_type' in query_details"
+                # Check for the new structure
+                assert "db" in event, "Missing 'db' in event"
+                assert "network" in event, "Missing 'network' in event"
+                assert "sqlserver" in event, "Missing 'sqlserver' in event"
+                assert "duration" in event, "Missing 'duration' in event"
+
+                # Check db section structure
+                assert "application" in event["db"], "Missing 'application' in db section"
+                assert "instance" in event["db"], "Missing 'instance' in db section"
+                assert "query_signature" in event["db"], "Missing 'query_signature' in db section"
+                assert "metadata" in event["db"], "Missing 'metadata' in db section"
+
+                # Check network section
+                assert "client" in event["network"], "Missing 'client' in network section"
+                assert "hostname" in event["network"]["client"], "Missing 'hostname' in client section"
+
+                # Check sqlserver section
+                assert "xe_type" in event["sqlserver"], "Missing 'xe_type' in sqlserver section"
+                assert (
+                    "event_fire_timestamp" in event["sqlserver"]
+                ), "Missing 'event_fire_timestamp' in sqlserver section"
 
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
@@ -1098,3 +1161,10 @@ class TestRunJob:
             # Verify the batch exists and contains multiple events
             assert batch_key in original_payload, f"Missing '{batch_key}' array in payload"
             assert len(original_payload[batch_key]) > 1, "Expected multiple events in the batch"
+
+            # Check first event has the new structure
+            first_event = original_payload[batch_key][0]
+            assert "db" in first_event, "Missing 'db' in event"
+            assert "network" in first_event, "Missing 'network' in event"
+            assert "sqlserver" in first_event, "Missing 'sqlserver' in event"
+            assert "duration" in first_event, "Missing 'duration' in event"

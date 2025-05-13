@@ -1020,42 +1020,69 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     # We should have at least one error event
     assert len(error_events) > 0, "No error events collected"
 
+    # Verify the new event structure contains db, network, sqlserver, and duration sections
+    for event in query_completion_events[:1]:
+        assert 'db' in event, "db section missing from event structure"
+        assert 'network' in event, "network section missing from event structure"
+        assert 'sqlserver' in event, "sqlserver section missing from event structure"
+        assert 'duration' in event, "duration field missing from event structure"
+
     # Verify specific query completion event details
     found_test_query = False
     for event in query_completion_events:
-        # Look at query_details field which contains the XE event info
-        query_details = event.get('query_details', {})
-        sql_text = query_details.get('sql_text', '')
+        # Check the SQL text in the sqlserver section
+        sqlserver = event.get('sqlserver', {})
+        sql_text = sqlserver.get('sql_text', '')
 
         if "WAITFOR DELAY" in sql_text and "SELECT 1" in sql_text:
             found_test_query = True
-            # Check for expected properties
-            assert "bob" in query_details.get('username', ''), "Username 'bob' not found in event"
-            assert 'duration_ms' in query_details, "Duration not found in event"
-            # The duration should be at least 2000ms (2 seconds)
-            duration = float(query_details.get('duration_ms', 0))
+            # Check for expected properties - now in different sections
+
+            # DB section checks
+            db = event.get('db', {})
+            assert "bob" in db.get('user', ''), "Username 'bob' not found in db.user"
+            assert 'query_signature' in db, "query_signature not found in db section"
+            assert 'statement' in db, "statement not found in db section"
+
+            # Check duration (now a top-level field)
+            duration = event.get('duration', 0)
             assert duration >= 2000, f"Expected duration >= 2000ms, but got {duration}ms"
-            # Verify raw_query_signature is present when collect_raw_query is enabled
-            assert 'raw_query_signature' in query_details, "raw_query_signature not found in query details"
-            assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
+
+            # Check sqlserver section
+            assert 'xe_type' in sqlserver, "xe_type not found in sqlserver section"
+            assert 'event_fire_timestamp' in sqlserver, "event_fire_timestamp not found in sqlserver section"
+
+            # Check network section
+            network = event.get('network', {})
+            assert 'client' in network, "client not found in network section"
+
+            # Verify raw_query_signature when collect_raw_query is enabled
+            assert 'raw_query_signature' in db, "raw_query_signature not found in db section"
+            assert db.get('raw_query_signature'), "raw_query_signature is empty"
 
     assert found_test_query, "Could not find our specific test query in the completion events"
 
     # Verify specific error event details
     found_error_query = False
     for event in error_events:
-        # Look at query_details field which contains the XE event info
-        query_details = event.get('query_details', {})
-        sql_text = query_details.get('sql_text', '')
+        # Check the SQL text in the sqlserver section
+        sqlserver = event.get('sqlserver', {})
+        sql_text = sqlserver.get('sql_text', '')
 
         if "SELECT 1/0" in sql_text:
             found_error_query = True
-            # Check for expected properties
-            assert "bob" in query_details.get('username', ''), "Username 'bob' not found in error event"
-            assert "Divide by zero" in query_details.get('message', ''), "Expected error message not found"
-            assert query_details.get('error_number') == 8134, "Expected error number 8134 not found"
-            # Verify raw_query_signature is present when collect_raw_query is enabled
-            assert 'raw_query_signature' in query_details, "raw_query_signature not found in error query details"
-            assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
+            # Check for expected properties - now in different sections
+
+            # DB section checks
+            db = event.get('db', {})
+            assert "bob" in db.get('user', ''), "Username 'bob' not found in db.user"
+
+            # Sqlserver section checks for error-specific fields
+            assert "Divide by zero" in sqlserver.get('message', ''), "Expected error message not found"
+            assert sqlserver.get('error_number') == 8134, "Expected error number 8134 not found"
+
+            # Verify raw_query_signature when collect_raw_query is enabled
+            assert 'raw_query_signature' in db, "raw_query_signature not found in db section"
+            assert db.get('raw_query_signature'), "raw_query_signature is empty"
 
     assert found_error_query, "Could not find our specific error query in the error events"
