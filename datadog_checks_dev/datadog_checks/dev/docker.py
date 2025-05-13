@@ -122,6 +122,7 @@ def docker_run(
     attempts=None,
     attempts_wait=1,
     capture=None,
+    pull_always=False,
 ):
     """
     A convenient context manager for safely setting up and tearing down Docker environments.
@@ -162,6 +163,8 @@ def docker_run(
             Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
         attempts_wait (int):
             Time to wait between attempts
+        pull_always (boolean):
+            Whether to use --pull=always
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
@@ -170,7 +173,12 @@ def docker_run(
         if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
 
-        composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
+        composeFileArgs = {
+            'compose_file': compose_file,
+            'build': build,
+            'service_name': service_name,
+            'pull_always': pull_always,
+        }
         if capture is not None:
             composeFileArgs['capture'] = capture
         set_up = ComposeFileUp(**composeFileArgs)
@@ -233,7 +241,7 @@ def docker_run(
 
 
 class ComposeFileUp(LazyFunction):
-    def __init__(self, compose_file, build=False, service_name=None, capture=None):
+    def __init__(self, compose_file, build=False, service_name=None, capture=None, pull_always=False):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
@@ -245,6 +253,9 @@ class ComposeFileUp(LazyFunction):
 
         if self.service_name:
             self.command.append(self.service_name)
+
+        if self.pull_always:
+            self.command.append('--pull-always')
 
     def __call__(self):
         args = {'check': True}
