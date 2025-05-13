@@ -1,0 +1,130 @@
+<event name="rpc_completed" package="sqlserver" timestamp="2025-04-24T20:57:04.937Z">
+	<data name="cpu_time">
+		<type name="uint64" package="package0" />
+		<value>
+			16000
+		</value>
+	</data>
+	<data name="duration">
+		<type name="uint64" package="package0" />
+		<value>
+			2699535
+		</value>
+	</data>
+	<data name="page_server_reads">
+		<type name="uint64" package="package0" />
+		<value>
+			0
+		</value>
+	</data>
+	<data name="physical_reads">
+		<type name="uint64" package="package0" />
+		<value>
+			0
+		</value>
+	</data>
+	<data name="logical_reads">
+		<type name="uint64" package="package0" />
+		<value>
+			75
+		</value>
+	</data>
+	<data name="writes">
+		<type name="uint64" package="package0" />
+		<value>
+			0
+		</value>
+	</data>
+	<data name="result">
+		<type name="rpc_return_result" package="sqlserver" />
+		<value>
+			0
+		</value>
+		<text>
+			OK
+		</text>
+	</data>
+	<data name="row_count">
+		<type name="uint64" package="package0" />
+		<value>
+			24
+		</value>
+	</data>
+	<data name="connection_reset_option">
+		<type name="connection_reset_option" package="sqlserver" />
+		<value>
+			0
+		</value>
+		<text>
+			None
+		</text>
+	</data>
+	<data name="object_name">
+		<type name="unicode_string" package="package0" />
+		<value>
+			sp_executesql
+		</value>
+	</data>
+	<data name="statement">
+		<type name="unicode_string" package="package0" />
+		<value>
+			exec sp_executesql N'EXECUTE [msdb].[dbo].[sp_agent_log_job_history] @job_id = @P1, @is_system = @P2, @step_id = @P3, @sql_message_id = @P4, @sql_severity = @P5, @run_status = @P6, @run_date = @P7, @run_time = @P8, @run_duration = @P9, @operator_id_emailed = @P10, @operator_id_netsent = @P11, @operator_id_paged = @P12, @retries_attempted = @P13, @session_id  = @P14, @message = @P15',N'@P1 uniqueidentifier,@P2 int,@P3 int,@P4 int,@P5 int,@P6 int,@P7 int,@P8 int,@P9 int,@P10 int,@P11 int,@P12 int,@P13 int,@P14 int,@P15 nvarchar(4000)','B3A023D3-F7F8-4D17-8524-59471E098205',0,0,0,0,0,20250424,205701,1,0,0,0,0,3,N'The job failed.  The Job was invoked by Schedule 9 (Failing Job Schedule).  The last step to run was step 1 (Set database to read only).'
+		</value>
+	</data>
+	<data name="data_stream">
+		<type name="binary_data" package="package0" />
+		<value />
+	</data>
+	<data name="output_parameters">
+		<type name="xml" package="package0" />
+		<value />
+	</data>
+	<action name="request_id" package="sqlserver">
+		<type name="uint32" package="package0" />
+		<value>
+			0
+		</value>
+	</action>
+	<action name="session_id" package="sqlserver">
+		<type name="uint16" package="package0" />
+		<value>
+			203
+		</value>
+	</action>
+	<action name="client_hostname" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			EC2AMAZ-ML3E0PH
+		</value>
+	</action>
+	<action name="client_app_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			SQLAgent - Job Manager
+		</value>
+	</action>
+	<action name="username" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			NT AUTHORITY\NETWORK SERVICE
+		</value>
+	</action>
+	<action name="database_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			msdb
+		</value>
+	</action>
+	<action name="sql_text" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			(@P1 uniqueidentifier,@P2 int,@P3 int,@P4 int,@P5 int,@P6 int,@P7 int,@P8 int,@P9 int,@P10 int,@P11 int,@P12 int,@P13 int,@P14 int,@P15 nvarchar(4000))EXECUTE [msdb].[dbo].[sp_agent_log_job_history] @job_id = @P1, @is_system = @P2, @step_id = @P3, @sql_message_id = @P4, @sql_severity = @P5, @run_status = @P6, @run_date = @P7, @run_time = @P8, @run_duration = @P9, @operator_id_emailed = @P10, @operator_id_netsent = @P11, @operator_id_paged = @P12, @retries_attempted = @P13, @session_id  = @P14, @message = @P15
+		</value>
+	</action>
+	<action name="attach_activity_id" package="package0">
+		<type name="activity_id" package="package0" />
+		<value>
+			C98F767E-39CD-4F0A-A4A2-5C7B28D2BE90-81
+		</value>
+	</action>
+</event>
