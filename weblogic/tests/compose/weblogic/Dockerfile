@@ -83,7 +83,7 @@ RUN /u01/oracle/createWLSDomain.sh && \
 
 
 RUN /u01/oracle/build-archive.sh
-RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
+#RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
 
 # Expose ports for admin, managed server, and debug
 EXPOSE $ADMIN_PORT $ADMIN_SERVER_SSL_PORT $MANAGED_SERVER_PORT $MANAGED_SERVER_SSL_PORT $DEBUG_PORT
