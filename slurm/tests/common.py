@@ -444,7 +444,7 @@ SINFO_MAP = {
             'tags': [],
         },
         # partition metrics
-        # PARTITION   | CLUSTER | NODES(A/I/O/T)| GRES         | GRES_USED  
+        # PARTITION   | CLUSTER | NODES(A/I/O/T)| GRES         | GRES_USED
         # test-queue* | N/A     | 1/2/0/3       | gpu:tesla:4  | gpu:tesla:3(IDX:0, 2-3)    # noqa: E501
         {
             'name': 'slurm.partition.node.allocated',
