@@ -11,7 +11,8 @@ SINFO_PARTITION_INFO_PARAMS = [
 ]
 SINFO_NODE_PARAMS = ["-haNO", "Partition:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,Features_act:|,Threads:|,AllocMem:"
-GPU_PARAMS = "|,Gres:|,GresUsed:"
+GPU_TOTAL = "|,Gres:"
+GPU_PARAMS = GPU_TOTAL + "|,GresUsed:"
 SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
 SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [

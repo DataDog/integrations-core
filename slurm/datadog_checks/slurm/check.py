@@ -13,6 +13,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from .config_models import ConfigMixin
 from .constants import (
     GPU_PARAMS,
+    GPU_TOTAL,
     NODE_MAP,
     PARTITION_MAP,
     SACCT_MAP,
@@ -88,7 +89,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 if self.gpu_stats:
                     self.sinfo_node_cmd[-1] += GPU_PARAMS
             if self.gpu_stats:
-                self.sinfo_partition_cmd[-1] += GPU_PARAMS
+                self.sinfo_partition_cmd[-1] += GPU_TOTAL
                 self.sinfo_partition_info_cmd[-1] += GPU_PARAMS
 
         if self.collect_squeue_stats:
@@ -178,7 +179,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             tags = self._process_tags(partition_data, PARTITION_MAP["tags"], tags)
 
             if self.gpu_stats:
-                gpu_tag, _ = self._process_sinfo_gpu(partition_data[-2], partition_data[-1], "partition", tags, False)
+                gpu_tag, _ = self._process_sinfo_gpu(partition_data[-1], None, "partition", tags)
                 tags.extend(gpu_tag)
 
             self._process_sinfo_aiot_state(partition_data[2], "partition", tags)
@@ -410,27 +411,26 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge(f'{namespace}.cpu.other', other, tags)
             self.gauge(f'{namespace}.cpu.total', total, tags)
 
-    def _process_sinfo_gpu(self, gres, gres_used, namespace, tags, submit_used_metrics=True):
+    def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
         used_gpu_used_idx = "null"
         gpu_type = "null"
         total_gpu = None
         used_gpu_count = None
 
         try:
-            # gpu:tesla:4(IDX:0-3) -> ["gpu","tesla","4(IDX","0-3)"]
-            gres_used_parts = gres_used.split(':')
-            # gpu:tesla:4 -> ["gpu","tesla","4"]
+            # Always parse total GPU info
             gres_total_parts = gres.split(':')
-
-            # Ensure gres_used_parts has the correct format for GPU usage
-            if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
-                _, gpu_type, used_gpu_count_part, used_gpu_used_idx = gres_used_parts
-                used_gpu_count = int(used_gpu_count_part.split('(')[0])
-                used_gpu_used_idx = used_gpu_used_idx.rstrip(')')
-
             if len(gres_total_parts) == 3 and gres_total_parts[0] == "gpu":
-                _, _, total_gpu_part = gres_total_parts
+                _, gpu_type, total_gpu_part = gres_total_parts
                 total_gpu = int(total_gpu_part)
+
+            # Only parse used GPU info if gres_used is not None
+            if gres_used is not None:
+                gres_used_parts = gres_used.split(':')
+                if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
+                    _, _, used_gpu_count_part, used_gpu_used_idx = gres_used_parts
+                    used_gpu_count = int(used_gpu_count_part.split('(')[0])
+                    used_gpu_used_idx = used_gpu_used_idx.rstrip(')')
         except (ValueError, IndexError) as e:
             self.log.debug(
                 "Invalid GPU data: gres:'%s', gres_used:'%s'. Skipping GPU metric submission. Error: %s",
@@ -444,7 +444,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         _tags = tags + gpu_tags
         if total_gpu is not None:
             self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
-        if used_gpu_count is not None and submit_used_metrics:
+        if used_gpu_count is not None and gres_used is not None:
             self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
 
         return gpu_tags, gpu_info_tags
