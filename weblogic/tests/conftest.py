@@ -22,7 +22,15 @@ def dd_environment(instance):
     compose_file = os.path.join(HERE, 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
-        conditions=[CheckDockerLogs(compose_file, ['WebLogic Server has started', 'Starting \"async\" replication service with remote cluster address \"null\"'])],
+        conditions=[
+            CheckDockerLogs(
+                compose_file,
+                [
+                    'WebLogic Server has started',
+                    'Starting \"async\" replication service with remote cluster address \"null\"',
+                ],
+            )
+        ],
         env_vars={'PROPERTIES_DIR': properties_dir},
         sleep=60,
         build=True,
