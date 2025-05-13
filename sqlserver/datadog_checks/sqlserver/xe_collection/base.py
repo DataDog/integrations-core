@@ -414,26 +414,18 @@ class XESessionBase(DBMAsyncJob):
             self._log.warning(f"Unrecognized session name: {self.session_name}, using default dbm_type")
             return "query_completion"
 
-    def _create_event_payload(self, raw_event):
+    def _create_db_section(self, normalized_event, raw_event, primary_field):
         """
-        Create a structured event payload for a single event with consistent format.
+        Create the db section of the event payload.
 
         Args:
-            raw_event: The raw event data to normalize
+            normalized_event: The normalized event data
+            raw_event: The raw event data
+            primary_field: The primary SQL field name
+
         Returns:
-            A dictionary with the standard payload structure
+            Dictionary containing the structured db section
         """
-        # Normalize the event - must be implemented by subclass
-        normalized_event = self._normalize_event_impl(raw_event)
-
-        # Add SQL metadata and signatures to the normalized event
-        if 'query_signature' in raw_event:
-            normalized_event['query_signature'] = raw_event['query_signature']
-
-        # Determine primary SQL field for statement in db section
-        primary_field = self._get_primary_sql_field(raw_event)
-
-        # Create the new structure with db, network, and sqlserver sections
         db_section = {
             "application": normalized_event.get("client_app_name", ""),
             "instance": normalized_event.get("database_name", ""),
@@ -465,15 +457,36 @@ class XESessionBase(DBMAsyncJob):
                 db_section["statement"] = ""
                 self._log.debug(f"No SQL field found for statement in event type {raw_event.get('event_name', '')}")
 
-        # Create network section
-        network_section = {
+        return db_section
+
+    def _create_network_section(self, normalized_event):
+        """
+        Create the network section of the event payload.
+
+        Args:
+            normalized_event: The normalized event data
+
+        Returns:
+            Dictionary containing the structured network section
+        """
+        return {
             "client": {
                 "hostname": normalized_event.get("client_hostname", ""),
                 # TODO: Populate ip and port by joining our XE events with sys.dm_exec_connections using the session ID
             }
         }
 
-        # Create sqlserver section with all remaining fields
+    def _create_sqlserver_section(self, normalized_event, raw_event):
+        """
+        Create the sqlserver section of the event payload.
+
+        Args:
+            normalized_event: The normalized event data
+            raw_event: The raw event data
+
+        Returns:
+            Dictionary containing the structured sqlserver section
+        """
         sqlserver_section = {
             "xe_type": normalized_event.get("xe_type", ""),
             "event_fire_timestamp": normalized_event.get("event_fire_timestamp", ""),
@@ -495,6 +508,7 @@ class XESessionBase(DBMAsyncJob):
                 "event_fire_timestamp",
                 "query_start",
                 "session_id",
+                "duration_ms",
             ]:
                 continue
 
@@ -504,6 +518,32 @@ class XESessionBase(DBMAsyncJob):
             # Add remaining fields that don't belong elsewhere
             elif field not in ["dd_tables", "dd_commands", "dd_comments"]:
                 sqlserver_section[field] = value
+
+        return sqlserver_section
+
+    def _create_event_payload(self, raw_event):
+        """
+        Create a structured event payload for a single event with consistent format.
+
+        Args:
+            raw_event: The raw event data to normalize
+        Returns:
+            A dictionary with the standard payload structure
+        """
+        # Normalize the event - must be implemented by subclass
+        normalized_event = self._normalize_event_impl(raw_event)
+
+        # Add SQL metadata and signatures to the normalized event
+        if 'query_signature' in raw_event:
+            normalized_event['query_signature'] = raw_event['query_signature']
+
+        # Determine primary SQL field for statement in db section
+        primary_field = self._get_primary_sql_field(raw_event)
+
+        # Create the new structure with db, network, and sqlserver sections
+        db_section = self._create_db_section(normalized_event, raw_event, primary_field)
+        network_section = self._create_network_section(normalized_event)
+        sqlserver_section = self._create_sqlserver_section(normalized_event, raw_event)
 
         # Add duration as a top-level field
         duration = normalized_event.get("duration_ms", 0)
@@ -522,6 +562,7 @@ class XESessionBase(DBMAsyncJob):
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "service": self._config.service,
+            # New structure fields
             "db": db_section,
             "network": network_section,
             "sqlserver": sqlserver_section,
@@ -739,12 +780,9 @@ class XESessionBase(DBMAsyncJob):
             obfuscated_event['dd_comments'] = list(set(obfuscated_event['dd_comments']))
 
         # Ensure metadata fields are always present, even if empty
-        if 'dd_commands' not in obfuscated_event:
-            obfuscated_event['dd_commands'] = []
-        if 'dd_tables' not in obfuscated_event:
-            obfuscated_event['dd_tables'] = []
-        if 'dd_comments' not in obfuscated_event:
-            obfuscated_event['dd_comments'] = []
+        for metadata_field in ['dd_commands', 'dd_tables', 'dd_comments']:
+            if metadata_field not in obfuscated_event:
+                obfuscated_event[metadata_field] = []
 
         return obfuscated_event, raw_sql_fields if raw_sql_fields else None
 
