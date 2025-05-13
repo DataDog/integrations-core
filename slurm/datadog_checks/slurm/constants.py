@@ -3,9 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 SINFO_PARTITION_PARAMS = [
     "-ahO",
-    "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:",
+    "Partition:|,Cluster:|,NodeAIOT:",
 ]
-SINFO_NODE_PARAMS = ["-haNO", "PartitionName:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
+SINFO_PARTITION_INFO_PARAMS = [
+    "-haO",
+    "Partition:|,Cluster:|,NodeList:|,Available:|,CPUs:|,Memory:|,StateLong:|,Nodes:",
+]
+SINFO_NODE_PARAMS = ["-haNO", "Partition:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,Features_act:|,Threads:|,AllocMem:"
 GPU_PARAMS = "|,Gres:|,GresUsed:"
 SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
@@ -20,17 +24,17 @@ SCONTROL_PARAMS = ["listpid"]
 PARTITION_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},
-        {"name": "slurm_cluster_name", "index": 5},
+        {"name": "slurm_cluster_name", "index": 1},
     ],
     "info_tags": [
-        {"name": "slurm_partition_node_list", "index": 1},
-        {"name": "slurm_partition_memory_assigned", "index": 4},
-        {"name": "slurm_partition_state", "index": 7},
+        {"name": "slurm_partition_node_list", "index": 2},
         {"name": "slurm_partition_availability", "index": 3},
-        {"name": "slurm_partition_cpus_assigned", "index": 2},
+        {"name": "slurm_partition_cpus_assigned", "index": 4},
+        {"name": "slurm_partition_memory_assigned", "index": 5},
+        {"name": "slurm_partition_state", "index": 6},
     ],
     "metrics": [
-        {"name": "partition.nodes.count", "index": 8},
+        {"name": "partition.nodes.count", "index": 7},
     ],
 }
 
