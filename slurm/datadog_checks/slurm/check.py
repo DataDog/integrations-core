@@ -305,11 +305,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 # CPU Utilized: 00:00:01
                 value = line.split(':', 1)[1].strip()
                 cpu_utilized = parse_duration(value)
-            elif line.startswith('CPU Efficiency:'):
+            if re.match(r'CPU Efficiency: ([\d.]+)%', line):
                 # CPU Efficiency: 20.00% of 00:00:05 core-walltime
-                match = re.match(r'CPU Efficiency: ([\d.]+)%', line)
-                if match:
-                    cpu_eff = float(match.group(1))
+                cpu_eff = float(match.group(1))
             elif line.startswith('Memory Utilized:'):
                 # Memory Utilized: 0.00 MB (estimated maximum)
                 match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
