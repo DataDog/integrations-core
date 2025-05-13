@@ -22,6 +22,7 @@ from .constants import (
     SDIAG_MAP,
     SINFO_ADDITIONAL_NODE_PARAMS,
     SINFO_NODE_PARAMS,
+    SINFO_PARTITION_INFO_PARAMS,
     SINFO_PARTITION_PARAMS,
     SINFO_STATE_CODE,
     SQUEUE_MAP,
@@ -79,6 +80,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # CMD compilation
         if self.collect_sinfo_stats:
             self.sinfo_partition_cmd = self.get_slurm_command('sinfo', SINFO_PARTITION_PARAMS)
+            self.sinfo_partition_info_cmd = self.get_slurm_command('sinfo', SINFO_PARTITION_INFO_PARAMS)
             self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
             if self.sinfo_collection_level > 1:
                 self.sinfo_node_cmd = self.get_slurm_command('sinfo', SINFO_NODE_PARAMS)
@@ -88,6 +90,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     self.sinfo_node_cmd[-1] += GPU_PARAMS
             if self.gpu_stats:
                 self.sinfo_partition_cmd[-1] += GPU_PARAMS
+                self.sinfo_partition_info_cmd[-1] += GPU_PARAMS
 
         if self.collect_squeue_stats:
             self.squeue_cmd = self.get_slurm_command('squeue', SQUEUE_PARAMS)
@@ -128,6 +131,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         if self.collect_sinfo_stats:
             commands.append(('sinfo', self.sinfo_partition_cmd, self.process_sinfo_partition))
+            commands.append(('sinfo', self.sinfo_partition_info_cmd, self.process_sinfo_partition_info))
             if self.sinfo_collection_level > 1:
                 commands.append(('snode', self.sinfo_node_cmd, self.process_sinfo_node))
 
@@ -163,7 +167,28 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 self.log.debug("No output from %s", name)
 
     def process_sinfo_partition(self, output):
-        # normal*|c1|1|up|1000|N/A|1/0/0/1|allocated|1
+        # test-queue*|N/A|0/3/0/3
+        lines = output.strip().split('\n')
+
+        if self.debug_sinfo_stats:
+            self.log.debug("Processing sinfo partition line: %s", lines)
+
+        for line in lines:
+            partition_data = line.split('|')
+
+            tags = []
+            tags.extend(self.tags)
+
+            tags = self._process_tags(partition_data, PARTITION_MAP["tags"], tags)
+
+            if self.gpu_stats:
+                gpu_tag, _ = self._process_sinfo_gpu(partition_data[-2], partition_data[-1], "partition", tags, False)
+                tags.extend(gpu_tag)
+
+            self._process_sinfo_aiot_state(partition_data[2], "partition", tags)
+
+    def process_sinfo_partition_info(self, output):
+        # normal*|c1|1|up|1000|N/A|allocated|1
         lines = output.strip().split('\n')
 
         if self.debug_sinfo_stats:
@@ -183,13 +208,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 )
                 tags.extend(gpu_tags)
 
-            self._process_metrics(partition_data, PARTITION_MAP, tags)
-
-            self._process_sinfo_aiot_state(partition_data[6], "partition", tags)
-
             tags = self._process_tags(partition_data, PARTITION_MAP["info_tags"], tags)
             if self.gpu_stats:
                 tags.extend(gpu_info_tags)
+
+            self._process_metrics(partition_data, PARTITION_MAP, tags)
             self.gauge('partition.info', 1, tags)
 
         self.gauge('sinfo.partition.enabled', 1)
@@ -444,7 +467,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge(f'{namespace}.cpu.other', other, tags)
             self.gauge(f'{namespace}.cpu.total', total, tags)
 
-    def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
+    def _process_sinfo_gpu(self, gres, gres_used, namespace, tags, submit_used_metrics=True):
         used_gpu_used_idx = "null"
         gpu_type = "null"
         total_gpu = None
@@ -478,7 +501,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         _tags = tags + gpu_tags
         if total_gpu is not None:
             self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
-        if used_gpu_count is not None:
+        if used_gpu_count is not None and submit_used_metrics:
             self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
 
         return gpu_tags, gpu_info_tags

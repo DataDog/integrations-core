@@ -444,16 +444,16 @@ SINFO_MAP = {
             'tags': [],
         },
         # partition metrics
-        # PARTITION |NODELIST |CPUS |AVAIL |MEMORY |CLUSTER |NODES(A/I/O/T) |STATE        |NODES         |GRES        |GRES_USED    # noqa: E501
-        # normal*   |c[1-2]   |   1 |up    |  1000 |N/A     |0/2/0/2        |idle~        |10            |gpu:tesla:4 |gpu:tesla:3(IDX:0,2-3)    # noqa: E501
+        # PARTITION   | CLUSTER | NODES(A/I/O/T)| GRES         | GRES_USED
+        # test-queue* | N/A     | 1/2/0/3       | gpu:tesla:4  | gpu:tesla:3(IDX:0, 2-3)    # noqa: E501
         {
             'name': 'slurm.partition.node.allocated',
-            'value': 0,
+            'value': 1,
             'tags': [
                 'slurm_cluster_name:N/A',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_name:test-queue',
             ],
         },
         {
@@ -463,7 +463,7 @@ SINFO_MAP = {
                 'slurm_cluster_name:N/A',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_name:test-queue',
             ],
         },
         {
@@ -473,27 +473,35 @@ SINFO_MAP = {
                 'slurm_cluster_name:N/A',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_name:test-queue',
             ],
         },
         {
             'name': 'slurm.partition.node.total',
-            'value': 2,
+            'value': 3,
             'tags': [
                 'slurm_cluster_name:N/A',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_name:test-queue',
             ],
         },
+        # PARTITION    | CLUSTER | NODELIST | AVAIL | CPUS | MEMORY | STATE     | NODES | GRES         | GRES_USED     # noqa: E501
+        # test-queue*  | N/A     | c[1-2]   | up    | 1    | 972    | allocated | 10    | gpu:tesla:4  | gpu:tesla:3(IDX:0, 2-3)    # noqa: E501
         {
             'name': 'slurm.partition.nodes.count',
             'value': 10,
             'tags': [
                 'slurm_cluster_name:N/A',
+                'slurm_partition_cpus_assigned:1',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_memory_assigned:972',
+                'slurm_partition_name:test-queue',
+                'slurm_partition_node_list:c[1-2]',
+                'slurm_partition_state:allocated',
+                'slurm_partition_availability:up',
+                'slurm_partition_gpu_used_idx:0,2-3',
             ],
         },
         {
@@ -503,7 +511,7 @@ SINFO_MAP = {
                 'slurm_cluster_name:N/A',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_name:test-queue',
             ],
         },
         {
@@ -513,7 +521,7 @@ SINFO_MAP = {
                 'slurm_cluster_name:N/A',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_name:normal',
+                'slurm_partition_name:test-queue',
             ],
         },
         {
@@ -524,60 +532,30 @@ SINFO_MAP = {
                 'slurm_partition_cpus_assigned:1',
                 'slurm_partition_gpu_type:tesla',
                 'slurm_default_partition:true',
-                'slurm_partition_memory_assigned:1000',
-                'slurm_partition_name:normal',
+                'slurm_partition_memory_assigned:972',
+                'slurm_partition_name:test-queue',
                 'slurm_partition_node_list:c[1-2]',
-                'slurm_partition_state:idle',
+                'slurm_partition_state:allocated',
                 'slurm_partition_availability:up',
-                'sinfo_state_code:powered_off',
                 'slurm_partition_gpu_used_idx:0,2-3',
             ],
         },
-        # PARTITION |NODELIST |CPUS |AVAIL |MEMORY |CLUSTER |NODES(A/I/O/T) |STATE        |NODES         |GRES         |GRES_USED   # noqa: E501
-        # foo       |c[3-4]   |   1 |down  |  2000 |N/A     |1/2/3/4        |idle*        |11            |(null)       |(null)    # noqa: E501
-        {
-            'name': 'slurm.partition.node.allocated',
-            'value': 1,
-            'tags': [
-                'slurm_cluster_name:N/A',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_name:foo',
-            ],
-        },
-        {
-            'name': 'slurm.partition.node.idle',
-            'value': 2,
-            'tags': [
-                'slurm_cluster_name:N/A',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_name:foo',
-            ],
-        },
-        {
-            'name': 'slurm.partition.node.other',
-            'value': 3,
-            'tags': [
-                'slurm_cluster_name:N/A',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_name:foo',
-            ],
-        },
-        {
-            'name': 'slurm.partition.node.total',
-            'value': 4,
-            'tags': [
-                'slurm_cluster_name:N/A',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_name:foo',
-            ],
-        },
+        # PARTITION    | CLUSTER | NODELIST | AVAIL | CPUS | MEMORY | STATE     | NODES | GRES         | GRES_USED    # noqa: E501
+        # foo          | N/A     | c[3-4]   | down  | 1    | 2000   | idle*     | 11    | (null)       | (null)     # noqa: E501
         {
             'name': 'slurm.partition.nodes.count',
             'value': 11,
             'tags': [
                 'slurm_cluster_name:N/A',
+                'slurm_partition_cpus_assigned:1',
                 'slurm_partition_gpu_type:null',
+                'slurm_partition_memory_assigned:2000',
                 'slurm_partition_name:foo',
+                'slurm_partition_node_list:c[3-4]',
+                'slurm_partition_state:idle',
+                'slurm_partition_availability:down',
+                'sinfo_state_code:non_responsive',
+                'slurm_partition_gpu_used_idx:null',
             ],
         },
         {
