@@ -53,6 +53,7 @@ class Faults:
             if not self.ndm_metadata_enabled():
                 self.log.warning("NDM metadata must be enabled (send_ndm_metadata) to collect faults")
                 return
+            self.log.info("collecting faults")
         if self.faultinst_faults_enabled():
             data = self.read_persistent_cache("max_timestamp_{}".format(Faults.FAULTINST_KEY))
             max_timestamp = from_json(data) if data else None
