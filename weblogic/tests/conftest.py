@@ -22,9 +22,9 @@ def dd_environment(instance):
     with docker_run(
         compose_file=compose_file,
         env_vars={'PROPERTIES_DIR': properties_dir},
-        sleep=100,
+        sleep=60,
         build=True,
-        attempts=3,
+        attempts=2,
     ):
         yield instance, {'use_jmx': True}
 
