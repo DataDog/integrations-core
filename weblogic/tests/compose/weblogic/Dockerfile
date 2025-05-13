@@ -83,8 +83,7 @@ RUN /u01/oracle/createWLSDomain.sh && \
 
 
 RUN /u01/oracle/build-archive.sh
-# TODO this fails with awk: fatal: cannot open file `/u01/oracle/properties/docker-build/domain.properties' for reading (No such file or directory)
-# RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
+#RUN /u01/oracle/setEnv.sh ${PROPERTIES_FILE_DIR}/docker-build/domain.properties
 
 # Expose ports for admin, managed server, and debug
 EXPOSE $ADMIN_PORT $ADMIN_SERVER_SSL_PORT $MANAGED_SERVER_PORT $MANAGED_SERVER_SSL_PORT $DEBUG_PORT
