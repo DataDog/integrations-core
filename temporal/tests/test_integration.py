@@ -33,8 +33,8 @@ def test_metadata(dd_run_check, datadog_agent, check):
         'version.scheme': 'semver',
         'version.major': '1',
         'version.minor': '27',
-        'version.patch': '2',
-        'version.raw': '1.27.2',
+        'version.patch': '0',
+        'version.raw': '1.27.0',
     }
 
     datadog_agent.assert_metadata(check.check_id, expected_version_metadata)

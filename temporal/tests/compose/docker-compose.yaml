@@ -54,6 +54,7 @@ services:
       - ES_SEEDS=elasticsearch
       - ES_VERSION=v7
       - PROMETHEUS_ENDPOINT=0.0.0.0:8000
+      - TEMPORAL_ADDRESS=temporal:7233
     image: temporalio/auto-setup:${TEMPORAL_VERSION}
     networks:
       - temporal-network
