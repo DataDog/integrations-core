@@ -78,7 +78,9 @@ Need help? Contact [Datadog support][15].
 
 <pre><code>
 #!/usr/bin/env bash
-# Script to add/update the Authorized key in locationd clients.plist for Datadog agent
+# Script to add/update the Authorized key in locationd clients.plist for Datadog agent (requires root access)
+# Usage: bash add_datadaog_agent_to_plist.sh [AGENT_BIN_PATH]
+# AGENT_BIN_PATH: optional - the agent binary path - default: /opt/datadog-agent/bin/agent/agent
 
 # Configuration
 PLIST_PATH="/var/db/locationd/clients.plist"
