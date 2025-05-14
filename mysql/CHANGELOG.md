@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.4.0 / 2025-05-14
+
+***Added***:
+
+* Add exclude_hostname option to specs ([#20259](https://github.com/DataDog/integrations-core/pull/20259))
+
 ## 15.3.1 / 2025-05-07
 
 ***Fixed***:

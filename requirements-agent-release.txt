@@ -130,7 +130,7 @@ datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
 datadog-milvus==1.2.0
 datadog-mongo==9.1.0
-datadog-mysql==15.3.1
+datadog-mysql==15.4.0
 datadog-nagios==3.0.0
 datadog-network==5.2.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
@@ -152,7 +152,7 @@ datadog-pgbouncer==8.1.2; sys_platform != 'win32'
 datadog-php-fpm==5.1.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.11.0
+datadog-postgres==22.12.0
 datadog-powerdns-recursor==4.1.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
