@@ -28,7 +28,7 @@ An administrator can also enable these settings using the following:
 
 #### macOS
 
-Just like on Windows, Wi-Fi telemetry collection on macOS requires user consent through location services. However, unlike Windows, macOS does not provide a well-defined mechanism for administrators to enable location access for specific processes - such as the Datadog Agent-at scale.
+Just like on Windows, Wi-Fi telemetry collection on macOS requires user consent through location services. However, unlike Windows, macOS does not provide a well-defined mechanism for administrators to enable location access for specific processes like the Datadog Agent at scale.
 
 To work around this, customers can adapt the `add_datadog_agent_to_plist.sh` script provided in **Appendix** to grant location access to the Agent process. This script requires **root** access and can be deployed across an enterprise Mac fleet using an MDM solution like Jamf.
 
