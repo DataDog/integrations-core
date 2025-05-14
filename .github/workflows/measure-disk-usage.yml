@@ -3,7 +3,7 @@ name: Measure Disk Usage
 on:
   pull_request:
     branches:
-    - master
+    - master 
 env:
   PYTHON_VERSION: "3.12"
 
