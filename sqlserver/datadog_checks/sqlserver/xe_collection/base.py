@@ -430,6 +430,17 @@ class XESessionBase(DBMAsyncJob):
         if 'query_signature' in raw_event:
             normalized_event['query_signature'] = raw_event['query_signature']
 
+        # Add primary_sql_field if available
+        if 'primary_sql_field' in raw_event:
+            normalized_event['primary_sql_field'] = raw_event['primary_sql_field']
+
+        # Add metadata if available
+        normalized_event['metadata'] = {
+            'tables': raw_event.get('dd_tables'),
+            'commands': raw_event.get('dd_commands'),
+            'comments': raw_event.get('dd_comments'),
+        }
+
         return {
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
@@ -518,7 +529,11 @@ class XESessionBase(DBMAsyncJob):
         for event in events:
             try:
                 # Obfuscate SQL fields and get the raw statement
-                obfuscated_event, raw_sql_fields = self._obfuscate_sql_fields(event)
+                obfuscated_event, raw_sql_fields, primary_sql_field = self._obfuscate_sql_fields(event)
+
+                # Add primary SQL field to the event if available
+                if primary_sql_field:
+                    obfuscated_event['primary_sql_field'] = primary_sql_field
 
                 # Create a properly structured payload for the individual event
                 payload = self._create_event_payload(obfuscated_event)
@@ -607,6 +622,7 @@ class XESessionBase(DBMAsyncJob):
         """SQL field obfuscation and signature creation"""
         obfuscated_event = event.copy()
         raw_sql_fields = {}
+        primary_sql_field = None
 
         # Get SQL fields for this event type
         sql_fields = self.get_sql_fields(event.get('event_name', ''))
@@ -636,8 +652,9 @@ class XESessionBase(DBMAsyncJob):
                         obfuscated_event['dd_comments'].extend(result['metadata']['comments'])
 
                     # Compute query_signature and raw_query_signature from the primary field
-                    primary_field = self._get_primary_sql_field(event)
-                    if field == primary_field or 'query_signature' not in obfuscated_event:
+                    current_primary_field = self._get_primary_sql_field(event)
+                    if field == current_primary_field or 'query_signature' not in obfuscated_event:
+                        primary_sql_field = field  # Store the field used for signature
                         obfuscated_event['query_signature'] = compute_sql_signature(result['query'])
                         raw_signature = compute_sql_signature(event[field])
                         raw_sql_fields['raw_query_signature'] = raw_signature
@@ -652,7 +669,7 @@ class XESessionBase(DBMAsyncJob):
         if 'dd_comments' in obfuscated_event:
             obfuscated_event['dd_comments'] = list(set(obfuscated_event['dd_comments']))
 
-        return obfuscated_event, raw_sql_fields if raw_sql_fields else None
+        return obfuscated_event, raw_sql_fields if raw_sql_fields else None, primary_sql_field
 
     def _get_primary_sql_field(self, event):
         """
@@ -698,7 +715,7 @@ class XESessionBase(DBMAsyncJob):
             return None
 
         # Get the primary SQL field for this event type
-        primary_field = self._get_primary_sql_field(event)
+        primary_field = event.get('primary_sql_field') or self._get_primary_sql_field(event)
         if not primary_field or primary_field not in raw_sql_fields:
             self._log.debug(
                 f"Skipping RQT event creation: Primary SQL field {primary_field} not found in raw_sql_fields"
@@ -729,6 +746,7 @@ class XESessionBase(DBMAsyncJob):
             "session_id": event.get("session_id"),
             "xe_type": event.get("event_name"),
             "event_fire_timestamp": query_details.get("event_fire_timestamp"),
+            "primary_sql_field": primary_field,
         }
 
         # Only include duration and query_start for non-error events
