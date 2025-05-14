@@ -910,7 +910,6 @@ class TestPayloadGeneration:
         assert rqt_event['db']['query_signature'] == 'abc123'
         assert rqt_event['db']['raw_query_signature'] == 'def456'
         assert rqt_event['db']['statement'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
-        assert rqt_event['db']['primary_sql_field'] == 'batch_text'
 
         # Verify metadata is present in the RQT event (RQT events already have this structure)
         assert 'metadata' in rqt_event['db']
@@ -925,6 +924,7 @@ class TestPayloadGeneration:
         assert rqt_event['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
         assert rqt_event['sqlserver']['duration_ms'] == 10.0
         assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:50.123Z'
+        assert rqt_event['sqlserver']['primary_sql_field'] == 'batch_text'
 
     def test_create_rqt_event_disabled(self, mock_check, mock_config):
         """Test RQT event creation when disabled"""

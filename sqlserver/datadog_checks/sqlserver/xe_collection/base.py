@@ -734,7 +734,6 @@ class XESessionBase(DBMAsyncJob):
             "query_signature": query_signature,
             "raw_query_signature": raw_sql_fields['raw_query_signature'],
             "statement": raw_sql_fields[primary_field],  # Primary field becomes the statement
-            "primary_sql_field": primary_field,  # Add primary SQL field name
             "metadata": {
                 "tables": event.get('dd_tables', None),
                 "commands": event.get('dd_commands', None),
@@ -747,6 +746,7 @@ class XESessionBase(DBMAsyncJob):
             "session_id": event.get("session_id"),
             "xe_type": event.get("event_name"),
             "event_fire_timestamp": query_details.get("event_fire_timestamp"),
+            "primary_sql_field": primary_field,
         }
 
         # Only include duration and query_start for non-error events
