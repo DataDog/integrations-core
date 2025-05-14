@@ -66,7 +66,7 @@ WLAN does not include any events.
 
 ### Channel Swap
 
-`Channel Swap` refers to the process of changing the Wi-Fi channel a router or Access Point is using to broadcast its signal. This is done to improve signal strength, reduce interference, or optimize performance, especially in areas with many competing Wi-Fi networks. `Channel Swap` event is detected when the *BSSID* of the connected Router or AP is the same but its channel had been changed. When the *BSSID* of the connected Router or AP had been changed (which makes it `Roaming` event if the Router or AP has the same *SSID*) it will not be considered as `Channel Swap` event even if the channel has been changed.
+`Channel Swap` refers to the process of changing the Wi-Fi channel a router or access point is using to broadcast its signal. This is done to improve signal strength, reduce interference, or optimize performance, especially in areas with many competing Wi-Fi networks. The `Channel Swap` event is detected when the *BSSID* of the connected router or access point is the same but its channel has been changed. When the *BSSID* of the connected router or access point has been changed (which makes it a `Roaming` event if the router or access point has the same *SSID*) it is not considered a `Channel Swap` event even if the channel has been changed.
 
 ## Troubleshooting
 
