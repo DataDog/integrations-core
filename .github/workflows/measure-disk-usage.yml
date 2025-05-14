@@ -117,6 +117,7 @@ jobs:
 
     - name: Upload diff PNGs
       if: false # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: diff-visuals
         path: diff_visualizations/
