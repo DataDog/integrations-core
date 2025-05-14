@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from ddev.cli.size.common import (
     compress,
@@ -12,6 +12,7 @@ from ddev.cli.size.common import (
     get_dependencies_sizes,
     get_files,
     get_gitignore_files,
+    get_org,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
@@ -122,7 +123,7 @@ def test_get_dependencies_sizes():
     ]
 
 
-def test_format_modules_multiple_platform():
+def test_format_modules():
     modules = [
         {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
         {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
@@ -147,31 +148,7 @@ def test_format_modules_multiple_platform():
         },
     ]
 
-    assert format_modules(modules, platform, version, True) == expected_output
-
-
-def test_format_modules_one_plat():
-    modules = [
-        {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
-        {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
-    ]
-    platform = "linux-aarch64"
-    version = "3.12"
-
-    expected_output = [
-        {
-            "Name": "module1",
-            "Type": "A",
-            "Size_Bytes": 1500,
-        },
-        {
-            "Name": "module2",
-            "Type": "B",
-            "Size_Bytes": 3000,
-        },
-    ]
-
-    assert format_modules(modules, platform, version, False) == expected_output
+    assert format_modules(modules, platform, version) == expected_output
 
 
 def test_get_files_grouped_and_with_versions():
@@ -317,3 +294,32 @@ def test_extract_version_from_about_py_no_version_pathlib():
         version = extract_version_from_about_py(str(fake_path))
 
     assert version == ""
+
+
+def test_get_org():
+    mock_app = Mock()
+    mock_path = Mock()
+
+    toml_data = b"""
+        [orgs.default]
+        api_key = "test_api_key"
+        app_key = "test_app_key"
+        site = "datadoghq.com"
+        """
+
+    mock_app.config_file.path = mock_path
+
+    with (
+        patch("builtins.open", mock_open(read_data=toml_data)),
+        patch.object(mock_path, "open", mock_open(read_data=toml_data)),
+    ):
+
+        result = get_org(mock_app)
+
+    expected = {
+        "api_key": "test_api_key",
+        "app_key": "test_app_key",
+        "site": "datadoghq.com",
+    }
+
+    assert result == expected

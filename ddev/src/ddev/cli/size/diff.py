@@ -4,7 +4,7 @@
 
 import os
 from datetime import datetime
-from typing import Literal, Optional, overload
+from typing import Optional
 
 import click
 from rich.console import Console
@@ -45,9 +45,9 @@ MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
 @click.option("--csv", is_flag=True, help="Output in CSV format")
 @click.option("--markdown", is_flag=True, help="Output in Markdown format")
 @click.option("--json", is_flag=True, help="Output in JSON format")
-@click.option("--save_to_png_path", help="Path to save the treemap as PNG")
+@click.option("--save-to-png-path", help="Path to save the treemap as PNG")
 @click.option(
-    "--show_gui",
+    "--show-gui",
     is_flag=True,
     help="Display a pop-up window with a treemap showing size differences between the two commits.",
 )
@@ -104,104 +104,53 @@ def diff(
                     raise ValueError(f"Invalid platform: {platform}")
                 elif version and version not in valid_versions:
                     raise ValueError(f"Invalid version: {version}")
-                if platform is None or version is None:
-                    modules_plat_ver: list[FileDataEntryPlatformVersion] = []
-                    platforms = valid_platforms if platform is None else [platform]
-                    versions = valid_versions if version is None else [version]
-                    progress.remove_task(task)
-                    combinations = [(p, v) for p in platforms for v in versions]
-                    for plat, ver in combinations:
-                        path = None
-                        if save_to_png_path:
-                            base, ext = os.path.splitext(save_to_png_path)
-                            path = f"{base}_{plat}_{ver}{ext}"
-                        parameters: Parameters = {
-                            "app": app,
-                            "platform": plat,
-                            "version": ver,
-                            "compressed": compressed,
-                            "csv": csv,
-                            "markdown": markdown,
-                            "json": json,
-                            "save_to_png_path": path,
-                            "show_gui": show_gui,
-                        }
-                        multiple_plats_and_vers: Literal[True] = True
-                        modules_plat_ver.extend(
-                            diff_mode(
-                                gitRepo,
-                                first_commit,
-                                second_commit,
-                                parameters,
-                                progress,
-                                multiple_plats_and_vers,
-                            )
-                        )
-                    if csv:
-                        print_csv(app, modules_plat_ver)
-                    elif json:
-                        print_json(app, modules_plat_ver)
-                else:
-                    progress.remove_task(task)
-                    modules: list[FileDataEntry] = []
-                    multiple_plat_and_ver: Literal[False] = False
-                    base_parameters: Parameters = {
+                modules_plat_ver: list[FileDataEntryPlatformVersion] = []
+                platforms = valid_platforms if platform is None else [platform]
+                versions = valid_versions if version is None else [version]
+                progress.remove_task(task)
+                combinations = [(p, v) for p in platforms for v in versions]
+                for plat, ver in combinations:
+                    path = None
+                    if save_to_png_path:
+                        base, ext = os.path.splitext(save_to_png_path)
+                        path = f"{base}_{plat}_{ver}{ext}"
+                    parameters: Parameters = {
                         "app": app,
-                        "platform": platform,
-                        "version": version,
+                        "platform": plat,
+                        "version": ver,
                         "compressed": compressed,
                         "csv": csv,
                         "markdown": markdown,
                         "json": json,
-                        "save_to_png_path": save_to_png_path,
+                        "save_to_png_path": path,
                         "show_gui": show_gui,
                     }
-                    modules.extend(
+                    modules_plat_ver.extend(
                         diff_mode(
                             gitRepo,
                             first_commit,
                             second_commit,
-                            base_parameters,
+                            parameters,
                             progress,
-                            multiple_plat_and_ver,
                         )
                     )
-                    if csv:
-                        print_csv(app, modules)
-                    elif json:
-                        print_json(app, modules)
+                if csv:
+                    print_csv(app, modules_plat_ver)
+                elif json:
+                    print_json(app, modules_plat_ver)
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
         return None
 
 
-@overload
 def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
     second_commit: str,
     params: Parameters,
     progress: Progress,
-    multiple_plats_and_vers: Literal[True],
-) -> list[FileDataEntryPlatformVersion]: ...
-@overload
-def diff_mode(
-    gitRepo: GitRepo,
-    first_commit: str,
-    second_commit: str,
-    params: Parameters,
-    progress: Progress,
-    multiple_plats_and_vers: Literal[False],
-) -> list[FileDataEntry]: ...
-def diff_mode(
-    gitRepo: GitRepo,
-    first_commit: str,
-    second_commit: str,
-    params: Parameters,
-    progress: Progress,
-    multiple_plats_and_vers: bool,
-) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
         gitRepo, params["platform"], params["version"], first_commit, second_commit, params["compressed"], progress
     )
@@ -213,13 +162,9 @@ def diff_mode(
         params["app"].display_error(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
-        formatted_modules = format_modules(
-            integrations + dependencies, params["platform"], params["version"], multiple_plats_and_vers
-        )
+        formatted_modules = format_modules(integrations + dependencies, params["platform"], params["version"])
     else:
-        formatted_modules = format_modules(
-            integrations + dependencies, params["platform"], params["version"], multiple_plats_and_vers
-        )
+        formatted_modules = format_modules(integrations + dependencies, params["platform"], params["version"])
         formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
         for module in formatted_modules:
             if module["Size_Bytes"] > 0:

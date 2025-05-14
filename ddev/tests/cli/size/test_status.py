@@ -74,8 +74,8 @@ def test_status_no_args(ddev, mock_size_status):
     assert ddev("size", "status", "--csv").exit_code == 0
     assert ddev("size", "status", "--markdown").exit_code == 0
     assert ddev("size", "status", "--json").exit_code == 0
-    assert ddev("size", "status", "--save_to_png_path", "out.png").exit_code == 0
-    assert ddev("size", "status", "--show_gui").exit_code == 0
+    assert ddev("size", "status", "--save-to-png-path", "out.png").exit_code == 0
+    assert ddev("size", "status", "--show-gui").exit_code == 0
 
 
 def test_status(ddev, mock_size_status):
@@ -85,9 +85,9 @@ def test_status(ddev, mock_size_status):
     assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--markdown")).exit_code == 0
     assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--json")).exit_code == 0
     assert (
-        ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--save_to_png_path", "out.png")
+        ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--save-to-png-path", "out.png")
     ).exit_code == 0
-    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--show_gui")).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--show-gui")).exit_code == 0
 
 
 def test_status_wrong_platform(ddev):

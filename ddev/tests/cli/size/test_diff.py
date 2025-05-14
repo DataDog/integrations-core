@@ -70,8 +70,8 @@ def test_diff_no_args(ddev, mock_size_diff_dependencies):
     assert ddev("size", "diff", "commit1", "commit2", "--csv").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--markdown").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--json").exit_code == 0
-    assert ddev("size", "diff", "commit1", "commit2", "--save_to_png_path", "out.png").exit_code == 0
-    assert ddev("size", "diff", "commit1", "commit2", "--show_gui").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--save-to-png-path", "out.png").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
 
 
 def test_diff_with_platform_and_version(ddev, mock_size_diff_dependencies):
@@ -108,14 +108,14 @@ def test_diff_with_platform_and_version(ddev, mock_size_diff_dependencies):
             "linux-aarch64",
             "--python",
             "3.12",
-            "--save_to_png_path",
+            "--save-to-png-path",
             "out.png",
         ).exit_code
         == 0
     )
     assert (
         ddev(
-            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--show_gui"
+            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--show-gui"
         ).exit_code
         == 0
     )
@@ -172,8 +172,8 @@ def test_diff_no_differences(ddev):
         assert ddev("size", "diff", "commit1", "commit2", "--csv").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--markdown").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--json").exit_code == 0
-        assert ddev("size", "diff", "commit1", "commit2", "--save_to_png_path", "out.png").exit_code == 0
-        assert ddev("size", "diff", "commit1", "commit2", "--show_gui").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--save-to-png-path", "out.png").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
 
 
 def test_diff_invalid_platform(ddev):

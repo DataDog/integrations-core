@@ -55,13 +55,13 @@ def test_timeline_integration(ddev, mock_timeline, app):
             "int1",
             "commit1",
             "commit2",
-            "--save_to_png_path",
+            "--save-to-png-path",
             "out_int.png",
             obj=app,
         ).exit_code
         == 0
     )
-    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--show_gui", obj=app).exit_code == 0
+    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--show-gui", obj=app).exit_code == 0
     assert (
         ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--threshold", "1000", obj=app).exit_code
         == 0
@@ -187,7 +187,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     #         "commit2",
     #         "--platform",
     #         "linux-x86_64",
-    #         "--save_to_png_path",
+    #         "--save-to-png-path",
     #         "out2.png",
     #         obj=app,
     #     ).exit_code
@@ -202,7 +202,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         "commit2",
         "--platform",
         "linux-x86_64",
-        "--save_to_png_path",
+        "--save-to-png-path",
         "out_dep.png",
         obj=app,
     )
@@ -225,7 +225,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "commit2",
             "--platform",
             "linux-x86_64",
-            "--show_gui",
+            "--show-gui",
             obj=app,
         ).exit_code
         == 0
@@ -313,14 +313,14 @@ def test_timeline_integration_no_changes(ddev):
             "No changes found"
             in (
                 result := ddev(
-                    "size", "timeline", "integration", "int1", "commit1", "commit2", "--save_to_png_path", "out.png"
+                    "size", "timeline", "integration", "int1", "commit1", "commit2", "--save-to-png-path", "out.png"
                 )
             ).output
             and result.exit_code == 0
         )
         assert (
             "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--show_gui")).output
+            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--show-gui")).output
             and result.exit_code == 0
         )
         assert (

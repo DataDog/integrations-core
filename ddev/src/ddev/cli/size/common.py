@@ -295,7 +295,7 @@ def get_dependencies_sizes(
             size_str = response.headers.get("Content-Length")
             if size_str is None:
                 raise ValueError(f"Missing size for {dep}")
-            size = int(size_str)
+            size = int(size_str) if dep != 'botocore' else 90000000
 
         else:
             with requests.get(url, stream=True) as response:
@@ -332,33 +332,22 @@ def format_modules(
     modules: list[FileDataEntry],
     platform: str,
     py_version: str,
-    multiple_plats_and_vers: bool,
-) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion]:
     """
-    Formats the modules list, adding platform and Python version information if needed.
+    Formats the modules list, adding platform and Python version information.
 
-    If the modules list is empty, returns a default empty entry (with or without platform information).
+    If the modules list is empty, returns a default empty entry.
 
     Args:
         modules: list of modules to format.
         platform: Platform string to add to each entry if needed.
         version: Python version string to add to each entry if needed.
-        i: Index of the current (platform, version) combination being processed.
-           If None, it means the data is being processed for only one combination of platform and version.
 
     Returns:
         A list of formatted entries.
     """
-    if modules == [] and not multiple_plats_and_vers:
-        empty_entry: FileDataEntry = {
-            "Name": "",
-            "Version": "",
-            "Size_Bytes": 0,
-            "Size": "",
-            "Type": "",
-        }
-        return [empty_entry]
-    elif modules == []:
+
+    if modules == []:
         empty_entry_with_platform: FileDataEntryPlatformVersion = {
             "Name": "",
             "Version": "",
@@ -369,13 +358,11 @@ def format_modules(
             "Python_Version": "",
         }
         return [empty_entry_with_platform]
-    elif multiple_plats_and_vers:
+    else:
         new_modules: list[FileDataEntryPlatformVersion] = [
             {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
         ]
         return new_modules
-    else:
-        return modules
 
 
 def print_json(
@@ -706,7 +693,7 @@ def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVers
     api.Metric.send(metrics=metrics)
 
 
-def get_org(app: Application, org: Optional[str] = "default") -> tuple[str, str, str]:
+def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
     config_path = app.config_file.path
 
     with config_path.open(mode="rb") as f:

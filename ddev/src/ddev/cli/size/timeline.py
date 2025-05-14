@@ -4,7 +4,7 @@ import tempfile
 import zipfile
 from datetime import date, datetime
 from pathlib import Path
-from typing import Literal, Optional, overload
+from typing import Optional, overload
 
 import click
 import matplotlib.pyplot as plt
@@ -65,9 +65,9 @@ console = Console(stderr=True)
 @click.option("--csv", is_flag=True, help="Output results in CSV format")
 @click.option("--markdown", is_flag=True, help="Output in Markdown format")
 @click.option("--json", is_flag=True, help="Output in JSON format")
-@click.option("--save_to_png_path", help="Path to save the treemap as PNG")
+@click.option("--save-to-png-path", help="Path to save the treemap as PNG")
 @click.option(
-    "--show_gui",
+    "--show-gui",
     is_flag=True,
     help="Display a pop-up window with a line chart showing the size evolution of the selected module over time.",
 )
@@ -172,10 +172,9 @@ def timeline(
                     return
                 if type == "dependency":
                     modules_plat: list[CommitEntryPlatformWithDelta] = []
-                    multiple_plats_and_vers: Literal[True] = True
                     progress.remove_task(task)
                     dep_parameters: ParametersTimelineDependency
-                    if not platform:
+                    if platform is None:
                         for plat in valid_platforms:
                             path = None
                             if save_to_png_path:
@@ -186,7 +185,6 @@ def timeline(
                                 "type": "dependency",
                                 "module": module,
                                 "threshold": threshold,
-                                "platform": plat,
                                 "compressed": compressed,
                                 "csv": csv,
                                 "markdown": markdown,
@@ -194,6 +192,7 @@ def timeline(
                                 "save_to_png_path": path,
                                 "show_gui": show_gui,
                                 "first_commit": None,
+                                "platform": plat,
                             }
 
                             modules_plat.extend(
@@ -201,18 +200,16 @@ def timeline(
                                     gitRepo,
                                     commits,
                                     dep_parameters,
-                                    multiple_plats_and_vers,
                                     progress,
                                 )
                             )
 
-                    else:
+                    else:  # dependency and platform
                         dep_parameters = {
                             "app": app,
                             "type": "dependency",
                             "module": module,
                             "threshold": threshold,
-                            "platform": platform,
                             "compressed": compressed,
                             "csv": csv,
                             "markdown": markdown,
@@ -220,13 +217,13 @@ def timeline(
                             "save_to_png_path": save_to_png_path,
                             "show_gui": show_gui,
                             "first_commit": None,
+                            "platform": platform,
                         }
                         modules_plat.extend(
                             timeline_mode(
                                 gitRepo,
                                 commits,
                                 dep_parameters,
-                                multiple_plats_and_vers,
                                 progress,
                             )
                         )
@@ -235,15 +232,14 @@ def timeline(
                         print_csv(app, modules_plat)
                     elif json:
                         print_json(app, modules_plat)
-                else:
+
+                else:  # integration
                     modules: list[CommitEntryWithDelta] = []
-                    multiple_plat_and_ver: Literal[False] = False
                     int_parameters: ParametersTimelineIntegration = {
                         "app": app,
                         "type": "integration",
                         "module": module,
                         "threshold": threshold,
-                        "platform": None,
                         "compressed": compressed,
                         "csv": csv,
                         "markdown": markdown,
@@ -251,6 +247,7 @@ def timeline(
                         "save_to_png_path": save_to_png_path,
                         "show_gui": show_gui,
                         "first_commit": first_commit,
+                        "platform": None,
                     }
                     progress.remove_task(task)
                     modules.extend(
@@ -258,7 +255,6 @@ def timeline(
                             gitRepo,
                             commits,
                             int_parameters,
-                            multiple_plat_and_ver,
                             progress,
                         )
                     )
@@ -277,7 +273,6 @@ def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
     params: ParametersTimelineDependency,
-    multiple_plats_and_vers: Literal[True],
     progress: Progress,
 ) -> list[CommitEntryPlatformWithDelta]: ...
 
@@ -287,17 +282,6 @@ def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
     params: ParametersTimelineIntegration,
-    multiple_plats_and_vers: Literal[False],
-    progress: Progress,
-) -> list[CommitEntryWithDelta]: ...
-
-
-@overload
-def timeline_mode(
-    gitRepo: GitRepo,
-    commits: list[str],
-    params: ParametersTimelineDependency,
-    multiple_plats_and_vers: Literal[False],
     progress: Progress,
 ) -> list[CommitEntryWithDelta]: ...
 
@@ -306,7 +290,6 @@ def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
     params: ParametersTimelineIntegration | ParametersTimelineDependency,
-    multiple_plats_and_vers: bool,
     progress: Progress,
 ) -> list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]:
     if params["type"] == "integration":
@@ -324,7 +307,7 @@ def timeline_mode(
             progress,
         )
     trimmed_modules = trim_modules(modules, params["threshold"])
-    formatted_modules = format_modules(trimmed_modules, params["platform"], multiple_plats_and_vers)
+    formatted_modules = format_modules(trimmed_modules, params["platform"])
 
     if params["markdown"]:
         print_markdown(params["app"], "Timeline for " + params["module"], formatted_modules)
@@ -370,7 +353,6 @@ def get_repo_info(
         gitRepo: Active GitRepo instance.
         params: Parameters Typed Dictionary containing module name, type, platform, and other configuration options.
         commits: List of commits to process.
-        first_commit: First commit hash where the given integration was introduced (only for integrations).
         progress: Progress bar instance.
 
     Returns:
@@ -378,30 +360,10 @@ def get_repo_info(
     """
     with progress:
         if params["type"] == "integration":
-            file_data = process_commits(commits, params, gitRepo, progress, params["first_commit"])
+            file_data = process_commits(commits, params, gitRepo, progress)
         else:
-            file_data = process_commits(commits, params, gitRepo, progress, params["first_commit"])
+            file_data = process_commits(commits, params, gitRepo, progress)
     return file_data
-
-
-@overload
-def process_commits(
-    commits: list[str],
-    params: ParametersTimelineIntegration,
-    gitRepo: GitRepo,
-    progress: Progress,
-    first_commit: str,
-) -> list[CommitEntry]: ...
-
-
-@overload
-def process_commits(
-    commits: list[str],
-    params: ParametersTimelineDependency,
-    gitRepo: GitRepo,
-    progress: Progress,
-    first_commit: None,
-) -> list[CommitEntry]: ...
 
 
 def process_commits(
@@ -409,7 +371,6 @@ def process_commits(
     params: ParametersTimelineIntegration | ParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
-    first_commit: Optional[str],
 ) -> list[CommitEntry]:
     """
     Processes a list of commits for a given integration or dependency.
@@ -422,7 +383,6 @@ def process_commits(
         params: ParametersTimeline dict containing module name, type, platform, and other configuration options.
         gitRepo: GitRepo instance managing the repository.
         progress: Progress bar instance.
-        first_commit: First commit hash where the given integration was introduced (only for integrations).
 
     Returns:
         A list of CommitEntry objects with commit metadata and size information.
@@ -436,9 +396,8 @@ def process_commits(
     for commit in commits:
         gitRepo.sparse_checkout_commit(commit, folder)
         date_str, author, message = gitRepo.get_commit_metadata(commit)
-        date, message, commit = format_commit_data(date_str, message, commit, first_commit)
+        date, message, commit = format_commit_data(date_str, message, commit, params["first_commit"])
         if params["type"] == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
-            assert params["platform"] is not None
             result = get_dependencies(
                 repo,
                 params["module"],
@@ -696,7 +655,6 @@ def get_version(files: list[str], platform: str) -> str:
 def format_modules(
     modules: list[CommitEntryWithDelta],
     platform: Optional[str],
-    multiple_plats_and_vers: bool,
 ) -> list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]:
     """
     Formats the modules list, adding platform and Python version information if needed.
@@ -713,7 +671,7 @@ def format_modules(
     Returns:
         A list of formatted entries.
     """
-    if modules == [] and multiple_plats_and_vers and platform:
+    if modules == [] and platform:
         empty_module_platform: CommitEntryPlatformWithDelta = {
             "Size_Bytes": 0,
             "Version": "",
@@ -738,7 +696,7 @@ def format_modules(
             "Delta": " ",
         }
         return [empty_module]
-    elif multiple_plats_and_vers and platform:
+    elif platform:
         new_modules: list[CommitEntryPlatformWithDelta] = [{**entry, "Platform": platform} for entry in modules]
         return new_modules
     else:
