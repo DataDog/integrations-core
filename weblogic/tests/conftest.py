@@ -30,7 +30,7 @@ def dd_environment(instance):
                     'Starting \"async\" replication service with remote cluster address \"null\"',
                     'The server \"managed-server2\" connected to this server',
                     'The server \"managed-server1\" connected to this server',
-                    'Server state changed to RUNNING'
+                    'Server state changed to RUNNING',
                 ],
             )
         ],
