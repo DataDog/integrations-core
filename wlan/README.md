@@ -18,7 +18,7 @@ The following settings need to be enabled:
 - **Settings > Privacy & security > Location > Location services**
 - **Settings > Privacy & security > Location > Let desktop apps access your location**
 
-One can quickly check if the Location API is not disabled by running `netsh wlan show interface` command which would fail to report any Wi-Fi interface connection even if you are connected.
+You can check if the Location API is not disabled by running `netsh wlan show interface` command, which would fail to report any Wi-Fi interface connection even if you are connected.
 
 An administrator can also enable these settings using the following:
 - [Registry][17]
@@ -62,7 +62,7 @@ WLAN does not include any events.
 
 ### Roaming
 
-`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. A `Roaming` event is detected when the *BSSID* of the connected router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the router or AP is not broadcasted, roaming detection is not possible. When a `Roaming` event is detected then `system.wlan.roaming_events` metric is incremented. Switching to a router with a different *SSID* is not considered to be `Roaming`.
+`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. A `Roaming` event is detected when the *BSSID* of the connected router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the router or AP is not broadcasted, roaming detection is not possible. When a `Roaming` event is detected, the `system.wlan.roaming_events` metric is then incremented. Switching to a router with a different *SSID* is not considered to be `Roaming`.
 
 ### Channel Swap
 
@@ -76,7 +76,7 @@ Need help? Contact [Datadog support][15].
 
 **add_datadog_agent_to_plist.sh**
 
-<pre><code>
+```shell script
 #!/usr/bin/env bash
 # Script to add/update the authorized key in `locationd/clients.plist` for the Datadog agent (requires root access)
 # Usage: bash add_datadaog_agent_to_plist.sh [AGENT_BIN_PATH]
@@ -182,7 +182,6 @@ sudo plutil -convert binary1 "$PLIST_PATH"
 echo "[INFO] Changes applied successfully."
 echo "[INFO] To apply changes, either reboot or run: sudo killall locationd"
 trap - ERR
-</code></pre>
 
 [1]: https://en.wikipedia.org/wiki/IEEE_802.11
 [2]: https://en.wikipedia.org/wiki/Service_set_(802.11_network)#SSID
