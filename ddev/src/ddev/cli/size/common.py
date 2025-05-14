@@ -211,7 +211,7 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
 
 def extract_version_from_about_py(path: str) -> str:
     """
-    Extracts the __version__ string from a given __about__.py file.
+    Extracts the __version__ string from a given __about__.py file
     """
     try:
         with open(path, "r", encoding="utf-8") as f:
