@@ -34,7 +34,7 @@ To work around this, customers can adapt the `add_datadog_agent_to_plist.sh` scr
 
 ### Installation
 
-The wlan check is included in the [Datadog Agent][8], but is not configured. Please see the next section to configure the check.
+The WLAN check is included in the [Datadog Agent][8], but is not configured. Please see the next section to configure the check.
 
 ### Configuration
 
