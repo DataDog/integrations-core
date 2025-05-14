@@ -47,6 +47,7 @@ REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
 REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
 USING_LATEST = False
 
+# test
 if POSTGRES_VERSION is not None:
     USING_LATEST = POSTGRES_VERSION.endswith('latest')
     POSTGRES_IMAGE = POSTGRES_VERSION + "-alpine"
