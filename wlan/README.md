@@ -12,7 +12,7 @@ It collects key Wi-Fi metrics, including Access Point (AP) information such as [
 
 #### Windows
 
-Starting from Windows 11 24H2 (Fall 2024), according to [Changes to API behavior for Wi-Fi access and location][16], wlan check which is using Windows wlan APIs, requires a user or an administrator consent. If the host's `Settings > Privacy & security > Location` has not been enabled this wlan check will fail to report wlan/Wi-Fi telemetry.
+Starting from Windows 11 24H2 (Fall 2024), according to [Changes to API behavior for Wi-Fi access and location][16], WLA Check (which uses Windows Wlan APIs), requires user or administrator consent. If the host's `Settings > Privacy & security > Location` has not been enabled, this WLAN check will fail to report WLAN/Wi-Fi telemetry.
 
 The following settings needs to be enabled
 - Settings > Privacy & security > Location > Location services
