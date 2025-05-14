@@ -120,6 +120,8 @@ def test_collect_load_activity(
     instance = copy(dbm_instance)
     instance_tags = set(instance.get('tags', []))
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags.add("database_hostname:stubbed.hostname")
+    expected_instance_tags.add("database_instance:stubbed.hostname")
     if collect_raw_query_statement:
         instance["collect_raw_query_statement"] = {"enabled": True}
         expected_instance_tags.add("raw_query_statement:enabled")

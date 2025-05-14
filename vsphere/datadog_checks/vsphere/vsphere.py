@@ -71,6 +71,7 @@ SERVICE_CHECK_NAME = 'can_connect'
 
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
+    HA_SUPPORTED = True
 
     def __new__(cls, name, init_config, instances):
         # type: (Type[VSphereCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck

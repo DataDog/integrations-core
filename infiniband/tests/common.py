@@ -14,5 +14,10 @@ MOCK_RDMA_COUNTER_DATA = {
     'rx_bytes': '3000',
 }
 
+MOCK_STATUS_DATA = {
+    'state': '4: ACTIVE',
+    'phys_state': '5: LinkUp',
+}
+
 MOCK_DEVICE = 'mlx5_0'
 MOCK_PORT = '1'

@@ -1413,6 +1413,91 @@
                 "width": 12,
                 "height": 8
             }
+        },
+        {
+          "id": 2956975389292306,
+          "definition": {
+            "title": "Faults",
+            "background_color": "vivid_purple",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": []
+          },
+          "layout": {
+            "x": 0,
+            "y": 34,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "id": 987022990164424,
+          "definition": {
+            "title": "",
+            "title_size": "16",
+            "title_align": "left",
+            "requests": [
+              {
+                "response_format": "event_list",
+                "query": {
+                  "data_source": "logs_stream",
+                  "query_string": "service:cisco-aci source:cisco-aci",
+                  "indexes": [],
+                  "storage": "hot"
+                },
+                "columns": [
+                  {
+                    "field": "status_line",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "timestamp",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "host",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "status",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "content",
+                    "width": "compact"
+                  },
+                  {
+                    "field": "@cisco_aci.ack",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.cause",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.code",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.occur",
+                    "width": "auto"
+                  },
+                  {
+                    "field": "@cisco_aci.severity",
+                    "width": "auto"
+                  }
+                ]
+              }
+            ],
+            "type": "list_stream"
+          },
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 7
+          }
         }
     ],
     "template_variables": [

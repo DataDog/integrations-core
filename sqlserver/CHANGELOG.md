@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 22.3.1 / 2025-04-25
+
+***Fixed***:
+
+* Use DB_NAME for query metrics in an Azure SQL database since joining on sys.databases doesn't always work. The dbid from dm_exec_query_stats doesn't match the one in sys.databases. ([#20097](https://github.com/DataDog/integrations-core/pull/20097))
+
+## 22.3.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+
+## 22.2.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.1.0 / 2025-04-17
+
+***Added***:
+
+* Optimize SQL Server integration by removing redundant query comment parsing using `extract_sql_comments` and switching stored procedure name extraction to use `OBJECT_NAME(sproc_object_id, dbid)`; when `disable_secondary_tags` is enabled, fall back to parsing the procedure name from the raw query text. ([#19935](https://github.com/DataDog/integrations-core/pull/19935))
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+***Fixed***:
+
+* Remove unnecessary `like` from SQL Server deadlock query ([#19921](https://github.com/DataDog/integrations-core/pull/19921))
+* Fix SQL Server integration when database is using case sensitive collation ([#19930](https://github.com/DataDog/integrations-core/pull/19930))
+* Fixed support for FreeTDS driver ([#19931](https://github.com/DataDog/integrations-core/pull/19931))
+
 ## 22.0.0 / 2025-03-19
 
 ***Changed***:

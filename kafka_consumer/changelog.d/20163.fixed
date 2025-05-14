@@ -1,0 +1,1 @@
+Create new kafka consumer client only if needed when fetching highwater offsets.

@@ -141,4 +141,4 @@ Need help? Contact [Datadog support][7].
 [7]: https://docs.datadoghq.com/help/
 [8]: https://www.sonicwall.com/support/knowledge-base/how-can-i-configure-a-syslog-server-on-a-sonicwall-firewall/170505984096810
 [9]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-[10]: https://app.datadoghq.com/logs/pipelines
+[10]: /logs/pipelines

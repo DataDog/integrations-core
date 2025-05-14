@@ -36,7 +36,7 @@ def get_local_driver():
     we need to define the 'FreeTDS' driver in odbcinst.ini
     """
     if ON_MACOS:
-        return '/usr/local/lib/libtdsodbc.so'
+        return '/opt/homebrew/Cellar/freetds/1.4.26/lib/libtdsodbc.so'
     elif ON_WINDOWS:
         return '{ODBC Driver 18 for SQL Server}'
     else:

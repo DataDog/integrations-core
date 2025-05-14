@@ -1,0 +1,1 @@
+Fix duplicate explain plan sampling on idle clients and incorrect event timestamp

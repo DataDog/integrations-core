@@ -103,10 +103,14 @@ integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
+integration/celery:
+- celery/**/*
 integration/ceph:
 - ceph/**/*
 integration/cert_manager:
 - cert_manager/**/*
+integration/checkpoint_harmony_email_and_collaboration:
+- checkpoint_harmony_email_and_collaboration/**/*
 integration/checkpoint_quantum_firewall:
 - checkpoint_quantum_firewall/**/*
 integration/cilium:
@@ -171,6 +175,8 @@ integration/dcgm:
 - dcgm/**/*
 integration/delinea_privilege_manager:
 - delinea_privilege_manager/**/*
+integration/delinea_secret_server:
+- delinea_secret_server/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -309,12 +315,16 @@ integration/jmeter:
 - jmeter/**/*
 integration/journald:
 - journald/**/*
+integration/juniper_srx_firewall:
+- juniper_srx_firewall/**/*
 integration/kafka:
 - kafka/**/*
 integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/kaspersky:
+- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
@@ -347,6 +357,8 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
+integration/kubevirt:
+- kubevirt/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
 integration/kubevirt_controller:
@@ -365,6 +377,8 @@ integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
+integration/linux_audit_logs:
+- linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/mailchimp:
@@ -385,6 +399,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_sysmon:
+- microsoft_sysmon/**/*
 integration/milvus:
 - milvus/**/*
 integration/mimecast:
@@ -435,6 +451,8 @@ integration/openstack:
 - openstack/**/*
 integration/openstack_controller:
 - openstack_controller/**/*
+integration/openvpn:
+- openvpn/**/*
 integration/oracle:
 - oracle/**/*
 integration/orca_security:

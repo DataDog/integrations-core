@@ -52,7 +52,7 @@ def test_check(aggregator, dd_run_check, instance, server_type):
 @pytest.mark.parametrize(
     'url, expected_status',
     [
-        pytest.param('mocked', AgentCheck.OK),
+        pytest.param('valid_json', AgentCheck.OK),
         pytest.param('wrong', AgentCheck.CRITICAL),
     ],
 )
