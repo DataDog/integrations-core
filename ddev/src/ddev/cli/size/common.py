@@ -7,7 +7,6 @@ import re
 import shutil
 import subprocess
 import tempfile
-import time
 import tomllib
 import zipfile
 import zlib
@@ -295,7 +294,7 @@ def get_dependencies_sizes(
             size_str = response.headers.get("Content-Length")
             if size_str is None:
                 raise ValueError(f"Missing size for {dep}")
-            size = int(size_str) 
+            size = int(size_str)
         else:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()
@@ -712,22 +711,16 @@ def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
         "site": org_config.get("site"),
     }
 
+
 def is_everything_committed():
-    result = subprocess.run(
-        ["git", "status", "--porcelain"],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
     return result.stdout.strip() == ""
 
+
 def get_last_commit_timestamp():
-    result = subprocess.run(
-        ["git", "log", "-1", "--format=%ct"],
-        capture_output=True,
-        text=True,
-        check=True
-    )
+    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
     return int(result.stdout.strip())
+
 
 class WrongDependencyFormat(Exception):
     def __init__(self, mensaje: str) -> None:
