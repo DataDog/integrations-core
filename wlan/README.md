@@ -62,7 +62,7 @@ wlan does not include any events.
 
 ### Roaming
 
-`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. `Roaming` event is detected when the *BSSID* of the connected Router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the Router or AP is not broadcasted Roaming detection is not possible. When a `Roaming` event is detected then `system.wlan.roaming_events` metric is incremented. Switch to router with a different *SSID* is not considered `Roaming`.
+`Roaming` refers to a device's ability to seamlessly switch from one Wi-Fi access point to another as it moves around, without losing its connection. This happens when the device finds a stronger or more reliable signal from a different access point, ensuring continuous internet access. A `Roaming` event is detected when the *BSSID* of the connected router or AP has been changed but its *SSID* is still the same.  When the *SSID* of the router or AP is not broadcasted, roaming detection is not possible. When a `Roaming` event is detected then `system.wlan.roaming_events` metric is incremented. Switching to a router with a different *SSID* is not considered to be `Roaming`.
 
 ### Channel Swap
 
