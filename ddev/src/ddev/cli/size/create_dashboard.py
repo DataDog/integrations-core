@@ -12,19 +12,19 @@ from ddev.cli.size.common import get_org, get_valid_platforms
 @click.option(
     "--dd-org",
     type=str,
-    default="default",
-    help="Datadog organization name taken from your config file." "If not specified, the default org will be used",
+    required=True,
+    help="Datadog organization name taken from your config file.",
 )
 @click.pass_obj
 def create_dashboard(
     app: Application,
-    org: str,
+    dd_org: str,
 ) -> None:
     """
     Creates a dashboard with the metrics on the Datadog platform
     """
     try:
-        config_file_info = get_org(app, org)
+        config_file_info = get_org(app, dd_org)
         headers = {
             "DD-API-KEY": config_file_info["api_key"],
             "DD-APPLICATION-KEY": config_file_info["app_key"],

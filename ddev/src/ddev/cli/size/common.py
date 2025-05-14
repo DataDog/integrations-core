@@ -295,8 +295,7 @@ def get_dependencies_sizes(
             size_str = response.headers.get("Content-Length")
             if size_str is None:
                 raise ValueError(f"Missing size for {dep}")
-            size = int(size_str) if dep != 'botocore' else 90000000
-
+            size = int(size_str) 
         else:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()
@@ -664,7 +663,11 @@ def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVers
     )
     config_file_info = get_org(app, org)
 
-    timestamp = time.time()
+    if not is_everything_committed():
+        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+
+    timestamp = get_last_commit_timestamp()
+
     metrics = []
 
     for item in modules:
@@ -709,6 +712,22 @@ def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
         "site": org_config.get("site"),
     }
 
+def is_everything_committed():
+    result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True,
+        text=True
+    )
+    return result.stdout.strip() == ""
+
+def get_last_commit_timestamp():
+    result = subprocess.run(
+        ["git", "log", "-1", "--format=%ct"],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    return int(result.stdout.strip())
 
 class WrongDependencyFormat(Exception):
     def __init__(self, mensaje: str) -> None:

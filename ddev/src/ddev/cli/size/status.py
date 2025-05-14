@@ -45,16 +45,7 @@ console = Console(stderr=True)
     is_flag=True,
     help="Display a pop-up window with a treemap showing the current size distribution of modules.",
 )
-@click.option("--send-metrics", is_flag=True, default=False, help="Sends metrics to Datadog.")
-@click.option(
-    "--dd-org",
-    type=str,
-    default="default",
-    help=(
-        "Datadog organization name. Requires --send-metrics."
-        " If not specified, the default org of the config file will be used"
-    ),
-)
+@click.option("--send-metrics-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @click.pass_obj
 def status(
     app: Application,
@@ -66,8 +57,7 @@ def status(
     json: bool,
     save_to_png_path: Optional[str],
     show_gui: bool,
-    send_metrics: bool,
-    dd_org: str,
+    send_metrics_dd_org: str,
 ) -> None:
     """
     Show the current size of all integrations and dependencies.
@@ -75,8 +65,6 @@ def status(
     try:
         if sum([csv, markdown, json]) > 1:
             raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
-        if dd_org and not send_metrics:
-            raise click.UsageError("--dd-org cannot be used without --send-metrics.")
         repo_path = app.repo.path
         valid_platforms = get_valid_platforms(repo_path)
         valid_versions = get_valid_versions(repo_path)
@@ -115,8 +103,8 @@ def status(
                 print_csv(app, modules_plat_ver)
             elif json:
                 print_json(app, modules_plat_ver)
-            if send_metrics:
-                send_metrics_to_dd(app, modules_plat_ver, dd_org, compressed)
+            if send_metrics_dd_org:
+                send_metrics_to_dd(app, modules_plat_ver, send_metrics_dd_org, compressed)
     except Exception as e:
         app.abort(str(e))
 
