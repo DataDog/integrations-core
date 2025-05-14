@@ -434,6 +434,7 @@ jobs:
     - name: Set reusable script - Notarize binaries
       id: script-notarize
       # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution
+      # We pass the --wait flag to catch problems with signing sooner at the cost of slowing down the job a little bit.
       run: |-
         cat <<"OUTER" >> $GITHUB_OUTPUT
         script<<INNER
@@ -447,6 +448,7 @@ jobs:
         cd ../notarize-bin
         for f in *; do
           rcodesign notary-submit -vv \
+          -- wait \
           --api-key-path /tmp/app-store-connect.json \
           "$f"
         done
