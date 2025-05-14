@@ -44,9 +44,6 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": ["virt-api"]
-    },
-    "dashboards": {
-      "KubeVirt Overview": "assets/dashboards/kubevirt_overview.json"
     }
   },
   "author": {

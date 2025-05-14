@@ -643,7 +643,9 @@ instances:
         #
         # keep_identifier_quotation: false
 
-    ## Configure the collection of raw query statements in query activity and execution plans.
+    ## Configure the collection of raw query statements in query activity, execution plans, and XE events.
+    ## To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and 
+    ## `xe_collection.query_errors.enabled` to `true`.
     ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
     ## or personally identifiable information in query text.
     ## Enabling this option will allow the collection and ingestion of raw query statements and 
@@ -796,6 +798,42 @@ instances:
     ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
     #
     # propagate_agent_tags: false
+
+    ## Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
+    ##
+    ## Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+    #
+    # xe_collection:
+
+        ## @param query_completions - mapping - optional
+        ## Configure the collection of completed queries from the `datadog_query_completions` XE session.
+        ##
+        ## Set `query_completions.enabled` to `true` to enable the collection of query completion events.
+        ##
+        ## Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of 
+        ## query completion events. Defaults to 10 seconds. If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+        ##
+        ## Use `query_completions.max_events` to set the maximum number of query completion events to process 
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query, 
+        ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+        #
+        # query_completions: {}
+
+        ## @param query_errors - mapping - optional
+        ## Configure the collection of query errors from the `datadog_query_errors` XE session.
+        ##
+        ## Set `query_errors.enabled` to `true` to enable the collection of query error events.
+        ##
+        ## Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of 
+        ## query error events. Defaults to 10 seconds. If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+        ##
+        ## Use `query_errors.max_events` to set the maximum number of query error events to process 
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query, 
+        ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+        #
+        # query_errors: {}
 
     ## Configure the collection of deadlock data.
     #
