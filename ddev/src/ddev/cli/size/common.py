@@ -53,7 +53,7 @@ class CommitEntryPlatformWithDelta(CommitEntryWithDelta):
     Platform: str  # Target platform (e.g. linux-aarch64)
 
 
-class Parameters(TypedDict):
+class CLIParameters(TypedDict):
     app: Application
     platform: str
     version: str
@@ -65,7 +65,7 @@ class Parameters(TypedDict):
     show_gui: bool
 
 
-class ParametersTimeline(TypedDict):
+class CLIParametersTimeline(TypedDict):
     app: Application
     module: str
     threshold: Optional[int]
@@ -77,13 +77,13 @@ class ParametersTimeline(TypedDict):
     show_gui: bool
 
 
-class ParametersTimelineIntegration(ParametersTimeline):
+class CLIParametersTimelineIntegration(CLIParametersTimeline):
     type: Literal["integration"]
     first_commit: str
     platform: None
 
 
-class ParametersTimelineDependency(ParametersTimeline):
+class CLIParametersTimelineDependency(CLIParametersTimeline):
     type: Literal["dependency"]
     first_commit: None
     platform: str

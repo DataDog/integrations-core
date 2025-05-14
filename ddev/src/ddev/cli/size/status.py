@@ -14,7 +14,7 @@ from ddev.cli.application import Application
 from .common import (
     FileDataEntry,
     FileDataEntryPlatformVersion,
-    Parameters,
+    CLIParameters,
     format_modules,
     get_dependencies,
     get_files,
@@ -82,7 +82,7 @@ def status(
                 if save_to_png_path:
                     base, ext = os.path.splitext(save_to_png_path)
                     path = f"{base}_{plat}_{ver}{ext}"
-                parameters: Parameters = {
+                parameters: CLIParameters = {
                     "app": app,
                     "platform": plat,
                     "version": ver,
@@ -107,7 +107,7 @@ def status(
         else:
             modules: list[FileDataEntry] = []
             multiple_plat_and_ver: Literal[False] = False
-            base_parameters: Parameters = {
+            base_parameters: CLIParameters = {
                 "app": app,
                 "platform": platform,
                 "version": version,
@@ -137,18 +137,18 @@ def status(
 @overload
 def status_mode(
     repo_path: Path,
-    params: Parameters,
+    params: CLIParameters,
     multiple_plats_and_vers: Literal[True],
 ) -> list[FileDataEntryPlatformVersion]: ...
 @overload
 def status_mode(
     repo_path: Path,
-    params: Parameters,
+    params: CLIParameters,
     multiple_plats_and_vers: Literal[False],
 ) -> list[FileDataEntry]: ...
 def status_mode(
     repo_path: Path,
-    params: Parameters,
+    params: CLIParameters,
     multiple_plats_and_vers: bool,
 ) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):

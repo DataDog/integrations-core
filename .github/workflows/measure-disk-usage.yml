@@ -1,7 +1,7 @@
 name: Measure Disk Usage
 
 on:
-  push:
+  pull_request:
     branches:
     - master
 env:
@@ -93,7 +93,7 @@ jobs:
         if-no-files-found: error
   
     - name: Upload file sizes diff (uncompressed)
-      if: false # DDisabled for now: size difference can be misleading due to dependencies not being built in the same PR
+      if: false # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: diff-uncompressed.csv

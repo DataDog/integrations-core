@@ -13,10 +13,10 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeEl
 from ddev.cli.application import Application
 
 from .common import (
+    CLIParameters,
     FileDataEntry,
     FileDataEntryPlatformVersion,
     GitRepo,
-    Parameters,
     convert_to_human_readable_size,
     format_modules,
     get_dependencies,
@@ -115,7 +115,7 @@ def diff(
                         if save_to_png_path:
                             base, ext = os.path.splitext(save_to_png_path)
                             path = f"{base}_{plat}_{ver}{ext}"
-                        parameters: Parameters = {
+                        parameters: CLIParameters = {
                             "app": app,
                             "platform": plat,
                             "version": ver,
@@ -145,7 +145,7 @@ def diff(
                     progress.remove_task(task)
                     modules: list[FileDataEntry] = []
                     multiple_plat_and_ver: Literal[False] = False
-                    base_parameters: Parameters = {
+                    base_parameters: CLIParameters = {
                         "app": app,
                         "platform": platform,
                         "version": version,
@@ -181,7 +181,7 @@ def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
     second_commit: str,
-    params: Parameters,
+    params: CLIParameters,
     progress: Progress,
     multiple_plats_and_vers: Literal[True],
 ) -> list[FileDataEntryPlatformVersion]: ...
@@ -190,7 +190,7 @@ def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
     second_commit: str,
-    params: Parameters,
+    params: CLIParameters,
     progress: Progress,
     multiple_plats_and_vers: Literal[False],
 ) -> list[FileDataEntry]: ...
@@ -198,7 +198,7 @@ def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
     second_commit: str,
-    params: Parameters,
+    params: CLIParameters,
     progress: Progress,
     multiple_plats_and_vers: bool,
 ) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:

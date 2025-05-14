@@ -1,4 +1,3 @@
-import traceback
 from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -177,43 +176,22 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
         ).exit_code
         == 0
     )
-    # assert ( a
-    #     ddev(
-    #         "size",
-    #         "timeline",
-    #         "dependency",
-    #         "dep1",
-    #         "commit1",
-    #         "commit2",
-    #         "--platform",
-    #         "linux-x86_64",
-    #         "--save_to_png_path",
-    #         "out2.png",
-    #         obj=app,
-    #     ).exit_code
-    #     == 0
-    # )
-    result = ddev(
-        "size",
-        "timeline",
-        "dependency",
-        "dep1",
-        "commit1",
-        "commit2",
-        "--platform",
-        "linux-x86_64",
-        "--save_to_png_path",
-        "out_dep.png",
-        obj=app,
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-x86_64",
+            "--save_to_png_path",
+            "out2.png",
+            obj=app,
+        ).exit_code
+        == 0
     )
-    if result.exception:
-        print("❌ Exception raised during CLI call:")
-        print(f"Type: {type(result.exception).__name__}")
-        print(f"Message: {result.exception}")
-        print("--- Traceback ---")
-        traceback.print_exception(type(result.exception), result.exception, result.exception.__traceback__)
-
-    assert result.exit_code == 0
 
     assert (
         ddev(
