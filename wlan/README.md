@@ -16,7 +16,7 @@ Starting from Windows 11 24H2 (Fall 2024), according to [Changes to API behavior
 
 The following settings need to be enabled:
 - **Settings > Privacy & security > Location > Location services**
-- Settings > Privacy & security > Location > Let's desktop apps access your location
+- **Settings > Privacy & security > Location > Let desktop apps access your location**
 
 One can quickly check if the Location API is not disabled by running `netsh wlan show interface` command which would fail to report any Wi-Fi interface connection even if you are connected.
 
