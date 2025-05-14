@@ -84,6 +84,10 @@ def instance_self_leader_check():
     return False
 
 
+def instance_services_tags_include_service_name():
+    return True
+
+
 def instance_single_node_install():
     return False
 
