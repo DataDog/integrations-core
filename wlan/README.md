@@ -56,7 +56,7 @@ See [metadata.csv][14] for a list of metrics that this integration provides.
 
 ### Events
 
-wlan does not include any events.
+WLAN does not include any events.
 
 ## Terminology
 
