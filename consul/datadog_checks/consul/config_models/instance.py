@@ -91,6 +91,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     services_exclude: Optional[tuple[str, ...]] = None
     services_include: Optional[tuple[str, ...]] = None
+    services_tags_keys_include: Optional[tuple[str, ...]] = None
     single_node_install: Optional[bool] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
