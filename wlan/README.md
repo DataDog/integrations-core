@@ -182,6 +182,7 @@ sudo plutil -convert binary1 "$PLIST_PATH"
 echo "[INFO] Changes applied successfully."
 echo "[INFO] To apply changes, either reboot or run: sudo killall locationd"
 trap - ERR
+```
 
 [1]: https://en.wikipedia.org/wiki/IEEE_802.11
 [2]: https://en.wikipedia.org/wiki/Service_set_(802.11_network)#SSID
