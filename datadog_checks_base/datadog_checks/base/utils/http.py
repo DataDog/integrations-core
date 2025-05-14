@@ -153,9 +153,10 @@ class RequestsWrapper(object):
         'request_size',
         'tls_protocols_allowed',
         'tls_ciphers_allowed',
+        'tls_context',
     )
 
-    def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
+    def __init__(self, instance, init_config, remapper=None, logger=None, session=None, tls_context=None):
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
@@ -348,12 +349,17 @@ class RequestsWrapper(object):
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
         ciphers = config.get('tls_ciphers')
-        if ciphers:
-            if 'ALL' in ciphers:
-                updated_ciphers = "ALL"
-            else:
-                updated_ciphers = ":".join(ciphers)
+        if ciphers is None:
+            updated_ciphers = 'ALL'
+            self.logger.debug('No ciphers specified, defaulting to ALL')
+        elif 'ALL' in ciphers:
+            updated_ciphers = "ALL"
+        else:
+            updated_ciphers = ":".join(ciphers)
         self.tls_ciphers_allowed = updated_ciphers
+
+        # If a TLS context was provided, use it
+        self.tls_context = tls_context
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -534,14 +540,23 @@ class RequestsWrapper(object):
 
     @property
     def session(self):
-        # TODO: modify the session object to use the same context and ciphers for all requests
         if self._session is None:
             self._session = requests.Session()
 
             # Enables HostHeaderSSLAdapter
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
-                self._session.mount('https://', _http_utils.HostHeaderSSLAdapter())
+                https_adapter = _http_utils.HostHeaderSSLAdapter()
+            else:
+                https_adapter = requests.adapters.HTTPAdapter()
+            # Set the context
+            if self.tls_context:
+                https_adapter.init_poolmanager(
+                    connections=self._session.adapters['https://']._pool_connections,
+                    maxsize=self._session.adapters['https://']._pool_maxsize,
+                    ssl_context=self.tls_context,
+                )
+            self._session.mount('https://', https_adapter)
             # Enable Unix Domain Socket (UDS) support.
             # See: https://github.com/msabramo/requests-unixsocket
             self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
