@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
+from redis.exceptions import ResponseError
 
 pytestmark = pytest.mark.unit
 
@@ -102,3 +103,12 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
 
     # Assert that the `redis.net.commands` metric was sent
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])
+
+def test_slowlog_quiet_failure(check, aggregator, redis_instance):
+    """
+    The check should not fail if the slowlog command fails
+    """
+    with mock.patch('redis.Redis.slowlog_get', side_effect=ResponseError('ERR unknown command `SLOWLOG`')):
+        check(redis_instance)
+        # Assert that no metrics were sent
+        aggregator.assert_metric('redis.slowlog.micros', count=0)
