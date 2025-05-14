@@ -24,7 +24,7 @@ PARTITION_MAP = {
         {"name": "slurm_partition_cpus_assigned", "index": 2},
         {"name": "slurm_partition_availability", "index": 3},
         {"name": "slurm_partition_memory_assigned", "index": 4},
-        {"name": "slurm_partition_available", "index": 5},
+        {"name": "slurm_cluster_name", "index": 5},
         {"name": "slurm_partition_state", "index": 7},
     ],
     "metrics": [
@@ -38,7 +38,7 @@ NODE_MAP = {
         {"name": "slurm_node_availability", "index": 1},
         {"name": "slurm_node_name", "index": 2},
         {"name": "slurm_node_memory", "index": 4},
-        {"name": "slurm_node_cluster", "index": 5},
+        {"name": "slurm_cluster_name", "index": 5},
     ],
     "extended_tags": [
         {"name": "slurm_node_state", "index": 9},
@@ -148,7 +148,6 @@ SDIAG_MAP = {
         'backfill.total_jobs_since_cycle_start': 'Total backfilled jobs (since last stats cycle start):',
         'backfill.total_heterogeneous_components': 'Total backfilled heterogeneous job components:',
         'backfill.total_cycles': 'Total cycles:',
-        'backfill.last_cycle_when': 'Last cycle when:',
         'backfill.last_cycle': 'Last cycle:',
         'backfill.max_cycle': 'Max cycle:',
         'backfill.mean_cycle': 'Mean cycle:',

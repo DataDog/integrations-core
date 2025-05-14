@@ -40,9 +40,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -79,7 +79,7 @@ jobs:
     steps:
     - name: Checkout code
       if: github.event_name != 'pull_request'
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 2
 
@@ -119,10 +119,10 @@ jobs:
 
     - name: Checkout code
       if: github.event_name == 'pull_request'
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -131,7 +131,7 @@ jobs:
         pip install -r .builders/deps/host_dependencies.txt
 
     - name: Log in to GitHub Packages
-      uses: docker/login-action@v3
+      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -166,7 +166,7 @@ jobs:
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: target-${{ matrix.job.image }}
         path: output
@@ -200,7 +200,7 @@ jobs:
         sudo installer -pkg python3.pkg -target /
 
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - name: Install management dependencies
       run: |
@@ -209,7 +209,7 @@ jobs:
 
     - name: Cache builder root
       id: cache-builder-root
-      uses: actions/cache@v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: |
           ~/builder_root
@@ -230,7 +230,7 @@ jobs:
         fi
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: target-macos
         path: output
@@ -249,12 +249,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         ref: "${{ github.head_ref }}"
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -262,7 +262,7 @@ jobs:
       run: pip install -r .builders/deps/host_dependencies.txt
 
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
       with:
         path: targets
         pattern: target-*
@@ -270,7 +270,7 @@ jobs:
 
     - name: Get credentials
       id: auth
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
       with:
         project_id: datadog-agent-int-build
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
@@ -287,7 +287,7 @@ jobs:
         rm -rf targets
 
     - name: Create token
-      uses: actions/create-github-app-token@v1
+      uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
       id: token-generator
       with:
         app-id: ${{ vars.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
@@ -295,7 +295,7 @@ jobs:
         repositories: integrations-core
 
     - name: Create pull request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5 # v5.0.3
       with:
         token: ${{ steps.token-generator.outputs.token }}
         title: Update dependency resolution
