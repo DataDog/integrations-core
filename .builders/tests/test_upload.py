@@ -136,7 +136,7 @@ def test_upload_built_no_conflict(setup_targets_dir, setup_fake_bucket, workflow
 
     bucket_files = [f.name for f in bucket.list_blobs()]
     assert (
-        f'built/without-collision/without_collision-3.14.1-{workflow_id}-cp311-cp311-manylinux2010_x86_64.whl'
+        f'built/without-collision/without_collision-3.14.1-{workflow_id}WID-cp311-cp311-manylinux2010_x86_64.whl'
         in bucket_files
     )
 
@@ -204,7 +204,7 @@ def test_upload_built_existing_different_sha_does_upload(
     assert uploads == {'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl'}
 
     bucket_files = {f.name for f in bucket.list_blobs()}
-    assert f'built/existing/existing-1.1.1-{workflow_id}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+    assert f'built/existing/existing-1.1.1-{workflow_id}WID-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
 
 
 def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_builds(
@@ -282,7 +282,7 @@ def test_upload_built_existing_different_sha_does_upload_multiple_existing_build
     assert uploads == {'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl'}
 
     bucket_files = {f.name for f in bucket.list_blobs()}
-    assert f'built/existing/existing-1.1.1-{workflow_id}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+    assert f'built/existing/existing-1.1.1-{workflow_id}WID-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
 
 
 def test_build_tag_use_workflow_id(
@@ -322,4 +322,4 @@ def test_build_tag_use_workflow_id(
     assert uploads == {'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl'}
 
     bucket_files = {f.name for f in bucket.list_blobs()}
-    assert f'built/existing/existing-1.1.1-{workflow_id}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+    assert f'built/existing/existing-1.1.1-{workflow_id}WID-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
