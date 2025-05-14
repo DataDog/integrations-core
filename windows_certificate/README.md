@@ -2,21 +2,44 @@
 
 ## Overview
 
-This check monitors the [Windows Certificate Store][1] for ceritificate expiration.
+This check monitors the Local Machine certificates in the [Windows Certificate Store][1] for ceritificate expiration.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
-
 ### Installation
 
-The windows_certificate check is included in the [Datadog Agent][2] package. No additional installation is needed.
+The Windows Certificate Store check is included in the [Datadog Agent][2] package. Please see the next section to configure the check.
 
 ### Configuration
 
-1. Edit the `windows_certificate.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your windows_certificate performance data. See the [sample windows_certificate.d/conf.yaml][4] for all available configuration options.
+Edit the `windows_certificate.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample windows_certificate.d/conf.yaml][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
 
-2. [Restart the Agent][5].
+The check can monitor the expiration of all certiificates in a given store or selectively monitor a few certificates by a given list of strings matching with the certificate subjects. Enter the store name as found in `HKEY_LOCAL_MACHINE\Software\Microsoft\SystemCertificates`.
+
+This example configuration monitors all certificates in the local machine's `ROOT` store:
+
+```yaml
+instances:
+  - certificate_store: ROOT
+```
+This example configuraiton monitors ceritificates in `ROOT` that have `microsoft` or `verisign` in the subject:
+```yaml
+instances:
+  - certificate_store: ROOT
+    certificate_subjects:
+      - microsoft
+      - verisign
+```
+The parameters `days_warning` and `days_critical` are used to specify the number of days before certificate expiration from which the service check `windows_certificate.cert_expiration` begins emitting WARNING/CRITICAL. In the below example the service check will emit a WARNING when a certificate is 10 days from expiring and CRITICAL when it is 5 days away from expiring:
+```yaml
+instances:
+  - certificate_store: ROOT
+    certificate_subjects:
+      - microsoft
+      - verisign
+    days_warning: 10
+    days_critical: 5
+```
 
 ### Validation
 
@@ -34,8 +57,6 @@ The windows_certificate integration does not include any events.
 
 ### Service Checks
 
-The windows_certificate integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
@@ -43,12 +64,13 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://learn.microsoft.com/en-us/windows-hardware/drivers/install/certificate-stores
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/windows_certificate/datadog_checks/windows_certificate/data/conf.yaml.example
+[4]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/windows_certificate.d/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/windows_certificate/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/windows_certificate/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
