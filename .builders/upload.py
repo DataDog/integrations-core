@@ -58,6 +58,11 @@ def display_message_block(message: str) -> None:
     print(divider)
 
 
+def timestamp_build_number() -> int:
+    """Produce a numeric timestamp to use as build numbers"""
+    return int(time.strftime('%Y%m%d%H%M%S'))
+
+
 def hash_file(path: Path) -> str:
     """Calculate the hash of the file pointed at by `path`"""
     with path.open('rb') as f:
@@ -90,7 +95,7 @@ def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
     return int(build_number[0]) if build_number else -1
 
 
-def upload(targets_dir, workflow_id):
+def upload(targets_dir):
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     artifact_types: set[str] = set()
@@ -143,7 +148,8 @@ def upload(targets_dir, workflow_id):
                               'with the same hash')
                         continue
 
-                artifact_name = f'{name}-{version}-{workflow_id}-{python_tag}-{abi_tag}-{platform_tag}.whl'
+                build_number = timestamp_build_number()
+                artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
                 artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
 
             print(f'{padding}Artifact: {artifact_name}')
@@ -207,6 +213,5 @@ def upload(targets_dir, workflow_id):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('targets_dir')
-    parser.add_argument('workflow_id')
     args = parser.parse_args()
-    upload(args.targets_dir, args.workflow_id)
+    upload(args.targets_dir)
