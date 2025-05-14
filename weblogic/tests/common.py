@@ -10,5 +10,5 @@ INSTANCES = [{'host': 'localhost', 'port': '7002'}]
 
 CHECK_CONFIG = load_jmx_config()
 CHECK_CONFIG['instances'] = INSTANCES
-
+# test
 CHECK_NAME = "weblogic"
