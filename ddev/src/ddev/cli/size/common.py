@@ -446,6 +446,7 @@ def print_markdown(
     markdown = "\n".join(lines)
     app.display_markdown(markdown)
 
+
 def print_table(
     app: Application,
     mode: str,
