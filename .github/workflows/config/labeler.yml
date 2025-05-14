@@ -323,6 +323,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/kaspersky:
+- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
@@ -375,6 +377,8 @@ integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
+integration/linux_audit_logs:
+- linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/mailchimp:
