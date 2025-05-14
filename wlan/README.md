@@ -52,7 +52,7 @@ The check automatically tags emitted metrics with SSID, BSSID, MAC Address, Wi-F
 
 ### Metrics
 
-See [metadata.csv][14] for a list of metrics provided by this integration.
+See [metadata.csv][14] for a list of metrics that this integration provides.
 
 ### Events
 
