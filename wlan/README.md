@@ -20,7 +20,7 @@ The following settings need to be enabled:
 
 One can quickly check if the Location API is not disabled by running `netsh wlan show interface` command which would fail to report any Wi-Fi interface connection even if you are connected.
 
-An administrator can also enable these settings using 
+An administrator can also enable these settings using the following:
 - [Registry][17]
 - [Group Policy][18]
 - [InTune][19]
