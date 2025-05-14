@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+from redis.exceptions import ResponseError
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from redis.exceptions import ResponseError
 
 pytestmark = pytest.mark.unit
 
@@ -103,6 +103,7 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
 
     # Assert that the `redis.net.commands` metric was sent
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])
+
 
 def test_slowlog_quiet_failure(check, aggregator, redis_instance):
     """
