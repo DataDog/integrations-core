@@ -430,15 +430,21 @@ def print_markdown(
         | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
-    if any(str(value).strip() not in ("", "0", "0001-01-01") for value in modules[0].values()):  # table is not empty
-        headers = [k for k in modules[0].keys() if "Bytes" not in k]
-        app.display_markdown(f"### {title}")
-        app.display_markdown("| " + " | ".join(headers) + " |")
-        app.display_markdown("| " + " | ".join("---" for _ in headers) + " |")
+    if all(str(value).strip() in ("", "0", "0001-01-01") for value in modules[0].values()):
+        return  # skip empty table
 
-        for row in modules:
-            app.display_markdown("| " + " | ".join(format(str(row.get(h, ""))) for h in headers) + " |")
+    headers = [k for k in modules[0].keys() if "Bytes" not in k]
 
+    lines = []
+    lines.append(f"### {title}")
+    lines.append("")
+    lines.append("| " + " | ".join(headers) + " |")
+    lines.append("| " + " | ".join("---" for _ in headers) + " |")
+    for row in modules:
+        lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+
+    markdown = "\n".join(lines)
+    app.display_markdown(markdown)
 
 def print_table(
     app: Application,
