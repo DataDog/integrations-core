@@ -437,7 +437,6 @@ def print_markdown(
 
     lines = []
     lines.append(f"### {title}")
-    lines.append("")
     lines.append("| " + " | ".join(headers) + " |")
     lines.append("| " + " | ".join("---" for _ in headers) + " |")
     for row in modules:
