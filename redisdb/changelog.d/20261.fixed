@@ -1,0 +1,1 @@
+Allow slowlog collection to fail without error to support some managed Redis that do not allow SLOWLOG GET.
