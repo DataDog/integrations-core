@@ -28,11 +28,14 @@ def dd_environment(instance):
                 [
                     'WebLogic Server has started',
                     'Starting \"async\" replication service with remote cluster address \"null\"',
+                    'The server \"managed-server2\" connected to this server',
+                    'The server \"managed-server1\" connected to this server',
+                    'Server state changed to RUNNING'
                 ],
             )
         ],
         env_vars={'PROPERTIES_DIR': properties_dir},
-        sleep=500,
+        sleep=60,
         build=True,
         attempts=2,
     ):
