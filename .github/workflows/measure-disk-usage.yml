@@ -31,7 +31,7 @@ jobs:
       run: | 
         mkdir -p status_visualizations
         ddev size status --csv > size-uncompressed.csv
-        ddev size status --markdown --save_to_png_path status_visualizations/uncompressed.png > size-uncompressed.txt
+        ddev size status  --save_to_png_path status_visualizations/uncompressed.png > size-uncompressed.txt
         cat size-uncompressed.txt
         echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
@@ -42,7 +42,7 @@ jobs:
       run: |
         mkdir -p status_visualizations
         ddev size status --csv --compressed > size-compressed.csv
-        ddev size status --compressed --markdown --save_to_png_path status_visualizations/compressed.png > size-compressed.txt
+        ddev size status --compressed  --save_to_png_path status_visualizations/compressed.png > size-compressed.txt
         cat size-compressed.txt
         echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
@@ -57,7 +57,7 @@ jobs:
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
         ddev size diff $BEFORE $AFTER --csv > diff-uncompressed.csv
-        ddev size diff $BEFORE $AFTER --markdown --save_to_png_path diff_visualizations/diff-uncompressed-linux.png > diff-uncompressed.txt
+        ddev size diff $BEFORE $AFTER  --save_to_png_path diff_visualizations/diff-uncompressed-linux.png > diff-uncompressed.txt
         cat diff-uncompressed.txt
         echo "# Size diff (uncompressed)" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
@@ -71,7 +71,7 @@ jobs:
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
         ddev size diff $BEFORE $AFTER --compressed --csv > diff-compressed.csv
-        ddev size diff $BEFORE $AFTER --compressed --markdown --save_to_png_path diff_visualizations/diff-compressed-linux.png > diff-compressed.txt
+        ddev size diff $BEFORE $AFTER --compressed  --save_to_png_path diff_visualizations/diff-compressed-linux.png > diff-compressed.txt
         cat diff-compressed.txt
         echo "# Size diff (compressed)" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
