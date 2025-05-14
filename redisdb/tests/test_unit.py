@@ -122,7 +122,7 @@ def test_slowlog_quiet_failure(check, aggregator, redis_instance):
         aggregator.assert_metric('redis.slowlog.micros', count=0)
 
 
-def test_slowlog_loud_failure(check, aggregator, redis_instance):
+def test_slowlog_loud_failure(check, redis_instance):
     """
     The check should fail if the slowlog command fails for any other reason
     """
