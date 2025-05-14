@@ -22,7 +22,7 @@ else:
     MYSQL_VERSION_PARSED = parse_version(str(maxsize))
 CHECK_NAME = 'mysql'
 
-# adding flavor to differentiate mariadb from mysql
+# 1 adding flavor to differentiate mariadb from mysql
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', '')
 
 HOST = get_docker_hostname()

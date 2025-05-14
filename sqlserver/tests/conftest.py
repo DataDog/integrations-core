@@ -69,7 +69,7 @@ def instance_session_default():
 
 @pytest.fixture
 def instance_docker_defaults(instance_session_default):
-    # deepcopy necessary here because we want to make sure each test invocation gets its own unique copy of the instance
+    # test deepcopy necessary here because we want to make sure each test invocation gets its own unique copy of the instance
     # this also means that none of the test need to defensively make their own copies
     return deepcopy(instance_session_default)
 
