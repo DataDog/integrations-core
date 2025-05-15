@@ -145,7 +145,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
                 'black==25.1.0',
-                'ruff==0.8.0',
+                'ruff==0.11.10',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.10.6',
             ],
