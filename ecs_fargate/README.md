@@ -1121,7 +1121,7 @@ partial -->
 
 <div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
 
-You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. For more information configuring Process Collection, see [Live Process documentation][75].
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. For more information on configuring Process Collection, see the [Live Process documentation][75].
 
 ## Out-of-the-box tags
 
