@@ -733,7 +733,7 @@ class TestPayloadGeneration:
             'sql_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
         }
 
-        obfuscated_event, raw_sql_fields = query_completion_handler._obfuscate_sql_fields(event)
+        obfuscated_event, raw_sql_fields, primary_sql_field = query_completion_handler._obfuscate_sql_fields(event)
 
         # Verify obfuscated fields
         assert obfuscated_event['batch_text'] == 'SELECT * FROM Customers WHERE CustomerId = ?'
@@ -746,6 +746,9 @@ class TestPayloadGeneration:
         assert raw_sql_fields['batch_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert raw_sql_fields['sql_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert raw_sql_fields['raw_query_signature'] == 'abc123'
+
+        # Verify primary SQL field
+        assert primary_sql_field == 'batch_text'
 
         # Verify raw_query_signature is added to the obfuscated event when collect_raw_query is enabled
         assert 'raw_query_signature' in obfuscated_event
@@ -836,6 +839,10 @@ class TestPayloadGeneration:
             'database_name': 'TestDB',
             'batch_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
             'query_signature': 'abc123',
+            'primary_sql_field': 'batch_text',
+            'dd_tables': ['Customers'],
+            'dd_commands': ['SELECT'],
+            'dd_comments': [],
         }
 
         # Create payload
@@ -854,6 +861,14 @@ class TestPayloadGeneration:
         assert query_details['request_id'] == 456
         assert query_details['database_name'] == 'TestDB'
         assert query_details['query_signature'] == 'abc123'
+        assert query_details['primary_sql_field'] == 'batch_text'
+
+        # Verify metadata structure
+        assert 'metadata' in query_details
+        metadata = query_details['metadata']
+        assert metadata['tables'] == ['Customers']
+        assert metadata['commands'] == ['SELECT']
+        assert metadata['comments'] == []
 
     @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     def test_create_rqt_event(self, mock_agent, query_completion_handler):
@@ -869,6 +884,10 @@ class TestPayloadGeneration:
             'database_name': 'TestDB',
             'batch_text': 'SELECT * FROM Customers WHERE CustomerId = ?',
             'query_signature': 'abc123',
+            'primary_sql_field': 'batch_text',
+            'dd_tables': ['Customers'],
+            'dd_commands': ['SELECT'],
+            'dd_comments': [],
         }
 
         # Create raw SQL fields
@@ -892,12 +911,20 @@ class TestPayloadGeneration:
         assert rqt_event['db']['raw_query_signature'] == 'def456'
         assert rqt_event['db']['statement'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
 
+        # Verify metadata is present in the RQT event (RQT events already have this structure)
+        assert 'metadata' in rqt_event['db']
+        metadata = rqt_event['db']['metadata']
+        assert metadata['tables'] == ['Customers']
+        assert metadata['commands'] == ['SELECT']
+        assert metadata['comments'] == []
+
         # Verify sqlserver fields
         assert rqt_event['sqlserver']['session_id'] == 123
         assert rqt_event['sqlserver']['xe_type'] == 'sql_batch_completed'
         assert rqt_event['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
         assert rqt_event['sqlserver']['duration_ms'] == 10.0
         assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:50.123Z'
+        assert rqt_event['sqlserver']['primary_sql_field'] == 'batch_text'
 
     def test_create_rqt_event_disabled(self, mock_check, mock_config):
         """Test RQT event creation when disabled"""
