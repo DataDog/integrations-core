@@ -146,7 +146,7 @@ datadog-nvidia-triton==2.2.0
 datadog-octopus-deploy==1.0.2
 datadog-openldap==3.0.0
 datadog-openmetrics==6.1.0
-datadog-openstack-controller==8.4.0
+datadog-openstack-controller==8.5.0
 datadog-openstack==4.0.1
 datadog-openvpn==1.0.0
 datadog-oracle==6.0.0
