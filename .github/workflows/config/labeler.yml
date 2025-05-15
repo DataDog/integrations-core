@@ -693,6 +693,8 @@ integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
 - winkmem/**/*
+integration/wlan:
+- wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
