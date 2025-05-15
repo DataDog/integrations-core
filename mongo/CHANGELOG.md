@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2025-05-15
+
+***Changed***:
+
+* Bump datadog-checks-base to 37.10.1 and python to 3.12 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+
+***Fixed***:
+
+* Skips explaining serverStatus command. ([#20149](https://github.com/DataDog/integrations-core/pull/20149))
+
 ## 9.1.0 / 2025-04-25
 
 ***Added***:
