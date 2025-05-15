@@ -22,8 +22,6 @@ This integration collects Mac audit logs and sends them to Datadog for analysis,
 
 To install the Mac Audit Logs integration, run the following Agent installation command and follow the steps below. For more information, see the [Integration Management][4] documentation.
 
-**Note**: This step is not necessary for Agent versions >= 7.66.0
-
 For Mac, run:
   ```shell
   sudo datadog-agent integration install datadog-mac-audit-logs==1.0.0
@@ -78,6 +76,7 @@ The Mac Audit Logs integration does not include any metrics.
       init_config:
       instances:
         - MONITOR: true
+          AUDIT_LOGS_DIR_PATH: /var/audit
           min_collection_interval: 15
       logs:
         - type: integration
@@ -87,6 +86,7 @@ The Mac Audit Logs integration does not include any metrics.
 
    **Note**:
      - Do not change the `service` and `source` values, as they are essential for proper log pipeline processing.
+     - Default value for `AUDIT_LOGS_DIR_PATH` is `/var/audit`. In case of different BSM audit logging directory, please check `dir` value in `/etc/security/audit_control` file.
 
 3. [Restart the Agent][7].
 

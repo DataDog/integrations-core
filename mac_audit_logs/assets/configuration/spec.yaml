@@ -13,6 +13,12 @@ files:
       value:
         type: boolean
         example: true
+    - name: AUDIT_LOGS_DIR_PATH
+      required: true
+      description: "Path to the directory containing the BSM audit logs."
+      value:
+        type: string
+        example: /var/audit
     - template: instances/default
       overrides:
         min_collection_interval.required: true

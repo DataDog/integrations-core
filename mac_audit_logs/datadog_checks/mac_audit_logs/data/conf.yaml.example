@@ -18,6 +18,11 @@ instances:
     #
   - MONITOR: true
 
+    ## @param AUDIT_LOGS_DIR_PATH - string - required
+    ## Path to the directory containing the BSM audit logs.
+    #
+    AUDIT_LOGS_DIR_PATH: /var/audit
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
