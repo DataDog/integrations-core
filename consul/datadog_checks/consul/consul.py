@@ -106,7 +106,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
             'service_whitelist', self.instance.get('services_include', default_services_include)
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
-        self.services_tags_keys_include = set(self.instance.get("services_tags_keys_include", self.init_config.get("services_tags_keys_include", [])))
+        self.services_tags_keys_include = set(
+            self.instance.get("services_tags_keys_include", self.init_config.get("services_tags_keys_include", []))
+        )
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
         if self.threads_count > 1:
