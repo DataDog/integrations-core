@@ -42,9 +42,7 @@ class QueryCompletionEventsHandler(XESessionBase):
         "physical_reads": 0,
         "logical_reads": 0,
         "writes": 0,
-        "spills": 0,
         "row_count": 0,
-        "object_id": 0,
     }
 
     RPC_SPECIFIC_STRING_FIELDS = [
