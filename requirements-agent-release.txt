@@ -41,7 +41,7 @@ datadog-cloud-foundry-api==5.2.0
 datadog-cloudera==3.2.0
 datadog-cockroachdb==5.1.0
 datadog-confluent-platform==3.0.0
-datadog-consul==4.1.0
+datadog-consul==4.1.1
 datadog-coredns==5.1.0; sys_platform == 'linux2'
 datadog-couch==8.3.0
 datadog-couchbase==5.1.0
