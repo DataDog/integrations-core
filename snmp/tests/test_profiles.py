@@ -2792,6 +2792,16 @@ def test_fortinet_fortigate(aggregator):
             'snmp.{}.rate'.format(metric), metric_type=aggregator.RATE, tags=firewall6_tags, count=1
         )
 
+    # Switch port metrics
+    switch_port_tags = common_tags + ['port_name:port1', 'switch_serial:FGVM02TM23000000']
+    for metric in ['fgSwPortStatus', 'fgSwPortSpeedDuplex', 'fgSwPortPOEPower']:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=switch_port_tags, count=1)
+
+    # Switch device metrics
+    switch_device_tags = common_tags + ['switch_name:FortiSwitch-1', 'switch_serial:FGVM02TM23000000']
+    for metric in ['fgSwCpu', 'fgSwMemory']:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=switch_device_tags, count=1)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
