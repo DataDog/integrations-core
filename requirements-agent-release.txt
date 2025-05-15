@@ -49,6 +49,7 @@ datadog-crio==4.1.0
 datadog-datadog-cluster-agent==5.5.0
 datadog-dcgm==3.3.0
 datadog-delinea-privilege-manager==1.0.0
+datadog-delinea-secret-server==1.0.0
 datadog-directory==4.0.1
 datadog-disk==7.1.0
 datadog-dns-check==5.1.0
@@ -97,9 +98,11 @@ datadog-istio==8.1.0
 datadog-ivanti-connect-secure==1.0.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
+datadog-juniper-srx-firewall==1.0.0
 datadog-kafka-consumer==6.5.1
 datadog-kafka==4.0.0
 datadog-karpenter==2.2.0
+datadog-kaspersky==1.0.0
 datadog-keda==1.0.1
 datadog-keycloak==1.0.0
 datadog-kong==5.1.0
@@ -120,6 +123,7 @@ datadog-kyototycoon==4.1.0
 datadog-kyverno==2.2.0
 datadog-lighttpd==5.1.0
 datadog-linkerd==6.1.0
+datadog-linux-audit-logs==1.0.0; sys_platform == 'linux2'
 datadog-linux-proc-extras==4.0.0; sys_platform == 'linux2'
 datadog-mapr==3.0.0; sys_platform == 'linux2'
 datadog-mapreduce==6.1.0
@@ -128,9 +132,10 @@ datadog-marklogic==6.1.1
 datadog-mcache==6.1.0; sys_platform != 'win32'
 datadog-mesos-master==5.1.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
+datadog-microsoft-sysmon==1.0.0; sys_platform == 'win32'
 datadog-milvus==1.2.0
 datadog-mongo==9.1.0
-datadog-mysql==15.3.1
+datadog-mysql==15.4.0
 datadog-nagios==3.0.0
 datadog-network==5.2.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
@@ -143,6 +148,7 @@ datadog-openldap==3.0.0
 datadog-openmetrics==6.1.0
 datadog-openstack-controller==8.4.0
 datadog-openstack==4.0.0
+datadog-openvpn==1.0.0
 datadog-oracle==6.0.0
 datadog-ossec-security==2.0.0
 datadog-palo-alto-panorama==1.0.0
@@ -152,7 +158,7 @@ datadog-pgbouncer==8.1.2; sys_platform != 'win32'
 datadog-php-fpm==5.1.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.11.0
+datadog-postgres==22.12.0
 datadog-powerdns-recursor==4.1.0
 datadog-presto==3.1.0
 datadog-process==5.0.0

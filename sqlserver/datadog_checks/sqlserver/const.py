@@ -38,6 +38,8 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
     "managed_instance": "azure_sql_server_managed_instance",
     "virtual_machine": "azure_virtual_machine_instance",
 }
+AZURE_SERVER_SUFFIX = ".database.windows.net"
+
 
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
