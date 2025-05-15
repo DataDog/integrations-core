@@ -1179,7 +1179,7 @@
             "id": 5680810966566357,
             "definition": {
               "type": "note",
-              "content": "Get insights into your queues' producers and consumers by instrumenting them with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/sns/?tab=rabbitmq&referrer=rabbitmq_openmetrics)",
+              "content": "Get insights into your queues' producers and consumers by instrumenting them with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/rabbitmq/?referrer=rabbitmq_openmetrics)",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
