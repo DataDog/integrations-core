@@ -15,11 +15,11 @@
             "id": 8101714083643424,
             "definition": {
               "type": "image",
-              "url": "/api/v2/images/4a4cff41-d920-4c93-aac1-d4210f973524",
+              "url": "https://static.datadoghq.com/static/images/logos/wlan_large.svg",
               "sizing": "contain",
-              "margin": "md",
-              "has_background": true,
-              "has_border": true,
+              "margin": "sm",
+              "has_background": false,
+              "has_border": false,
               "vertical_align": "center",
               "horizontal_align": "center"
             },
@@ -717,7 +717,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 7,
         "width": 12,
         "height": 5,
         "is_column_break": true
@@ -844,7 +844,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 12,
         "width": 12,
         "height": 3
       }
