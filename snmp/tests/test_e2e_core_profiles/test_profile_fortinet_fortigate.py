@@ -145,7 +145,7 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
 
     # Test FortiGate switch port metrics
     switch_port_tags = [
-        ['port_name:port1', 'switch_serial:FSW1234567890', 'port_speed_duplex:1000', 'switch_name:FortiSwitch-448E'],
+        ['switch_serial:FSW1234567890', 'port_name:port1', 'port_speed_duplex:1000', 'switch_name:FortiSwitch-448E'],
     ]
     for tag_row in switch_port_tags:
         aggregator.assert_metric('snmp.fgSwPortStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -153,7 +153,7 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
 
     # Test FortiGate switch device metrics
     switch_device_tags = [
-        ['switch_name:FortiSwitch-448E', 'switch_serial:FSW1234567890'],
+        ['switch_serial:FSW1234567890', 'switch_name:FortiSwitch-448E'],
     ]
     for tag_row in switch_device_tags:
         aggregator.assert_metric('snmp.fgSwCpu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
