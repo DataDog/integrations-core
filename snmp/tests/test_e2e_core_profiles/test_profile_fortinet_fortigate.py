@@ -159,7 +159,6 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
         aggregator.assert_metric('snmp.fgSwCpu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.fgSwMemory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
-
     # --- TEST METADATA ---
     device = {
         'id': 'default:' + ip_address,

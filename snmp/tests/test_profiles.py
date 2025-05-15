@@ -2797,12 +2797,10 @@ def test_fortinet_fortigate(aggregator):
         'port_name:port1',
         'switch_serial:FSW1234567890',
         'port_speed_duplex:1000',
-        'switch_name:FortiSwitch-448E'
+        'switch_name:FortiSwitch-448E',
     ]
     for metric in ['fgSwPortStatus', 'fgSwPortPOEPower']:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=switch_port_tags, count=1
-        )
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=switch_port_tags, count=1)
 
     # Switch device metrics
     switch_device_tags = common_tags + ['switch_name:FortiSwitch-448E', 'switch_serial:FSW1234567890']
