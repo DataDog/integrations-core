@@ -330,7 +330,9 @@ class SQLServer(AgentCheck):
             tag_dict['resolved_hostname'] = self.resolved_hostname
             tag_dict['host'] = str(self.host)
             tag_dict['port'] = str(self.port)
-            tag_dict['database'] = str(self.instance.get('database', self.connection.DEFAULT_DATABASE))
+            tag_dict['database'] = str(
+                self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+            )
             if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
                 tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
             if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
