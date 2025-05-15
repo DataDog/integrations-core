@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    AUDIT_LOGS_DIR_PATH: str
     MONITOR: bool
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
