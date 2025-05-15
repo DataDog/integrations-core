@@ -148,11 +148,12 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
         return {
-            'host': self._check.resolved_hostname,
+            'host': self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
-            'cloud_metadata': self._config.cloud_metadata,
+            'cloud_metadata': self._check.cloud_metadata,
             'kind': 'procedure_metrics',
             'sqlserver_rows': rows,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),

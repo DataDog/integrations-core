@@ -1,0 +1,1 @@
+Check for performance_schema enabled automatically instead of requiring `replication_non_blocking_status` config option when retrieving replica counts

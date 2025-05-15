@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 11.2.0 / 2025-03-19
+## 11.3.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Add defaults for `days_critical` and `days_warning` config options ([#20062](https://github.com/DataDog/integrations-core/pull/20062))
+
+## 11.2.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:
 

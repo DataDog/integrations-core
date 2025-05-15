@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from dateutil.tz import gettz
 
@@ -466,7 +466,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.utcnow() + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(timezone.utc) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()

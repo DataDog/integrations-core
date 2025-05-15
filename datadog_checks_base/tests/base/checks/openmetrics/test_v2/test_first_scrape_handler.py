@@ -86,8 +86,6 @@ def test_first_scrape_handler(
     agent_start_time,
     process_start_time,
 ):
-    mock_http_response(_make_test_data(process_start_time))
-
     check = get_check(
         {
             'metrics': ['.*'],
@@ -98,53 +96,62 @@ def test_first_scrape_handler(
 
     datadog_agent.set_process_start_time(agent_start_time)
 
-    for _ in range(0, 5):
+    for idx in range(0, 10):
         aggregator.reset()
-        dd_run_check(check)
 
-        aggregator.assert_metric(
-            'test.go_memstats_alloc_bytes.count',
-            metric_type=aggregator.MONOTONIC_COUNT,
-            count=1,
-            flush_first_value=expect_first_flush,
-        )
-        aggregator.assert_metric(
-            'test.go_gc_duration_seconds.count',
-            metric_type=aggregator.MONOTONIC_COUNT,
-            count=1,
-            flush_first_value=expect_first_flush,
-        )
+        if idx != 5:
+            mock_http_response(_make_test_data(process_start_time))
+            dd_run_check(check)
 
-        if with_buckets:
-            aggregator.assert_histogram_bucket(
-                'test.skydns_skydns_dns_request_duration_seconds',
-                None,
-                None,
-                None,
-                True,
-                None,
-                None,
-                count=2,
+            aggregator.assert_metric(
+                'test.go_memstats_alloc_bytes.count',
+                metric_type=aggregator.MONOTONIC_COUNT,
+                count=1,
                 flush_first_value=expect_first_flush,
             )
+            aggregator.assert_metric(
+                'test.go_gc_duration_seconds.count',
+                metric_type=aggregator.MONOTONIC_COUNT,
+                count=1,
+                flush_first_value=expect_first_flush,
+            )
+
+            if with_buckets:
+                aggregator.assert_histogram_bucket(
+                    'test.skydns_skydns_dns_request_duration_seconds',
+                    None,
+                    None,
+                    None,
+                    True,
+                    None,
+                    None,
+                    count=2,
+                    flush_first_value=expect_first_flush,
+                )
+            else:
+                aggregator.assert_metric(
+                    'test.skydns_skydns_dns_request_duration_seconds.count',
+                    metric_type=aggregator.MONOTONIC_COUNT,
+                    count=1,
+                    flush_first_value=expect_first_flush,
+                )
+                aggregator.assert_metric(
+                    'test.skydns_skydns_dns_request_duration_seconds.sum',
+                    metric_type=aggregator.MONOTONIC_COUNT,
+                    count=1,
+                    flush_first_value=expect_first_flush,
+                )
+                aggregator.assert_metric(
+                    'test.skydns_skydns_dns_request_duration_seconds.bucket',
+                    metric_type=aggregator.MONOTONIC_COUNT,
+                    count=1,
+                    flush_first_value=expect_first_flush,
+                )
+
+            expect_first_flush = True
         else:
-            aggregator.assert_metric(
-                'test.skydns_skydns_dns_request_duration_seconds.count',
-                metric_type=aggregator.MONOTONIC_COUNT,
-                count=1,
-                flush_first_value=expect_first_flush,
-            )
-            aggregator.assert_metric(
-                'test.skydns_skydns_dns_request_duration_seconds.sum',
-                metric_type=aggregator.MONOTONIC_COUNT,
-                count=1,
-                flush_first_value=expect_first_flush,
-            )
-            aggregator.assert_metric(
-                'test.skydns_skydns_dns_request_duration_seconds.bucket',
-                metric_type=aggregator.MONOTONIC_COUNT,
-                count=1,
-                flush_first_value=expect_first_flush,
-            )
+            mock_http_response("", status_code=500)
+            with pytest.raises(Exception):
+                dd_run_check(check)
 
-        expect_first_flush = True
+            expect_first_flush = False

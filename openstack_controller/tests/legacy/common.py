@@ -170,7 +170,7 @@ SERVERS_CACHE_MOCK = {
         "other-1": {"id": "other-1", "name": "server-name-other-1", "status": "ACTIVE", "project_name": "blacklist_1"},
         "other-2": {"id": "other-2", "name": "server-name-other-2", "status": "ACTIVE", "project_name": "blacklist_2"},
     },
-    'change_since': datetime.datetime.utcnow().isoformat(),
+    'change_since': datetime.datetime.now(datetime.timezone.utc).isoformat(),
 }
 
 EMPTY_NOVA_SERVERS = []

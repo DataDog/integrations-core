@@ -6,11 +6,12 @@ metric_id: plaid
 # If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - facetType: list
+  - description: ""
+    facetType: list
     groups:
       - Plaid
-    name: Account id
-    path: plaid_account_id
+    name: Log Label
+    path: label
     source: log
     type: string
 pipeline:
@@ -21,7 +22,7 @@ pipeline:
     query: "source:plaid"
   processors:
     - type: attribute-remapper
-      name: "Map `created` to `timestamp`"
+      name: Map `created` to `timestamp`
       enabled: true
       sources:
         - created
