@@ -114,7 +114,7 @@ files:
         If set, only tags with keys matching this list will be sent to Datadog.
         This is helpful if you have a lot of tags on services that are not
         relevant to Datadog (ingress routing tags, etc). Tags should be specified
-        here in lowercase, the check will downcase tags from Consul before comparing.
+        here in lowercase. Otherwise, the check will downcase tags from Consul before comparing.
       value:
         type: array
         items:
