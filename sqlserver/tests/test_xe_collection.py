@@ -190,6 +190,7 @@ def rpc_completed_expected_values():
         'client_hostname': 'EC2AMAZ-ML3E0PH',
         'client_app_name': 'SQLAgent - Job Manager',
         'username': 'NT AUTHORITY\\NETWORK SERVICE',
+        'object_name': 'sp_executesql',
     }
 
 
@@ -621,6 +622,8 @@ class TestEventProcessing:
         assert 'sp_executesql' in event['statement']
         assert 'sql_text' in event
         assert 'EXECUTE [msdb].[dbo].[sp_agent_log_job_history]' in event['sql_text']
+        assert 'object_name' in event
+        assert event['object_name'] == 'sp_executesql'
 
     def test_process_events_error_reported(self, error_events_handler, sample_error_event_xml, error_expected_values):
         """Test processing of error reported events"""

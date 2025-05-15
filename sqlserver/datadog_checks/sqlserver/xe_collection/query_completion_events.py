@@ -45,12 +45,11 @@ class QueryCompletionEventsHandler(XESessionBase):
         "spills": 0,
         "row_count": 0,
         "object_id": 0,
-        "line_number": 0,
     }
 
     RPC_SPECIFIC_STRING_FIELDS = [
         "result",
-        "procedure_name",
+        "object_name",
         "data_stream",
         "connection_reset_option",
     ]
