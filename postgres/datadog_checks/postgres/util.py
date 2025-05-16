@@ -391,7 +391,7 @@ SELECT
     pg_stat_replication.client_addr,
     pg_stat_replication_slot.slot_name,
     pg_stat_replication_slot.slot_type,
-    GREATEST (0, age(backend_xmin)) as backend_xmin_age,
+    GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age,
     GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
     GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) as flush_lag,
     GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag
