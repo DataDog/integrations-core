@@ -109,6 +109,9 @@ ban-relative-imports = "all"
 "datadog_checks/*/config_models/deprecations.py" = ["E501"]
 "tests/models/config_models/deprecations.py" = ["E501"]
 
+[tool.ddev]
+repo = "integrations-core"
+
 [project]
 name = "integrations-core"
 version = "0.0.0"
