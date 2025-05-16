@@ -18,14 +18,14 @@ jobs:
       pull-requests: write
     steps:
       - name: Create token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
         id: token-generator
         with:
           app-id: ${{ secrets.app-id }}
           private-key: ${{ secrets.private-key }}
           repositories: integrations-core
       - name: Add labels
-        uses: actions/labeler@v4
+        uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594 # v4.3.0
         with:
           configuration-path: .github/workflows/config/labeler.yml
           repo-token: "${{ steps.token-generator.outputs.token }}"
