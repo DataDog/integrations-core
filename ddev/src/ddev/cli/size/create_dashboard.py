@@ -44,7 +44,10 @@ def create_dashboard(
         )
 
         resp_json = response.json()
-        print(f"Dashboard URL: https://{config_file_info['site']}{resp_json['url']}")
+        if "Forbidden" in str(resp_json.get("errors", [])):
+            raise PermissionError("Access denied: your APP key doesn't have permission to create dashboards.")
+
+        print(f"Dashboard URL: https://app.{config_file_info['site']}{resp_json['url']}")
     except Exception as e:
         app.abort(str(e))
 
