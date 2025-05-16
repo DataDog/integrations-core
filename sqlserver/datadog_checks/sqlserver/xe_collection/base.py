@@ -95,6 +95,7 @@ class XESessionBase(DBMAsyncJob):
         "client_app_name",
         "username",
         "activity_id",
+        "activity_id_xfer",
     ]
 
     BASE_SQL_FIELDS = [
