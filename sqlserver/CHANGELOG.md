@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.6.0 / 2025-05-16
+
+***Added***:
+
+* Fill in missing fields for XE events ([#20293](https://github.com/DataDog/integrations-core/pull/20293))
+
 ## 22.5.0 / 2025-05-15
 
 ***Added***:
