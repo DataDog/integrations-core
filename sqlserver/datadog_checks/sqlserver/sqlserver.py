@@ -67,6 +67,7 @@ from datadog_checks.sqlserver.const import (
     AUTODISCOVERY_QUERY,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
+    AZURE_SERVER_SUFFIX,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_SERVICE_CHECK_NAME,
@@ -330,7 +331,11 @@ class SQLServer(AgentCheck):
             tag_dict['resolved_hostname'] = self.resolved_hostname
             tag_dict['host'] = str(self.host)
             tag_dict['port'] = str(self.port)
-            print(self.static_info_cache)
+            tag_dict['database'] = str(
+                self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+            )
+            if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
+                tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
             if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
                 tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
             if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
