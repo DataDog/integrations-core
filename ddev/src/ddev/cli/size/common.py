@@ -170,7 +170,7 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
     """
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks"
+    included_folder = "datadog_checks" + os.sep
 
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}

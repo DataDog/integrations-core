@@ -515,7 +515,7 @@ def get_files(
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks/"
+    included_folder = "datadog_checks" + os.sep
 
     total_size = 0
     version = ""
