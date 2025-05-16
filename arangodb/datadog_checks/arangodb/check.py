@@ -20,6 +20,7 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     SERVER_ID_ENDPOINT = '/_admin/server/id'
     SERVER_TAGS = {'mode': SERVER_MODE_ENDPOINT, 'id': SERVER_ID_ENDPOINT}
 
+    # test
     def __init__(self, name, init_config, instances):
 
         super(ArangodbCheck, self).__init__(name, init_config, instances)
