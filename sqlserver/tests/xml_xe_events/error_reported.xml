@@ -95,4 +95,16 @@
 			/*dddbs='orders-app',ddps='orders-app',ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',dddb='dbmorders',ddprs='orders-sqlserver'*/ SELECT discount_percent, store_name, description, discount_in_currency, dbm_item_id, REPEAT('a', 1000) from discount where id BETWEEN 6117 AND 6127 GROUP by dbm_item_id, store_name, description, discount_in_currency, discount_percent /* date='12%2F31',key='val' */
 		</value>
 	</action>
+	<action name="attach_activity_id_xfer" package="package0">
+		<type name="activity_id_xfer" package="package0" />
+		<value>
+			AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0
+		</value>
+	</action>
+	<action name="attach_activity_id" package="package0">
+		<type name="activity_id" package="package0" />
+		<value>
+			F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1
+		</value>
+	</action>
 </event>
