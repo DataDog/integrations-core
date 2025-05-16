@@ -584,6 +584,44 @@ failed_explain_test_repeat_count = 5
 
 
 @pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM pg_class",
+        "SET LOCAL datestyle TO postgres; SELECT * FROM pg_class",
+    ],
+)
+def test_successful_explain(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+):
+    dbname = "datadog_test"
+    # Don't need metrics for this one
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # run check so all internal state is correctly initialized
+    run_one_check(check)
+
+    # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
+    aggregator.reset()
+
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error is None
+    assert err is None
+
+    plan, *rest = check.statement_samples._run_and_track_explain(dbname, query, query, query)
+    assert plan is not None
+
+    plan = plan['Plan']
+    assert plan['Node Type'] == 'Seq Scan'
+    assert plan['Relation Name'] == 'pg_class'
+
+
+@pytest.mark.parametrize(
     "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
         (
