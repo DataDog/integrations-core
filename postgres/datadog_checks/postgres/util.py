@@ -391,9 +391,10 @@ SELECT
     pg_stat_replication.client_addr,
     pg_stat_replication_slot.slot_name,
     pg_stat_replication_slot.slot_type,
+    GREATEST (0, age(backend_xmin)) as backend_xmin_age,
     GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
-    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag,
-    GREATEST (0, age(pg_stat_replication.backend_xmin)) AS backend_xmin_age
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) as flush_lag,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag
 FROM pg_stat_replication as pg_stat_replication
 LEFT JOIN pg_replication_slots as pg_stat_replication_slot
 ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
@@ -405,6 +406,7 @@ ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
         {'name': 'wal_client_addr', 'type': 'tag'},
         {'name': 'slot_name', 'type': 'tag_not_null'},
         {'name': 'slot_type', 'type': 'tag_not_null'},
+        {'name': 'replication.backend_xmin_age', 'type': 'gauge'},
         {'name': 'replication.wal_write_lag', 'type': 'gauge'},
         {'name': 'replication.wal_flush_lag', 'type': 'gauge'},
         {'name': 'replication.wal_replay_lag', 'type': 'gauge'},
