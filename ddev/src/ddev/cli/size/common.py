@@ -77,13 +77,13 @@ class CLIParametersTimeline(TypedDict):
     show_gui: bool
 
 
-class CLIParametersTimelineIntegration(CLIParametersTimeline):
+class InitialParametersTimelineIntegration(CLIParametersTimeline):
     type: Literal["integration"]
     first_commit: str
     platform: None
 
 
-class CLIParametersTimelineDependency(CLIParametersTimeline):
+class InitialParametersTimelineDependency(CLIParametersTimeline):
     type: Literal["dependency"]
     first_commit: None
     platform: str
@@ -170,7 +170,7 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
     """
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks/"
+    included_folder = "datadog_checks"
 
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
@@ -223,17 +223,8 @@ def extract_version_from_about_py(path: str) -> str:
 
 def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> list[FileDataEntry]:
     """
-    Gets the list of dependencies for a given platform and Python version.
-    Each FileDataEntry includes: Name, Version, Size_Bytes, Size, and Type.
-
-    Args:
-        repo_path: Path to the repository.
-        platform: Target platform.
-        version: Target Python version.
-        compressed: If True, measure compressed file sizes. If False, measure uncompressed sizes.
-
-    Returns:
-        A list of FileDataEntry dictionaries containing the dependency information.
+    Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
+    Name, Version, Size_Bytes, Size, and Type.
     """
     resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
 
@@ -332,19 +323,9 @@ def format_modules(
     multiple_plats_and_vers: bool,
 ) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
     """
-    Formats the modules list, adding platform and Python version information if needed.
+    Formats the modules list, adding platform and Python version information.
 
-    If the modules list is empty, returns a default empty entry (with or without platform information).
-
-    Args:
-        modules: List of modules to format.
-        platform: Platform string to add to each entry if needed.
-        version: Python version string to add to each entry if needed.
-        i: Index of the current (platform, version) combination being processed.
-           If None, it means the data is being processed for only one combination of platform and version.
-
-    Returns:
-        A list of formatted entries.
+    If the modules list is empty, returns a default empty entry.
     """
     if modules == [] and not multiple_plats_and_vers:
         empty_entry: FileDataEntry = {

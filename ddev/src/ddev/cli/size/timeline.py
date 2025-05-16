@@ -15,12 +15,12 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeEl
 from ddev.cli.application import Application
 
 from .common import (
-    CLIParametersTimelineDependency,
-    CLIParametersTimelineIntegration,
     CommitEntry,
     CommitEntryPlatformWithDelta,
     CommitEntryWithDelta,
     GitRepo,
+    InitialParametersTimelineDependency,
+    InitialParametersTimelineIntegration,
     WrongDependencyFormat,
     compress,
     convert_to_human_readable_size,
@@ -174,7 +174,7 @@ def timeline(
                     modules_plat: list[CommitEntryPlatformWithDelta] = []
                     multiple_plats_and_vers: Literal[True] = True
                     progress.remove_task(task)
-                    dep_parameters: CLIParametersTimelineDependency
+                    dep_parameters: InitialParametersTimelineDependency
                     if not platform:
                         for plat in valid_platforms:
                             path = None
@@ -238,7 +238,7 @@ def timeline(
                 else:
                     modules: list[CommitEntryWithDelta] = []
                     multiple_plat_and_ver: Literal[False] = False
-                    int_parameters: CLIParametersTimelineIntegration = {
+                    int_parameters: InitialParametersTimelineIntegration = {
                         "app": app,
                         "type": "integration",
                         "module": module,
@@ -276,7 +276,7 @@ def timeline(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: CLIParametersTimelineDependency,
+    params: InitialParametersTimelineDependency,
     multiple_plats_and_vers: Literal[True],
     progress: Progress,
 ) -> list[CommitEntryPlatformWithDelta]: ...
@@ -286,7 +286,7 @@ def timeline_mode(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: CLIParametersTimelineIntegration,
+    params: InitialParametersTimelineIntegration,
     multiple_plats_and_vers: Literal[False],
     progress: Progress,
 ) -> list[CommitEntryWithDelta]: ...
@@ -296,7 +296,7 @@ def timeline_mode(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: CLIParametersTimelineDependency,
+    params: InitialParametersTimelineDependency,
     multiple_plats_and_vers: Literal[False],
     progress: Progress,
 ) -> list[CommitEntryWithDelta]: ...
@@ -305,7 +305,7 @@ def timeline_mode(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: CLIParametersTimelineIntegration | CLIParametersTimelineDependency,
+    params: InitialParametersTimelineIntegration | InitialParametersTimelineDependency,
     multiple_plats_and_vers: bool,
     progress: Progress,
 ) -> list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]:
@@ -342,7 +342,7 @@ def timeline_mode(
 @overload
 def get_repo_info(
     gitRepo: GitRepo,
-    params: CLIParametersTimelineIntegration,
+    params: InitialParametersTimelineIntegration,
     commits: list[str],
     progress: Progress,
 ) -> list[CommitEntry]: ...
@@ -351,7 +351,7 @@ def get_repo_info(
 @overload
 def get_repo_info(
     gitRepo: GitRepo,
-    params: CLIParametersTimelineDependency,
+    params: InitialParametersTimelineDependency,
     commits: list[str],
     progress: Progress,
 ) -> list[CommitEntry]: ...
@@ -359,7 +359,7 @@ def get_repo_info(
 
 def get_repo_info(
     gitRepo: GitRepo,
-    params: CLIParametersTimelineIntegration | CLIParametersTimelineDependency,
+    params: InitialParametersTimelineIntegration | InitialParametersTimelineDependency,
     commits: list[str],
     progress: Progress,
 ) -> list[CommitEntry]:
@@ -387,7 +387,7 @@ def get_repo_info(
 @overload
 def process_commits(
     commits: list[str],
-    params: CLIParametersTimelineIntegration,
+    params: InitialParametersTimelineIntegration,
     gitRepo: GitRepo,
     progress: Progress,
     first_commit: str,
@@ -397,7 +397,7 @@ def process_commits(
 @overload
 def process_commits(
     commits: list[str],
-    params: CLIParametersTimelineDependency,
+    params: InitialParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
     first_commit: None,
@@ -406,7 +406,7 @@ def process_commits(
 
 def process_commits(
     commits: list[str],
-    params: CLIParametersTimelineIntegration | CLIParametersTimelineDependency,
+    params: InitialParametersTimelineIntegration | InitialParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
     first_commit: Optional[str],
@@ -702,16 +702,6 @@ def format_modules(
     Formats the modules list, adding platform and Python version information if needed.
 
     If the modules list is empty, returns a default empty entry (with or without platform information).
-
-    Args:
-        modules: List of modules to format.
-        platform: Platform string to add to each entry if needed.
-        version: Python version string to add to each entry if needed.
-        i: Index of the current platform, version) combination being processed.
-           If None, it means the data is being processed for only one platform.
-
-    Returns:
-        A list of formatted entries.
     """
     if modules == [] and multiple_plats_and_vers and platform:
         empty_module_platform: CommitEntryPlatformWithDelta = {
