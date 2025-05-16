@@ -431,6 +431,17 @@ class XESessionBase(DBMAsyncJob):
         if 'query_signature' in raw_event:
             normalized_event['query_signature'] = raw_event['query_signature']
 
+        # Add primary_sql_field if available
+        if 'primary_sql_field' in raw_event:
+            normalized_event['primary_sql_field'] = raw_event['primary_sql_field']
+
+        # Add metadata if available
+        normalized_event['metadata'] = {
+            'tables': raw_event.get('dd_tables'),
+            'commands': raw_event.get('dd_commands'),
+            'comments': raw_event.get('dd_comments'),
+        }
+
         return {
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
