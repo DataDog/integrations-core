@@ -3,7 +3,7 @@
 ## Overview
 
 
-[Workato][1] provides a powerful platform for enterprise automation and integration so you can confidently connect, integrate, and automate your applications, data, and processes end-to-end.
+[Workato][1] provides a platform for enterprise automation and integration so you can connect, integrate, and automate your applications, data, and processes end-to-end.
 
 The Workato integration collects Jobs Logs (Recipe execution) and Status Metrics (Connection and Recipe state), sending them to Datadog for detailed analysis. The logs are parsed and enriched for efficient searching, while the metrics provide insights into operational status.
 
@@ -17,10 +17,10 @@ The integration includes a dashboard that shows Job execution status and duratio
 2. Navigate to **Workspace Admin > API Clients**.
 3. Click **Create API Client**, and then enter the required information:
    4. Under **Name**, Enter a descriptive and identifiable client name.
-   5. Choose an appropriate **Client role** from the dropdown - ensure the selected role has LIST and GET DETAILS permissions on all Workato Resources.
-   6. Choose between _Selected Projects_ or _All Projects_ from the **Project access** dropdown.
-   7. Leave the **Allowed IPs** text box blank/empty to allow access from any IP.
-8. Click **Create Client** and copy the API token from here for later use.       
+   5. Choose an appropriate **Client role** from the drop-down menu. Ensure the selected role has LIST and GET DETAILS permissions on all Workato Resources.
+   6. Choose between _Selected Projects_ or _All Projects_ from the **Project access** drop-down menu.
+   7. Leave the **Allowed IPs** text box blank to allow access from any IP.
+8. Click **Create Client**, and copy the API token for later use.       
 
 ### Connect your Workato Account to Datadog
 
