@@ -115,7 +115,6 @@ def test_check_all_available_config_options(check, aggregator, redis_instance, d
         'username': 'user',
         'password': 'devops-best-friend',
         'socket_timeout': 5,
-        'connection_pool': {},
         'host': 'localhost',
         'port': '6379',
         'unix_socket_path': '/path',
