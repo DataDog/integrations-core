@@ -220,13 +220,15 @@ def test_database_identifier(pg_instance, template, expected, tags):
         ("SET 'l" + "o" * 1024 + "ng'; SELECT *;", "SELECT *;"),
         (" /** pl/pgsql **/ SET 'comment'; SELECT *;", "SELECT *;"),
         ("this isn't SQL", "this isn't SQL"),
-        ("SET SESSION min_wal_size = 14400; " +
-         "SET LOCAL wal_buffers TO 2048; " +
-         "/* testing id 1234 */ set send_abort_for_kill TO 'stderr'; " +
-         "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) " +
-         "or (cast(null as point) <@ cast(null as line))) or (public.my table",
-         "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) " +
-         "or (cast(null as point) <@ cast(null as line))) or (public.my table"),
+        (
+            "SET SESSION min_wal_size = 14400; "
+            + "SET LOCAL wal_buffers TO 2048; "
+            + "/* testing id 1234 */ set send_abort_for_kill TO 'stderr'; "
+            + "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) "
+            + "or (cast(null as point) <@ cast(null as line))) or (public.my table",
+            "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) "
+            + "or (cast(null as point) <@ cast(null as line))) or (public.my table",
+        ),
         ("", ""),
     ],
 )
