@@ -209,6 +209,8 @@ def error_expected_values():
         'client_app_name': 'go-mssqldb',
         'username': 'shopper_4',
         'message': "'REPEAT' is not a recognized built-in function name.",
+        'activity_id': 'F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1',
+        'activity_id_xfer': 'AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0',
     }
 
 
@@ -254,6 +256,8 @@ def attention_expected_values():
         'client_hostname': 'COMP-MX2YQD7P2P',
         'client_app_name': 'azdata',
         'username': 'datadog',
+        'activity_id': 'F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1',
+        'activity_id_xfer': 'AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0',
     }
 
 

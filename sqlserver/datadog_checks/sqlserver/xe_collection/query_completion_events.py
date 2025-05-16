@@ -143,9 +143,10 @@ class QueryCompletionEventsHandler(XESessionBase):
         for action in event.findall('./action'):
             action_name = action.get('name')
             if action_name:
-                # Add activity_id support
                 if action_name == 'attach_activity_id':
                     event_data['activity_id'] = extract_value(action)
+                elif action_name == 'attach_activity_id_xfer':
+                    event_data['activity_id_xfer'] = extract_value(action)
                 else:
                     event_data[action_name] = extract_value(action)
 

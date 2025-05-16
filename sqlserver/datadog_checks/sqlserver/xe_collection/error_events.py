@@ -93,7 +93,14 @@ class ErrorEventsHandler(XESessionBase):
         # Extract action elements
         for action in event.findall('./action'):
             action_name = action.get('name')
-            if action_name:
+            if not action_name:
+                continue
+
+            if action_name == 'attach_activity_id':
+                event_data['activity_id'] = extract_value(action)
+            elif action_name == 'attach_activity_id_xfer':
+                event_data['activity_id_xfer'] = extract_value(action)
+            else:
                 event_data[action_name] = extract_value(action)
 
         return True
@@ -122,7 +129,11 @@ class ErrorEventsHandler(XESessionBase):
             if not action_name:
                 continue
 
-            if action_name == 'session_id' or action_name == 'request_id':
+            if action_name == 'attach_activity_id':
+                event_data['activity_id'] = extract_value(action)
+            elif action_name == 'attach_activity_id_xfer':
+                event_data['activity_id_xfer'] = extract_value(action)
+            elif action_name == 'session_id' or action_name == 'request_id':
                 # These are numeric values in the actions
                 value = extract_int_value(action)
                 if value is not None:
