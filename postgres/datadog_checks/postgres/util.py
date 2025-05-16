@@ -405,9 +405,9 @@ ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
         {'name': 'wal_client_addr', 'type': 'tag'},
         {'name': 'slot_name', 'type': 'tag_not_null'},
         {'name': 'slot_type', 'type': 'tag_not_null'},
-        {'name': 'wal_write_lag', 'type': 'gauge'},
-        {'name': 'wal_flush_lag', 'type': 'gauge'},
-        {'name': 'wal_replay_lag', 'type': 'gauge'},
+        {'name': 'replication.wal_write_lag', 'type': 'gauge'},
+        {'name': 'replication.wal_flush_lag', 'type': 'gauge'},
+        {'name': 'replication.wal_replay_lag', 'type': 'gauge'},
     ],
 }
 
