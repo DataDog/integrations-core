@@ -480,7 +480,7 @@ def get_files(
     compressed: bool,
 ) -> list[CommitEntry]:
     """
-    Calculates integration file sizes and versions from a repository.
+    Calculates integration file sizes and versions from a repository
 
     If the integration folder no longer exists, a 'Deleted' entry is added. Otherwise,
     it walks the module directory, sums file sizes, extracts the version, and appends a CommitEntry.
