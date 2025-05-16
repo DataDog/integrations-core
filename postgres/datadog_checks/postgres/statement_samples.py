@@ -32,7 +32,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, DBExplainError, warning_with_tags
+from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -749,15 +749,22 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
+
+        orig_statement = statement
+
+        # remove leading SET statements from our SQL
+        if obfuscated_statement[:3].lower() == "set":
+            statement = trim_leading_set_stmts(statement)
+            obfuscated_statement = trim_leading_set_stmts(obfuscated_statement)
+
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
         track_activity_query_size = self._get_track_activity_query_size()
 
-        if (
-            self._get_truncation_state(track_activity_query_size, statement, query_signature)
-            == StatementTruncationState.truncated
-        ):
+        # truncation check is on the original query, not the trimmed version
+        stmt_trunc = self._get_truncation_state(track_activity_query_size, orig_statement, query_signature)
+        if stmt_trunc == StatementTruncationState.truncated:
             return (
                 None,
                 DBExplainError.query_truncated,
