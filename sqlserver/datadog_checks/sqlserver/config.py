@@ -18,6 +18,13 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
+        self.database_identifier = instance.get('database_identifier', {})
+        self.tags: list[str] = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            additional_tags=[],
+        )
+        self.exclude_hostname = instance.get("exclude_hostname", False)
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']

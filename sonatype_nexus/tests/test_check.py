@@ -9,6 +9,8 @@ from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.errors import EmptyResponseError
 
+from .conftest import instance
+
 
 @pytest.fixture
 def mock_http_response(mocker):
@@ -26,17 +28,48 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response, aggrega
         json_data=status_metrics_response_data.update({"gauges": {"jvm.memory.heap.used": {"value": 123456789}}}),
     )
 
-    instance = {
-        "username": "test_username",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_create_metric_for_configs_int(mocker, aggregator):
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
+    metric_data = {"value": 100}
+    metric_name = "analytics.total_memory"
+
+    check.create_metric_for_configs(metric_data, metric_name)
+
+    aggregator.assert_metric(
+        "sonatype_nexus.analytics.total_memory",
+    )
+
+
+def test_create_metric_for_configs_dict(mocker, aggregator):
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
+    metric_data = {"value": {"total_count": 200}}
+    metric_name = "analytics.malicious_risk_on_disk"
+
+    check.create_metric_for_configs(metric_data, metric_name)
+
+    aggregator.assert_metric(
+        "sonatype_nexus.analytics.malicious_risk_on_disk",
+    )
+
+
+def test_create_metric_for_configs_by_format_type_list(mocker, aggregator):
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
+    metric_data = [{"maven": {"bytes_uploaded": 100}}]
+    metric_name = "analytics.uploaded_bytes_by_format"
+    metric_info = constants.METRIC_CONFIGS_BY_FORMAT_TYPE[metric_name]
+
+    check.create_metric_for_configs_by_format_type(metric_data, metric_name, metric_info)
+
+    aggregator.assert_metric(
+        f"sonatype_nexus.{metric_name}",
+    )
 
 
 def test_empty_instance(dd_run_check):
@@ -75,13 +108,6 @@ def test_bad_request_error(dd_run_check, mock_http_response):
         json_data={"error": "Bad request"},
     )
 
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
-
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
         dd_run_check(check)
@@ -94,13 +120,6 @@ def test_license_expired_error(dd_run_check, mock_http_response):
         status_code=402,
         json_data={"error": "License expired"},
     )
-
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
 
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
@@ -115,13 +134,6 @@ def test_insufficient_permission_error(dd_run_check, mock_http_response):
         json_data={"error": "Insufficient permissions"},
     )
 
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
-
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
         dd_run_check(check)
@@ -134,13 +146,6 @@ def test_not_found_error(dd_run_check, mock_http_response):
         status_code=404,
         json_data={"error": "Resource not found"},
     )
-
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
 
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
@@ -155,13 +160,6 @@ def test_server_error(dd_run_check, mock_http_response):
         json_data={"error": "Internal server error"},
     )
 
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
-
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
         dd_run_check(check)
@@ -174,13 +172,6 @@ def test_timeout_error(dd_run_check, mock_http_response):
         status_code=408,
         json_data={"error": "TimeoutError"},
     )
-
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
 
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
@@ -195,13 +186,6 @@ def test_empty_response_error(dd_run_check, mocker):
         "datadog_checks.sonatype_nexus.api_client.SonatypeNexusClient.call_sonatype_nexus_api",
         side_effect=EmptyResponseError(),
     )
-
-    instance = {
-        "username": "test_user",
-        "password": "test_password",
-        "min_collection_interval": 400,
-        "server_url": "https://example.com",
-    }
 
     with pytest.raises(Exception) as excinfo:
         check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])

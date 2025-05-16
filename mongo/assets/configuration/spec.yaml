@@ -448,6 +448,19 @@ files:
       value:
         type: boolean
         example: true
+    - name: free_storage_metrics
+      description: |
+        Enabled or disable the collection of free storage metrics.
+        By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+        Set to `false` to disable collection of free storage metrics.
+
+        Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+        processing delays and high CPU usage on the instance.
+        https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+      value:
+        type: boolean
+        example: true
+        display_default: true
     - name: add_node_tag_to_events
       description: |
         Adds the Mongo node to events as a tag rather than creating a seperate host for the event.

@@ -159,7 +159,7 @@ exclude = [
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
     'psutil',
-    'pymongo[srv]', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

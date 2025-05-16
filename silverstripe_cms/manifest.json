@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "acd6d383-dfe8-4e70-8c68-e5f3b6da84af",
   "app_id": "silverstripe-cms",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -39,7 +39,9 @@
       },
       "metrics": {
         "prefix": "silverstripe_cms.",
-        "check": ["silverstripe_cms.files.count"],
+        "check": [
+          "silverstripe_cms.files.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

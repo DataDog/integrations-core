@@ -1,0 +1,3771 @@
+{   "author_name": "Datadog",
+    "title": "Appgate (AGI) ZTNA/SDP",
+    "description": "Appgate (AGI) Zero Trust Network Access and Software Defined Perimeter\n\nDashboard for monitoring essential metrics and alerts to support operations management",
+    "widgets": [
+        {
+            "id": 5710787937461844,
+            "definition": {
+                "title": "",
+                "banner_img": "/api/v2/images/84afa174-e0ca-4fa8-8785-8c813aa1863d",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1074625189699766,
+                        "definition": {
+                            "type": "free_text",
+                            "text": "Critical metrics for your ZTNA Collective",
+                            "color": "#4d4d4d",
+                            "font_size": "auto",
+                            "text_align": "left"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3237525789031586,
+                        "definition": {
+                            "type": "note",
+                            "content": "Appgate SDP provides a secure access management solution for users and devices that operates across cloud and hybrid environments.\n\nThe growth of a highly distributed WFH culture, enterprise collaboration, consumption of information on personal devices and the boom in Internet of Things (IoT) devices has resulted in the collapse of the traditional perimeter. Today, access needs to be provisioned to business applications, data and services whether on-premises or in the cloud. And in today’s globally connected environment, this could be from external systems, countless IoT devices, employees, partners or customers. Such diversity cannot simply be handled using some extended network model as in today's security climate, this would represent an unacceptable risk.\n\nAppgate SDP enables organizations to adopt a Zero Trust Network Access approach to provide; granular, context aware, access control to distributed cloud and hybrid environments. Appgate SDP introduces the concept of the 6-layer trust model with separate verification steps that extend beyond just sign-in allowing further verification to be required at time of use - when an attempt is made to connect to a specific resource.\n\nAppgate SDP does not depend on a traditional network perimeter model or require specific hardware; it can be used across cloud and hybrid environments through a distributed topology and by leveraging software virtualization.\n\n[Learn more from our Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/introduction.html)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5898517131098230,
+                        "definition": {
+                            "type": "iframe",
+                            "url": "https://fast.wistia.net/embed/iframe/494j4pgemz"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 12,
+                            "height": 7
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 8370307491683924,
+            "definition": {
+                "title": "Gateway",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2538416199920670,
+                        "definition": {
+                            "title": "Active Sessions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.gw_vpn_sessions{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1681489541339846,
+                        "definition": {
+                            "type": "note",
+                            "content": "JS Execution time may provide further insight into the causes of long Event processing time",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8246150504006274,
+                        "definition": {
+                            "type": "note",
+                            "content": "Events can be generated by user accesses and changes in infrastructure.  The events need to be processed by the gateways to update user access rules.  These consume time as they are being processed.  This will provide insight into how much time is being consumed",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "75%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3571467521721086,
+                        "definition": {
+                            "title": "JS Execution time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Rules",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.gw_session_js_exectime{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2073430237569134,
+                        "definition": {
+                            "title": "Event processing time",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query2)",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:appgate.gw_session_event_timing{measure:accumulated ,$collective_name,$site_name,$appliance_name,$func,$scope} by {type,appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7831374786534714,
+                        "definition": {
+                            "type": "note",
+                            "content": "These are critical metrics that relate to Gateway load, and can trigger Gateway suspension or Warning and Error notifications.  When a gateway is suspended, no new clients are accepted.  The metric then needs to fall below a value for new clients to be accepted again.  Read more about [metrics thresholds](\nhttps://sdphelp.appgate.com/adminguide/v6.4/ha.html?q=suspend) or \n[how suspend works](https://sdphelp.appgate.com/adminguide/v6.4/prometheus-metrics-thresholds.html?q=prometheus) in the Admin guide",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4919694389838114,
+                        "definition": {
+                            "title": "Java Heap Usage (Percent)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "autosmooth(query3)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:appgate.apn_memory{measure:percent,$collective_name,$site_name,$appliance_name,$func,$scope , func:*gw*} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "thin"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "sqrt",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "label": " Warning ",
+                                    "value": "70 < y < 85",
+                                    "display_type": "warning dashed"
+                                },
+                                {
+                                    "label": " Nominal: Accept new clients ",
+                                    "value": "y < 70",
+                                    "display_type": "ok dashed"
+                                },
+                                {
+                                    "label": " Error: Reject new clients ",
+                                    "value": "y > 85",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7546274214502290,
+                        "definition": {
+                            "title": "Java Heap Usage (Percent)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "autosmooth(query2 / query1 * 100)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "max:appgate.gw_sessiond_heap{measure:used,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:appgate.gw_sessiond_heap{measure:max,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "thin"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "sqrt",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "label": " Warning ",
+                                    "value": "70 < y < 85",
+                                    "display_type": "warning dashed"
+                                },
+                                {
+                                    "label": " Error: Reject new clients ",
+                                    "value": "y > 85",
+                                    "display_type": "error dashed"
+                                },
+                                {
+                                    "label": " Nominal: Accept new clients ",
+                                    "value": "y < 70",
+                                    "display_type": "ok dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6276411608038532,
+                        "definition": {
+                            "title": "Event Queue Usage (Percent)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "autosmooth(query2 / query1 * 100)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "max:appgate.gw_event_queue_size{measure:current,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:appgate.gw_event_queue_size{measure:length,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "thin"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "sqrt",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "label": " Warning ",
+                                    "value": "50 < y < 70",
+                                    "display_type": "warning dashed"
+                                },
+                                {
+                                    "label": " Error: Reject new clients ",
+                                    "value": "y > 70",
+                                    "display_type": "error dashed"
+                                },
+                                {
+                                    "label": " Nominal: Accept new clients ",
+                                    "value": "y < 50",
+                                    "display_type": "ok dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4441013572447962,
+                        "definition": {
+                            "title": "Sessions per Gateway",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:appgate.gw_vpn_sessions{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "thin"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "sqrt",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": " Error: Reject new clients ",
+                                    "value": "y > 8000",
+                                    "display_type": "error dashed"
+                                },
+                                {
+                                    "label": " Warning: Accept new Clients ",
+                                    "value": "4000 < y < 7500",
+                                    "display_type": "warning dashed"
+                                },
+                                {
+                                    "label": " Nominal: Accept new clients ",
+                                    "value": "y < 4000",
+                                    "display_type": "ok dashed"
+                                },
+                                {
+                                    "label": " Warning ",
+                                    "value": "7500 < y < 8000",
+                                    "display_type": "warning dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7053271542484426,
+                        "definition": {
+                            "type": "note",
+                            "content": "These graphs provide various usage and load details of configured resolvers, which drive powerful name based entitlements that can be used to control access to dynamic resources.  Read more about resolvers: [DNS](https://sdphelp.appgate.com/adminguide/v6.4/dns-name-resolvers.html) or \n[Cloud](https://sdphelp.appgate.com/adminguide/v6.4/cloud-api-resolvers.html) ",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4426250983962188,
+                        "definition": {
+                            "title": "Resolutions by Resolver Type ",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.gw_name_resolver_value{!measure:accounts,!measure:update_interval,$collective_name,$site_name,$appliance_name,$func,$scope} by {kind,measure,site_name,appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 15,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4739345915570116,
+                        "definition": {
+                            "title": "Resolver Cache",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:appgate.gw_name_resolver_value{!measure:accounts,!measure:update_interval,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,kind}",
+                                            "aggregator": "max"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.gw_name_resolver_cache_count.count{measure:insertions,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,kind}.as_count()",
+                                            "aggregator": "max"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:appgate.gw_name_resolver_cache_count.count{measure:evictions,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,kind}.as_count()",
+                                            "aggregator": "max"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:appgate.gw_name_resolver_cache_count.count{measure:misses,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,kind}.as_count()",
+                                            "aggregator": "max"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": ""
+                                                },
+                                                "palette": "white_on_green"
+                                            }
+                                        ]
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Queries",
+                                            "formula": "monotonic_diff(query4)"
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Insertions",
+                                            "formula": "query1",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Evictions",
+                                            "formula": "query2",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Misses",
+                                            "formula": "query3",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1972480607780248,
+                        "definition": {
+                            "title": "Client Reported Metrics",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "max:appgate.gw_vpn_client_metric{$collective_name,$site_name,name:rtt,measure:avg,$appliance_name,$func,$scope} by {site_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "max:appgate.gw_vpn_client_metric{$collective_name,$site_name,name:client-connect-time-tcp,measure:avg,$appliance_name,$func,$scope} by {site_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "max:appgate.gw_vpn_client_metric{$collective_name,$site_name,name:client-connect-time-udp,measure:avg,$appliance_name,$func,$scope} by {site_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "RTT ms",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Connect ms",
+                                            "formula": "query3",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 917529348026258,
+                        "definition": {
+                            "title": "Firewall Rule Memory",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Rules",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.gw_vpn_rules_size{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 22,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 276606122115256,
+                        "definition": {
+                            "title": "Sessiond Thread Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:appgate.gw_sessiond_thread_count{type:current,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "thin"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "sqrt",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 22,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 26
+            }
+        },
+        {
+            "id": 4759419771318390,
+            "definition": {
+                "title": "Administration",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2580603072169270,
+                        "definition": {
+                            "type": "note",
+                            "content": "Appgate SDP is licensed by Users, Portal Users, Sites, Connector Resource Groups and Service Users.  The optional feature licenses will be shown only when they are enabled.  [Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/licenses.html)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2203916225361362,
+                        "definition": {
+                            "title": "Next License Expiry in",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "min:appgate.ctr_license_days_remaining{func:*ctr*,$collective_name,$site_name,$appliance_name,$func,$scope}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 30,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 15,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 15,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "Days"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2487931227036236,
+                        "definition": {
+                            "title": "License Utilization",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:appgate.ctr_license{func:*ctr*,measure:used,$collective_name,$site_name,$appliance_name,$func,$scope} by {type}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:appgate.ctr_license{func:*ctr*,measure:entitled,$collective_name,$site_name,$appliance_name,$func,$scope} by {type}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 2,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Used",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Entitled",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "% Used",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 60,
+                                                    "palette": "white_on_yellow"
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "value": 60,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar",
+                                            "formula": "(query1 / query2) * 100"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6508929595376246,
+                        "definition": {
+                            "type": "note",
+                            "content": "It is important to make sure that you do not let your appliance certificate expire.  Appgate will update the appliance certificate automatically 24h before expiration, but will require a restart of the local services. If the certificate expires, critical appliance operations may stop working  [Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/internal-certificates.html)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4781628586894176,
+                        "definition": {
+                            "title": "Next Certificate Expiry In",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "min:appgate.apn_certificate_days_remaining{$collective_name,$site_name,$appliance_name,$func,$scope}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 90,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 90,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 30,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "Days"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": false
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2402931887933012,
+                        "definition": {
+                            "title": "Certificate Days Remaining",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "min:appgate.apn_certificate_days_remaining{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "asc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Days Remaining",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 41,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 2930787099822908,
+            "definition": {
+                "title": "General",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3232812868126444,
+                        "definition": {
+                            "type": "note",
+                            "content": "Here you can monitor your Appliance's essential resources",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6393831940101180,
+                        "definition": {
+                            "title": "CPU",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:appgate.apn_cpu_usage_percent{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y > 90",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 499696252972626,
+                        "definition": {
+                            "title": "Memory",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:appgate.apn_memory{measure:percent,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y > 90",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1597646738434562,
+                        "definition": {
+                            "title": "Network",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_network_interface_statistic.count{$collective_name,$site_name,measure:*_bytes,$appliance_name,$func,$scope} by {appliance_name,measure,ifname}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3013013957275000,
+                        "definition": {
+                            "title": "Storage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "%Disk",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:appgate.apn_disk_partition_statistic{measure:percent,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "value": "50 < y < 80",
+                                    "display_type": "warning solid"
+                                },
+                                {
+                                    "value": "y > 80",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2345770939535744,
+                        "definition": {
+                            "type": "note",
+                            "content": "Each appliance can have a number of functions assigned.  Here you can see the status of each function, and for some see the session activity.",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3930680518874452,
+                        "definition": {
+                            "title": "Function Status and Sessions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:appgate.apn_function_sessions{(NOT ((name:appliance OR name:controller OR name:logserver OR name:logforwarder OR name:metricsaggregator) AND status:healthy)) AND $collective_name AND $site_name AND $appliance_name AND $func AND $scope} by {site_name,appliance_name,name,status}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "warning"
+                                                },
+                                                "palette": "white_on_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "busy"
+                                                },
+                                                "palette": "custom_bg",
+                                                "custom_bg_color": "#65b2fb"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "error"
+                                                },
+                                                "palette": "white_on_red"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "healthy"
+                                                },
+                                                "palette": "white_on_green"
+                                            }
+                                        ]
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Sessions",
+                                            "cell_display_mode": "trend",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            },
+                                            "formula": "query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always",
+                            "custom_links": [
+                                {
+                                    "override_label": "containers",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "hosts",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "logs",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "traces",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "profiles",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "label": "To Site Detail",
+                                    "link": "https://us5.datadoghq.com/dashboard/wva-5pd-nwh/agi-site?tpl_var_site_name={{site_name.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 46,
+                "width": 12,
+                "height": 12
+            }
+        },
+        {
+            "id": 5717316770328850,
+            "definition": {
+                "title": "Overview",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6050069524318478,
+                        "definition": {
+                            "title": "Appliance Status and Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "hostmap",
+                            "requests": {
+                                "fill": {
+                                    "q": "max:appgate.apn_status{$collective_name,$site_name,$func,$scope,$appliance_name} by {host}"
+                                },
+                                "size": {
+                                    "q": "sum:appgate.apn_function_sessions{$collective_name,$site_name,$func,$scope,$appliance_name} by {host}"
+                                }
+                            },
+                            "node_type": "host",
+                            "no_metric_hosts": false,
+                            "no_group_hosts": true,
+                            "group": [
+                                "site_name"
+                            ],
+                            "scope": [
+                                "$collective_name",
+                                "$site_name",
+                                "$func",
+                                "$scope",
+                                "$appliance_name"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false,
+                                "fill_min": "auto",
+                                "fill_max": "2"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 7
+                        }
+                    },
+                    {
+                        "id": 6730389429154438,
+                        "definition": {
+                            "type": "note",
+                            "content": "Site can be used to group some appliance behavior together [Learn more](https://sdphelp.appgate.com/adminguide/v6.4/sites.html)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4104195947543564,
+                        "definition": {
+                            "type": "note",
+                            "content": "This is how many of each type of appliance exist.  Each appliance is a stateless, configurable machine that can operate as a Controller, Gateway, Connector, Portal, LogServer, LogForwarder, Metrics Aggregator or some combination thereof.  [Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/about-appliances.html)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 7,
+                            "width": 9,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4040527383181254,
+                        "definition": {
+                            "title": "Sites",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_status{site_name:*,$collective_name,$site_name,$appliance_name,$func,$scope} by {site_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [
+                                {
+                                    "override_label": "containers",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "hosts",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "logs",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "traces",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "profiles",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "label": "View All Sites",
+                                    "link": "/dashboard/kfc-6h2-9q2"
+                                }
+                            ],
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7347974458734656,
+                        "definition": {
+                            "title": "GW",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_status{func:*gw*,$collective_name,$site_name,$appliance_name,$func,$scope} by {host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "custom_links": [
+                                {
+                                    "override_label": "containers",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "hosts",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "logs",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "traces",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "profiles",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "label": "View All Gateways",
+                                    "link": "/dashboard/8xq-ta2-cq3"
+                                }
+                            ],
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": false
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 8,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4297175628801590,
+                        "definition": {
+                            "title": "LS / LF / MA",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_status{(func:*lf* OR func:*ls* OR func:*ma*) AND $collective_name AND $site_name AND $appliance_name AND $func AND $scope} by {appliance_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": false
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 8,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8372366163195718,
+                        "definition": {
+                            "title": "CTR",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_status{func:*ctr*,$collective_name,$site_name,$appliance_name,$func,$scope} by {host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [
+                                {
+                                    "override_label": "containers",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "hosts",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "logs",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "traces",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "profiles",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "label": "View All Controllers",
+                                    "link": "/dashboard/ejz-4re-7kb/agi-controllers"
+                                }
+                            ],
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3306115222859030,
+                        "definition": {
+                            "title": "PTL / CON",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_status{(func:*ptl* OR func:*con* ) AND $collective_name AND $site_name AND $appliance_name AND $func AND $scope} by {host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": false
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 8,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 587037674547886,
+                        "definition": {
+                            "title": "ALL",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_status{$collective_name,$site_name,$appliance_name,$func,$scope} by {host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "formula": "count_not_null(query1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 8,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7419217352875590,
+                        "definition": {
+                            "type": "note",
+                            "content": "Various monitors have been created that try to detect important issues.  Pay attention to this list to see the problems as they arise.\n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 5,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 174267436480544,
+                        "definition": {
+                            "type": "note",
+                            "content": "These are user sessions to appliance functions.  Most common type are gateway sessions, which are used to provide user access to protected networks.  Appliances have a finite session capacity, so it is important to know what your system can handle\n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 10,
+                            "width": 7,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1767996069202152,
+                        "definition": {
+                            "title": "Problems",
+                            "type": "manage_status",
+                            "display_format": "list",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "status:(Warn OR Alert) group:$collective_name group:$site_name group:$appliance_name group:$func  group:$scope",
+                            "sort": "triggered,desc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "combined",
+                            "show_priority": false,
+                            "show_last_triggered": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3282880558531680,
+                        "definition": {
+                            "title": "Sessions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_function_sessions{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 15,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 8053264789392412,
+            "definition": {
+                "title": "Controller",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4005940736254150,
+                        "definition": {
+                            "title": "Monitors",
+                            "type": "manage_status",
+                            "display_format": "list",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:agisdp_monitor_function:ctr group:$collective_name group:$site_name group:$appliance_name group:$func $scope",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "combined",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8831261536528962,
+                        "definition": {
+                            "type": "note",
+                            "content": "These are user Auth operations.  The errors are in red.  Look here to see the volume of user activity and the rate of errors",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8330496733233772,
+                        "definition": {
+                            "title": "Authentications (Successes/Errors)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Successes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "alias": "Errors",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:appgate.ctr_client_authentication.count{measure:success ,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:appgate.ctr_client_authentication.count{measure:error,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8750236787819670,
+                        "definition": {
+                            "title": "Authorizations (Successes/Errors)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Successes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "alias": "Errors",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:appgate.ctr_client_authorization.count{measure:success ,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:appgate.ctr_client_authorization.count{measure:error,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 929018921780118,
+                        "definition": {
+                            "title": "Scripts Evaluations (Successes/Errors)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Successes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Successes",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Successes",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "Errors",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Errors",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "alias": "Errors",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.ctr_evaluate_user_claim_script.count{measure:success ,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:appgate.ctr_client_evaluate_auto_update_criteria_script.count{measure:success ,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:appgate.ctr_client_evaluate_all_policies.count{measure:success ,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:appgate.ctr_evaluate_user_claim_script.count{measure:error,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:appgate.ctr_client_evaluate_all_policies.count{measure:error,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:appgate.ctr_client_evaluate_auto_update_criteria_script.count{measure:error,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4610294368354208,
+                        "definition": {
+                            "type": "note",
+                            "content": "Data storage and Memory are critical resources for Controllers.  Use these metrics to gauge proper sizing of your appliances",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2513444485997972,
+                        "definition": {
+                            "title": "Database Storage Partition Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "%Disk",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:appgate.apn_disk_partition_statistic{func:*ctr*,name:data,measure:percent,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "max": "100"
+                            },
+                            "markers": [
+                                {
+                                    "value": "50 < y < 80",
+                                    "display_type": "warning solid"
+                                },
+                                {
+                                    "value": "y > 80",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7401444508391056,
+                        "definition": {
+                            "title": "Java Heap Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Controller memory heap issue (?)",
+                                            "formula": "(query1 / query2) * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:appgate.ctr_memory_heap{measure:used,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:appgate.ctr_memory_heap{measure:max,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "thin"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": false,
+                                "scale": "sqrt"
+                            },
+                            "markers": [
+                                {
+                                    "value": "y > 80",
+                                    "display_type": "error dashed"
+                                },
+                                {
+                                    "value": "70 < y < 80",
+                                    "display_type": "warning dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7024915804622202,
+                        "definition": {
+                            "type": "note",
+                            "content": "These metrics monitor the Database size and the replication lag. \n Non-zero Replication lag means that not all controllers have a consistent view the of the collective state.  This can happen if there is a breakdown in Appliance to Appliance communication\n [Read more about the Database on in the controllers section of the Admin guide](https://sdphelp.appgate.com/adminguide/v6.4/controllers.html?q=database)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1482906679755028,
+                        "definition": {
+                            "title": "DB Size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:appgate.ctr_database_size{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y > 2000000000",
+                                    "display_type": "error dashed"
+                                },
+                                {
+                                    "value": "1800000000 < y < 2000000000",
+                                    "display_type": "warning dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4457191654848010,
+                        "definition": {
+                            "title": "DB Replication Lag",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:appgate.ctr_database_replication_slot_replay_lag{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 0",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 2829487408892358,
+            "definition": {
+                "title": "Audit",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7856241958742542,
+                        "definition": {
+                            "type": "note",
+                            "content": "This shows the flow volume of the Audit logs, which are records of transactions and provide a definitive record of accesses and administrative actions.  Forwarding of Audit logs at high volume can be resource intensive, so it is important to know your systems limits and monitor that the flow is within capacity.   [Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/audit-logs-intro.html) \n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 628282241331886,
+                        "definition": {
+                            "title": "Flow",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_audit_logs.count{type:received,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7122697638166662,
+                        "definition": {
+                            "type": "note",
+                            "content": "As audits are stored in a locally until they can be reliably forwarded.  A **Positive** value here shows a new accumulation of logs, while a **Negative** value shows an emptying of the local database.  Nominally this will be flat, but due to connectivity or forwarder issues, there can be spikes, and then dips for recovery.  \n\n[Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/audit-logs-intro.html) \n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7731161887896948,
+                        "definition": {
+                            "title": "Client Database Flow IN vs OUT",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_audit_logs.count{type:received,!func:*lf*,!func:*ls*,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:appgate.apn_audit_logs.count{type:removed,!func:*lf*,!func:*ls*,$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "sqrt",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": " Critical ",
+                                    "value": "y > 250",
+                                    "display_type": "error dashed"
+                                },
+                                {
+                                    "label": " Accumulation ",
+                                    "value": "y > 50",
+                                    "display_type": "warning dashed"
+                                },
+                                {
+                                    "label": " Nominal ",
+                                    "value": "-50 < y < 50",
+                                    "display_type": "ok dashed"
+                                },
+                                {
+                                    "label": " Recovery ",
+                                    "value": "y < -50",
+                                    "display_type": "info dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6292180265244474,
+                        "definition": {
+                            "title": "Drops",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "record"
+                                                }
+                                            },
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:appgate.apn_audit_logs.count{type:dropped,$collective_name,$site_name,$appliance_name,$func,$scope}.as_count()",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "=",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4996650470096118,
+                        "definition": {
+                            "type": "note",
+                            "content": "If there is a severe issue, a non-zero value for *Dropped* shows that the local database was at capacity and could not store new logs as they came in\n\n[Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/audit-logs-intro.html) \n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1043237795032844,
+                        "definition": {
+                            "type": "note",
+                            "content": "These show the volume of logs by various types. [Learn more from the Admin Guide](https://sdphelp.appgate.com/adminguide/v6.4/audit-log-types.html) \n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3651671959902218,
+                        "definition": {
+                            "title": "Type: Common User Access",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_audit_events.count{$collective_name AND $appliance_name AND $func AND $site_name AND (type:ip_access OR type:*_evaluated OR type:*_succeeded OR type:url_access OR type:remedy_action_triggered OR type:*_accepted OR type:tunnel_closed OR type:session_removed OR type:session_created OR type:session_reconnected OR type:tunnel_connected OR type:tunnel_established OR type:session_created OR type:add-name OR type:acl_rules_update) AND $scope} by {type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2561339389420510,
+                        "definition": {
+                            "title": "Type: Common Administration",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_audit_events.count{$collective_name AND $appliance_name AND $func AND $site_name AND (type:*_viewed OR type:*_listed OR type:ssh_*) AND $scope} by {type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 7,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6147249173410948,
+                        "definition": {
+                            "title": "Type: Other",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_audit_events.count{$collective_name AND $appliance_name AND $func AND $site_name AND NOT (type:ip_access OR type:*_evaluated OR type:*_succeeded OR type:url_access OR type:remedy_action_triggered OR type:*_accepted OR type:tunnel_closed OR type:session_removed OR type:session_created OR type:tunnel_connected OR type:tunnel_established OR type:session_created OR type:add-name OR type:acl_rules_update OR type:session_reconnected OR type:*_viewed OR type:*_listed OR type:ssh_*) AND $scope} by {type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 7,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 5441278406875284,
+            "definition": {
+                "title": "Network",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2392123012908928,
+                        "definition": {
+                            "type": "note",
+                            "content": "These show load at the network interface level. Allowing you to see real-time throughput of user and system activity on the wire",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6886578391561178,
+                        "definition": {
+                            "title": "Throughput",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_network_interface_statistic.count{$collective_name,$site_name,measure:*_bytes,$appliance_name,$func,$scope} by {appliance_name,measure,ifname}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3718838684390940,
+                        "definition": {
+                            "title": "Packets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_network_interface_statistic.count{$collective_name,$site_name,measure:*_packets,$appliance_name,$func,$scope} by {appliance_name,measure,ifname}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 859981684251402,
+                        "definition": {
+                            "title": "Connections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_active_connections{$collective_name,$site_name,$appliance_name,$func,$scope} by {appliance_name,proto}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2545061730038390,
+                        "definition": {
+                            "title": "Service Endpoint Access",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:appgate.apn_audit_events.count{$site_name,$collective_name,$appliance_name,$func,type:ip_access,$scope} by {appliance_name}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5627946111255954,
+                        "definition": {
+                            "title": "Drops and Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.apn_network_interface_statistic.count{$collective_name AND $site_name AND $appliance_name AND $func AND (measure:*_dropped OR measure:*_errors OR measure:*_nohandler OR measure:collisions) AND $scope} by {appliance_name,ifname}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2002654993962588,
+                        "definition": {
+                            "type": "note",
+                            "content": "IP Pools are an important resource and this table shows their allocation and and usage.  [Read more in the admin guide](\nhttps://sdphelp.appgate.com/adminguide/v6.4/ipv4-ipv6-pools.html)",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2980697813974032,
+                        "definition": {
+                            "title": "IP Pool Utilization",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:appgate.ctr_ip_pool{usage:current,$collective_name,$site_name,$appliance_name,$func,$scope} by {name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:appgate.ctr_ip_pool{usage:reserved,$collective_name,$site_name,$appliance_name,$func,$scope} by {name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:appgate.ctr_ip_pool{usage:total,$collective_name,$site_name,$appliance_name,$func,$scope} by {name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 4,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Used",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "alias": "Reserved",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "independent"
+                                            },
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "% Used",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 90,
+                                                    "palette": "white_on_red"
+                                                },
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 70,
+                                                    "palette": "white_on_yellow"
+                                                }
+                                            ],
+                                            "formula": "cutoff_min((query1 / query3) * 100, 0.01)"
+                                        },
+                                        {
+                                            "alias": "% Reserved",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 70,
+                                                    "palette": "white_on_yellow"
+                                                },
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 90,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ],
+                                            "formula": "cutoff_min((query2 / query3) * 100, 0.01)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 10,
+                            "width": 10,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4366244582446882,
+                        "definition": {
+                            "title": "Single Packet Authorization (New Client and Appliance Connections)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Valid",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "orange"
+                                            },
+                                            "alias": "Error",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Invalid",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:appgate.apn_spa_packets.count{$collective_name,$site_name,$appliance_name,$func,$scope,type:authorized} by {type,proto,appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:appgate.apn_spa_packets.count{$collective_name AND $site_name AND $appliance_name AND $func AND $scope AND NOT ((type:invalid AND proto:tcp ) OR (type:ignored AND proto:udp) OR (type:authorized ))} by {type,proto,appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        },
+                                        {
+                                            "query": "sum:appgate.apn_spa_packets.count{$collective_name AND $site_name AND $appliance_name AND $func AND $scope AND ((type:invalid AND proto:tcp ) OR (type:ignored AND proto:udp))} by {type,proto,appliance_name}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "tags",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 41,
+                "width": 12,
+                "height": 17
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "collective_name",
+            "prefix": "collective_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "site_name",
+            "prefix": "site_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "appliance_name",
+            "prefix": "appliance_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "func",
+            "prefix": "func",
+            "available_values": [
+                "*gw*",
+                "*con*",
+                "*ptl*",
+                "*ctr*",
+                "*ls*",
+                "*lf*",
+                "*ma*"
+            ],
+            "default": "*"
+        },
+        {
+            "name": "scope",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "template_variable_presets": [
+        {
+            "name": "Appgate Corp Dashboard",
+            "template_variables": [
+                {
+                    "name": "collective_name",
+                    "value": "appgateinc"
+                }
+            ]
+        }
+    ],
+    "reflow_type": "fixed"
+}

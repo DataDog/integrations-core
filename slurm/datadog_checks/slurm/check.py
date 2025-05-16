@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import subprocess
+import time
 from datetime import timedelta
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -213,8 +215,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge('sinfo.node.enabled', 1)
 
     def process_squeue(self, output):
-        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY # noqa: E501
-        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M # noqa: E501
+        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY | Partition # noqa: E501
+        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M | foo       # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_squeue_stats:
@@ -311,6 +313,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             # we see the 'Backfilling stats' line.
             current_map = SDIAG_MAP['backfill_stats'] if backfill_section else SDIAG_MAP['main_stats']
 
+            # Try to match known metrics
             for metric, pattern in current_map.items():
                 if pattern in line:
                     try:
@@ -320,6 +323,17 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     except (ValueError, IndexError):
                         continue
                     break
+
+            if 'Last cycle when' in line:
+                try:
+                    match = re.search(r'\((\d+)\)', line)
+                    if match:
+                        last_cycle_epoch = int(match.group(1))
+                        now = int(time.time())
+                        diff = now - last_cycle_epoch
+                        self.gauge('sdiag.last_cycle_seconds_ago', diff, tags=self.tags)
+                except Exception as e:
+                    self.log.debug("Failed to parse last cycle epoch from line '%s': %s", line, e)
 
         for name, value in metrics.items():
             self.gauge(f'sdiag.{name}', value, tags=self.tags)

@@ -11,6 +11,7 @@ from .common import (
     MOCK_IB_COUNTER_DATA,
     MOCK_PORT,
     MOCK_RDMA_COUNTER_DATA,
+    MOCK_STATUS_DATA,
 )
 
 
@@ -56,6 +57,8 @@ def _get_file_content(filename):
         return MOCK_IB_COUNTER_DATA[counter]
     elif counter in MOCK_RDMA_COUNTER_DATA:
         return MOCK_RDMA_COUNTER_DATA[counter]
+    elif counter in MOCK_STATUS_DATA:
+        return MOCK_STATUS_DATA[counter]
     return '0'
 
 

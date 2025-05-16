@@ -119,6 +119,14 @@ class DatabaseAutodiscovery(BaseModel):
     refresh: Optional[int] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -242,6 +250,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     dbname: Optional[str] = None
