@@ -8,3 +8,8 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+  - template: logs
+    example:
+    - type: docker
+      source: velero
+      service: <SERVICE>

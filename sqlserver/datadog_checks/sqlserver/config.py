@@ -18,6 +18,13 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
+        self.database_identifier = instance.get('database_identifier', {})
+        self.tags: list[str] = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            additional_tags=[],
+        )
+        self.exclude_hostname = instance.get("exclude_hostname", False)
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
@@ -50,6 +57,7 @@ class SQLServerConfig:
         self.activity_config: dict = instance.get('query_activity', {}) or {}
         self.schema_config: dict = instance.get('schemas_collection', {}) or {}
         self.deadlocks_config: dict = instance.get('deadlocks_collection', {}) or {}
+        self.xe_collection_config: dict = instance.get('xe_collection', {}) or {}
         self.cloud_metadata: dict = {}
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
@@ -83,6 +91,7 @@ class SQLServerConfig:
                     'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
                     'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
                     'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
+                    'collect_procedures': is_affirmative(obfuscator_options_config.get('collect_procedures', True)),
                     # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
                     # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
                     'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', 'obfuscate_and_normalize'),

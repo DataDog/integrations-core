@@ -2,7 +2,34 @@
 
 <!-- towncrier release notes start -->
 
-## 9.0.0 / 2025-03-19
+## 10.0.0 / 2025-05-15
+
+***Changed***:
+
+* Bump datadog-checks-base to 37.10.1 and python to 3.12 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+
+***Fixed***:
+
+* Skips explaining serverStatus command. ([#20149](https://github.com/DataDog/integrations-core/pull/20149))
+
+## 9.1.0 / 2025-04-25
+
+***Added***:
+
+* [mongo] Provide a way to optionally disable collecting free storage metrics ([#20135](https://github.com/DataDog/integrations-core/pull/20135))
+
+## 9.0.1 / 2025-04-17
+
+***Fixed***:
+
+* Skip collect explain plan for shardCollection operation. ([#19990](https://github.com/DataDog/integrations-core/pull/19990))
+* Skip dbstats metrics on shards primary because `db.stats` cannot run on shards. ([#19996](https://github.com/DataDog/integrations-core/pull/19996))
+
+## 9.0.0 / 2025-03-19 / Agent 7.65.0
 
 ***Changed***:
 
@@ -19,6 +46,12 @@
 ***Fixed***:
 
 * Revert "[mongo] add service tag to agent operations (#19456)" ([#19768](https://github.com/DataDog/integrations-core/pull/19768))
+
+## 8.6.0 / 2025-03-25 / Agent 7.64.2
+
+***Added***:
+
+* Skip running explain on aggregation pipelines that contain $mergeCursors to prevent potential MongoDB crashes. ([#19798](https://github.com/DataDog/integrations-core/pull/19798)) This release is for the 7.64.x Agent series.
 
 ## 8.5.1 / 2025-03-12 / Agent 7.64.0
 
@@ -259,8 +292,8 @@
 * Add cursor object to sampled activities and explain plan payload. cursor contains the cursor information for idleCursor and getmore operations. ([#17840](https://github.com/DataDog/integrations-core/pull/17840))
 * Add tag `clustername` to mongo metrics. This tag is set only when `cluster_name` is provided in the integration configuration. ([#17876](https://github.com/DataDog/integrations-core/pull/17876))
 * Update mongo conf.yaml.example to include DBM for MongoDB config options. The new config options includes `dbm`, `cluster_name`, `operation_samples.enabled` & `operation_samples.collection_interval`. ([#17940](https://github.com/DataDog/integrations-core/pull/17940))
-* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance. 
-  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery. 
+* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance.
+  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery.
   When enabled, the integration will automatically discover the databases available in the monitored mongodb instance and refresh the list of databases every 10 minutes.
   Use `database_autodiscovery.include` and `database_autodiscovery.exclude` to filter the list of databases to monitor. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
 * Added new collection latency and query execution stats metrics.

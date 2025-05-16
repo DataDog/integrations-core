@@ -15,9 +15,9 @@ from datadog_checks.postgres.util import (
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
+    QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
-    REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     STAT_IO_METRICS,
@@ -42,7 +42,9 @@ DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
 
-REPLICA_CONTAINER_NAME = 'compose-postgres_replica-1'
+REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
+REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
+REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
 USING_LATEST = False
 
 if POSTGRES_VERSION is not None:
@@ -150,13 +152,17 @@ def _get_expected_tags(
     role='master',
     **kwargs,
 ):
-    base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}'] + [f'database_hostname:{check.database_hostname}']
+    base_tags = (
+        pg_instance['tags']
+        + [f'port:{pg_instance["port"]}']
+        + [f'database_hostname:{check.database_hostname}', f'database_instance:{check.database_identifier}']
+    )
     if role:
         base_tags.append(f'replication_role:{role}')
     if with_db:
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:
-        base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
+        base_tags.append(f'dd.internal.resource:database_instance:{check.database_identifier}')
     if with_cluster_name and check.cluster_name:
         base_tags.append(f'postgresql_cluster_name:{check.cluster_name}')
     if with_sys_id and check.system_identifier:
@@ -261,16 +267,34 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
 
 
-def check_stat_replication(aggregator, expected_tags, count=1):
+def check_stat_replication_physical_slot(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
     replication_tags = expected_tags + [
         'wal_app_name:walreceiver',
-        'wal_client_addr:{}'.format(get_container_ip(REPLICA_CONTAINER_NAME)),
+        f'wal_client_addr:{get_container_ip(REPLICA_CONTAINER_1_NAME)}',
+        'wal_state:streaming',
+        'wal_sync_state:async',
+        'slot_name:replication_slot',
+        'slot_type:physical',
+    ]
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_STATS_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
+
+
+def check_stat_replication_no_slot(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10:
+        return
+    wal_app_name = 'replica2'
+    if float(POSTGRES_VERSION) < 12:
+        wal_app_name = 'walreceiver'
+    replication_tags = expected_tags + [
+        f'wal_app_name:{wal_app_name}',
+        f'wal_client_addr:{get_container_ip(REPLICA_CONTAINER_2_NAME)}',
         'wal_state:streaming',
         'wal_sync_state:async',
     ]
-    for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 

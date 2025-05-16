@@ -65,6 +65,7 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+        self._lowercase_device_tag = is_affirmative(instance.get('lowercase_device_tag', False))
 
         if self._use_lsblk and self._blkid_cache_file:
             raise ConfigurationError("Only one of 'use_lsblk' and 'blkid_cache_file' can be set at the same time.")
@@ -183,7 +184,7 @@ class Disk(AgentCheck):
         if Platform.is_win32():
             device_name = device_name.strip('\\').lower()
 
-        tags.append('device:{}'.format(device_name))
+        tags.append('device:{}'.format(device_name.lower() if self._lowercase_device_tag else device_name))
         tags.append('device_name:{}'.format(_base_device_name(part.device)))
         return tags
 
@@ -331,7 +332,7 @@ class Disk(AgentCheck):
                 device_specific_tags = self._get_device_specific_tags(disk_name)
                 metric_tags.extend(device_specific_tags)
 
-                metric_tags.append('device:{}'.format(disk_name))
+                metric_tags.append('device:{}'.format(disk_name.lower() if self._lowercase_device_tag else disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.extend(self.devices_label.get(disk_name))

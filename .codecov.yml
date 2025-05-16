@@ -106,6 +106,10 @@ coverage:
         target: 75
         flags:
         - cassandra_nodetool
+      Celery:
+        target: 75
+        flags:
+        - celery
       Ceph:
         target: 75
         flags:
@@ -873,6 +877,11 @@ flags:
     paths:
     - cassandra_nodetool/datadog_checks/cassandra_nodetool
     - cassandra_nodetool/tests
+  celery:
+    carryforward: true
+    paths:
+    - celery/datadog_checks/celery
+    - celery/tests
   ceph:
     carryforward: true
     paths:

@@ -8,6 +8,7 @@ import pytest
 from .common import (
     DB_NAME,
     _get_expected_replication_tags,
+    _get_expected_tags,
     assert_metric_at_least,
     check_bgw_metrics,
     check_common_metrics,
@@ -208,3 +209,37 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
     check.check(pg_replica_instance2)
     expected_tags = _get_expected_replication_tags(check, pg_replica_instance2, db=DB_NAME)
     aggregator.assert_metric('postgresql.conflicts.bufferpin', value=1, tags=expected_tags)
+
+
+@requires_over_10
+def test_pg_control_replication(aggregator, integration_check, pg_instance, pg_replica_instance):
+    check = integration_check(pg_replica_instance)
+    check.run()
+
+    dd_agent_tags = _get_expected_tags(check, pg_replica_instance, role='standby')
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1, value=1, tags=dd_agent_tags)
+
+    # Also checkpoint on primary to generate changes
+    master_conn = _get_superconn(pg_instance)
+    with master_conn.cursor() as cur:
+        cur.execute("CHECKPOINT;")
+
+    postgres_conn = _get_superconn(pg_replica_instance)
+    with postgres_conn.cursor() as cur:
+        cur.execute("CHECKPOINT;")
+
+    aggregator.reset()
+    check.run()
+    # checkpoint should be less than 2s old
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
+    )
+    # After a checkpoint, we have the CHECKPOINT_ONLINE record (114 bytes) and also
+    # likely receive RUNNING_XACTS (50 bytes) record
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay_bytes', count=1, higher_bound=250, tags=dd_agent_tags
+    )
+    # And restart should be slightly more than checkpoint delay
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
+    )
