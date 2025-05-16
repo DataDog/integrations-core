@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import string
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
@@ -128,6 +129,40 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+SET_TRIM_PATTERN = re.compile(
+    r"""
+    ^
+    (?:
+        \s*
+        # match one leading comment
+        (?:
+            /\*
+            .*
+            \*/
+            \s*
+        )?
+
+        # match leading SET commands
+        SET\b
+        (?:
+            [^';] | # keywords, integer literals, etc.
+            '[^']*' # single-quoted strings
+        )+
+        ;
+    )+
+    """,
+    flags=(re.I | re.X),
+)
+
+
+# Expects one or more SQL statements in a string. If the string
+# begins with any SET statements, they are removed and the rest
+# of the string is returned. Otherwise, the string is returned
+# as it was received.
+def trim_leading_set_stmts(sql):
+    return SET_TRIM_PATTERN.sub('', sql, 1).lstrip()
 
 
 fmt = PartialFormatter()
