@@ -133,23 +133,25 @@ def get_list_chunks(lst, n):
 
 SET_TRIM_PATTERN = re.compile(
     r"""
-    ^(?:
+    ^
+    (?:
+        \s*
         # match one leading comment
         (?:
-            \s*
             /\*
-            .*?
+            .*
             \*/
+            \s*
         )?
+
         # match leading SET commands
-        \s*SET\b
+        SET\b
         (?:
-            [^';]*? | # keywords, integer literals, etc.
-            (?:'[^']*?')* # single-quoted strings
+            [^';] | # keywords, integer literals, etc.
+            '[^']*' # single-quoted strings
         )+
         ;
     )+
-    \s*(.+?)$ # actual non-SET cmds
     """,
     flags=(re.I | re.X),
 )
@@ -160,12 +162,7 @@ SET_TRIM_PATTERN = re.compile(
 # of the string is returned. Otherwise, the string is returned
 # as it was received.
 def trim_leading_set_stmts(sql):
-    match = SET_TRIM_PATTERN.match(sql)
-
-    if match:
-        return match.group(1)
-    else:
-        return sql
+    return SET_TRIM_PATTERN.sub('', sql, 1).lstrip()
 
 
 fmt = PartialFormatter()
