@@ -42,7 +42,11 @@ class VersionUtils(object):
             return self._is_aurora
         with db as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
-                cursor.execute("SELECT 1 FROM pg_available_extension_versions WHERE name ILIKE '%aurora%' OR comment ILIKE '%aurora%' LIMIT 1;")
+                cursor.execute(
+                    "SELECT 1 FROM pg_available_extension_versions "
+                    "WHERE name ILIKE '%aurora%' OR comment ILIKE '%aurora%' "
+                    "LIMIT 1;"
+                )
                 if cursor.fetchone():
                     # This query will pollute PG logs in non aurora versions,
                     # but is the only reliable way to detect aurora.
