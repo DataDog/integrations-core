@@ -392,7 +392,7 @@ class AgentCheck(object):
             # See Performance Optimizations in this package's README.md.
             from datadog_checks.base.utils.http import RequestsWrapper
 
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log, tls_context=self.get_tls_context())
 
         return self._http
 

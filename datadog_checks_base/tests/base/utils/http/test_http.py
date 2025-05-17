@@ -48,7 +48,7 @@ class TestTLSCiphers:
             ),
         ],
     )
-    def test_cipher_construction(self, instance, expected_ciphers):
+    def test_ciphers_in_aia_chasing(self, instance, expected_ciphers):
         init_config = {}
         http = RequestsWrapper(instance, init_config)
         mock_socket = mock.MagicMock()
@@ -170,6 +170,17 @@ class TestSession:
 
         assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs
         assert mock_session.get.call_args.kwargs['timeout'] == (0.08, 0.08)
+    
+    def test_context_in_session(self):
+        init_config = {}
+        instance = {}
+        tls_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        tls_context.set_ciphers('PSK-CAMELLIA128-SHA256')
+        http = RequestsWrapper(instance, init_config, tls_context=tls_context)
+
+        assert http.session.adapters['https://']
+        adapter = http.session.get_adapter('https://')
+        assert adapter.poolmanager.connection_pool_kw['ssl_context'] is tls_context
 
 
 class TestLogger:
