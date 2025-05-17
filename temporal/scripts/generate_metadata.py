@@ -41,7 +41,7 @@ def main():
 
     def append_metric_metadata(metric_name, metric_type='count', unit_name=None):
         qualified_metric_name = f'temporal.server.{metric_name}'
-        metric_meta = {k: '' for k in metadata_fields}
+        metric_meta = dict.fromkeys(metadata_fields, '')
         metric_meta['orientation'] = 0
         metric_meta.update(previous_metadata.get(qualified_metric_name, {}))
         metric_meta['integration'] = 'temporal'
