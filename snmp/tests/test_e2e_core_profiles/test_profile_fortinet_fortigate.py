@@ -143,6 +143,22 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
         aggregator.assert_metric('snmp.fgFwPol6PktCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.fgFwPol6PktCount.rate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
+    # Test FortiGate switch port metrics
+    switch_port_tags = [
+        ['switch_serial:FSW1234567890', 'port_name:port1', 'port_speed_duplex:1000', 'switch_name:FortiSwitch-448E'],
+    ]
+    for tag_row in switch_port_tags:
+        aggregator.assert_metric('snmp.fgSwPortStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fgSwPortPOEPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    # Test FortiGate switch device metrics
+    switch_device_tags = [
+        ['switch_serial:FSW1234567890', 'switch_name:FortiSwitch-448E'],
+    ]
+    for tag_row in switch_device_tags:
+        aggregator.assert_metric('snmp.fgSwCpu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fgSwMemory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
     # --- TEST METADATA ---
     device = {
         'id': 'default:' + ip_address,
