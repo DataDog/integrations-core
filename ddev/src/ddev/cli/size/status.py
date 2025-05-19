@@ -12,8 +12,8 @@ from rich.console import Console
 from ddev.cli.application import Application
 
 from .common import (
+    CLIParameters,
     FileDataEntryPlatformVersion,
-    Parameters,
     format_modules,
     get_dependencies,
     get_files,
@@ -82,7 +82,7 @@ def status(
             if save_to_png_path:
                 base, ext = os.path.splitext(save_to_png_path)
                 path = f"{base}_{plat}_{ver}{ext}"
-            parameters: Parameters = {
+            parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
                 "version": ver,
@@ -111,7 +111,7 @@ def status(
 
 def status_mode(
     repo_path: Path,
-    params: Parameters,
+    params: CLIParameters,
 ) -> list[FileDataEntryPlatformVersion]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
         modules = get_files(repo_path, params["compressed"]) + get_dependencies(

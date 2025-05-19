@@ -19,8 +19,8 @@ from .common import (
     CommitEntryPlatformWithDelta,
     CommitEntryWithDelta,
     GitRepo,
-    ParametersTimelineDependency,
-    ParametersTimelineIntegration,
+    InitialParametersTimelineDependency,
+    InitialParametersTimelineIntegration,
     WrongDependencyFormat,
     compress,
     convert_to_human_readable_size,
@@ -173,7 +173,7 @@ def timeline(
                 if type == "dependency":
                     modules_plat: list[CommitEntryPlatformWithDelta] = []
                     progress.remove_task(task)
-                    dep_parameters: ParametersTimelineDependency
+                    dep_parameters: InitialParametersTimelineDependency
                     if platform is None:
                         for plat in valid_platforms:
                             path = None
@@ -235,7 +235,7 @@ def timeline(
 
                 else:  # integration
                     modules: list[CommitEntryWithDelta] = []
-                    int_parameters: ParametersTimelineIntegration = {
+                    int_parameters: InitialParametersTimelineIntegration = {
                         "app": app,
                         "type": "integration",
                         "module": module,
@@ -272,7 +272,7 @@ def timeline(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: ParametersTimelineDependency,
+    params: InitialParametersTimelineDependency,
     progress: Progress,
 ) -> list[CommitEntryPlatformWithDelta]: ...
 
@@ -281,7 +281,7 @@ def timeline_mode(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: ParametersTimelineIntegration,
+    params: InitialParametersTimelineIntegration,
     progress: Progress,
 ) -> list[CommitEntryWithDelta]: ...
 
@@ -289,7 +289,7 @@ def timeline_mode(
 def timeline_mode(
     gitRepo: GitRepo,
     commits: list[str],
-    params: ParametersTimelineIntegration | ParametersTimelineDependency,
+    params: InitialParametersTimelineIntegration | InitialParametersTimelineDependency,
     progress: Progress,
 ) -> list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]:
     if params["type"] == "integration":
@@ -325,7 +325,7 @@ def timeline_mode(
 @overload
 def get_repo_info(
     gitRepo: GitRepo,
-    params: ParametersTimelineIntegration,
+    params: InitialParametersTimelineIntegration,
     commits: list[str],
     progress: Progress,
 ) -> list[CommitEntry]: ...
@@ -334,7 +334,7 @@ def get_repo_info(
 @overload
 def get_repo_info(
     gitRepo: GitRepo,
-    params: ParametersTimelineDependency,
+    params: InitialParametersTimelineDependency,
     commits: list[str],
     progress: Progress,
 ) -> list[CommitEntry]: ...
@@ -342,7 +342,7 @@ def get_repo_info(
 
 def get_repo_info(
     gitRepo: GitRepo,
-    params: ParametersTimelineIntegration | ParametersTimelineDependency,
+    params: InitialParametersTimelineIntegration | InitialParametersTimelineDependency,
     commits: list[str],
     progress: Progress,
 ) -> list[CommitEntry]:
@@ -368,7 +368,7 @@ def get_repo_info(
 
 def process_commits(
     commits: list[str],
-    params: ParametersTimelineIntegration | ParametersTimelineDependency,
+    params: InitialParametersTimelineIntegration | InitialParametersTimelineDependency,
     gitRepo: GitRepo,
     progress: Progress,
 ) -> list[CommitEntry]:
@@ -380,7 +380,8 @@ def process_commits(
 
     Args:
         commits: List of commit SHAs to process.
-        params: ParametersTimeline dict containing module name, type, platform, and other configuration options.
+        params: InitialParametersTimelineIntegration or InitialParametersTimelineDependency dict containing module name,
+            type, platform, and other configuration options.
         gitRepo: GitRepo instance managing the repository.
         progress: Progress bar instance.
 
@@ -439,7 +440,7 @@ def get_files(
     compressed: bool,
 ) -> list[CommitEntry]:
     """
-    Calculates integration file sizes and versions from a repository.
+    Calculates integration file sizes and versions from a repository
 
     If the integration folder no longer exists, a 'Deleted' entry is added. Otherwise,
     it walks the module directory, sums file sizes, extracts the version, and appends a CommitEntry.
@@ -474,7 +475,7 @@ def get_files(
 
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks/"
+    included_folder = "datadog_checks" + os.sep
 
     total_size = 0
     version = ""

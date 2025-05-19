@@ -13,10 +13,10 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeEl
 from ddev.cli.application import Application
 
 from .common import (
+    CLIParameters,
     FileDataEntry,
     FileDataEntryPlatformVersion,
     GitRepo,
-    Parameters,
     convert_to_human_readable_size,
     format_modules,
     get_dependencies,
@@ -32,6 +32,7 @@ from .common import (
 
 console = Console(stderr=True)
 MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
+MINIMUM_LENGTH_COMMIT = 7
 
 
 @click.command()
@@ -79,13 +80,17 @@ def diff(
         task = progress.add_task("[cyan]Calculating differences...", total=None)
         if sum([csv, markdown, json]) > 1:
             raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
-        if len(first_commit) < 7 and len(second_commit) < 7:
-            raise click.BadParameter("Commit hashes must be at least 7 characters long")
-        elif len(first_commit) < 7:
-            raise click.BadParameter("First commit hash must be at least 7 characters long.", param_hint="first_commit")
-        elif len(second_commit) < 7:
+        if len(first_commit) < MINIMUM_LENGTH_COMMIT and len(second_commit) < MINIMUM_LENGTH_COMMIT:
+            raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
+        elif len(first_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter(
-                "Second commit hash must be at least 7 characters long.", param_hint="second_commit"
+                f"First commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+                param_hint="first_commit",
+            )
+        elif len(second_commit) < MINIMUM_LENGTH_COMMIT:
+            raise click.BadParameter(
+                f"Second commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+                param_hint="second_commit",
             )
         if first_commit == second_commit:
             raise click.BadParameter("Commit hashes must be different")
@@ -114,7 +119,7 @@ def diff(
                     if save_to_png_path:
                         base, ext = os.path.splitext(save_to_png_path)
                         path = f"{base}_{plat}_{ver}{ext}"
-                    parameters: Parameters = {
+                    parameters: CLIParameters = {
                         "app": app,
                         "platform": plat,
                         "version": ver,
@@ -148,7 +153,7 @@ def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
     second_commit: str,
-    params: Parameters,
+    params: CLIParameters,
     progress: Progress,
 ) -> list[FileDataEntryPlatformVersion]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(

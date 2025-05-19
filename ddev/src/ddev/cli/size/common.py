@@ -55,7 +55,7 @@ class CommitEntryPlatformWithDelta(CommitEntryWithDelta):
     Platform: str  # Target platform (e.g. linux-aarch64)
 
 
-class Parameters(TypedDict):
+class CLIParameters(TypedDict):
     app: Application
     platform: str
     version: str
@@ -67,7 +67,7 @@ class Parameters(TypedDict):
     show_gui: bool
 
 
-class ParametersTimeline(TypedDict):
+class CLIParametersTimeline(TypedDict):
     app: Application
     module: str
     threshold: Optional[int]
@@ -79,13 +79,13 @@ class ParametersTimeline(TypedDict):
     show_gui: bool
 
 
-class ParametersTimelineIntegration(ParametersTimeline):
+class InitialParametersTimelineIntegration(CLIParametersTimeline):
     type: Literal["integration"]
     first_commit: str
     platform: None
 
 
-class ParametersTimelineDependency(ParametersTimeline):
+class InitialParametersTimelineDependency(CLIParametersTimeline):
     type: Literal["dependency"]
     first_commit: None
     platform: str
@@ -172,7 +172,7 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
     """
     ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks/"
+    included_folder = "datadog_checks" + os.sep
 
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
@@ -225,17 +225,8 @@ def extract_version_from_about_py(path: str) -> str:
 
 def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> list[FileDataEntry]:
     """
-    Gets the list of dependencies for a given platform and Python version.
-    Each FileDataEntry includes: Name, Version, Size_Bytes, Size, and Type.
-
-    Args:
-        repo_path: Path to the repository.
-        platform: Target platform.
-        version: Target Python version.
-        compressed: If True, measure compressed file sizes. If False, measure uncompressed sizes.
-
-    Returns:
-        A list of FileDataEntry dictionaries containing the dependency information.
+    Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
+    Name, Version, Size_Bytes, Size, and Type.
     """
     resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
 
@@ -335,14 +326,6 @@ def format_modules(
     Formats the modules list, adding platform and Python version information.
 
     If the modules list is empty, returns a default empty entry.
-
-    Args:
-        modules: list of modules to format.
-        platform: Platform string to add to each entry if needed.
-        version: Python version string to add to each entry if needed.
-
-    Returns:
-        A list of formatted entries.
     """
 
     if modules == []:
@@ -418,14 +401,20 @@ def print_markdown(
         | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
-    if any(str(value).strip() not in ("", "0", "0001-01-01") for value in modules[0].values()):  # table is not empty
-        headers = [k for k in modules[0].keys() if "Bytes" not in k]
-        app.display_markdown(f"### {title}")
-        app.display_markdown("| " + " | ".join(headers) + " |")
-        app.display_markdown("| " + " | ".join("---" for _ in headers) + " |")
+    if all(str(value).strip() in ("", "0", "0001-01-01") for value in modules[0].values()):
+        return  # skip empty table
 
-        for row in modules:
-            app.display_markdown("| " + " | ".join(format(str(row.get(h, ""))) for h in headers) + " |")
+    headers = [k for k in modules[0].keys() if "Bytes" not in k]
+
+    lines = []
+    lines.append(f"### {title}")
+    lines.append("| " + " | ".join(headers) + " |")
+    lines.append("| " + " | ".join("---" for _ in headers) + " |")
+    for row in modules:
+        lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+
+    markdown = "\n".join(lines)
+    app.display_markdown(markdown)
 
 
 def print_table(
@@ -654,7 +643,9 @@ def draw_treemap_rects_with_labels(
             )
 
 
-def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool) -> None:
+def send_metrics_to_dd(
+    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool
+) -> None:
     metric_name = (
         "datadog.agent_integrations.size_analyzer.compressed"
         if compressed
