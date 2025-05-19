@@ -113,7 +113,7 @@ def configure_tracer(tracer, self_check):
     """
     apm_tracing_enabled = False
     context_provider = None
-    
+
     integration_tracing, integration_tracing_exhaustive = tracing_enabled()
     if integration_tracing or integration_tracing_exhaustive:
         apm_tracing_enabled = True
