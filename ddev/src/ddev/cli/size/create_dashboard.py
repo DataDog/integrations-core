@@ -78,12 +78,12 @@ def create_json(app: Application) -> list[dict[str, Any]]:
                                 "formulas": [
                                     {
                                         "formula": "query2",
-                                        "number_format": {
-                                            "unit": {
-                                                "type": "canonical_unit",
-                                                "unit_name": "byte_in_binary_bytes_family",
-                                            }
-                                        },
+                                        # "number_format": {
+                                        #     "unit": {
+                                        #         "type": "canonical_unit",
+                                        #         "unit_name": "byte_in_binary_bytes_family",
+                                        #     }
+                                        # },
                                     }
                                 ],
                             }
