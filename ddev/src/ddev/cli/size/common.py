@@ -674,7 +674,6 @@ def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVers
             {
                 "metric": metric_name,
                 "type": "gauge",
-                "unit": "binary_byte",
                 "points": [(timestamp, item["Size_Bytes"])],
                 "tags": [
                     f"name:{item['Name']}",
