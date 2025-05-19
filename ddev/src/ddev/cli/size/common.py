@@ -654,7 +654,7 @@ def draw_treemap_rects_with_labels(
             )
 
 
-def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool):
+def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool) -> None:
     metric_name = (
         "datadog.agent_integrations.size_analyzer.compressed"
         if compressed
@@ -693,6 +693,7 @@ def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVers
     )
 
     api.Metric.send(metrics=metrics)
+    print("sent")
 
 
 def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
