@@ -32,6 +32,7 @@ from .common import (
 
 console = Console(stderr=True)
 MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
+MINIMUM_LENGTH_COMMIT = 7
 
 
 @click.command()
@@ -79,11 +80,11 @@ def diff(
         task = progress.add_task("[cyan]Calculating differences...", total=None)
         if sum([csv, markdown, json]) > 1:
             raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
-        if len(first_commit) < 7 and len(second_commit) < 7:
+        if len(first_commit) < MINIMUM_LENGTH_COMMIT and len(second_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter("Commit hashes must be at least 7 characters long")
-        elif len(first_commit) < 7:
+        elif len(first_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter("First commit hash must be at least 7 characters long.", param_hint="first_commit")
-        elif len(second_commit) < 7:
+        elif len(second_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter(
                 "Second commit hash must be at least 7 characters long.", param_hint="second_commit"
             )

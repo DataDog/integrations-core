@@ -419,7 +419,8 @@ def process_commits(
 
     Args:
         commits: List of commit SHAs to process.
-        params: CLIParametersTimeline dict containing module name, type, platform, and other configuration options.
+        params: InitialParametersTimelineIntegration or InitialParametersTimelineDependency dict containing module name,
+            type, platform, and other configuration options.
         gitRepo: GitRepo instance managing the repository.
         progress: Progress bar instance.
         first_commit: First commit hash where the given integration was introduced (only for integrations).
