@@ -34,6 +34,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
+    check_metrics_metadata,
     check_performance_metrics,
     check_physical_replication_slots,
     check_slru_metrics,
@@ -97,6 +98,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
 
     aggregator.assert_all_metrics_covered()
+    check_metrics_metadata(aggregator)
 
 
 def _increase_txid(cur):
