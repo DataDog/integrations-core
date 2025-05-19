@@ -810,7 +810,7 @@ class GitRepo:
 
     def get_creation_commit_module(self, integration: str) -> str:
         """
-        Returns the first commit (SHA) where the given integration was introduced.
+        Returns the first commit (SHA) where the given integration was introduced
         """
         return self._run(f'git log --reverse --format="%H" -- {integration}')[0]
 
