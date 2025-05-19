@@ -3,42 +3,51 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 SINFO_PARTITION_PARAMS = [
     "-ahO",
-    "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:",
+    "Partition:|,Cluster:|,NodeAIOT:",
 ]
-SINFO_NODE_PARAMS = ["-haNO", "PartitionName:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
-SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
-GPU_PARAMS = "|,Gres:|,GresUsed:"
-SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m"]
+SINFO_PARTITION_INFO_PARAMS = [
+    "-haO",
+    "Partition:|,Cluster:|,NodeList:|,Available:|,CPUs:|,Memory:|,StateLong:|,Nodes:",
+]
+SINFO_NODE_PARAMS = ["-haNO", "Partition:|,Available:|,NodeList:|,CPUsState:|,Memory:|,Cluster:"]
+SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,Features_act:|,Threads:|,AllocMem:"
+GPU_TOTAL = "|,Gres:"
+GPU_PARAMS = GPU_TOTAL + "|,GresUsed:"
+SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
 SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
     "-anpo",
-    "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
-    "--units=M",
+    "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList,AveDiskRead,MaxDiskRead",
+    "--units=K",
 ]
 SCONTROL_PARAMS = ["listpid"]
 
 PARTITION_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},
-        {"name": "slurm_partition_node_list", "index": 1},
-        {"name": "slurm_partition_cpus_assigned", "index": 2},
+        {"name": "slurm_cluster_name", "index": 1},
+    ],
+    "info_tags": [
+        {"name": "slurm_partition_node_list", "index": 2},
         {"name": "slurm_partition_availability", "index": 3},
-        {"name": "slurm_partition_memory_assigned", "index": 4},
-        {"name": "slurm_partition_available", "index": 5},
-        {"name": "slurm_partition_state", "index": 7},
+        {"name": "slurm_partition_cpus_assigned", "index": 4},
+        {"name": "slurm_partition_memory_assigned", "index": 5},
+        {"name": "slurm_partition_state", "index": 6},
     ],
     "metrics": [
-        {"name": "partition.nodes.count", "index": 8},
+        {"name": "partition.nodes.count", "index": 7},
     ],
 }
 
 NODE_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},
-        {"name": "slurm_node_availability", "index": 1},
         {"name": "slurm_node_name", "index": 2},
+        {"name": "slurm_cluster_name", "index": 5},
+    ],
+    "info_tags": [
+        {"name": "slurm_node_availability", "index": 1},
         {"name": "slurm_node_memory", "index": 4},
-        {"name": "slurm_node_cluster", "index": 5},
     ],
     "extended_tags": [
         {"name": "slurm_node_state", "index": 9},
@@ -47,9 +56,11 @@ NODE_MAP = {
         {"name": "slurm_node_threads", "index": 12},
     ],
     "metrics": [
+        {"name": "node.memory", "index": 4},
         {"name": "node.cpu_load", "index": 6},
         {"name": "node.free_mem", "index": 7},
         {"name": "node.tmp_disk", "index": 8},
+        {"name": "node.alloc_mem", "index": 13},
     ],
 }
 
@@ -75,6 +86,7 @@ SQUEUE_MAP = {
         {"name": "slurm_job_cpus", "index": 5},
         {"name": "slurm_job_reason", "index": 6},
         {"name": "slurm_job_tres_per_node", "index": 7},
+        {"name": "slurm_partition_name", "index": 8},
     ],
 }
 
@@ -82,10 +94,10 @@ SACCT_MAP = {
     "tags": [
         {"name": "slurm_job_name", "index": 1},
         {"name": "slurm_job_partition", "index": 2},
+        {"name": "slurm_partition_name", "index": 2},
         {"name": "slurm_job_account", "index": 3},
         {"name": "slurm_job_cpus", "index": 4},
         {"name": "slurm_job_tres_per_node", "index": 5},
-        {"name": "slurm_job_maxvm", "index": 9},
         {"name": "slurm_job_state", "index": 12},
         {"name": "slurm_job_exitcode", "index": 13},
         {"name": "slurm_job_node_list", "index": 16},
@@ -93,8 +105,10 @@ SACCT_MAP = {
     "metrics": [
         {"name": "sacct.slurm_job_cputime", "index": 7},
         {"name": "sacct.slurm_job_maxrss", "index": 8},
-        {"name": "sacct.slurm_job_avgcpu", "index": 10},
+        {"name": "sacct.slurm_job_maxvm", "index": 9},
         {"name": "sacct.slurm_job_avgrss", "index": 11},
+        {"name": "sacct.slurm_job_ave_disk_read", "index": 17},
+        {"name": "sacct.slurm_job_max_disk_read", "index": 18},
     ],
 }
 
@@ -143,7 +157,6 @@ SDIAG_MAP = {
         'backfill.total_jobs_since_cycle_start': 'Total backfilled jobs (since last stats cycle start):',
         'backfill.total_heterogeneous_components': 'Total backfilled heterogeneous job components:',
         'backfill.total_cycles': 'Total cycles:',
-        'backfill.last_cycle_when': 'Last cycle when:',
         'backfill.last_cycle': 'Last cycle:',
         'backfill.max_cycle': 'Max cycle:',
         'backfill.mean_cycle': 'Mean cycle:',

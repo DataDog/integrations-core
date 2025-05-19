@@ -573,7 +573,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
-    mysql_check.performance_schema_enabled = False
+    mysql_check._performance_schema_enabled = False
 
     # Run this twice to confirm that duplicate warnings aren't added more than once
     mysql_check._statement_metrics.collect_per_statement_metrics()
