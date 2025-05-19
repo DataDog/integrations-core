@@ -13,7 +13,13 @@
 
 ***Fixed***:
 
-* Fixed bug where we fail to explain parameterized queries that have no parameters ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+* Fixed bug where we fail to explain parameterized queries that have no parameters. *Note: Does not include fix from 22.12.1* ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+
+## 22.12.1 / 2025-05-19
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix. *Note: This fix is not included in 22.13.0* ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
 
 ## 22.12.0 / 2025-05-14
 
