@@ -693,7 +693,7 @@ class GitRepo:
             time: Optional time filter (e.g. '2 weeks ago').
 
         Returns:
-            List of commit SHAs (oldest to newest).
+            List of commit SHAs (oldest to newest)
         """
         self._run("git fetch origin --quiet")
         self._run("git checkout origin/HEAD")
