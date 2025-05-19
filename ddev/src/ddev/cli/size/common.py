@@ -678,7 +678,7 @@ def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVers
                 "tags": [
                     f"name:{item['Name']}",
                     f"type:{item['Type']}",
-                    f"name_type:{item['Name']}({item['Type']})",
+                    f"name_type:{item['Type']}({item['Name']})",
                     f"version:{item['Version']}",
                     f"platform:{item['Platform']}",
                     "team:agent-integrations",
@@ -693,7 +693,6 @@ def send_metrics_to_dd(app: Application, modules: list[FileDataEntryPlatformVers
     )
 
     api.Metric.send(metrics=metrics)
-    print("sent")
 
 
 def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:

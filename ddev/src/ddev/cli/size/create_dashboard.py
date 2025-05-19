@@ -61,7 +61,7 @@ def create_json(app: Application) -> list[dict[str, Any]]:
                 {
                     "definition": {
                         "type": "treemap",
-                        "title": f"Module {size_type} sizes in {platform}",
+                        "title": f"{size_type.capitalize()} sizes in {platform}",
                         "requests": [
                             {
                                 "queries": [
@@ -69,7 +69,7 @@ def create_json(app: Application) -> list[dict[str, Any]]:
                                         "data_source": "metrics",
                                         "name": "query2",
                                         "query": f"avg:datadog.agent_integrations.size_analyzer.{size_type}"
-                                        f"{{platform:{platform}}} by {{name}}",
+                                        f"{{platform:{platform}}} by {{name_type,name}}",
                                         "aggregator": "last",
                                     }
                                 ],
