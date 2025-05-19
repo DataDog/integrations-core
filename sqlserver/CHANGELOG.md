@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 22.5.0 / 2025-05-15
+
+***Added***:
+
+* Add database and Azure name to SQL Server database identifier template variables ([#20301](https://github.com/DataDog/integrations-core/pull/20301))
+
+## 22.4.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Added SQLServer Extended Event Handlers ([#20229](https://github.com/DataDog/integrations-core/pull/20229))
+
 ## 22.3.1 / 2025-04-25
 
 ***Fixed***:

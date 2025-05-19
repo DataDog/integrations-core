@@ -95,6 +95,7 @@ class XESessionBase(DBMAsyncJob):
         "client_app_name",
         "username",
         "activity_id",
+        "activity_id_xfer",
     ]
 
     BASE_SQL_FIELDS = [
@@ -749,23 +750,21 @@ class XESessionBase(DBMAsyncJob):
             "primary_sql_field": primary_field,
         }
 
-        # Only include duration and query_start for non-error events
-        is_error_event = self.session_name == "datadog_query_errors"
-        if not is_error_event:
+        # Only exclude duration and query_start for error_reported events, not attention events
+        is_error_reported = event.get("event_name") == "error_reported"
+        if not is_error_reported:
             sqlserver_fields.update(
                 {
                     "duration_ms": event.get("duration_ms"),
                     "query_start": query_details.get("query_start"),
                 }
             )
-        else:
-            # Include error_number and message for error events
-            sqlserver_fields.update(
-                {
-                    "error_number": event.get("error_number"),
-                    "message": event.get("message"),
-                }
-            )
+
+        # Include error_number and message if they're present in the event
+        if event.get("error_number") is not None:
+            sqlserver_fields["error_number"] = event.get("error_number")
+        if event.get("message"):
+            sqlserver_fields["message"] = event.get("message")
 
         # Add additional SQL fields to the sqlserver section
         # but only if they're not the primary field and not empty
