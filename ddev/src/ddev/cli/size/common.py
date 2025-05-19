@@ -614,7 +614,7 @@ def draw_treemap_rects_with_labels(
         name = mod["Name"]
         size_str = f"({mod['Size']})"
 
-        # Estimate if there's enough space for text
+        # Estimate if there is enough space for text
         CHAR_WIDTH_FACTOR = 0.1  # Width of each character relative to font size
         CHAR_HEIGHT_FACTOR = 0.5  # Minimum height for readable text
 
