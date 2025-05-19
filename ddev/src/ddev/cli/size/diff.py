@@ -81,12 +81,16 @@ def diff(
         if sum([csv, markdown, json]) > 1:
             raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
         if len(first_commit) < MINIMUM_LENGTH_COMMIT and len(second_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter("Commit hashes must be at least 7 characters long")
+            raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
         elif len(first_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter("First commit hash must be at least 7 characters long.", param_hint="first_commit")
+            raise click.BadParameter(
+                f"First commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+                param_hint="first_commit",
+            )
         elif len(second_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter(
-                "Second commit hash must be at least 7 characters long.", param_hint="second_commit"
+                f"Second commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+                param_hint="second_commit",
             )
         if first_commit == second_commit:
             raise click.BadParameter("Commit hashes must be different")
