@@ -85,11 +85,11 @@ class SonatypeNexusCheck(AgentCheck):
                 tag_list = []
                 for tag_key in config["tag_key"]:
                     tag_list.append(f"{tag_key}:{item[tag_key]}")
-                self.gauge(metric_name, int(item[config["value_key"]]), base_tags + tag_list, hostname=None)
+                self.gauge(metric_name, int(item.get(config["value_key"], 0)), base_tags + tag_list, hostname=None)
         elif isinstance(value, int):
             self.gauge(metric_name, int(value), base_tags, hostname=None)
         elif isinstance(value, dict):
-            self.gauge(metric_name, int(value[config["value_key"]]), base_tags, hostname=None)
+            self.gauge(metric_name, int(value.get(config["value_key"], 0)), base_tags, hostname=None)
 
     def create_metric_for_configs_by_format_type(self, metric_data, metric_name, metric_info):
         base_tags = [f"sonatype_host:{self.extract_ip_from_url()}"] + (self.custom_tags if self.custom_tags else [])
@@ -97,7 +97,9 @@ class SonatypeNexusCheck(AgentCheck):
         if isinstance(metric_data, list):
             for item in metric_data:
                 for format_type, data in item.items():
-                    self.ingest_metric(base_tags, format_type, metric_info, metric_name, data[metric_info["value_key"]])
+                    self.ingest_metric(
+                        base_tags, format_type, metric_info, metric_name, data.get(metric_info["value_key"], 0)
+                    )
         elif isinstance(metric_data, dict):
             for format_type, metric_value in metric_data.items():
                 self.ingest_metric(base_tags, format_type, metric_info, metric_name, metric_value)

@@ -304,6 +304,28 @@ DEFAULT_OPENMETRICS = {
     'rabbitmq.telemetry.scrape.encoded_size_bytes.sum',
     'rabbitmq.telemetry.scrape.size_bytes.count',
     'rabbitmq.telemetry.scrape.size_bytes.sum',
+    'rabbitmq.queue.get.ack.count',
+    'rabbitmq.queue.get.count',
+    'rabbitmq.queue.messages.delivered.ack.count',
+    'rabbitmq.queue.messages.delivered.count',
+    'rabbitmq.queue.messages.redelivered.count',
+    'rabbitmq.queue.messages.acked.count',
+    'rabbitmq.queue.get.empty.count',
+}
+
+RABBITMQ_4_0_ADDED = {
+    'rabbitmq.queue.get.ack.count',
+    'rabbitmq.queue.get.count',
+    'rabbitmq.queue.messages.delivered.ack.count',
+    'rabbitmq.queue.messages.delivered.count',
+    'rabbitmq.queue.messages.redelivered.count',
+    'rabbitmq.queue.messages.acked.count',
+    'rabbitmq.queue.get.empty.count',
+}
+
+RABBITMQ_4_0_REMOVED = {
+    'rabbitmq.process.open_tcp_sockets',
+    'rabbitmq.process.max_tcp_sockets',
 }
 
 SUMMARY_METRICS = {
@@ -353,7 +375,7 @@ AGGREGATED_ONLY_METRICS = {
     "rabbitmq.alarms.memory_used_watermark",
 }
 
-FLAKY_E2E_METRICS = [
+FLAKY_E2E_METRICS = {
     'rabbitmq.erlang.vm.statistics.run_queues_length',
     'rabbitmq.global.consumers',
     'rabbitmq.global.messages.acknowledged.count',
@@ -377,7 +399,7 @@ FLAKY_E2E_METRICS = [
     'rabbitmq.global.messages.unroutable.returned.count',
     'rabbitmq.global.publishers',
     'rabbitmq.process_start_time_seconds',
-]
+}
 
 
 def assert_metric_covered(aggregator):

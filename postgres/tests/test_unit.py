@@ -143,6 +143,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'foo:bar',
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
             },
         ),
         (
@@ -154,6 +155,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'server:localhost',
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
+                'database_instance:stubbed.hostname',
             },
         ),
     ],
@@ -178,3 +180,24 @@ def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance)
         check = PostgreSql('test_instance', {}, [instance])
         assert check.resolved_hostname == expected_hostname
         assert resolve_db_host_mock.called is True
+
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:5432', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
+    ],
+)
+def test_database_identifier(pg_instance, template, expected, tags):
+    """
+    Test functionality of calculating database_identifier
+    """
+
+    pg_instance['database_identifier'] = {'template': template}
+    pg_instance['tags'] = tags
+    check = PostgreSql('postgres', {}, [pg_instance])
+    assert check.database_identifier == expected

@@ -23,6 +23,8 @@ from .config_models import ConfigMixin
 
 
 class OpenStackControllerCheck(AgentCheck, ConfigMixin):
+    HA_SUPPORTED = True
+
     def __new__(cls, name, init_config, instances):
         # type: (Type[OpenStackControllerCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> OpenStackControllerCheck
         """For backward compatibility reasons, there are two side-by-side implementations of OpenStackControllerCheck.

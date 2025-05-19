@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.1.0 / 2025-04-17
+
+***Added***:
+
+* Add option to lowercase "device" tag. Useful for those who cannot use the "device_name" tag and need "device" to only be lowercase. ([#19964](https://github.com/DataDog/integrations-core/pull/19964))
+
 ## 7.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

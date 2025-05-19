@@ -58,29 +58,76 @@ SELECT
     waits_a.index_name,
     waits_a.object_type,
     waits_a.source
+    {blocking_columns}
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
+    {blocking_joins}
 WHERE
-    thread_a.processlist_state IS NOT NULL
-    AND thread_a.processlist_command != 'Sleep'
-    AND thread_a.processlist_id != CONNECTION_ID()
-    AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
-    AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
-    AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
-    -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
-    -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
-    AND (
-        waits_a.event_id = (
-           SELECT
-              MAX(waits_b.EVENT_ID)
-          FROM  performance_schema.events_waits_current AS waits_b
-          Where waits_b.thread_id = thread_a.thread_id
-    ) OR waits_a.event_id is NULL)
-    -- We ignore rows without SQL text because there will be rows for background operations that do not have
-    -- SQL text associated with it.
-    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != '';
+    (
+        thread_a.processlist_state IS NOT NULL
+        AND thread_a.processlist_id != CONNECTION_ID()
+        AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
+        AND thread_a.processlist_command != 'Sleep'
+        AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
+        AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
+        -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row
+        -- we want to use. Additionally, we want the row with the highest EVENT_ID which reflects the most recent wait.
+        AND (
+            waits_a.event_id = (
+            SELECT
+                MAX(waits_b.EVENT_ID)
+            FROM  performance_schema.events_waits_current AS waits_b
+            Where waits_b.thread_id = thread_a.thread_id
+        ) OR waits_a.event_id is NULL)
+        -- We ignore rows without SQL text because there will be rows for background operations that do not have
+        -- SQL text associated with it.
+        AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != ''
+    )
+    {idle_blockers_subquery};
+"""
+
+BLOCKING_COLUMNS_MYSQL8 = """\
+    ,blocking_thread.thread_id AS blocking_thread_id,
+    blocking_thread.processlist_id AS blocking_processlist_id
+"""
+
+BLOCKING_JOINS_MYSQL8 = """\
+    LEFT JOIN performance_schema.data_lock_waits AS lock_waits ON thread_a.thread_id = lock_waits.requesting_thread_id
+    LEFT JOIN performance_schema.threads AS blocking_thread ON lock_waits.blocking_thread_id = blocking_thread.thread_id
+"""
+
+IDLE_BLOCKERS_SUBQUERY_MYSQL8 = """\
+        OR
+        -- Include idle sessions that are blocking others
+        thread_a.thread_id IN (
+            SELECT blocking_thread_id
+            FROM performance_schema.data_lock_waits
+        )
+"""
+
+BLOCKING_COLUMNS_MYSQL7 = """\
+    ,blocking_thread.thread_id AS blocking_thread_id,
+    blocking_thread.processlist_id AS blocking_processlist_id
+"""
+
+BLOCKING_JOINS_MYSQL7 = """\
+    LEFT JOIN information_schema.INNODB_TRX AS trx ON thread_a.processlist_id = trx.trx_mysql_thread_id
+    LEFT JOIN information_schema.INNODB_LOCK_WAITS AS lock_waits ON trx.trx_id = lock_waits.requesting_trx_id
+    LEFT JOIN information_schema.INNODB_TRX AS blocking_trx ON lock_waits.blocking_trx_id = blocking_trx.trx_id
+    LEFT JOIN performance_schema.threads AS blocking_thread
+        ON blocking_trx.trx_mysql_thread_id = blocking_thread.processlist_id
+"""
+
+IDLE_BLOCKERS_SUBQUERY_MYSQL7 = """\
+        OR
+        -- Include idle sessions that are blocking others
+        thread_a.processlist_id IN (
+            SELECT blocking_trx.trx_mysql_thread_id
+            FROM information_schema.INNODB_LOCK_WAITS AS lock_waits
+            JOIN information_schema.INNODB_TRX AS blocking_trx ON lock_waits.blocking_trx_id = blocking_trx.trx_id
+        )
 """
 
 
@@ -127,6 +174,7 @@ class MySQLActivity(DBMAsyncJob):
         self._db = None
         self._db_version = None
         self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._activity_query = None
 
     def run_job(self):
         # type: () -> None
@@ -147,7 +195,7 @@ class MySQLActivity(DBMAsyncJob):
                         'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
                         DatabaseConfigurationError.events_waits_current_not_enabled.value,
                         code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                     ),
                 )
             return
@@ -180,19 +228,57 @@ class MySQLActivity(DBMAsyncJob):
                 tags=tags + self._check._get_debug_tags(),
             )
 
+    def _should_collect_blocking_queries(self):
+        # type: () -> bool
+        return self._config.activity_config.get("collect_blocking_queries", False)
+
+    def _get_activity_query(self):
+        # type: () -> str
+        if self._activity_query:
+            return self._activity_query
+        blocking_columns = ""
+        blocking_joins = ""
+        idle_blockers_subquery = ""
+        if self._should_collect_blocking_queries():
+            if self._db_version == MySQLVersion.VERSION_80 and not self._check.is_mariadb:
+                blocking_columns = BLOCKING_COLUMNS_MYSQL8
+                blocking_joins = BLOCKING_JOINS_MYSQL8
+                idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY_MYSQL8
+            else:
+                blocking_columns = BLOCKING_COLUMNS_MYSQL7
+                blocking_joins = BLOCKING_JOINS_MYSQL7
+                idle_blockers_subquery = IDLE_BLOCKERS_SUBQUERY_MYSQL7
+        return ACTIVITY_QUERY.format(
+            blocking_columns=blocking_columns,
+            blocking_joins=blocking_joins,
+            idle_blockers_subquery=idle_blockers_subquery,
+        )
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
         # type: (pymysql.cursor) -> List[Dict[str]]
-        self._log.debug("Running activity query [%s]", ACTIVITY_QUERY)
-        cursor.execute(ACTIVITY_QUERY)
+        query = self._get_activity_query()
+        self._log.debug("Running activity query [%s]", query)
+        cursor.execute(query)
         return cursor.fetchall()
 
     def _normalize_rows(self, rows):
         # type: (List[Dict[str]]) -> List[Dict[str]]
         rows = sorted(rows, key=lambda r: self._sort_key(r))
         normalized_rows = []
+        seen = {}
+        second_pass = {}
         estimated_size = 0
         for row in rows:
+            if row["thread_id"] in seen:
+                # `performance_schema.events_statements_current` can contain previous statements
+                # for the same thread. We only want the most recent one.
+                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                    continue
+                else:
+                    second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
+            else:
+                seen[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
             if row["sql_text"] is not None:
                 row["query_truncated"] = get_truncation_state(row["sql_text"]).value
             row = self._obfuscate_and_sanitize_row(row)
@@ -200,7 +286,22 @@ class MySQLActivity(DBMAsyncJob):
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
                 return normalized_rows
             normalized_rows.append(row)
+        if second_pass:
+            normalized_rows = self._eliminate_duplicate_rows(normalized_rows, second_pass)
         return normalized_rows
+
+    @staticmethod
+    def _eliminate_duplicate_rows(rows, second_pass):
+        # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
+        filtered_rows = []
+        for row in rows:
+            if (
+                row["thread_id"] in second_pass
+                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            ):
+                continue
+            filtered_rows.append(row)
+        return filtered_rows
 
     @staticmethod
     def _sort_key(row):
@@ -257,7 +358,7 @@ class MySQLActivity(DBMAsyncJob):
     def _create_activity_event(self, active_sessions, tags):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mysql",
             "dbm_type": "activity",

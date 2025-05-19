@@ -129,7 +129,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://traefik.io/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/datadog_checks/traefik_mesh/data/conf.yaml.example
 [5]: https://doc.traefik.io/traefik-mesh/api/
