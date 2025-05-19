@@ -113,21 +113,25 @@ def configure_tracer(tracer, self_check):
     """
     apm_tracing_enabled = False
     context_provider = None
-    try:
-        integration_tracing, integration_tracing_exhaustive = tracing_enabled()
-        if integration_tracing or integration_tracing_exhaustive:
-            apm_tracing_enabled = True
+    
+    integration_tracing, integration_tracing_exhaustive = tracing_enabled()
+    if integration_tracing or integration_tracing_exhaustive:
+        apm_tracing_enabled = True
 
+    dd_parent_id = None
+    dd_trace_id = None
+    try:
         # If the check has a dd_trace_id and dd_parent_id, we can use it to create a trace root
-        dd_parent_id = None
-        dd_trace_id = None
         if hasattr(self_check, "instance") and self_check.instance:
             dd_trace_id = self_check.instance.get("dd_trace_id", None)
             dd_parent_id = self_check.instance.get("dd_parent_span_id", None)
         elif hasattr(self_check, "instances") and self_check.instances and len(self_check.instances) > 0:
             dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
             dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
+    except (AttributeError, ValueError, TypeError):
+        pass
 
+    try:
         if dd_trace_id and dd_parent_id:
             from ddtrace.context import Context
 
@@ -136,7 +140,7 @@ def configure_tracer(tracer, self_check):
                 trace_id=dd_trace_id,
                 span_id=dd_parent_id,
             )
-    except (ValueError, TypeError, AttributeError, ImportError):
+    except ImportError:
         pass
 
     try:
