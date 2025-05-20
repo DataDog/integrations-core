@@ -11,8 +11,10 @@
     "description": "CloudGen Firewall is a NGFW that protect networks and Internet traffic",
     "title": "cloudgen_firewall",
     "classifier_tags": [
-      "Category::Syslog Collection",
-      "Offering::integration",
+      "Category::Log Collection",
+      "Category::Security",
+      "Queried Data Type::Logs",
+      "Offering::Integration",
       "Submitted Data Type::Logs"
     ]
   },
