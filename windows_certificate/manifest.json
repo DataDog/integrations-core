@@ -42,8 +42,7 @@
     },
     "monitors": {
       "A certificate is expired or about to expire": "assets/monitors/windows_certificate_expiration.json"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

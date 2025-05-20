@@ -5,7 +5,7 @@
 	"title": "Windows Certificate Store: Certificate expiring/expired",
 	"description": "This monitor alerts when there are certificates in the Windows Certificate Store that are expired or close to expiring.",
 	"tags": [
-	  "integration:windows_certificate"
+	  "integration:windows-certificate"
 	],
 	"definition": {
 	  "name": "A certificate is expired or about to expire",
