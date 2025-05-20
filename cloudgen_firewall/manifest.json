@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Barracuda CloudGen Firewall is a next-generation firewall (NGFW) that combines traditional firewall functions with advanced security and networking features to protect and optimize distributed networks",
+    "description": "CloudGen Firewall is a NGFW that protect networks and Internet traffic",
     "title": "cloudgen_firewall",
     "classifier_tags": [
       "Supported OS::Linux",
