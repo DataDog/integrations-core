@@ -22,7 +22,8 @@
     "integration": {
       "source_type_name": "cloudgen_firewall",
       "auto_install": "true",
-      "source_type_id": "30173123"      
+      "source_type_id": "30173123",
+      "metadata_path": "metadata.csv"
     },
     "dashboards": {
       "dashboard_short_name": "Barracuda CloudGen Firewall"
