@@ -19,7 +19,12 @@
     ]
   },
   "assets": {
-    "dashboards": {},
+    "integration": {
+      "metadata_path": "metadata.csv"
+    },
+    "dashboards": {
+      "dashboard_short_name": "Barracuda CloudGen Firewall"
+    },
     "monitors": {},
     "saved_views": {}
   },
