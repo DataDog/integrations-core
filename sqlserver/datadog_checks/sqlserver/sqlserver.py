@@ -339,10 +339,8 @@ class SQLServer(AgentCheck):
                 tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
             if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
                 tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
-                # in many cases the instance name is not set, so we use an empty string as a fallback in the
-                # cases where we already have a server name. This usually means that the instance is not a named instance
-                # and the server name is the same as the instance name.
-                tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME) or ''
+            if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
+                tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
             if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
                 tag_dict['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
             self._database_identifier = template.safe_substitute(**tag_dict)
