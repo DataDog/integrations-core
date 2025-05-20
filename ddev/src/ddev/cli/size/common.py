@@ -644,20 +644,25 @@ def draw_treemap_rects_with_labels(
 
 
 def send_metrics_to_dd(
-    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool
+    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool, timestamp: int
 ) -> None:
     metric_name = (
         "datadog.agent_integrations.size_analyzer.compressed"
         if compressed
         else "datadog.agent_integrations.size_analyzer.uncompressed"
     )
-    config_file_info = get_org(app, org)
+    config_file_info = {
+        "api_key": "",
+        "app_key": "",
+        "site": "datadoghq.eu",
+    }
+    # get_org(app, org)
 
-    if not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    # if not is_everything_committed():
+    #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
 
-    timestamp = get_last_commit_timestamp()
-
+    # timestamp = get_last_commit_timestamp()
+    print(f"Sending metrics for commit timestamp: {date.fromtimestamp(timestamp)}")
     metrics = []
 
     for item in modules:
@@ -682,8 +687,8 @@ def send_metrics_to_dd(
         app_key=config_file_info["app_key"],
         api_host=f"https://api.{config_file_info['site']}",
     )
-
-    api.Metric.send(metrics=metrics)
+    response = api.Metric.send(metrics=metrics)
+    print(f"Metrics sent successfully: {response}")
 
 
 def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:

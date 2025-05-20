@@ -46,6 +46,7 @@ console = Console(stderr=True)
     help="Display a pop-up window with a treemap showing the current size distribution of modules.",
 )
 @click.option("--send-metrics-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--timestamp", type=int, help="Timestamp of the commit to send metrics for.")
 @click.pass_obj
 def status(
     app: Application,
@@ -58,6 +59,7 @@ def status(
     save_to_png_path: Optional[str],
     show_gui: bool,
     send_metrics_dd_org: str,
+    timestamp: Optional[int],
 ) -> None:
     """
     Show the current size of all integrations and dependencies.
@@ -104,7 +106,7 @@ def status(
             elif json:
                 print_json(app, modules_plat_ver)
             if send_metrics_dd_org:
-                send_metrics_to_dd(app, modules_plat_ver, send_metrics_dd_org, compressed)
+                send_metrics_to_dd(app, modules_plat_ver, send_metrics_dd_org, compressed, timestamp)
     except Exception as e:
         app.abort(str(e))
 
