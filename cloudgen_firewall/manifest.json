@@ -20,6 +20,9 @@
   },
   "assets": {
     "integration": {
+      "source_type_name": "cloudgen_firewall",
+      "auto_install": "true",
+      "source_type_id": "30173123",
       "metadata_path": "metadata.csv"
     },
     "dashboards": {
