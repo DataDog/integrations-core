@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.13.1 / 2025-05-19
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
 ## 22.13.0 / 2025-05-15
 
 ***Added***:
