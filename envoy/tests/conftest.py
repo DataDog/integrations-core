@@ -6,7 +6,6 @@ import os
 
 import pytest
 import requests
-
 from datadog_checks.dev import docker_run
 from datadog_checks.envoy import Envoy
 

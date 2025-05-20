@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
 from . import common

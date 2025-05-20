@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base import ensure_bytes
 from datadog_checks.snowflake import SnowflakeCheck, queries
 

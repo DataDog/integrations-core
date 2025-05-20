@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from mock import Mock
-
 from datadog_checks.base.constants import ServiceCheck
+from mock import Mock
 
 from .utils import get_check
 

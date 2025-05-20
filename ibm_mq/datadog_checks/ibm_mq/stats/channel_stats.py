@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.ibm_mq.stats.base_stats import BaseStats
 from pymqi.CMQC import MQCA_REMOTE_Q_MGR_NAME
 from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQCACH_CONNECTION_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE
-
-from datadog_checks.ibm_mq.stats.base_stats import BaseStats
 
 from ..utils import sanitize_strings
 

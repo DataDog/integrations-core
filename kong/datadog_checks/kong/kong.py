@@ -4,7 +4,6 @@
 from urllib.parse import urlparse
 
 import simplejson as json
-
 from datadog_checks.base import AgentCheck
 
 from .check import KongCheck

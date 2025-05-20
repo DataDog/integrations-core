@@ -11,8 +11,6 @@ from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
-from pyVmomi import vim, vmodl
-
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
@@ -59,6 +57,7 @@ from datadog_checks.vsphere.utils import (
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
 )
+from pyVmomi import vim, vmodl
 
 try:
     import datadog_agent

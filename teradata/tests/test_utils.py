@@ -4,7 +4,6 @@
 import time
 
 import pytest
-
 from datadog_checks.teradata.check import TeradataCheck
 from datadog_checks.teradata.utils import submit_version, timestamp_validator
 

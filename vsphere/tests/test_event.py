@@ -5,11 +5,10 @@
 import datetime as dt
 
 import pytest
-from mock import mock, patch
-from pyVmomi import vim
-
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.constants import EXCLUDE_FILTERS
+from mock import mock, patch
+from pyVmomi import vim
 
 from .mocked_api import MockedAPI
 

@@ -5,7 +5,6 @@
 import datetime as dt
 
 import pytest
-
 from datadog_checks.base.utils.time import UTC
 from datadog_checks.rethinkdb.utils import to_time_elapsed
 

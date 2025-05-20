@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pymysql
-
 from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
 
 DD_QUERY_ATTRIBUTES = {

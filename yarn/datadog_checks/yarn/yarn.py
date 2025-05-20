@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.errors import ConfigurationError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'

@@ -7,7 +7,6 @@ import re
 import mock
 import pyodbc
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer

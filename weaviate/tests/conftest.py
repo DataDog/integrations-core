@@ -8,7 +8,6 @@ from contextlib import ExitStack
 
 import pytest
 import requests
-
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward

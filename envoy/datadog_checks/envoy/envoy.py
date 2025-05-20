@@ -6,7 +6,6 @@ from collections import defaultdict
 from urllib.parse import urljoin
 
 import requests
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .check import EnvoyCheckV2

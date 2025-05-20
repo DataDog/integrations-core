@@ -5,7 +5,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common

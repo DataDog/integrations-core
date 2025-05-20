@@ -5,10 +5,10 @@ import importlib
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, Iterator, List, Optional, cast  # noqa: F401
 
-import rethinkdb
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
+
+import rethinkdb
 
 from . import queries
 from .config import Config

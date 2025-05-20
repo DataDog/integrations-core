@@ -5,10 +5,9 @@
 import os
 
 import pytest
-from packaging import version
-
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.utils import ON_LINUX, ON_MACOS
+from packaging import version
 
 from ..common import HAPROXY_LEGACY, HAPROXY_VERSION
 

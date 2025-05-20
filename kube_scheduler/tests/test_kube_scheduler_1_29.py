@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 

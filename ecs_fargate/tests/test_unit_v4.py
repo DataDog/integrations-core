@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.ecs_fargate import FargateCheck
 
 from .conftest import (

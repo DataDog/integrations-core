@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.vsphere.legacy.vsphere_legacy import VSphereLegacyCheck
 
 from .utils import disable_thread_pool, get_mocked_server

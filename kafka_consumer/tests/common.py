@@ -6,7 +6,6 @@ import os
 import socket
 
 from confluent_kafka.admin import AdminClient
-
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import get_metadata_metrics
 

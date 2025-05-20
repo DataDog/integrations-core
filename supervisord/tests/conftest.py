@@ -7,7 +7,6 @@ from copy import deepcopy
 from xmlrpc.client import ServerProxy
 
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.supervisord.supervisord import SupervisordCheck
 

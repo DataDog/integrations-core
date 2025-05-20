@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from freezegun import freeze_time
-
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api
+from freezegun import freeze_time
 
 from . import common
 from .fixtures.metadata import (

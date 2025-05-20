@@ -5,7 +5,6 @@ import time
 from unittest.mock import patch
 
 import pytest
-
 from datadog_checks.slurm import SlurmCheck
 from datadog_checks.slurm.constants import SACCT_PARAMS
 

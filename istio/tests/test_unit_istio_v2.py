@@ -4,7 +4,6 @@
 import copy
 
 import pytest
-
 from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio

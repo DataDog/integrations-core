@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BUCKET_NAME, BUCKET_TAGS, CHECK_TAGS, PORT, _assert_bucket_metrics, _assert_stats

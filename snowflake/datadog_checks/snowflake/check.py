@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing
 
-import snowflake.connector as sf
-
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
+
+import snowflake.connector as sf
 
 from . import queries
 from .config import Config

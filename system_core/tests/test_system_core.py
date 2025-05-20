@@ -4,7 +4,6 @@
 from collections import defaultdict
 
 import mock
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.system_core import SystemCore
 

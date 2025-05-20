@@ -7,7 +7,6 @@ from itertools import chain
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.dev.testing import requires_linux, requires_windows

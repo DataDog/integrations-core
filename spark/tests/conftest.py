@@ -5,10 +5,9 @@ import os
 
 import pytest
 import requests
-from datadog_test_libs.utils.mock_dns import mock_local
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_test_libs.utils.mock_dns import mock_local
 
 from .common import HERE, HOST, HOSTNAME_TO_PORT_MAPPING, INSTANCE_STANDALONE
 

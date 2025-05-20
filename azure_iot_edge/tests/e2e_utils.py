@@ -4,7 +4,6 @@
 from typing import Any  # noqa: F401
 
 import requests
-
 from datadog_checks.dev.docker import ComposeFileDown, ComposeFileUp
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.dev.subprocess import run_command

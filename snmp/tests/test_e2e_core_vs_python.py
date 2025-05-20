@@ -5,7 +5,6 @@ from collections import defaultdict
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
 from . import common

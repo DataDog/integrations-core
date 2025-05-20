@@ -7,9 +7,8 @@ import re
 from datetime import datetime
 from hashlib import md5
 
-from pyVmomi import vim
-
 from datadog_checks.base import ensure_unicode
+from pyVmomi import vim
 
 from .constants import (
     DEFAULT_EVENT_RESOURCES,

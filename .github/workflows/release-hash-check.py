@@ -1,7 +1,7 @@
-from fnmatch import fnmatch
-import sys
-import json
 import hashlib
+import json
+import sys
+from fnmatch import fnmatch
 
 
 def compute_sha256(filename):

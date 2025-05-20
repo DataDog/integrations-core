@@ -6,11 +6,10 @@ import os
 from copy import deepcopy
 
 import pytest
-from mock import patch
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
+from mock import patch
 
 from .common import FIXTURE_DIR, HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
 

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import mock
-
 from datadog_checks.http_check import HTTPCheck, http_check
 
 

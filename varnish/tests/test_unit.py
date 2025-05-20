@@ -4,9 +4,8 @@
 
 import mock
 import pytest
-from packaging.version import Version
-
 from datadog_checks.varnish import Varnish
+from packaging.version import Version
 
 from . import common, mocks
 

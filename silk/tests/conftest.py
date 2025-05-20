@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import docker_run, get_here
 
 from . import common

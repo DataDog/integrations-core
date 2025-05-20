@@ -10,13 +10,13 @@ from importlib.metadata import metadata
 
 import mock
 import pytest
+from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import MockResponse
+from datadog_checks.openstack_controller.api.type import ApiType
 from packaging.version import Version
 
 import tests.configs as configs
 import tests.metrics as metrics
-from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
 pytestmark = [

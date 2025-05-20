@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from mock import MagicMock
-from requests import HTTPError
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
+from mock import MagicMock
+from requests import HTTPError
 
 from .common import HARBOR_COMPONENTS
 

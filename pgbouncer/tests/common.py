@@ -3,9 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-from packaging import version
-
 from datadog_checks.base.utils.common import get_docker_hostname
+from packaging import version
 
 HOST = get_docker_hostname()
 PORT = '6432'

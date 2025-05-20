@@ -8,10 +8,9 @@ import os
 import mock
 import pymysql
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from packaging.version import parse as parse_version
 
 from . import common, tags
 from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED

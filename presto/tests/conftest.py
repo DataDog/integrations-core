@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import prestodb
 import pytest
-
 from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.utils import load_jmx_config

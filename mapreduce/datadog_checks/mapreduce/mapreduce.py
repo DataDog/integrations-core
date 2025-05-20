@@ -3,9 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-from simplejson import JSONDecodeError
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.mapreduce.metrics import (
     HISTOGRAM,
@@ -15,6 +12,8 @@ from datadog_checks.mapreduce.metrics import (
     MAPREDUCE_MAP_TASK_METRICS,
     MAPREDUCE_REDUCE_TASK_METRICS,
 )
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from simplejson import JSONDecodeError
 
 
 class MapReduceCheck(AgentCheck):

@@ -7,7 +7,6 @@ import shutil
 import sys
 
 from click.testing import CliRunner
-
 from datadog_checks.dev import run_command
 
 TEST_MIB = "A3COM-HUAWEI-LswTRAP-MIB"

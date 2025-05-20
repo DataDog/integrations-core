@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pyVmomi import vim
-
 from datadog_checks.base import to_string
+from pyVmomi import vim
 
 from .constants import METRIC_TO_INSTANCE_TAG_MAPPING, RESOURCE_TYPE_TO_NAME
 from .metrics import REFERENCE_METRIC

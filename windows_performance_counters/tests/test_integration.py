@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.windows_performance_counters import WindowsPerformanceCountersCheck
 

@@ -5,7 +5,6 @@
 import pathlib
 
 import pytest
-
 from datadog_checks.dev.tooling.license_headers import parse_license_header, validate_license_headers
 from datadog_checks.dev.tooling.utils import get_license_header
 

@@ -4,11 +4,10 @@
 import copy
 import os
 
-from packaging import version
-
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
+from packaging import version
 
 HOST = get_docker_hostname()
 PORT = '8080'

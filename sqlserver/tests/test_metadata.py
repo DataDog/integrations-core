@@ -9,7 +9,6 @@ import re
 from copy import copy, deepcopy
 
 import pytest
-
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 

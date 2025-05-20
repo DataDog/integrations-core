@@ -9,7 +9,6 @@ from fnmatch import fnmatch
 from urllib.parse import urlparse
 
 import requests
-
 from datadog_checks.base.utils.tagging import tagger
 
 from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix, tags_for_docker, tags_for_pod

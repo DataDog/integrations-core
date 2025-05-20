@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from typing import Any, Dict, Generator  # noqa: F401
 
+from datadog_checks.base.errors import CheckException
 from pyasn1.type.univ import Null
 from pysnmp import hlapi  # noqa: F401
 from pysnmp.entity.rfc3413 import cmdgen
@@ -10,8 +11,6 @@ from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 from pysnmp.smi.rfc1902 import ObjectIdentity, ObjectType
-
-from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig  # noqa: F401
 

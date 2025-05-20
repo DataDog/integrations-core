@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import pytest
 import vertica_python as vertica
-
 from datadog_checks.dev import LazyFunction, docker_run
 
 from . import common

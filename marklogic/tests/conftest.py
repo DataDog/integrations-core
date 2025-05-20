@@ -6,7 +6,6 @@ from typing import Any, Dict, Generator  # noqa: F401
 
 import pytest
 import requests
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 

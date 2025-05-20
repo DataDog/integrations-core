@@ -7,12 +7,12 @@ import os
 
 import mock
 import pytest
-
-import tests.configs as configs
-import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller.api.type import ApiType
+
+import tests.configs as configs
+import tests.metrics as metrics
 from tests.common import remove_service_from_catalog
 
 pytestmark = [

@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics
 
 if ON_WINDOWS:

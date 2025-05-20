@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.dev import docker_run
 
 from .common import COMPOSE_FILE, INSTANCE, INSTANCE_BAD_URL, INSTANCE_NO_URL, TRAFFIC_SERVER_URL

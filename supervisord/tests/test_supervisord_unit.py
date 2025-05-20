@@ -7,9 +7,8 @@ from socket import socket
 
 import mock
 import pytest
-from mock import patch
-
 from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
+from mock import patch
 
 from .common import TEST_CASES
 

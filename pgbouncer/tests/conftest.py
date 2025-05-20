@@ -7,9 +7,8 @@ from copy import deepcopy
 
 import psycopg2
 import pytest
-from packaging import version
-
 from datadog_checks.dev import WaitFor, docker_run
+from packaging import version
 
 from . import common
 

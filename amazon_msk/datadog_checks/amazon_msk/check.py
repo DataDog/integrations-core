@@ -4,7 +4,6 @@
 from collections import ChainMap
 
 import boto3
-
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from datadog_checks.base.utils.serialization import json

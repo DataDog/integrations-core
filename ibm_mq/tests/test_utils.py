@@ -34,11 +34,10 @@ def test_sanitize_strings(input_string, expected):
 def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     from datetime import datetime
 
-    from dateutil import tz
-    from dateutil.tz import UTC
-
     from datadog_checks.base.utils.time import EPOCH
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
+    from dateutil import tz
+    from dateutil.tz import UTC
 
     current_tz = UTC
     current_dt = datetime.strptime('2021-09-15 18:46:00', '%Y-%m-%d %H:%M:%S')

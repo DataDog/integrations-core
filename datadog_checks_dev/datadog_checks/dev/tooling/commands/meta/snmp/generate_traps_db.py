@@ -11,7 +11,6 @@ from functools import lru_cache
 
 import click
 import yaml
-
 from datadog_checks.dev import TempDir
 
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, set_debug

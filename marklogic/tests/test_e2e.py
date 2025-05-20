@@ -4,7 +4,6 @@
 from typing import Any  # noqa: F401
 
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import COMMON_TAGS, INSTANCE, assert_metrics, assert_service_checks

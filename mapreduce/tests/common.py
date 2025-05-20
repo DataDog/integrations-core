@@ -6,10 +6,9 @@ import time
 from contextlib import contextmanager
 
 import requests
-from datadog_test_libs.utils.mock_dns import mock_local
-
 from datadog_checks.dev import get_docker_hostname, get_here, run_command
 from datadog_checks.mapreduce import MapReduceCheck
+from datadog_test_libs.utils.mock_dns import mock_local
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -82,7 +81,7 @@ def setup_mapreduce():
 
 @contextmanager
 def mock_local_mapreduce_dns():
-    mapping = {x: ('127.0.0.1', None) for x in MOCKED_E2E_HOSTS}
+    mapping = dict.fromkeys(MOCKED_E2E_HOSTS, ('127.0.0.1', None))
     with mock_local(mapping):
         yield
 

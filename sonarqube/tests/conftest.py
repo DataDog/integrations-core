@@ -6,7 +6,6 @@ import shutil
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.sonarqube import SonarqubeCheck

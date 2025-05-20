@@ -4,7 +4,6 @@
 from itertools import product
 
 import pytest
-
 from datadog_checks.activemq_xml import ActiveMQXML
 from datadog_checks.dev.utils import get_metadata_metrics
 

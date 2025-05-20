@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.ibm_mq.stats.base_stats import BaseStats
 from pymqi.CMQC import MQCA_Q_NAME, MQIA_DEFINITION_TYPE, MQIA_Q_TYPE
 from pymqi.CMQCFC import MQGACF_Q_STATISTICS_DATA
-
-from datadog_checks.ibm_mq.stats.base_stats import BaseStats
 
 from ..utils import sanitize_strings
 

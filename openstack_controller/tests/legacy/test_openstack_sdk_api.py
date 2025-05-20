@@ -6,8 +6,6 @@ import os
 
 import mock
 import pytest
-from openstack.exceptions import SDKException
-
 from datadog_checks.openstack_controller.legacy.api import OpenstackSDKApi
 from datadog_checks.openstack_controller.legacy.exceptions import (
     AuthenticationNeeded,
@@ -15,6 +13,8 @@ from datadog_checks.openstack_controller.legacy.exceptions import (
     MissingNeutronEndpoint,
     MissingNovaEndpoint,
 )
+
+from openstack.exceptions import SDKException
 
 from . import common
 

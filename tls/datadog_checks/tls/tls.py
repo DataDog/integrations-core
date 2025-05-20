@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import service_identity
-
 from datadog_checks.base import AgentCheck, is_affirmative
 
 from .const import (

@@ -11,7 +11,6 @@ import struct
 from collections import defaultdict
 
 import psutil
-
 from datadog_checks.base import AgentCheck
 
 MIXED = "mixed"

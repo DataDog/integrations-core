@@ -3,6 +3,7 @@ import os
 from datadog_checks.dev.tooling.catalog_const import DASHBOARD_NOT_POSSIBLE, PROCESS_SIGNATURE_EXCLUDE
 from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
+    get_available_recommended_monitors_integrations,
     get_check_file,
     get_default_config_spec,
     get_hatch_file,
@@ -10,17 +11,16 @@ from datadog_checks.dev.tooling.utils import (
     get_tox_file,
     get_valid_checks,
     get_valid_integrations,
-    has_logs,
     has_agent_8_check_signature,
     has_config_models,
     has_dashboard,
     has_e2e,
+    has_logs,
     has_process_signature,
-    has_saved_views,
     has_recommended_monitor,
-    is_tile_only,
+    has_saved_views,
     is_logs_only,
-    get_available_recommended_monitors_integrations,
+    is_tile_only,
 )
 
 MARKER = '<docs-insert-status>'

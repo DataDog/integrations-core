@@ -14,14 +14,13 @@ import time
 import mock
 import pytest
 import requests
-from mock import patch
-from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
-from prometheus_client.samples import Sample
-
 from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
+from mock import patch
+from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
+from prometheus_client.samples import Sample
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))

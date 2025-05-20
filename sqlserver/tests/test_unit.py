@@ -10,7 +10,6 @@ from collections import namedtuple
 
 import mock
 import pytest
-
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port

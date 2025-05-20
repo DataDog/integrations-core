@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.postgres import PostgreSql
 
 from .common import _get_expected_tags

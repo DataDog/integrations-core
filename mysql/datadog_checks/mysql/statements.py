@@ -9,7 +9,6 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
 from cachetools import TTLCache
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string

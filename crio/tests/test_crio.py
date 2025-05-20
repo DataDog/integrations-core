@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.crio import CrioCheck
 

@@ -5,7 +5,6 @@ import os
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck

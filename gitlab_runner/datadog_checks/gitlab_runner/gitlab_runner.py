@@ -6,7 +6,6 @@ from copy import deepcopy
 from urllib.parse import urlparse
 
 import requests
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 

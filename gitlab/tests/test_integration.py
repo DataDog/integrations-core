@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from requests.exceptions import ConnectionError
-
 from datadog_checks.gitlab import GitlabCheck
+from requests.exceptions import ConnectionError
 
 from .common import (
     CUSTOM_TAGS,

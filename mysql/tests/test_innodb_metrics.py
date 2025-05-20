@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.mysql.innodb_metrics import InnoDBMetrics
 
 from .common import HERE

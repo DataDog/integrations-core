@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.coredns import CoreDNSCheck
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics
 

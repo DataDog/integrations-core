@@ -8,8 +8,6 @@ import sys
 from unittest.mock import Mock, patch
 
 import pytest
-from lxml import etree
-
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
@@ -21,6 +19,7 @@ from datadog_checks.sqlserver.xe_collection.xml_tools import (
     extract_text_representation,
     extract_value,
 )
+from lxml import etree
 
 CHECK_NAME = 'sqlserver'
 

@@ -7,7 +7,6 @@ from itertools import chain
 
 import mock
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.silk import SilkCheck
 from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, Metric

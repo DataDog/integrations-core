@@ -6,7 +6,6 @@ import copy
 import random
 
 import pytest
-
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, _merge_duplicate_rows
 
 

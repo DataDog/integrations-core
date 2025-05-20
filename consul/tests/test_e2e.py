@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 

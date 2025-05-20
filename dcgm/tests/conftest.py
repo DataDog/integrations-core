@@ -7,7 +7,6 @@ import os
 from unittest import mock
 
 import pytest
-
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints

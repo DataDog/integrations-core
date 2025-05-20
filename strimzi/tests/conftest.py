@@ -5,7 +5,6 @@ import os.path
 from contextlib import ExitStack
 
 import pytest
-
 from datadog_checks.dev import run_command
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run

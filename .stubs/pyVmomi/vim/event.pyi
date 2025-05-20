@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import List, Type
 
-
 class Event:
     createdTime: datetime
     key: int

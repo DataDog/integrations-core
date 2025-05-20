@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from requests.exceptions import ConnectionError, HTTPError, Timeout
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import CheckException
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 from . import common
 

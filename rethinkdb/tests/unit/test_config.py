@@ -4,7 +4,6 @@
 from typing import Any  # noqa: F401
 
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.rethinkdb.config import Config
 from datadog_checks.rethinkdb.types import Instance  # noqa: F401

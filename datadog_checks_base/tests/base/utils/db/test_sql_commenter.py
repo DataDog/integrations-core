@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base.utils.db.sql_commenter import add_sql_comment, generate_sql_comment
 
 

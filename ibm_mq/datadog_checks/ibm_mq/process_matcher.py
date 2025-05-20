@@ -4,7 +4,6 @@
 import sys
 
 import psutil
-
 from datadog_checks.base.utils.concurrency.limiter import ConditionLimiter
 
 if sys.platform == 'win32':

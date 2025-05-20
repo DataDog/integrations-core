@@ -5,7 +5,6 @@ import copy
 import logging
 
 import pytest
-
 from datadog_checks.esxi import EsxiCheck
 
 from .common import (

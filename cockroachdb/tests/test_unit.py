@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP

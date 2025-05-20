@@ -7,7 +7,6 @@ import logging
 import mock
 import pytest
 import yaml
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.snmp.parsing import parse_metrics
 

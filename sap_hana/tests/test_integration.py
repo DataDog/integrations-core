@@ -5,9 +5,8 @@ import time
 
 import mock
 import pytest
-from mock.mock import ANY, call
-
 from datadog_checks.sap_hana import SapHanaCheck
+from mock.mock import ANY, call
 
 from . import metrics
 from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked

@@ -15,12 +15,11 @@ from threading import Event
 import mock
 import pymysql
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
+from packaging.version import parse as parse_version
 
 from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_VERSION_PARSED, PORT
 

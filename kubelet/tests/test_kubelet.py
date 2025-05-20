@@ -11,7 +11,6 @@ import mock
 import pytest
 import requests
 import requests_mock
-
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339

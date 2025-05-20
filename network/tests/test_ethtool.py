@@ -9,7 +9,6 @@ import platform
 
 import mock
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network import ethtool
 

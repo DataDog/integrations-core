@@ -5,7 +5,6 @@ import logging
 
 import mock
 import pytest
-
 from datadog_checks.citrix_hypervisor import metrics
 
 logger = logging.getLogger(__name__)

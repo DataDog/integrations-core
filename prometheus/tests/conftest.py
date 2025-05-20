@@ -6,10 +6,9 @@ import os
 
 import mock
 import pytest
-from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
-
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run, get_docker_hostname
+from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

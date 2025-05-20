@@ -7,7 +7,6 @@ import os
 import mock
 import pytest
 import requests_mock
-
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 from .common import HERE

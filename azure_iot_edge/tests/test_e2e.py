@@ -6,7 +6,6 @@ from typing import Callable  # noqa: F401
 
 import pytest
 import requests
-
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 

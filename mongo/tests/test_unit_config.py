@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.config import MongoConfig

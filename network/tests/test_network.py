@@ -5,7 +5,6 @@ import copy
 
 import mock
 import pytest
-
 from datadog_checks.dev import EnvVars
 
 from . import common

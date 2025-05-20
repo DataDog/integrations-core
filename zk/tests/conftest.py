@@ -8,7 +8,6 @@ from copy import deepcopy
 from io import StringIO
 
 import pytest
-
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs

@@ -4,7 +4,6 @@
 import os
 
 import mock
-
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()

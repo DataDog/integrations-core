@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.azure_iot_edge.types import Instance  # noqa: F401
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor

@@ -5,12 +5,11 @@ import copy
 import logging
 
 import pytest
-from mock import MagicMock, patch
-from pyVmomi import vim
-
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
+from mock import MagicMock, patch
+from pyVmomi import vim
 
 from .common import build_rest_api_client
 

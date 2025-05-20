@@ -7,7 +7,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.nginx import Nginx
 
 from .common import FIXTURES_PATH, HOST, PORT

@@ -5,7 +5,6 @@
 from urllib.parse import urljoin
 
 import requests
-
 from datadog_checks.base import AgentCheck
 
 

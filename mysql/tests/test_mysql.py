@@ -6,8 +6,6 @@ import logging
 
 import mock
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
@@ -27,6 +25,7 @@ from datadog_checks.mysql.const import (
     SYNTHETIC_VARS,
     VARIABLES_VARS,
 )
+from packaging.version import parse as parse_version
 
 from . import common, tags, variables
 from .common import HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version

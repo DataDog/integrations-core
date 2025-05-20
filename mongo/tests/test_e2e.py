@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from packaging import version
-
 from datadog_checks.mongo import MongoDb
+from packaging import version
 
 from .common import HOST, MONGODB_VERSION, PORT1, auth, shard, standalone, tls
 

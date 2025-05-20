@@ -9,9 +9,6 @@ from abc import abstractmethod
 from io import BytesIO
 from time import time
 
-from dateutil import parser
-from lxml import etree
-
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -23,6 +20,8 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database
+from dateutil import parser
+from lxml import etree
 
 try:
     import datadog_agent

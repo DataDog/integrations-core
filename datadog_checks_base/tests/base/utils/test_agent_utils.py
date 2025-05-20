@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
-
 from datadog_checks.base import stubs
 from datadog_checks.base.utils.agent.utils import should_profile_memory
 

@@ -6,7 +6,6 @@ import sys
 from urllib.response import addinfourl
 
 import pytest
-
 from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command

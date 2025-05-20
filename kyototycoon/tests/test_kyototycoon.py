@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.kyototycoon import KyotoTycoonCheck
 
 from .common import DEFAULT_INSTANCE, TAGS

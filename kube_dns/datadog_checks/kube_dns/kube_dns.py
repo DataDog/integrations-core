@@ -6,7 +6,6 @@ import re
 from copy import deepcopy
 
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.http import RequestsWrapper

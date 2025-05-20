@@ -4,7 +4,6 @@
 import time
 
 import requests
-
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
 
 from .check import VaultCheckV2

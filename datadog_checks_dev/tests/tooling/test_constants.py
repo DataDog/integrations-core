@@ -4,7 +4,6 @@
 import os
 
 import mock
-
 from datadog_checks.dev.tooling.constants import (
     get_agent_changelog,
     get_agent_integrations_file,

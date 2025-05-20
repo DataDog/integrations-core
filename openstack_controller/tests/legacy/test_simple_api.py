@@ -10,7 +10,6 @@ import mock
 import pytest
 import requests
 import simplejson as json
-
 from datadog_checks.openstack_controller.legacy.api import ApiFactory, Authenticator, Credential, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import (
     AuthenticationNeeded,

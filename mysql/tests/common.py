@@ -5,9 +5,8 @@ import os
 from sys import maxsize
 
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.dev import get_docker_hostname
+from packaging.version import parse as parse_version
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))

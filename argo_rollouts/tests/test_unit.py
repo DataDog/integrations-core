@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.argo_rollouts import ArgoRolloutsCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics

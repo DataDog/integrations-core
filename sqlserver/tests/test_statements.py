@@ -16,8 +16,6 @@ from unittest.mock import ANY
 
 import mock
 import pytest
-from lxml import etree as ET
-
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
@@ -31,6 +29,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
+from lxml import etree as ET
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 from .utils import CLOSE_TO_ZERO_INTERVAL

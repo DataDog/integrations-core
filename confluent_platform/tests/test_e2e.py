@@ -4,7 +4,6 @@
 from typing import Any  # noqa: F401
 
 import pytest
-
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 
 from .common import CHECK_CONFIG

@@ -6,7 +6,6 @@ import subprocess
 
 import pytest
 import requests
-
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
 

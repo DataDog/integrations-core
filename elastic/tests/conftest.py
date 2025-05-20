@@ -7,11 +7,10 @@ import os
 import mock
 import pytest
 import requests
-from packaging import version
-
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.elastic import ESCheck
+from packaging import version
 
 from .common import CLUSTER_TAG, ELASTIC_CLUSTER_TAG, ELASTIC_FLAVOR, ELASTIC_VERSION, HERE, PASSWORD, URL, USER
 

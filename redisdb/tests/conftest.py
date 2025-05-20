@@ -6,7 +6,6 @@ import time
 
 import pytest
 import redis
-
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis

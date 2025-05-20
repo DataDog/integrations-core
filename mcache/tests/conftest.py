@@ -5,7 +5,6 @@ import os
 
 import bmemcached
 import pytest
-
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.mcache import Memcache
 

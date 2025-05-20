@@ -5,10 +5,9 @@ from datetime import timezone
 
 import cm_client
 from cm_client.rest import RESTClientObject
+from datadog_checks.cloudera.client.client import Client
 from dateutil import parser
 from packaging.version import Version, parse
-
-from datadog_checks.cloudera.client.client import Client
 
 EVENT_TYPES = {
     'UNKNOWN': 'error',

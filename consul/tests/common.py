@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from packaging import version
-
 from datadog_checks.dev import get_docker_hostname
+from packaging import version
 
 PORT = '8500'
 

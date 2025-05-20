@@ -6,7 +6,6 @@ from __future__ import division
 from ipaddress import IPv6Address
 
 import bmemcached
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 

@@ -7,9 +7,8 @@ import time
 from collections import defaultdict
 from urllib.parse import quote_plus, urljoin, urlparse
 
-from requests.exceptions import RequestException
-
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
+from requests.exceptions import RequestException
 
 from .const import (
     ALERT_THRESHOLD,
@@ -490,7 +489,7 @@ class RabbitMQManagement(AgentCheck):
         if grab_all_data or not len(data):
             data = self._get_data(urljoin(base_url, object_type))
 
-        stats = {vhost: 0 for vhost in vhosts}
+        stats = dict.fromkeys(vhosts, 0)
         connection_states = defaultdict(int)
         for conn in data:
             if conn['vhost'] in vhosts:

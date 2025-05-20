@@ -11,10 +11,9 @@ from time import time as timestamp
 from urllib.parse import urljoin
 
 import requests
-from requests import HTTPError
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.base.utils.serialization import json
+from requests import HTTPError
 
 from .common import (
     CONSUL_CAN_CONNECT,

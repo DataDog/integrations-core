@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev import docker_run
 
 from . import common

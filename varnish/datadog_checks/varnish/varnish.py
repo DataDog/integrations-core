@@ -7,11 +7,10 @@ import xml.parsers.expat  # python 2.4 compatible
 from collections import defaultdict
 from os import geteuid
 
-from packaging.version import Version
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from packaging.version import Version
 
 
 class BackendStatus(object):

@@ -6,7 +6,6 @@ from contextlib import ExitStack
 
 import pytest
 import yaml
-
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run

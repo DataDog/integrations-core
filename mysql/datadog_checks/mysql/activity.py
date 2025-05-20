@@ -10,7 +10,6 @@ from enum import Enum
 from typing import Dict, List  # noqa: F401
 
 import pymysql
-
 from datadog_checks.base import is_affirmative, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata

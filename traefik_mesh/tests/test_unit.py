@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 from datadog_checks.traefik_mesh import TraefikMeshCheck

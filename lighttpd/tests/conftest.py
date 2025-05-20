@@ -6,7 +6,6 @@ from urllib import error
 from urllib.request import urlopen
 
 import pytest
-
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.lighttpd import Lighttpd
 

@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance, sanitize_url

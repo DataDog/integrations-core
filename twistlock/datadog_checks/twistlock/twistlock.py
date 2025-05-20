@@ -6,10 +6,9 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
-from dateutil import parser
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.serialization import json
+from dateutil import parser
 
 from .config import Config
 from .utils import normalize_api_data_inplace

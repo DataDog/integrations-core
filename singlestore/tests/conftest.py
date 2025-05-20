@@ -8,7 +8,6 @@ import re
 
 import mock
 import pytest
-
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 
 TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')

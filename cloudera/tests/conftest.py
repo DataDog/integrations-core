@@ -6,11 +6,10 @@ from copy import deepcopy
 
 import mock
 import pytest
-from packaging.version import Version
-
 from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from packaging.version import Version
 
 from . import common
 

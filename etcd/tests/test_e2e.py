@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.etcd import Etcd
 
 from .common import REMAPED_DEBUGGING_METRICS, URL

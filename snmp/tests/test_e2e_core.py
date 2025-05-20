@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from tests.common import SNMP_CONTAINER_NAME
 
 from . import common, metrics

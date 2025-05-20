@@ -8,7 +8,6 @@ from contextlib import contextmanager
 from shutil import which
 
 import pytest
-
 from datadog_checks.dev.env import environment_run
 from datadog_checks.dev.fs import chdir, copy_path, get_here, path_join
 from datadog_checks.dev.structures import LazyFunction, TempDir

@@ -6,9 +6,8 @@ import os
 
 import psutil
 import pytest
-from mock import patch
-
 from datadog_checks.process import ProcessCheck
+from mock import patch
 
 from . import common
 
@@ -168,7 +167,7 @@ def mock_psutil_wrapper(method, accessors):
     if accessors is None:
         result = 0
     else:
-        result = {accessor: 0 for accessor in accessors}
+        result = dict.fromkeys(accessors, 0)
     return result
 
 

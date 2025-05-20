@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.tls import TLSCheck
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,

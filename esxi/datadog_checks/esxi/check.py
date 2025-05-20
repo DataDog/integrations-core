@@ -9,11 +9,10 @@ from collections import defaultdict
 from urllib.parse import urlparse
 
 import socks
-from pyVim import connect
-from pyVmomi import vim, vmodl
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import to_string
+from pyVim import connect
+from pyVmomi import vim, vmodl
 
 from .constants import (
     ALL_RESOURCES,

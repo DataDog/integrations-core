@@ -5,7 +5,6 @@ from collections import OrderedDict
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import RequestsWrapper
 

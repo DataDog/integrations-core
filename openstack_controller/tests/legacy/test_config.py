@@ -7,7 +7,6 @@ import os
 import re
 
 import pytest
-
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
 from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH

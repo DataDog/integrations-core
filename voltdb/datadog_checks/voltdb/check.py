@@ -4,7 +4,6 @@
 from typing import Any, List, Optional, cast  # noqa: F401
 
 import requests  # noqa: F401
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 

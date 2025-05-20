@@ -5,7 +5,6 @@ import os
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.squid import SquidCheck
 

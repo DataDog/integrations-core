@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.system_core import SystemCore
 
 from . import common

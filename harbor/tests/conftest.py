@@ -6,8 +6,6 @@ import time
 
 import pytest
 import requests
-from mock import patch
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.http import MockResponse
@@ -24,6 +22,7 @@ from datadog_checks.harbor.common import (
     SYSTEM_INFO_URL,
     VOLUME_INFO_URL,
 )
+from mock import patch
 
 from .common import (
     ADMIN_INSTANCE,

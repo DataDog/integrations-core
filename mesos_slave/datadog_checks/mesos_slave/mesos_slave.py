@@ -8,9 +8,8 @@ Collects metrics from mesos slave node.
 """
 from urllib.parse import urlparse
 
-from requests.exceptions import Timeout
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from requests.exceptions import Timeout
 
 DEFAULT_MASTER_PORT = 5050
 

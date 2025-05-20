@@ -10,7 +10,6 @@ from ipaddress import IPv4Address
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db.utils import (

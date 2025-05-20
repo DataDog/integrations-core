@@ -4,7 +4,6 @@
 import os
 
 import mock
-
 from datadog_checks.network.check_solaris import SolarisNetwork
 
 from . import common

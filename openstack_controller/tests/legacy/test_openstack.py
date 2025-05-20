@@ -9,13 +9,12 @@ from copy import deepcopy
 
 import mock
 import pytest
-from mock import ANY
-from requests.exceptions import HTTPError
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.legacy.api import AbstractApi, Authenticator, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import IncompleteConfig, KeystoneUnreachable
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
+from mock import ANY
+from requests.exceptions import HTTPError
 
 from . import common
 

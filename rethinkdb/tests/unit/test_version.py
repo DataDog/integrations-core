@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.rethinkdb.version import parse_version
 
 from ..common import MALFORMED_VERSION_STRING_PARAMS

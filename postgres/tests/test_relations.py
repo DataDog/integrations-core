@@ -6,7 +6,6 @@ import threading
 
 import psycopg2
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import (
     QUERY_PG_CLASS,

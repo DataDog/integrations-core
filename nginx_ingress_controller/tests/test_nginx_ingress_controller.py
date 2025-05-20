@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 

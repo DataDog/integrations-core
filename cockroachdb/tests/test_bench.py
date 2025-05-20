@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.cockroachdb import CockroachdbCheck
 
 pytestmark = [pytest.mark.usefixtures('dd_environment')]

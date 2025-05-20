@@ -9,7 +9,6 @@ from urllib.parse import urljoin
 
 import pytest
 import requests
-
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor

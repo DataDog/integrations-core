@@ -5,7 +5,6 @@ import os
 
 import pytest
 import requests_mock
-
 from datadog_checks.linkerd import LinkerdCheck
 
 from .common import (

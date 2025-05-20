@@ -9,7 +9,6 @@ from copy import deepcopy
 import mock
 import pymysql
 import pytest
-
 from datadog_checks.cacti import CactiCheck
 
 from .common import HERE

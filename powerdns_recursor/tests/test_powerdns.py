@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common, metrics

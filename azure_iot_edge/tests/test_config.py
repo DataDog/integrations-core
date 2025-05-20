@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.azure_iot_edge.config import Config
 from datadog_checks.azure_iot_edge.metrics import EDGE_AGENT_METRICS, EDGE_AGENT_TYPE_OVERRIDES, EDGE_HUB_METRICS
 from datadog_checks.azure_iot_edge.types import Instance  # noqa: F401

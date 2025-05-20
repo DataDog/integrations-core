@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.vsphere import VSphereCheck
 

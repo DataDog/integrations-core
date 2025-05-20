@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from requests import ConnectionError
-
 from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.utils import scrub_connection_string
+from requests import ConnectionError
 
 pytestmark = pytest.mark.unit
 

@@ -11,8 +11,6 @@ from urllib.parse import quote_plus
 import mock
 import pytest
 from bson import json_util
-from pymongo.errors import ConnectionFailure, OperationFailure
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
@@ -21,6 +19,7 @@ from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, 
 from datadog_checks.mongo.dbm.utils import should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
+from pymongo.errors import ConnectionFailure, OperationFailure
 
 from . import common
 from .conftest import mock_pymongo

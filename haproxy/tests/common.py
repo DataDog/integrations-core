@@ -5,9 +5,8 @@ import os
 from sys import maxsize
 
 import pytest
-from packaging import version
-
 from datadog_checks.dev import get_docker_hostname, get_here
+from packaging import version
 
 HERE = get_here()
 HOST = get_docker_hostname()

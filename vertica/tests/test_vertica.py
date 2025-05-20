@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.vertica import VerticaCheck
 from datadog_checks.vertica.vertica import VerticaClient
 

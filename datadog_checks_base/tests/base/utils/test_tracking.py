@@ -6,7 +6,6 @@
 import os
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tracking import tracked_method
 

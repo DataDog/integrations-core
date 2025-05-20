@@ -4,10 +4,10 @@
 
 import mock
 import pytest
-from packaging.version import Version
-
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
+from packaging.version import Version
+
 from tests.common import query_time_series
 
 pytestmark = [pytest.mark.unit]

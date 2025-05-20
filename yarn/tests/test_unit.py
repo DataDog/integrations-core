@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.yarn import YarnCheck
 
 from .common import YARN_CONFIG

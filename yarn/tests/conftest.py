@@ -7,14 +7,13 @@ from copy import deepcopy
 from urllib.parse import urljoin
 
 import pytest
-from mock import patch
-from requests.exceptions import SSLError
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
+from mock import patch
+from requests.exceptions import SSLError
 
 from .common import (
     FIXTURE_DIR,

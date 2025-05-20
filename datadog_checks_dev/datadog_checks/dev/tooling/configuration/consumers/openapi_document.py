@@ -4,9 +4,8 @@
 from keyword import iskeyword
 from typing import List
 
-from pydantic import BaseModel
-
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
+from pydantic import BaseModel
 
 from ..constants import OPENAPI_SCHEMA_PROPERTIES
 

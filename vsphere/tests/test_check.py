@@ -8,14 +8,14 @@ import os
 import time
 
 import pytest
-from mock import MagicMock, mock, patch
-from pyVmomi import vim, vmodl
-
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
+from mock import MagicMock, mock, patch
+from pyVmomi import vim, vmodl
+
 from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client

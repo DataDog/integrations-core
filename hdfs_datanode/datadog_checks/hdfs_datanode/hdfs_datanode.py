@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin
 
+from datadog_checks.base import AgentCheck
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-
-from datadog_checks.base import AgentCheck
 
 
 class HDFSDataNode(AgentCheck):

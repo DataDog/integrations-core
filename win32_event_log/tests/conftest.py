@@ -7,7 +7,6 @@ from copy import deepcopy
 
 import pytest
 import win32evtlog
-
 from datadog_checks.win32_event_log import Win32EventLogCheck
 
 from . import common

@@ -4,7 +4,6 @@
 import logging
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db import QueryManager

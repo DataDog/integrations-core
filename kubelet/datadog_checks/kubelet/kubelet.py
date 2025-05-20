@@ -10,13 +10,12 @@ from copy import deepcopy
 from urllib.parse import urlparse
 
 import requests
-from kubeutil import get_connection_info
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException, SkipInstanceError
 from datadog_checks.base.utils.tagging import tagger
+from kubeutil import get_connection_info
 
 try:
     import datadog_agent
@@ -228,13 +227,13 @@ class KubeletCheck(
 
         self.probes_scraper_config = self.get_scraper_config(probes_instance)
 
-        counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
+        counter_transformers = dict.fromkeys(self.COUNTER_METRICS, self.send_always_counter)
 
         histogram_transformers = {
             k: self._histogram_from_seconds_to_microseconds(v) for k, v in TRANSFORM_VALUE_HISTOGRAMS.items()
         }
 
-        volume_metric_transformers = {k: self.append_pod_tags_to_volume_metrics for k in self.VOLUME_METRICS}
+        volume_metric_transformers = dict.fromkeys(self.VOLUME_METRICS, self.append_pod_tags_to_volume_metrics)
 
         self.transformers = {}
         for d in [

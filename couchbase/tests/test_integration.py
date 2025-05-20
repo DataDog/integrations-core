@@ -4,7 +4,6 @@
 
 import mock
 import pytest
-
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.couchbase.couchbase_consts import (
     INDEX_STATS_SERVICE_CHECK_NAME,

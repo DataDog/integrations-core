@@ -5,7 +5,6 @@ import os
 import sys
 
 import pytest
-
 from datadog_checks.dev import EnvVars, run_command
 from datadog_checks.dev._env import E2E_PREFIX, TESTING_PLUGIN
 from datadog_checks.dev.fs import chdir, remove_path

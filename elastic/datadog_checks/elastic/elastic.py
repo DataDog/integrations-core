@@ -9,7 +9,6 @@ from itertools import product
 from urllib.parse import urljoin, urlparse
 
 import requests
-
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 
 from .config import from_instance

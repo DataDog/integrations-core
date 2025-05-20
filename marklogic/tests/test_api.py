@@ -4,7 +4,6 @@
 from typing import Any, Dict  # noqa: F401
 
 import pytest
-
 from datadog_checks.marklogic.api import MarkLogicApi
 
 pytestmark = pytest.mark.unit

@@ -4,7 +4,6 @@
 import os
 
 import mock
-
 from datadog_checks.dev import EnvVars
 from datadog_checks.dev.ci import running_on_ci, running_on_linux_ci, running_on_macos_ci, running_on_windows_ci
 

@@ -5,7 +5,6 @@
 import mock
 import pytest
 import requests
-
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 

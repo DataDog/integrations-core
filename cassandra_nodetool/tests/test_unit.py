@@ -4,9 +4,8 @@
 
 from os import path
 
-from mock import patch
-
 from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
+from mock import patch
 
 from . import common
 

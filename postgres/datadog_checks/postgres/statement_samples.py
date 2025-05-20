@@ -10,7 +10,6 @@ from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
-
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
 try:

@@ -6,7 +6,6 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-
 from datadog_checks.base.types import ServiceCheck
 
 pytestmark = [pytest.mark.unit]

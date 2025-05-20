@@ -4,9 +4,8 @@
 
 import os
 
-from packaging.version import Version
-
 from datadog_checks.zk import ZookeeperCheck
+from packaging.version import Version
 
 from .metrics import LATENCY_METRICS, METRICS_34, METRICS_36, METRICS_36_OPTIONAL, STAT_METRICS
 

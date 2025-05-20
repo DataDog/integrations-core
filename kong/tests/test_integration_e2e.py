@@ -6,7 +6,6 @@ import os
 import platform
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.kong import Kong
 

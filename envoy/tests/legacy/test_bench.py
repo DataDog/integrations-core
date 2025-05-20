@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.envoy import Envoy
 
 from .common import INSTANCES

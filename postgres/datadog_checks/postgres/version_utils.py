@@ -3,10 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
-from semver import VersionInfo
-
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.postgres.cursor import CommenterCursor
+from semver import VersionInfo
 
 V8_3 = VersionInfo.parse("8.3.0")
 V9 = VersionInfo.parse("9.0.0")

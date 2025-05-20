@@ -63,9 +63,8 @@ from collections import defaultdict
 from contextlib import closing
 from io import StringIO
 
-from packaging.version import Version
-
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
+from packaging.version import Version
 
 
 class ZKConnectionFailure(Exception):

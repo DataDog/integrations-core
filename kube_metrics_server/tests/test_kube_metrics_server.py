@@ -7,7 +7,6 @@ import os
 import mock
 import pytest
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.kube_metrics_server import KubeMetricsServerCheck
 

@@ -6,9 +6,8 @@ import ctypes
 import pytest
 import pywintypes
 import winerror
-from mock import patch
-
 from datadog_checks.windows_service import WindowsService
+from mock import patch
 
 
 def test_bad_config(check, instance_bad_config):

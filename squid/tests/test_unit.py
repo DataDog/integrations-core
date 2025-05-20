@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.squid import SquidCheck
 
 from . import common

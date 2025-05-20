@@ -6,13 +6,12 @@ import datetime
 from collections.abc import Iterable
 
 from cachetools import TTLCache
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery.discovery import Discovery
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, Projects
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from .config_models import ConfigMixin
 

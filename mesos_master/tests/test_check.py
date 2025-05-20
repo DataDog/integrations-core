@@ -4,7 +4,6 @@
 import mock
 import pytest
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster

@@ -11,11 +11,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
-from typing_extensions import Literal
-
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from typing_extensions import Literal
 
 from . import defaults, validators
 

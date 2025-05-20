@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.dev.utils import get_metadata_metrics

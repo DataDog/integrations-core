@@ -9,7 +9,6 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 
 import redis
-
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
 

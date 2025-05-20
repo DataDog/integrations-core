@@ -4,7 +4,6 @@
 from os import path
 
 import pytest
-
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward

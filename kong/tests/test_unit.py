@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kong import Kong
 

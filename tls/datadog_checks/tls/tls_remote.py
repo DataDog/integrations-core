@@ -8,7 +8,6 @@ from struct import pack, unpack
 from cryptography.x509.base import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
-
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.time import get_timestamp

@@ -6,7 +6,6 @@ import unicodedata
 from copy import copy
 
 import simplejson as json
-
 from datadog_checks.base import AgentCheck
 
 from .keys import KEYS, SEARCH_LATENCY_KEYS, STAT_KEYS, VNODEQ_KEYS

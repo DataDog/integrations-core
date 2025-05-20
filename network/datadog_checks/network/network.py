@@ -11,7 +11,6 @@ import shutil
 import socket
 
 import psutil
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.platform import Platform
@@ -317,7 +316,7 @@ class Network(AgentCheck):
         return net_proc_base_location
 
     def _get_metrics(self):
-        return {val: 0 for val in self.cx_state_gauge.values()}
+        return dict.fromkeys(self.cx_state_gauge.values(), 0)
 
     def parse_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """

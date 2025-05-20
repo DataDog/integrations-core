@@ -10,7 +10,6 @@ from collections import defaultdict
 from string import Template
 
 from cachetools import TTLCache
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager

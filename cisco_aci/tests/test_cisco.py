@@ -5,13 +5,12 @@ import os
 from copy import deepcopy
 
 import pytest
-from freezegun import freeze_time
-from mock import MagicMock
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
+from freezegun import freeze_time
+from mock import MagicMock
 
 from . import common
 

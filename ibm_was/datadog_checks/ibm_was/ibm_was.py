@@ -4,9 +4,8 @@
 from xml.etree.ElementTree import ParseError
 
 import requests
-from lxml import etree
-
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
+from lxml import etree
 
 from . import metrics, validation
 

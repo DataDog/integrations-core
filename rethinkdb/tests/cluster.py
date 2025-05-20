@@ -5,11 +5,11 @@ import logging
 from contextlib import contextmanager
 from typing import Iterator, List  # noqa: F401
 
-import rethinkdb  # noqa: F401
-from rethinkdb import r
-
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import temporarily_stop_service
+
+import rethinkdb  # noqa: F401
+from rethinkdb import r
 
 from .common import (
     AGENT_PASSWORD,

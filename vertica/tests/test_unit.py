@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import TRACE_LEVEL
 from datadog_checks.vertica import VerticaCheck

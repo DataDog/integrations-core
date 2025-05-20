@@ -4,7 +4,6 @@
 import copy
 
 import pytest
-
 from datadog_checks.mysql import MySql
 
 from . import common

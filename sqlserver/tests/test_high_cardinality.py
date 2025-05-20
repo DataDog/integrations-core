@@ -7,7 +7,6 @@ import time
 from copy import copy
 
 import pytest
-
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME

@@ -6,10 +6,9 @@ import os
 
 import mock
 import pytest
-from requests import HTTPError
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.torchserve.model_discovery import ModelDiscovery
+from requests import HTTPError
 
 from ..common import get_fixture_path
 

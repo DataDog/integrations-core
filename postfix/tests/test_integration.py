@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.postfix import PostfixCheck
 
 from .common import get_instance, get_queue_counts

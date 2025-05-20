@@ -7,7 +7,6 @@ import random
 
 import pytest
 import redis
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import HOST, PASSWORD, PORT

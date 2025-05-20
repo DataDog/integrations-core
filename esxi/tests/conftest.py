@@ -5,12 +5,11 @@ import copy
 import os
 
 import pytest
-from mock import MagicMock, patch
-from pyVmomi import vim
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitForPortListening
 from datadog_checks.dev.fs import get_here
+from mock import MagicMock, patch
+from pyVmomi import vim
 
 from .common import (
     BASE_INSTANCE,

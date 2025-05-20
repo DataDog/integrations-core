@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 
 import mock
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse
 

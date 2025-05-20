@@ -4,7 +4,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import python3_gearman as gearman
-
 from datadog_checks.base import AgentCheck
 
 MAX_NUM_TASKS = 200

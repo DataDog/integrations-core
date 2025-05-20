@@ -4,12 +4,11 @@
 import logging
 
 import pytest
-from mock import MagicMock, patch
-from pyVmomi import vim
-
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, VSphereCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
+from mock import MagicMock, patch
+from pyVmomi import vim
 
 from .common import build_rest_api_client
 

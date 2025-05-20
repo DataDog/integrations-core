@@ -4,7 +4,6 @@
 from collections import OrderedDict
 
 import pytest
-
 from datadog_checks.teamcity.common import filter_build_configs, filter_items, filter_projects, normalize_server_url
 
 from .common import (

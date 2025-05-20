@@ -4,11 +4,10 @@
 import os
 
 import pytest
-from mock import patch
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.hdfs_namenode import HDFSNameNode
+from mock import patch
 
 from .common import (
     FIXTURE_DIR,

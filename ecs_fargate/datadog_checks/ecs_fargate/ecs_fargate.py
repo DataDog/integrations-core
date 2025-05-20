@@ -6,10 +6,9 @@ from __future__ import division
 import os
 
 import requests
-from dateutil import parser
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
+from dateutil import parser
 
 try:
     from tagger import get_tags

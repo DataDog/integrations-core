@@ -5,7 +5,6 @@
 import copy
 
 import pytest
-
 from datadog_checks.fluentd import Fluentd
 
 from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST

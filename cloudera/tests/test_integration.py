@@ -5,9 +5,9 @@ import logging
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
+
 from tests.common import METRICS
 
 

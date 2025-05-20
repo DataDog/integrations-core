@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urlparse
 
-from requests import HTTPError
-
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from requests import HTTPError
 
 from .config_models import ConfigMixin
 from .metrics import METRIC_MAP

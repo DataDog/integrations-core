@@ -7,7 +7,6 @@ import stat
 import tarfile
 
 import pytest
-
 from datadog_checks.dev import TempDir, docker_run
 
 from .common import CONFIG, HERE, URL

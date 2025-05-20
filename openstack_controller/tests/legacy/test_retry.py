@@ -7,7 +7,6 @@ import os
 import time
 
 import pytest
-
 from datadog_checks.openstack_controller.legacy.retry import BackOffRetry
 
 from . import common

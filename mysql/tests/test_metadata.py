@@ -6,9 +6,8 @@ import re
 from os import environ
 
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.mysql import MySql
+from packaging.version import parse as parse_version
 
 from . import common
 from .common import MYSQL_VERSION_PARSED

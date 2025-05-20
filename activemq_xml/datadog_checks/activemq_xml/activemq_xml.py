@@ -4,7 +4,6 @@
 from xml.etree import ElementTree
 
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 

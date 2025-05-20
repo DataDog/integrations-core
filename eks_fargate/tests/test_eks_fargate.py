@@ -5,7 +5,6 @@ import json
 import os
 
 import mock
-
 from datadog_checks.dev import EnvVars
 from datadog_checks.eks_fargate import EksFargateCheck
 from datadog_checks.eks_fargate.eks_fargate import KUBELET_NODE_ENV_VAR, extract_resource_values

@@ -9,7 +9,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
 import pytest
-
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (

@@ -5,13 +5,12 @@ import contextlib
 import logging
 
 import pytest
-from mock import MagicMock, mock, patch
-from pyVmomi import vim, vmodl
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS, PROPERTY_METRICS_BY_RESOURCE_TYPE
+from mock import MagicMock, mock, patch
+from pyVmomi import vim, vmodl
 
 from .common import (
     EVENTS,

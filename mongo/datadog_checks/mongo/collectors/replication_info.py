@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pymongo
-
 from datadog_checks.base.utils.common import round_value
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import ReplicaSetDeployment

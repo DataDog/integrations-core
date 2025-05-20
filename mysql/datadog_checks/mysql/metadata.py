@@ -6,7 +6,6 @@ from contextlib import closing
 from operator import attrgetter
 
 import pymysql
-
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 

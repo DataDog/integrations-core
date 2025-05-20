@@ -4,9 +4,8 @@
 
 import mock
 import pytest
-from dns.resolver import Resolver, Timeout
-
 from datadog_checks.dns_check import DNSCheck
+from dns.resolver import Resolver, Timeout
 
 from . import common
 from .mocks import MockTime, nxdomain_query_mock, success_query_mock

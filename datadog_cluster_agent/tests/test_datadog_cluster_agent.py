@@ -4,7 +4,6 @@
 from typing import Any, Dict  # noqa: F401
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck

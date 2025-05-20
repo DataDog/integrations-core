@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
-from requests.exceptions import ConnectionError, HTTPError
-
 from datadog_checks.base import AgentCheck
+from requests.exceptions import ConnectionError, HTTPError
 
 from .api import MarkLogicApi
 from .config import Config

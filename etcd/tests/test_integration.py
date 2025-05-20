@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.etcd import Etcd
 
 from .common import ETCD_VERSION, REMAPED_DEBUGGING_METRICS, URL

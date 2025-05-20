@@ -4,11 +4,10 @@
 import logging
 import os
 
-from kubeutil import get_connection_info
-
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tagging import tagger
+from kubeutil import get_connection_info
 
 KUBELET_NODE_ENV_VAR = 'DD_KUBERNETES_KUBELET_NODENAME'
 CAPACITY_ANNOTATION_KEY = 'CapacityProvisioned'

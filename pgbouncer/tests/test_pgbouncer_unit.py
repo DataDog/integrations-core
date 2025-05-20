@@ -6,7 +6,6 @@ from unittest.mock import ANY, MagicMock, patch
 
 import psycopg2 as pg
 import pytest
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
 

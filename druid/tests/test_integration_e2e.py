@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.druid import DruidCheck
 

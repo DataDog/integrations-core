@@ -4,7 +4,6 @@
 import platform
 
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.win32_event_log import Win32EventLogCheck

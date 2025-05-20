@@ -8,7 +8,6 @@ import mock
 import pytest
 import requests
 import requests_unixsocket
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev.utils import ON_WINDOWS

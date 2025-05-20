@@ -7,7 +7,6 @@ from enum import Enum, unique
 from functools import wraps
 
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.api.catalog import CatalogEndPointFailure
 

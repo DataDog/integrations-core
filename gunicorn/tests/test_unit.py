@@ -6,7 +6,6 @@ import logging
 import mock
 import psutil
 import pytest
-
 from datadog_checks.gunicorn import GUnicornCheck
 
 from .common import CHECK_NAME, INSTANCE

@@ -6,7 +6,6 @@ import os
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.tokumx import TokuMX
 from datadog_checks.tokumx.vendor import pymongo

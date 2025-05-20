@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import get_active_env
 from datadog_checks.iis import IIS

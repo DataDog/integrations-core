@@ -6,7 +6,6 @@ import os
 from random import sample, shuffle
 
 import pytest
-
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import LazyFunction, TempDir
 from datadog_checks.dev.env import environment_run, serialize_data, set_env_vars

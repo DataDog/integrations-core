@@ -10,7 +10,6 @@ import time
 from collections import defaultdict
 
 import psutil
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 

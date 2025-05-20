@@ -5,7 +5,6 @@ import copy
 from pathlib import Path
 
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 

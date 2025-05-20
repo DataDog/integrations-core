@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pymongo.errors import OperationFailure
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.collectors.base import MongoCollector, collection_interval_checker
 from datadog_checks.mongo.metrics import COLLECTION_METRICS
+from pymongo.errors import OperationFailure
 
 
 class CollStatsCollector(MongoCollector):

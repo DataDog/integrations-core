@@ -6,9 +6,8 @@ import logging
 from copy import deepcopy
 
 import pytest
-from packaging import version
-
 from datadog_checks.dev.utils import get_metadata_metrics
+from packaging import version
 
 from .common import CONFIG, OPENMETRICS_CONFIG, requires_management, requires_prometheus
 from .metrics import (

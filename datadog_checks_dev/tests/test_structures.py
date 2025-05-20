@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev.structures import EnvVars, TempDir
 
 

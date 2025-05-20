@@ -7,7 +7,6 @@ from collections import namedtuple
 
 import mock
 import pytest
-
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 from .common import HERE

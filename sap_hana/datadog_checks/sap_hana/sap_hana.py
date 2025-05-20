@@ -9,7 +9,6 @@ from datetime import datetime
 from itertools import chain
 
 import certifi
-
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp

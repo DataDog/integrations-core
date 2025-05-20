@@ -10,7 +10,6 @@ from time import time
 
 import psycopg2
 from cachetools import TTLCache
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager

@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.utils import ON_WINDOWS

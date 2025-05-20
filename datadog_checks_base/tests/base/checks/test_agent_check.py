@@ -11,7 +11,6 @@ from typing import Any  # noqa: F401
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
 

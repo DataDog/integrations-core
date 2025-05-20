@@ -5,7 +5,6 @@ import os
 
 import mock
 import requests
-
 from datadog_checks.dev.http import MockResponse
 
 from .common import HERE

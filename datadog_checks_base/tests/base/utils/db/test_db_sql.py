@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import pytest
-
 from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
 
 

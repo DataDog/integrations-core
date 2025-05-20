@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import clickhouse_driver
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 

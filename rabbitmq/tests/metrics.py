@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from packaging import version
-
 from datadog_checks.rabbitmq import RabbitMQ
+from packaging import version
 
 from .common import RABBITMQ_VERSION
 

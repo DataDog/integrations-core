@@ -8,7 +8,6 @@ from copy import deepcopy
 
 import pytest
 import requests
-
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip

@@ -5,7 +5,6 @@ import re
 
 import mock
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,

@@ -8,7 +8,6 @@ import sys
 
 import pytest
 from click.testing import CliRunner
-
 from datadog_checks.dev import run_command
 
 

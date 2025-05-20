@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.weaviate import WeaviateCheck
 
 from .common import MOCKED_INSTANCE, get_fixture_path

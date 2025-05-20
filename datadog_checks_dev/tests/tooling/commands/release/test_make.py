@@ -4,7 +4,6 @@
 import sys
 
 import pytest
-
 from datadog_checks.dev import run_command
 from datadog_checks.dev.tooling.commands.release.make import validate_version
 

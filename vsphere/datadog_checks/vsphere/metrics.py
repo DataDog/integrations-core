@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from pyVmomi import vim
-
 from datadog_checks.vsphere.constants import (
     HISTORICAL,
     REALTIME,
 )
+from pyVmomi import vim
 
 # https://code.vmware.com/apis/358/vsphere/doc/cpu_counters.html
 

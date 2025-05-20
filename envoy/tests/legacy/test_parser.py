@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.envoy.errors import UnknownMetric, UnknownTags
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 from datadog_checks.envoy.parser import parse_histogram, parse_metric

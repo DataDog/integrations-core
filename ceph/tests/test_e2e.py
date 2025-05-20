@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.ceph import Ceph
 
 from .common import BASIC_CONFIG, EXPECTED_METRICS, EXPECTED_SERVICE_CHECKS, EXPECTED_SERVICE_TAGS

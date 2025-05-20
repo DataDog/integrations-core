@@ -11,7 +11,6 @@ import sys
 from collections import defaultdict
 
 import pytest
-
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
 from datadog_checks.dev.docker import get_container_ip

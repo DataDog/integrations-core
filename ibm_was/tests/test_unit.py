@@ -6,7 +6,6 @@ import os
 import mock
 import pytest
 import requests
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.ibm_was import IbmWasCheck
 

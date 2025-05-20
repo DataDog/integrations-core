@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.glusterfs import GlusterfsCheck
 
 from .common import CHECK, E2E_INIT_CONFIG, GLUSTER_VERSION

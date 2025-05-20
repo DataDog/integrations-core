@@ -13,7 +13,6 @@ from typing import Any, List  # noqa: F401
 import mock
 import pytest
 import yaml
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck

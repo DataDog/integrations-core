@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.jmx import JVM_E2E_METRICS
 

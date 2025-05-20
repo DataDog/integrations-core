@@ -4,9 +4,8 @@
 import time
 from datetime import datetime, timedelta, timezone
 
-from dateutil.tz import gettz
-
 from datadog_checks.base.utils.time import UTC
+from dateutil.tz import gettz
 
 from .common import CHECK_ID, create_query_manager, mock_executor
 

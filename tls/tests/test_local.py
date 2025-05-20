@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.tls import TLSCheck
 from datadog_checks.tls.const import (

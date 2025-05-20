@@ -5,7 +5,6 @@
 import time
 
 import pytest
-
 from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
 
 from . import common

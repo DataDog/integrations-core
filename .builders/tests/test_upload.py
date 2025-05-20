@@ -1,10 +1,9 @@
+import fnmatch
 from pathlib import Path
 from unittest import mock
 from zipfile import ZipFile
-import fnmatch
 
 import pytest
-
 import upload
 
 

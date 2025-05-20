@@ -8,7 +8,6 @@ from typing import Any  # noqa: F401
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
 SET_CHECK_METADATA_METHOD = 'datadog_checks.base.stubs.datadog_agent.set_check_metadata'

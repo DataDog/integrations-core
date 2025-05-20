@@ -4,10 +4,9 @@
 import json
 import os
 
+import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 import jsonschema
 import requests
-
-import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 
 from ...constants import get_root
 from ...manifest_validator.common.validator import BaseManifestValidator

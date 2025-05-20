@@ -5,9 +5,8 @@ import logging
 
 import mock
 import pytest
-from requests.exceptions import SSLError
-
 from datadog_checks.base.utils.http import RequestsWrapper
+from requests.exceptions import SSLError
 
 pytestmark = [pytest.mark.unit]
 

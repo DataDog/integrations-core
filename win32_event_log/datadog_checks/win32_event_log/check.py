@@ -8,7 +8,6 @@ import win32con
 import win32event
 import win32evtlog
 import win32security
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.common import exclude_undefined_keys

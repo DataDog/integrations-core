@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.kind import kind_run

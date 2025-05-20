@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.harbor import HarborCheck
 
 from .common import HARBOR_COMPONENTS, HARBOR_METRICS, HARBOR_VERSION, VERSION_2_2

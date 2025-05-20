@@ -8,9 +8,6 @@ from datetime import datetime, timezone
 
 import mock
 import pytest
-from mock import MagicMock
-from pyVmomi import vim
-
 from datadog_checks.vsphere.legacy.cache_config import CacheConfig
 from datadog_checks.vsphere.legacy.common import SOURCE_TYPE
 from datadog_checks.vsphere.legacy.errors import BadConfigError, ConnectionError
@@ -21,6 +18,8 @@ from datadog_checks.vsphere.legacy.vsphere_legacy import (
     SHORT_ROLLUP,
     VSphereLegacyCheck,
 )
+from mock import MagicMock
+from pyVmomi import vim
 
 from .utils import MockedMOR, assertMOR, disable_thread_pool, get_mocked_server, mock_alarm_event
 

@@ -6,9 +6,8 @@ from copy import deepcopy
 
 import paramiko
 import pytest
-from mock import MagicMock, call, create_autospec
-
 from datadog_checks.ssh_check import CheckSSH
+from mock import MagicMock, call, create_autospec
 
 from . import common
 

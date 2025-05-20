@@ -8,7 +8,6 @@ import os
 from typing import Iterator  # noqa: F401
 
 import mock
-
 from datadog_checks.snmp import utils
 
 

@@ -5,8 +5,8 @@
 import os
 
 import pytest
-
 from datadog_checks.base import AgentCheck
+
 from tests.legacy.common import DEFAULT_METRICS
 
 pytestmark = [

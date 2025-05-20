@@ -5,7 +5,6 @@ import os
 from os.path import join
 
 import mock
-
 from datadog_checks.dev.tooling.config import copy_default_config
 from datadog_checks.dev.tooling.utils import (
     complete_set_root,

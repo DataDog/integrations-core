@@ -5,7 +5,6 @@ import os
 from contextlib import contextmanager
 
 import pytest
-
 from datadog_checks.dev import EnvVars, TempDir
 from datadog_checks.dev.docker import docker_run
 from datadog_checks.dev.env import get_state, save_state

@@ -5,14 +5,13 @@
 import os
 
 import pytest
+from datadog_checks.base import ensure_unicode
+from datadog_checks.dev import docker_run
 from prometheus_client import CollectorRegistry, Counter, Gauge
 from prometheus_client import generate_latest as generate_prometheus
 from prometheus_client.exposition import CONTENT_TYPE_LATEST as PROMETHEUS_CONTENT_TYPE
 from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPENMETRICS_CONTENT_TYPE
 from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
-
-from datadog_checks.base import ensure_unicode
-from datadog_checks.dev import docker_run
 
 from .common import HERE, INSTANCE
 

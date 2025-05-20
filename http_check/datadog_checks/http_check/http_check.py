@@ -12,9 +12,8 @@ from urllib.parse import urlparse
 
 import requests
 from cryptography import x509
-from requests import Response  # noqa: F401
-
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from requests import Response  # noqa: F401
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path

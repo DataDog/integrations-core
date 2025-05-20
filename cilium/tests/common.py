@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev.ci import running_on_ci
 
 CHECK_NAME = 'cilium'

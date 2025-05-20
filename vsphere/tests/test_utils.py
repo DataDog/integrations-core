@@ -3,11 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from pytest import param
-from pyVmomi import vim
-
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.utils import get_mapped_instance_tag, should_collect_per_instance_values
+from pytest import param
+from pyVmomi import vim
 
 
 @pytest.mark.parametrize(

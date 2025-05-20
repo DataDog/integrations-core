@@ -4,7 +4,6 @@
 
 import psycopg2.extensions
 import psycopg2.extras
-
 from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
 
 DD_QUERY_ATTRIBUTES = {

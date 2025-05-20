@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 
 from . import common

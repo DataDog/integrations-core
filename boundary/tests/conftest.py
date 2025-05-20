@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.boundary import BoundaryCheck
 from datadog_checks.dev import docker_run
 

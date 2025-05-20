@@ -5,7 +5,6 @@
 import copy
 
 import pytest
-
 from datadog_checks.fluentd import Fluentd
 
 from .common import CHECK_NAME, HOST, INSTANCE_WITH_PLUGIN

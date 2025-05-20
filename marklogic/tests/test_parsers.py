@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.marklogic.parsers.common import MarkLogicParserException, build_metric_to_submit
 from datadog_checks.marklogic.parsers.health import parse_summary_health

@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from pyVmomi import vim
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
+from pyVmomi import vim
 
 from .common import EVENTS, LEGACY_HISTORICAL_INSTANCE
 

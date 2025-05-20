@@ -6,7 +6,6 @@ import copy
 
 import mock
 import pytest
-
 from datadog_checks.riakcs import RiakCs
 
 from . import common

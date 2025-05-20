@@ -5,7 +5,6 @@
 import certifi
 import mock
 import pytest
-
 from datadog_checks.sap_hana import SapHanaCheck
 
 from .common import TIMEOUT

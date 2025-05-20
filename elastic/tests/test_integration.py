@@ -5,8 +5,6 @@ import logging
 
 import pytest
 import requests
-from packaging import version
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.metrics import (
@@ -19,6 +17,7 @@ from datadog_checks.elastic.metrics import (
     pshard_stats_for_version,
     slm_stats_for_version,
 )
+from packaging import version
 
 from .common import CLUSTER_TAG, ELASTIC_VERSION, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER, _test_check
 

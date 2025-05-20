@@ -6,7 +6,6 @@ import os
 from base64 import urlsafe_b64decode
 
 import pytest
-
 from datadog_checks.dev._env import TESTING_PLUGIN
 
 

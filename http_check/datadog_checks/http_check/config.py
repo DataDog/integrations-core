@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
-from requests.structures import CaseInsensitiveDict
-
 from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.headers import headers as agent_headers
+from requests.structures import CaseInsensitiveDict
 
 DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 

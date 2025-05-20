@@ -4,10 +4,9 @@
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .constants import (
     APPLICATION_STATES,

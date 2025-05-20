@@ -6,11 +6,10 @@ import ssl
 from ssl import SSLContext
 
 import pytest
-from mock import MagicMock, patch  # noqa: F401
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tls import TlsContextWrapper
 from datadog_checks.dev import TempDir
+from mock import MagicMock, patch  # noqa: F401
 
 
 class TestCheckAttribute:

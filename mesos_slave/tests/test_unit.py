@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
 

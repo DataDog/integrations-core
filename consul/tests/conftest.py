@@ -5,7 +5,6 @@ import os
 
 import pytest
 import requests
-
 from datadog_checks.dev import WaitFor, docker_run
 
 from . import common

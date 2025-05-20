@@ -6,7 +6,6 @@ import os
 from contextlib import ExitStack
 
 import pytest
-
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command

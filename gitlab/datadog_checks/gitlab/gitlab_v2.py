@@ -5,7 +5,6 @@ import copy
 from collections import ChainMap
 
 import requests
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.gitlab.config_models import ConfigMixin
 

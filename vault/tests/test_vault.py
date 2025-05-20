@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 import mock
 import pytest
 import requests
-
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION

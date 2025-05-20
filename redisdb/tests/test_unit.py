@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from redis.exceptions import ResponseError
-
 from datadog_checks.dev.utils import get_metadata_metrics
+from redis.exceptions import ResponseError
 
 pytestmark = pytest.mark.unit
 

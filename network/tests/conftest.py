@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.network import Network
 

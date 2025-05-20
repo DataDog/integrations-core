@@ -12,18 +12,17 @@ from collections import defaultdict
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 
-from pyVim import connect
-from pyVmomi import (
-    vim,  # pylint: disable=E0611
-    vmodl,  # pylint: disable=E0611
-)
-
 from datadog_checks.base import AgentCheck, ensure_unicode, to_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.base.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.base.config import is_affirmative
+from pyVim import connect
+from pyVmomi import (
+    vim,  # pylint: disable=E0611
+    vmodl,  # pylint: disable=E0611
+)
 
 from ..event import VSphereEvent
 from .cache_config import CacheConfig

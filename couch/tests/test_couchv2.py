@@ -12,7 +12,6 @@ from copy import deepcopy
 
 import pytest
 import requests
-
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
 

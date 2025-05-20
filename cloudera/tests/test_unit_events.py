@@ -5,9 +5,8 @@
 
 import mock
 import pytest
-from packaging.version import Version
-
 from datadog_checks.base.types import ServiceCheck
+from packaging.version import Version
 
 pytestmark = [pytest.mark.unit]
 

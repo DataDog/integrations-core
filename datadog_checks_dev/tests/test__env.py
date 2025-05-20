@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import tenacity
-from mock import mock
-
 from datadog_checks.dev import EnvVars, environment_run
 from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, set_up_env, tear_down_env
 from datadog_checks.dev.ci import running_on_ci
+from mock import mock
 
 
 def test_set_up_env_default_true():

@@ -12,11 +12,10 @@ from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, 
 import mock
 import pytest
 import urllib3
-from requests import RequestException
-
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
+from requests import RequestException
 
 from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
 

@@ -5,7 +5,6 @@ import re
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.discovery import Discovery
 
 

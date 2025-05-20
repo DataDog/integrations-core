@@ -5,7 +5,6 @@ from contextlib import closing, contextmanager
 
 import pymysql
 import pymysql.cursors
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 

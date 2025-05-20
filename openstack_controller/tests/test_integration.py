@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 
 pytestmark = [

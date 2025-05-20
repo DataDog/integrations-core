@@ -6,7 +6,6 @@ import logging
 import os
 
 import pytest
-
 from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.statsd.statsd import SERVICE_CHECK_NAME, SERVICE_CHECK_NAME_HEALTH, StatsCheck
 

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.elastic.metrics import (
     health_stats_for_version,
     node_system_stats_for_version,

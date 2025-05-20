@@ -7,7 +7,6 @@ import traceback
 from abc import ABC, abstractmethod
 
 import pymqi
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp

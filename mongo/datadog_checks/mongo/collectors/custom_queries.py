@@ -8,8 +8,6 @@ from copy import deepcopy
 
 import dateutil.parser
 import pymongo
-from dateutil.tz import tzutc
-
 from datadog_checks.mongo.api import CRITICAL_FAILURE
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import (
@@ -17,6 +15,7 @@ from datadog_checks.mongo.common import (
     ALLOWED_CUSTOM_QUERIES_COMMANDS,
     ReplicaSetDeployment,
 )
+from dateutil.tz import tzutc
 
 MONGO_DATE_EXPRESSIONS = {
     r"ISODate\(\s*\'(.*?)\'\s*\)": (lambda m: dateutil.parser.isoparse(m.groups()[0])),

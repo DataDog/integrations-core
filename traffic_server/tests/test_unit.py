@@ -4,7 +4,6 @@
 import logging
 
 import pytest
-
 from datadog_checks.traffic_server import TrafficServerCheck, metrics
 
 logger = logging.getLogger(__name__)

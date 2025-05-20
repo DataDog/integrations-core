@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.ibm_i.config_models import InstanceConfig
 from datadog_checks.ibm_i.queries import query_map
 

@@ -7,7 +7,6 @@ import sys
 
 import mock
 import pytest
-
 from datadog_checks.kubelet import KubeletCheck
 from datadog_checks.kubelet.common import PodListUtils
 from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraperMixin

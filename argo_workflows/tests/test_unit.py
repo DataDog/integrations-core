@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.argo_workflows import ArgoWorkflowsCheck
 from datadog_checks.base.stubs import aggregator as agg
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics

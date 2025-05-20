@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from mock import MagicMock
-
 from datadog_checks.nagios.nagios import NagiosEventLogTailer
+from mock import MagicMock
 
 from .common import NAGIOS_TEST_LOG
 

@@ -12,7 +12,6 @@ import subprocess
 import time
 
 import psutil
-
 from datadog_checks.base import AgentCheck
 
 

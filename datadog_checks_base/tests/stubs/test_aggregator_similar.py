@@ -4,7 +4,6 @@
 import difflib
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import similar
 from datadog_checks.base.stubs.aggregator import AggregatorStub

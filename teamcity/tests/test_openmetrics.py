@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import PROMETHEUS_METRICS, PROMETHEUS_METRICS_2023_05_04, get_fixture_path

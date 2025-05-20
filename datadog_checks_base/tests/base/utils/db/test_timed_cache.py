@@ -4,7 +4,6 @@
 import time
 
 import pytest
-
 from datadog_checks.base.utils.db.timed_cache import TimedCache
 
 

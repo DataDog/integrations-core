@@ -5,7 +5,6 @@ import os
 from contextlib import ExitStack
 
 import pytest
-
 from datadog_checks.dev import TempDir, run_command
 from datadog_checks.dev.fs import path_join
 from datadog_checks.dev.kind import kind_run

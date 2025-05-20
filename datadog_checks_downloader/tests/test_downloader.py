@@ -18,17 +18,17 @@ from contextlib import contextmanager
 from datetime import datetime
 from urllib.parse import urljoin
 
+import datadog_checks.downloader
 import pytest
 import requests
+from datadog_checks.downloader.cli import download, instantiate_downloader, run_downloader
+from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
+from datadog_checks.downloader.exceptions import NonDatadogPackage, NoSuchDatadogPackage
 from freezegun import freeze_time
 from packaging.version import parse as parse_version
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tuf.api.exceptions import DownloadError, ExpiredMetadataError, RepositoryError, UnsignedMetadataError
 
-import datadog_checks.downloader
-from datadog_checks.downloader.cli import download, instantiate_downloader, run_downloader
-from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
-from datadog_checks.downloader.exceptions import NonDatadogPackage, NoSuchDatadogPackage
 from tests.local_http import local_http_server, local_http_server_local_dir
 
 _LOGGER = logging.getLogger("test_downloader")

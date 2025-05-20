@@ -12,13 +12,13 @@ import mock
 import pytest
 import requests
 import yaml
-
-import tests.configs as configs
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
+
+import tests.configs as configs
 
 from .endpoints import IRONIC_ENDPOINTS, NOVA_ENDPOINTS
 from .ssh_tunnel import socks_proxy

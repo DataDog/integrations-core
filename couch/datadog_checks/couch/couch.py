@@ -8,7 +8,6 @@ import math
 from urllib.parse import quote, urljoin
 
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.utils.headers import headers

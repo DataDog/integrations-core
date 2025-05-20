@@ -12,7 +12,6 @@ from collections import defaultdict
 from contextlib import closing
 
 import pymysql
-
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor

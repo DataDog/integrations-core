@@ -5,7 +5,6 @@
 from pathlib import Path
 
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.quarkus import QuarkusCheck
 

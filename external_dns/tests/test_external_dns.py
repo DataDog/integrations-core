@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.external_dns import ExternalDNSCheck
 from datadog_checks.external_dns.metrics import DEFAULT_METRICS

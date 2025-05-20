@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 customtag = "custom:tag"

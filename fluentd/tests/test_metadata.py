@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.fluentd import Fluentd
 
 from .common import CHECK_NAME, FLUENTD_CONTAINER_NAME, FLUENTD_VERSION, HERE

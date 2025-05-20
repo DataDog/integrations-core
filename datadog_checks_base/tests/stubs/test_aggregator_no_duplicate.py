@@ -4,7 +4,6 @@
 from textwrap import dedent
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 
 

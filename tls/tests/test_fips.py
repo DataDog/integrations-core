@@ -5,7 +5,6 @@ import re
 from typing import Any  # noqa: F401
 
 import pytest
-
 from datadog_checks.tls import TLSCheck
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,

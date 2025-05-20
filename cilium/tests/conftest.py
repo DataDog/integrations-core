@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command

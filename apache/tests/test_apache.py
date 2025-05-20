@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.apache import Apache
 from datadog_checks.dev.utils import get_metadata_metrics
 

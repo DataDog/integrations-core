@@ -6,7 +6,6 @@ from collections import defaultdict
 from contextlib import closing
 
 import pymysql
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.mysql.cursor import CommenterCursor

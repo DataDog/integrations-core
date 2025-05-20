@@ -7,7 +7,6 @@ import os
 import mock
 import pytest
 import requests
-
 from datadog_checks.apache import Apache
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor

@@ -4,7 +4,6 @@
 import mock
 import pytest
 from clickhouse_driver.errors import Error, NetworkError
-
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error

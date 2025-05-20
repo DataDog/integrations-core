@@ -4,10 +4,9 @@
 
 import collections
 
-import mock
-
 # project
 import datadog_checks.btrfs
+import mock
 
 btrfs_check = datadog_checks.btrfs.BTRFS('btrfs', {}, [{}])
 

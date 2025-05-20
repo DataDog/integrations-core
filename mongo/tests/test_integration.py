@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.common import SECONDARY_STATE_ID

@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-from flaky import flaky
-
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
+from flaky import flaky
 
 from .common import CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_TAGS
 

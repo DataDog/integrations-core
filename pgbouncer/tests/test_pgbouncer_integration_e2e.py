@@ -4,9 +4,8 @@
 
 import psycopg2
 import pytest
-from packaging import version
-
 from datadog_checks.pgbouncer import PgBouncer
+from packaging import version
 
 from . import common
 

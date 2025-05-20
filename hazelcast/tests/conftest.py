@@ -4,12 +4,12 @@
 import os
 
 import pytest
-from hazelcast import HazelcastClient
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.utils import load_jmx_config
 from datadog_checks.hazelcast import HazelcastCheck
+
+from hazelcast import HazelcastClient
 
 from . import common
 

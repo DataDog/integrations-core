@@ -6,7 +6,6 @@ import os
 import subprocess
 
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import get_container_ip

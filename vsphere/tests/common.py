@@ -6,11 +6,10 @@ import re
 from urllib.parse import urlparse
 
 import mock
-from pyVmomi import vim, vmodl
-
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
+from pyVmomi import vim, vmodl
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 

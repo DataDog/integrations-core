@@ -4,7 +4,6 @@
 import platform
 
 import pytest
-
 from datadog_checks.istio import Istio
 
 from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS

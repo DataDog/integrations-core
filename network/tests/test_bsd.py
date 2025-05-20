@@ -4,7 +4,6 @@
 import os
 
 import mock
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network.check_bsd import BSDNetwork
 

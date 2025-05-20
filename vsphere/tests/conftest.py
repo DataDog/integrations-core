@@ -4,10 +4,9 @@
 import datetime as dt
 
 import pytest
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
 from mock import MagicMock, Mock, patch
 from pyVmomi import vim
-
-from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
 
 from .common import (
     DEFAULT_INSTANCE,

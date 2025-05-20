@@ -6,7 +6,6 @@ import os
 from os import path
 
 import pytest
-
 from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 

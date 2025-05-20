@@ -6,9 +6,9 @@ import os
 import re
 
 import pytest
+from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 import tests.configs as configs
-from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 pytestmark = [
     pytest.mark.unit,

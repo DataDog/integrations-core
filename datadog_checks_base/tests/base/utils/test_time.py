@@ -4,8 +4,6 @@
 import time
 from datetime import datetime
 
-from dateutil import tz
-
 from datadog_checks.base.utils.time import (
     EPOCH,
     UTC,
@@ -14,6 +12,7 @@ from datadog_checks.base.utils.time import (
     get_precise_time,
     get_timestamp,
 )
+from dateutil import tz
 
 
 class TestNormalization:

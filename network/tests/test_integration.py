@@ -5,7 +5,6 @@ import copy
 import platform
 
 import pytest
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 

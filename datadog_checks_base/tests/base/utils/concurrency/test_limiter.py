@@ -5,7 +5,6 @@ import threading
 import time
 
 import pytest
-
 from datadog_checks.base.utils.concurrency.limiter import ConditionLimiter
 
 

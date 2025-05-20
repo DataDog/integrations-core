@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.silk import SilkCheck
 
 from .common import BASE_TAGS, BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS

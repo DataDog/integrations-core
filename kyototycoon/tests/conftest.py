@@ -6,7 +6,6 @@ import os
 
 import pytest
 import requests
-
 from datadog_checks.dev import docker_run
 
 from .common import DEFAULT_INSTANCE, HERE, URL

@@ -6,8 +6,6 @@ import time
 from urllib.parse import urlparse
 
 import psycopg2 as pg
-from psycopg2 import extras as pgextras
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.pgbouncer.metrics import (
     CLIENTS_METRICS,
@@ -17,6 +15,7 @@ from datadog_checks.pgbouncer.metrics import (
     SERVERS_METRICS,
     STATS_METRICS,
 )
+from psycopg2 import extras as pgextras
 
 
 class ShouldReconnectException(Exception):

@@ -6,7 +6,6 @@ import copy
 
 import mock
 import pytest
-
 from datadog_checks.ceph import Ceph
 
 from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_SERVICE_TAGS, mock_data

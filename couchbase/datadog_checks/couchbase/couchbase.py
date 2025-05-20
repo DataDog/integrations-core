@@ -10,7 +10,6 @@ import time
 from urllib.parse import urljoin
 
 import requests
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,

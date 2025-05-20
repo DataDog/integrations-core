@@ -6,7 +6,6 @@ import os
 import time
 
 import pytest
-
 from datadog_checks.dev import WaitFor, docker_run, run_command
 
 from .common import E2E_CONFIG, E2E_METADATA, E2E_TLS_CONFIG, HERE, INSTANCE, PROTOCOL, TLS_INSTANCE

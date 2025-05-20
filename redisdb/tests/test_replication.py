@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import pytest
 import redis
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 

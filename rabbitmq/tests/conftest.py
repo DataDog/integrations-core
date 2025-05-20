@@ -7,7 +7,6 @@ import subprocess
 
 import pytest
 import requests
-
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 

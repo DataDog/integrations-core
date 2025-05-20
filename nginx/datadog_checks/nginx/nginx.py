@@ -7,7 +7,6 @@ from itertools import chain
 from urllib.parse import urljoin, urlparse
 
 import simplejson as json
-
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 

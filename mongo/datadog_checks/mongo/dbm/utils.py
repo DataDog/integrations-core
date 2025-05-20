@@ -6,13 +6,12 @@
 from typing import Optional, Tuple
 
 from bson import json_util, regex
-from pymongo.errors import ExecutionTimeout, NetworkTimeout
-
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
 from datadog_checks.mongo.common import MONGODB_SYSTEM_DATABASES
+from pymongo.errors import ExecutionTimeout, NetworkTimeout
 
 try:
     import datadog_agent

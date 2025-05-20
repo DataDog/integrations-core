@@ -9,8 +9,6 @@ from datetime import datetime
 
 from bson import json_util
 from cachetools import TTLCache
-from pymongo.errors import OperationFailure
-
 from datadog_checks.mongo.dbm.utils import (
     format_explain_plan,
     format_key_name,
@@ -21,6 +19,7 @@ from datadog_checks.mongo.dbm.utils import (
     obfuscate_command,
     should_explain_operation,
 )
+from pymongo.errors import OperationFailure
 
 try:
     import datadog_agent

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.postgres.util import STAT_SUBSCRIPTION_METRICS
 
 from .common import (

@@ -4,10 +4,9 @@
 import os
 
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev import docker_run, run_command
+from packaging.version import parse as parse_version
 
 from .common import COCKROACHDB_VERSION, HERE, HOST, PORT
 

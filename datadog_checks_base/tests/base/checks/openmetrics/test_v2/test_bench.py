@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.dev import get_here
 

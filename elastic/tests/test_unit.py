@@ -6,7 +6,6 @@ import logging
 
 import mock
 import pytest
-
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck

@@ -5,7 +5,6 @@ import os
 from typing import Callable, Dict, List, Set, Tuple, Union  # noqa: F401
 
 import pytest
-
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev import get_docker_hostname, get_here
 

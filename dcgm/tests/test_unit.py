@@ -4,7 +4,6 @@
 
 
 import pytest
-
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev.utils import get_metadata_metrics

@@ -5,7 +5,6 @@
 import copy
 
 import pytest
-
 from datadog_checks.ceph import Ceph
 
 from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_METRICS, EXPECTED_SERVICE_CHECKS, EXPECTED_SERVICE_TAGS

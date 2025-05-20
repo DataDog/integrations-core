@@ -5,10 +5,9 @@ import mock
 import pytest
 import requests_ntlm
 from aws_requests_auth import boto_utils as requests_aws
-from requests import auth as requests_auth
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper
+from requests import auth as requests_auth
 
 pytestmark = [pytest.mark.unit]
 

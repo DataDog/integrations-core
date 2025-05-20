@@ -5,7 +5,6 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 import pytest
-
 from datadog_checks.vertica.queries import QueryBuilder
 from datadog_checks.vertica.vertica import VerticaClient
 

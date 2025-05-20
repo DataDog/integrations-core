@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.win32_event_log.filters import construct_xpath_query
 

@@ -5,7 +5,6 @@ import calendar
 from datetime import datetime, timedelta, timezone
 
 import psutil
-
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
 from datadog_checks.base.utils.containers import hash_mutable

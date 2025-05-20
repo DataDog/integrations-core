@@ -1,9 +1,8 @@
 import os
 
 import pytest
-from mock import patch
-
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from mock import patch
 
 FIXTURE_PATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', '..', 'fixtures', 'bearer_tokens'

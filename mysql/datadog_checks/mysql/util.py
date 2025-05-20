@@ -6,7 +6,6 @@ from contextlib import closing
 from enum import Enum
 
 import pymysql
-
 from datadog_checks.mysql.cursor import CommenterCursor
 
 

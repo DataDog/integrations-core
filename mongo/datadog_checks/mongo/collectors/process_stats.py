@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import psutil
-from pymongo.errors import OperationFailure
-
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import HostingType
+from pymongo.errors import OperationFailure
 
 
 class ProcessStatsCollector(MongoCollector):

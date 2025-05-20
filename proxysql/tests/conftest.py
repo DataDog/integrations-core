@@ -7,7 +7,6 @@ from copy import deepcopy
 import mock
 import pymysql
 import pytest
-
 from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.proxysql import ProxysqlCheck

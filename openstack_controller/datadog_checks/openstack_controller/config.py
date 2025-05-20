@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from openstack.config import loader
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.models.types import copy_raw
 from datadog_checks.openstack_controller.api.type import ApiType
+
+from openstack.config import loader
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config

@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import mock
 import pytest
-
 from datadog_checks.couch import CouchDb
 from datadog_checks.couch.couch import CouchDB2
 

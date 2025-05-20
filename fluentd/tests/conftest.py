@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev import docker_run
 
 from .common import DEFAULT_INSTANCE, FLUENTD_CONTAINER_NAME, FLUENTD_IMAGE_TAG, HERE, URL

@@ -6,7 +6,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.kube_proxy import KubeProxyCheck
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}

@@ -5,7 +5,6 @@
 import sys
 
 import pytest
-
 from datadog_checks.base.utils.fips import is_enabled
 
 

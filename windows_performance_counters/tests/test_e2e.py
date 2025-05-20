@@ -4,7 +4,6 @@
 import subprocess
 
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_active_env
 

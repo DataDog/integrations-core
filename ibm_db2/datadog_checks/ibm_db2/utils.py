@@ -4,7 +4,6 @@
 import re
 
 import ibm_db
-
 from datadog_checks.base.constants import ServiceCheck
 
 CONN_STRING_PASSWORD = re.compile('(?:^|;)pwd=([^;]+)')

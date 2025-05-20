@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import tenacity
-from mock.mock import MagicMock, patch
-
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.kind import kind_run
+from mock.mock import MagicMock, patch
 
 from .common import not_windows_ci
 

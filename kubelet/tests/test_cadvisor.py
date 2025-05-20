@@ -7,9 +7,8 @@ import sys
 import mock
 import pytest
 import requests_mock
-from requests.exceptions import HTTPError
-
 from datadog_checks.kubelet import KubeletCheck
+from requests.exceptions import HTTPError
 
 from .test_kubelet import EXPECTED_METRICS_COMMON, NODE_SPEC, mock_from_file
 

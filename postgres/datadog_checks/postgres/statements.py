@@ -9,7 +9,6 @@ import time
 import psycopg2
 import psycopg2.extras
 from cachetools import TTLCache
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature

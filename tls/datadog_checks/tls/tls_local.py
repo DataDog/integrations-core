@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.tls.const import SERVICE_CHECK_VALIDATION

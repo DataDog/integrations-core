@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.yarn import YarnCheck
 

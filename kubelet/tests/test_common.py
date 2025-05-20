@@ -7,7 +7,6 @@ import sys
 
 import mock
 import pytest
-
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials, urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.kubelet import PodListUtils, get_pod_by_uid, is_static_pending_pod

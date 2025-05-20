@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.openmetrics import OpenMetricsCheck
 
 from .common import CHECK_NAME, INSTANCE

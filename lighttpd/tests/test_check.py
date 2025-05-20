@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import pytest
-
 from datadog_checks.lighttpd import Lighttpd
 
 from . import common

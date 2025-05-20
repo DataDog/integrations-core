@@ -6,7 +6,6 @@ from typing import Any  # noqa: F401
 from urllib.parse import urljoin
 
 import requests
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.traefik_mesh.config_models import ConfigMixin
 from datadog_checks.traefik_mesh.metrics import METRIC_MAP, RENAME_LABELS

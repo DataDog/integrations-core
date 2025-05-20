@@ -6,7 +6,6 @@ import sys
 from contextlib import closing
 
 import pyodbc
-
 from datadog_checks.base.utils.serialization import json
 
 

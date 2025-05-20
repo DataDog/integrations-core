@@ -7,12 +7,12 @@ from datetime import datetime, timedelta, timezone
 
 import mock
 import pytest
+from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
+from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation, ElectionRecordLease
+
 from kubernetes.client.models.v1_lease import V1Lease
 from kubernetes.client.models.v1_lease_spec import V1LeaseSpec
 from kubernetes.config.dateutil import format_rfc3339
-
-from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
-from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation, ElectionRecordLease
 
 # Trigger lazy imports
 try:

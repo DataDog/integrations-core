@@ -5,9 +5,8 @@ import time
 from contextlib import contextmanager
 from typing import Any, Dict, Generator, Iterator, List, Type  # noqa: F401
 
-from pyVmomi import vim  # noqa: F401
-
 from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags  # noqa: F401
+from pyVmomi import vim  # noqa: F401
 
 
 class VSphereCache(object):

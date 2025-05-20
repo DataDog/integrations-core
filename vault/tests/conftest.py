@@ -7,7 +7,6 @@ import time
 
 import pytest
 import requests
-
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import WaitFor

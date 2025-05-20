@@ -8,7 +8,6 @@ from copy import deepcopy
 import boto3
 import simplejson as json
 from botocore.config import Config
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 

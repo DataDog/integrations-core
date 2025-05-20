@@ -5,11 +5,10 @@ from __future__ import division
 
 from urllib.parse import urljoin
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-from simplejson import JSONDecodeError
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import compute_percent
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from simplejson import JSONDecodeError
 
 
 class HDFSNameNode(AgentCheck):

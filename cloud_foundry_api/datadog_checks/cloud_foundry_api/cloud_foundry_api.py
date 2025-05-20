@@ -7,12 +7,11 @@ import time
 from typing import Any, Dict, Generator, Tuple  # noqa: F401
 from urllib.parse import urlparse
 
-from requests.exceptions import HTTPError, RequestException
-from semver import VersionInfo
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.types import Event  # noqa: F401
+from requests.exceptions import HTTPError, RequestException
+from semver import VersionInfo
 
 from .constants import (
     API_SERVICE_CHECK_NAME,

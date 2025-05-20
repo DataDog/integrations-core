@@ -10,7 +10,6 @@ import sys
 import time
 
 import pytest
-
 from datadog_checks.dev import docker_run, temp_dir
 
 from .common import COMPOSE, GUNICORN_VERSION, INSTANCE, PROC_NAME

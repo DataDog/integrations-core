@@ -6,12 +6,11 @@ import os
 
 import psycopg2
 import pytest
-from semver import VersionInfo
-
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from semver import VersionInfo
 
 from .common import (
     DB_NAME,

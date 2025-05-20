@@ -5,9 +5,8 @@
 import os
 
 import pytest
-from packaging import version
-
 from datadog_checks.base.utils.common import get_docker_hostname
+from packaging import version
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))

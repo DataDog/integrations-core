@@ -17,7 +17,6 @@
       "Supported OS::macOS",
       "Category::Log Collection",
       "Category::Security",
-      "Queried Data Type::Logs",
       "Offering::Integration",
       "Queried Data Type::Logs",
       "Submitted Data Type::Logs"

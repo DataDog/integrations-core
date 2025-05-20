@@ -5,7 +5,6 @@
 import mock
 import pytest
 from click.testing import CliRunner
-
 from datadog_checks.dev.errors import ManifestError
 from datadog_checks.dev.fs import read_file_lines
 from datadog_checks.dev.tooling.release import (

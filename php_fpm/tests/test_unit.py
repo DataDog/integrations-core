@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
-
 from datadog_checks.php_fpm.php_fpm import BadConfigError, PHPFPMCheck
 
 

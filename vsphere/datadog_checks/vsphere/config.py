@@ -5,8 +5,6 @@
 import re
 from typing import Any, Dict, List  # noqa: F401
 
-from pyVmomi import vim
-
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.types import InitConfigType  # noqa: F401
@@ -48,6 +46,7 @@ from datadog_checks.vsphere.utils import (
     property_metrics_to_collect,
     simple_properties_to_collect,
 )
+from pyVmomi import vim
 
 
 class VSphereConfig(object):

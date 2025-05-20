@@ -6,7 +6,6 @@ import os
 from unittest import mock
 
 import pytest
-
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import WaitFor, docker_run, run_command
 

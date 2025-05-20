@@ -5,7 +5,6 @@ import copy
 import platform
 
 import pytest
-
 from datadog_checks.dev.utils import ON_WINDOWS
 
 if not ON_WINDOWS:
@@ -16,7 +15,6 @@ import socket
 from collections import namedtuple
 
 import mock
-
 from datadog_checks.network.check_windows import TCPSTATS, WindowsNetwork
 
 from . import common

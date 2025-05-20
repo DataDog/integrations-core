@@ -5,7 +5,6 @@ import copy
 
 import mock
 import pytest
-
 from datadog_checks.amazon_msk import AmazonMskCheck
 from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 

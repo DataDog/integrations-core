@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datamodel_code_generator.format import CodeFormatter
-
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
+from datamodel_code_generator.format import CodeFormatter
 
 
 def build_model_file(

@@ -12,7 +12,6 @@ from urllib.parse import urljoin
 
 import requests
 import simplejson as json
-
 from datadog_checks.base import AgentCheck, is_affirmative
 
 SOURCE_TYPE = 'openstack'

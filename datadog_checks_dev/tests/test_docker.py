@@ -6,7 +6,6 @@ import os
 import mock
 import pytest
 import tenacity
-
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command

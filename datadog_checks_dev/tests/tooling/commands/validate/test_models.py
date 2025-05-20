@@ -8,7 +8,6 @@ import sys
 
 import pytest
 from click.testing import CliRunner
-
 from datadog_checks.dev import run_command
 from datadog_checks.dev.tooling.configuration.consumers.model.model_consumer import VALIDATORS_DOCUMENTATION
 from datadog_checks.dev.tooling.utils import get_license_header

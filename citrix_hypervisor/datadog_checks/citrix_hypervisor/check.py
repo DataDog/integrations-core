@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, Dict, List  # noqa: F401
 from xmlrpc.client import ServerProxy
 
 import yaml
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import requests
 

@@ -6,7 +6,6 @@ import os
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.dev.fs import create_file
 

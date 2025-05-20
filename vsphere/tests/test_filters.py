@@ -4,9 +4,6 @@
 import re
 
 import pytest
-from mock import MagicMock
-from pyVmomi import vim
-
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.config import VSphereConfig
@@ -16,6 +13,9 @@ from datadog_checks.vsphere.utils import (
     is_resource_collected_by_filters,
     match_any_regex,
 )
+from mock import MagicMock
+from pyVmomi import vim
+
 from tests.mocked_api import MockedAPI
 
 regexes = [re.compile(r) for r in (r'foo\d', r'bar\s\d')]

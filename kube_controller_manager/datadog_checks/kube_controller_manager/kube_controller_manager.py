@@ -5,7 +5,6 @@
 import re
 
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck

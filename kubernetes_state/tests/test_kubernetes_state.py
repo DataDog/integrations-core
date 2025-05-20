@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.kubernetes_state import KubernetesState
 

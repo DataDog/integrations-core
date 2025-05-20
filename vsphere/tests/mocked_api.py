@@ -6,11 +6,11 @@ import json
 import os
 import re
 
+from datadog_checks.vsphere.api import VersionInfo
 from mock import MagicMock
 from pyVmomi import vim
 from requests import Response
 
-from datadog_checks.vsphere.api import VersionInfo
 from tests.common import HERE, VSPHERE_VERSION
 
 

@@ -11,7 +11,6 @@ import time
 import mock
 import pytest
 import yaml
-
 from datadog_checks.base import ConfigurationError, to_native_string
 from datadog_checks.dev import temp_dir
 from datadog_checks.dev.utils import get_metadata_metrics

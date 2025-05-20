@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 

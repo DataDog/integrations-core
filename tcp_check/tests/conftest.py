@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.tcp_check import TCPCheck
 
 from . import common

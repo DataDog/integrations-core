@@ -4,9 +4,8 @@
 import copy
 
 import pytest
-from requests.exceptions import ConnectionError
-
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
+from requests.exceptions import ConnectionError
 
 from .common import BAD_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_VERSION, HOST, assert_check
 

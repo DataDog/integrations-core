@@ -6,7 +6,6 @@ import time
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import docker_run, run_command
 
 from .common import COMPOSE, INSTANCE

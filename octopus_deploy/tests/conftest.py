@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 import mock
 import pytest
 import requests
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here

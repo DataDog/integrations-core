@@ -8,10 +8,9 @@ from copy import deepcopy
 import mock
 import pytest
 import redis
-from packaging.version import Version
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
+from packaging.version import Version
 
 from .common import HOST, PASSWORD, PORT, REDIS_VERSION
 from .utils import requires_static_version

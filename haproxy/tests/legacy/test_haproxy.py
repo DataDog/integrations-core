@@ -5,10 +5,9 @@
 import copy
 
 import pytest
-from packaging import version
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.haproxy import HAProxyCheck
+from packaging import version
 
 from ..common import HAPROXY_VERSION
 from .common import (

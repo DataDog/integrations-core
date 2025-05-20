@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mcache.mcache import InvalidConfigError
 

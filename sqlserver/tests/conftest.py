@@ -9,7 +9,6 @@ import traceback
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers

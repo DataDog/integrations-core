@@ -8,7 +8,6 @@ from collections import OrderedDict
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.http_check import HTTPCheck
 

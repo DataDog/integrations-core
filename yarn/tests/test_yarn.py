@@ -5,8 +5,6 @@ import copy
 import re
 
 import pytest
-from requests.exceptions import SSLError
-
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
     APPLICATION_STATUS_SERVICE_CHECK,
@@ -14,6 +12,7 @@ from datadog_checks.yarn.yarn import (
     YARN_APP_METRICS,
     YARN_QUEUE_METRICS,
 )
+from requests.exceptions import SSLError
 
 from .common import (
     CUSTOM_TAGS,

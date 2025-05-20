@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.iis import IIS
 
 from .common import INSTANCE

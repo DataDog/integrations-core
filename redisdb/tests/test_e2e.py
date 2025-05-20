@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis

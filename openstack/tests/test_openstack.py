@@ -7,7 +7,6 @@ import time
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack.openstack import (
     IncompleteAuthScope,

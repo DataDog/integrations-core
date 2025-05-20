@@ -7,7 +7,6 @@ import re
 
 import mock
 import pytest
-
 from datadog_checks.dev.utils import read_file
 
 from .common import FIXTURES_PATH, USING_LATEST

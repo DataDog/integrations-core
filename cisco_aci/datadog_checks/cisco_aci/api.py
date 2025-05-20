@@ -7,7 +7,6 @@ import random
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-
 from datadog_checks.base import ConfigurationError, ensure_bytes
 
 from .exceptions import APIAuthException, APIConnectionException, APIParsingException

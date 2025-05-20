@@ -8,11 +8,11 @@ import os
 
 import mock
 import pytest
-
-import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller.api.type import ApiType
+
+import tests.configs as configs
 from tests.common import remove_service_from_catalog
 
 pytestmark = [

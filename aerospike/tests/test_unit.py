@@ -5,7 +5,6 @@ import copy
 
 import mock
 import pytest
-
 from datadog_checks.aerospike import AerospikeCheck
 
 from . import common

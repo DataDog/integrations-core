@@ -8,7 +8,6 @@ import re
 
 import mock
 import pytest
-
 from datadog_checks.zk import ZookeeperCheck
 
 from . import common, conftest

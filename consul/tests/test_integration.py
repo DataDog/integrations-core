@@ -4,11 +4,10 @@
 import logging
 
 import pytest
-from packaging import version
-from requests import HTTPError
-
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+from packaging import version
+from requests import HTTPError
 
 from . import common
 from .common import CONSUL_VERSION, PROMETHEUS_HIST_METRICS_1_9, PROMETHEUS_METRICS_1_9

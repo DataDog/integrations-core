@@ -5,7 +5,6 @@
 import copy
 
 import pytest
-
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     AO_AG_SYNC_METRICS,

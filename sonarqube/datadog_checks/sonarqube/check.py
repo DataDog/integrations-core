@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from requests.exceptions import RequestException
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from requests.exceptions import RequestException
 
 from .constants import CATEGORIES, MAX_PAGES, NUMERIC_TYPES
 

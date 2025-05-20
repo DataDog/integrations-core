@@ -11,13 +11,12 @@ from os import environ
 
 import mock
 import pytest
-from packaging.version import parse as parse_version
-
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
+from packaging.version import parse as parse_version
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED

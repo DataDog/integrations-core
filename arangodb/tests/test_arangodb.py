@@ -6,11 +6,10 @@ import os
 
 import mock
 import pytest
-from requests import HTTPError
-
 from datadog_checks.arangodb import ArangodbCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
+from requests import HTTPError
 
 from .common import METRICS
 

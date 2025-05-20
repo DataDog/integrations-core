@@ -12,11 +12,10 @@ from copy import deepcopy
 import mock
 import pytest
 import requests
-from packaging import version
-
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
+from packaging import version
 
 from .common import (
     ENDPOINT_PROMETHEUS,

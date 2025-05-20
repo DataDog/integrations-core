@@ -6,7 +6,6 @@ import os
 import mock
 import pytest
 import requests_kerberos
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import EnvVars

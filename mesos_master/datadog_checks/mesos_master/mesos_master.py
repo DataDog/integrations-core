@@ -9,7 +9,6 @@ Collects metrics from mesos master node, only the leader is sending metrics.
 from urllib.parse import urlparse
 
 import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 

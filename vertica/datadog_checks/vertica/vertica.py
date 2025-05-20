@@ -7,7 +7,6 @@ import logging
 import ssl
 
 import vertica_python as vertica
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.db import QueryManager

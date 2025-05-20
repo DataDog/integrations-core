@@ -9,7 +9,6 @@ from collections import namedtuple
 from fnmatch import fnmatch
 
 import pymysql
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 try:

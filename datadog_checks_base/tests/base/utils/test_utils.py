@@ -8,7 +8,6 @@ from decimal import ROUND_HALF_DOWN
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
 from datadog_checks.base.utils.containers import hash_mutable, iter_unique
 from datadog_checks.base.utils.limiter import Limiter

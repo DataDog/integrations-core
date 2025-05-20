@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.strimzi import StrimziCheck
+
 from tests.common import (
     E2E_CLUSTER_OPERATOR_METRICS,
     FLAKY_E2E_METRICS,

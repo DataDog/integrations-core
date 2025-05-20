@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psutil
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.platform import Platform
 

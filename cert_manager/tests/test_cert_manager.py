@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.cert_manager import CertManagerCheck
 from datadog_checks.dev.http import MockResponse
 

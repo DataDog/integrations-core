@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
 from .utils import _get_superconn

@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-from requests.exceptions import HTTPError
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.time import get_precise_time
+from requests.exceptions import HTTPError
 
 from .build_configs import BuildConfigs
 from .common import (

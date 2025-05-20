@@ -7,9 +7,9 @@ import os
 
 import mock
 import pytest
+from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
 import tests.legacy.common as common
-from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
 pytestmark = [
     pytest.mark.unit,

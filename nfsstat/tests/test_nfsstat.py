@@ -6,7 +6,6 @@ import os
 from copy import deepcopy
 
 import mock
-
 from datadog_checks.base import ensure_unicode
 from datadog_checks.nfsstat import NfsStatCheck
 

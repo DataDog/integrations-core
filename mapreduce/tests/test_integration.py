@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import ELAPSED_TIME_METRICS, assert_metrics_covered, mock_local_mapreduce_dns

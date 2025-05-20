@@ -16,12 +16,11 @@ from copy import copy
 
 import mock
 import pytest
-from dateutil import parser
-
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
+from dateutil import parser
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT

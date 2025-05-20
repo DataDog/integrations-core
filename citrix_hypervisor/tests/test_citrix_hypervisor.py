@@ -5,7 +5,6 @@ import logging
 
 import mock
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics

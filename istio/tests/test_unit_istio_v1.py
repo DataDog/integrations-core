@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests_mock
-
 from datadog_checks.istio import Istio
 
 from . import common

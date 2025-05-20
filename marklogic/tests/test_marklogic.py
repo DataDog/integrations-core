@@ -6,11 +6,10 @@ from typing import Any  # noqa: F401
 
 import mock
 import pytest
-from packaging import version
-
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
+from packaging import version
 
 from .common import (
     COMMON_TAGS,

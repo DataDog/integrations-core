@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.nginx.metrics import COUNT_METRICS
 
 from .common import TAGS_WITH_HOST_AND_PORT, assert_all_metrics_and_metadata, assert_num_metrics

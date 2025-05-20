@@ -6,13 +6,12 @@ import sys
 
 import pytest
 import requests
-from datadog_test_libs.utils.mock_dns import mock_local
-from mock import patch
-
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.http_check import HTTPCheck
+from datadog_test_libs.utils.mock_dns import mock_local
+from mock import patch
 
 from .common import CONFIG_E2E, HERE
 
@@ -43,7 +42,7 @@ def call_endpoint(url):
 
 @pytest.fixture(scope='session')
 def mock_local_http_dns():
-    mapping = {x: ('127.0.0.1', 443) for x in MOCKED_HOSTS}
+    mapping = dict.fromkeys(MOCKED_HOSTS, ('127.0.0.1', 443))
     with mock_local(mapping):
         yield
 

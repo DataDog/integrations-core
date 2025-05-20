@@ -4,6 +4,7 @@
 import re
 
 import requests
+
 from snowflake.connector.cursor import SnowflakeCursor
 
 from . import tables

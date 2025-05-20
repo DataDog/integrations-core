@@ -5,7 +5,6 @@
 from typing import Any, Tuple  # noqa: F401
 
 import pytest
-
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.metrics import as_metric_with_forced_type
 from datadog_checks.snmp.models import OID

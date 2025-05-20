@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 from typing import List, Optional  # noqa: F401
 
 import dns.resolver
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_precise_time
 

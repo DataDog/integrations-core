@@ -6,7 +6,6 @@ from typing import Any, Dict, List  # noqa: F401
 
 import mock
 import pytest
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.marklogic import MarklogicCheck

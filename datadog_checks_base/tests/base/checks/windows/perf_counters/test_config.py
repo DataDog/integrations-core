@@ -4,7 +4,6 @@
 import logging
 
 import pytest
-
 from datadog_checks.dev.testing import requires_windows
 
 from .utils import get_check

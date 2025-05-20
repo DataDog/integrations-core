@@ -6,10 +6,9 @@ import logging
 import ssl
 
 import pytest
+from datadog_checks.esxi import EsxiCheck
 from mock import MagicMock, patch
 from pyVmomi import vim, vmodl
-
-from datadog_checks.esxi import EsxiCheck
 
 from .common import USE_VSPHERE_LAB
 

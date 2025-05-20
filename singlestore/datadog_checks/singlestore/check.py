@@ -5,7 +5,6 @@ from contextlib import closing, contextmanager
 from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast  # noqa: F401
 
 import pymysql
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.singlestore.config import SingleStoreConfig

@@ -4,7 +4,6 @@
 import json
 
 import boto3
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .check import AmazonMskCheckV2

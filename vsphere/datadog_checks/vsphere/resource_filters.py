@@ -3,9 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from typing import List, Pattern, Tuple  # noqa: F401
 
-from pyVmomi import vim  # noqa: F401
-
 from datadog_checks.vsphere.types import InfrastructureData  # noqa: F401
+from pyVmomi import vim  # noqa: F401
 
 
 def make_inventory_path(mor, infrastructure_data):

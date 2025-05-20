@@ -13,8 +13,6 @@ from copy import copy, deepcopy
 from threading import Event
 
 import pytest
-from mock import patch
-
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVENT_FILE, XE_RING_BUFFER
 from datadog_checks.sqlserver.deadlocks import (
@@ -28,6 +26,7 @@ from datadog_checks.sqlserver.queries import (
     XE_SESSION_DATADOG,
     XE_SESSION_SYSTEM,
 )
+from mock import patch
 
 from .common import CHECK_NAME
 

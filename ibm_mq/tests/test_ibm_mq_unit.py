@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from dateutil import tz
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from dateutil import tz
 
 from .common import skip_windows_ci
 
@@ -119,7 +118,6 @@ def test_invalid_mqcd_version(get_check, instance, mqcd_version):
 
 def test_set_mqcd_version(instance):
     import pymqi
-
     from datadog_checks.ibm_mq.config import IBMMQConfig
 
     instance['mqcd_version'] = 9
@@ -222,7 +220,6 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     import logging
 
     import pymqi
-
     from datadog_checks.ibm_mq.config import IBMMQConfig
     from datadog_checks.ibm_mq.connection import get_queue_manager_connection
 

@@ -4,7 +4,6 @@
 import socket
 
 import simplejson as json
-
 from datadog_checks.base import AgentCheck, ensure_unicode
 
 GLOBAL_STATS = {'curr_connections'}

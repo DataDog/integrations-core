@@ -3,10 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-from packaging.version import parse as parse_version
-
 from datadog_checks.dev import get_here
 from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
+from packaging.version import parse as parse_version
 
 HERE = get_here()
 

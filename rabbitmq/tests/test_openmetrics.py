@@ -6,13 +6,12 @@ from itertools import product
 from urllib.parse import urlparse
 
 import pytest
-from packaging import version
-
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
+from packaging import version
 
 from .common import HERE, RABBITMQ_VERSION
 from .metrics import (

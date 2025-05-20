@@ -4,7 +4,6 @@
 from contextlib import closing
 
 import pytest
-
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
 

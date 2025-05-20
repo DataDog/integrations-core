@@ -8,8 +8,6 @@ import time
 from typing import List, Optional
 
 from bson import json_util
-from pymongo.errors import NotPrimaryError
-
 from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
@@ -19,6 +17,7 @@ from datadog_checks.mongo.dbm.utils import (
     obfuscate_command,
     should_explain_operation,
 )
+from pymongo.errors import NotPrimaryError
 
 try:
     import datadog_agent

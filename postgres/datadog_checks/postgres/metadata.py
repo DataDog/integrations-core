@@ -7,7 +7,6 @@ import time
 from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
 import psycopg2
-
 from datadog_checks.postgres.cursor import CommenterDictCursor
 
 try:

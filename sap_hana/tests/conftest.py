@@ -5,8 +5,6 @@ from contextlib import closing
 from copy import deepcopy
 
 import pytest
-from hdbcli.dbapi import Connection as HanaConnection
-
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.sap_hana.queries import (
@@ -23,6 +21,7 @@ from datadog_checks.sap_hana.queries import (
     MasterDatabase,
     SystemDatabases,
 )
+from hdbcli.dbapi import Connection as HanaConnection
 
 from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA, TIMEOUT
 

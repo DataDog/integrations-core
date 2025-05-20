@@ -5,7 +5,6 @@ import copy
 import os
 
 import pytest
-
 from datadog_checks.dev import docker_run
 from datadog_checks.nginx import Nginx
 

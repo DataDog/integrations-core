@@ -8,7 +8,6 @@ import time
 from collections import defaultdict
 
 from bson import json_util
-
 from datadog_checks.mongo.common import HostingType
 from datadog_checks.mongo.dbm.utils import MONGODB_SYSTEM_DATABASES
 

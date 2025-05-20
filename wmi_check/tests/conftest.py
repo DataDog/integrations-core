@@ -3,9 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from mock import patch
-
 from datadog_checks.wmi_check import WMICheck
+from mock import patch
 
 
 @pytest.fixture

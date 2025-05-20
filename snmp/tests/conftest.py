@@ -10,7 +10,6 @@ from copy import deepcopy
 import pytest
 import requests
 import yaml
-
 from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 

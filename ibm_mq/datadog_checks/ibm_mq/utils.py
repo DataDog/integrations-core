@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime
 
-from dateutil import tz
-
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
 from datadog_checks.base.utils.time import EPOCH, get_timestamp
+from dateutil import tz
 
 
 def sanitize_strings(s):

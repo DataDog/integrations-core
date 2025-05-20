@@ -6,7 +6,6 @@ import re
 from collections import defaultdict
 
 import requests
-
 from datadog_checks.base import AgentCheck
 
 db_stats = re.compile(r'^db_(\d)+$')

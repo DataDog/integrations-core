@@ -5,11 +5,10 @@
 import datetime as dt
 import re
 
-from dateutil import tz
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.log import get_check_logger
+from dateutil import tz
 
 try:
     from typing import Dict, List, Pattern  # noqa: F401

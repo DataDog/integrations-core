@@ -5,7 +5,6 @@ import logging
 
 import mock
 import pytest
-
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 

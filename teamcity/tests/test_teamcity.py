@@ -4,14 +4,13 @@
 from copy import deepcopy
 
 import pytest
-from mock import ANY, patch
-
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
     SERVICE_CHECK_BUILD_STATUS,
     SERVICE_CHECK_TEST_RESULTS,
 )
 from datadog_checks.teamcity.teamcity_rest import TeamCityRest
+from mock import ANY, patch
 
 from .common import (
     BUILD_STATS_METRICS,

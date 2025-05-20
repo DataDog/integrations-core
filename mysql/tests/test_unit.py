@@ -9,7 +9,6 @@ import mock
 import psutil
 import pymysql
 import pytest
-
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData

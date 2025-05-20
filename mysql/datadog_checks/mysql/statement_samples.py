@@ -11,7 +11,6 @@ from operator import attrgetter
 
 import pymysql
 from cachetools import TTLCache
-
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
 
 try:

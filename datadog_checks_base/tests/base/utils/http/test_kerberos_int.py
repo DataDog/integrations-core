@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.utils import ON_WINDOWS
 

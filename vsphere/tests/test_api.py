@@ -5,13 +5,12 @@ import datetime as dt
 import ssl
 
 import pytest
-from mock import ANY, MagicMock, patch
-from pyVmomi import vim, vmodl
-
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.cache import InfrastructureCache
 from datadog_checks.vsphere.config import VSphereConfig
+from mock import ANY, MagicMock, patch
+from pyVmomi import vim, vmodl
 
 
 @pytest.fixture(autouse=True)

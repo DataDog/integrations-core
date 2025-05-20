@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from mock import Mock
-
 from datadog_checks.ibm_mq.collectors import ChannelMetricCollector
 from datadog_checks.ibm_mq.config import IBMMQConfig
+from mock import Mock
 
 pytestmark = pytest.mark.unit
 

@@ -4,9 +4,8 @@
 
 import re
 
-from kubeutil import get_connection_info
-
 from datadog_checks.base.utils.tagging import tagger
+from kubeutil import get_connection_info
 
 try:
     from containers import is_excluded as c_is_excluded

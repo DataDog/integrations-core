@@ -7,9 +7,6 @@ import ssl
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
 import vsanapiutils
-from pyVim import connect
-from pyVmomi import SoapStubAdapter, vim, vmodl
-
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import (
@@ -25,6 +22,8 @@ from datadog_checks.vsphere.metrics import (
 )
 from datadog_checks.vsphere.types import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
+from pyVim import connect
+from pyVmomi import SoapStubAdapter, vim, vmodl
 
 CallableT = TypeVar('CallableT', bound=Callable)
 

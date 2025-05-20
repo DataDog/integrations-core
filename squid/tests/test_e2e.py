@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.squid import SquidCheck
 
 from .common import EXPECTED_METRICS, SERVICE_CHECK

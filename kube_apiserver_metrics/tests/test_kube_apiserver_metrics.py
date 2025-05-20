@@ -6,7 +6,6 @@ import tempfile
 
 import mock
 import pytest
-
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 from .common import APISERVER_INSTANCE_BEARER_TOKEN, HERE

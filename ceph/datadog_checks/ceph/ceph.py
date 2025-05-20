@@ -7,7 +7,6 @@ import os
 import re
 
 import simplejson as json
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException

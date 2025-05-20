@@ -9,7 +9,6 @@ import xmlrpc.client as xmlrpclib
 from collections import defaultdict
 
 import supervisor.xmlrpc
-
 from datadog_checks.base import AgentCheck
 
 DEFAULT_HOST = 'localhost'

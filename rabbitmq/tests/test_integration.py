@@ -8,7 +8,6 @@ from contextlib import closing
 
 import pika
 import pytest
-
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import (

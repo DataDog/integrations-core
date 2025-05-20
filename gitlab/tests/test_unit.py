@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from mock.mock import MagicMock
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
+from mock.mock import MagicMock
 
 from .common import (
     CUSTOM_TAGS,

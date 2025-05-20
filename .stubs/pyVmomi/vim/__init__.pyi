@@ -2,10 +2,12 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, List
 
-from . import event  # noqa: F401
-from . import fault  # noqa: F401
-from . import view  # noqa: F401
 from ..vmodl.query import PropertyCollector
+from . import (
+    event,  # noqa: F401
+    fault,  # noqa: F401
+    view,  # noqa: F401
+)
 from .event import EventManager
 from .option import OptionManager
 from .view import ViewManager

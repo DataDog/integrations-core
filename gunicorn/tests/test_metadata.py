@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.gunicorn import GUnicornCheck
 
 from .common import CHECK_NAME, CONTAINER_NAME, GUNICORN_VERSION, INSTANCE

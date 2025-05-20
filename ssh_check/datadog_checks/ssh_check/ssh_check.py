@@ -5,7 +5,6 @@ import re
 import time
 
 import paramiko
-
 from datadog_checks.base import AgentCheck, is_affirmative
 
 # Example ssh remote version: http://supervisord.org/changes.html

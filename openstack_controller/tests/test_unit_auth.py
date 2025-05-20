@@ -6,9 +6,9 @@ import logging
 import os
 
 import pytest
+from datadog_checks.dev.http import MockResponse
 
 import tests.configs as configs
-from datadog_checks.dev.http import MockResponse
 
 pytestmark = [
     pytest.mark.unit,
