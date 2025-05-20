@@ -57,5 +57,3 @@ Need help? Contact [Datadog support][3].
 [1]: https://www.barracuda.com/products/network-protection/cloudgen-firewall
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
-
-
