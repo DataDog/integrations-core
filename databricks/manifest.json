@@ -7,7 +7,6 @@
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
-    "changelog": "CHANGELOG.md",
     "description": "Monitor the reliability and cost of your Databricks environment.",
     "title": "Databricks",
     "media": [],
