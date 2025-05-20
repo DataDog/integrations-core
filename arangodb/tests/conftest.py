@@ -16,7 +16,6 @@ URL = 'http://{}:{}/_admin/metrics/v2'
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    # test
     with docker_run(
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
     ):
