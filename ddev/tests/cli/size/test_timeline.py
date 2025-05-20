@@ -186,7 +186,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "commit2",
             "--platform",
             "linux-x86_64",
-            "--save_to_png_path",
+            "--save-to-png-path",
             "out2.png",
             obj=app,
         ).exit_code

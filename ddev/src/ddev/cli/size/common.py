@@ -703,12 +703,12 @@ def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
     }
 
 
-def is_everything_committed():
+def is_everything_committed() -> bool:
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
     return result.stdout.strip() == ""
 
 
-def get_last_commit_timestamp():
+def get_last_commit_timestamp() -> int:
     result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
     return int(result.stdout.strip())
 
