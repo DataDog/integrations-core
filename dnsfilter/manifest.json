@@ -12,7 +12,10 @@
       "title": "DNSFilter",
       "media": [],
       "classifier_tags": [
-        "Category::Metrics"
+        "Category::Log Collection",
+        "Category::Security",
+        "Submitted Data Type::Logs",
+        "Offering::Integration"
       ]
     },
     "assets": {
@@ -23,17 +26,9 @@
         "events": {
           "creates_events": false
         },
-        "metrics": {
-          "prefix": "dnsfilter.",
-          "check": [],
-          "metadata_path": "metadata.csv"
-        },
         "service_checks": {
           "metadata_path": "assets/service_checks.json"
         }
-      },
-      "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/dnsfilter_overview.json"
       }
     },
     "author": {
