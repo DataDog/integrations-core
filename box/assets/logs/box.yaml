@@ -101,7 +101,8 @@ pipeline:
           name: other
       target: box_event_category
     - type: attribute-remapper
-      name: Map `additional_details.shield_alert.user.name`, `created_by.name` to
+      name:
+        Map `additional_details.shield_alert.user.name`, `created_by.name` to
         `usr.name`
       enabled: true
       sources:
@@ -124,7 +125,8 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `additional_details.shield_alert.user.email`, `created_by.login` to
+      name:
+        Map `additional_details.shield_alert.user.email`, `created_by.login` to
         `usr.email`
       enabled: true
       sources:
