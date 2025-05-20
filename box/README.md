@@ -1,43 +1,59 @@
-# Agent Check: box
-
 ## Overview
 
-This check monitors [box][1].
+[Box][1] is a cloud-based file storage and collaboration platform that allows users to securely share, manage, and access files from anywhere.
+
+This integration ingests the following logs:
+
+- **Enterprise Events**: Enterprise events provide a detailed record of user activities (like uploads, downloads, sharing) and administrative actions in an enterprise Box instance.
+
+This integration gathers enterprise events and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Box platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
-### Installation
+### Prerequisites
 
-The box check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+- Box Business or higher plan required.
 
-### Configuration
+### Generate API Credentials in Box
 
-!!! Add list of steps to set up this integration !!!
+1. Log into Box and go to the [Developer Console][3]. Select **Create Platform App**.
+2. Choose **Custom App**, enter required app info, then click **Next**, select **Server Authentication (with Client Credentials Grant)** as the authentication method, and then click **Create App**.
+3. Go to the **Configuration** tab, select **App + Enterprise Access** under App Access Level, and check **Generate user access tokens** under Advanced Features.
+4. In the **Authorization** tab, click **Review and Submit**, enter a brief app description, and click **Submit**.
+5. Copy the **Enterprise ID** from the **General** tab, and the **Client ID** and **Client Secret** from the **Configuration** tab.
+6. Navigate to the [Platform Apps Manager][4] in the Admin Console. Locate your app under **Server Authentication Apps**, click on **`...` (More)**, and select **Authorize App**. In the popup, click **Authorize** to confirm.
 
-### Validation
+### Connect your Box Account to Datadog
 
-!!! Add steps to validate integration is functioning as expected !!!
+1. Add your Enterprise ID, Client ID and Client Secret.
+   | Parameters    | Description                                                 |
+   | ------------- | ----------------------------------------------------------- |
+   | Enterprise ID | The Enterprise ID of your organization in the Box platform. |
+   | Client ID     | The Client ID of your organization in the Box platform.     |
+   | Client Secret | The Client Secret of your organization in the Box platform. |
+
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The Box integration collects and forwards enterprise events to Datadog. For more details on the logs we collect with this integration, see the Box Enterprise Events API [Docs][5].
+
 ### Metrics
 
-box does not include any metrics.
-
-### Service Checks
-
-box does not include any service checks.
+The Box integration does not include any metrics.
 
 ### Events
 
-box does not include any events.
+The Box integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+For any further assistance, contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://www.box.com/
+[2]: https://docs.datadoghq.com/help/
+[3]: https://app.box.com/developers/console
+[4]: https://app.box.com/master/platform-apps
+[5]: https://developer.box.com/guides/events/enterprise-events/for-enterprise/#event-types
