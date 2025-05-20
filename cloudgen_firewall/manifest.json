@@ -1,0 +1,34 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c40f4279-9c4b-42bd-9cbf-690e1a58d32f",
+  "app_id": "cloudgen-firewall",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Barracuda CloudGen Firewall is a next-generation firewall (NGFW) that combines traditional firewall functions with advanced security and networking features to protect and optimize distributed networks",
+    "title": "cloudgen_firewall",
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Syslog Collection",
+      "Offering::integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
