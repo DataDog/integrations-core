@@ -27,14 +27,13 @@ def get_fixture_path(filename):
 def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response):
 
     check = AerospikeCheck('aerospike', {}, [instance_openmetrics_v2])
-    # check.get_default_config
     dd_run_check(check)
 
     version_parts = [int(p) for p in VERSION.split('.')]
 
     if version_parts[0] >= 7:
         metrics_to_check = EXPECTED_PROMETHEUS_METRICS_7
-        _test_check_after_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check)
+        _test_check_from_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check)
 
     elif version_parts >= [5, 6]:
         metrics_to_check = EXPECTED_PROMETHEUS_METRICS + EXPECTED_PROMETHEUS_METRICS_5_6
@@ -65,7 +64,7 @@ def _test_check_before_v7(aggregator, dd_run_check, instance_openmetrics_v2, moc
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-def _test_check_after_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check):
+def _test_check_from_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check):
     """
     run checks if aerospike server version is 7 or above, validates, mock prom metrics, labels and metadata.csv
     """
