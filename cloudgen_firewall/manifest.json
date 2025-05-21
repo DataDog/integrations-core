@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "1bddb05e-d0a8-441e-b75b-c927eab2b474",
+  "app_id": "cloudgen-firewall",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "CloudGen Firewall is a NGFW that protect networks and Internet traffic",
+    "title": "cloudgen_firewall",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 47743103,
+      "source_type_name": "cloudgen_firewall",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cloudgen_firewall.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
