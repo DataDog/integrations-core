@@ -528,6 +528,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /openvpn/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /openvpn/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/watchguard_firebox/                                                  @DataDog/agent-integrations
+/watchguard_firebox/*.md                                              @DataDog/agent-integrations @DataDog/documentation
+/watchguard_firebox/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
+/watchguard_firebox/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 /kaspersky/                                                          @DataDog/agent-integrations
 /kaspersky/*.md                                                      @DataDog/agent-integrations @DataDog/documentation
 /kaspersky/manifest.json                                             @DataDog/agent-integrations @DataDog/documentation
