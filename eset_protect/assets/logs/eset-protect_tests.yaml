@@ -1,0 +1,147 @@
+id: eset-protect
+tests:
+  - sample: |-
+      {
+          "severity": "Information",
+          "occured": "13-May-2025 09:51:12",
+          "source_uuid": "3144d5db-1bb7-4b4b-9393-b1eb601ec052",
+          "target": "Administrator",
+          "result": "Success",
+          "hostname": "win-eset",
+          "event_type": "Audit_Event",
+          "ipv4": "192.0.2.1",
+          "domain": "Native user",
+          "action": "Login attempt",
+          "detail": "Authenticating native user 'administrator'.",
+          "user": ""
+        }
+    result: null
+  - sample: |-
+      {
+          "severity": "Information",
+          "occured": "08-May-2025 11:30:20",
+          "source_uuid": "3144d5db-1bb7-4b4b-9393-b1eb601ec052",
+          "target": "488b9f4c-b100-4cc8-88d0-5a291da69b72",
+          "result": "Success",
+          "hostname": "win-eset",
+          "event_type": "Audit_Event",
+          "ipv4": "192.0.2.1",
+          "domain": "License",
+          "action": "Deactivate",
+          "detail": "Deactivating all active units for license '3BB-VD8-EKH' on computer 'desktop-20gupv6'.",
+          "user": "Administrator"
+        }
+    result: null
+  - sample: |-
+      {
+          "severity": "Information",
+          "occured": "29-Apr-2025 09:14:13",
+          "source_uuid": "3144d5db-1bb7-4b4b-9393-b1eb601ec052",
+          "target": "24a76737-26e1-497d-beeb-e5d54668ac36",
+          "result": "Success",
+          "hostname": "win-eset",
+          "event_type": "Audit_Event",
+          "ipv4": "192.0.2.1",
+          "domain": "User group",
+          "action": "Delete",
+          "detail": "Removing user group 'Test G2' in group 'All groups\\Test G11'.",
+          "user": "Administrator"
+        }
+    result: null
+  - sample: |-
+      {
+          "severity": "Information",
+          "occured": "07-May-2025 07:40:59",
+          "source_uuid": "3144d5db-1bb7-4b4b-9393-b1eb601ec052",
+          "target": "Datadog",
+          "result": "Success",
+          "hostname": "win-eset",
+          "event_type": "Audit_Event",
+          "ipv4": "192.0.2.1",
+          "domain": "Native user",
+          "action": "Create",
+          "detail": "Creating native user 'Datadog'.",
+          "user": "Administrator"
+        }
+    result: null
+  - sample: |-
+      {
+          "severity": "Warning",
+          "target_address": "192.0.2.0",
+          "group_name": "All/Lost & found",
+          "inbound": true,
+          "occured": "13-May-2025 11:58:27",
+          "aggregate_count": 6,
+          "group_desription": "Lost & found static group",
+          "source_uuid": "a0e906b8-4214-41ab-8d41-4c52dc4ade8f",
+          "hostname": "win-eset",
+          "protocol": "ARP",
+          "event_type": "FirewallAggregated_Event",
+          "target_address_type": "IPv4",
+          "threat_name": "ARP/CachePoisoningAttack",
+          "ipv4": "192.0.2.1",
+          "source_address_type": "IPv4",
+          "source_address": "192.0.2.1",
+          "handled": true,
+          "os_name": "Microsoft Windows Server 2022 Standard Evaluation",
+          "action": "Blocked",
+          "event": "ARP Cache Poisoning attack"
+        }
+    result: null
+  - sample: |-
+      {
+          "severity": "Warning",
+          "target_address": "192.0.2.0",
+          "group_name": "All/Companies/Test/Test New Static Group",
+          "occured": "12-May-2025 06:18:57",
+          "processname": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+          "group_desription": "Test New Static Group",
+          "action_taken": "Blocked URL",
+          "source_uuid": "f1641561-3aa1-46bd-8292-e490c90badca",
+          "rule_id": "Blocked by Anti-Phishing blacklist",
+          "scanner_id": "HTTP filter",
+          "hostname": "assettag-eid",
+          "event_type": "FilteredWebsites_Event",
+          "target_address_type": "IPv4",
+          "ipv4": "192.0.2.1",
+          "handled": true,
+          "object_uri": "https://www.atc-secure.com",
+          "os_name": "Microsoft Windows 11 Pro",
+          "event": "An attempt to connect to URL",
+          "hash": "F3B15DBF7DABB37266B13CB67EC36EA819EBD0AD",
+          "username": "CLW-933-WIN\\Test"
+        }
+    result: null
+  - sample: |-
+      {
+          "firstseen": "23-Dec-2023 22:19:54",
+          "scanner_id": "Real-time file system protection",
+          "hostname": "assettag-eid",
+          "event_type": "Threat_Event",
+          "ipv4": "192.0.2.1",
+          "threat_handled": false,
+          "need_restart": false,
+          "threat_type": "Potentially unsafe application",
+          "severity": "Critical",
+          "circumstances": "Event occurred during an attempt to access the file.",
+          "group_name": "All/Companies/Test/Test New Static Group",
+          "object_type": "File",
+          "occured": "12-May-2025 07:26:20",
+          "processname": "C:\\Windows\\System32\\SearchProtocolHost.exe",
+          "group_desription": "Test New Static Group",
+          "action_taken": "Retained",
+          "source_uuid": "f1641561-3aa1-46bd-8292-e490c90badca",
+          "threat_name": "MSIL/BadJoke.Agent.AP",
+          "object_uri": "file:///C:/Users/Test/Downloads/The-MALWARE-Repo-master/The-MALWARE-Repo-master/Joke/YouAreAnIdiot/EXEVersion/YouAreAnIdiot.exe",
+          "os_name": "Microsoft Windows 11 Pro",
+          "scan_id": "virlog.dat",
+          "engine_version": "31164 (20250508)",
+          "hash": "E7DCD6C23C72209EE5AA0890372DE1CE52045815",
+          "username": "NT AUTHORITY\\SYSTEM"
+        }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
