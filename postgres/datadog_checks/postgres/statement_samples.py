@@ -786,7 +786,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             if self._explain_parameterized_queries._is_parameterized_query(statement):
                 if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                     return self._explain_parameterized_queries.explain_statement(
-                        dbname, statement, obfuscated_statement
+                        dbname, statement, obfuscated_statement, query_signature
                     )
                 e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
