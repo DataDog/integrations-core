@@ -1,1 +1,0 @@
-Fixed bug where we fail to explain parameterized queries that have no parameters 

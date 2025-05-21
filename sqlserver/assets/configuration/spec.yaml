@@ -98,6 +98,9 @@ files:
             - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
             - host: The provided host of the instance.
             - port: The port number of the instance.
+            - azure_name: The resolved hostname of the instance, which respects the `reported_hostname` option,
+              but removes `.database.windows.net`
+            - database: The connection database.
             - server_name: The resolved server name of the instance.
             - instance_name: The resolved instance name of the instance.
             In addition, you can use any key from the `tags` section of the configuration.

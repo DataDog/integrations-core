@@ -10,7 +10,7 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
-from .util import connect_with_autocommit
+from .util import connect_with_session_variables
 
 try:
     import datadog_agent
@@ -94,7 +94,7 @@ class MySQLMetadata(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
+            self._db = connect_with_session_variables(**self._connection_args)
         else:
             # Metadata checks runs far less frequently than other checks, and there are reports
             # that unused pymysql connections sometimes end up being closed unexpectedly.

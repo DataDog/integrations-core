@@ -1,1 +1,0 @@
-Allow EXPLAIN on multi-statement SQL where one or more SET commands appear before another supported statement type

@@ -85,7 +85,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.total_conversations{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.total_conversations{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -127,7 +127,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.connected_conversations_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.connected_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -169,7 +169,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.consulted_conversations_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.consulted_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -211,7 +211,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.bot_interactions_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.bot_interactions_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -253,7 +253,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.consult_transferred_conversations_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.consult_transferred_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -317,17 +317,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.total_transferred_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.total_transferred_count{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.consult_transferred_conversations_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.consult_transferred_conversations_count{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.blind_transferred_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.blind_transferred_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -379,12 +379,12 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.outbound_conversations_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.outbound_conversations_count{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.connected_outbound_conversations_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.connected_outbound_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -436,12 +436,12 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.total_conversations{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.total_conversations{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.connected_conversations_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.connected_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -493,7 +493,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.offered_conversations_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.offered_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -535,7 +535,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.errored_conversations_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.errored_conversations_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -577,7 +577,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.alert_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.alert_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -619,7 +619,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.flow_out_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.flow_out_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -667,7 +667,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.not_responding_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.not_responding_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -733,7 +733,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.handle_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.handle_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -821,17 +821,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.handle_time_avg{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.handle_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.handle_time_min{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.handle_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.handle_time_max{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.handle_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -865,7 +865,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.acw_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.acw_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -907,7 +907,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.answered_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.answered_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -971,17 +971,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.answered_time_avg{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.answered_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.answered_time_min{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.answered_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.answered_time_max{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.answered_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1015,7 +1015,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "min:genesys.email.answered_time_min{*}.as_count()",
+                      "query": "min:genesys_cloud.email.answered_time_min{*}.as_count()",
                       "aggregator": "min"
                     }
                   ],
@@ -1057,7 +1057,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.agent_response_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.agent_response_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1121,17 +1121,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.agent_response_time_avg{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.agent_response_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.agent_response_time_min{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.agent_response_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.agent_response_time_max{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.agent_response_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1183,7 +1183,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.dialing_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.dialing_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1231,7 +1231,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.contacting_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.contacting_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1279,7 +1279,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.park_complete_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.park_complete_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1327,7 +1327,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.blind_transferred_count{*}.as_count()",
+                      "query": "sum:genesys_cloud.email.blind_transferred_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -1369,7 +1369,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.held_complete_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.held_complete_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1457,17 +1457,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.held_complete_time_avg{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.held_complete_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.held_complete_time_max{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.held_complete_time_max{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.held_complete_time_min{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.held_complete_time_min{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1501,7 +1501,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:genesys.email.held_complete_time_max{*}.as_count()",
+                      "query": "max:genesys_cloud.email.held_complete_time_max{*}.as_count()",
                       "aggregator": "max"
                     }
                   ],
@@ -1589,17 +1589,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.ivr_time_avg{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.ivr_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.ivr_time_max{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.ivr_time_max{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.ivr_time_min{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.ivr_time_min{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1651,7 +1651,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.connected_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.connected_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1699,7 +1699,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.monitoring_complete_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.monitoring_complete_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1747,7 +1747,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:genesys.email.user_response_time_avg{*}.as_count()",
+                      "query": "avg:genesys_cloud.email.user_response_time_avg{*}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1835,17 +1835,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.talk_complete_time_avg{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.talk_complete_time_avg{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.talk_complete_time_min{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.talk_complete_time_min{*}.as_count()"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.talk_complete_time_max{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.talk_complete_time_max{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1897,12 +1897,12 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.barged_conversations_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.barged_conversations_count{*}.as_count()"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:genesys.email.coached_conversations_count{*}.as_count()"
+                      "query": "sum:genesys_cloud.email.coached_conversations_count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
