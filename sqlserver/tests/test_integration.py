@@ -485,6 +485,38 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     if database_autodiscovery:
         assert 'datadog_test-1' in seen_databases
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_table_size_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(sqlserver_check)
+    seen_databases = set()
+    for m in aggregator.metrics("sqlserver.table.total_size"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+    
+
+    for m in aggregator.metrics("sqlserver.table.used_size"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+
+    for m in aggregator.metrics("sqlserver.table.data_size"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+
+    for m in aggregator.metrics("sqlserver.table.row_count"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+
+    assert 'master' in seen_databases
+    if database_autodiscovery:
+        assert 'datadog_test-1' in seen_databases
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

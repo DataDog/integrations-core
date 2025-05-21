@@ -250,6 +250,14 @@ DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
 ]
 
+TABLE_SIZE_METRICS = [
+    'sqlserver.table.size',
+    'sqlserver.table.row_count',
+    'sqlserver.table.total_size_mb',
+    'sqlserver.table.used_size_mb',
+    'sqlserver.table.data_size_mb',
+]
+
 TEMPDB_FILE_SPACE_USAGE_METRICS = [
     ('sqlserver.tempdb.file_space_usage.free_space', 'sys.dm_db_file_space_usage', 'free_space'),
     (

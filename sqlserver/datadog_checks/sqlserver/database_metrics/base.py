@@ -33,6 +33,10 @@ class SqlserverDatabaseMetricsBase:
         self._query_executors: List[QueryExecutor] = []
         self.log = get_check_logger()
 
+        print("EG was here")
+        print("self databases", self._databases)
+        print("databases", databases)
+
     @property
     def major_version(self) -> Optional[int]:
         return self.server_static_info.get(STATIC_INFO_MAJOR_VERSION)

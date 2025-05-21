@@ -12,28 +12,26 @@ TABLE_SIZE_STATS_QUERY = {
     "name": "sys.dm_db_partition_stats",
     "query": """
     SELECT 
-    t.name AS table,
-    s.name AS schema,
-    SUM(p.row_count) AS row_count,
-    CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS total_size_mb,
-    CAST(SUM(a.used_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS used_size_mb,
-    CAST(SUM(a.data_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS data_size_mb
-FROM 
-    sys.tables t
-INNER JOIN 
-    sys.schemas s ON t.schema_id = s.schema_id
-INNER JOIN 
-    sys.indexes i ON t.object_id = i.object_id
-INNER JOIN 
-    sys.dm_db_partition_stats p ON i.object_id = p.object_id AND i.index_id = p.index_id
-INNER JOIN 
-    sys.allocation_units a ON p.partition_id = a.container_id
-GROUP BY 
-    t.name, s.name
-ORDER BY 
-    total_size_mb DESC;
-
-
+        t.name AS table_name,
+        s.name AS schema_name,
+        SUM(p.row_count) AS row_count,
+        CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS total_size_mb,
+        CAST(SUM(a.used_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS used_size_mb,
+        CAST(SUM(a.data_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS data_size_mb
+    FROM 
+        sys.tables t
+    INNER JOIN 
+        sys.schemas s ON t.schema_id = s.schema_id
+    INNER JOIN 
+        sys.indexes i ON t.object_id = i.object_id
+    INNER JOIN 
+        sys.dm_db_partition_stats p ON i.object_id = p.object_id AND i.index_id = p.index_id
+    INNER JOIN 
+        sys.allocation_units a ON p.partition_id = a.container_id
+    GROUP BY 
+        t.name, s.name
+    ORDER BY 
+        total_size_mb DESC;
 """,
     "columns": [
         {"name": "table", "type": "tag"},
@@ -52,9 +50,9 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
     def include_table_size_metrics(self) -> bool:
         return self.config.database_metrics_config["table_size_metrics"]["enabled"]
 
-    @property
-    def include_table_size_metrics_tempdb(self) -> bool:
-        return self.config.database_metrics_config["table_size_metrics"]["enabled_tempdb"]
+    # @property
+    # def include_table_size_metrics_tempdb(self) -> bool:
+    #     return self.config.database_metrics_config["table_size_metrics"]["enabled_tempdb"]
 
     @property
     def collection_interval(self) -> int:
@@ -72,11 +70,6 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
         '''
         if not self._databases:
             raise ConfigurationError("No databases configured for table size metrics")
-        if not self.include_table_size_metrics_tempdb:
-            try:
-                self._databases.remove('tempdb')
-            except ValueError:
-                pass
         return self._databases
 
     @property
@@ -87,6 +80,7 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
+        print("EG was here")
         # make a copy of the query to avoid modifying the original
         # in case different instances have different collection intervals
         query = TABLE_SIZE_STATS_QUERY.copy()
@@ -97,8 +91,6 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"include_table_size_metrics={self.include_table_size_metrics}), "
-            f"include_table_size_metrics_tempdb={self.include_table_size_metrics_tempdb}, "
             f"collection_interval={self.collection_interval})"
         )
 

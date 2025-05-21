@@ -286,6 +286,13 @@ instances:
         #
         # xe_metrics: {}
 
+        ## @param table_size_metrics - mapping - optional
+        ## Configure collection of table size metrics.
+        ##
+        ## Set `table_size_metrics.enabled` to true to enable collection of table size metrics. Defaults to false.
+        #
+        # table_size_metrics: {}
+
     ## Configure collection of SQL Server Agent jobs events and metrics
     #
     # agent_jobs:

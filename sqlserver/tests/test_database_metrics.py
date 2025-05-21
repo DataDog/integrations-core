@@ -33,6 +33,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
+    SqlserverTableSizeMetrics,
 )
 from datadog_checks.sqlserver.utils import Database
 
@@ -1299,6 +1300,49 @@ def test_sqlserver_database_files_metrics(
                 ] + tags
                 for metric_name, metric_value in metrics:
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_table_size_metrics', [True, False])
+def test_sqlserver_table_size_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_table_size_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'table_size_metrics': {'enabled': include_table_size_metrics},
+    }
+
+    mocked_results = [
+       [ ('master', 'dbo', 100, 1024, 500, 200),
+        ('tempdb', 'dbo', 100, 1024, 500, 200),
+        ('model', 'dbo', 100, 1024, 500, 200),
+        ('msdb', 'dbo', 100, 1024, 500, 200),]
+    ]
+
+    execute_query_handler_mocked = mock.MagicMock()
+    execute_query_handler_mocked.side_effect = mocked_results
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check.databases = {Database(db) for db in AUTODISCOVERY_DBS + ['tempdb']}
+    table_size_metrics = SqlserverTableSizeMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        databases=AUTODISCOVERY_DBS,
+    )
+
+
+    sqlserver_check._database_metrics = [table_size_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_table_size_metrics:
+        assert table_size_metrics.enabled is False
 
 
 @pytest.mark.integration
