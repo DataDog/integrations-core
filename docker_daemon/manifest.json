@@ -76,6 +76,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Docker - Overview": "assets/dashboards/docker_dashboard.json"
     }
   }
 }
