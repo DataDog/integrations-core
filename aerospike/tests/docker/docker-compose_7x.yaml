@@ -23,6 +23,13 @@ services:
       AS_HOST: aerospike
       AS_PORT: 3000
 
+  aerospike-tools-sindex:
+    image: aerospike/aerospike-tools
+    container_name: aerospike-tools-sindex
+    depends_on: 
+      - aerospike-tools-asbench-batch
+    command: asadm -h aerospike --enable -e "manage sindex create numeric sindex1 ns test bin 0"
+
   aerospike-tools-asbench-batch:
     image: aerospike/aerospike-tools:${AEROSPIKE_TOOLS_VERSION}
     container_name: aerospike-tools-asbench-batch
@@ -31,4 +38,10 @@ services:
         condition: service_healthy
     command: asbench -h aerospike -T 10 -t 10 -n test -s mysets -K 0 -k 900000 -o B80 -w RU,60 -z 64 -g 4000 --batch-size 100 --batch-read-size 100 --batch-write-size 30
 
-  
+  aerospike-tools-asbench:
+    image: aerospike/aerospike-tools:${AEROSPIKE_TOOLS_VERSION}
+    container_name: aerospike-tools-asbench
+    depends_on:
+      aerospike:
+        condition: service_healthy
+    command: asbench -h aerospike -T 10 -t 10 -n test -s mysets -K 0 -k 900000 -o B80 -w RU,60 -z 64 -g 4000 
