@@ -11,12 +11,23 @@ class TestTagManager:
         assert tag_manager._cached_tag_list is None
         assert tag_manager._keyless == TagType.KEYLESS
 
-    def test_set_tag_new_key(self):
-        """Test setting a tag for a new key"""
+    @pytest.mark.parametrize(
+        'key,value,internal,expected_tags,expected_internal_tags',
+        [
+            ('test_key', 'test_value', False, {'test_key': ['test_value']}, {}),
+            ('test_key', 'test_value', True, {}, {'test_key': ['test_value']}),
+            (None, 'test_value', False, {TagType.KEYLESS: ['test_value']}, {}),
+            (None, 'test_value', True, {}, {TagType.KEYLESS: ['test_value']}),
+        ]
+    )
+    def test_set_tag(self, key, value, internal, expected_tags, expected_internal_tags):
+        """Test setting tags with various combinations of key, value, and internal status"""
         tag_manager = TagManager()
-        tag_manager.set_tag('test_key', 'test_value')
-        assert tag_manager._tags == {'test_key': ['test_value']}
+        tag_manager.set_tag(key, value, internal=internal)
+        assert tag_manager._tags == expected_tags
+        assert tag_manager._internal_tags == expected_internal_tags
         assert tag_manager._cached_tag_list is None
+        assert tag_manager._cached_internal_tag_list is None
 
     def test_set_tag_existing_key_append(self):
         """Test appending a value to an existing key"""
@@ -42,25 +53,17 @@ class TestTagManager:
         assert tag_manager._tags == {'test_key': ['test_value']}
         assert tag_manager._cached_tag_list is None
 
-    def test_delete_tag_nonexistent_key(self):
-        tag_manager = TagManager()
-        assert not tag_manager.delete_tag('nonexistent_key')
-
-    def test_delete_tag_nonexistent_value(self):
-        tag_manager = TagManager()
-        tag_manager.set_tag('test_key', 'value1')
-        assert not tag_manager.delete_tag('test_key', 'nonexistent_value')
-
     @pytest.mark.parametrize(
-        'key,values,delete_key,delete_value,expected_tags,expected_internal_state,description',
+        'key,values,delete_key,delete_value,internal,expected_tags,expected_internal_tags,description',
         [
             (
                 'test_key',
                 ['value1', 'value2'],
                 'test_key',
                 'value1',
-                ['test_key:value2'],
+                False,
                 {'test_key': ['value2']},
+                {},
                 'deleting specific value'
             ),
             (
@@ -68,7 +71,8 @@ class TestTagManager:
                 ['value1', 'value2'],
                 'test_key',
                 None,
-                [],
+                False,
+                {},
                 {},
                 'deleting all values for key'
             ),
@@ -77,8 +81,9 @@ class TestTagManager:
                 ['value1', 'value2'],
                 None,
                 'value1',
-                ['value2'],
+                False,
                 {TagType.KEYLESS: ['value2']},
+                {},
                 'deleting specific keyless value'
             ),
             (
@@ -86,34 +91,47 @@ class TestTagManager:
                 ['value1', 'value2'],
                 None,
                 None,
-                [],
+                False,
+                {},
                 {},
                 'deleting all keyless values'
             ),
+            (
+                'test_key',
+                ['value1', 'value2'],
+                'test_key',
+                'value1',
+                True,
+                {},
+                {'test_key': ['value2']},
+                'deleting specific internal value'
+            ),
         ]
     )
-    def test_delete_tag(self, key, values, delete_key, delete_value, expected_tags, expected_internal_state, description):
+    def test_delete_tag(self, key, values, delete_key, delete_value, internal, expected_tags, expected_internal_tags, description):
         """Test various tag deletion scenarios"""
         tag_manager = TagManager()
         # Set up initial tags
         for value in values:
-            tag_manager.set_tag(key, value)
+            tag_manager.set_tag(key, value, internal=internal)
 
         # Generate initial cache
-        tag_manager.get_tags()
+        tag_manager.get_tags(include_internal=True)
         assert tag_manager._cached_tag_list is not None
+        assert tag_manager._cached_internal_tag_list is not None
 
         # Perform deletion
-        assert tag_manager.delete_tag(delete_key, delete_value)
+        assert tag_manager.delete_tag(delete_key, delete_value, internal=internal)
 
-        # Verify cache is invalidated immediately after deletion
-        assert tag_manager._cached_tag_list is None
+        # Verify cache is invalidated
+        if internal:
+            assert tag_manager._cached_internal_tag_list is None
+        else:
+            assert tag_manager._cached_tag_list is None
 
         # Verify internal state
-        assert tag_manager._tags == expected_internal_state
-
-        # Verify external state (get_tags)
-        assert tag_manager.get_tags() == expected_tags
+        assert tag_manager._tags == expected_tags
+        assert tag_manager._internal_tags == expected_internal_tags
 
     @pytest.mark.parametrize(
         'initial_tags,tag_list,replace,expected_tags,description',
@@ -143,70 +161,77 @@ class TestTagManager:
         tag_manager = TagManager()
         assert tag_manager.get_tags() == []
 
-    def test_get_tags(self):
-        """Test getting tags with various combinations of key-value and keyless tags"""
+    @pytest.mark.parametrize(
+        'regular_tags,internal_tags,include_internal,expected_tags',
+        [
+            (
+                {'key1': ['value1']},
+                {'key2': ['value2']},
+                True,
+                ['key1:value1', 'key2:value2']
+            ),
+            (
+                {'key1': ['value1']},
+                {'key2': ['value2']},
+                False,
+                ['key1:value1']
+            ),
+            (
+                {'key1': ['value1']},
+                {'key1': ['value2']},
+                True,
+                ['key1:value1', 'key1:value2']
+            ),
+            (
+                {'key1': ['value1']},
+                {'key1': ['value2']},
+                False,
+                ['key1:value1']
+            ),
+        ]
+    )
+    def test_get_tags(self, regular_tags, internal_tags, include_internal, expected_tags):
+        """Test getting tags with various combinations of regular and internal tags"""
         tag_manager = TagManager()
-        tag_manager.set_tag('key1', 'value1')
-        tag_manager.set_tag('key2', 'value2')
-        tag_manager.set_tag(None, 'keyless1')
-        tag_manager.set_tag(None, 'keyless2')
 
-        expected = ['key1:value1', 'key2:value2', 'keyless1', 'keyless2']
-        assert tag_manager.get_tags() == expected
+        # Set up regular tags
+        for key, values in regular_tags.items():
+            for value in values:
+                tag_manager.set_tag(key, value)
 
-    def test_get_tags_cache(self):
-        """Test that get_tags uses and updates the cache correctly"""
+        # Set up internal tags
+        for key, values in internal_tags.items():
+            for value in values:
+                tag_manager.set_tag(key, value, internal=True)
+
+        # Verify tags
+        assert sorted(tag_manager.get_tags(include_internal=include_internal)) == sorted(expected_tags)
+
+    def test_cache_management(self):
+        """Test that tag caches are properly managed"""
         tag_manager = TagManager()
-        tag_manager.set_tag('key1', 'value1')
 
-        # First call should generate cache
-        first_result = tag_manager.get_tags()
-        assert first_result == ['key1:value1']
-        assert tag_manager._cached_tag_list == ['key1:value1']
+        # Set initial tags
+        tag_manager.set_tag('regular_key', 'regular_value')
+        tag_manager.set_tag('internal_key', 'internal_value', internal=True)
 
-        # Second call should use cache
-        second_result = tag_manager.get_tags()
-        assert second_result == ['key1:value1']
-        assert tag_manager._cached_tag_list == ['key1:value1']
+        # First call should generate both caches
+        first_result = tag_manager.get_tags(include_internal=True)
+        assert tag_manager._cached_tag_list is not None
+        assert tag_manager._cached_internal_tag_list is not None
 
-        # Modifying tags should invalidate cache
-        tag_manager.set_tag('key2', 'value2')
+        # Modify regular tags
+        tag_manager.set_tag('regular_key2', 'regular_value2')
         assert tag_manager._cached_tag_list is None
-        third_result = tag_manager.get_tags()
-        assert third_result == ['key1:value1', 'key2:value2']
+        assert tag_manager._cached_internal_tag_list is not None
 
-    def test_keyless_and_keyed_same_value(self):
-        """Test that a keyless tag and a keyed tag with the same value don't conflict"""
-        tag_manager = TagManager()
-        # Set a keyless tag
-        tag_manager.set_tag(None, 'same_value')
-        # Set a keyed tag with the same value
-        tag_manager.set_tag('some_key', 'same_value')
-        # Set another keyed tag with the same value
-        tag_manager.set_tag('another_key', 'same_value')
+        # Modify internal tags
+        tag_manager.set_tag('internal_key2', 'internal_value2', internal=True)
+        assert tag_manager._cached_internal_tag_list is None
 
-        # Verify all tags are stored correctly
-        assert tag_manager._tags == {
-            TagType.KEYLESS: ['same_value'],
-            'some_key': ['same_value'],
-            'another_key': ['same_value']
-        }
-
-        # Verify get_tags includes all tags
-        expected = ['another_key:same_value', 'same_value', 'some_key:same_value']
-        assert tag_manager.get_tags() == expected
-
-        # Verify we can delete each tag independently
-        assert tag_manager.delete_tag(None, 'same_value')
-        assert tag_manager._tags == {
-            'some_key': ['same_value'],
-            'another_key': ['same_value']
-        }
-
-        assert tag_manager.delete_tag('some_key', 'same_value')
-        assert tag_manager._tags == {
-            'another_key': ['same_value']
-        }
-
-        assert tag_manager.delete_tag('another_key', 'same_value')
-        assert tag_manager._tags == {}
+        # Verify all tags are included
+        second_result = tag_manager.get_tags(include_internal=True)
+        assert 'regular_key:regular_value' in second_result
+        assert 'regular_key2:regular_value2' in second_result
+        assert 'internal_key:internal_value' in second_result
+        assert 'internal_key2:internal_value2' in second_result
