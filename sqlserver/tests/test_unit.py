@@ -896,7 +896,7 @@ def test_get_unixodbc_sysconfig():
         ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
         ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
         ('$env-$server_name/$instance_name', 'prod,staging-server/instance', ['env:prod', 'env:staging']),
-        ('$full_server_name', 'prod-server\\instance', ['env:prod']),
+        ('$full_server_name', 'server\\instance', ['env:prod']),
     ],
 )
 def test_database_identifier(instance_docker, template, expected, tags):
