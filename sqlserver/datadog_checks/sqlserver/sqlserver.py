@@ -53,6 +53,7 @@ from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
+from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 try:
     import datadog_agent
@@ -66,6 +67,7 @@ from datadog_checks.sqlserver.const import (
     AUTODISCOVERY_QUERY,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
+    AZURE_SERVER_SUFFIX,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_SERVICE_CHECK_NAME,
@@ -157,6 +159,9 @@ class SQLServer(AgentCheck):
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
 
+        # XE Session Handlers
+        self.xe_session_handlers = []
+
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -169,6 +174,7 @@ class SQLServer(AgentCheck):
         self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
+        self.check_initializations.append(self.initialize_xe_session_handlers)
 
         # Query declarations
         self._query_manager = None
@@ -177,6 +183,13 @@ class SQLServer(AgentCheck):
 
         self._schemas = Schemas(self, self._config)
 
+    def initialize_xe_session_handlers(self):
+        """Initialize the XE session handlers without starting them"""
+        # Initialize XE session handlers if not already initialized
+        if not self.xe_session_handlers:
+            self.xe_session_handlers = get_xe_session_handlers(self, self._config)
+            self.log.debug("Initialized %d XE session handlers", len(self.xe_session_handlers))
+
     def cancel(self):
         self.statement_metrics.cancel()
         self.procedure_metrics.cancel()
@@ -184,6 +197,13 @@ class SQLServer(AgentCheck):
         self.sql_metadata.cancel()
         self._schemas.cancel()
         self.deadlocks.cancel()
+
+        # Cancel all XE session handlers
+        for handler in self.xe_session_handlers:
+            try:
+                handler.cancel()
+            except Exception as e:
+                self.log.error("Error canceling XE session handler for %s: %s", handler.session_name, e)
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -311,7 +331,11 @@ class SQLServer(AgentCheck):
             tag_dict['resolved_hostname'] = self.resolved_hostname
             tag_dict['host'] = str(self.host)
             tag_dict['port'] = str(self.port)
-            print(self.static_info_cache)
+            tag_dict['database'] = str(
+                self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+            )
+            if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
+                tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
             if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
                 tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
             if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
@@ -810,6 +834,13 @@ class SQLServer(AgentCheck):
                 self.sql_metadata.run_job_loop(self.tags)
                 self._schemas.run_job_loop(self.tags)
                 self.deadlocks.run_job_loop(self.tags)
+
+                # Run XE session handlers
+                for handler in self.xe_session_handlers:
+                    try:
+                        handler.run_job_loop(self.tags)
+                    except Exception as e:
+                        self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
         else:
             self.log.debug("Skipping check")
 
