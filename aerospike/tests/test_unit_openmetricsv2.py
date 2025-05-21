@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
 import pytest
@@ -8,7 +9,13 @@ import pytest
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import EXPECTED_PROMETHEUS_METRICS, EXPECTED_PROMETHEUS_METRICS_5_6, HERE, VERSION
+from .common import (
+    EXPECTED_PROMETHEUS_METRICS,
+    EXPECTED_PROMETHEUS_METRICS_5_6,
+    EXPECTED_PROMETHEUS_METRICS_7,
+    HERE,
+    VERSION,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -20,13 +27,13 @@ def get_fixture_path(filename):
 def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response):
 
     check = AerospikeCheck('aerospike', {}, [instance_openmetrics_v2])
+    # check.get_default_config
     dd_run_check(check)
 
     version_parts = [int(p) for p in VERSION.split('.')]
 
     if version_parts[0] >= 7:
-        # these tests will include metrics from aerospike server version 7 and above
-        metrics_to_check = aggregator.metric_names
+        metrics_to_check = EXPECTED_PROMETHEUS_METRICS_7
         _test_check_after_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check)
 
     elif version_parts >= [5, 6]:
@@ -50,11 +57,12 @@ def _test_check_before_v7(aggregator, dd_run_check, instance_openmetrics_v2, moc
         aggregator.assert_metric_has_tag(
             metric_name, 'endpoint:{}'.format(instance_openmetrics_v2.get('openmetrics_endpoint'))
         )
+
         aggregator.assert_metric_has_tag(metric_name, 'aerospike_cluster:null')
         aggregator.assert_metric_has_tag_prefix(metric_name, 'aerospike_service')
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(_get_metadata_metrics_before_7(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def _test_check_after_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check):
@@ -78,32 +86,4 @@ def _test_check_after_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock
             aggregator.assert_metric_has_tag_prefix(metric_name, 'aerospike_service')
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(_get_metadata_metrics_after_7(), check_submission_type=True)
-
-
-def _get_metadata_metrics_before_7():
-    """
-    Returns metrics from metadata.csv which are available in aerospike version below 7
-    """
-
-    all_metrics = get_metadata_metrics()
-    filtered_metrics = {}
-    for metric_name, line in all_metrics.items():
-        if not metric_name.startswith("aerospike.aerospike_"):
-            filtered_metrics[metric_name] = line
-
-    return filtered_metrics
-
-
-def _get_metadata_metrics_after_7():
-    """
-    Returns metrics from metadata.csv which are available in aerospike version 7 and above
-    """
-
-    all_metrics = get_metadata_metrics()
-    filtered_metrics = {}
-    for metric_name, line in all_metrics.items():
-        if metric_name.startswith("aerospike.aerospike_"):
-            filtered_metrics[metric_name] = line
-
-    return filtered_metrics
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

@@ -2,49 +2,50 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from collections import defaultdict
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import METRIC_MAP, METRIC_MAP_V7
+from .config_models import ConfigMixin
+from .metrics import METRIC_MAP, METRIC_NAME_PATTERN
 
 RENAMED_LABELS = {'cluster_name': 'aerospike_cluster', 'service': 'aerospike_service'}
 
 
-class AerospikeCheckV2(OpenMetricsBaseCheckV2):
-    __NAMESPACE__ = "aerospike"
+class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
+    __NAMESPACE__ = 'aerospike'
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
-        super(AerospikeCheckV2, self).__init__(name, init_config, instances)
+        super().__init__(name, init_config, instances)
+
         self.exporter_url = instances[0]["openmetrics_endpoint"]
         self.build_version = None
 
-    def get_default_config(self):
-        """
-        shares details of metrics map depending on aerospike version 7 or below
-        """
-        metric_map_to_use = self._get_metrics_map()
-
-        return {
-            'metrics': [metric_map_to_use],
-            'rename_labels': RENAMED_LABELS,
-        }
-
-    def _get_metrics_map(self):
-        """
-        identifies the aerospike server version by making a http call to the exporter,
-        if aersopike server version is 7.0 or above, return the new metric_map_v7 defined in metrics.py
-        """
-
+        # Apply addl transformer only for aerospike-server >=7, without impacting existing customers
         if self.build_version is None:
             self._fetch_build_info_from_metric()
 
-        # build-version is identified from node_up metrics, which is available from aerospike server 4.x
-        # default to 7 if no build version info is available, version number example: 7.1.0.2, 5.6.0.0
-        if self.build_version is not None and int(self.build_version.split('.')[0]) < 7:
-            return METRIC_MAP
+        if self.build_version is not None and int(self.build_version.split('.')[0]) >= 7:
+            self.check_initializations.append(self.configure_additional_transformers)
 
-        return METRIC_MAP_V7
+    def get_default_config(self):
+
+        config = {
+            'rename_labels': RENAMED_LABELS,
+            'send_monotonic_counter': False,  # Don't send as monotonic counter
+            'send_monotonic_with_gauge': False,  # Don't send both monotonic and gauge
+            'raw_metric_prefix': '',  # Don't add any prefix
+            'collect_histogram_buckets': False,  # Collect histogram buckets
+            'histogram_buckets_as_distributions': False,  # Don't convert to distributions
+            'non_cumulative_histogram_buckets': False,  # Keep cumulative buckets
+        }
+
+        if int(self.build_version.split('.')[0]) < 7:
+            config['metrics'] = [METRIC_MAP]
+
+        return config
 
     def _fetch_build_info_from_metric(self):
         """
@@ -64,15 +65,44 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
         """
         parse the list of metrics for aerospike_node_up metrics, and get the build label
         """
-        pattern = re.compile(r'aerospike_node_up\{([^}]*build="[^"]+"[^}]*)\}\s+([\d\.]+)')
+        pattern = re.compile(r'aerospike_node_up\{([^}]*build="[^"]+"[^}]*)\}\s+([\d\.]+)', re.MULTILINE)
 
         for match in pattern.finditer(metrics_text):
             labels_text, value = match.groups()
 
-            # Convert labels into a dictionary
+            # aerospike_node_up{build="4.9.0.11",cluster_name="null",service="172.19.0.2:3000"}
             labels = dict(item.split("=") for item in labels_text.split(","))
             labels = {k.strip(): v.strip('"') for k, v in labels.items()}  # Remove quotes
 
             return labels["build"]
 
         return "7.2.0.0"
+
+    def configure_additional_transformers(self):
+        for metric, data in METRIC_NAME_PATTERN.items():
+            self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
+                metric, self.configure_transformer_for_metric(metric, **data), pattern=True
+            )
+
+    def configure_transformer_for_metric(self, metric_pattern, metric_type):
+
+        # Datadog counter is a monitonic_counter, which always gives delta between current and previous values
+        method = getattr(self, metric_type)  # Always use gauge
+        cached_patterns = defaultdict(lambda: re.compile(metric_pattern))
+
+        def transform(metric, sample_data, runtime_data):
+            for sample, tags, hostname in sample_data:
+                new_metric_name = sample.name
+
+                # Remove _total suffix if present
+                if new_metric_name.endswith("_total"):
+                    new_metric_name = new_metric_name[:-6]
+
+                match = cached_patterns[metric_pattern].match(new_metric_name)
+                if match:
+                    new_metric_name = f"{match.groups(1)[0]}.{match.groups(1)[1]}"
+                    method(new_metric_name, sample.value, tags=tags, hostname=hostname)
+                else:
+                    method(new_metric_name, sample.value, tags=tags, hostname=hostname)
+
+        return transform

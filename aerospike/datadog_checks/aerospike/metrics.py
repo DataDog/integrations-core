@@ -60,15 +60,26 @@ METRIC_MAP = {
     'aerospike_xdr_success': 'xdr.success',
 }
 
-
-METRIC_MAP_V7 = {
-    # all metrics will be treated as gauge, as we need latest values, without having up-down changes
-    "aerospike_users(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_namespace(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_node(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_sets(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_sindex(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_xdr(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_sysinfo(.*)": {"name": "$1", "type": "gauge"},
-    "aerospike_latencies(.*)": {"name": "$1", "type": "gauge"},
+METRIC_NAME_PATTERN = {
+    r'^aerospike_(namespace)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(node_stats)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(sets)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(sindex)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(xdr)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(sysinfo)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(latencies)_(.*)$': {
+        'metric_type': 'gauge',
+    },
 }
