@@ -38,8 +38,8 @@
         "check": "",
         "metadata_path": "metadata.csv"
       }
-    },
-    "saved_views": {}
+    }
+
   },
   "author": {
     "support_email": "help@datadoghq.com",
