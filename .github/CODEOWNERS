@@ -251,6 +251,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
 /contentful/assets/logs/                                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/eset_protect/                                                       @DataDog/saas-integrations
+/eset_protect/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
+/eset_protect/manifest.json                                          @DataDog/saas-integrations @DataDog/documentation
+/eset_protect/assets/logs/                                           @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /extrahop/                                                          @DataDog/saas-integrations
 /extrahop/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /extrahop/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
