@@ -20,10 +20,10 @@ from .common import (
     get_valid_platforms,
     get_valid_versions,
     plot_treemap,
-    print_csv,
-    print_json,
-    print_markdown,
     print_table,
+    save_csv,
+    save_json,
+    save_markdown,
     send_metrics_to_dd,
 )
 
@@ -36,10 +36,7 @@ console = Console(stderr=True)
 )
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option("--csv", is_flag=True, help="Output in CSV format")
-@click.option("--markdown", is_flag=True, help="Output in Markdown format")
-@click.option("--json", is_flag=True, help="Output in JSON format")
-@click.option("--save-to-png-path", help="Path to save the treemap as PNG")
+@click.option("--format", type=click.Choice(["png", "csv", "markdown", "json"]), help="Format of the output", multiple=True)
 @click.option(
     "--show-gui",
     is_flag=True,
@@ -52,10 +49,7 @@ def status(
     platform: Optional[str],
     version: Optional[str],
     compressed: bool,
-    csv: bool,
-    markdown: bool,
-    json: bool,
-    save_to_png_path: Optional[str],
+    format: list[str],
     show_gui: bool,
     send_metrics_dd_org: str,
 ) -> None:
@@ -63,8 +57,6 @@ def status(
     Show the current size of all integrations and dependencies.
     """
     try:
-        if sum([csv, markdown, json]) > 1:
-            raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
         repo_path = app.repo.path
         valid_platforms = get_valid_platforms(repo_path)
         valid_versions = get_valid_versions(repo_path)
@@ -78,19 +70,12 @@ def status(
         versions = valid_versions if version is None else [version]
         combinations = [(p, v) for p in platforms for v in versions]
         for plat, ver in combinations:
-            path = None
-            if save_to_png_path:
-                base, ext = os.path.splitext(save_to_png_path)
-                path = f"{base}_{plat}_{ver}{ext}"
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
                 "version": ver,
                 "compressed": compressed,
-                "csv": csv,
-                "markdown": markdown,
-                "json": json,
-                "save_to_png_path": path,
+                "format": format,
                 "show_gui": show_gui,
             }
             modules_plat_ver.extend(
@@ -99,10 +84,36 @@ def status(
                     parameters,
                 )
             )
-            if csv:
-                print_csv(app, modules_plat_ver)
-            elif json:
-                print_json(app, modules_plat_ver)
+
+        size_type = "compressed" if compressed else "uncompressed"
+        for output_format in format:
+            if output_format == "csv":
+                csv_filename = (
+                    f"{platform}_{version}_{size_type}_status.csv" if platform and version else
+                    f"{version}_{size_type}_status.csv" if version else
+                    f"{platform}_{size_type}_status.csv" if platform else
+                    f"{size_type}_status.csv"
+                )
+                save_csv(app, modules_plat_ver, csv_filename)
+
+            elif output_format == "json":
+                json_filename = (
+                    f"{platform}_{version}_{size_type}_status.json" if platform and version else
+                    f"{version}_{size_type}_status.json" if version else
+                    f"{platform}_{size_type}_status.json" if platform else
+                    f"{size_type}_status.json"
+                )
+                save_json(json_filename, modules_plat_ver)
+
+            elif output_format == "markdown":
+                markdown_filename = (
+                    f"{platform}_{version}_{size_type}_status.md" if platform and version else
+                    f"{version}_{size_type}_status.md" if version else
+                    f"{platform}_{size_type}_status.md" if platform else
+                    f"{size_type}_status.md"
+                )
+                with open(markdown_filename, 'w', encoding='utf-8'):
+                    pass
             if send_metrics_dd_org:
                 send_metrics_to_dd(app, modules_plat_ver, send_metrics_dd_org, compressed)
     except Exception as e:
@@ -122,7 +133,7 @@ def status_mode(
     formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
 
     if params["markdown"]:
-        print_markdown(params["app"], "Status", formatted_modules)
+        save_markdown(params["app"], "Status", formatted_modules)
     elif not params["csv"] and not params["json"]:
         print_table(params["app"], "Status", formatted_modules)
 

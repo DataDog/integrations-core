@@ -346,8 +346,9 @@ def format_modules(
         return new_modules
 
 
-def print_json(
+def save_json(
     app: Application,
+    file_path: str,
     modules: (
         list[FileDataEntry]
         | list[FileDataEntryPlatformVersion]
@@ -355,19 +356,17 @@ def print_json(
         | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
-    printed_yet = False
-    app.display("[")
-    for row in modules:
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            if printed_yet:
-                app.display(",")
-            app.display(json.dumps(row, default=str))
-            printed_yet = True
+    filtered_modules = [
+        row for row in modules if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values())
+    ]
 
-    app.display("]")
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(filtered_modules, f, default=str, indent=2)
+
+    app.display(f"JSON file saved to {file_path}")
 
 
-def print_csv(
+def save_csv(
     app: Application,
     modules: (
         list[FileDataEntry]
@@ -375,13 +374,18 @@ def print_csv(
         | list[CommitEntryWithDelta]
         | list[CommitEntryPlatformWithDelta]
     ),
+    file_path: str,
 ) -> None:
     headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
-    app.display(",".join(headers))
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(",".join(headers) + "\n")
 
     for row in modules:
         if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            app.display(",".join(format(str(row.get(h, ""))) for h in headers))
+            f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
+
+    app.display(f"CSV file saved to {file_path}")
 
 
 def format(s: str) -> str:
@@ -391,7 +395,7 @@ def format(s: str) -> str:
     return f'"{s}"' if "," in s else s
 
 
-def print_markdown(
+def save_markdown(
     app: Application,
     title: str,
     modules: (
@@ -400,6 +404,7 @@ def print_markdown(
         | list[CommitEntryWithDelta]
         | list[CommitEntryPlatformWithDelta]
     ),
+    file_path: str,
 ) -> None:
     if all(str(value).strip() in ("", "0", "0001-01-01") for value in modules[0].values()):
         return  # skip empty table
@@ -414,7 +419,10 @@ def print_markdown(
         lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
 
     markdown = "\n".join(lines)
-    app.display_markdown(markdown)
+
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(markdown)
+    app.display(f"Markdown table saved to {file_path}")
 
 
 def print_table(
