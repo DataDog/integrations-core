@@ -11,6 +11,7 @@ import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
 from datadog_checks.mysql.version_utils import get_version
 
@@ -496,3 +497,14 @@ def test_database_identifier(template, expected, tags):
     check = MySql(common.CHECK_NAME, {}, instances=[config])
 
     assert check.database_identifier == expected
+
+
+def test__eliminate_duplicate_rows():
+    rows = [
+        {'thread_id': 1, 'event_timer_start': 1000, 'event_timer_end': 2000, 'sql_text': 'SELECT 1'},
+        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+    ]
+    second_pass = {1: {'event_timer_start': 2001}}
+    assert MySQLActivity._eliminate_duplicate_rows(rows, second_pass) == [
+        {'thread_id': 1, 'event_timer_start': 2001, 'event_timer_end': 3000, 'sql_text': 'SELECT 1'},
+    ]

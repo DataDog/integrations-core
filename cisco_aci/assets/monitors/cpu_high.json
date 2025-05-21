@@ -8,7 +8,7 @@
 		"name": "[Cisco ACI] Avg CPU usage is high for {{device_ip.name}} in namespace {{device_namespace.name}}",
 		"type": "query alert",
 		"query": "avg(last_5m):avg:cisco_aci.fabric.node.cpu.avg{*} by {device_ip,device_namespace} > 90",
-		"message": "{{#is_alert}} \n{{device_ip.name}} in namespace {{device_namespace.name}} is reporting high CPU usage (at or above 90%).\n{{/is_alert}}\n\n{{#is_warning}}\n{{device_ip.name}} in namespace {{device_namespace.name}} is reporting higher CPU usage (at or above 80%).\n{{/is_warning}} \n\n{{#is_recovery}}\nCPU usage for {{device_ip.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+		"message": "{{#is_alert}} \n{{device_ip.name}} in namespace {{device_namespace.name}} is reporting high CPU usage (at or above 90%).\n{{/is_alert}}\n\n{{#is_warning}}\n{{device_ip.name}} in namespace {{device_namespace.name}} is reporting higher CPU usage (at or above 80%).\n{{/is_warning}} \n\n{{#is_recovery}}\nCPU usage for {{device_ip.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/devices?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
 		"tags": [],
 		"options": {
 			"thresholds": {

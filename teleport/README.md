@@ -24,7 +24,7 @@ The Teleport check gathers Teleport's metrics and performance data using two dis
 - The [Health endpoint](https://goteleport.com/docs/management/diagnostics/monitoring/#healthz) provides the overall health status of your Teleport instance.
 - The [OpenMetrics endpoint](https://goteleport.com/docs/reference/metrics/#auth-service-and-backends) extracts metrics on the Teleport instance and the various services operating within that instance.
 
-These endpoints aren't activated by default. To enable the diagnostic HTTP endpoints in your Teleport instance, please refer to the public Teleport [documentation](https://goteleport.com/docs/management/diagnostics/monitoring/#enable-health-monitoring).
+These endpoints aren't activated by default. To enable the diagnostic HTTP endpoints in your Teleport instance, please refer to the public Teleport [documentation](https://goteleport.com/docs/admin-guides/management/diagnostics/monitoring/).
 
 ### Configuration
 

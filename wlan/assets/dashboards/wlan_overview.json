@@ -1,0 +1,882 @@
+{
+  "title": "Wi-Fi Overview",
+  "description": "This dashboard provides key insights into your Wi-Fi networks. Monitor metrics like AP details, signal quality (RSSI, Noise), transmission rates, and transitions (Roaming, Swapping). Quickly identify network issues and optimize performance with ease.\n\nFor more information:\n\n- https://docs.datadoghq.com/integrations/wlan",
+  "widgets": [
+    {
+      "id": 8945376566918994,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8101714083643424,
+            "definition": {
+              "type": "image",
+              "url": "https://static.datadoghq.com/static/images/logos/wlan_large.svg",
+              "sizing": "contain",
+              "margin": "sm",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 2784710628418850,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard provides key insights into your Wi-Fi networks. Monitor metrics like AP details, signal quality (RSSI, Noise), transmission rates, and transitions (Roaming, Swapping). Quickly identify network issues and optimize performance with ease.\n\nFor more information:\n\n- https://docs.datadoghq.com/integrations/wlan",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7284143872048936,
+            "definition": {
+              "title": "Total Connected End Devices",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
+          },
+          {
+            "id": 2663397248280306,
+            "definition": {
+              "title": "Total Channel Swaps",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 1730580051118652,
+            "definition": {
+              "title": "Total Roaming Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 3310749698720082,
+      "definition": {
+        "title": "Devices",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4462670146624940,
+            "definition": {
+              "type": "note",
+              "content": "This section displays devices that often change wireless channels, providing insights into channel interference and network optimization needs.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 7013351936992322,
+            "definition": {
+              "type": "note",
+              "content": "This section shows devices achieving the highest data transmission rates, offering a view of network efficiency and highlighting high-performance areas.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 620268179520716,
+            "definition": {
+              "type": "note",
+              "content": "This section highlights devices frequently switching between access points, helping identify connectivity patterns and potential network stability issues.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 8410344786666611,
+            "definition": {
+              "type": "note",
+              "content": "This section highlights devices with the worse RSSI, helping identify connectivity patterns and potential network stability issues.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 7148523091652516,
+            "definition": {
+              "title": "Top Channel Swaps By Device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "CHANNEL SWAPS",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7953177025394194,
+            "definition": {
+              "title": "Top Transmit Rate By Device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.txrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "TRANSMIT RATE",
+                      "number_format": {
+                        "precision": "integer",
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "Mbps"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 3,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 327812947988002,
+            "definition": {
+              "title": "Top Roaming Events by Device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "ROAMING EVENTS",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8138983755384169,
+            "definition": {
+              "title": "Bottom RSSI by Device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RSSI",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "dBm"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 9,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 7779196715797384,
+      "definition": {
+        "title": "Signal Quality",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1111230594216134,
+            "definition": {
+              "title": "RSSI (Received Signal Strength Indicator) [further from 0 is weaker]",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "dBm"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "markers": [
+                {
+                  "value": "y = 0",
+                  "display_type": "error dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 2
+            }
+          },
+          {
+            "id": 1570981471701844,
+            "definition": {
+              "title": "Noise",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.noise{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "dB"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8098607015917662,
+            "definition": {
+              "title": "Channel Swaps",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1738668615522542,
+            "definition": {
+              "title": "Roaming Events",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4241398114674070,
+      "definition": {
+        "title": "Available Bandwith",
+        "background_color": "vivid_yellow",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2327544501125610,
+            "definition": {
+              "title": "Tx Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.txrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "Mbps"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8905572173387450,
+            "definition": {
+              "title": "Rx Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:system.wlan.rxrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "Mbps"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 3
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "ssid",
+      "prefix": "ssid",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "bssid",
+      "prefix": "bssid",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "mac_address",
+      "prefix": "mac_address",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
