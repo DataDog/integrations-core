@@ -99,11 +99,11 @@ def test_trim_modules_keep_some_remove_some():
 
 
 def test_get_dependency():
-    content = """dep1 @ https://example.com/dep1-1.1.1-.whl
-dep2 @ https://example.com/dep2-1.1.2-.whl"""
+    content = """dep1 @ https://example.com/dep1/dep1-1.1.1-.whl
+dep2 @ https://example.com/dep2/dep2-1.1.2-.whl"""
     with patch("builtins.open", mock_open(read_data=content)):
         url, version = get_dependency_data(Path("some") / "path" / "file.txt", "dep2")
-        assert (url, version) == ("https://example.com/dep2-1.1.2-.whl", "1.1.2")
+        assert (url, version) == ("https://example.com/dep2/dep2-1.1.2-.whl", "1.1.2")
 
 
 def make_mock_response(size):

@@ -255,9 +255,11 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
 
             deps.append(name)
             download_urls.append(url)
-            version_match = re.search(rf"{re.escape(name)}-([0-9]+(?:\.[0-9]+)*)-", url)
+            version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
             if version_match:
                 versions.append(version_match.group(1))
+            else:
+                versions.append("")
 
     return deps, download_urls, versions
 
