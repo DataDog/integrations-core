@@ -699,6 +699,8 @@ aerospike.namespace.xdr_write_error,gauge,,request,,[Legacy] The number of write
 aerospike.namespace.xdr_write_success,gauge,,request,,[Legacy] The number of write requests initiated by XDR that succeeded on the namespace on this node. Deprecated.,0,aerospike,,,
 aerospike.namespace.xdr_write_timeout,gauge,,request,,[Legacy] The number of write requests initiated by XDR that timed out on the namespace on this node,0,aerospike,,,
 aerospike.namespace.xmem_id,gauge,,,,[OpenMetricsV2 ] The extended memory id of the namespace,0,aerospike,,,
+aerospike.node.ticks,gauge,,,,Represents how many times exporter is called to fetch metrics,0,aerospike,,,
+aerospike.node.up,gauge,,,,Represents if exporter is up and running,0,aerospike,,,
 aerospike.node_stats.advertise_ipv6,gauge,,,,[OpenMetricsV2 ] config- Requires heartbeat v3. Set to true in order enable IPv6,0,aerospike,,,
 aerospike.node_stats.batch_index_complete,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
 aerospike.node_stats.batch_index_created_buffers,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,

@@ -82,4 +82,10 @@ METRIC_NAME_PATTERN = {
     r'^aerospike_(latencies)_(.*)$': {
         'metric_type': 'gauge',
     },
+    r'^aerospike_(node)_(up)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(node)_(ticks)$': {
+        'metric_type': 'gauge',
+    },
 }

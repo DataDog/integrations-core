@@ -99,6 +99,7 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     new_metric_name = new_metric_name[:-6]
 
                 match = cached_patterns[metric_pattern].match(new_metric_name)
+
                 if match:
                     new_metric_name = f"{match.groups(1)[0]}.{match.groups(1)[1]}"
                     method(new_metric_name, sample.value, tags=tags, hostname=hostname)

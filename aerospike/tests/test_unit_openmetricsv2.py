@@ -10,6 +10,7 @@ from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
+    AEROSPIKE_V7,
     EXPECTED_PROMETHEUS_METRICS,
     EXPECTED_PROMETHEUS_METRICS_5_6,
     EXPECTED_PROMETHEUS_METRICS_7,
@@ -31,7 +32,7 @@ def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, 
 
     version_parts = [int(p) for p in VERSION.split('.')]
 
-    if version_parts[0] >= 7:
+    if version_parts[0] >= AEROSPIKE_V7:
         metrics_to_check = EXPECTED_PROMETHEUS_METRICS_7
         _test_check_from_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response, metrics_to_check)
 
@@ -76,7 +77,7 @@ def _test_check_from_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_
 
         # no need to validate node-ticks for labels, as its a counter to check how many times exporter url is called
         #    node-ticks wiill not have any labels associated
-        if metric_name != "aerospike.aerospike_node_ticks":
+        if metric_name not in ("aerospike.node.ticks", "aerospike.node.up"):
             aggregator.assert_metric_has_tag(
                 metric_name, 'endpoint:{}'.format(instance_openmetrics_v2.get('openmetrics_endpoint'))
             )

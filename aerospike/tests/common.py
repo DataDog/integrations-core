@@ -799,4 +799,6 @@ EXPECTED_PROMETHEUS_METRICS_7 = [
     'aerospike.sysinfo.netstat_tcp_retranssegs',
     'aerospike.sysinfo.network_receive_bytes',
     'aerospike.sysinfo.network_transfer_bytes',
+    'aerospike.node.ticks',
+    'aerospike.node.up',
 ]
