@@ -42,15 +42,12 @@ class QueryCompletionEventsHandler(XESessionBase):
         "physical_reads": 0,
         "logical_reads": 0,
         "writes": 0,
-        "spills": 0,
         "row_count": 0,
-        "object_id": 0,
-        "line_number": 0,
     }
 
     RPC_SPECIFIC_STRING_FIELDS = [
         "result",
-        "procedure_name",
+        "object_name",
         "data_stream",
         "connection_reset_option",
     ]
@@ -146,9 +143,10 @@ class QueryCompletionEventsHandler(XESessionBase):
         for action in event.findall('./action'):
             action_name = action.get('name')
             if action_name:
-                # Add activity_id support
                 if action_name == 'attach_activity_id':
                     event_data['activity_id'] = extract_value(action)
+                elif action_name == 'attach_activity_id_xfer':
+                    event_data['activity_id_xfer'] = extract_value(action)
                 else:
                     event_data[action_name] = extract_value(action)
 
