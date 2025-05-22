@@ -1,0 +1,34 @@
+id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+tests:
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
+      ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1
+      : Allowed."
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
+      [1071065] Insert Event from 127.0.0.1:38791 -
+      (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login
+      abhishek from 10.10.16.1 : Allowed.)"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event:
+      [1071200] starting worker 27775: connected from 10.10.16.167:52584"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin
+      Session @10.10.16.167] AdminAction: abhishek logged in"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_SSH_config:  Info     sacumentestlocal [0210108]
+      writeSSHdconf(): starting handling of ssh daemon configuration"
+    result: null
+  - sample: "2025-04-28T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal Handler
+      #749 returned with code 0 (No error.)"
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
