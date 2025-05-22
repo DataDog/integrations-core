@@ -4,7 +4,9 @@
 
 This integration ingests the following logs:
 
-- **Enterprise Events**: Enterprise events provide a detailed record of user activities (like uploads, downloads, sharing) and administrative actions in an enterprise Box instance.
+- **Enterprise Events**: Enterprise events provide a detailed record of user activities (like uploads, downloads, sharing), administrative actions and shield events in an enterprise Box instance.
+
+**Note**: [Box Shield][6] must be enabled on your Box Enterprise account to access security insights and threat detection data.
 
 This integration gathers enterprise events and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Box platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
@@ -34,6 +36,8 @@ This integration gathers enterprise events and forwards them to Datadog for seam
 
 2. Click the Save button to save your settings.
 
+**Note**: Monthly API call limits are outlined on the [Box Pricing Page][7]. If you need to purchase additional volume, please contact [Box Support][8].
+
 ## Data Collected
 
 ### Logs
@@ -57,3 +61,6 @@ For any further assistance, contact [Datadog support][2].
 [3]: https://app.box.com/developers/console
 [4]: https://app.box.com/master/platform-apps
 [5]: https://developer.box.com/guides/events/enterprise-events/for-enterprise/#event-types
+[6]: https://www.box.com/shield
+[7]: https://www.box.com/pricing#:~:text=100-,API%20calls%20per%20month,-50%2C000*
+[8]: https://support.box.com/
