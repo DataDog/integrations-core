@@ -144,7 +144,7 @@ pipeline:
 
           autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component} %{word:level}  %{data:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
     - type: attribute-remapper
-      name: " Map `timestamp` to `syslog.timestamp`"
+      name: Map `timestamp` to `syslog.timestamp`
       enabled: true
       sources:
         - timestamp
