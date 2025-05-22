@@ -15,41 +15,42 @@ tests:
           "detail": "Authenticating native user 'administrator'.",
           "user": ""
         }
-    result: 
-     custom:
-      action: "Login attempt"
-      detail: "Authenticating native user 'administrator'."
-      domain: "Native user"
-      event_type: "Audit_Event"
-      hostname: "win-eset"
-      ipv4: "192.0.2.1"
-      occured: 1747129872000
-      result: "Success"
-      severity: "Information"
-      source_uuid: "3144d5db-1bb7-4b4b-9393-b1eb601ec052"
+    result:
+      custom:
+        action: "Login attempt"
+        detail: "Authenticating native user 'administrator'."
+        domain: "Native user"
+        event_type: "Audit_Event"
+        hostname: "win-eset"
+        ipv4: "192.0.2.1"
+        occured: 1747129872000
+        result: "Success"
+        severity: "Information"
+        source_uuid: "3144d5db-1bb7-4b4b-9393-b1eb601ec052"
+        status: "info"
+        usr:
+          name: "Administrator"
+      message: |-
+        {
+          "severity" : "Information",
+          "result" : "Success",
+          "hostname" : "win-eset",
+          "event_type" : "Audit_Event",
+          "ipv4" : "192.0.2.1",
+          "occured" : "13-May-2025 09:51:12",
+          "domain" : "Native user",
+          "action" : "Login attempt",
+          "source_uuid" : "3144d5db-1bb7-4b4b-9393-b1eb601ec052",
+          "detail" : "Authenticating native user 'administrator'.",
+          "user" : "",
+          "target" : "Administrator"
+        }
+      service: "Audit_Event"
       status: "info"
-      usr:
-        name: "Administrator"
-    message: |-
-      {
-        "severity" : "Information",
-        "result" : "Success",
-        "hostname" : "win-eset",
-        "event_type" : "Audit_Event",
-        "ipv4" : "192.0.2.1",
-        "occured" : "13-May-2025 09:51:12",
-        "domain" : "Native user",
-        "action" : "Login attempt",
-        "source_uuid" : "3144d5db-1bb7-4b4b-9393-b1eb601ec052",
-        "detail" : "Authenticating native user 'administrator'.",
-        "user" : "",
-        "target" : "Administrator"
-      }
-    service: "Audit_Event"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1747129872000
+      tags:
+      - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
+      timestamp: 1747129872000
   - sample: |-
       {
           "severity": "Information",

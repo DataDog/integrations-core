@@ -146,7 +146,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `username`, `user` and `account` to `usr.name`
+      name: Map `username`, `user`, `account` to `usr.name`
       enabled: true
       sources:
         - username
