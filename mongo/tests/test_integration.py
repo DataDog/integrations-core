@@ -42,7 +42,7 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongo"
-    assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
+    assert sorted(mongodb_instance_event['tags']) == sorted(expected_tags)
 
     expected_instance_metadata = {
         "replset_name": replset_name,
@@ -112,7 +112,12 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'hosting_type:self-hosted']
+    expected_tags = [
+        'server:mongodb://testUser2:*****@localhost:27017/test',
+        'sharding_cluster_role:mongos',
+        'hosting_type:self-hosted',
+        'clustername:my_cluster',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongos_check,
