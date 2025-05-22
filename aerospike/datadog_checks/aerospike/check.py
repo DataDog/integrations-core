@@ -79,6 +79,10 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             )
 
     def configure_transformer_for_metric(self, metric_pattern, metric_type):
+        
+        # We are doing this to modify the exporter metric-name to datadog standard pattern
+        # exporter metric-name pattern: aerospike_namespace_master_objects
+        # datadog metric-name pattern: aerospike.namespace.master_objects
 
         # Datadog counter is a monitonic_counter, which always gives delta between current and previous values
         method = getattr(self, metric_type)  # Always use gauge
