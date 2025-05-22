@@ -9,7 +9,7 @@ tests:
           "result": "Success",
           "hostname": "win-eset",
           "event_type": "Audit_Event",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "domain": "Native user",
           "action": "Login attempt",
           "detail": "Authenticating native user 'administrator'.",
@@ -22,7 +22,7 @@ tests:
         domain: "Native user"
         event_type: "Audit_Event"
         hostname: "win-eset"
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         occured: 1747129872000
         result: "Success"
         severity: "Information"
@@ -37,7 +37,7 @@ tests:
           "result" : "Success",
           "hostname" : "win-eset",
           "event_type" : "Audit_Event",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "occured" : "13-May-2025 09:51:12",
           "domain" : "Native user",
           "action" : "Login attempt",
@@ -60,7 +60,7 @@ tests:
           "result": "Success",
           "hostname": "win-eset",
           "event_type": "Audit_Event",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "domain": "License",
           "action": "Deactivate",
           "detail": "Deactivating all active units for license '3BB-VD8-EKH' on computer 'desktop-20gupv6'.",
@@ -74,7 +74,7 @@ tests:
         domain: "License"
         event_type: "Audit_Event"
         hostname: "win-eset"
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         license_name: "3BB-VD8-EKH"
         occured: 1746703820000
         result: "Success"
@@ -90,7 +90,7 @@ tests:
           "result" : "Success",
           "hostname" : "win-eset",
           "event_type" : "Audit_Event",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "occured" : "08-May-2025 11:30:20",
           "domain" : "License",
           "action" : "Deactivate",
@@ -113,7 +113,7 @@ tests:
           "result": "Success",
           "hostname": "win-eset",
           "event_type": "Audit_Event",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "domain": "User group",
           "action": "Delete",
           "detail": "Removing user group 'Test G2' in group 'All groups\\Test G11'.",
@@ -126,7 +126,7 @@ tests:
         domain: "User group"
         event_type: "Audit_Event"
         hostname: "win-eset"
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         object_name: "Test G2"
         occured: 1745918053000
         result: "Success"
@@ -142,7 +142,7 @@ tests:
           "result" : "Success",
           "hostname" : "win-eset",
           "event_type" : "Audit_Event",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "occured" : "29-Apr-2025 09:14:13",
           "domain" : "User group",
           "action" : "Delete",
@@ -165,7 +165,7 @@ tests:
           "result": "Success",
           "hostname": "win-eset",
           "event_type": "Audit_Event",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "domain": "Native user",
           "action": "Create",
           "detail": "Creating native user 'Datadog'.",
@@ -178,7 +178,7 @@ tests:
         domain: "Native user"
         event_type: "Audit_Event"
         hostname: "win-eset"
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         object_name: "Datadog"
         occured: 1746603659000
         result: "Success"
@@ -194,7 +194,7 @@ tests:
           "result" : "Success",
           "hostname" : "win-eset",
           "event_type" : "Audit_Event",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "occured" : "07-May-2025 07:40:59",
           "domain" : "Native user",
           "action" : "Create",
@@ -211,7 +211,7 @@ tests:
   - sample: |-
       {
           "severity": "Warning",
-          "target_address": "192.0.2.0",
+          "target_address": "10.10.10.10",
           "group_name": "All/Lost & found",
           "inbound": true,
           "occured": "13-May-2025 11:58:27",
@@ -223,9 +223,9 @@ tests:
           "event_type": "FirewallAggregated_Event",
           "target_address_type": "IPv4",
           "threat_name": "ARP/CachePoisoningAttack",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "source_address_type": "IPv4",
-          "source_address": "192.0.2.1",
+          "source_address": "10.10.10.10",
           "handled": true,
           "os_name": "Microsoft Windows Server 2022 Standard Evaluation",
           "action": "Blocked",
@@ -243,14 +243,14 @@ tests:
         handled: true
         hostname: "win-eset"
         inbound: true
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         network:
           client:
             geoip: {}
-            ip: "192.0.2.1"
+            ip: "10.10.10.10"
           destination:
             geoip: {}
-            ip: "192.0.2.0"
+            ip: "10.10.10.10"
         occured: 1747137507000
         os:
           name: "Microsoft Windows Server 2022 Standard Evaluation"
@@ -264,7 +264,7 @@ tests:
       message: |-
         {
           "severity" : "Warning",
-          "target_address" : "192.0.2.0",
+          "target_address" : "10.10.10.10",
           "group_name" : "All/Lost & found",
           "inbound" : true,
           "occured" : "13-May-2025 11:58:27",
@@ -276,9 +276,9 @@ tests:
           "event_type" : "FirewallAggregated_Event",
           "target_address_type" : "IPv4",
           "threat_name" : "ARP/CachePoisoningAttack",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "source_address_type" : "IPv4",
-          "source_address" : "192.0.2.1",
+          "source_address" : "10.10.10.10",
           "handled" : true,
           "os_name" : "Microsoft Windows Server 2022 Standard Evaluation",
           "action" : "Blocked",
@@ -292,7 +292,7 @@ tests:
   - sample: |-
       {
           "severity": "Warning",
-          "target_address": "192.0.2.0",
+          "target_address": "10.10.10.10",
           "group_name": "All/Companies/Test/Test New Static Group",
           "occured": "12-May-2025 06:18:57",
           "processname": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
@@ -304,7 +304,7 @@ tests:
           "hostname": "assettag-eid",
           "event_type": "FilteredWebsites_Event",
           "target_address_type": "IPv4",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "handled": true,
           "object_uri": "https://www.atc-secure.com",
           "os_name": "Microsoft Windows 11 Pro",
@@ -323,11 +323,11 @@ tests:
         handled: true
         hash: "F3B15DBF7DABB37266B13CB67EC36EA819EBD0AD"
         hostname: "assettag-eid"
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         network:
           destination:
             geoip: {}
-            ip: "192.0.2.0"
+            ip: "10.10.10.10"
         object_uri: "https://www.atc-secure.com"
         occured: 1747030737000
         os:
@@ -344,7 +344,7 @@ tests:
       message: |-
         {
           "severity" : "Warning",
-          "target_address" : "192.0.2.0",
+          "target_address" : "10.10.10.10",
           "group_name" : "All/Companies/Test/Test New Static Group",
           "occured" : "12-May-2025 06:18:57",
           "processname" : "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
@@ -356,7 +356,7 @@ tests:
           "hostname" : "assettag-eid",
           "event_type" : "FilteredWebsites_Event",
           "target_address_type" : "IPv4",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "handled" : true,
           "object_uri" : "https://www.atc-secure.com",
           "os_name" : "Microsoft Windows 11 Pro",
@@ -375,7 +375,7 @@ tests:
           "scanner_id": "Real-time file system protection",
           "hostname": "assettag-eid",
           "event_type": "Threat_Event",
-          "ipv4": "192.0.2.1",
+          "ipv4": "10.10.10.10",
           "threat_handled": false,
           "need_restart": false,
           "threat_type": "Potentially unsafe application",
@@ -407,7 +407,7 @@ tests:
         group_name: "All/Companies/Test/Test New Static Group"
         hash: "E7DCD6C23C72209EE5AA0890372DE1CE52045815"
         hostname: "assettag-eid"
-        ipv4: "192.0.2.1"
+        ipv4: "10.10.10.10"
         need_restart: false
         object_type: "File"
         object_uri: "file:///C:/Users/Test/Downloads/The-MALWARE-Repo-master/The-MALWARE-Repo-master/Joke/YouAreAnIdiot/EXEVersion/YouAreAnIdiot.exe"
@@ -441,7 +441,7 @@ tests:
           "hostname" : "assettag-eid",
           "event_type" : "Threat_Event",
           "threat_name" : "MSIL/BadJoke.Agent.AP",
-          "ipv4" : "192.0.2.1",
+          "ipv4" : "10.10.10.10",
           "threat_handled" : false,
           "object_uri" : "file:///C:/Users/Test/Downloads/The-MALWARE-Repo-master/The-MALWARE-Repo-master/Joke/YouAreAnIdiot/EXEVersion/YouAreAnIdiot.exe",
           "need_restart" : false,
@@ -463,7 +463,7 @@ tests:
         "result": "Access denied",
         "hostname": "win-eset",
         "event_type": "Audit_Event",
-        "ipv4": "10.50.13.123",
+        "ipv4": "10.10.10.10",
         "occured": "21-May-2025 12:19:42",
         "domain": "Native user",
         "action": "Login attempt",
@@ -478,7 +478,7 @@ tests:
         domain: "Native user"
         event_type: "Audit_Event"
         hostname: "win-eset"
-        ipv4: "10.50.13.123"
+        ipv4: "10.10.10.10"
         occured: 1747829982000
         result: "Access denied"
         severity: "Error"
@@ -491,7 +491,7 @@ tests:
           "result" : "Access denied",
           "hostname" : "win-eset",
           "event_type" : "Audit_Event",
-          "ipv4" : "10.50.13.123",
+          "ipv4" : "10.10.10.10",
           "occured" : "21-May-2025 12:19:42",
           "domain" : "Native user",
           "action" : "Login attempt",
