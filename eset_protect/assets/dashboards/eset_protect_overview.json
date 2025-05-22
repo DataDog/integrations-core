@@ -67,7 +67,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -97,10 +97,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -116,7 +114,7 @@
                             "title": "Events over Time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
+                            "show_legend": false,
                             "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
@@ -139,7 +137,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -189,7 +187,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Threat_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:Threat_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -215,10 +213,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -234,7 +230,7 @@
                             "title": "Threat Events over Time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
+                            "show_legend": false,
                             "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
@@ -257,7 +253,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Threat_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:Threat_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -307,7 +303,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FirewallAggregated_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:FirewallAggregated_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -333,10 +329,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -352,7 +346,7 @@
                             "title": "Firewall Events over Time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
+                            "show_legend": false,
                             "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
@@ -375,7 +369,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FirewallAggregated_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:FirewallAggregated_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -425,7 +419,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FilteredWebsites_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:FilteredWebsites_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -451,10 +445,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -470,7 +462,7 @@
                             "title": "Filtered Website Events over Time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
+                            "show_legend": false,
                             "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
@@ -493,7 +485,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FilteredWebsites_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:FilteredWebsites_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -543,7 +535,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Audit_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:Audit_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -569,10 +561,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             }
                         },
                         "layout": {
@@ -588,7 +578,7 @@
                             "title": "Audit Events over Time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
+                            "show_legend": false,
                             "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
@@ -611,7 +601,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Audit_Event $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect service:Audit_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -661,7 +651,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect @severity:Error $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect @severity:Error $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -719,7 +709,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect @severity:Critical $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect @severity:Critical $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -777,7 +767,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect @severity:Fatal $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect @severity:Fatal $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -830,7 +820,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -899,7 +889,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -969,7 +959,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect $Event-Type $Severity $HostName $Group-Name $OS-Name"
+                                                "query": "source:eset-protect $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1035,7 +1025,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:eset-protect service:(Threat_Event OR FirewallAggregated_Event OR FilteredWebsites_Event) $Event-Type $Severity $HostName $Group-Name $OS-Name",
+                                        "query_string": "source:eset-protect $event_type $severity $hostname $group_name $os_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1754,13 +1744,13 @@
                 "x": 0,
                 "y": 34,
                 "width": 12,
-                "height": 14
+                "height": 1
             }
         }
     ],
     "template_variables": [
         {
-            "name": "Event-Type",
+            "name": "event_type",
             "prefix": "service",
             "available_values": [
                 "Threat_Event",
@@ -1771,25 +1761,25 @@
             "default": "*"
         },
         {
-            "name": "Severity",
+            "name": "severity",
             "prefix": "@severity",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "HostName",
+            "name": "hostname",
             "prefix": "@hostname",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "Group-Name",
+            "name": "group_name",
             "prefix": "@group_name",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "OS-Name",
+            "name": "os_name",
             "prefix": "@os.name",
             "available_values": [],
             "default": "*"

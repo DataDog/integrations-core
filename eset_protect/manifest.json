@@ -8,9 +8,35 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into ESET Protect Threat_Event, FirewallAggregated_Event, FilteredWebsites_Event, Audit_Event logs.",
+    "description": "Gain insights into ESET Protect Events.",
     "title": "ESET Protect",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Overview",
+        "image_url": "images/eset_protect_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Filtered Websites Events",
+        "image_url": "images/eset_protect_filtered_websites_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Threat Events",
+        "image_url": "images/eset_protect_threat_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Firewall Events",
+        "image_url": "images/eset_protect_firewall_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Audit Events",
+        "image_url": "images/eset_protect_audit_events.png"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",

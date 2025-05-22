@@ -71,7 +71,7 @@ Linux command:
 
 ### Logs
 
-The ESET Protect integration collects Threat_Event, FirewallAggregated_Event, FilteredWebsites_Event, and Audit_Event Logs.
+The ESET Protect integration collects Threat_Event, FirewallAggregated_Event, FilteredWebsites_Event, and Audit_Event logs.
 
 ### Metrics
 
@@ -80,10 +80,6 @@ The ESET Protect integration does not include any metrics.
 ### Events
 
 The ESET Protect integration does not include any events.
-
-### Service Checks
-
-The ESET Protect integration does not include any service checks.
 
 ## Troubleshooting
 
