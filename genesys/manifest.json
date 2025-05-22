@@ -65,8 +65,8 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "genesys.",
-        "check": ["genesys.voice.total_conversations", "genesys.callback.wait_time_avg"],
+        "prefix": "genesys_cloud.",
+        "check": ["genesys_cloud.callback.connected_conversations_count", "genesys_cloud.chat.connected_conversations_count", "genesys_cloud.email.connected_conversations_count", "genesys_cloud.message.connected_conversations_count", "genesys_cloud.voice.connected_conversations_count", "genesys_cloud.callback.total_conversations"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
