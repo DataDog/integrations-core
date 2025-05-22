@@ -18,15 +18,13 @@ from .common import (
     FileDataEntryPlatformVersion,
     GitRepo,
     convert_to_human_readable_size,
+    export_format,
     format_modules,
     get_dependencies,
     get_files,
     get_valid_platforms,
     get_valid_versions,
     plot_treemap,
-    print_csv,
-    print_json,
-    print_markdown,
     print_table,
 )
 
@@ -43,10 +41,11 @@ MINIMUM_LENGTH_COMMIT = 7
 )
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option("--csv", is_flag=True, help="Output in CSV format")
-@click.option("--markdown", is_flag=True, help="Output in Markdown format")
-@click.option("--json", is_flag=True, help="Output in JSON format")
-@click.option("--save-to-png-path", help="Path to save the treemap as PNG")
+@click.option(
+    "--format",
+    help="Format of the output (comma-separated values: png, csv, markdown, json)",
+    callback=lambda _, __, v: v.split(",") if v else []
+)
 @click.option(
     "--show-gui",
     is_flag=True,
@@ -60,10 +59,7 @@ def diff(
     platform: Optional[str],
     version: Optional[str],
     compressed: bool,
-    csv: bool,
-    markdown: bool,
-    json: bool,
-    save_to_png_path: str,
+    format: list[str],
     show_gui: bool,
 ) -> None:
     """
@@ -78,8 +74,6 @@ def diff(
         console=console,
     ) as progress:
         task = progress.add_task("[cyan]Calculating differences...", total=None)
-        if sum([csv, markdown, json]) > 1:
-            raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
         if len(first_commit) < MINIMUM_LENGTH_COMMIT and len(second_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
         elif len(first_commit) < MINIMUM_LENGTH_COMMIT:
@@ -115,19 +109,12 @@ def diff(
                 progress.remove_task(task)
                 combinations = [(p, v) for p in platforms for v in versions]
                 for plat, ver in combinations:
-                    path = None
-                    if save_to_png_path:
-                        base, ext = os.path.splitext(save_to_png_path)
-                        path = f"{base}_{plat}_{ver}{ext}"
                     parameters: CLIParameters = {
                         "app": app,
                         "platform": plat,
                         "version": ver,
                         "compressed": compressed,
-                        "csv": csv,
-                        "markdown": markdown,
-                        "json": json,
-                        "save_to_png_path": path,
+                        "format": format,
                         "show_gui": show_gui,
                     }
                     modules_plat_ver.extend(
@@ -139,10 +126,7 @@ def diff(
                             progress,
                         )
                     )
-                if csv:
-                    print_csv(app, modules_plat_ver)
-                elif json:
-                    print_json(app, modules_plat_ver)
+                export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
@@ -175,19 +159,19 @@ def diff_mode(
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
 
-        if params["markdown"]:
-            print_markdown(params["app"], "Differences between selected commits", formatted_modules)
-        elif not params["csv"] and not params["json"]:
-            print_table(params["app"], "Differences between selected commits", formatted_modules)
+    if not params["format"] or params["format"] == ["png"]: # if no format is provided for the data print the table
+        print_table(params["app"], "Status", formatted_modules)
 
-        if params["show_gui"] or params["save_to_png_path"]:
-            plot_treemap(
-                formatted_modules,
-                f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
-                params["show_gui"],
-                "diff",
-                params["save_to_png_path"],
-            )
+    treemap_path = f"treemap_{params['platform']}_{params['version']}.png" if "png" in params["format"] else None
+
+    if params["show_gui"] or treemap_path:
+        plot_treemap(
+            formatted_modules,
+            f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
+            params["show_gui"],
+            "diff",
+            treemap_path,
+        )
 
     return formatted_modules
 

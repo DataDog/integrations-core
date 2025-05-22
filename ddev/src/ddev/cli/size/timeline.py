@@ -29,10 +29,10 @@ from .common import (
     get_valid_platforms,
     is_correct_dependency,
     is_valid_integration,
-    print_csv,
-    print_json,
-    print_markdown,
     print_table,
+    save_csv,
+    save_json,
+    save_markdown,
 )
 
 MINIMUM_DATE_DEPENDENCIES = datetime.strptime(
@@ -45,8 +45,8 @@ console = Console(stderr=True)
 @click.command()
 @click.argument("type", type=click.Choice(["integration", "dependency"]))
 @click.argument("name")
-@click.argument("initial_commit", required=False)
-@click.argument("final_commit", required=False)
+@click.option("--initial-commit", help="Initial commit to analyze. If not specified, will start from the first commit")
+@click.option("--final-commit", help="Final commit to analyze. If not specified, will end at the latest commit")
 @click.option(
     "--time",
     help="Filter commits starting from a specific date. Accepts both absolute and relative formats, "
@@ -62,10 +62,11 @@ console = Console(stderr=True)
     help="Target platform to analyze. Only required for dependencies. If not specified, all platforms will be analyzed",
 )
 @click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option("--csv", is_flag=True, help="Output results in CSV format")
-@click.option("--markdown", is_flag=True, help="Output in Markdown format")
-@click.option("--json", is_flag=True, help="Output in JSON format")
-@click.option("--save-to-png-path", help="Path to save the treemap as PNG")
+@click.option(
+    "--format",
+    help="Format of the output (comma-separated values: png, csv, markdown, json)",
+    callback=lambda _, __, v: v.split(",") if v else []
+)
 @click.option(
     "--show-gui",
     is_flag=True,
@@ -82,10 +83,6 @@ def timeline(
     threshold: Optional[int],
     platform: Optional[str],
     compressed: bool,
-    csv: bool,
-    markdown: bool,
-    json: bool,
-    save_to_png_path: str,
     show_gui: bool,
 ) -> None:
     """
@@ -100,9 +97,7 @@ def timeline(
         console=console,
     ) as progress:
         module = name  # module is the name of the integration or the dependency
-        if sum([csv, markdown, json]) > 1:
-            raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
-        elif (
+        if (
             initial_commit
             and final_commit
             and len(initial_commit) < MINIMUM_LENGTH_COMMIT
@@ -176,20 +171,13 @@ def timeline(
                     dep_parameters: InitialParametersTimelineDependency
                     if platform is None:
                         for plat in valid_platforms:
-                            path = None
-                            if save_to_png_path:
-                                base, ext = os.path.splitext(save_to_png_path)
-                                path = f"{base}_{plat}{ext}"
                             dep_parameters = {
                                 "app": app,
                                 "type": "dependency",
                                 "module": module,
                                 "threshold": threshold,
                                 "compressed": compressed,
-                                "csv": csv,
-                                "markdown": markdown,
-                                "json": json,
-                                "save_to_png_path": path,
+                                "format": format,
                                 "show_gui": show_gui,
                                 "first_commit": None,
                                 "platform": plat,
@@ -211,10 +199,7 @@ def timeline(
                             "module": module,
                             "threshold": threshold,
                             "compressed": compressed,
-                            "csv": csv,
-                            "markdown": markdown,
-                            "json": json,
-                            "save_to_png_path": save_to_png_path,
+                            "format": format,
                             "show_gui": show_gui,
                             "first_commit": None,
                             "platform": platform,
@@ -228,10 +213,7 @@ def timeline(
                             )
                         )
 
-                    if csv:
-                        print_csv(app, modules_plat)
-                    elif json:
-                        print_json(app, modules_plat)
+                    export_format(app, format, platform, None, compressed, modules_plat)
 
                 else:  # integration
                     modules: list[CommitEntryWithDelta] = []
@@ -241,10 +223,7 @@ def timeline(
                         "module": module,
                         "threshold": threshold,
                         "compressed": compressed,
-                        "csv": csv,
-                        "markdown": markdown,
-                        "json": json,
-                        "save_to_png_path": save_to_png_path,
+                        "format": format,
                         "show_gui": show_gui,
                         "first_commit": first_commit,
                         "platform": None,
@@ -258,10 +237,7 @@ def timeline(
                             progress,
                         )
                     )
-                    if csv:
-                        print_csv(app, modules)
-                    elif json:
-                        print_json(app, modules)
+                    export_format(app, format, None, None, compressed, modules)
 
             except Exception as e:
                 progress.stop()
@@ -309,12 +285,12 @@ def timeline_mode(
     trimmed_modules = trim_modules(modules, params["threshold"])
     formatted_modules = format_modules(trimmed_modules, params["platform"])
 
-    if params["markdown"]:
-        print_markdown(params["app"], "Timeline for " + params["module"], formatted_modules)
-    elif not params["csv"] and not params["json"]:
-        print_table(params["app"], "Timeline for " + params["module"], formatted_modules)
+    if not params["format"] or params["format"] == ["png"]: # if no format is provided for the data print the table
+        print_table(params["app"], "Status", formatted_modules)
 
-    if params["show_gui"] or params["save_to_png_path"]:
+    treemap_path = f"treemap_{params['platform']}_{params['version']}.png" if "png" in params["format"] else None
+
+    if params["show_gui"] or treemap_path:
         plot_linegraph(
             formatted_modules, params["module"], params["platform"], params["show_gui"], params["save_to_png_path"]
         )
@@ -814,6 +790,37 @@ def get_dependency_list(path: str, platforms: set[str]) -> set[str]:
                     matches = re.findall(r"([\w\-\d\.]+) @ https?://[^\s#]+", file.read())
                     dependencies.update(matches)
     return dependencies
+
+def export_format(
+    app: Application,
+    format: list[str],
+    modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
+    platform: Optional[str],
+    module: str,
+    compressed: bool,
+) -> None:
+    size_type = "compressed" if compressed else "uncompressed"
+    for output_format in format:
+        if output_format == "csv":
+            csv_filename = (
+                f"{module}_{platform}_{size_type}_timeline.csv" if platform else
+                f"{module}_{size_type}_timeline.csv"
+            )
+            save_csv(app, modules, csv_filename)
+
+        elif output_format == "json":
+            json_filename = (
+                f"{module}_{platform}_{size_type}_timeline.json" if platform else
+                f"{module}_{size_type}_timeline.json"
+            )
+            save_json(app, json_filename, modules)
+
+        elif output_format == "markdown":
+            markdown_filename = (
+                f"{module}_{platform}_{size_type}_timeline.md" if platform else
+                f"{module}_{size_type}_timeline.md"
+            )
+            save_markdown(app, "Timeline", modules, markdown_filename)
 
 
 def plot_linegraph(

@@ -17,8 +17,8 @@ from ddev.cli.size.common import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration,
-    print_csv,
-    print_json,
+    save_csv,
+    save_json,
 )
 
 
@@ -223,26 +223,31 @@ def test_compress():
     assert compressed_size < original_size
 
 
-def test_print_csv():
+def test_save_csv():
+    mock_file = mock_open()
     mock_app = MagicMock()
+
     modules = [
-        {"Name": "module1", "Size B": 123, "Size": "2 B"},
-        {"Name": "module,with,comma", "Size B": 456, "Size": "2 B"},
+        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B"},
+        {"Name": "module,with,comma", "Size_Bytes": 456, "Size": "2 B"},
     ]
 
-    print_csv(mock_app, modules=modules)
+    with patch("builtins.open", mock_file):
+        save_csv(mock_app, modules, "output.csv")
 
-    expected_calls = [
-        (("Name,Size B",),),
-        (('module1,123',),),
-        (('"module,with,comma",456',),),
+    mock_file.assert_called_once_with("output.csv", "w", newline="")
+    handle = mock_file()
+
+    expected_writes = [
+        "Name,Size_Bytes\n",
+        "module1,123\n",
+        '"module,with,comma",456\n"
     ]
 
-    actual_calls = mock_app.display.call_args_list
-    assert actual_calls == expected_calls
+    assert handle.write.call_args_list == [((line,),) for line in expected_writes]
 
 
-def test_print_json():
+def test_save_json():
     mock_app = MagicMock()
 
     modules = [
@@ -250,7 +255,7 @@ def test_print_json():
         {"name": "mod2", "size": "200"},
         {"name": "mod3", "size": "300"},
     ]
-    print_json(mock_app, modules)
+    save_json(mock_app, modules)
 
     expected_calls = [
         (("[",),),
@@ -263,7 +268,6 @@ def test_print_json():
     ]
 
     actual_calls = mock_app.display.call_args_list
-    print(actual_calls)
     assert actual_calls == expected_calls
 
     result = "".join(call[0][0] for call in actual_calls)

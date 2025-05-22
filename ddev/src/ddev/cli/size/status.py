@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -14,6 +13,7 @@ from ddev.cli.application import Application
 from .common import (
     CLIParameters,
     FileDataEntryPlatformVersion,
+    export_format,
     format_modules,
     get_dependencies,
     get_files,
@@ -21,9 +21,6 @@ from .common import (
     get_valid_versions,
     plot_treemap,
     print_table,
-    save_csv,
-    save_json,
-    save_markdown,
     send_metrics_to_dd,
 )
 
@@ -36,13 +33,17 @@ console = Console(stderr=True)
 )
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option("--format", type=click.Choice(["png", "csv", "markdown", "json"]), help="Format of the output", multiple=True)
+@click.option(
+    "--format",
+    help="Format of the output (comma-separated values: png, csv, markdown, json)",
+    callback=lambda _, __, v: v.split(",") if v else []
+)
 @click.option(
     "--show-gui",
     is_flag=True,
     help="Display a pop-up window with a treemap showing the current size distribution of modules.",
 )
-@click.option("--send-metrics-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @click.pass_obj
 def status(
     app: Application,
@@ -51,7 +52,7 @@ def status(
     compressed: bool,
     format: list[str],
     show_gui: bool,
-    send_metrics_dd_org: str,
+    to_dd_org: str,
 ) -> None:
     """
     Show the current size of all integrations and dependencies.
@@ -85,37 +86,9 @@ def status(
                 )
             )
 
-        size_type = "compressed" if compressed else "uncompressed"
-        for output_format in format:
-            if output_format == "csv":
-                csv_filename = (
-                    f"{platform}_{version}_{size_type}_status.csv" if platform and version else
-                    f"{version}_{size_type}_status.csv" if version else
-                    f"{platform}_{size_type}_status.csv" if platform else
-                    f"{size_type}_status.csv"
-                )
-                save_csv(app, modules_plat_ver, csv_filename)
-
-            elif output_format == "json":
-                json_filename = (
-                    f"{platform}_{version}_{size_type}_status.json" if platform and version else
-                    f"{version}_{size_type}_status.json" if version else
-                    f"{platform}_{size_type}_status.json" if platform else
-                    f"{size_type}_status.json"
-                )
-                save_json(json_filename, modules_plat_ver)
-
-            elif output_format == "markdown":
-                markdown_filename = (
-                    f"{platform}_{version}_{size_type}_status.md" if platform and version else
-                    f"{version}_{size_type}_status.md" if version else
-                    f"{platform}_{size_type}_status.md" if platform else
-                    f"{size_type}_status.md"
-                )
-                with open(markdown_filename, 'w', encoding='utf-8'):
-                    pass
-            if send_metrics_dd_org:
-                send_metrics_to_dd(app, modules_plat_ver, send_metrics_dd_org, compressed)
+        export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
+        if to_dd_org:
+            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed)
     except Exception as e:
         app.abort(str(e))
 
@@ -132,18 +105,18 @@ def status_mode(
     formatted_modules = format_modules(modules, params["platform"], params["version"])
     formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
 
-    if params["markdown"]:
-        save_markdown(params["app"], "Status", formatted_modules)
-    elif not params["csv"] and not params["json"]:
+    if not params["format"] or params["format"] == ["png"]: # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    if params["show_gui"] or params["save_to_png_path"]:
+    treemap_path = f"treemap_{params['platform']}_{params['version']}.png" if "png" in params["format"] else None
+
+    if params["show_gui"] or treemap_path:
         plot_treemap(
             formatted_modules,
             f"Disk Usage Status for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "status",
-            params["save_to_png_path"],
+            treemap_path,
         )
 
     return formatted_modules

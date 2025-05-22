@@ -210,7 +210,7 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
 
 def extract_version_from_about_py(path: str) -> str:
     """
-    Extracts the __version__ string from a given __about__.py file
+    Extracts the __version__ string from a given __about__.py file.
     """
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -257,9 +257,11 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
 
             deps.append(name)
             download_urls.append(url)
-            version_match = re.search(rf"{re.escape(name)}-([0-9]+(?:\.[0-9]+)*)-", url)
+            version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
             if version_match:
                 versions.append(version_match.group(1))
+            else:
+                versions.append("")
 
     return deps, download_urls, versions
 
@@ -271,7 +273,7 @@ def get_dependencies_sizes(
     Calculates the sizes of dependencies, either compressed or uncompressed.
 
     Args:
-        deps: list of dependency names.
+        deps: List of dependency names.
         download_urls: Corresponding download URLs for the dependencies.
         versions: Corresponding version strings for the dependencies.
         compressed: If True, use the Content-Length from the HTTP headers.
@@ -286,6 +288,7 @@ def get_dependencies_sizes(
             if size_str is None:
                 raise ValueError(f"Missing size for {dep}")
             size = int(size_str)
+
         else:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()
@@ -362,15 +365,13 @@ def save_json(
 
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(filtered_modules, f, default=str, indent=2)
-
     app.display(f"JSON file saved to {file_path}")
 
 
 def save_csv(
     app: Application,
     modules: (
-        list[FileDataEntry]
-        | list[FileDataEntryPlatformVersion]
+         list[FileDataEntryPlatformVersion]
         | list[CommitEntryWithDelta]
         | list[CommitEntryPlatformWithDelta]
     ),
@@ -381,9 +382,9 @@ def save_csv(
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(",".join(headers) + "\n")
 
-    for row in modules:
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
+        for row in modules:
+            if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
+                f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
 
     app.display(f"CSV file saved to {file_path}")
 
@@ -399,24 +400,48 @@ def save_markdown(
     app: Application,
     title: str,
     modules: (
-        list[FileDataEntry]
-        | list[FileDataEntryPlatformVersion]
+        list[FileDataEntryPlatformVersion]
         | list[CommitEntryWithDelta]
         | list[CommitEntryPlatformWithDelta]
     ),
     file_path: str,
 ) -> None:
+
     if all(str(value).strip() in ("", "0", "0001-01-01") for value in modules[0].values()):
         return  # skip empty table
 
     headers = [k for k in modules[0].keys() if "Bytes" not in k]
 
+    # Group modules by platform and version
+    grouped_modules = {}
+    for module in modules:
+        platform = module.get("Platform", "")
+        version = module.get("Python_Version", "")
+        key = (platform, version)
+        if key not in grouped_modules:
+            grouped_modules[key] = []
+        grouped_modules[key].append(module)
+
     lines = []
-    lines.append(f"### {title}")
-    lines.append("| " + " | ".join(headers) + " |")
-    lines.append("| " + " | ".join("---" for _ in headers) + " |")
-    for row in modules:
-        lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+    lines.append(f"# {title}")
+    lines.append("")
+
+    for (platform, version), group in grouped_modules.items():
+        if platform and version:
+            lines.append(f"## Platform: {platform}, Python Version: {version}")
+        elif platform:
+            lines.append(f"## Platform: {platform}")
+        elif version:
+            lines.append(f"## Python Version: {version}")
+        else:
+            lines.append("## Other")
+        
+        lines.append("")
+        lines.append("| " + " | ".join(headers) + " |")
+        lines.append("| " + " | ".join("---" for _ in headers) + " |")
+        for row in group:
+            lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+        lines.append("")
 
     markdown = "\n".join(lines)
 
@@ -429,8 +454,7 @@ def print_table(
     app: Application,
     mode: str,
     modules: (
-        list[FileDataEntry]
-        | list[FileDataEntryPlatformVersion]
+         list[FileDataEntryPlatformVersion]
         | list[CommitEntryWithDelta]
         | list[CommitEntryPlatformWithDelta]
     ),
@@ -444,9 +468,46 @@ def print_table(
 
     app.display_table(mode, modules_table)
 
+def export_format(
+    app: Application,
+    format: list[str],
+    modules: list[FileDataEntryPlatformVersion],
+    mode: Literal["status", "diff"],
+    platform: Optional[str],
+    version: Optional[str],
+    compressed: bool,
+) -> None:
+    size_type = "compressed" if compressed else "uncompressed"
+    for output_format in format:
+        if output_format == "csv":
+            csv_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.csv" if platform and version else
+                f"{version}_{size_type}_{mode}.csv" if version else
+                f"{platform}_{size_type}_{mode}.csv" if platform else
+                f"{size_type}_{mode}.csv"
+            )
+            save_csv(app, modules, csv_filename)
+
+        elif output_format == "json":
+            json_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.json" if platform and version else
+                f"{version}_{size_type}_{mode}.json" if version else
+                f"{platform}_{size_type}_{mode}.json" if platform else
+                f"{size_type}_{mode}.json"
+            )
+            save_json(app, json_filename, modules)
+
+        elif output_format == "markdown":
+            markdown_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.md" if platform and version else
+                f"{version}_{size_type}_{mode}.md" if version else
+                f"{platform}_{size_type}_{mode}.md" if platform else
+                f"{size_type}_{mode}.md"
+            )
+            save_markdown(app, "Status", modules, markdown_filename)
 
 def plot_treemap(
-    modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
+    modules: list[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
     mode: Literal["status", "diff"] = "status",
@@ -611,7 +672,7 @@ def draw_treemap_rects_with_labels(
         name = mod["Name"]
         size_str = f"({mod['Size']})"
 
-        # Estimate if there is enough space for text
+        # Estimate if there's enough space for text
         CHAR_WIDTH_FACTOR = 0.1  # Width of each character relative to font size
         CHAR_HEIGHT_FACTOR = 0.5  # Minimum height for readable text
 
@@ -761,7 +822,7 @@ class GitRepo:
             time: Optional time filter (e.g. '2 weeks ago').
 
         Returns:
-            list of commit SHAs (oldest to newest).
+            List of commit SHAs (oldest to newest)
         """
         self._run("git fetch origin --quiet")
         self._run("git checkout origin/HEAD")
@@ -769,8 +830,13 @@ class GitRepo:
             if time:
                 return self._run(f'git log --since="{time}" --reverse --pretty=format:%H -- {module_path}')
             elif not initial and not final:
+                # Get all commits from first to latest
                 return self._run(f"git log --reverse --pretty=format:%H -- {module_path}")
+            elif not initial:
+                # Get commits from first commit up to specified final commit
+                return self._run(f"git log --reverse --pretty=format:%H ..{final} -- {module_path}")
             elif not final:
+                # Get commits from specified initial commit up to latest
                 return self._run(f"git log --reverse --pretty=format:%H {initial}..HEAD -- {module_path}")
             else:
                 try:
@@ -809,7 +875,7 @@ class GitRepo:
 
     def get_creation_commit_module(self, integration: str) -> str:
         """
-        Returns the first commit (SHA) where the given integration was introduced
+        Returns the first commit (SHA) where the given integration was introduced.
         """
         return self._run(f'git log --reverse --format="%H" -- {integration}')[0]
 

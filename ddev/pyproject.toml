@@ -42,7 +42,8 @@ dependencies = [
     "tqdm",
     "requests",
     "matplotlib",
-    "squarify"
+    "squarify",
+    "datadog",
 ]
 dynamic = ["version"]
 
