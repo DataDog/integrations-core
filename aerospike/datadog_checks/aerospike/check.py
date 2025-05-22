@@ -34,12 +34,6 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         config = {
             'rename_labels': RENAMED_LABELS,
-            'send_monotonic_counter': False,  # Don't send as monotonic counter
-            'send_monotonic_with_gauge': False,  # Don't send both monotonic and gauge
-            'raw_metric_prefix': '',  # Don't add any prefix
-            'collect_histogram_buckets': False,  # Collect histogram buckets
-            'histogram_buckets_as_distributions': False,  # Don't convert to distributions
-            'non_cumulative_histogram_buckets': False,  # Keep cumulative buckets
         }
 
         if int(self.build_version.split('.')[0]) < 7:
