@@ -49,7 +49,6 @@ tests:
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
-      - "source:LOGS_SOURCE"
       timestamp: 1747129872000
   - sample: |-
       {
