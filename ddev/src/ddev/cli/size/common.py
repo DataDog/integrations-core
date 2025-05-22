@@ -541,10 +541,11 @@ def plot_treemap(
     plt.subplots_adjust(right=0.8)
     plt.tight_layout()
 
-    if show:
-        plt.show()
     if path:
         plt.savefig(path, bbox_inches="tight", format="png")
+    if show:
+        plt.show()
+    
 
 
 def plot_status_treemap(

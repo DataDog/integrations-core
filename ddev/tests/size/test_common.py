@@ -19,6 +19,7 @@ from ddev.cli.size.common import (
     is_valid_integration,
     save_csv,
     save_json,
+    save_markdown,
 )
 
 
@@ -178,7 +179,6 @@ def test_get_files_grouped_and_with_versions():
         patch("ddev.cli.size.common.extract_version_from_about_py", return_value="1.2.3"),
         patch("ddev.cli.size.common.convert_to_human_readable_size", side_effect=lambda s: f"{s / 1024:.2f} KB"),
     ):
-
         result = get_files(repo_path, compressed=False)
 
     expected = [
@@ -211,7 +211,7 @@ def test_get_gitignore_files():
 
 
 def test_compress():
-    fake_content = b'a' * 16384
+    fake_content = b"a" * 16384
     original_size = len(fake_content)
 
     m = mock_open(read_data=fake_content)
@@ -235,48 +235,64 @@ def test_save_csv():
     with patch("builtins.open", mock_file):
         save_csv(mock_app, modules, "output.csv")
 
-    mock_file.assert_called_once_with("output.csv", "w", newline="")
+    mock_file.assert_called_once_with("output.csv", "w", encoding="utf-8")
     handle = mock_file()
 
-    expected_writes = [
-        "Name,Size_Bytes\n",
-        "module1,123\n",
-        '"module,with,comma",456\n"
-    ]
+    expected_writes = ["Name,Size_Bytes\n", "module1,123\n", '"module,with,comma",456\n']
 
     assert handle.write.call_args_list == [((line,),) for line in expected_writes]
 
 
 def test_save_json():
     mock_app = MagicMock()
+    mock_file = mock_open()
 
     modules = [
         {"name": "mod1", "size": "100"},
         {"name": "mod2", "size": "200"},
         {"name": "mod3", "size": "300"},
     ]
-    save_json(mock_app, modules)
 
-    expected_calls = [
-        (("[",),),
-        (('{"name": "mod1", "size": "100"}',),),
-        ((",",),),
-        (('{"name": "mod2", "size": "200"}',),),
-        ((",",),),
-        (('{"name": "mod3", "size": "300"}',),),
-        (("]",),),
+    with patch("builtins.open", mock_file):
+        save_json(mock_app, "output.json", modules)
+
+    mock_file.assert_called_once_with("output.json", "w", encoding="utf-8")
+    handle = mock_file()
+
+    expected_json = json.dumps(modules, indent=2)
+
+    written_content = "".join(call.args[0] for call in handle.write.call_args_list)
+    assert written_content == expected_json
+
+    mock_app.display.assert_called_once_with("JSON file saved to output.json")
+
+
+def test_save_markdown():
+    mock_app = MagicMock()
+    mock_file = mock_open()
+
+    modules = [
+        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B", "Type": "Integration", "Platform": "linux-x86_64"},
+        {"Name": "module2", "Size_Bytes": 456, "Size": "4 B", "Type": "Dependency", "Platform": "linux-x86_64"},
     ]
 
-    actual_calls = mock_app.display.call_args_list
-    assert actual_calls == expected_calls
+    with patch("builtins.open", mock_file):
+        save_markdown(mock_app, "Status", modules, "output.md")
 
-    result = "".join(call[0][0] for call in actual_calls)
-    parsed = json.loads(result)
-    assert parsed == [
-        {"name": "mod1", "size": "100"},
-        {"name": "mod2", "size": "200"},
-        {"name": "mod3", "size": "300"},
-    ]
+    mock_file.assert_called_once_with("output.md", "a", encoding="utf-8")
+    handle = mock_file()
+
+    expected_writes = (
+        "# Status\n\n"
+        "## Platform: linux-x86_64\n\n"
+        "| Name | Size | Type | Platform |\n"
+        "| --- | --- | --- | --- |\n"
+        "| module1 | 2 B | Integration | linux-x86_64 |\n"
+        "| module2 | 4 B | Dependency | linux-x86_64 |\n"
+    )
+
+    written_content = "".join(call.args[0] for call in handle.write.call_args_list)
+    assert written_content == expected_writes
 
 
 def test_extract_version_from_about_py_pathlib():
@@ -317,7 +333,6 @@ def test_get_org():
         patch("builtins.open", mock_open(read_data=toml_data)),
         patch.object(mock_path, "open", mock_open(read_data=toml_data)),
     ):
-
         result = get_org(mock_app)
 
     expected = {
