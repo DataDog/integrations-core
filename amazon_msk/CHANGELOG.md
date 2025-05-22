@@ -8,7 +8,7 @@
 
 * Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
 
-## 6.5.0 / 2025-04-17
+## 6.5.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 

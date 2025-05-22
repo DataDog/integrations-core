@@ -21,7 +21,7 @@
 
 * Fixed bug where we fail to explain parameterized queries that have no parameters. *Note: Does not include fix from 22.12.1* ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
 
-## 22.12.1 / 2025-05-19
+## 22.12.1 / 2025-05-19 / Agent 7.66.0
 
 ***Fixed***:
 

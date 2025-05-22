@@ -16,7 +16,7 @@
 
 * Skips explaining serverStatus command. ([#20149](https://github.com/DataDog/integrations-core/pull/20149))
 
-## 9.1.0 / 2025-04-25
+## 9.1.0 / 2025-04-25 / Agent 7.66.0
 
 ***Added***:
 

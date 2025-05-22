@@ -25,7 +25,7 @@
 * Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
 * Added SQLServer Extended Event Handlers ([#20229](https://github.com/DataDog/integrations-core/pull/20229))
 
-## 22.3.1 / 2025-04-25
+## 22.3.1 / 2025-04-25 / Agent 7.66.0
 
 ***Fixed***:
 
