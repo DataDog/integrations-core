@@ -912,7 +912,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = [f'server:{mongo_check._config.clean_server_name}', 'hosting_type:self-hosted']
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
@@ -1097,7 +1097,11 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         'hosting_type:self-hosted',
     ]
 
-    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = replica_tags + [
+        f'server:{mongo_check._config.clean_server_name}',
+        'clustername:my_cluster',
+        'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
