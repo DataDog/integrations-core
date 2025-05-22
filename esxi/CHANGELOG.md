@@ -8,7 +8,7 @@
 
 * Bump datadog-checks-base to 37.10.1 and python to 3.12 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
 
-## 3.0.1 / 2025-04-09
+## 3.0.1 / 2025-04-09 / Agent 7.66.0
 
 ***Fixed***:
 
