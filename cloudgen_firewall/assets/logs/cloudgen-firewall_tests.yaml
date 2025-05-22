@@ -1,4 +1,4 @@
-id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+id: cloudgen_firewall
 tests:
   - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
       sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
