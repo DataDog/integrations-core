@@ -4,6 +4,7 @@
 from .__about__ import __version__
 from .conditions import WaitFor
 from .docker import docker_run, get_docker_hostname
+from .vm import vm_run, vm_is_running
 from .env import environment_run
 from .errors import RetryError
 from .fs import chdir, get_here, temp_chdir, temp_dir
