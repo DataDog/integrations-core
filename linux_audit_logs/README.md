@@ -80,21 +80,21 @@ For Linux, run:
     sudo systemctl restart auditd
     ```
 
-### Setup Audit Rules (Optional)
+### Set up Audit Rules (optional)
 
-1. Create/Edit the Audit Rules File
+1. Create or Edit the audit rules file:
     ```shell
     sudo nano /etc/audit/rules.d/audit.rules
     ```
 
-2. Configure the audit rules based on your requirements. For reference, check out [audit rulesets][9].
+2. Configure the audit rules based on your requirements. For reference, see [audit rulesets][9].
 
-3. Reload Audit Rules
+3. Reload audit rules:
     ```shell
     sudo augenrules --load
     ```
 
-4. Verify Loaded Rules
+4. Verify loaded rules:
     ```shell
     sudo auditctl -l
     ```
