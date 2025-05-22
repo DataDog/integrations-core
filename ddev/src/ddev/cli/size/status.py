@@ -65,7 +65,9 @@ def status(
             raise ValueError(f"Invalid platform: {platform}")
         elif version and version not in valid_versions:
             raise ValueError(f"Invalid version: {version}")
-
+        for fmt in format:
+            if fmt not in ["png", "csv", "markdown", "json"]:
+                raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
         modules_plat_ver: list[FileDataEntryPlatformVersion] = []
         platforms = valid_platforms if platform is None else [platform]
         versions = valid_versions if version is None else [version]

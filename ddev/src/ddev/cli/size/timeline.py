@@ -83,6 +83,7 @@ def timeline(
     threshold: Optional[int],
     platform: Optional[str],
     compressed: bool,
+    format: Optional[list[str]],
     show_gui: bool,
 ) -> None:
     """
@@ -213,7 +214,7 @@ def timeline(
                             )
                         )
 
-                    export_format(app, format, platform, None, compressed, modules_plat)
+                    export_format(app, format, modules_plat, platform, module, compressed)
 
                 else:  # integration
                     modules: list[CommitEntryWithDelta] = []
@@ -237,7 +238,7 @@ def timeline(
                             progress,
                         )
                     )
-                    export_format(app, format, None, None, compressed, modules)
+                    export_format(app, format, modules, None, module, compressed)
 
             except Exception as e:
                 progress.stop()

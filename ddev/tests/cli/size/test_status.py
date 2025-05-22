@@ -55,15 +55,15 @@ def mock_size_status():
         patch("ddev.cli.size.status.get_files", return_value=fake_files),
         patch("ddev.cli.size.status.get_dependencies", return_value=fake_deps),
         patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", "")),
-        patch("ddev.cli.size.status.print_csv"),
         patch("ddev.cli.size.common.compress", return_value=1234),
-        patch("ddev.cli.size.status.print_table"),
-        patch("ddev.cli.size.status.plot_treemap"),
+        # patch("ddev.cli.size.status.plot_treemap"),
         patch("os.walk", return_value=mock_walk),
         patch("os.listdir", return_value=["fake_dep.whl"]),
         patch("os.path.isfile", return_value=True),
         patch("matplotlib.pyplot.show"),
         patch("matplotlib.pyplot.savefig"),
+        patch("matplotlib.pyplot.figure"),
+        patch("builtins.open", MagicMock()),
     ):
         yield mock_app
 
@@ -71,22 +71,14 @@ def mock_size_status():
 def test_status_no_args(ddev, mock_size_status):
     assert ddev("size", "status").exit_code == 0
     assert ddev("size", "status", "--compressed").exit_code == 0
-    assert ddev("size", "status", "--csv").exit_code == 0
-    assert ddev("size", "status", "--markdown").exit_code == 0
-    assert ddev("size", "status", "--json").exit_code == 0
-    assert ddev("size", "status", "--save-to-png-path", "out.png").exit_code == 0
+    assert ddev("size", "status", "--format", "csv,markdown,json,png").exit_code == 0
     assert ddev("size", "status", "--show-gui").exit_code == 0
 
 
 def test_status(ddev, mock_size_status):
     assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12")).exit_code == 0
     assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--compressed")).exit_code == 0
-    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--csv")).exit_code == 0
-    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--markdown")).exit_code == 0
-    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--json")).exit_code == 0
-    assert (
-        ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--save-to-png-path", "out.png")
-    ).exit_code == 0
+    assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--format", "csv,markdown,json,png")).exit_code == 0
     assert (ddev("size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--show-gui")).exit_code == 0
 
 

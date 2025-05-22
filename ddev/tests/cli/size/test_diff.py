@@ -60,6 +60,8 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.diff.format_modules", side_effect=lambda m, *_: m),
         patch("matplotlib.pyplot.show"),
         patch("matplotlib.pyplot.savefig"),
+        patch("matplotlib.pyplot.figure"),
+        patch("builtins.open", MagicMock()),
     ):
         yield
 
@@ -67,10 +69,7 @@ def mock_size_diff_dependencies():
 def test_diff_no_args(ddev, mock_size_diff_dependencies):
     assert ddev("size", "diff", "commit1", "commit2").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
-    assert ddev("size", "diff", "commit1", "commit2", "--csv").exit_code == 0
-    assert ddev("size", "diff", "commit1", "commit2", "--markdown").exit_code == 0
-    assert ddev("size", "diff", "commit1", "commit2", "--json").exit_code == 0
-    assert ddev("size", "diff", "commit1", "commit2", "--save-to-png-path", "out.png").exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2", "--format", "csv,markdown,json,png").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
 
 
@@ -83,34 +82,8 @@ def test_diff_with_platform_and_version(ddev, mock_size_diff_dependencies):
         == 0
     )
     assert (
-        ddev("size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--csv").exit_code
-        == 0
-    )
-    assert (
-        ddev(
-            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--markdown"
-        ).exit_code
-        == 0
-    )
-    assert (
-        ddev(
-            "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--json"
-        ).exit_code
-        == 0
-    )
-    assert (
-        ddev(
-            "size",
-            "diff",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-aarch64",
-            "--python",
-            "3.12",
-            "--save-to-png-path",
-            "out.png",
-        ).exit_code
+        ddev("size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--format", 
+             "csv,markdown,json,png").exit_code
         == 0
     )
     assert (
@@ -159,6 +132,8 @@ def test_diff_no_differences(ddev):
         ),
         patch("matplotlib.pyplot.show"),
         patch("matplotlib.pyplot.savefig"),
+        patch("matplotlib.pyplot.figure"),
+        patch("builtins.open", MagicMock()),
     ):
         result = ddev(
             "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"
@@ -169,10 +144,7 @@ def test_diff_no_differences(ddev):
 
         assert ddev("size", "diff", "commit1", "commit2").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
-        assert ddev("size", "diff", "commit1", "commit2", "--csv").exit_code == 0
-        assert ddev("size", "diff", "commit1", "commit2", "--markdown").exit_code == 0
-        assert ddev("size", "diff", "commit1", "commit2", "--json").exit_code == 0
-        assert ddev("size", "diff", "commit1", "commit2", "--save-to-png-path", "out.png").exit_code == 0
+        assert ddev("size", "diff", "commit1", "commit2", "--format", "csv,markdown,json,png").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
 
 

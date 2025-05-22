@@ -88,7 +88,9 @@ def diff(
             )
         if first_commit == second_commit:
             raise click.BadParameter("Commit hashes must be different")
-
+        for fmt in format:
+            if fmt not in ["png", "csv", "markdown", "json"]:
+                raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
         repo_url = app.repo.path
 
         with GitRepo(repo_url) as gitRepo:
