@@ -10,7 +10,23 @@
     "changelog": "CHANGELOG.md",
     "description": "CloudGen Firewall is a NGFW that protect networks and Internet traffic",
     "title": "cloudgen_firewall",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Barracuda CloudGen Firewall Overview",
+        "image_url": "images/cloudgen_firewall_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Other Event types of CloudGen Firewall",
+        "image_url": "images/cloudgen_firewall_logs1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Some more Events types of CloudGen Firewall",
+        "image_url": "images/cloudgen_firewall_logs2.png"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
@@ -38,8 +54,12 @@
         "check": "",
         "metadata_path": "metadata.csv"
       }
-    }
-
+    },
+    "dashboards": {
+        "Barracuda CloudGen Firewall overview": "assets/dashboards/cloudgen_firewall_overview.json"
+    },
+    "monitors": {},
+    "saved_views": {}
   },
   "author": {
     "support_email": "help@datadoghq.com",
