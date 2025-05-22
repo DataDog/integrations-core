@@ -211,50 +211,34 @@ class CheckDockerLogs(CheckCommandOutput):
         )
         self.identifier = identifier
 
-class CheckVMLogs(CheckEndpoints):
-    def __init__(self, vm_identifier, log_patterns, wait_name="logs", vm_name=None):
-        self.vm_identifier = vm_identifier
-        self.log_patterns = log_patterns
-        self.wait_name = wait_name
-        self.vm_name = vm_name or "gluster-node-1"  # Default to a known VM name if not specified
+class CheckVMLogs(CheckCommandOutput):
+    def __init__(
+        self,
+        identifier,  # type: str
+        patterns,  # type: Union[str, List[str]]
+        matches=1,  # type: Union[str, int]
+        stdout=True,  # type: bool
+        stderr=True,  # type: bool
+        attempts=60,  # type: int
+        wait=1,  # type: int
+    ):
+        """
+        Checks if the provided patterns are present in docker logs
 
-        # Command will be set in __call__ based on whether vm_identifier is a VM name or Vagrant file
-        self.command = None
+        :param identifier: The docker image identifier
+        :param patterns: List of patterns to match
+        :param matches: How many of the provided patterns need to match, it can be a number or "all"
+        :param stdout: Whether to search for the provided patterns in stdout
+        :param stderr: Whether to search for the provided patterns in stderr
+        :param attempts: How many times to try searching for the patterns
+        :param wait: How long, in seconds, to wait between attempts
+        """
+        command = ["VBoxManage", "showvminfo", identifier, "--log", "0"]
 
-    def __call__(self):
-        # Determine if vm_identifier is a VM name or Vagrant file
-        if os.path.exists(self.vm_identifier) or os.path.exists(os.path.join(self.vm_identifier, "Vagrantfile")):
-            # It's a Vagrant file or directory containing one
-            vagrant_dir = self.vm_identifier
-            if os.path.isfile(self.vm_identifier):
-                vagrant_dir = os.path.dirname(self.vm_identifier)
-
-            # Specify the VM name when using vagrant ssh
-            self.command = ["vagrant", "ssh", self.vm_name, "-c", "cat /var/log/syslog | tail -n 1000"]
-
-            # Need to change directory to run vagrant command
-            original_dir = os.getcwd()
-            os.chdir(vagrant_dir)
-            try:
-                logs = run_command(self.command, capture="out", check=True).stdout.strip()
-            finally:
-                os.chdir(original_dir)
-        else:
-            # It's a VM name, use VirtualBox logs
-            vm_name = self.vm_identifier
-            self.command = ["VBoxManage", "showvminfo", vm_name, "--log", "0"]
-            logs = run_command(self.command, capture="out", check=True).stdout.strip()
-
-        for log_pattern in self.log_patterns:
-            if hasattr(log_pattern, "search"):
-                match = log_pattern.search(logs)
-            else:
-                match = re.search(log_pattern, logs)
-
-            if not match:
-                return False
-
-        return True
+        super(CheckVMLogs, self).__init__(
+            command, patterns, matches=matches, stdout=stdout, stderr=stderr, attempts=attempts, wait=wait
+        )
+        self.identifier = identifier
 
 
 class WaitForPortListening(WaitFor):

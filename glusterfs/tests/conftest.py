@@ -24,69 +24,33 @@ SECONDARY_VM = "gluster-node-2"
 
 E2E_METADATA = {
     "start_commands": [
-        # For GitHub Actions, run the setup script
-        "cd {}/tests/vm && bash github_setup.sh".format(os.path.dirname(HERE)),
     ],
 }
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    # For macOS, use Vagrant
     if platform.system() == "Darwin" and not ON_CI:
         vagrant_file = os.path.join(HERE, "vm", "Vagrantfile")
 
-        # Create custom conditions list with VM name specified
-        # If you need to add log patterns, add them like this:
-        # log_patterns = ["GlusterFS started"]
-        # vm_conditions.append(CheckVMLogs(vagrant_file, log_patterns, vm_name=PRIMARY_VM))
+        log_patterns = ["GlusterFS started"]
+        vm_conditions = []
+        vm_conditions.append(CheckVMLogs(PRIMARY_VM, log_patterns))
+        vm_conditions.append(CheckVMLogs(SECONDARY_VM, log_patterns))
+        vm_conditions.append(WaitFor(setup_gluster_cluster))
 
         with vm_run(
             vm_definition=vagrant_file,
-            # conditions=[WaitFor(setup_gluster_cluster)],
-            # down=teardown_gluster_cluster,
+            conditions=vm_conditions,
+            down=teardown_gluster_cluster,
             attempts=1,
             attempts_wait=15,
             primary_vm=PRIMARY_VM,
         ):
-            # Use an updated config for VMs if needed
             vm_config = copy.deepcopy(CONFIG)
-            # If you need to update any config fields for VM usage, do it here
-
             yield vm_config, E2E_METADATA
     else:
-        # For GitHub Actions or other CI, use the script directly
-        setup_script = os.path.join(HERE, "vm", "github_setup.sh")
-
-        # Ensure execute permissions
-        if os.path.exists(setup_script):
-            run_command(["chmod", "+x", setup_script], check=True)
-
-        # Run with custom setup
-        def github_setup():
-            return run_command(["bash", setup_script], check=True)
-
-        def github_teardown():
-            try:
-                run_command(["sudo", "gluster", "volume", "stop", "gv0", "--mode=script"], check=False)
-                run_command(["sudo", "gluster", "volume", "delete", "gv0", "--mode=script"], check=False)
-                run_command(["sudo", "systemctl", "stop", "glusterd"], check=False)
-            except Exception:
-                # Ignore errors during teardown
-                pass
-
-        with vm_run(
-            up=github_setup,
-            down=github_teardown,
-            attempts=1,
-            attempts_wait=5,
-        ):
-            # Use a config that works with the GitHub Actions setup
-            github_config = copy.deepcopy(CONFIG)
-            # GitHub Actions configuration might need adjustments
-
-            yield github_config, E2E_METADATA
-
+        raise Exception("VMs are only supported on Mac OS arm64")
 
 @pytest.fixture
 def instance():
