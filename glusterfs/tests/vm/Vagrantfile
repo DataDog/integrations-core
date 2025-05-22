@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Use ARM64-compatible box for Apple Silicon Macs
+  config.vm.box = "net9/ubuntu-24.04-arm64"
+  config.vm.box_version = "1.1"
+
+  config.vm.network "private_network", type: "dhcp"
+  
+  # VM for gluster node 1
+  config.vm.define "gluster-node-1" do |node1|
+    node1.vm.hostname = "gluster-node-1"
+    node1.vm.provision "shell", inline: <<-SHELL
+      apt update
+      apt install -y software-properties-common
+      add-apt-repository -y ppa:gluster/glusterfs-9
+      apt update
+      apt install -y glusterfs-server glusterfs-client
+      systemctl start glusterd
+      systemctl enable glusterd
+    SHELL
+  end
+
+  # VM for gluster node 2
+  config.vm.define "gluster-node-2" do |node2|
+    node2.vm.hostname = "gluster-node-2"
+    node2.vm.provision "shell", inline: <<-SHELL
+      apt update
+      apt install -y software-properties-common
+      add-apt-repository -y ppa:gluster/glusterfs-9
+      apt update
+      apt install -y glusterfs-server glusterfs-client
+      systemctl start glusterd
+      systemctl enable glusterd
+    SHELL
+  end
+end 
