@@ -96,7 +96,7 @@ release-auto:
     - schedules
   script:
     - ddev --version
-    - ddev config set core .
+    - ddev config set repos.core .
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
