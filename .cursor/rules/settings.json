@@ -1,0 +1,8 @@
+{
+    "python.testing.pytestArgs": [
+      "ddev/tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+  }
+  
