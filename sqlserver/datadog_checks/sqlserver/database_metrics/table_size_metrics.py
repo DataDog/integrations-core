@@ -14,10 +14,11 @@ TABLE_SIZE_STATS_QUERY = {
     SELECT 
         t.name AS table_name,
         s.name AS schema_name,
+        db_name() AS database_name,
         SUM(p.row_count) AS row_count,
-        CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS total_size_mb,
-        CAST(SUM(a.used_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS used_size_mb,
-        CAST(SUM(a.data_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS data_size_mb
+        CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS total_size,
+        CAST(SUM(a.used_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS used_size,
+        CAST(SUM(a.data_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS data_size
     FROM 
         sys.tables t
     INNER JOIN 
@@ -31,15 +32,16 @@ TABLE_SIZE_STATS_QUERY = {
     GROUP BY 
         t.name, s.name
     ORDER BY 
-        total_size_mb DESC;
+        total_size DESC;
 """,
     "columns": [
         {"name": "table", "type": "tag"},
         {"name": "schema", "type": "tag"},
-        {"name": "row_count", "type": "gauge"},
-        {"name": "total_size_mb", "type": "gauge"},
-        {"name": "used_size_mb", "type": "gauge"},
-        {"name": "data_size_mb", "type": "gauge"},
+        {"name": "database", "type": "tag"},
+        {"name": "table.row_count", "type": "gauge"},
+        {"name": "table.total_size", "type": "gauge"},
+        {"name": "table.used_size", "type": "gauge"},
+        {"name": "table.data_size", "type": "gauge"},
     ],
 }
 
