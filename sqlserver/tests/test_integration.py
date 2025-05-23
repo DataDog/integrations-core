@@ -269,7 +269,7 @@ def test_autodiscovery_db_service_checks(
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
-            assert c.tags.sort() == critical_tags.sort()
+            assert sorted(c.tags) == sorted(critical_tags)
     if service_check_enabled:
         assert db_critical_exists
 

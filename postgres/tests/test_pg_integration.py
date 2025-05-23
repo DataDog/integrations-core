@@ -772,7 +772,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         (True, None),
         (False, None),
         (True, 'forced_hostname'),
-        (True, 'forced_hostname'),
+        (False, 'forced_hostname'),
     ],
 )
 def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
@@ -780,19 +780,36 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     # this will block on cancel and wait for the coll interval of 600 seconds,
     # unless the collection_interval is set to a short amount of time
     pg_instance['collect_resources'] = {'collection_interval': 0.1}
+
+    expected_database_hostname = expected_database_instance = expected_host = "stubbed.hostname"
     if reported_hostname:
         pg_instance['reported_hostname'] = reported_hostname
-    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
+        expected_host = reported_hostname
+        expected_database_instance = reported_hostname
+
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'postgresql_cluster_name:primary',
+        'replication_role:master',
+        'database_hostname:{}'.format(expected_database_hostname),
+        'database_instance:{}'.format(expected_database_instance),
+    ]
     check = PostgreSql('test_instance', {}, [pg_instance])
     run_one_check(check)
+
+    # These tags are a bit dynamic in value, so we get them from the check and ensure they are present
+    expected_tags.append('postgresql_version:{}'.format(check.raw_version))
+    expected_tags.append('system_identifier:{}'.format(check.system_identifier))
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is not None
     assert event['host'] == expected_host
+    assert event['database_instance'] == expected_database_instance
+    assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "postgres"
-    assert event['tags'].sort() == expected_tags.sort()
+
+    assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {
