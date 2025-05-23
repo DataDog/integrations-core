@@ -78,7 +78,7 @@
       }
     },
     "dashboards": {
-      "Docker - Overview": "assets/dashboards/docker_dashboard.json"
+      "docker": "assets/dashboards/docker_dashboard.json"
     }
   }
 }
