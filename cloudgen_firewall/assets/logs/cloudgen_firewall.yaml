@@ -154,7 +154,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map hostname to syslog.hostname
+      name: Map `hostname` to `syslog.hostname`
       enabled: true
       sources:
         - hostname
@@ -164,7 +164,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map 'component' to 'service'
+      name: Map `component` to `service`
       enabled: true
       sources:
         - component
@@ -447,7 +447,7 @@ pipeline:
         matchRules: autoFilledRule1
           %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+%{greedyData:message}
     - type: attribute-remapper
-      name: Remapping status from level attribute
+      name: Map `level` to `status`
       enabled: true
       sources:
         - level
@@ -500,7 +500,7 @@ pipeline:
           %{data:hostname}
           %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+%{greedyData:Action}
     - type: status-remapper
-      name: Remapper level to status
+      name: [Define `level` as the official status of the log]
       enabled: true
       sources:
         - level
