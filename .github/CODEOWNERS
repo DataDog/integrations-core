@@ -165,6 +165,7 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /openai/            @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /anthropic/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
+/crewai/            @DataDog/ml-observability @DataDog/documentation
 
 # Windows agent
 datadog_checks_base/datadog_checks/base/checks/win/                  @DataDog/windows-agent @DataDog/agent-integrations
@@ -537,6 +538,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /kaspersky/*.md                                                      @DataDog/agent-integrations @DataDog/documentation
 /kaspersky/manifest.json                                             @DataDog/agent-integrations @DataDog/documentation
 /kaspersky/assets/logs/                                              @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
+/dnsfilter/                                                          @DataDog/saas-integrations
+/dnsfilter/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/dnsfilter/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations

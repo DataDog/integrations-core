@@ -82,7 +82,7 @@ def instance_basic():
         'username': common.USER,
         'password': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
     }
 
 
@@ -93,7 +93,7 @@ def instance_complex():
         'username': common.USER,
         'password': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -131,7 +131,7 @@ def instance_additional_status():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "Innodb_rows_read",
@@ -179,7 +179,7 @@ def instance_status_already_queried():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "Open_files",
@@ -198,7 +198,7 @@ def instance_var_already_queried():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_variable': [
             {
                 'name': "Key_buffer_size",
@@ -217,7 +217,7 @@ def instance_invalid_var():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "longer_query_time",
@@ -241,7 +241,7 @@ def instance_custom_queries():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'custom_queries': [
             {
                 'query': "SELECT name,age from testdb.users where name='Alice' limit 1;",
