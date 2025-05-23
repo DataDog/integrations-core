@@ -159,9 +159,6 @@ validate-log-intgs-builder:
     - changes:
         - .gitlab/validate-logs-intgs/**/*
         - .gitlab-ci.yml
-    # Allow to manually trigger a build if we need to
-    - when: manual
-      allow_failure: true
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
