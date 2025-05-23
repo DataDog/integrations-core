@@ -269,7 +269,7 @@ def test_autodiscovery_db_service_checks(
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
-            assert c.tags.sort() == critical_tags.sort()
+            assert sorted(c.tags) == sorted(critical_tags)
     if service_check_enabled:
         assert db_critical_exists
 
@@ -1039,6 +1039,22 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             assert 'raw_query_signature' in query_details, "raw_query_signature not found in query details"
             assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
 
+            # Verify primary_sql_field is present
+            assert 'primary_sql_field' in query_details, "primary_sql_field not found in query details"
+            assert query_details.get('primary_sql_field') in [
+                'batch_text',
+                'sql_text',
+                'statement',
+            ], f"Unexpected primary_sql_field value: {query_details.get('primary_sql_field')}"
+
+            # Verify metadata is present
+            assert 'metadata' in query_details, "metadata not found in query details"
+            metadata = query_details.get('metadata', {})
+            assert isinstance(metadata, dict), "metadata is not a dictionary"
+            assert 'tables' in metadata, "tables not found in metadata"
+            assert 'commands' in metadata, "commands not found in metadata"
+            assert 'comments' in metadata, "comments not found in metadata"
+
     assert found_test_query, "Could not find our specific test query in the completion events"
 
     # Verify specific error event details
@@ -1057,5 +1073,21 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
             # Verify raw_query_signature is present when collect_raw_query is enabled
             assert 'raw_query_signature' in query_details, "raw_query_signature not found in error query details"
             assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
+
+            # Verify primary_sql_field is present
+            assert 'primary_sql_field' in query_details, "primary_sql_field not found in error query details"
+            assert query_details.get('primary_sql_field') in [
+                'batch_text',
+                'sql_text',
+                'statement',
+            ], f"Unexpected primary_sql_field value: {query_details.get('primary_sql_field')}"
+
+            # Verify metadata is present
+            assert 'metadata' in query_details, "metadata not found in error query details"
+            metadata = query_details.get('metadata', {})
+            assert isinstance(metadata, dict), "metadata is not a dictionary"
+            assert 'tables' in metadata, "tables not found in metadata"
+            assert 'commands' in metadata, "commands not found in metadata"
+            assert 'comments' in metadata, "comments not found in metadata"
 
     assert found_error_query, "Could not find our specific error query in the error events"

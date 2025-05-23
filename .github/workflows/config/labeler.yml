@@ -159,6 +159,8 @@ integration/couch:
 - couch/**/*
 integration/couchbase:
 - couchbase/**/*
+integration/crewai:
+- crewai/**/*
 integration/cri:
 - cri/**/*
 integration/crio:
@@ -181,6 +183,8 @@ integration/directory:
 - directory/**/*
 integration/disk:
 - disk/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
@@ -673,6 +677,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/watchguard_firebox:
+- watchguard_firebox/**/*
 integration/wazuh:
 - wazuh/**/*
 integration/weaviate:
@@ -691,6 +697,8 @@ integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
 - winkmem/**/*
+integration/wlan:
+- wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
