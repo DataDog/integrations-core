@@ -1,0 +1,4 @@
+Added new commands to track and analyze size changes in integrations and dependencies:
+- **`ddev size status`**: Shows current sizes of all modules.
+- **`ddev size diff [COMMIT_BEFORE] [COMMIT_AFTER]`**: Compares size changes between two commits.
+- **`ddev size timeline {integration | dependency} [INTEGRATION_NAME/DEPENDENCY_NAME]`**: Visualizes the size evolution of a module over time.

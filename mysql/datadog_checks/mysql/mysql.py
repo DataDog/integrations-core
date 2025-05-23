@@ -25,6 +25,7 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 
 from .__about__ import __version__
@@ -81,7 +82,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_autocommit  # noqa: F401
+from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
 from .version_utils import get_version
 
 try:
@@ -103,7 +104,6 @@ class MySql(AgentCheck):
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
     GROUP_REPLICATION_SERVICE_CHECK_NAME = 'mysql.replication.group.status'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
-
     HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
@@ -494,6 +494,20 @@ class MySql(AgentCheck):
             return connection_args
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
+        if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
+            # if we are running on AWS, check if IAM auth is enabled
+            aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+            if aws_managed_authentication['enabled']:
+                # if IAM auth is enabled, region must be set. Validation is done in the config
+                region = self.cloud_metadata['aws']['region']
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    region=region,
+                    role_arn=aws_managed_authentication.get('role_arn'),
+                )
+                connection_args.update({'user': self._config.user, 'passwd': password})
         if self._config.mysql_sock != '':
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
@@ -521,7 +535,7 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = connect_with_autocommit(**connect_args)
+            db = connect_with_session_variables(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
@@ -1237,7 +1251,7 @@ class MySql(AgentCheck):
                 query_exec_time_95th_per = row[0]
 
                 return query_exec_time_95th_per
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+        except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.InterfaceError) as e:
             self.warning("95th percentile performance metrics unavailable at this time: %s", e)
             return None
 

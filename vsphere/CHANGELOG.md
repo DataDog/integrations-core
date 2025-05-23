@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 8.3.0 / 2025-04-17
+## 8.3.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 
@@ -12,7 +12,7 @@
 
 * Don't submit property metrics with unknown hostname. ([#19944](https://github.com/DataDog/integrations-core/pull/19944))
 
-## 8.2.1 / 2025-03-19
+## 8.2.1 / 2025-03-19 / Agent 7.65.0
 
 ***Fixed***:
 
