@@ -723,8 +723,8 @@ def send_metrics_to_dd(
     )
     config_file_info = get_org(app, org)
     print(config_file_info)
-    if not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    # if not is_everything_committed():
+    #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
 
 
     timestamp = get_last_commit_timestamp()
