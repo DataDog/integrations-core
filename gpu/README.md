@@ -9,6 +9,12 @@ Supported vendors: NVIDIA.
 - Track utilization of GPU devices and retrieve performance and health metrics.
 - Monitor processes that are using GPU devices and their performance.
 
+## Requirements
+
+- NVIDIA driver version: 450.51 and above
+- Supported OS: Linux only
+- Linux kernel version: 5.8 and above
+
 ## Setup
 
 ### Installation
@@ -26,14 +32,21 @@ The check also uses eBPF probes to assign GPU usage and performance metrics to p
 
 #### Host
 
-Enabling the `gpu` integration requires `system-probe` to have the configuration option enabled.  Inside the `system-probe.yaml` configuration file, the following parameters must be set:
+The agent needs to be configured to enable GPU-related features. Add the following parameters to the `/etc/datadog-agent/datadog.yaml` configuration file and then restart the Agent:
+
+```yaml
+collect_gpu_tags: true
+enable_nvml_detection: true
+```
+
+Enabling the `gpu` integration requires `system-probe` to have the configuration option enabled for collecting per-process metrics. Inside the `/etc/datadog-agent/system-probe.yaml` configuration file, the following parameters must be set:
 
 ```yaml
 gpu_monitoring:
   enabled: true
 ```
 
-The check in the Agent configuration file is enabled by default whenever NVIDIA GPUs and their drivers are detected in the system. However, it can also be configured manually following these steps:
+The check in the Agent configuration file is enabled by default whenever NVIDIA GPUs and their drivers are detected in the system, as long as the `enable_nvml_detection` parameter is set to `true`. However, it can also be configured manually following these steps:
 
 1. Edit the `gpu.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Agent's configuration directory, to start collecting your GPU performance data.
@@ -45,6 +58,43 @@ This check is automatically enabled when the Agent is running on a host with NVI
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
+
+#### Docker
+
+The GPU monitoring feature requires the `system-probe` component to be enabled, so in addition to the configuration above for the `datadog.yaml` and `system-probe.yaml` files, the following needs to be added to the `docker run` command:
+
+```bash
+docker run --cgroupns host \
+  --pid host \
+  -e DD_API_KEY="<DATADOG_API_KEY>" \
+  -e DD_GPU_MONITORING_ENABLED=true \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc/:/host/proc/:ro \
+  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+  -v /sys/kernel/debug:/sys/kernel/debug \
+  -v /lib/modules:/lib/modules:ro \
+  -v /usr/src:/usr/src:ro \
+  -v /var/tmp/datadog-agent/system-probe/build:/var/tmp/datadog-agent/system-probe/build \
+  -v /var/tmp/datadog-agent/system-probe/kernel-headers:/var/tmp/datadog-agent/system-probe/kernel-headers \
+  -v /etc/apt:/host/etc/apt:ro \
+  -v /etc/yum.repos.d:/host/etc/yum.repos.d:ro \
+  -v /etc/zypp:/host/etc/zypp:ro \
+  -v /etc/pki:/host/etc/pki:ro \
+  -v /etc/yum/vars:/host/etc/yum/vars:ro \
+  -v /etc/dnf/vars:/host/etc/dnf/vars:ro \
+  -v /etc/rhsm:/host/etc/rhsm:ro \
+  -e HOST_ROOT=/host/root \
+  --security-opt apparmor:unconfined \
+  --cap-add=SYS_ADMIN \
+  --cap-add=SYS_RESOURCE \
+  --cap-add=SYS_PTRACE \
+  --cap-add=NET_ADMIN \
+  --cap-add=NET_BROADCAST \
+  --cap-add=NET_RAW \
+  --cap-add=IPC_LOCK \
+  --cap-add=CHOWN \
+  gcr.io/datadoghq/agent:latest
+```
 
 #### Important: Running on Helm/Kubernetes in mixed environments
 
@@ -185,7 +235,7 @@ The GPU check does not include any service checks.
 
 Need help? Contact [Datadog support][8].
 
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/gpu.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

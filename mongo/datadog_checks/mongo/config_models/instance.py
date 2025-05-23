@@ -141,6 +141,7 @@ class InstanceConfig(BaseModel):
     dbstats_tag_dbname: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    free_storage_metrics: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics_collection_interval: Optional[MetricsCollectionInterval] = None

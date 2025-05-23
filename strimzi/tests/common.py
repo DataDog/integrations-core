@@ -207,6 +207,7 @@ USER_OPERATOR_METRICS = (
 FLAKY_E2E_METRICS = (
     "strimzi.cluster_operator.reconciliations.failed.count",
     "strimzi.cluster_operator.reconciliations.periodical.count",
+    "strimzi.cluster_operator.reconciliations.locked.count",
     "strimzi.cluster_operator.resources.paused",
     "strimzi.cluster_operator.vertx.http_client.active_connections",
     "strimzi.cluster_operator.vertx.http_client.active_requests",

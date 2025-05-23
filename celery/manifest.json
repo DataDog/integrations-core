@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6aee88c6-c3b2-43b2-8f1e-5ba7c6011cb6",
   "app_id": "celery",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -43,6 +43,9 @@
       "process_signatures": [
         "celery"
       ]
+    },
+    "dashboards": {
+      "Celery Overview": "assets/dashboards/celery_overview.json"
     },
     "monitors": {
       "Celery workers are idle": "assets/monitors/celery_exection_idle.json",

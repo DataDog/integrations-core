@@ -2,6 +2,66 @@
 
 <!-- towncrier release notes start -->
 
+## 22.6.0 / 2025-05-19
+
+***Added***:
+
+* Fill in missing fields for XE events ([#20293](https://github.com/DataDog/integrations-core/pull/20293))
+
+***Fixed***:
+
+* Add object_name to rpc_completed XE events, add activity ID and activity ID Xfer to error events ([#20302](https://github.com/DataDog/integrations-core/pull/20302))
+
+## 22.5.0 / 2025-05-15
+
+***Added***:
+
+* Add database and Azure name to SQL Server database identifier template variables ([#20301](https://github.com/DataDog/integrations-core/pull/20301))
+
+## 22.4.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Added SQLServer Extended Event Handlers ([#20229](https://github.com/DataDog/integrations-core/pull/20229))
+
+## 22.3.1 / 2025-04-25 / Agent 7.66.0
+
+***Fixed***:
+
+* Use DB_NAME for query metrics in an Azure SQL database since joining on sys.databases doesn't always work. The dbid from dm_exec_query_stats doesn't match the one in sys.databases. ([#20097](https://github.com/DataDog/integrations-core/pull/20097))
+
+## 22.3.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+
+## 22.2.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.1.0 / 2025-04-17
+
+***Added***:
+
+* Optimize SQL Server integration by removing redundant query comment parsing using `extract_sql_comments` and switching stored procedure name extraction to use `OBJECT_NAME(sproc_object_id, dbid)`; when `disable_secondary_tags` is enabled, fall back to parsing the procedure name from the raw query text. ([#19935](https://github.com/DataDog/integrations-core/pull/19935))
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+***Fixed***:
+
+* Remove unnecessary `like` from SQL Server deadlock query ([#19921](https://github.com/DataDog/integrations-core/pull/19921))
+
+## 22.0.1 / 2025-03-28 / Agent 7.65.0
+
+***Fixed***:
+
+* Fix SQL Server integration when database is using case sensitive collation ([#19930](https://github.com/DataDog/integrations-core/pull/19930))
+* Fixed support for FreeTDS driver ([#19931](https://github.com/DataDog/integrations-core/pull/19931))
+
 ## 22.0.0 / 2025-03-19
 
 ***Changed***:

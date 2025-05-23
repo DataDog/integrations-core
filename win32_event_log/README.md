@@ -542,7 +542,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor Windows event logs with Datadog][27]
 - [Monitor your Windows event logs with Datadog Cloud SIEM][33]]
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest?platform=windows
+[1]: /account/settings/agent/latest?platform=windows
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -572,5 +572,5 @@ Additional helpful documentation, links, and articles:
 [29]: https://docs.datadoghq.com/security/cloud_siem/
 [30]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_low.yaml.example
 [31]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_high.yaml.example
-[32]: https://app.datadoghq.com/integrations?integrationId=event-viewer
+[32]: /integrations?integrationId=event-viewer
 [33]: https://www.datadoghq.com/blog/datadog-cloud-siem-windows-event-logs/

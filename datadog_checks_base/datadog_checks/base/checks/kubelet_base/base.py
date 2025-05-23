@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-from ...utils.date import UTC, parse_rfc3339
+from ...utils.date import parse_rfc3339
 from .. import AgentCheck
 
 try:
@@ -70,7 +70,7 @@ class KubeletBase(AgentCheck):
             seconds = int(get_config("kubernetes_pod_expiration_duration"))
             if seconds == 0:  # Expiration disabled
                 return None
-            return datetime.utcnow().replace(tzinfo=UTC) - timedelta(seconds=seconds)
+            return datetime.now(timezone.utc) - timedelta(seconds=seconds)
         except (ValueError, TypeError):
             return None
 

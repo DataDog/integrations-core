@@ -18,7 +18,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, connect_with_autocommit, get_truncation_state, warning_with_tags
+from .util import DatabaseConfigurationError, connect_with_session_variables, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
@@ -195,7 +195,7 @@ class MySQLActivity(DBMAsyncJob):
                         'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
                         DatabaseConfigurationError.events_waits_current_not_enabled.value,
                         code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
-                        host=self._check.resolved_hostname,
+                        host=self._check.reported_hostname,
                     ),
                 )
             return
@@ -266,8 +266,19 @@ class MySQLActivity(DBMAsyncJob):
         # type: (List[Dict[str]]) -> List[Dict[str]]
         rows = sorted(rows, key=lambda r: self._sort_key(r))
         normalized_rows = []
+        seen = {}
+        second_pass = {}
         estimated_size = 0
         for row in rows:
+            if row["thread_id"] in seen:
+                # `performance_schema.events_statements_current` can contain previous statements
+                # for the same thread. We only want the most recent one.
+                if row["event_timer_end"] < seen[row["thread_id"]]["event_timer_start"]:
+                    continue
+                else:
+                    second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
+            else:
+                seen[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
             if row["sql_text"] is not None:
                 row["query_truncated"] = get_truncation_state(row["sql_text"]).value
             row = self._obfuscate_and_sanitize_row(row)
@@ -275,7 +286,22 @@ class MySQLActivity(DBMAsyncJob):
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
                 return normalized_rows
             normalized_rows.append(row)
+        if second_pass:
+            normalized_rows = self._eliminate_duplicate_rows(normalized_rows, second_pass)
         return normalized_rows
+
+    @staticmethod
+    def _eliminate_duplicate_rows(rows, second_pass):
+        # type: (List[Dict[str]], Dict[str]) -> List[Dict[str]]
+        filtered_rows = []
+        for row in rows:
+            if (
+                row["thread_id"] in second_pass
+                and row["event_timer_end"] < second_pass[row["thread_id"]]["event_timer_start"]
+            ):
+                continue
+            filtered_rows.append(row)
+        return filtered_rows
 
     @staticmethod
     def _sort_key(row):
@@ -332,7 +358,7 @@ class MySQLActivity(DBMAsyncJob):
     def _create_activity_event(self, active_sessions, tags):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mysql",
             "dbm_type": "activity",
@@ -361,7 +387,7 @@ class MySQLActivity(DBMAsyncJob):
         pymysql connections are not thread safe, so we can't reuse the same connection from the main check.
         """
         if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
+            self._db = connect_with_session_variables(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):
