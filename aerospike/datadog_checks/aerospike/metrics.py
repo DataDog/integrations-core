@@ -59,3 +59,33 @@ METRIC_MAP = {
     'aerospike_xdr_retry_no_node': 'xdr.retry_no_node',
     'aerospike_xdr_success': 'xdr.success',
 }
+
+METRIC_NAME_PATTERN = {
+    r'^aerospike_(namespace)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(node_stats)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(sets)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(sindex)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(xdr)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(sysinfo)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(latencies)_(.*)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(node)_(up)$': {
+        'metric_type': 'gauge',
+    },
+    r'^aerospike_(node)_(ticks)$': {
+        'metric_type': 'gauge',
+    },
+}

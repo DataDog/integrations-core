@@ -1,0 +1,1613 @@
+# HELP aerospike_latencies_batch_index_ms_bucket batch index ms bucket
+# TYPE aerospike_latencies_batch_index_ms_bucket gauge
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="+Inf",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="1",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="1024",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="128",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="16",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="16384",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="2",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="2048",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="256",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="32",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="32768",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="4",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="4096",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="512",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="64",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="65536",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="8",ns="",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_index_ms_bucket{cluster_name="docker",le="8192",ns="",service="172.19.0.3:3000"} 0
+# HELP aerospike_latencies_batch_index_ms_count batch index ms count
+# TYPE aerospike_latencies_batch_index_ms_count gauge
+aerospike_latencies_batch_index_ms_count{cluster_name="docker",ns="",service="172.19.0.3:3000"} 0
+# HELP aerospike_latencies_batch_sub_read_ms_bucket batch sub read ms bucket
+# TYPE aerospike_latencies_batch_sub_read_ms_bucket gauge
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="+Inf",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="1",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="1024",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="128",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="16",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="16384",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="2",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="2048",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="256",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="32",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="32768",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="4",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="4096",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="512",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="64",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="65536",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="8",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="docker",le="8192",ns="test",service="172.19.0.3:3000"} 0
+# HELP aerospike_latencies_batch_sub_read_ms_count batch sub read ms count
+# TYPE aerospike_latencies_batch_sub_read_ms_count gauge
+aerospike_latencies_batch_sub_read_ms_count{cluster_name="docker",ns="test",service="172.19.0.3:3000"} 0
+# HELP aerospike_latencies_batch_sub_write_ms_bucket batch sub write ms bucket
+# TYPE aerospike_latencies_batch_sub_write_ms_bucket gauge
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="+Inf",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="1",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="1024",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="128",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="16",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="16384",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="2",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="2048",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="256",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="32",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="32768",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="4",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="4096",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="512",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="64",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="65536",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="8",ns="test",service="172.19.0.3:3000"} 0
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="docker",le="8192",ns="test",service="172.19.0.3:3000"} 0
+# HELP aerospike_latencies_batch_sub_write_ms_count batch sub write ms count
+# TYPE aerospike_latencies_batch_sub_write_ms_count gauge
+aerospike_latencies_batch_sub_write_ms_count{cluster_name="docker",ns="test",service="172.19.0.3:3000"} 0
+# HELP aerospike_namespace_active_rack active rack
+# TYPE aerospike_namespace_active_rack gauge
+aerospike_namespace_active_rack{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_allow_ttl_without_nsup allow ttl without nsup
+# TYPE aerospike_namespace_allow_ttl_without_nsup gauge
+aerospike_namespace_allow_ttl_without_nsup{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_appeals_records_exonerated appeals records exonerated
+# TYPE aerospike_namespace_appeals_records_exonerated counter
+aerospike_namespace_appeals_records_exonerated{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_appeals_rx_active appeals rx active
+# TYPE aerospike_namespace_appeals_rx_active gauge
+aerospike_namespace_appeals_rx_active{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_appeals_tx_active appeals tx active
+# TYPE aerospike_namespace_appeals_tx_active gauge
+aerospike_namespace_appeals_tx_active{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_appeals_tx_remaining appeals tx remaining
+# TYPE aerospike_namespace_appeals_tx_remaining gauge
+aerospike_namespace_appeals_tx_remaining{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_auto_revive auto revive
+# TYPE aerospike_namespace_auto_revive gauge
+aerospike_namespace_auto_revive{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_auto_revived_partitions auto revived partitions
+# TYPE aerospike_namespace_auto_revived_partitions counter
+aerospike_namespace_auto_revived_partitions{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_background_query_max_rps background query max rps
+# TYPE aerospike_namespace_background_query_max_rps gauge
+aerospike_namespace_background_query_max_rps{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 10000
+# HELP aerospike_namespace_batch_sub_delete_error batch sub delete error
+# TYPE aerospike_namespace_batch_sub_delete_error counter
+aerospike_namespace_batch_sub_delete_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_delete_filtered_out batch sub delete filtered out
+# TYPE aerospike_namespace_batch_sub_delete_filtered_out counter
+aerospike_namespace_batch_sub_delete_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_delete_not_found batch sub delete not found
+# TYPE aerospike_namespace_batch_sub_delete_not_found counter
+aerospike_namespace_batch_sub_delete_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_delete_success batch sub delete success
+# TYPE aerospike_namespace_batch_sub_delete_success counter
+aerospike_namespace_batch_sub_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_delete_timeout batch sub delete timeout
+# TYPE aerospike_namespace_batch_sub_delete_timeout counter
+aerospike_namespace_batch_sub_delete_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_lang_delete_success batch sub lang delete success
+# TYPE aerospike_namespace_batch_sub_lang_delete_success counter
+aerospike_namespace_batch_sub_lang_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_lang_error batch sub lang error
+# TYPE aerospike_namespace_batch_sub_lang_error counter
+aerospike_namespace_batch_sub_lang_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_lang_read_success batch sub lang read success
+# TYPE aerospike_namespace_batch_sub_lang_read_success counter
+aerospike_namespace_batch_sub_lang_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_lang_write_success batch sub lang write success
+# TYPE aerospike_namespace_batch_sub_lang_write_success counter
+aerospike_namespace_batch_sub_lang_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_proxy_complete batch sub proxy complete
+# TYPE aerospike_namespace_batch_sub_proxy_complete counter
+aerospike_namespace_batch_sub_proxy_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_proxy_error batch sub proxy error
+# TYPE aerospike_namespace_batch_sub_proxy_error counter
+aerospike_namespace_batch_sub_proxy_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_proxy_timeout batch sub proxy timeout
+# TYPE aerospike_namespace_batch_sub_proxy_timeout counter
+aerospike_namespace_batch_sub_proxy_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_read_error batch sub read error
+# TYPE aerospike_namespace_batch_sub_read_error counter
+aerospike_namespace_batch_sub_read_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_read_filtered_out batch sub read filtered out
+# TYPE aerospike_namespace_batch_sub_read_filtered_out counter
+aerospike_namespace_batch_sub_read_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_read_not_found batch sub read not found
+# TYPE aerospike_namespace_batch_sub_read_not_found counter
+aerospike_namespace_batch_sub_read_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1.847722e+06
+# HELP aerospike_namespace_batch_sub_read_success batch sub read success
+# TYPE aerospike_namespace_batch_sub_read_success counter
+aerospike_namespace_batch_sub_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 567275
+# HELP aerospike_namespace_batch_sub_read_timeout batch sub read timeout
+# TYPE aerospike_namespace_batch_sub_read_timeout counter
+aerospike_namespace_batch_sub_read_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_tsvc_error batch sub tsvc error
+# TYPE aerospike_namespace_batch_sub_tsvc_error counter
+aerospike_namespace_batch_sub_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_tsvc_timeout batch sub tsvc timeout
+# TYPE aerospike_namespace_batch_sub_tsvc_timeout counter
+aerospike_namespace_batch_sub_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 3
+# HELP aerospike_namespace_batch_sub_udf_complete batch sub udf complete
+# TYPE aerospike_namespace_batch_sub_udf_complete counter
+aerospike_namespace_batch_sub_udf_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_udf_error batch sub udf error
+# TYPE aerospike_namespace_batch_sub_udf_error counter
+aerospike_namespace_batch_sub_udf_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_udf_filtered_out batch sub udf filtered out
+# TYPE aerospike_namespace_batch_sub_udf_filtered_out counter
+aerospike_namespace_batch_sub_udf_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_udf_timeout batch sub udf timeout
+# TYPE aerospike_namespace_batch_sub_udf_timeout counter
+aerospike_namespace_batch_sub_udf_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_write_error batch sub write error
+# TYPE aerospike_namespace_batch_sub_write_error counter
+aerospike_namespace_batch_sub_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_write_filtered_out batch sub write filtered out
+# TYPE aerospike_namespace_batch_sub_write_filtered_out counter
+aerospike_namespace_batch_sub_write_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_batch_sub_write_success batch sub write success
+# TYPE aerospike_namespace_batch_sub_write_success counter
+aerospike_namespace_batch_sub_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 479520
+# HELP aerospike_namespace_batch_sub_write_timeout batch sub write timeout
+# TYPE aerospike_namespace_batch_sub_write_timeout counter
+aerospike_namespace_batch_sub_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_cache_read_pct cache read pct
+# TYPE aerospike_namespace_cache_read_pct gauge
+aerospike_namespace_cache_read_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_delete_error client delete error
+# TYPE aerospike_namespace_client_delete_error counter
+aerospike_namespace_client_delete_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_delete_filtered_out client delete filtered out
+# TYPE aerospike_namespace_client_delete_filtered_out counter
+aerospike_namespace_client_delete_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_delete_not_found client delete not found
+# TYPE aerospike_namespace_client_delete_not_found counter
+aerospike_namespace_client_delete_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_delete_success client delete success
+# TYPE aerospike_namespace_client_delete_success counter
+aerospike_namespace_client_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_delete_timeout client delete timeout
+# TYPE aerospike_namespace_client_delete_timeout counter
+aerospike_namespace_client_delete_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_lang_delete_success client lang delete success
+# TYPE aerospike_namespace_client_lang_delete_success counter
+aerospike_namespace_client_lang_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_lang_error client lang error
+# TYPE aerospike_namespace_client_lang_error counter
+aerospike_namespace_client_lang_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_lang_read_success client lang read success
+# TYPE aerospike_namespace_client_lang_read_success counter
+aerospike_namespace_client_lang_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_lang_write_success client lang write success
+# TYPE aerospike_namespace_client_lang_write_success counter
+aerospike_namespace_client_lang_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_proxy_complete client proxy complete
+# TYPE aerospike_namespace_client_proxy_complete counter
+aerospike_namespace_client_proxy_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_proxy_error client proxy error
+# TYPE aerospike_namespace_client_proxy_error counter
+aerospike_namespace_client_proxy_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_proxy_timeout client proxy timeout
+# TYPE aerospike_namespace_client_proxy_timeout counter
+aerospike_namespace_client_proxy_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_error client read error
+# TYPE aerospike_namespace_client_read_error counter
+aerospike_namespace_client_read_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_filtered_out client read filtered out
+# TYPE aerospike_namespace_client_read_filtered_out counter
+aerospike_namespace_client_read_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_not_found client read not found
+# TYPE aerospike_namespace_client_read_not_found counter
+aerospike_namespace_client_read_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_success client read success
+# TYPE aerospike_namespace_client_read_success counter
+aerospike_namespace_client_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_read_timeout client read timeout
+# TYPE aerospike_namespace_client_read_timeout counter
+aerospike_namespace_client_read_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_tsvc_error client tsvc error
+# TYPE aerospike_namespace_client_tsvc_error counter
+aerospike_namespace_client_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_tsvc_timeout client tsvc timeout
+# TYPE aerospike_namespace_client_tsvc_timeout counter
+aerospike_namespace_client_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_udf_complete client udf complete
+# TYPE aerospike_namespace_client_udf_complete counter
+aerospike_namespace_client_udf_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_udf_error client udf error
+# TYPE aerospike_namespace_client_udf_error counter
+aerospike_namespace_client_udf_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_udf_filtered_out client udf filtered out
+# TYPE aerospike_namespace_client_udf_filtered_out counter
+aerospike_namespace_client_udf_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_udf_timeout client udf timeout
+# TYPE aerospike_namespace_client_udf_timeout counter
+aerospike_namespace_client_udf_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_write_error client write error
+# TYPE aerospike_namespace_client_write_error counter
+aerospike_namespace_client_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_write_filtered_out client write filtered out
+# TYPE aerospike_namespace_client_write_filtered_out counter
+aerospike_namespace_client_write_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_write_success client write success
+# TYPE aerospike_namespace_client_write_success counter
+aerospike_namespace_client_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_client_write_timeout client write timeout
+# TYPE aerospike_namespace_client_write_timeout counter
+aerospike_namespace_client_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_clock_skew_stop_writes clock skew stop writes
+# TYPE aerospike_namespace_clock_skew_stop_writes gauge
+aerospike_namespace_clock_skew_stop_writes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_conflict_resolve_writes conflict resolve writes
+# TYPE aerospike_namespace_conflict_resolve_writes gauge
+aerospike_namespace_conflict_resolve_writes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_current_time current time
+# TYPE aerospike_namespace_current_time counter
+aerospike_namespace_current_time{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4.78583447e+08
+# HELP aerospike_namespace_data_avail_pct data avail pct
+# TYPE aerospike_namespace_data_avail_pct gauge
+aerospike_namespace_data_avail_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 98
+# HELP aerospike_namespace_data_compression_ratio data compression ratio
+# TYPE aerospike_namespace_data_compression_ratio gauge
+aerospike_namespace_data_compression_ratio{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_data_total_bytes data total bytes
+# TYPE aerospike_namespace_data_total_bytes gauge
+aerospike_namespace_data_total_bytes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4.294967296e+09
+# HELP aerospike_namespace_data_used_bytes data used bytes
+# TYPE aerospike_namespace_data_used_bytes gauge
+aerospike_namespace_data_used_bytes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 5.2462656e+07
+# HELP aerospike_namespace_data_used_pct data used pct
+# TYPE aerospike_namespace_data_used_pct gauge
+aerospike_namespace_data_used_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_dead_partitions dead partitions
+# TYPE aerospike_namespace_dead_partitions gauge
+aerospike_namespace_dead_partitions{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_default_read_touch_ttl_pct default read touch ttl pct
+# TYPE aerospike_namespace_default_read_touch_ttl_pct gauge
+aerospike_namespace_default_read_touch_ttl_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_default_ttl default ttl
+# TYPE aerospike_namespace_default_ttl gauge
+aerospike_namespace_default_ttl{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_deleted_last_bin deleted last bin
+# TYPE aerospike_namespace_deleted_last_bin counter
+aerospike_namespace_deleted_last_bin{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_disable_cold_start_eviction disable cold start eviction
+# TYPE aerospike_namespace_disable_cold_start_eviction gauge
+aerospike_namespace_disable_cold_start_eviction{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_disable_write_dup_res disable write dup res
+# TYPE aerospike_namespace_disable_write_dup_res gauge
+aerospike_namespace_disable_write_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_disallow_expunge disallow expunge
+# TYPE aerospike_namespace_disallow_expunge gauge
+aerospike_namespace_disallow_expunge{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_disallow_null_setname disallow null setname
+# TYPE aerospike_namespace_disallow_null_setname gauge
+aerospike_namespace_disallow_null_setname{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_dup_res_ask dup res ask
+# TYPE aerospike_namespace_dup_res_ask counter
+aerospike_namespace_dup_res_ask{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_dup_res_respond_no_read dup res respond no read
+# TYPE aerospike_namespace_dup_res_respond_no_read counter
+aerospike_namespace_dup_res_respond_no_read{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_dup_res_respond_read dup res respond read
+# TYPE aerospike_namespace_dup_res_respond_read counter
+aerospike_namespace_dup_res_respond_read{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_effective_active_rack effective active rack
+# TYPE aerospike_namespace_effective_active_rack counter
+aerospike_namespace_effective_active_rack{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_effective_is_quiesced effective is quiesced
+# TYPE aerospike_namespace_effective_is_quiesced gauge
+aerospike_namespace_effective_is_quiesced{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_effective_prefer_uniform_balance effective prefer uniform balance
+# TYPE aerospike_namespace_effective_prefer_uniform_balance gauge
+aerospike_namespace_effective_prefer_uniform_balance{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_effective_replication_factor effective replication factor
+# TYPE aerospike_namespace_effective_replication_factor gauge
+aerospike_namespace_effective_replication_factor{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_enable_benchmarks_batch_sub enable benchmarks batch sub
+# TYPE aerospike_namespace_enable_benchmarks_batch_sub gauge
+aerospike_namespace_enable_benchmarks_batch_sub{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_enable_benchmarks_ops_sub enable benchmarks ops sub
+# TYPE aerospike_namespace_enable_benchmarks_ops_sub gauge
+aerospike_namespace_enable_benchmarks_ops_sub{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_enable_benchmarks_read enable benchmarks read
+# TYPE aerospike_namespace_enable_benchmarks_read gauge
+aerospike_namespace_enable_benchmarks_read{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_enable_benchmarks_udf enable benchmarks udf
+# TYPE aerospike_namespace_enable_benchmarks_udf gauge
+aerospike_namespace_enable_benchmarks_udf{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_enable_benchmarks_udf_sub enable benchmarks udf sub
+# TYPE aerospike_namespace_enable_benchmarks_udf_sub gauge
+aerospike_namespace_enable_benchmarks_udf_sub{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_enable_benchmarks_write enable benchmarks write
+# TYPE aerospike_namespace_enable_benchmarks_write gauge
+aerospike_namespace_enable_benchmarks_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_enable_hist_proxy enable hist proxy
+# TYPE aerospike_namespace_enable_hist_proxy gauge
+aerospike_namespace_enable_hist_proxy{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_evict_hist_buckets evict hist buckets
+# TYPE aerospike_namespace_evict_hist_buckets gauge
+aerospike_namespace_evict_hist_buckets{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 10000
+# HELP aerospike_namespace_evict_indexes_memory_pct evict indexes memory pct
+# TYPE aerospike_namespace_evict_indexes_memory_pct gauge
+aerospike_namespace_evict_indexes_memory_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_evict_tenths_pct evict tenths pct
+# TYPE aerospike_namespace_evict_tenths_pct gauge
+aerospike_namespace_evict_tenths_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 5
+# HELP aerospike_namespace_evict_ttl evict ttl
+# TYPE aerospike_namespace_evict_ttl gauge
+aerospike_namespace_evict_ttl{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_evict_void_time evict void time
+# TYPE aerospike_namespace_evict_void_time counter
+aerospike_namespace_evict_void_time{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_evicted_objects evicted objects
+# TYPE aerospike_namespace_evicted_objects counter
+aerospike_namespace_evicted_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_expired_objects expired objects
+# TYPE aerospike_namespace_expired_objects counter
+aerospike_namespace_expired_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_client_lost_conflict fail client lost conflict
+# TYPE aerospike_namespace_fail_client_lost_conflict counter
+aerospike_namespace_fail_client_lost_conflict{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_generation fail generation
+# TYPE aerospike_namespace_fail_generation counter
+aerospike_namespace_fail_generation{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_key_busy fail key busy
+# TYPE aerospike_namespace_fail_key_busy counter
+aerospike_namespace_fail_key_busy{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_record_too_big fail record too big
+# TYPE aerospike_namespace_fail_record_too_big counter
+aerospike_namespace_fail_record_too_big{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_xdr_forbidden fail xdr forbidden
+# TYPE aerospike_namespace_fail_xdr_forbidden counter
+aerospike_namespace_fail_xdr_forbidden{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_xdr_key_busy fail xdr key busy
+# TYPE aerospike_namespace_fail_xdr_key_busy counter
+aerospike_namespace_fail_xdr_key_busy{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_fail_xdr_lost_conflict fail xdr lost conflict
+# TYPE aerospike_namespace_fail_xdr_lost_conflict counter
+aerospike_namespace_fail_xdr_lost_conflict{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_force_long_queries force long queries
+# TYPE aerospike_namespace_force_long_queries gauge
+aerospike_namespace_force_long_queries{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_delete_error from proxy batch sub delete error
+# TYPE aerospike_namespace_from_proxy_batch_sub_delete_error counter
+aerospike_namespace_from_proxy_batch_sub_delete_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_delete_filtered_out from proxy batch sub delete filtered out
+# TYPE aerospike_namespace_from_proxy_batch_sub_delete_filtered_out counter
+aerospike_namespace_from_proxy_batch_sub_delete_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_delete_not_found from proxy batch sub delete not found
+# TYPE aerospike_namespace_from_proxy_batch_sub_delete_not_found counter
+aerospike_namespace_from_proxy_batch_sub_delete_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_delete_success from proxy batch sub delete success
+# TYPE aerospike_namespace_from_proxy_batch_sub_delete_success counter
+aerospike_namespace_from_proxy_batch_sub_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_delete_timeout from proxy batch sub delete timeout
+# TYPE aerospike_namespace_from_proxy_batch_sub_delete_timeout counter
+aerospike_namespace_from_proxy_batch_sub_delete_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_lang_delete_success from proxy batch sub lang delete success
+# TYPE aerospike_namespace_from_proxy_batch_sub_lang_delete_success counter
+aerospike_namespace_from_proxy_batch_sub_lang_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_lang_error from proxy batch sub lang error
+# TYPE aerospike_namespace_from_proxy_batch_sub_lang_error counter
+aerospike_namespace_from_proxy_batch_sub_lang_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_lang_read_success from proxy batch sub lang read success
+# TYPE aerospike_namespace_from_proxy_batch_sub_lang_read_success counter
+aerospike_namespace_from_proxy_batch_sub_lang_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_lang_write_success from proxy batch sub lang write success
+# TYPE aerospike_namespace_from_proxy_batch_sub_lang_write_success counter
+aerospike_namespace_from_proxy_batch_sub_lang_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_read_error from proxy batch sub read error
+# TYPE aerospike_namespace_from_proxy_batch_sub_read_error counter
+aerospike_namespace_from_proxy_batch_sub_read_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_read_filtered_out from proxy batch sub read filtered out
+# TYPE aerospike_namespace_from_proxy_batch_sub_read_filtered_out counter
+aerospike_namespace_from_proxy_batch_sub_read_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_read_not_found from proxy batch sub read not found
+# TYPE aerospike_namespace_from_proxy_batch_sub_read_not_found counter
+aerospike_namespace_from_proxy_batch_sub_read_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_read_success from proxy batch sub read success
+# TYPE aerospike_namespace_from_proxy_batch_sub_read_success counter
+aerospike_namespace_from_proxy_batch_sub_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_read_timeout from proxy batch sub read timeout
+# TYPE aerospike_namespace_from_proxy_batch_sub_read_timeout counter
+aerospike_namespace_from_proxy_batch_sub_read_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_tsvc_error from proxy batch sub tsvc error
+# TYPE aerospike_namespace_from_proxy_batch_sub_tsvc_error counter
+aerospike_namespace_from_proxy_batch_sub_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_tsvc_timeout from proxy batch sub tsvc timeout
+# TYPE aerospike_namespace_from_proxy_batch_sub_tsvc_timeout counter
+aerospike_namespace_from_proxy_batch_sub_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_udf_complete from proxy batch sub udf complete
+# TYPE aerospike_namespace_from_proxy_batch_sub_udf_complete counter
+aerospike_namespace_from_proxy_batch_sub_udf_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_udf_error from proxy batch sub udf error
+# TYPE aerospike_namespace_from_proxy_batch_sub_udf_error counter
+aerospike_namespace_from_proxy_batch_sub_udf_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_udf_filtered_out from proxy batch sub udf filtered out
+# TYPE aerospike_namespace_from_proxy_batch_sub_udf_filtered_out counter
+aerospike_namespace_from_proxy_batch_sub_udf_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_udf_timeout from proxy batch sub udf timeout
+# TYPE aerospike_namespace_from_proxy_batch_sub_udf_timeout counter
+aerospike_namespace_from_proxy_batch_sub_udf_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_write_error from proxy batch sub write error
+# TYPE aerospike_namespace_from_proxy_batch_sub_write_error counter
+aerospike_namespace_from_proxy_batch_sub_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_write_filtered_out from proxy batch sub write filtered out
+# TYPE aerospike_namespace_from_proxy_batch_sub_write_filtered_out counter
+aerospike_namespace_from_proxy_batch_sub_write_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_write_success from proxy batch sub write success
+# TYPE aerospike_namespace_from_proxy_batch_sub_write_success counter
+aerospike_namespace_from_proxy_batch_sub_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_batch_sub_write_timeout from proxy batch sub write timeout
+# TYPE aerospike_namespace_from_proxy_batch_sub_write_timeout counter
+aerospike_namespace_from_proxy_batch_sub_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_delete_error from proxy delete error
+# TYPE aerospike_namespace_from_proxy_delete_error counter
+aerospike_namespace_from_proxy_delete_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_delete_filtered_out from proxy delete filtered out
+# TYPE aerospike_namespace_from_proxy_delete_filtered_out counter
+aerospike_namespace_from_proxy_delete_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_delete_not_found from proxy delete not found
+# TYPE aerospike_namespace_from_proxy_delete_not_found counter
+aerospike_namespace_from_proxy_delete_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_delete_success from proxy delete success
+# TYPE aerospike_namespace_from_proxy_delete_success counter
+aerospike_namespace_from_proxy_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_delete_timeout from proxy delete timeout
+# TYPE aerospike_namespace_from_proxy_delete_timeout counter
+aerospike_namespace_from_proxy_delete_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_lang_delete_success from proxy lang delete success
+# TYPE aerospike_namespace_from_proxy_lang_delete_success counter
+aerospike_namespace_from_proxy_lang_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_lang_error from proxy lang error
+# TYPE aerospike_namespace_from_proxy_lang_error counter
+aerospike_namespace_from_proxy_lang_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_lang_read_success from proxy lang read success
+# TYPE aerospike_namespace_from_proxy_lang_read_success counter
+aerospike_namespace_from_proxy_lang_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_lang_write_success from proxy lang write success
+# TYPE aerospike_namespace_from_proxy_lang_write_success counter
+aerospike_namespace_from_proxy_lang_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_read_error from proxy read error
+# TYPE aerospike_namespace_from_proxy_read_error counter
+aerospike_namespace_from_proxy_read_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_read_filtered_out from proxy read filtered out
+# TYPE aerospike_namespace_from_proxy_read_filtered_out counter
+aerospike_namespace_from_proxy_read_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_read_not_found from proxy read not found
+# TYPE aerospike_namespace_from_proxy_read_not_found counter
+aerospike_namespace_from_proxy_read_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_read_success from proxy read success
+# TYPE aerospike_namespace_from_proxy_read_success counter
+aerospike_namespace_from_proxy_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_read_timeout from proxy read timeout
+# TYPE aerospike_namespace_from_proxy_read_timeout counter
+aerospike_namespace_from_proxy_read_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_tsvc_error from proxy tsvc error
+# TYPE aerospike_namespace_from_proxy_tsvc_error counter
+aerospike_namespace_from_proxy_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_tsvc_timeout from proxy tsvc timeout
+# TYPE aerospike_namespace_from_proxy_tsvc_timeout counter
+aerospike_namespace_from_proxy_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_udf_complete from proxy udf complete
+# TYPE aerospike_namespace_from_proxy_udf_complete counter
+aerospike_namespace_from_proxy_udf_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_udf_error from proxy udf error
+# TYPE aerospike_namespace_from_proxy_udf_error counter
+aerospike_namespace_from_proxy_udf_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_udf_filtered_out from proxy udf filtered out
+# TYPE aerospike_namespace_from_proxy_udf_filtered_out counter
+aerospike_namespace_from_proxy_udf_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_udf_timeout from proxy udf timeout
+# TYPE aerospike_namespace_from_proxy_udf_timeout counter
+aerospike_namespace_from_proxy_udf_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_write_error from proxy write error
+# TYPE aerospike_namespace_from_proxy_write_error counter
+aerospike_namespace_from_proxy_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_write_filtered_out from proxy write filtered out
+# TYPE aerospike_namespace_from_proxy_write_filtered_out counter
+aerospike_namespace_from_proxy_write_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_write_success from proxy write success
+# TYPE aerospike_namespace_from_proxy_write_success counter
+aerospike_namespace_from_proxy_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_from_proxy_write_timeout from proxy write timeout
+# TYPE aerospike_namespace_from_proxy_write_timeout counter
+aerospike_namespace_from_proxy_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_geo2dsphere_within_earth_radius_meters geo2dsphere within earth radius meters
+# TYPE aerospike_namespace_geo2dsphere_within_earth_radius_meters gauge
+aerospike_namespace_geo2dsphere_within_earth_radius_meters{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 6.371e+06
+# HELP aerospike_namespace_geo2dsphere_within_level_mod geo2dsphere within level mod
+# TYPE aerospike_namespace_geo2dsphere_within_level_mod gauge
+aerospike_namespace_geo2dsphere_within_level_mod{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_geo2dsphere_within_max_cells geo2dsphere within max cells
+# TYPE aerospike_namespace_geo2dsphere_within_max_cells gauge
+aerospike_namespace_geo2dsphere_within_max_cells{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 12
+# HELP aerospike_namespace_geo2dsphere_within_max_level geo2dsphere within max level
+# TYPE aerospike_namespace_geo2dsphere_within_max_level gauge
+aerospike_namespace_geo2dsphere_within_max_level{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 20
+# HELP aerospike_namespace_geo2dsphere_within_min_level geo2dsphere within min level
+# TYPE aerospike_namespace_geo2dsphere_within_min_level gauge
+aerospike_namespace_geo2dsphere_within_min_level{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_geo2dsphere_within_strict geo2dsphere within strict
+# TYPE aerospike_namespace_geo2dsphere_within_strict gauge
+aerospike_namespace_geo2dsphere_within_strict{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_geo_region_query_cells geo region query cells
+# TYPE aerospike_namespace_geo_region_query_cells counter
+aerospike_namespace_geo_region_query_cells{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_geo_region_query_falsepos geo region query falsepos
+# TYPE aerospike_namespace_geo_region_query_falsepos counter
+aerospike_namespace_geo_region_query_falsepos{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_geo_region_query_points geo region query points
+# TYPE aerospike_namespace_geo_region_query_points counter
+aerospike_namespace_geo_region_query_points{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_geo_region_query_reqs geo region query reqs
+# TYPE aerospike_namespace_geo_region_query_reqs counter
+aerospike_namespace_geo_region_query_reqs{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_hwm_breached hwm breached
+# TYPE aerospike_namespace_hwm_breached gauge
+aerospike_namespace_hwm_breached{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ignore_migrate_fill_delay ignore migrate fill delay
+# TYPE aerospike_namespace_ignore_migrate_fill_delay gauge
+aerospike_namespace_ignore_migrate_fill_delay{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_index_stage_size index stage size
+# TYPE aerospike_namespace_index_stage_size gauge
+aerospike_namespace_index_stage_size{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1.073741824e+09
+# HELP aerospike_namespace_index_used_bytes index used bytes
+# TYPE aerospike_namespace_index_used_bytes gauge
+aerospike_namespace_index_used_bytes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 2.3316736e+07
+# HELP aerospike_namespace_indexes_memory_budget indexes memory budget
+# TYPE aerospike_namespace_indexes_memory_budget gauge
+aerospike_namespace_indexes_memory_budget{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_inline_short_queries inline short queries
+# TYPE aerospike_namespace_inline_short_queries gauge
+aerospike_namespace_inline_short_queries{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_master_objects master objects
+# TYPE aerospike_namespace_master_objects gauge
+aerospike_namespace_master_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 364324
+# HELP aerospike_namespace_master_tombstones master tombstones
+# TYPE aerospike_namespace_master_tombstones gauge
+aerospike_namespace_master_tombstones{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_max_record_size max record size
+# TYPE aerospike_namespace_max_record_size gauge
+aerospike_namespace_max_record_size{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1.048576e+06
+# HELP aerospike_namespace_migrate_fresh_partitions migrate fresh partitions
+# TYPE aerospike_namespace_migrate_fresh_partitions gauge
+aerospike_namespace_migrate_fresh_partitions{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4096
+# HELP aerospike_namespace_migrate_order migrate order
+# TYPE aerospike_namespace_migrate_order gauge
+aerospike_namespace_migrate_order{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 5
+# HELP aerospike_namespace_migrate_record_receives migrate record receives
+# TYPE aerospike_namespace_migrate_record_receives counter
+aerospike_namespace_migrate_record_receives{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_record_retransmits migrate record retransmits
+# TYPE aerospike_namespace_migrate_record_retransmits counter
+aerospike_namespace_migrate_record_retransmits{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_records_skipped migrate records skipped
+# TYPE aerospike_namespace_migrate_records_skipped counter
+aerospike_namespace_migrate_records_skipped{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_records_transmitted migrate records transmitted
+# TYPE aerospike_namespace_migrate_records_transmitted counter
+aerospike_namespace_migrate_records_transmitted{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_records_unreadable migrate records unreadable
+# TYPE aerospike_namespace_migrate_records_unreadable counter
+aerospike_namespace_migrate_records_unreadable{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_retransmit_ms migrate retransmit ms
+# TYPE aerospike_namespace_migrate_retransmit_ms gauge
+aerospike_namespace_migrate_retransmit_ms{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 5000
+# HELP aerospike_namespace_migrate_rx_instances migrate rx instances
+# TYPE aerospike_namespace_migrate_rx_instances gauge
+aerospike_namespace_migrate_rx_instances{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_rx_partitions_active migrate rx partitions active
+# TYPE aerospike_namespace_migrate_rx_partitions_active gauge
+aerospike_namespace_migrate_rx_partitions_active{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_rx_partitions_initial migrate rx partitions initial
+# TYPE aerospike_namespace_migrate_rx_partitions_initial gauge
+aerospike_namespace_migrate_rx_partitions_initial{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_rx_partitions_remaining migrate rx partitions remaining
+# TYPE aerospike_namespace_migrate_rx_partitions_remaining gauge
+aerospike_namespace_migrate_rx_partitions_remaining{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_signals_active migrate signals active
+# TYPE aerospike_namespace_migrate_signals_active gauge
+aerospike_namespace_migrate_signals_active{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_signals_remaining migrate signals remaining
+# TYPE aerospike_namespace_migrate_signals_remaining gauge
+aerospike_namespace_migrate_signals_remaining{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_skip_unreadable migrate skip unreadable
+# TYPE aerospike_namespace_migrate_skip_unreadable gauge
+aerospike_namespace_migrate_skip_unreadable{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_sleep migrate sleep
+# TYPE aerospike_namespace_migrate_sleep gauge
+aerospike_namespace_migrate_sleep{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_migrate_tx_instances migrate tx instances
+# TYPE aerospike_namespace_migrate_tx_instances gauge
+aerospike_namespace_migrate_tx_instances{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_tx_partitions_active migrate tx partitions active
+# TYPE aerospike_namespace_migrate_tx_partitions_active gauge
+aerospike_namespace_migrate_tx_partitions_active{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_tx_partitions_imbalance migrate tx partitions imbalance
+# TYPE aerospike_namespace_migrate_tx_partitions_imbalance gauge
+aerospike_namespace_migrate_tx_partitions_imbalance{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_tx_partitions_initial migrate tx partitions initial
+# TYPE aerospike_namespace_migrate_tx_partitions_initial gauge
+aerospike_namespace_migrate_tx_partitions_initial{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_tx_partitions_lead_remaining migrate tx partitions lead remaining
+# TYPE aerospike_namespace_migrate_tx_partitions_lead_remaining gauge
+aerospike_namespace_migrate_tx_partitions_lead_remaining{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_migrate_tx_partitions_remaining migrate tx partitions remaining
+# TYPE aerospike_namespace_migrate_tx_partitions_remaining gauge
+aerospike_namespace_migrate_tx_partitions_remaining{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_nodes_quiesced nodes quiesced
+# TYPE aerospike_namespace_nodes_quiesced counter
+aerospike_namespace_nodes_quiesced{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_non_expirable_objects non expirable objects
+# TYPE aerospike_namespace_non_expirable_objects gauge
+aerospike_namespace_non_expirable_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_non_replica_objects non replica objects
+# TYPE aerospike_namespace_non_replica_objects gauge
+aerospike_namespace_non_replica_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_non_replica_tombstones non replica tombstones
+# TYPE aerospike_namespace_non_replica_tombstones gauge
+aerospike_namespace_non_replica_tombstones{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ns_cluster_size ns cluster size
+# TYPE aerospike_namespace_ns_cluster_size gauge
+aerospike_namespace_ns_cluster_size{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_nsup_cycle_deleted_pct nsup cycle deleted pct
+# TYPE aerospike_namespace_nsup_cycle_deleted_pct gauge
+aerospike_namespace_nsup_cycle_deleted_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_nsup_cycle_duration nsup cycle duration
+# TYPE aerospike_namespace_nsup_cycle_duration gauge
+aerospike_namespace_nsup_cycle_duration{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_nsup_hist_period nsup hist period
+# TYPE aerospike_namespace_nsup_hist_period gauge
+aerospike_namespace_nsup_hist_period{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 3600
+# HELP aerospike_namespace_nsup_period nsup period
+# TYPE aerospike_namespace_nsup_period gauge
+aerospike_namespace_nsup_period{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 120
+# HELP aerospike_namespace_nsup_threads nsup threads
+# TYPE aerospike_namespace_nsup_threads gauge
+aerospike_namespace_nsup_threads{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_nsup_xdr_key_busy nsup xdr key busy
+# TYPE aerospike_namespace_nsup_xdr_key_busy counter
+aerospike_namespace_nsup_xdr_key_busy{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_objects objects
+# TYPE aerospike_namespace_objects gauge
+aerospike_namespace_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 364324
+# HELP aerospike_namespace_ops_sub_tsvc_error ops sub tsvc error
+# TYPE aerospike_namespace_ops_sub_tsvc_error counter
+aerospike_namespace_ops_sub_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ops_sub_tsvc_timeout ops sub tsvc timeout
+# TYPE aerospike_namespace_ops_sub_tsvc_timeout counter
+aerospike_namespace_ops_sub_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ops_sub_write_error ops sub write error
+# TYPE aerospike_namespace_ops_sub_write_error counter
+aerospike_namespace_ops_sub_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ops_sub_write_filtered_out ops sub write filtered out
+# TYPE aerospike_namespace_ops_sub_write_filtered_out counter
+aerospike_namespace_ops_sub_write_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ops_sub_write_success ops sub write success
+# TYPE aerospike_namespace_ops_sub_write_success counter
+aerospike_namespace_ops_sub_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_ops_sub_write_timeout ops sub write timeout
+# TYPE aerospike_namespace_ops_sub_write_timeout counter
+aerospike_namespace_ops_sub_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_partition_tree_sprigs partition tree sprigs
+# TYPE aerospike_namespace_partition_tree_sprigs gauge
+aerospike_namespace_partition_tree_sprigs{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 256
+# HELP aerospike_namespace_pending_quiesce pending quiesce
+# TYPE aerospike_namespace_pending_quiesce gauge
+aerospike_namespace_pending_quiesce{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_aggr_abort pi query aggr abort
+# TYPE aerospike_namespace_pi_query_aggr_abort counter
+aerospike_namespace_pi_query_aggr_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_aggr_complete pi query aggr complete
+# TYPE aerospike_namespace_pi_query_aggr_complete counter
+aerospike_namespace_pi_query_aggr_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_aggr_error pi query aggr error
+# TYPE aerospike_namespace_pi_query_aggr_error counter
+aerospike_namespace_pi_query_aggr_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_long_basic_abort pi query long basic abort
+# TYPE aerospike_namespace_pi_query_long_basic_abort counter
+aerospike_namespace_pi_query_long_basic_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_long_basic_complete pi query long basic complete
+# TYPE aerospike_namespace_pi_query_long_basic_complete counter
+aerospike_namespace_pi_query_long_basic_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_long_basic_error pi query long basic error
+# TYPE aerospike_namespace_pi_query_long_basic_error counter
+aerospike_namespace_pi_query_long_basic_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_ops_bg_abort pi query ops bg abort
+# TYPE aerospike_namespace_pi_query_ops_bg_abort counter
+aerospike_namespace_pi_query_ops_bg_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_ops_bg_complete pi query ops bg complete
+# TYPE aerospike_namespace_pi_query_ops_bg_complete counter
+aerospike_namespace_pi_query_ops_bg_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_ops_bg_error pi query ops bg error
+# TYPE aerospike_namespace_pi_query_ops_bg_error counter
+aerospike_namespace_pi_query_ops_bg_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_short_basic_complete pi query short basic complete
+# TYPE aerospike_namespace_pi_query_short_basic_complete counter
+aerospike_namespace_pi_query_short_basic_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_short_basic_error pi query short basic error
+# TYPE aerospike_namespace_pi_query_short_basic_error counter
+aerospike_namespace_pi_query_short_basic_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_short_basic_timeout pi query short basic timeout
+# TYPE aerospike_namespace_pi_query_short_basic_timeout counter
+aerospike_namespace_pi_query_short_basic_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_udf_bg_abort pi query udf bg abort
+# TYPE aerospike_namespace_pi_query_udf_bg_abort counter
+aerospike_namespace_pi_query_udf_bg_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_udf_bg_complete pi query udf bg complete
+# TYPE aerospike_namespace_pi_query_udf_bg_complete counter
+aerospike_namespace_pi_query_udf_bg_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_pi_query_udf_bg_error pi query udf bg error
+# TYPE aerospike_namespace_pi_query_udf_bg_error counter
+aerospike_namespace_pi_query_udf_bg_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_prefer_uniform_balance prefer uniform balance
+# TYPE aerospike_namespace_prefer_uniform_balance gauge
+aerospike_namespace_prefer_uniform_balance{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_prole_objects prole objects
+# TYPE aerospike_namespace_prole_objects gauge
+aerospike_namespace_prole_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_prole_tombstones prole tombstones
+# TYPE aerospike_namespace_prole_tombstones gauge
+aerospike_namespace_prole_tombstones{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_query_proto_compression_ratio query proto compression ratio
+# TYPE aerospike_namespace_query_proto_compression_ratio gauge
+aerospike_namespace_query_proto_compression_ratio{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_query_proto_uncompressed_pct query proto uncompressed pct
+# TYPE aerospike_namespace_query_proto_uncompressed_pct gauge
+aerospike_namespace_query_proto_uncompressed_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_rack_id rack id
+# TYPE aerospike_namespace_rack_id gauge
+aerospike_namespace_rack_id{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_re_repl_error re repl error
+# TYPE aerospike_namespace_re_repl_error counter
+aerospike_namespace_re_repl_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_re_repl_success re repl success
+# TYPE aerospike_namespace_re_repl_success counter
+aerospike_namespace_re_repl_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_re_repl_timeout re repl timeout
+# TYPE aerospike_namespace_re_repl_timeout counter
+aerospike_namespace_re_repl_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_re_repl_tsvc_error re repl tsvc error
+# TYPE aerospike_namespace_re_repl_tsvc_error counter
+aerospike_namespace_re_repl_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_re_repl_tsvc_timeout re repl tsvc timeout
+# TYPE aerospike_namespace_re_repl_tsvc_timeout counter
+aerospike_namespace_re_repl_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_read_touch_error read touch error
+# TYPE aerospike_namespace_read_touch_error counter
+aerospike_namespace_read_touch_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_read_touch_skip read touch skip
+# TYPE aerospike_namespace_read_touch_skip counter
+aerospike_namespace_read_touch_skip{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_read_touch_success read touch success
+# TYPE aerospike_namespace_read_touch_success counter
+aerospike_namespace_read_touch_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_read_touch_timeout read touch timeout
+# TYPE aerospike_namespace_read_touch_timeout counter
+aerospike_namespace_read_touch_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_read_touch_tsvc_error read touch tsvc error
+# TYPE aerospike_namespace_read_touch_tsvc_error counter
+aerospike_namespace_read_touch_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_read_touch_tsvc_timeout read touch tsvc timeout
+# TYPE aerospike_namespace_read_touch_tsvc_timeout counter
+aerospike_namespace_read_touch_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_record_proto_compression_ratio record proto compression ratio
+# TYPE aerospike_namespace_record_proto_compression_ratio gauge
+aerospike_namespace_record_proto_compression_ratio{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_record_proto_uncompressed_pct record proto uncompressed pct
+# TYPE aerospike_namespace_record_proto_uncompressed_pct gauge
+aerospike_namespace_record_proto_uncompressed_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_reject_non_xdr_writes reject non xdr writes
+# TYPE aerospike_namespace_reject_non_xdr_writes gauge
+aerospike_namespace_reject_non_xdr_writes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_reject_xdr_writes reject xdr writes
+# TYPE aerospike_namespace_reject_xdr_writes gauge
+aerospike_namespace_reject_xdr_writes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_replication_factor replication factor
+# TYPE aerospike_namespace_replication_factor gauge
+aerospike_namespace_replication_factor{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_retransmit_all_batch_sub_delete_dup_res retransmit all batch sub delete dup res
+# TYPE aerospike_namespace_retransmit_all_batch_sub_delete_dup_res counter
+aerospike_namespace_retransmit_all_batch_sub_delete_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_delete_repl_write retransmit all batch sub delete repl write
+# TYPE aerospike_namespace_retransmit_all_batch_sub_delete_repl_write counter
+aerospike_namespace_retransmit_all_batch_sub_delete_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_read_dup_res retransmit all batch sub read dup res
+# TYPE aerospike_namespace_retransmit_all_batch_sub_read_dup_res counter
+aerospike_namespace_retransmit_all_batch_sub_read_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_read_repl_ping retransmit all batch sub read repl ping
+# TYPE aerospike_namespace_retransmit_all_batch_sub_read_repl_ping counter
+aerospike_namespace_retransmit_all_batch_sub_read_repl_ping{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_udf_dup_res retransmit all batch sub udf dup res
+# TYPE aerospike_namespace_retransmit_all_batch_sub_udf_dup_res counter
+aerospike_namespace_retransmit_all_batch_sub_udf_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_udf_repl_write retransmit all batch sub udf repl write
+# TYPE aerospike_namespace_retransmit_all_batch_sub_udf_repl_write counter
+aerospike_namespace_retransmit_all_batch_sub_udf_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_write_dup_res retransmit all batch sub write dup res
+# TYPE aerospike_namespace_retransmit_all_batch_sub_write_dup_res counter
+aerospike_namespace_retransmit_all_batch_sub_write_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_batch_sub_write_repl_write retransmit all batch sub write repl write
+# TYPE aerospike_namespace_retransmit_all_batch_sub_write_repl_write counter
+aerospike_namespace_retransmit_all_batch_sub_write_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_delete_dup_res retransmit all delete dup res
+# TYPE aerospike_namespace_retransmit_all_delete_dup_res counter
+aerospike_namespace_retransmit_all_delete_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_delete_repl_write retransmit all delete repl write
+# TYPE aerospike_namespace_retransmit_all_delete_repl_write counter
+aerospike_namespace_retransmit_all_delete_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_read_dup_res retransmit all read dup res
+# TYPE aerospike_namespace_retransmit_all_read_dup_res counter
+aerospike_namespace_retransmit_all_read_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_read_repl_ping retransmit all read repl ping
+# TYPE aerospike_namespace_retransmit_all_read_repl_ping counter
+aerospike_namespace_retransmit_all_read_repl_ping{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_udf_dup_res retransmit all udf dup res
+# TYPE aerospike_namespace_retransmit_all_udf_dup_res counter
+aerospike_namespace_retransmit_all_udf_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_udf_repl_write retransmit all udf repl write
+# TYPE aerospike_namespace_retransmit_all_udf_repl_write counter
+aerospike_namespace_retransmit_all_udf_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_write_dup_res retransmit all write dup res
+# TYPE aerospike_namespace_retransmit_all_write_dup_res counter
+aerospike_namespace_retransmit_all_write_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_all_write_repl_write retransmit all write repl write
+# TYPE aerospike_namespace_retransmit_all_write_repl_write counter
+aerospike_namespace_retransmit_all_write_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_ops_sub_dup_res retransmit ops sub dup res
+# TYPE aerospike_namespace_retransmit_ops_sub_dup_res counter
+aerospike_namespace_retransmit_ops_sub_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_ops_sub_repl_write retransmit ops sub repl write
+# TYPE aerospike_namespace_retransmit_ops_sub_repl_write counter
+aerospike_namespace_retransmit_ops_sub_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_udf_sub_dup_res retransmit udf sub dup res
+# TYPE aerospike_namespace_retransmit_udf_sub_dup_res counter
+aerospike_namespace_retransmit_udf_sub_dup_res{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_retransmit_udf_sub_repl_write retransmit udf sub repl write
+# TYPE aerospike_namespace_retransmit_udf_sub_repl_write counter
+aerospike_namespace_retransmit_udf_sub_repl_write{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_set_index_used_bytes set index used bytes
+# TYPE aerospike_namespace_set_index_used_bytes gauge
+aerospike_namespace_set_index_used_bytes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_aggr_abort si query aggr abort
+# TYPE aerospike_namespace_si_query_aggr_abort counter
+aerospike_namespace_si_query_aggr_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_aggr_complete si query aggr complete
+# TYPE aerospike_namespace_si_query_aggr_complete counter
+aerospike_namespace_si_query_aggr_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_aggr_error si query aggr error
+# TYPE aerospike_namespace_si_query_aggr_error counter
+aerospike_namespace_si_query_aggr_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_long_basic_abort si query long basic abort
+# TYPE aerospike_namespace_si_query_long_basic_abort counter
+aerospike_namespace_si_query_long_basic_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_long_basic_complete si query long basic complete
+# TYPE aerospike_namespace_si_query_long_basic_complete counter
+aerospike_namespace_si_query_long_basic_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_long_basic_error si query long basic error
+# TYPE aerospike_namespace_si_query_long_basic_error counter
+aerospike_namespace_si_query_long_basic_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_ops_bg_abort si query ops bg abort
+# TYPE aerospike_namespace_si_query_ops_bg_abort counter
+aerospike_namespace_si_query_ops_bg_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_ops_bg_complete si query ops bg complete
+# TYPE aerospike_namespace_si_query_ops_bg_complete counter
+aerospike_namespace_si_query_ops_bg_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_ops_bg_error si query ops bg error
+# TYPE aerospike_namespace_si_query_ops_bg_error counter
+aerospike_namespace_si_query_ops_bg_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_short_basic_complete si query short basic complete
+# TYPE aerospike_namespace_si_query_short_basic_complete counter
+aerospike_namespace_si_query_short_basic_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_short_basic_error si query short basic error
+# TYPE aerospike_namespace_si_query_short_basic_error counter
+aerospike_namespace_si_query_short_basic_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_short_basic_timeout si query short basic timeout
+# TYPE aerospike_namespace_si_query_short_basic_timeout counter
+aerospike_namespace_si_query_short_basic_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_udf_bg_abort si query udf bg abort
+# TYPE aerospike_namespace_si_query_udf_bg_abort counter
+aerospike_namespace_si_query_udf_bg_abort{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_udf_bg_complete si query udf bg complete
+# TYPE aerospike_namespace_si_query_udf_bg_complete counter
+aerospike_namespace_si_query_udf_bg_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_si_query_udf_bg_error si query udf bg error
+# TYPE aerospike_namespace_si_query_udf_bg_error counter
+aerospike_namespace_si_query_udf_bg_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_sindex_gc_cleaned sindex gc cleaned
+# TYPE aerospike_namespace_sindex_gc_cleaned counter
+aerospike_namespace_sindex_gc_cleaned{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_sindex_stage_size sindex stage size
+# TYPE aerospike_namespace_sindex_stage_size gauge
+aerospike_namespace_sindex_stage_size{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1.073741824e+09
+# HELP aerospike_namespace_sindex_used_bytes sindex used bytes
+# TYPE aerospike_namespace_sindex_used_bytes gauge
+aerospike_namespace_sindex_used_bytes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_single_query_threads single query threads
+# TYPE aerospike_namespace_single_query_threads gauge
+aerospike_namespace_single_query_threads{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4
+# HELP aerospike_namespace_smd_evict_void_time smd evict void time
+# TYPE aerospike_namespace_smd_evict_void_time counter
+aerospike_namespace_smd_evict_void_time{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_stop_writes stop writes
+# TYPE aerospike_namespace_stop_writes gauge
+aerospike_namespace_stop_writes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_stop_writes_sys_memory_pct stop writes sys memory pct
+# TYPE aerospike_namespace_stop_writes_sys_memory_pct gauge
+aerospike_namespace_stop_writes_sys_memory_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 90
+# HELP aerospike_namespace_storage_engine_cache_replica_writes storage engine cache replica writes
+# TYPE aerospike_namespace_storage_engine_cache_replica_writes gauge
+aerospike_namespace_storage_engine_cache_replica_writes{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_cold_start_empty storage engine cold start empty
+# TYPE aerospike_namespace_storage_engine_cold_start_empty gauge
+aerospike_namespace_storage_engine_cold_start_empty{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_commit_to_device storage engine commit to device
+# TYPE aerospike_namespace_storage_engine_commit_to_device gauge
+aerospike_namespace_storage_engine_commit_to_device{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_compression_acceleration storage engine compression acceleration
+# TYPE aerospike_namespace_storage_engine_compression_acceleration gauge
+aerospike_namespace_storage_engine_compression_acceleration{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_compression_level storage engine compression level
+# TYPE aerospike_namespace_storage_engine_compression_level gauge
+aerospike_namespace_storage_engine_compression_level{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_defrag_lwm_pct storage engine defrag lwm pct
+# TYPE aerospike_namespace_storage_engine_defrag_lwm_pct gauge
+aerospike_namespace_storage_engine_defrag_lwm_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 50
+# HELP aerospike_namespace_storage_engine_defrag_queue_min storage engine defrag queue min
+# TYPE aerospike_namespace_storage_engine_defrag_queue_min gauge
+aerospike_namespace_storage_engine_defrag_queue_min{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_defrag_sleep storage engine defrag sleep
+# TYPE aerospike_namespace_storage_engine_defrag_sleep gauge
+aerospike_namespace_storage_engine_defrag_sleep{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1000
+# HELP aerospike_namespace_storage_engine_defrag_startup_minimum storage engine defrag startup minimum
+# TYPE aerospike_namespace_storage_engine_defrag_startup_minimum gauge
+aerospike_namespace_storage_engine_defrag_startup_minimum{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_direct_files storage engine direct files
+# TYPE aerospike_namespace_storage_engine_direct_files gauge
+aerospike_namespace_storage_engine_direct_files{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_disable_odsync storage engine disable odsync
+# TYPE aerospike_namespace_storage_engine_disable_odsync gauge
+aerospike_namespace_storage_engine_disable_odsync{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_enable_benchmarks_storage storage engine enable benchmarks storage
+# TYPE aerospike_namespace_storage_engine_enable_benchmarks_storage gauge
+aerospike_namespace_storage_engine_enable_benchmarks_storage{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_evict_used_pct storage engine evict used pct
+# TYPE aerospike_namespace_storage_engine_evict_used_pct gauge
+aerospike_namespace_storage_engine_evict_used_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_age storage engine file age
+# TYPE aerospike_namespace_storage_engine_file_age counter
+aerospike_namespace_storage_engine_file_age{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} -1
+# HELP aerospike_namespace_storage_engine_file_defrag_partial_writes storage engine file defrag partial writes
+# TYPE aerospike_namespace_storage_engine_file_defrag_partial_writes counter
+aerospike_namespace_storage_engine_file_defrag_partial_writes{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_defrag_q storage engine file defrag q
+# TYPE aerospike_namespace_storage_engine_file_defrag_q counter
+aerospike_namespace_storage_engine_file_defrag_q{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_defrag_reads storage engine file defrag reads
+# TYPE aerospike_namespace_storage_engine_file_defrag_reads counter
+aerospike_namespace_storage_engine_file_defrag_reads{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_defrag_writes storage engine file defrag writes
+# TYPE aerospike_namespace_storage_engine_file_defrag_writes counter
+aerospike_namespace_storage_engine_file_defrag_writes{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_free_wblocks storage engine file free wblocks
+# TYPE aerospike_namespace_storage_engine_file_free_wblocks counter
+aerospike_namespace_storage_engine_file_free_wblocks{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 503
+# HELP aerospike_namespace_storage_engine_file_partial_writes storage engine file partial writes
+# TYPE aerospike_namespace_storage_engine_file_partial_writes counter
+aerospike_namespace_storage_engine_file_partial_writes{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4
+# HELP aerospike_namespace_storage_engine_file_read_errors storage engine file read errors
+# TYPE aerospike_namespace_storage_engine_file_read_errors counter
+aerospike_namespace_storage_engine_file_read_errors{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_used_bytes storage engine file used bytes
+# TYPE aerospike_namespace_storage_engine_file_used_bytes counter
+aerospike_namespace_storage_engine_file_used_bytes{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 5.2462656e+07
+# HELP aerospike_namespace_storage_engine_file_write_q storage engine file write q
+# TYPE aerospike_namespace_storage_engine_file_write_q counter
+aerospike_namespace_storage_engine_file_write_q{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_file_writes storage engine file writes
+# TYPE aerospike_namespace_storage_engine_file_writes counter
+aerospike_namespace_storage_engine_file_writes{cluster_name="docker",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="172.19.0.3:3000",storage_engine="device"} 7
+# HELP aerospike_namespace_storage_engine_filesize storage engine filesize
+# TYPE aerospike_namespace_storage_engine_filesize counter
+aerospike_namespace_storage_engine_filesize{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4.294967296e+09
+# HELP aerospike_namespace_storage_engine_flush_max_ms storage engine flush max ms
+# TYPE aerospike_namespace_storage_engine_flush_max_ms gauge
+aerospike_namespace_storage_engine_flush_max_ms{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1000
+# HELP aerospike_namespace_storage_engine_flush_size storage engine flush size
+# TYPE aerospike_namespace_storage_engine_flush_size gauge
+aerospike_namespace_storage_engine_flush_size{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1.048576e+06
+# HELP aerospike_namespace_storage_engine_max_write_cache storage engine max write cache
+# TYPE aerospike_namespace_storage_engine_max_write_cache gauge
+aerospike_namespace_storage_engine_max_write_cache{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 6.7108864e+07
+# HELP aerospike_namespace_storage_engine_post_write_cache storage engine post write cache
+# TYPE aerospike_namespace_storage_engine_post_write_cache gauge
+aerospike_namespace_storage_engine_post_write_cache{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 2.68435456e+08
+# HELP aerospike_namespace_storage_engine_read_page_cache storage engine read page cache
+# TYPE aerospike_namespace_storage_engine_read_page_cache gauge
+aerospike_namespace_storage_engine_read_page_cache{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_storage_engine_serialize_tomb_raider storage engine serialize tomb raider
+# TYPE aerospike_namespace_storage_engine_serialize_tomb_raider gauge
+aerospike_namespace_storage_engine_serialize_tomb_raider{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_sindex_startup_device_scan storage engine sindex startup device scan
+# TYPE aerospike_namespace_storage_engine_sindex_startup_device_scan gauge
+aerospike_namespace_storage_engine_sindex_startup_device_scan{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_storage_engine_stop_writes_avail_pct storage engine stop writes avail pct
+# TYPE aerospike_namespace_storage_engine_stop_writes_avail_pct gauge
+aerospike_namespace_storage_engine_stop_writes_avail_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 5
+# HELP aerospike_namespace_storage_engine_stop_writes_used_pct storage engine stop writes used pct
+# TYPE aerospike_namespace_storage_engine_stop_writes_used_pct gauge
+aerospike_namespace_storage_engine_stop_writes_used_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 70
+# HELP aerospike_namespace_storage_engine_tomb_raider_sleep storage engine tomb raider sleep
+# TYPE aerospike_namespace_storage_engine_tomb_raider_sleep gauge
+aerospike_namespace_storage_engine_tomb_raider_sleep{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1000
+# HELP aerospike_namespace_strong_consistency strong consistency
+# TYPE aerospike_namespace_strong_consistency gauge
+aerospike_namespace_strong_consistency{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_strong_consistency_allow_expunge strong consistency allow expunge
+# TYPE aerospike_namespace_strong_consistency_allow_expunge gauge
+aerospike_namespace_strong_consistency_allow_expunge{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_tomb_raider_eligible_age tomb raider eligible age
+# TYPE aerospike_namespace_tomb_raider_eligible_age gauge
+aerospike_namespace_tomb_raider_eligible_age{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 86400
+# HELP aerospike_namespace_tomb_raider_period tomb raider period
+# TYPE aerospike_namespace_tomb_raider_period gauge
+aerospike_namespace_tomb_raider_period{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 86400
+# HELP aerospike_namespace_tombstones tombstones
+# TYPE aerospike_namespace_tombstones gauge
+aerospike_namespace_tombstones{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_transaction_pending_limit transaction pending limit
+# TYPE aerospike_namespace_transaction_pending_limit gauge
+aerospike_namespace_transaction_pending_limit{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 20
+# HELP aerospike_namespace_truncate_lut truncate lut
+# TYPE aerospike_namespace_truncate_lut gauge
+aerospike_namespace_truncate_lut{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_truncate_threads truncate threads
+# TYPE aerospike_namespace_truncate_threads gauge
+aerospike_namespace_truncate_threads{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 4
+# HELP aerospike_namespace_truncating truncating
+# TYPE aerospike_namespace_truncating gauge
+aerospike_namespace_truncating{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_lang_delete_success udf sub lang delete success
+# TYPE aerospike_namespace_udf_sub_lang_delete_success counter
+aerospike_namespace_udf_sub_lang_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_lang_error udf sub lang error
+# TYPE aerospike_namespace_udf_sub_lang_error counter
+aerospike_namespace_udf_sub_lang_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_lang_read_success udf sub lang read success
+# TYPE aerospike_namespace_udf_sub_lang_read_success counter
+aerospike_namespace_udf_sub_lang_read_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_lang_write_success udf sub lang write success
+# TYPE aerospike_namespace_udf_sub_lang_write_success counter
+aerospike_namespace_udf_sub_lang_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_tsvc_error udf sub tsvc error
+# TYPE aerospike_namespace_udf_sub_tsvc_error counter
+aerospike_namespace_udf_sub_tsvc_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_tsvc_timeout udf sub tsvc timeout
+# TYPE aerospike_namespace_udf_sub_tsvc_timeout counter
+aerospike_namespace_udf_sub_tsvc_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_udf_complete udf sub udf complete
+# TYPE aerospike_namespace_udf_sub_udf_complete counter
+aerospike_namespace_udf_sub_udf_complete{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_udf_error udf sub udf error
+# TYPE aerospike_namespace_udf_sub_udf_error counter
+aerospike_namespace_udf_sub_udf_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_udf_filtered_out udf sub udf filtered out
+# TYPE aerospike_namespace_udf_sub_udf_filtered_out counter
+aerospike_namespace_udf_sub_udf_filtered_out{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_udf_sub_udf_timeout udf sub udf timeout
+# TYPE aerospike_namespace_udf_sub_udf_timeout counter
+aerospike_namespace_udf_sub_udf_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_unavailable_partitions unavailable partitions
+# TYPE aerospike_namespace_unavailable_partitions gauge
+aerospike_namespace_unavailable_partitions{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_unreplicated_records unreplicated records
+# TYPE aerospike_namespace_unreplicated_records gauge
+aerospike_namespace_unreplicated_records{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_bin_cemeteries xdr bin cemeteries
+# TYPE aerospike_namespace_xdr_bin_cemeteries gauge
+aerospike_namespace_xdr_bin_cemeteries{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_bin_tombstone_ttl xdr bin tombstone ttl
+# TYPE aerospike_namespace_xdr_bin_tombstone_ttl gauge
+aerospike_namespace_xdr_bin_tombstone_ttl{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 86400
+# HELP aerospike_namespace_xdr_client_delete_error xdr client delete error
+# TYPE aerospike_namespace_xdr_client_delete_error counter
+aerospike_namespace_xdr_client_delete_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_client_delete_not_found xdr client delete not found
+# TYPE aerospike_namespace_xdr_client_delete_not_found counter
+aerospike_namespace_xdr_client_delete_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_client_delete_success xdr client delete success
+# TYPE aerospike_namespace_xdr_client_delete_success counter
+aerospike_namespace_xdr_client_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_client_delete_timeout xdr client delete timeout
+# TYPE aerospike_namespace_xdr_client_delete_timeout counter
+aerospike_namespace_xdr_client_delete_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_client_write_error xdr client write error
+# TYPE aerospike_namespace_xdr_client_write_error counter
+aerospike_namespace_xdr_client_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_client_write_success xdr client write success
+# TYPE aerospike_namespace_xdr_client_write_success counter
+aerospike_namespace_xdr_client_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_client_write_timeout xdr client write timeout
+# TYPE aerospike_namespace_xdr_client_write_timeout counter
+aerospike_namespace_xdr_client_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_delete_error xdr from proxy delete error
+# TYPE aerospike_namespace_xdr_from_proxy_delete_error counter
+aerospike_namespace_xdr_from_proxy_delete_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_delete_not_found xdr from proxy delete not found
+# TYPE aerospike_namespace_xdr_from_proxy_delete_not_found counter
+aerospike_namespace_xdr_from_proxy_delete_not_found{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_delete_success xdr from proxy delete success
+# TYPE aerospike_namespace_xdr_from_proxy_delete_success counter
+aerospike_namespace_xdr_from_proxy_delete_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_delete_timeout xdr from proxy delete timeout
+# TYPE aerospike_namespace_xdr_from_proxy_delete_timeout counter
+aerospike_namespace_xdr_from_proxy_delete_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_write_error xdr from proxy write error
+# TYPE aerospike_namespace_xdr_from_proxy_write_error counter
+aerospike_namespace_xdr_from_proxy_write_error{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_write_success xdr from proxy write success
+# TYPE aerospike_namespace_xdr_from_proxy_write_success counter
+aerospike_namespace_xdr_from_proxy_write_success{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_from_proxy_write_timeout xdr from proxy write timeout
+# TYPE aerospike_namespace_xdr_from_proxy_write_timeout counter
+aerospike_namespace_xdr_from_proxy_write_timeout{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xdr_tomb_raider_period xdr tomb raider period
+# TYPE aerospike_namespace_xdr_tomb_raider_period gauge
+aerospike_namespace_xdr_tomb_raider_period{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 120
+# HELP aerospike_namespace_xdr_tomb_raider_threads xdr tomb raider threads
+# TYPE aerospike_namespace_xdr_tomb_raider_threads gauge
+aerospike_namespace_xdr_tomb_raider_threads{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 1
+# HELP aerospike_namespace_xdr_tombstones xdr tombstones
+# TYPE aerospike_namespace_xdr_tombstones gauge
+aerospike_namespace_xdr_tombstones{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_namespace_xmem_id xmem id
+# TYPE aerospike_namespace_xmem_id counter
+aerospike_namespace_xmem_id{cluster_name="docker",ns="test",service="172.19.0.3:3000",storage_engine="device"} 0
+# HELP aerospike_node_stats_advertise_ipv6 advertise ipv6
+# TYPE aerospike_node_stats_advertise_ipv6 gauge
+aerospike_node_stats_advertise_ipv6{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_complete batch index complete
+# TYPE aerospike_node_stats_batch_index_complete counter
+aerospike_node_stats_batch_index_complete{cluster_name="docker",service="172.19.0.3:3000"} 40130
+# HELP aerospike_node_stats_batch_index_created_buffers batch index created buffers
+# TYPE aerospike_node_stats_batch_index_created_buffers counter
+aerospike_node_stats_batch_index_created_buffers{cluster_name="docker",service="172.19.0.3:3000"} 60
+# HELP aerospike_node_stats_batch_index_delay batch index delay
+# TYPE aerospike_node_stats_batch_index_delay counter
+aerospike_node_stats_batch_index_delay{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_destroyed_buffers batch index destroyed buffers
+# TYPE aerospike_node_stats_batch_index_destroyed_buffers counter
+aerospike_node_stats_batch_index_destroyed_buffers{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_error batch index error
+# TYPE aerospike_node_stats_batch_index_error counter
+aerospike_node_stats_batch_index_error{cluster_name="docker",service="172.19.0.3:3000"} 4
+# HELP aerospike_node_stats_batch_index_huge_buffers batch index huge buffers
+# TYPE aerospike_node_stats_batch_index_huge_buffers counter
+aerospike_node_stats_batch_index_huge_buffers{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_initiate batch index initiate
+# TYPE aerospike_node_stats_batch_index_initiate counter
+aerospike_node_stats_batch_index_initiate{cluster_name="docker",service="172.19.0.3:3000"} 40134
+# HELP aerospike_node_stats_batch_index_proto_compression_ratio batch index proto compression ratio
+# TYPE aerospike_node_stats_batch_index_proto_compression_ratio gauge
+aerospike_node_stats_batch_index_proto_compression_ratio{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_batch_index_proto_uncompressed_pct batch index proto uncompressed pct
+# TYPE aerospike_node_stats_batch_index_proto_uncompressed_pct gauge
+aerospike_node_stats_batch_index_proto_uncompressed_pct{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_threads batch index threads
+# TYPE aerospike_node_stats_batch_index_threads gauge
+aerospike_node_stats_batch_index_threads{cluster_name="docker",service="172.19.0.3:3000"} 10
+# HELP aerospike_node_stats_batch_index_timeout batch index timeout
+# TYPE aerospike_node_stats_batch_index_timeout counter
+aerospike_node_stats_batch_index_timeout{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_unused_buffers batch index unused buffers
+# TYPE aerospike_node_stats_batch_index_unused_buffers gauge
+aerospike_node_stats_batch_index_unused_buffers{cluster_name="docker",service="172.19.0.3:3000"} 60
+# HELP aerospike_node_stats_batch_max_buffers_per_queue batch max buffers per queue
+# TYPE aerospike_node_stats_batch_max_buffers_per_queue gauge
+aerospike_node_stats_batch_max_buffers_per_queue{cluster_name="docker",service="172.19.0.3:3000"} 255
+# HELP aerospike_node_stats_batch_max_requests batch max requests
+# TYPE aerospike_node_stats_batch_max_requests gauge
+aerospike_node_stats_batch_max_requests{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_batch_max_unused_buffers batch max unused buffers
+# TYPE aerospike_node_stats_batch_max_unused_buffers gauge
+aerospike_node_stats_batch_max_unused_buffers{cluster_name="docker",service="172.19.0.3:3000"} 256
+# HELP aerospike_node_stats_client_connections client connections
+# TYPE aerospike_node_stats_client_connections gauge
+aerospike_node_stats_client_connections{cluster_name="docker",service="172.19.0.3:3000"} 3
+# HELP aerospike_node_stats_client_connections_closed client connections closed
+# TYPE aerospike_node_stats_client_connections_closed counter
+aerospike_node_stats_client_connections_closed{cluster_name="docker",service="172.19.0.3:3000"} 74
+# HELP aerospike_node_stats_client_connections_opened client connections opened
+# TYPE aerospike_node_stats_client_connections_opened counter
+aerospike_node_stats_client_connections_opened{cluster_name="docker",service="172.19.0.3:3000"} 77
+# HELP aerospike_node_stats_cluster_clock_skew_ms cluster clock skew ms
+# TYPE aerospike_node_stats_cluster_clock_skew_ms gauge
+aerospike_node_stats_cluster_clock_skew_ms{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_cluster_clock_skew_stop_writes_sec cluster clock skew stop writes sec
+# TYPE aerospike_node_stats_cluster_clock_skew_stop_writes_sec gauge
+aerospike_node_stats_cluster_clock_skew_stop_writes_sec{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_cluster_generation cluster generation
+# TYPE aerospike_node_stats_cluster_generation counter
+aerospike_node_stats_cluster_generation{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_cluster_integrity cluster integrity
+# TYPE aerospike_node_stats_cluster_integrity gauge
+aerospike_node_stats_cluster_integrity{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_cluster_is_member cluster is member
+# TYPE aerospike_node_stats_cluster_is_member gauge
+aerospike_node_stats_cluster_is_member{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_cluster_max_compatibility_id cluster max compatibility id
+# TYPE aerospike_node_stats_cluster_max_compatibility_id gauge
+aerospike_node_stats_cluster_max_compatibility_id{cluster_name="docker",service="172.19.0.3:3000"} 15
+# HELP aerospike_node_stats_cluster_min_compatibility_id cluster min compatibility id
+# TYPE aerospike_node_stats_cluster_min_compatibility_id gauge
+aerospike_node_stats_cluster_min_compatibility_id{cluster_name="docker",service="172.19.0.3:3000"} 15
+# HELP aerospike_node_stats_cluster_size cluster size
+# TYPE aerospike_node_stats_cluster_size gauge
+aerospike_node_stats_cluster_size{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_debug_allocations debug allocations
+# TYPE aerospike_node_stats_debug_allocations gauge
+aerospike_node_stats_debug_allocations{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_demarshal_error demarshal error
+# TYPE aerospike_node_stats_demarshal_error counter
+aerospike_node_stats_demarshal_error{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_disable_udf_execution disable udf execution
+# TYPE aerospike_node_stats_disable_udf_execution gauge
+aerospike_node_stats_disable_udf_execution{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_early_tsvc_client_error early tsvc client error
+# TYPE aerospike_node_stats_early_tsvc_client_error counter
+aerospike_node_stats_early_tsvc_client_error{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_early_tsvc_from_proxy_batch_sub_error early tsvc from proxy batch sub error
+# TYPE aerospike_node_stats_early_tsvc_from_proxy_batch_sub_error counter
+aerospike_node_stats_early_tsvc_from_proxy_batch_sub_error{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_early_tsvc_from_proxy_error early tsvc from proxy error
+# TYPE aerospike_node_stats_early_tsvc_from_proxy_error counter
+aerospike_node_stats_early_tsvc_from_proxy_error{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_enable_benchmarks_fabric enable benchmarks fabric
+# TYPE aerospike_node_stats_enable_benchmarks_fabric gauge
+aerospike_node_stats_enable_benchmarks_fabric{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_enable_health_check enable health check
+# TYPE aerospike_node_stats_enable_health_check gauge
+aerospike_node_stats_enable_health_check{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_enable_hist_info enable hist info
+# TYPE aerospike_node_stats_enable_hist_info gauge
+aerospike_node_stats_enable_hist_info{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_enforce_best_practices enforce best practices
+# TYPE aerospike_node_stats_enforce_best_practices gauge
+aerospike_node_stats_enforce_best_practices{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_bulk_recv_rate fabric bulk recv rate
+# TYPE aerospike_node_stats_fabric_bulk_recv_rate gauge
+aerospike_node_stats_fabric_bulk_recv_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_bulk_send_rate fabric bulk send rate
+# TYPE aerospike_node_stats_fabric_bulk_send_rate gauge
+aerospike_node_stats_fabric_bulk_send_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_connections fabric connections
+# TYPE aerospike_node_stats_fabric_connections gauge
+aerospike_node_stats_fabric_connections{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_connections_closed fabric connections closed
+# TYPE aerospike_node_stats_fabric_connections_closed counter
+aerospike_node_stats_fabric_connections_closed{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_connections_opened fabric connections opened
+# TYPE aerospike_node_stats_fabric_connections_opened counter
+aerospike_node_stats_fabric_connections_opened{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_ctrl_recv_rate fabric ctrl recv rate
+# TYPE aerospike_node_stats_fabric_ctrl_recv_rate gauge
+aerospike_node_stats_fabric_ctrl_recv_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_ctrl_send_rate fabric ctrl send rate
+# TYPE aerospike_node_stats_fabric_ctrl_send_rate gauge
+aerospike_node_stats_fabric_ctrl_send_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_meta_recv_rate fabric meta recv rate
+# TYPE aerospike_node_stats_fabric_meta_recv_rate gauge
+aerospike_node_stats_fabric_meta_recv_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_meta_send_rate fabric meta send rate
+# TYPE aerospike_node_stats_fabric_meta_send_rate gauge
+aerospike_node_stats_fabric_meta_send_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_rw_recv_rate fabric rw recv rate
+# TYPE aerospike_node_stats_fabric_rw_recv_rate gauge
+aerospike_node_stats_fabric_rw_recv_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_fabric_rw_send_rate fabric rw send rate
+# TYPE aerospike_node_stats_fabric_rw_send_rate gauge
+aerospike_node_stats_fabric_rw_send_rate{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_failed_best_practices failed best practices
+# TYPE aerospike_node_stats_failed_best_practices gauge
+aerospike_node_stats_failed_best_practices{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_heap_active_kbytes heap active kbytes
+# TYPE aerospike_node_stats_heap_active_kbytes gauge
+aerospike_node_stats_heap_active_kbytes{cluster_name="docker",service="172.19.0.3:3000"} 1.329448e+06
+# HELP aerospike_node_stats_heap_allocated_kbytes heap allocated kbytes
+# TYPE aerospike_node_stats_heap_allocated_kbytes gauge
+aerospike_node_stats_heap_allocated_kbytes{cluster_name="docker",service="172.19.0.3:3000"} 1.308116e+06
+# HELP aerospike_node_stats_heap_efficiency_pct heap efficiency pct
+# TYPE aerospike_node_stats_heap_efficiency_pct gauge
+aerospike_node_stats_heap_efficiency_pct{cluster_name="docker",service="172.19.0.3:3000"} 98
+# HELP aerospike_node_stats_heap_mapped_kbytes heap mapped kbytes
+# TYPE aerospike_node_stats_heap_mapped_kbytes gauge
+aerospike_node_stats_heap_mapped_kbytes{cluster_name="docker",service="172.19.0.3:3000"} 1.448448e+06
+# HELP aerospike_node_stats_heap_site_count heap site count
+# TYPE aerospike_node_stats_heap_site_count gauge
+aerospike_node_stats_heap_site_count{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_heartbeat_connections heartbeat connections
+# TYPE aerospike_node_stats_heartbeat_connections gauge
+aerospike_node_stats_heartbeat_connections{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_heartbeat_connections_closed heartbeat connections closed
+# TYPE aerospike_node_stats_heartbeat_connections_closed counter
+aerospike_node_stats_heartbeat_connections_closed{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_heartbeat_connections_opened heartbeat connections opened
+# TYPE aerospike_node_stats_heartbeat_connections_opened counter
+aerospike_node_stats_heartbeat_connections_opened{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_heartbeat_received_foreign heartbeat received foreign
+# TYPE aerospike_node_stats_heartbeat_received_foreign counter
+aerospike_node_stats_heartbeat_received_foreign{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_heartbeat_received_self heartbeat received self
+# TYPE aerospike_node_stats_heartbeat_received_self counter
+aerospike_node_stats_heartbeat_received_self{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_indent_allocations indent allocations
+# TYPE aerospike_node_stats_indent_allocations gauge
+aerospike_node_stats_indent_allocations{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_info_complete info complete
+# TYPE aerospike_node_stats_info_complete counter
+aerospike_node_stats_info_complete{cluster_name="docker",service="172.19.0.3:3000"} 57
+# HELP aerospike_node_stats_info_max_ms info max ms
+# TYPE aerospike_node_stats_info_max_ms gauge
+aerospike_node_stats_info_max_ms{cluster_name="docker",service="172.19.0.3:3000"} 10000
+# HELP aerospike_node_stats_info_queue info queue
+# TYPE aerospike_node_stats_info_queue gauge
+aerospike_node_stats_info_queue{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_info_threads info threads
+# TYPE aerospike_node_stats_info_threads gauge
+aerospike_node_stats_info_threads{cluster_name="docker",service="172.19.0.3:3000"} 16
+# HELP aerospike_node_stats_info_timeout info timeout
+# TYPE aerospike_node_stats_info_timeout counter
+aerospike_node_stats_info_timeout{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_keep_caps_ssd_health keep caps ssd health
+# TYPE aerospike_node_stats_keep_caps_ssd_health gauge
+aerospike_node_stats_keep_caps_ssd_health{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_log_local_time log local time
+# TYPE aerospike_node_stats_log_local_time gauge
+aerospike_node_stats_log_local_time{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_log_millis log millis
+# TYPE aerospike_node_stats_log_millis gauge
+aerospike_node_stats_log_millis{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_long_queries_active long queries active
+# TYPE aerospike_node_stats_long_queries_active counter
+aerospike_node_stats_long_queries_active{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_microsecond_histograms microsecond histograms
+# TYPE aerospike_node_stats_microsecond_histograms gauge
+aerospike_node_stats_microsecond_histograms{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_migrate_allowed migrate allowed
+# TYPE aerospike_node_stats_migrate_allowed counter
+aerospike_node_stats_migrate_allowed{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_migrate_fill_delay migrate fill delay
+# TYPE aerospike_node_stats_migrate_fill_delay gauge
+aerospike_node_stats_migrate_fill_delay{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_migrate_max_num_incoming migrate max num incoming
+# TYPE aerospike_node_stats_migrate_max_num_incoming gauge
+aerospike_node_stats_migrate_max_num_incoming{cluster_name="docker",service="172.19.0.3:3000"} 4
+# HELP aerospike_node_stats_migrate_partitions_remaining migrate partitions remaining
+# TYPE aerospike_node_stats_migrate_partitions_remaining gauge
+aerospike_node_stats_migrate_partitions_remaining{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_migrate_threads migrate threads
+# TYPE aerospike_node_stats_migrate_threads gauge
+aerospike_node_stats_migrate_threads{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_min_cluster_size min cluster size
+# TYPE aerospike_node_stats_min_cluster_size gauge
+aerospike_node_stats_min_cluster_size{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_objects objects
+# TYPE aerospike_node_stats_objects gauge
+aerospike_node_stats_objects{cluster_name="docker",service="172.19.0.3:3000"} 364324
+# HELP aerospike_node_stats_os_group_perms os group perms
+# TYPE aerospike_node_stats_os_group_perms gauge
+aerospike_node_stats_os_group_perms{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_poison_allocations poison allocations
+# TYPE aerospike_node_stats_poison_allocations gauge
+aerospike_node_stats_poison_allocations{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_process_cpu_pct process cpu pct
+# TYPE aerospike_node_stats_process_cpu_pct gauge
+aerospike_node_stats_process_cpu_pct{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_proto_fd_idle_ms proto fd idle ms
+# TYPE aerospike_node_stats_proto_fd_idle_ms gauge
+aerospike_node_stats_proto_fd_idle_ms{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_proto_fd_max proto fd max
+# TYPE aerospike_node_stats_proto_fd_max gauge
+aerospike_node_stats_proto_fd_max{cluster_name="docker",service="172.19.0.3:3000"} 15000
+# HELP aerospike_node_stats_proxy_in_progress proxy in progress
+# TYPE aerospike_node_stats_proxy_in_progress gauge
+aerospike_node_stats_proxy_in_progress{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_quarantine_allocations quarantine allocations
+# TYPE aerospike_node_stats_quarantine_allocations gauge
+aerospike_node_stats_quarantine_allocations{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_query_max_done query max done
+# TYPE aerospike_node_stats_query_max_done gauge
+aerospike_node_stats_query_max_done{cluster_name="docker",service="172.19.0.3:3000"} 100
+# HELP aerospike_node_stats_query_threads_limit query threads limit
+# TYPE aerospike_node_stats_query_threads_limit gauge
+aerospike_node_stats_query_threads_limit{cluster_name="docker",service="172.19.0.3:3000"} 128
+# HELP aerospike_node_stats_reaped_fds reaped fds
+# TYPE aerospike_node_stats_reaped_fds counter
+aerospike_node_stats_reaped_fds{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_run_as_daemon run as daemon
+# TYPE aerospike_node_stats_run_as_daemon gauge
+aerospike_node_stats_run_as_daemon{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_node_stats_rw_in_progress rw in progress
+# TYPE aerospike_node_stats_rw_in_progress gauge
+aerospike_node_stats_rw_in_progress{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_service_threads service threads
+# TYPE aerospike_node_stats_service_threads gauge
+aerospike_node_stats_service_threads{cluster_name="docker",service="172.19.0.3:3000"} 50
+# HELP aerospike_node_stats_sindex_builder_threads sindex builder threads
+# TYPE aerospike_node_stats_sindex_builder_threads gauge
+aerospike_node_stats_sindex_builder_threads{cluster_name="docker",service="172.19.0.3:3000"} 4
+# HELP aerospike_node_stats_sindex_gc_period sindex gc period
+# TYPE aerospike_node_stats_sindex_gc_period gauge
+aerospike_node_stats_sindex_gc_period{cluster_name="docker",service="172.19.0.3:3000"} 10
+# HELP aerospike_node_stats_stay_quiesced stay quiesced
+# TYPE aerospike_node_stats_stay_quiesced gauge
+aerospike_node_stats_stay_quiesced{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_system_free_mem_kbytes system free mem kbytes
+# TYPE aerospike_node_stats_system_free_mem_kbytes counter
+aerospike_node_stats_system_free_mem_kbytes{cluster_name="docker",service="172.19.0.3:3000"} 8.038444e+06
+# HELP aerospike_node_stats_system_free_mem_pct system free mem pct
+# TYPE aerospike_node_stats_system_free_mem_pct gauge
+aerospike_node_stats_system_free_mem_pct{cluster_name="docker",service="172.19.0.3:3000"} 65
+# HELP aerospike_node_stats_system_kernel_cpu_pct system kernel cpu pct
+# TYPE aerospike_node_stats_system_kernel_cpu_pct gauge
+aerospike_node_stats_system_kernel_cpu_pct{cluster_name="docker",service="172.19.0.3:3000"} 2
+# HELP aerospike_node_stats_system_thp_mem_kbytes system thp mem kbytes
+# TYPE aerospike_node_stats_system_thp_mem_kbytes counter
+aerospike_node_stats_system_thp_mem_kbytes{cluster_name="docker",service="172.19.0.3:3000"} 2.115584e+06
+# HELP aerospike_node_stats_system_total_cpu_pct system total cpu pct
+# TYPE aerospike_node_stats_system_total_cpu_pct gauge
+aerospike_node_stats_system_total_cpu_pct{cluster_name="docker",service="172.19.0.3:3000"} 7
+# HELP aerospike_node_stats_system_user_cpu_pct system user cpu pct
+# TYPE aerospike_node_stats_system_user_cpu_pct gauge
+aerospike_node_stats_system_user_cpu_pct{cluster_name="docker",service="172.19.0.3:3000"} 5
+# HELP aerospike_node_stats_threads_detached threads detached
+# TYPE aerospike_node_stats_threads_detached gauge
+aerospike_node_stats_threads_detached{cluster_name="docker",service="172.19.0.3:3000"} 60
+# HELP aerospike_node_stats_threads_joinable threads joinable
+# TYPE aerospike_node_stats_threads_joinable gauge
+aerospike_node_stats_threads_joinable{cluster_name="docker",service="172.19.0.3:3000"} 9
+# HELP aerospike_node_stats_threads_pool_active threads pool active
+# TYPE aerospike_node_stats_threads_pool_active gauge
+aerospike_node_stats_threads_pool_active{cluster_name="docker",service="172.19.0.3:3000"} 77
+# HELP aerospike_node_stats_threads_pool_total threads pool total
+# TYPE aerospike_node_stats_threads_pool_total gauge
+aerospike_node_stats_threads_pool_total{cluster_name="docker",service="172.19.0.3:3000"} 77
+# HELP aerospike_node_stats_ticker_interval ticker interval
+# TYPE aerospike_node_stats_ticker_interval gauge
+aerospike_node_stats_ticker_interval{cluster_name="docker",service="172.19.0.3:3000"} 10
+# HELP aerospike_node_stats_time_since_rebalance time since rebalance
+# TYPE aerospike_node_stats_time_since_rebalance gauge
+aerospike_node_stats_time_since_rebalance{cluster_name="docker",service="172.19.0.3:3000"} 40
+# HELP aerospike_node_stats_tls_refresh_period tls refresh period
+# TYPE aerospike_node_stats_tls_refresh_period gauge
+aerospike_node_stats_tls_refresh_period{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_tombstones tombstones
+# TYPE aerospike_node_stats_tombstones gauge
+aerospike_node_stats_tombstones{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_transaction_max_ms transaction max ms
+# TYPE aerospike_node_stats_transaction_max_ms gauge
+aerospike_node_stats_transaction_max_ms{cluster_name="docker",service="172.19.0.3:3000"} 1000
+# HELP aerospike_node_stats_transaction_retry_ms transaction retry ms
+# TYPE aerospike_node_stats_transaction_retry_ms gauge
+aerospike_node_stats_transaction_retry_ms{cluster_name="docker",service="172.19.0.3:3000"} 1002
+# HELP aerospike_node_stats_tree_gc_queue tree gc queue
+# TYPE aerospike_node_stats_tree_gc_queue gauge
+aerospike_node_stats_tree_gc_queue{cluster_name="docker",service="172.19.0.3:3000"} 0
+# HELP aerospike_node_stats_uptime uptime
+# TYPE aerospike_node_stats_uptime counter
+aerospike_node_stats_uptime{cluster_name="docker",service="172.19.0.3:3000"} 42
+# HELP aerospike_node_ticks Counter that detemines how many times the Aerospike node was scraped for metrics.
+# TYPE aerospike_node_ticks counter
+aerospike_node_ticks 4
+# HELP aerospike_node_up Aerospike node active status
+# TYPE aerospike_node_up gauge
+aerospike_node_up{build="7.2.0.4",cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_sets_data_used_bytes data used bytes
+# TYPE aerospike_sets_data_used_bytes gauge
+aerospike_sets_data_used_bytes{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 5.2462656e+07
+# HELP aerospike_sets_default_read_touch_ttl_pct default read touch ttl pct
+# TYPE aerospike_sets_default_read_touch_ttl_pct gauge
+aerospike_sets_default_read_touch_ttl_pct{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_default_ttl default ttl
+# TYPE aerospike_sets_default_ttl gauge
+aerospike_sets_default_ttl{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_disable_eviction disable eviction
+# TYPE aerospike_sets_disable_eviction gauge
+aerospike_sets_disable_eviction{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_enable_index enable index
+# TYPE aerospike_sets_enable_index gauge
+aerospike_sets_enable_index{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_index_populating index populating
+# TYPE aerospike_sets_index_populating gauge
+aerospike_sets_index_populating{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_objects objects
+# TYPE aerospike_sets_objects gauge
+aerospike_sets_objects{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 364324
+# HELP aerospike_sets_sindexes sindexes
+# TYPE aerospike_sets_sindexes gauge
+aerospike_sets_sindexes{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_stop_writes_count stop writes count
+# TYPE aerospike_sets_stop_writes_count gauge
+aerospike_sets_stop_writes_count{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_stop_writes_size stop writes size
+# TYPE aerospike_sets_stop_writes_size gauge
+aerospike_sets_stop_writes_size{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_tombstones tombstones
+# TYPE aerospike_sets_tombstones gauge
+aerospike_sets_tombstones{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_truncate_lut truncate lut
+# TYPE aerospike_sets_truncate_lut gauge
+aerospike_sets_truncate_lut{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sets_truncating truncating
+# TYPE aerospike_sets_truncating gauge
+aerospike_sets_truncating{cluster_name="docker",ns="test",service="172.19.0.3:3000",set="mysets"} 0
+# HELP aerospike_sysinfo_filefd_allocated allocated
+# TYPE aerospike_sysinfo_filefd_allocated gauge
+aerospike_sysinfo_filefd_allocated{cluster_name="docker",service="172.19.0.3:3000"} 1664
+# HELP aerospike_sysinfo_memory_stats_shmem_bytes shmem bytes
+# TYPE aerospike_sysinfo_memory_stats_shmem_bytes gauge
+aerospike_sysinfo_memory_stats_shmem_bytes{cluster_name="docker",service="172.19.0.3:3000"} 3.1830016e+08
+# HELP aerospike_sysinfo_memory_stats_swap_cached_bytes swap cached bytes
+# TYPE aerospike_sysinfo_memory_stats_swap_cached_bytes gauge
+aerospike_sysinfo_memory_stats_swap_cached_bytes{cluster_name="docker",service="172.19.0.3:3000"} 1.2189696e+07
+# HELP aerospike_sysinfo_netstat_tcp_activeopens tcp activeopens
+# TYPE aerospike_sysinfo_netstat_tcp_activeopens gauge
+aerospike_sysinfo_netstat_tcp_activeopens{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_sysinfo_netstat_tcp_currestab tcp currestab
+# TYPE aerospike_sysinfo_netstat_tcp_currestab gauge
+aerospike_sysinfo_netstat_tcp_currestab{cluster_name="docker",service="172.19.0.3:3000"} 2
+# HELP aerospike_sysinfo_netstat_tcp_retranssegs tcp retranssegs
+# TYPE aerospike_sysinfo_netstat_tcp_retranssegs counter
+aerospike_sysinfo_netstat_tcp_retranssegs{cluster_name="docker",service="172.19.0.3:3000"} 1
+# HELP aerospike_sysinfo_network_receive_bytes_total receive bytes total
+# TYPE aerospike_sysinfo_network_receive_bytes_total counter
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="erspan0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="eth0",service="172.19.0.3:3000"} 99704
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="gre0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="gretap0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="ip6_vti0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="ip6gre0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="ip6tnl0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="ip_vti0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="lo",service="172.19.0.3:3000"} 267
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="sit0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_receive_bytes_total{cluster_name="docker",device="tunl0",service="172.19.0.3:3000"} 0
+# HELP aerospike_sysinfo_network_transfer_bytes_total transfer bytes total
+# TYPE aerospike_sysinfo_network_transfer_bytes_total counter
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="erspan0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="eth0",service="172.19.0.3:3000"} 400053
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="gre0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="gretap0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="ip6_vti0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="ip6gre0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="ip6tnl0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="ip_vti0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="lo",service="172.19.0.3:3000"} 267
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="sit0",service="172.19.0.3:3000"} 0
+aerospike_sysinfo_network_transfer_bytes_total{cluster_name="docker",device="tunl0",service="172.19.0.3:3000"} 0
