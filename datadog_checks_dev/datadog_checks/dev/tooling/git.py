@@ -7,7 +7,7 @@ import re
 from semver import VersionInfo
 
 from ..fs import chdir
-from ..subprocess import run_command
+from ..subprocess import SubprocessResult, run_command
 from .constants import get_root
 
 
@@ -142,6 +142,17 @@ def git_tag(tag_name, push=False):
             return run_command(f'git push origin {tag_name}', capture=True)
 
         return result
+
+
+def git_fetch(remote: str = 'origin', tags: bool = False) -> SubprocessResult:
+    """
+    Fetch all tags from the remote
+    """
+    with chdir(get_root()):
+        cmd = ['git', 'fetch', remote]
+        if tags:
+            cmd.append('--tags')
+        return run_command(cmd, capture=True)
 
 
 def git_tag_list(pattern=None, contains=None):
