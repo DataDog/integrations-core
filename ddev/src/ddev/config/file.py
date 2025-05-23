@@ -281,7 +281,7 @@ class ConfigFileWithOverrides:
 
     @property
     def model(self) -> RootConfig:
-        return cast(RootConfig, self.global_model)
+        return self.global_model
 
     def save(self, content=None):
         import tomli_w
