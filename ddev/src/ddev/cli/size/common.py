@@ -435,7 +435,7 @@ def save_markdown(
             lines.append(f"## Python Version: {version}")
         else:
             lines.append("## Other")
-        
+
         lines.append("")
         lines.append("| " + " | ".join(headers) + " |")
         lines.append("| " + " | ".join("---" for _ in headers) + " |")
@@ -755,22 +755,50 @@ def send_metrics_to_dd(
 
     api.Metric.send(metrics=metrics)
 
-
 def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
-    config_path = app.config_file.path
+    config_path: Path = app.config_file.path
 
-    with config_path.open(mode="rb") as f:
-        data = tomllib.load(f)
+    current_section = None
+    org_data = {}
 
-    org_config = data.get("orgs", {}).get(org)
-    if not org_config:
+    with config_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            # Detect section header
+            if line.startswith("[") and line.endswith("]"):
+                current_section = line[1:-1]
+                continue
+
+            if current_section == f"orgs.{org}":
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    key = key.strip()
+                    value = value.strip().strip('"')
+                    org_data[key] = value
+    if not org_data:
         raise ValueError(f"Organization '{org}' not found in config")
+    return org_data
 
-    return {
-        "api_key": org_config["api_key"],
-        "app_key": org_config["app_key"],
-        "site": org_config.get("site"),
-    }
+
+
+# def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
+#     config_path = app.config_file.path
+
+#     with config_path.open(mode="rb") as f:
+#         data = tomllib.load(f)
+
+#     org_config = data.get("orgs", {}).get(org)
+#     if not org_config:
+#         raise ValueError(f"Organization '{org}' not found in config")
+
+#     return {
+#         "api_key": org_config["api_key"],
+#         "app_key": org_config["app_key"],
+#         "site": org_config.get("site"),
+#     }
 
 
 def is_everything_committed() -> bool:

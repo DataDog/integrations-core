@@ -1,6 +1,6 @@
 from datetime import date
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
@@ -43,17 +43,67 @@ def app():
 
 
 def test_timeline_integration(ddev, mock_timeline, app):
-    assert ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--compressed", obj=app).exit_code == 0
-    # assert ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--format", "csv,markdown,json,png", obj=app).exit_code == 0
-    result = ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--format", "csv,markdown,json,png", obj=app)
-    print("HOLA")
-    assert result.exit_code == 0, result.output
-    assert ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--show-gui", obj=app).exit_code == 0
     assert (
-        ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--threshold", "1000", obj=app).exit_code
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--compressed",
+            obj=app,
+        ).exit_code
         == 0
     )
-    
+    # assert ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--format", "csv,markdown,json,png", obj=app).exit_code == 0
+    result = ddev(
+        "size",
+        "timeline",
+        "integration",
+        "int1",
+        "--initial-commit",
+        "commit1",
+        "--final-commit",
+        "commit2",
+        "--format",
+        "csv,markdown,json,png",
+        obj=app,
+    )
+    assert result.exit_code == 0, result.output
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--show-gui",
+            obj=app,
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--threshold",
+            "1000",
+            obj=app,
+        ).exit_code
+        == 0
+    )
 
 
 @pytest.fixture
@@ -101,11 +151,34 @@ def mock_timeline_dependencies():
 def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
-            "size", "timeline", "dependency", "dep1", "--initial-commit", "commit1", "--final-commit", "commit2", "--platform", "linux-x86_64", obj=app
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--platform",
+            "linux-x86_64",
+            obj=app,
         ).exit_code
         == 0
     )
-    assert ddev("size", "timeline", "dependency", "dep1", "--initial-commit", "commit1", "--final-commit", "commit2", obj=app).exit_code == 0
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            obj=app,
+        ).exit_code
+        == 0
+    )
     assert (
         ddev(
             "size",
@@ -161,7 +234,19 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     )
     assert (
         ddev(
-            "size", "timeline", "dependency", "dep1", "--initial-commit", "commit1", "--final-commit", "commit2", "--platform", "linux-x86_64", "--threshold", "1000", obj=app
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--platform",
+            "linux-x86_64",
+            "--threshold",
+            "1000",
+            obj=app,
         ).exit_code
         == 0
     )
@@ -217,35 +302,105 @@ def test_timeline_integration_no_changes(ddev):
     ):
         assert (
             "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--compressed")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--format", "csv,markdown,json,png")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--show-gui")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
             in (
-                result := ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--threshold", "1000")
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                )
             ).output
             and result.exit_code == 0
         )
         assert (
             "No changes found"
             in (
-                result := ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--threshold", "1000")
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--compressed",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--format",
+                    "csv,markdown,json,png",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--show-gui",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--threshold",
+                    "1000",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--threshold",
+                    "1000",
+                )
             ).output
             and result.exit_code == 0
         )
@@ -270,7 +425,16 @@ def test_timeline_integration_not_found(ddev):
         patch("matplotlib.pyplot.show"),
         patch("matplotlib.pyplot.savefig"),
     ):
-        result = ddev("size", "timeline", "integration", "missing_module", "--initial-commit", "c123456", "--final-commit", "c2345667")
+        result = ddev(
+            "size",
+            "timeline",
+            "integration",
+            "missing_module",
+            "--initial-commit",
+            "c123456",
+            "--final-commit",
+            "c2345667",
+        )
         assert result.exit_code != 0
         assert "not found" in result.output
 
@@ -292,7 +456,16 @@ def test_timeline_dependency_missing_no_platform(ddev):
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
     ):
-        result = ddev("size", "timeline", "dependency", "missing_module", "--initial-commit", "c123456", "--final-commit", "c2345667")
+        result = ddev(
+            "size",
+            "timeline",
+            "dependency",
+            "missing_module",
+            "--initial-commit",
+            "c123456",
+            "--final-commit",
+            "c2345667",
+        )
         assert result.exit_code != 0
         assert "Dependency missing_module not found in latest commit" in result.output
 

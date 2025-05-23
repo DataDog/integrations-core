@@ -289,12 +289,12 @@ def timeline_mode(
     if not params["format"] or params["format"] == ["png"]: # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    treemap_path = f"treemap_{params['platform']}_{params['version']}.png" if "png" in params["format"] else None
+    treemap_path = f"treemap_{params['platform']}.png" if "png" in params["format"] else None
 
     if params["show_gui"] or treemap_path:
         plot_linegraph(
-            formatted_modules, params["module"], params["platform"], params["show_gui"], params["save_to_png_path"]
-        )
+            formatted_modules, params["module"], params["platform"], params["show_gui"], treemap_path)
+        
 
     return formatted_modules
 

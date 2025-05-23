@@ -98,12 +98,12 @@ def test_is_valid_integration():
 
 
 def test_get_dependencies_list():
-    file_content = "dependency1 @ https://example.com/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2-1.1.1-.whl"
+    file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
         deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
-    assert urls == ["https://example.com/dependency1-1.1.1-.whl", "https://example.com/dependency2-1.1.1-.whl"]
+    assert urls == ["https://example.com/dependency1/dependency1-1.1.1-.whl", "https://example.com/dependency2/dependency2-1.1.1-.whl"]
     assert versions == ["1.1.1", "1.1.1"]
 
 
@@ -112,7 +112,7 @@ def test_get_dependencies_sizes():
     mock_response.status_code = 200
     mock_response.headers = {"Content-Length": "12345"}
     with patch("requests.head", return_value=mock_response):
-        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1.whl"], ["1.1.1"], True)
+        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True)
     assert file_data == [
         {
             "Name": "dependency1",
