@@ -726,6 +726,7 @@ def send_metrics_to_dd(
     if not is_everything_committed():
         raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
 
+
     timestamp = get_last_commit_timestamp()
 
     metrics = []
@@ -748,7 +749,7 @@ def send_metrics_to_dd(
         )
 
     initialize(
-        api_key=config_file_info["api_key"],
+        # api_key=config_file_info["api_key"],
         app_key=config_file_info["app_key"],
         api_host=f"https://api.{config_file_info['site']}",
     )
@@ -761,7 +762,7 @@ def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
     current_section = None
     org_data = {}
 
-    with config_path.open("r", encoding="utf-8") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
