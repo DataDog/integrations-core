@@ -24,6 +24,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS_DATABASE_SINGLE,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
+    TABLE_SIZE_METRICS,
 )
 
 from .utils import is_always_on
@@ -97,6 +98,7 @@ EXPECTED_DEFAULT_METRICS = (
             DATABASE_METRICS,
             DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
+            TABLE_SIZE_METRICS,
         )
     ]
     + DATABASE_INDEX_METRICS
@@ -262,7 +264,6 @@ OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'
 E2E_OPERATION_TIME_METRIC_NAME = [
     'dd.sqlserver.operation.time.{}'.format(suffix) for suffix in ('avg', 'max', '95percentile', 'count', 'median')
 ]
-
 
 def assert_metrics(
     instance,

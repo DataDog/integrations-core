@@ -31,8 +31,6 @@ TABLE_SIZE_STATS_QUERY = {
         sys.allocation_units a ON p.partition_id = a.container_id
     GROUP BY 
         t.name, s.name
-    ORDER BY 
-        total_size DESC;
 """,
     "columns": [
         {"name": "table", "type": "tag"},
@@ -82,7 +80,6 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        print("EG was here")
         # make a copy of the query to avoid modifying the original
         # in case different instances have different collection intervals
         query = TABLE_SIZE_STATS_QUERY.copy()

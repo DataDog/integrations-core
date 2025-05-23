@@ -251,8 +251,8 @@ DATABASE_MASTER_FILES = [
 ]
 
 TABLE_SIZE_METRICS = [
-    ('sqlserver.table.total_size', 'sys.dm_db_partition_stats', 'total_size'),
     ('sqlserver.table.row_count', 'sys.dm_db_partition_stats', 'row_count'),
+    ('sqlserver.table.total_size', 'sys.dm_db_partition_stats', 'total_size'),
     ('sqlserver.table.used_size', 'sys.dm_db_partition_stats', 'used_size'),
     ('sqlserver.table.data_size', 'sys.dm_db_partition_stats', 'data_size'),
 ]

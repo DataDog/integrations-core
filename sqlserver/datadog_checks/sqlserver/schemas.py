@@ -222,7 +222,6 @@ class Schemas(DBMAsyncJob):
                             if not is_azure_sql_database(engine_edition):
                                 cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
                             self._fetch_schema_data(cursor, start_time, db_name)
-                            self._fetch_table_metrics_data(cursor, start_time, db_name)
                         except StopIteration as e:
                             self._log.error(
                                 """While executing fetch schemas for databse {},
@@ -312,34 +311,6 @@ class Schemas(DBMAsyncJob):
             with self._check.connection.get_managed_cursor() as cursor:
                 db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
                 return execute_query(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
-
-    # Query all table size metrics within the current database context
-    def _fetch_table_metrics_data(self, cursor, start_time, db_name):
-        tables_info = execute_query(TABLE_SIZE_STATS_QUERY, cursor, convert_results_to_str=True)
-        # Submit as metrics
-        for table_info in tables_info:
-            self._check.gauge(
-                'sqlserver.table.used_size',
-                table_info['used_size_mb'],
-                tags=['table:{}'.format(table_name), 'schema:{}'.format(schema_name), 'database:{}'.format(db_name)]
-            )
-            self._check.gauge(
-                'sqlserver.table.total_size',
-                table_info['total_size_mb'],
-                tags=['table:{}'.format(table_name), 'schema:{}'.format(schema_name), 'database:{}'.format(db_name)]
-            )
-            self._check.gauge(
-                'sqlserver.table.data_size',
-                table_info['data_size_mb'],
-                tags=['table:{}'.format(table_name), 'schema:{}'.format(schema_name), 'database:{}'.format(db_name)]
-            )
-            self._check.gauge(
-                'sqlserver.table.row_count',
-                table_info['row_count'],
-                tags=['table:{}'.format(table_name), 'schema:{}'.format(schema_name), 'database:{}'.format(db_name)]
-            )
-            
-            
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, schema, cursor):

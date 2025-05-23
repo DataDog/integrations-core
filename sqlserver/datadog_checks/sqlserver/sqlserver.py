@@ -888,9 +888,6 @@ class SQLServer(AgentCheck):
         Initializes dynamic queries which depend on static information loaded from the database
         """
         if self._database_metrics:
-            print("EG was here 891")
-            print("self._database_metrics", self._database_metrics)
-            print("self.databases", self.databases)
             return self._database_metrics
 
         self._database_metrics = []
@@ -903,7 +900,6 @@ class SQLServer(AgentCheck):
 
         # database level metrics
         for database_metric_class in self._database_level_database_metrics:
-            print("db_names", db_names)
             self._database_metrics.append(self._new_database_metric_executor(database_metric_class, db_names))
 
         self.log.debug("initialized dynamic queries")
