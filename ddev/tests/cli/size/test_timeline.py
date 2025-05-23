@@ -1,6 +1,6 @@
 from datetime import date
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -20,7 +20,7 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
         patch("os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
-        patch("os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch(
@@ -30,7 +30,7 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.plt.show"),
         patch("ddev.cli.size.timeline.plt.savefig"),
         patch("ddev.cli.size.timeline.plt.figure"),
-        patch("builtins.open", MagicMock()),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -58,21 +58,22 @@ def test_timeline_integration(ddev, mock_timeline, app):
         ).exit_code
         == 0
     )
-    # assert ddev("size", "timeline", "integration", "int1", "--initial-commit", "commit1", "--final-commit", "commit2", "--format", "csv,markdown,json,png", obj=app).exit_code == 0
-    result = ddev(
-        "size",
-        "timeline",
-        "integration",
-        "int1",
-        "--initial-commit",
-        "commit1",
-        "--final-commit",
-        "commit2",
-        "--format",
-        "csv,markdown,json,png",
-        obj=app,
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--format",
+            "csv,markdown,json,png",
+            obj=app,
+        ).exit_code
+        == 0
     )
-    assert result.exit_code == 0, result.output
     assert (
         ddev(
             "size",
@@ -122,10 +123,10 @@ def mock_timeline_dependencies():
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
-        patch("os.path.exists", return_value=True),
-        patch("os.path.isdir", return_value=True),
-        patch("os.listdir", return_value=["linux-x86_64-3.12"]),
-        patch("os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch(
             "ddev.cli.size.timeline.get_dependencies",
@@ -143,7 +144,7 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.timeline.plt.show"),
         patch("ddev.cli.size.timeline.plt.savefig"),
         patch("ddev.cli.size.timeline.plt.figure"),
-        patch("builtins.open", MagicMock()),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -292,9 +293,9 @@ def test_timeline_integration_no_changes(ddev):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("os.path.exists", return_value=True),
-        patch("os.path.isdir", return_value=True),
-        patch("os.listdir", return_value=[]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=[]),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
@@ -422,8 +423,9 @@ def test_timeline_integration_not_found(ddev):
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.module_exists", return_value=False),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
+        patch("ddev.cli.size.utils.common_funcs.plt.show"),
+        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
+        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
     ):
         result = ddev(
             "size",

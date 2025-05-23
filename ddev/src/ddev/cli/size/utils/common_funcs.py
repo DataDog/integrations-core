@@ -7,7 +7,6 @@ import re
 import shutil
 import subprocess
 import tempfile
-import tomllib
 import zipfile
 import zlib
 from datetime import date
@@ -60,10 +59,7 @@ class CLIParameters(TypedDict):
     platform: str
     version: str
     compressed: bool
-    csv: bool
-    markdown: bool
-    json: bool
-    save_to_png_path: Optional[str]
+    format: Optional[list[str]]
     show_gui: bool
 
 
@@ -72,10 +68,7 @@ class CLIParametersTimeline(TypedDict):
     module: str
     threshold: Optional[int]
     compressed: bool
-    csv: bool
-    markdown: bool
-    json: bool
-    save_to_png_path: Optional[str]
+    format: Optional[list[str]]
     show_gui: bool
 
 
@@ -370,11 +363,7 @@ def save_json(
 
 def save_csv(
     app: Application,
-    modules: (
-         list[FileDataEntryPlatformVersion]
-        | list[CommitEntryWithDelta]
-        | list[CommitEntryPlatformWithDelta]
-    ),
+    modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     file_path: str,
 ) -> None:
     headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
@@ -399,11 +388,7 @@ def format(s: str) -> str:
 def save_markdown(
     app: Application,
     title: str,
-    modules: (
-        list[FileDataEntryPlatformVersion]
-        | list[CommitEntryWithDelta]
-        | list[CommitEntryPlatformWithDelta]
-    ),
+    modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     file_path: str,
 ) -> None:
 
@@ -413,14 +398,15 @@ def save_markdown(
     headers = [k for k in modules[0].keys() if "Bytes" not in k]
 
     # Group modules by platform and version
-    grouped_modules = {}
-    for module in modules:
+    grouped_modules = {(modules[0].get("Platform", ""), modules[0].get("Python_Version", "")): [modules[0]]}
+    for module in modules[1:]:
         platform = module.get("Platform", "")
         version = module.get("Python_Version", "")
         key = (platform, version)
         if key not in grouped_modules:
             grouped_modules[key] = []
-        grouped_modules[key].append(module)
+        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in module.values()):
+            grouped_modules[key].append(module)
 
     lines = []
     lines.append(f"# {title}")
@@ -453,11 +439,7 @@ def save_markdown(
 def print_table(
     app: Application,
     mode: str,
-    modules: (
-         list[FileDataEntryPlatformVersion]
-        | list[CommitEntryWithDelta]
-        | list[CommitEntryPlatformWithDelta]
-    ),
+    modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
 ) -> None:
     columns = [col for col in modules[0].keys() if "Bytes" not in col]
     modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
@@ -467,6 +449,7 @@ def print_table(
                 modules_table[key][i] = str(row.get(key, ""))
 
     app.display_table(mode, modules_table)
+
 
 def export_format(
     app: Application,
@@ -481,30 +464,40 @@ def export_format(
     for output_format in format:
         if output_format == "csv":
             csv_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.csv" if platform and version else
-                f"{version}_{size_type}_{mode}.csv" if version else
-                f"{platform}_{size_type}_{mode}.csv" if platform else
-                f"{size_type}_{mode}.csv"
+                f"{platform}_{version}_{size_type}_{mode}.csv"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.csv"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
+                )
             )
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
             json_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.json" if platform and version else
-                f"{version}_{size_type}_{mode}.json" if version else
-                f"{platform}_{size_type}_{mode}.json" if platform else
-                f"{size_type}_{mode}.json"
+                f"{platform}_{version}_{size_type}_{mode}.json"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.json"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
+                )
             )
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
             markdown_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.md" if platform and version else
-                f"{version}_{size_type}_{mode}.md" if version else
-                f"{platform}_{size_type}_{mode}.md" if platform else
-                f"{size_type}_{mode}.md"
+                f"{platform}_{version}_{size_type}_{mode}.md"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.md"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
+                )
             )
             save_markdown(app, "Status", modules, markdown_filename)
+
 
 def plot_treemap(
     modules: list[FileDataEntryPlatformVersion],
@@ -545,7 +538,6 @@ def plot_treemap(
         plt.savefig(path, bbox_inches="tight", format="png")
     if show:
         plt.show()
-    
 
 
 def plot_status_treemap(
@@ -722,10 +714,12 @@ def send_metrics_to_dd(
         else "datadog.agent_integrations.size_analyzer.uncompressed"
     )
     config_file_info = get_org(app, org)
-    print(config_file_info)
-    # if not is_everything_committed():
-    #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
-
+    if not is_everything_committed():
+        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    if 'api_key' not in config_file_info:
+        raise RuntimeError("No API key found in config file")
+    if 'site' not in config_file_info:
+        raise RuntimeError("No site found in config file")
 
     timestamp = get_last_commit_timestamp()
 
@@ -750,11 +744,11 @@ def send_metrics_to_dd(
 
     initialize(
         api_key=config_file_info["api_key"],
-        # app_key=config_file_info["app_key"],
         api_host=f"https://api.{config_file_info['site']}",
     )
 
     api.Metric.send(metrics=metrics)
+
 
 def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
     config_path: Path = app.config_file.path
@@ -782,7 +776,6 @@ def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
     if not org_data:
         raise ValueError(f"Organization '{org}' not found in config")
     return org_data
-
 
 
 # def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:

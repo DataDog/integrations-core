@@ -54,14 +54,14 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.diff.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch("ddev.cli.size.diff.GitRepo.checkout_commit"),
-        patch("tempfile.mkdtemp", return_value="fake_repo"),
+        patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
         patch("ddev.cli.size.diff.get_files", side_effect=get_compressed_files_side_effect),
         patch("ddev.cli.size.diff.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
         patch("ddev.cli.size.diff.format_modules", side_effect=lambda m, *_: m),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
-        patch("matplotlib.pyplot.figure"),
-        patch("builtins.open", MagicMock()),
+        patch("ddev.cli.size.utils.common_funcs.plt.show"),
+        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
+        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -82,8 +82,18 @@ def test_diff_with_platform_and_version(ddev, mock_size_diff_dependencies):
         == 0
     )
     assert (
-        ddev("size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--format", 
-             "csv,markdown,json,png").exit_code
+        ddev(
+            "size",
+            "diff",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-aarch64",
+            "--python",
+            "3.12",
+            "--format",
+            "csv,markdown,json,png",
+        ).exit_code
         == 0
     )
     assert (
@@ -111,11 +121,11 @@ def test_diff_no_differences(ddev):
             return_value=({'3.12'}),
         ),
         patch.object(fake_repo, "checkout_commit"),
-        patch("tempfile.mkdtemp", return_value="fake_repo"),
-        patch("os.path.exists", return_value=True),
-        patch("os.path.isdir", return_value=True),
-        patch("os.path.isfile", return_value=True),
-        patch("os.listdir", return_value=["linux-aarch64_3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-aarch64_3.12"]),
         patch(
             "ddev.cli.size.diff.get_files",
             return_value=[
@@ -130,10 +140,10 @@ def test_diff_no_differences(ddev):
                 {"Name": "dep2.whl", "Version": "2.0.0", "Size_Bytes": 1000},
             ],
         ),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
-        patch("matplotlib.pyplot.figure"),
-        patch("builtins.open", MagicMock()),
+        patch("ddev.cli.size.utils.common_funcs.plt.show"),
+        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
+        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"

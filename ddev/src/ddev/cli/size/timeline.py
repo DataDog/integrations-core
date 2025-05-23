@@ -13,8 +13,9 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_params import common_params
 
-from .common import (
+from .utils.common_funcs import (
     CommitEntry,
     CommitEntryPlatformWithDelta,
     CommitEntryWithDelta,
@@ -57,21 +58,7 @@ console = Console(stderr=True)
     type=click.IntRange(min=0),
     help="Only show modules with size differences greater than a threshold in bytes",
 )
-@click.option(
-    "--platform",
-    help="Target platform to analyze. Only required for dependencies. If not specified, all platforms will be analyzed",
-)
-@click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option(
-    "--format",
-    help="Format of the output (comma-separated values: png, csv, markdown, json)",
-    callback=lambda _, __, v: v.split(",") if v else []
-)
-@click.option(
-    "--show-gui",
-    is_flag=True,
-    help="Display a pop-up window with a line chart showing the size evolution of the selected module over time.",
-)
+@common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def timeline(
     app: Application,
@@ -115,6 +102,10 @@ def timeline(
             )
         elif final_commit and initial_commit and final_commit == initial_commit:
             raise click.BadParameter("Commit hashes must be different")
+        if format:
+            for fmt in format:
+                if fmt not in ["png", "csv", "markdown", "json"]:
+                    raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
         task = progress.add_task("[cyan]Calculating timeline...", total=None)
         url = app.repo.path
 
@@ -213,8 +204,8 @@ def timeline(
                                 progress,
                             )
                         )
-
-                    export_format(app, format, modules_plat, platform, module, compressed)
+                    if format:
+                        export_format(app, format, modules_plat, platform, module, compressed)
 
                 else:  # integration
                     modules: list[CommitEntryWithDelta] = []
@@ -238,7 +229,8 @@ def timeline(
                             progress,
                         )
                     )
-                    export_format(app, format, modules, None, module, compressed)
+                    if format:
+                        export_format(app, format, modules, None, module, compressed)
 
             except Exception as e:
                 progress.stop()
@@ -286,15 +278,13 @@ def timeline_mode(
     trimmed_modules = trim_modules(modules, params["threshold"])
     formatted_modules = format_modules(trimmed_modules, params["platform"])
 
-    if not params["format"] or params["format"] == ["png"]: # if no format is provided for the data print the table
+    if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    treemap_path = f"treemap_{params['platform']}.png" if "png" in params["format"] else None
+    treemap_path = f"treemap_{params['platform']}.png" if params["format"] and "png" in params["format"] else None
 
     if params["show_gui"] or treemap_path:
-        plot_linegraph(
-            formatted_modules, params["module"], params["platform"], params["show_gui"], treemap_path)
-        
+        plot_linegraph(formatted_modules, params["module"], params["platform"], params["show_gui"], treemap_path)
 
     return formatted_modules
 
@@ -792,6 +782,7 @@ def get_dependency_list(path: str, platforms: set[str]) -> set[str]:
                     dependencies.update(matches)
     return dependencies
 
+
 def export_format(
     app: Application,
     format: list[str],
@@ -804,22 +795,19 @@ def export_format(
     for output_format in format:
         if output_format == "csv":
             csv_filename = (
-                f"{module}_{platform}_{size_type}_timeline.csv" if platform else
-                f"{module}_{size_type}_timeline.csv"
+                f"{module}_{platform}_{size_type}_timeline.csv" if platform else f"{module}_{size_type}_timeline.csv"
             )
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
             json_filename = (
-                f"{module}_{platform}_{size_type}_timeline.json" if platform else
-                f"{module}_{size_type}_timeline.json"
+                f"{module}_{platform}_{size_type}_timeline.json" if platform else f"{module}_{size_type}_timeline.json"
             )
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
             markdown_filename = (
-                f"{module}_{platform}_{size_type}_timeline.md" if platform else
-                f"{module}_{size_type}_timeline.md"
+                f"{module}_{platform}_{size_type}_timeline.md" if platform else f"{module}_{size_type}_timeline.md"
             )
             save_markdown(app, "Timeline", modules, markdown_filename)
 

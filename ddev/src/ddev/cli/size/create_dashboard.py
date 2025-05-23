@@ -5,7 +5,7 @@ import click
 import requests
 
 from ddev.cli.application import Application
-from ddev.cli.size.common import get_org, get_valid_platforms
+from ddev.cli.size.utils.common_funcs import get_org, get_valid_platforms
 
 
 @click.command()

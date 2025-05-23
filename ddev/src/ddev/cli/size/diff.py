@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
 from datetime import datetime
 from typing import Optional
 
@@ -11,8 +10,9 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_params import common_params, python_version_param
 
-from .common import (
+from .utils.common_funcs import (
     CLIParameters,
     FileDataEntry,
     FileDataEntryPlatformVersion,
@@ -37,20 +37,9 @@ MINIMUM_LENGTH_COMMIT = 7
 @click.argument("first_commit")
 @click.argument("second_commit")
 @click.option(
-    "--platform", help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
-)
-@click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
-@click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option(
-    "--format",
-    help="Format of the output (comma-separated values: png, csv, markdown, json)",
-    callback=lambda _, __, v: v.split(",") if v else []
-)
-@click.option(
-    "--show-gui",
-    is_flag=True,
-    help="Display a pop-up window with a treemap showing size differences between the two commits.",
-)
+        "--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
+    )
+@common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
     app: Application,
@@ -88,9 +77,10 @@ def diff(
             )
         if first_commit == second_commit:
             raise click.BadParameter("Commit hashes must be different")
-        for fmt in format:
-            if fmt not in ["png", "csv", "markdown", "json"]:
-                raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
+        if format:
+            for fmt in format:
+                if fmt not in ["png", "csv", "markdown", "json"]:
+                    raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
         repo_url = app.repo.path
 
         with GitRepo(repo_url) as gitRepo:
@@ -128,7 +118,8 @@ def diff(
                             progress,
                         )
                     )
-                export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
+                if format:
+                    export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
@@ -161,10 +152,14 @@ def diff_mode(
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
 
-    if not params["format"] or params["format"] == ["png"]: # if no format is provided for the data print the table
+    if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    treemap_path = f"treemap_{params['platform']}_{params['version']}.png" if "png" in params["format"] else None
+    treemap_path = (
+        f"treemap_{params['platform']}_{params['version']}.png"
+        if params["format"] and "png" in params["format"]
+        else None
+    )
 
     if params["show_gui"] or treemap_path:
         plot_treemap(

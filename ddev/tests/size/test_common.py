@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
-from ddev.cli.size.common import (
+from ddev.cli.size.utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
@@ -103,7 +103,10 @@ def test_get_dependencies_list():
     with patch("builtins.open", mock_open_obj):
         deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
-    assert urls == ["https://example.com/dependency1/dependency1-1.1.1-.whl", "https://example.com/dependency2/dependency2-1.1.1-.whl"]
+    assert urls == [
+        "https://example.com/dependency1/dependency1-1.1.1-.whl",
+        "https://example.com/dependency2/dependency2-1.1.1-.whl",
+    ]
     assert versions == ["1.1.1", "1.1.1"]
 
 
@@ -112,7 +115,9 @@ def test_get_dependencies_sizes():
     mock_response.status_code = 200
     mock_response.headers = {"Content-Length": "12345"}
     with patch("requests.head", return_value=mock_response):
-        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True)
+        file_data = get_dependencies_sizes(
+            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
+        )
     assert file_data == [
         {
             "Name": "dependency1",
@@ -174,10 +179,13 @@ def test_get_files_grouped_and_with_versions():
     with (
         patch("os.walk", return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output]),
         patch("os.path.getsize", side_effect=mock_getsize),
-        patch("ddev.cli.size.common.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.common.is_valid_integration", side_effect=mock_is_valid_integration),
-        patch("ddev.cli.size.common.extract_version_from_about_py", return_value="1.2.3"),
-        patch("ddev.cli.size.common.convert_to_human_readable_size", side_effect=lambda s: f"{s / 1024:.2f} KB"),
+        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),
+        patch("ddev.cli.size.utils.common_funcs.extract_version_from_about_py", return_value="1.2.3"),
+        patch(
+            "ddev.cli.size.utils.common_funcs.convert_to_human_readable_size",
+            side_effect=lambda s: f"{s / 1024:.2f} KB",
+        ),
     ):
         result = get_files(repo_path, compressed=False)
 
@@ -320,7 +328,7 @@ def test_get_org():
     mock_app = Mock()
     mock_path = Mock()
 
-    toml_data = b"""
+    toml_data = """
         [orgs.default]
         api_key = "test_api_key"
         app_key = "test_app_key"
