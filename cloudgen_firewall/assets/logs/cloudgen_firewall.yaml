@@ -500,12 +500,12 @@ pipeline:
           %{data:hostname}
           %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+%{greedyData:Action}
     - type: status-remapper
-      name: [Define `level` as the official status of the log]
+      name: Define `level` as the official status of the log
       enabled: true
       sources:
         - level
     - type: date-remapper
-      name: "Define `timestamp` as the official date of the log "
+      name: Define `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
