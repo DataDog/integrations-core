@@ -217,6 +217,10 @@ class SQLServerConfig:
             "task_scheduler_metrics": {'enabled': False},
             "tempdb_file_space_usage_metrics": {'enabled': True},
             "xe_metrics": {'enabled': False},
+            "table_size_metrics": {
+                'enabled': False, 
+                'collection_interval': DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
+            },
         }
         # Check if the instance has any configuration for the metrics in legacy structure
         legacy_configuration_metrics = {
