@@ -1317,12 +1317,13 @@ def test_env_var_logic_preset():
         assert os.getenv('OPENSSL_CONF', None) == preset_conf
         assert os.getenv('OPENSSL_MODULES', None) == preset_modules
 
+
 @pytest.mark.parametrize(
-        "should_profile_value, expected_calls",
-        [
-            (True, 1),
-            (False, 0),
-        ],
+    "should_profile_value, expected_calls",
+    [
+        (True, 1),
+        (False, 0),
+    ],
 )
 def test_profile_memory(should_profile_value, expected_calls):
     """
