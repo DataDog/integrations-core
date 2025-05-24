@@ -25,6 +25,17 @@ This integration collects logs and metrics from the sources listed above and sen
 
 ## Setup
 
+### Prerequisite
+- List of required ServiceNow plugins and roles by module for integration
+    |Module|User Roles Required|Plugin Required|
+    |--------------------|--------------------|--------------------|
+    |ITSM|`itil`|-|
+    |ITAM|`asset`|-|
+    |CMDB Health|`cmdb_dedup_admin`|-|
+    |Vulnerability Response (VR)| `sn_sec_analytics.read` ,<br>`sn_vul.app_read_all` ,<br>`sn_vul.read_all` ,<br>`sn_vul_container.read_all`|`Vulnerability Response and Configuration Compliance for Containers` ,<br>`Vulnerability Response`|
+    |Security Incident Response (SIR)|`sn_si.read`|`Security Incident Response`|
+
+### Configuration
 #### Connect your ServiceNow instance to Datadog
 
 1. Add your instance, username, password, and data preference options
@@ -37,11 +48,9 @@ This integration collects logs and metrics from the sources listed above and sen
     |Get ITSM|Enable to collect ITSM data from ServiceNow. The default value is True.|
     |Get ITAM|Enable to collect ITAM data from ServiceNow. The default value is True.|
     |Get CMDB Health|Enable to collect CMDB Health data from ServiceNow. The default value is True.|
-    |Get Security Incident Response|Enable to collect Security Incident Response data from ServiceNow. The default value is False. Note: Ensure the Security Incident Response Plugin is installed before enabling.|
-    |Get Vulnerability Response|Enable to collect Vulnerability Response data from ServiceNow. The default value is False. Note: Ensure the Vulnerability Response Plugin is installed before enabling.|
+    |Get Security Incident Response|Enable to collect Security Incident Response data from ServiceNow. The default value is False.|
+    |Get Vulnerability Response|Enable to collect Vulnerability Response data from ServiceNow. The default value is False.|
 2. Click the **Save** button to save your settings.
-
-**Note**: You can create a new user in ServiceNow with the necessary roles for the integration.
 
 
 ## Data Collected
