@@ -11,7 +11,7 @@ class ModelDiscovery(Discovery):
         super().__init__(
             self.get_models,
             limit=limit,
-            include={pattern: None for pattern in include} if include else None,
+            include=dict.fromkeys(include) if include else None,
             exclude=exclude,
             interval=interval,
             key=lambda n: n.get("modelName"),

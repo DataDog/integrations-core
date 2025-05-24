@@ -17,7 +17,7 @@ class MockDNSAnswer:
             else:
                 items = [MockDNSAnswer.MockItem(address)]
 
-            self.items = {item: None for item in items}
+            self.items = dict.fromkeys(items)
 
     class MockItem:
         def __init__(self, address):

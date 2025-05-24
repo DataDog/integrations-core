@@ -490,7 +490,7 @@ class RabbitMQManagement(AgentCheck):
         if grab_all_data or not len(data):
             data = self._get_data(urljoin(base_url, object_type))
 
-        stats = {vhost: 0 for vhost in vhosts}
+        stats = dict.fromkeys(vhosts, 0)
         connection_states = defaultdict(int)
         for conn in data:
             if conn['vhost'] in vhosts:

@@ -82,7 +82,7 @@ def setup_mapreduce():
 
 @contextmanager
 def mock_local_mapreduce_dns():
-    mapping = {x: ('127.0.0.1', None) for x in MOCKED_E2E_HOSTS}
+    mapping = dict.fromkeys(MOCKED_E2E_HOSTS, ('127.0.0.1', None))
     with mock_local(mapping):
         yield
 
