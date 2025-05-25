@@ -19,7 +19,7 @@ def test__get_postqueue_stats(aggregator):
     with open(filepath, 'r') as f:
         mocked_output = f.read()
 
-    with mock.patch('datadog_checks.postfix.postfix.get_subprocess_output') as s:
+    with mock.patch('datadog_checks.postfix.postfix.PostfixCheck._get_subprocess_output') as s:
         s.side_effect = [(False, None, None), (mocked_output, None, None)]
         check._get_postqueue_stats('/etc/postfix', ['foo:bar'])
 
@@ -32,7 +32,7 @@ def test__get_postqueue_stats_empty(aggregator):
     check = PostfixCheck('postfix', {}, [])
     common_tags = ['instance:/etc/postfix']
 
-    with mock.patch('datadog_checks.postfix.postfix.get_subprocess_output') as s:
+    with mock.patch('datadog_checks.postfix.postfix.PostfixCheck._get_subprocess_output') as s:
         s.side_effect = [(False, None, None), ('Mail queue is empty', None, None)]
         check._get_postqueue_stats('/etc/postfix', [])
 
@@ -42,7 +42,7 @@ def test__get_postqueue_stats_empty(aggregator):
 
 
 @mock.patch(
-    'datadog_checks.postfix.postfix.get_subprocess_output',
+    'datadog_checks.postfix.postfix.PostfixCheck._get_subprocess_output',
     return_value=('mail_version = {}'.format(MOCK_VERSION), None, None),
 )
 def test_collect_metadata(aggregator, datadog_agent):
