@@ -55,33 +55,33 @@ class CommitEntryPlatformWithDelta(CommitEntryWithDelta):
 
 
 class CLIParameters(TypedDict):
-    app: Application
-    platform: str
-    version: str
-    compressed: bool
-    format: Optional[list[str]]
-    show_gui: bool
+    app: Application  # Main application instance for CLI operations
+    platform: str  # Target platform for analysis (e.g. linux-aarch64)
+    version: str  # Target Python version for analysis
+    compressed: bool  # Whether to analyze compressed file sizes
+    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    show_gui: bool  # Whether to display interactive visualization
 
 
 class CLIParametersTimeline(TypedDict):
-    app: Application
-    module: str
-    threshold: Optional[int]
-    compressed: bool
-    format: Optional[list[str]]
-    show_gui: bool
+    app: Application  # Main application instance for CLI operations
+    module: str  # Name of module to analyze
+    threshold: Optional[int]  # Minimum size threshold for filtering
+    compressed: bool  # Whether to analyze compressed file sizes
+    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    show_gui: bool  # Whether to display interactive visualization
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
-    type: Literal["integration"]
-    first_commit: str
-    platform: None
+    type: Literal["integration"]  # Specifies this is for integration analysis
+    first_commit: str  # Starting commit hash for timeline analysis
+    platform: None  # Platform not needed for integration analysis
 
 
 class InitialParametersTimelineDependency(CLIParametersTimeline):
-    type: Literal["dependency"]
-    first_commit: None
-    platform: str
+    type: Literal["dependency"]  # Specifies this is for dependency analysis
+    first_commit: None  # No commit needed for dependency analysis
+    platform: str  # Target platform for dependency analysis
 
 
 def get_valid_platforms(repo_path: Path | str) -> set[str]:
@@ -503,7 +503,7 @@ def plot_treemap(
     modules: list[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
-    mode: Literal["status", "diff"] = "status",
+    mode: Literal["status", "diff"],
     path: Optional[str] = None,
 ) -> None:
     if not any(str(value).strip() not in ("", "0") for value in modules[0].values()):
@@ -776,23 +776,6 @@ def get_org(app: Application, org: str) -> dict[str, str]:
     if not org_data:
         raise ValueError(f"Organization '{org}' not found in config")
     return org_data
-
-
-# def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
-#     config_path = app.config_file.path
-
-#     with config_path.open(mode="rb") as f:
-#         data = tomllib.load(f)
-
-#     org_config = data.get("orgs", {}).get(org)
-#     if not org_config:
-#         raise ValueError(f"Organization '{org}' not found in config")
-
-#     return {
-#         "api_key": org_config["api_key"],
-#         "app_key": org_config["app_key"],
-#         "site": org_config.get("site"),
-#     }
 
 
 def is_everything_committed() -> bool:

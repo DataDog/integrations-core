@@ -19,7 +19,7 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
-        patch("os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
+        patch("ddev.cli.size.timeline.os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
