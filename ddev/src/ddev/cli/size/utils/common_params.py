@@ -32,15 +32,3 @@ def common_params(func: Callable) -> Callable:
 
     return wrapper
 
-
-def python_version_param(func: Callable) -> Callable:
-    @functools.wraps(func)
-    @click.option(
-        "--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
-    )
-    @click.pass_context
-    def wrapper(ctx: click.Context, version: str, *args, **kwargs):
-        kwargs["version"] = version
-        return ctx.invoke(func, *args, **kwargs)
-
-    return wrapper

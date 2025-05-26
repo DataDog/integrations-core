@@ -22,7 +22,7 @@ from ddev.cli.size.utils.common_funcs import (
     print_table,
     send_metrics_to_dd,
 )
-from ddev.cli.size.utils.common_params import common_params, python_version_param
+from ddev.cli.size.utils.common_params import common_params
 
 console = Console(stderr=True)
 
