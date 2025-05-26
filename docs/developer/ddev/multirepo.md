@@ -34,7 +34,7 @@ repo = "integrations-core"
 
 In any of the following cases the `ddev config override` won't automatically detect the repo you are in and will prompt you to specify the repo you want to override:
 
-* If the command is run in a directory that is not part of a git repository.
+* If the command is run in a directory that is not part of a Git repository.
 * The directory is part of a repository but the repository root does not have a `pyproject.toml` file.
 * The file exists but has no `[tool.ddev]` table.
 * The file exists and has the table but an unsupported repo name is defined.
