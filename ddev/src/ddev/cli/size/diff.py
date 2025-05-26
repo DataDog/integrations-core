@@ -36,9 +36,7 @@ MINIMUM_LENGTH_COMMIT = 7
 @click.command()
 @click.argument("first_commit")
 @click.argument("second_commit")
-@click.option(
-        "--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
-    )
+@click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(

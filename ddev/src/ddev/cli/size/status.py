@@ -29,9 +29,7 @@ console = Console(stderr=True)
 
 @click.command()
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
-@click.option(
-        "--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
-    )
+@click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(

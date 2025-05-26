@@ -177,7 +177,10 @@ def test_get_files_grouped_and_with_versions():
         return file_sizes[Path(path)]
 
     with (
-        patch("ddev.cli.size.utils.common_funcs.os.walk", return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output]),
+        patch(
+            "ddev.cli.size.utils.common_funcs.os.walk",
+            return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output],
+        ),
         patch("ddev.cli.size.utils.common_funcs.os.path.getsize", side_effect=mock_getsize),
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),

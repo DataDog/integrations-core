@@ -31,4 +31,3 @@ def common_params(func: Callable) -> Callable:
         return ctx.invoke(func, *args, **kwargs)
 
     return wrapper
-

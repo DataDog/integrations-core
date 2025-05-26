@@ -54,7 +54,10 @@ def mock_size_status():
         ),
         patch("ddev.cli.size.status.get_files", return_value=fake_files),
         patch("ddev.cli.size.status.get_dependencies", return_value=fake_deps),
-        patch("ddev.cli.size.utils.common_funcs.os.path.relpath", side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", "")),
+        patch(
+            "ddev.cli.size.utils.common_funcs.os.path.relpath",
+            side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", ""),
+        ),
         patch("ddev.cli.size.utils.common_funcs.compress", return_value=1234),
         patch("ddev.cli.size.utils.common_funcs.os.walk", return_value=mock_walk),
         patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),

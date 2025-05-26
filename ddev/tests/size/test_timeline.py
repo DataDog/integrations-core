@@ -16,7 +16,10 @@ from ddev.cli.size.timeline import (
 
 def test_get_compressed_files():
     with (
-        patch("ddev.cli.size.timeline.os.walk", return_value=[(os.path.join("fake_repo", "datadog_checks"), [], ["__about__.py"])]),
+        patch(
+            "ddev.cli.size.timeline.os.walk",
+            return_value=[(os.path.join("fake_repo", "datadog_checks"), [], ["__about__.py"])],
+        ),
         patch("ddev.cli.size.timeline.os.path.relpath", return_value=os.path.join("datadog_checks", "__about__.py")),
         patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
@@ -49,7 +52,10 @@ def test_get_compressed_files_deleted_only():
     with (
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.os.walk", return_value=[]),
-        patch("ddev.cli.size.timeline.os.path.relpath", side_effect=lambda path, _: path.replace(f"{repo_path}{os.sep}", "")),
+        patch(
+            "ddev.cli.size.timeline.os.path.relpath",
+            side_effect=lambda path, _: path.replace(f"{repo_path}{os.sep}", ""),
+        ),
         patch("ddev.cli.size.timeline.os.path.exists", return_value=False),
     ):
         file_data = get_files(repo_path, module, commit, date, author, message, [], True)
@@ -142,7 +148,10 @@ def test_get_compressed_dependencies():
         patch("ddev.cli.size.timeline.os.path.isdir", return_value=True),
         patch("ddev.cli.size.timeline.os.path.isfile", return_value=True),
         patch("ddev.cli.size.timeline.os.listdir", return_value=["linux-x86_64_3.12.txt"]),
-        patch("ddev.cli.size.timeline.get_dependency_data", return_value=("https://example.com/dep1/dep1-1.1.1-.whl", '1.1.1')),
+        patch(
+            "ddev.cli.size.timeline.get_dependency_data",
+            return_value=("https://example.com/dep1/dep1-1.1.1-.whl", '1.1.1'),
+        ),
         patch("ddev.cli.size.timeline.requests.head", return_value=make_mock_response("12345")),
     ):
         result = get_dependencies(
