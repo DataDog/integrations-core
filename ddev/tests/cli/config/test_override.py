@@ -12,6 +12,14 @@ from tests.helpers.git import ClonedRepo
 from tests.helpers.runner import CliRunner, Result
 
 
+@pytest.fixture(autouse=True)
+# Ensure the local override is removed from any test if we have generated it
+def delete_local_override_config(config_file: ConfigFileWithOverrides):
+    yield
+    if config_file.overrides_available():
+        config_file.overrides_path.unlink()
+
+
 @pytest.fixture
 def repo_with_ddev_tool_config(repository_as_cwd: ClonedRepo) -> Generator[ClonedRepo, None, None]:
     pyproject_path = repository_as_cwd.path / "pyproject.toml"
@@ -130,7 +138,10 @@ def test_not_in_repo_ask_user(ddev: CliRunner, config_file: ConfigFileWithOverri
 def test_pyproject_not_found_ask_user(
     ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, repository_as_cwd: ClonedRepo
 ):
-    (repository_as_cwd.path / "pyproject.toml").unlink()
+    original_pyproject = repository_as_cwd.path / "pyproject.toml"
+    backup_pyproject = original_pyproject.with_suffix(".bak")
+    original_pyproject.rename(backup_pyproject)
+
     result = ddev("config", "override", input="extras")
     extras_path = str(config_file.overrides_path.parent).replace("\\", "\\\\")
 
@@ -145,13 +156,17 @@ def test_pyproject_not_found_ask_user(
         extras = "{extras_path}"
         """
     )
+    print(result.output)
     # Reload new values
     config_file.load()
     assert_valid_local_config(config_file, config_file.overrides_path.parent, result, expected_output)
 
+    # Restore the original pyproject.toml
+    backup_pyproject.rename(original_pyproject)
+
 
 def test_misconfigured_pyproject_fails(
-    ddev: CliRunner, config_file: ConfigFileWithOverrides, helpers, repository_as_cwd: ClonedRepo
+    ddev: CliRunner, config_file: ConfigFileWithOverrides, repository_as_cwd: ClonedRepo
 ):
     # Setup wrongly configured pyproject.toml
     pyproject_path = repository_as_cwd.path / "pyproject.toml"
