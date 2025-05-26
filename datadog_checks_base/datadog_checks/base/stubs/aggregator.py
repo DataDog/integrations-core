@@ -83,7 +83,7 @@ class AggregatorStub(object):
     IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
     METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP = {
         'gauge': 'gauge',
-        'rate': 'gauge',
+        'rate': 'rate',
         'count': 'count',
         'monotonic_count': 'count',
         'counter': 'rate',

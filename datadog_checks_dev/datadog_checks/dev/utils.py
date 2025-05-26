@@ -133,6 +133,7 @@ def get_metadata_metrics():
     # Only called in tests of a check, so just go back one frame
     root = find_check_root(depth=1)
     metadata_path = os.path.join(root, 'metadata.csv')
+    print(f"metadata_path: {metadata_path}\n")
     metrics = {}
     with open(metadata_path) as f:
         for row in csv.DictReader(f):

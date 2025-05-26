@@ -112,7 +112,7 @@ mysql.innodb.queries_inside,gauge,,query,,As shown in the FILE I/O section of th
 mysql.innodb.queries_queued,gauge,,query,,As shown in the FILE I/O section of the SHOW ENGINE INNODB STATUS output.,0,mysql,mysql innodb queries queued,
 mysql.innodb.read_views,gauge,,,,As shown in the FILE I/O section of the SHOW ENGINE INNODB STATUS output.,0,mysql,mysql innodb read views,
 mysql.innodb.row_lock_current_waits,gauge,,,,The number of row locks currently being waited for by operations on InnoDB tables.,0,mysql,mysql innodb row_lock_current_waits,
-mysql.innodb.row_lock_time,gauge,,millisecond,,The time spent acquiring row locks.,-1,mysql,row lock time,
+mysql.innodb.row_lock_time,rate,,millisecond,,The time spent acquiring row locks.,-1,mysql,row lock time,
 mysql.innodb.row_lock_waits,rate,,event,second,The number of times per second a row lock had to be waited for.,0,mysql,innodb row lock waits,
 mysql.innodb.rows_deleted,rate,,row,second,Number of rows deleted from InnoDB tables.,0,mysql,mysql innodb rows_deleted,
 mysql.innodb.rows_inserted,rate,,row,second,Number of rows inserted into InnoDB tables.,0,mysql,mysql innodb rows_inserted,
@@ -147,11 +147,11 @@ mysql.performance.com_insert,rate,,query,second,The rate of insert statements.,0
 mysql.performance.com_insert_select,rate,,query,second,The rate of insert-select statements.,0,mysql,insrt select,
 mysql.performance.com_load,rate,,query,second,The rate of load statements.,0,mysql,mysql performance com_load,
 mysql.performance.com_replace,rate,,query,second,The rate of replace statements.,0,mysql,mysql performance com_replace,
-mysql.performance.com_replace_select,gauge,,query,second,The rate of replace-select statements.,0,mysql,replc select,
+mysql.performance.com_replace_select,rate,,query,second,The rate of replace-select statements.,0,mysql,replc select,
 mysql.performance.com_select,rate,,query,second,The rate of select statements.,0,mysql,selects,cpu
 mysql.performance.com_update,rate,,query,second,The rate of update statements.,0,mysql,updates,
 mysql.performance.com_update_multi,rate,,query,second,The rate of update-multi.,0,mysql,update multi,
-mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu,cpu
+mysql.performance.cpu_time,rate,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu,cpu
 mysql.performance.created_tmp_disk_tables,rate,,table,second,The rate of internal on-disk temporary tables created by second by the server while executing statements.,-1,mysql,disk tmp tables created,
 mysql.performance.created_tmp_files,rate,,file,second,The rate of temporary files created by second.,-1,mysql,tmp files created,
 mysql.performance.created_tmp_tables,rate,,table,second,The rate of internal temporary tables created by second by the server while executing statements.,0,mysql,tmp tables created,
@@ -168,7 +168,7 @@ mysql.performance.handler_read_rnd_next,rate,,operation,second,The number of int
 mysql.performance.handler_rollback,rate,,operation,second,The number of internal ROLLBACK statements.,0,mysql,mysql performance handler_rollback,
 mysql.performance.handler_update,rate,,operation,second,The number of internal UPDATE statements.,0,mysql,mysql performance handler_update,
 mysql.performance.handler_write,rate,,operation,second,The number of internal WRITE statements.,0,mysql,mysql performance handler_write,
-mysql.performance.kernel_time,gauge,,percent,,Percentage of CPU time spent in kernel space by MySQL.,-1,mysql,cpu kernel,
+mysql.performance.kernel_time,rate,,percent,,Percentage of CPU time spent in kernel space by MySQL.,-1,mysql,cpu kernel,
 mysql.performance.key_cache_utilization,gauge,,fraction,,The key cache utilization ratio.,1,mysql,key cache utilization,
 mysql.performance.max_prepared_stmt_count,gauge,,,,The maximum allowed prepared statements on the server.,0,mysql,max prepared statements,
 mysql.performance.open_files,gauge,,file,,The number of open files.,0,mysql,open files,
@@ -212,7 +212,7 @@ mysql.performance.threads_connected,gauge,,connection,,The number of currently o
 mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If `threads_created` is big, you may want to increase the `thread_cache_size` value.",0,mysql,mysql performance threads_created,memory
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
 mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: `processlist_db`, `processlist_host`, `processlist_state`, `processlist_user`",0,mysql,user conns,
-mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
+mysql.performance.user_time,rate,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
 mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count,cpu
 mysql.queries.errors,count,,error,,The total count of queries run with an error per normalized query and schema. (DBM only),0,mysql,mysql query errors,
 mysql.queries.lock_time,count,,nanosecond,,The total time spent waiting on locks per normalized query and schema. (DBM only),0,mysql,mysql queries lock time,
