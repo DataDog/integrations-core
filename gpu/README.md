@@ -114,6 +114,8 @@ datadog:
 
 For **mixed environments**, two different Helm charts need to be deployed with different affinity sets and with one of them joining the other's Cluster Agent [as documented here](https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux).
 
+While the `nvidia.com/gpu.present` tag is commonly used to identify GPU nodes (often automatically added by the NVIDIA GPU operator), your specific environment might use different tags or labeling schemes. It's important to identify the correct tag and value that distinguishes your GPU nodes from non-GPU nodes. You can then adapt the examples below accordingly.
+
 Assuming we have already a `values.yml` file for a regular, non-GPU deployment, the steps to enable GPU monitoring only on GPU nodes are the following:
 
 1. In `agents.affinity`, add a node selector that stops the non-GPU Agent from running on GPU nodes:
@@ -132,7 +134,7 @@ agents:
               - "true"
 ```
 
-The `nvidia.com/gpu.present` tag is used above as it's automatically added to GPU nodes by the NVIDIA GPU operator. However, any other appropriate tag may be chosen.
+Additionally, if you need to select nodes based on the presence of a label key, irrespective of its value, you can use the `Exists` [operator](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity). Conversely, to exclude nodes that have a specific label key, you can use `DoesNotExist`. For example, to select nodes that have the label `custom.gpu/available` (regardless of its value), you would use `operator: Exists`.
 
 2. Create another file (for example, `values-gpu.yaml`) to apply on top of the previous one. In this file, enable GPU monitoring, configure the Cluster Agent to join the existing cluster as per the [instructions],(<https://github.com/DataDog/helm-charts/tree/main/charts/datadog#how-to-join-a-cluster-agent-from-another-helm-chart-deployment-linux>) and include the affinity for the GPU nodes:
 

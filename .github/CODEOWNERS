@@ -6,14 +6,14 @@
 *                   @DataDog/agent-integrations
 
 # Documentation
-/docs/                @DataDog/documentation @DataDog/agent-integrations
-*.md                  @DataDog/documentation @DataDog/agent-integrations
+/docs/                @DataDog/agent-integrations
+**/README.md          @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/assets             @DataDog/documentation @DataDog/agent-integrations
-
+**/metadata.csv       @DataDog/documentation @DataDog/agent-integrations
 
 # Dependencies
 /.deps/                            @DataDog/agent-integrations @DataDog/agent-delivery
@@ -120,7 +120,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /network_path/*.md                                                 @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/ndm-core @DataDog/agent-integrations
-/docs/developer/tutorials/snmp/                                    @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/docs/developer/tutorials/snmp/                                    @DataDog/ndm-core @DataDog/agent-integrations
 
 # System checks
 /disk/                                    @DataDog/agent-integrations @DataDog/windows-agent
