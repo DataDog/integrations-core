@@ -85,7 +85,7 @@ instances:
     #
     # exclude_hostname: false
 
-    ## Controls how the database is identified. The default value is the resolved hostname for the instance, 
+    ## Controls how the database is identified. The default value is the resolved hostname for the instance,
     ## which respects the `reported_hostname` option.
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
@@ -105,9 +105,10 @@ instances:
         ## - database: The connection database.
         ## - server_name: The resolved server name of the instance.
         ## - instance_name: The resolved instance name of the instance.
+        ## - full_server_name: The resolved full server name of the instance i.e. the value returned by `@@SERVERNAME`.
         ## In addition, you can use any key from the `tags` section of the configuration.
         #
-        # template: $env-$resolved_hostname:$port
+        # template: $env-$resolved_hostname-$full_server_name
 
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check.
@@ -165,9 +166,9 @@ instances:
         ##
         ## Set `ao_metrics.enabled` to true to enable collection of AlwaysOn metrics. Defaults to false.
         ##
-        ## When `ao_metrics.enabled` is True, use `ao_metrics.availability_group` to specify the 
-        ## resource group id of a specific availability group that you would like to monitor. 
-        ## If no availability group is specified, then we will collect AlwaysOn metrics for all 
+        ## When `ao_metrics.enabled` is True, use `ao_metrics.availability_group` to specify the
+        ## resource group id of a specific availability group that you would like to monitor.
+        ## If no availability group is specified, then we will collect AlwaysOn metrics for all
         ## availability groups on the current replica.
         ##
         ## Primary replicas may emit metrics for remote secondary replicas
@@ -179,11 +180,11 @@ instances:
         # ao_metrics: {}
 
         ## @param db_fragmentation_metrics - mapping - optional
-        ## Configure collection of database fragmentation metrics. 
-        ## Note these queries can be resource intensive on large datasets. Recommend to limit these via 
+        ## Configure collection of database fragmentation metrics.
+        ## Note these queries can be resource intensive on large datasets. Recommend to limit these via
         ## autodiscovery or specific database instances.
         ##
-        ## Set `db_fragmentation_metrics.enabled` to true to enable collection of 
+        ## Set `db_fragmentation_metrics.enabled` to true to enable collection of
         ## database index fragmentation statistics. Defaults to false.
         ##
         ## Use `db_fragmentation_metrics.enabled_tempdb` to enable collection of database index fragmentation statistics
@@ -247,7 +248,7 @@ instances:
         # master_files_metrics: {}
 
         ## @param primary_log_shipping_metrics - mapping - optional
-        ## Configure collection of metrics for a log shipping setup. Required to run against the 
+        ## Configure collection of metrics for a log shipping setup. Required to run against the
         ## primary instance in a transaction log shipping configuration. Note that
         ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
         ##
@@ -257,7 +258,7 @@ instances:
         # primary_log_shipping_metrics: {}
 
         ## @param secondary_log_shipping_metrics - mapping - optional
-        ## Configure collection of metrics for a log shipping setup. Required to run against the 
+        ## Configure collection of metrics for a log shipping setup. Required to run against the
         ## secondary instance in a transaction log shipping configuration. Note that
         ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
         ##
@@ -277,13 +278,13 @@ instances:
         ## @param tempdb_file_space_usage_metrics - mapping - optional
         ## Configure collection of tempdb file space usage metrics for how space is used in tempdb data files.
         ##
-        ## Set `tempdb_file_space_usage_metrics.enabled` to true to enable collection of 
+        ## Set `tempdb_file_space_usage_metrics.enabled` to true to enable collection of
         ## tempdb file space usage metrics. Defaults to true.
         #
         # tempdb_file_space_usage_metrics: {}
 
         ## @param xe_metrics - mapping - optional
-        ## Configure collection of extended events (XE) metrics. 
+        ## Configure collection of extended events (XE) metrics.
         ##
         ## Set `xe_metrics.enabled` to true to enable collection of extended events metrics. Defaults to false.
         #
@@ -647,12 +648,12 @@ instances:
         # keep_identifier_quotation: false
 
     ## Configure the collection of raw query statements in query activity, execution plans, and XE events.
-    ## To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and 
+    ## To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and
     ## `xe_collection.query_errors.enabled` to `true`.
     ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
     ## or personally identifiable information in query text.
-    ## Enabling this option will allow the collection and ingestion of raw query statements and 
-    ## execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+    ## Enabling this option will allow the collection and ingestion of raw query statements and
+    ## execution plans into Datadog, which can then become viewable in query samples or explain plans.
     ## This option is disabled by default.
     ## Note: Collection of raw query statements is currently in preview.
     ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
@@ -813,12 +814,12 @@ instances:
         ##
         ## Set `query_completions.enabled` to `true` to enable the collection of query completion events.
         ##
-        ## Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of 
+        ## Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of
         ## query completion events. Defaults to 10 seconds. If you intend on updating this value,
         ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
         ##
-        ## Use `query_completions.max_events` to set the maximum number of query completion events to process 
-        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query, 
+        ## Use `query_completions.max_events` to set the maximum number of query completion events to process
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
         ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
         #
         # query_completions: {}
@@ -828,12 +829,12 @@ instances:
         ##
         ## Set `query_errors.enabled` to `true` to enable the collection of query error events.
         ##
-        ## Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of 
+        ## Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of
         ## query error events. Defaults to 10 seconds. If you intend on updating this value,
         ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
         ##
-        ## Use `query_errors.max_events` to set the maximum number of query error events to process 
-        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query, 
+        ## Use `query_errors.max_events` to set the maximum number of query error events to process
+        ## per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
         ## so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
         #
         # query_errors: {}

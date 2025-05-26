@@ -145,6 +145,10 @@ def isolation() -> Generator[Path, None, None]:
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     cloned_repo_path = isolation / local_repo.name
 
+    # Get the current origin remote url
+    with local_repo.as_cwd():
+        origin_url = PLATFORM.check_command_output(['git', 'remote', 'get-url', 'origin']).strip()
+
     PLATFORM.check_command_output(
         ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
     )
@@ -153,6 +157,11 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
         PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
         PLATFORM.check_command_output(['git', 'config', 'tag.gpgsign', 'false'])
+
+        # Set url to point to the origin of the local source and not to the local repo
+        PLATFORM.check_command_output(['git', 'remote', 'set-url', 'origin', origin_url])
+        # Now fetch latest updates
+        PLATFORM.check_command_output(['git', 'fetch', 'origin'])
 
     cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
