@@ -156,7 +156,7 @@ def test_pyproject_not_found_ask_user(
         extras = "{extras_path}"
         """
     )
-    print(result.output)
+
     # Reload new values
     config_file.load()
     assert_valid_local_config(config_file, config_file.overrides_path.parent, result, expected_output)
