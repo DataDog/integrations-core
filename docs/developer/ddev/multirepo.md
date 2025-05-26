@@ -32,7 +32,7 @@ repo = "integrations-core"
 # "integrations-internal-core"
 ```
 
-In any of the following cases the `ddev config override` woin't be able to automatically detect the repo you are in and will prompt you to specify what repo is it that you want to override:
+In any of the following cases the `ddev config override` won't automatically detect the repo you are in and will prompt you to specify the repo you want to override:
 
 * If the command is run in a directory that is not part of a git repository.
 * The directory is part of a repository but the repository root does not have a `pyproject.toml` file.
