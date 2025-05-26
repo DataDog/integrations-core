@@ -744,6 +744,7 @@ def send_metrics_to_dd(
 
     initialize(
         api_key=config_file_info["api_key"],
+        app_key=config_file_info["app_key"],
         api_host=f"https://api.{config_file_info['site']}",
     )
 
