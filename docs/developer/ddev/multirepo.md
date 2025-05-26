@@ -86,7 +86,7 @@ If we go back to our `integrations-core` directory and execute any `ddev` comman
 
 ## Command Behavior with Overrides
 
-The presence of a `.ddev.toml` file influences how certain `ddev` config commands behave. Assume the global config has `repo = "core"` and `org = "default"`, and a local `.ddev.toml` has `repo = "extras"` and `github.user = "test-user"`.
+The presence of a `.ddev.toml` file influences how certain `ddev` config commands behave. Let's look at an example where the global config has `repo = "core"` and `org = "default"`, and a local `.ddev.toml` has `repo = "extras"` and `github.user = "test-user"`.
 
 *   **`ddev config show`**: Displays the merged configuration, annotating each setting with its source (`GlobalConfig:<line>` or `Overrides:<line>`).
 
