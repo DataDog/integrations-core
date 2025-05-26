@@ -280,7 +280,7 @@ def get_dependencies_sizes(
             size_str = response.headers.get("Content-Length")
             if size_str is None:
                 raise ValueError(f"Missing size for {dep}")
-            size = int(size_str) if dep != "botocore" else 1400000000
+            size = int(size_str) if dep != "botocore" else 16000000
 
         else:
             with requests.get(url, stream=True) as response:
