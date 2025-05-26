@@ -1,0 +1,1 @@
+Check for aws extensions before querying aurora_version()

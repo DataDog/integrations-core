@@ -120,7 +120,7 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_.utils.common_funcs.64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),

@@ -1,7 +1,6 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
-  # We apply no-changelog label for PRs that release integrations by bumping __about__.py.
 - any:
   - requirements-agent-release.txt
   - '**/__about__.py'
@@ -160,6 +159,8 @@ integration/couch:
 - couch/**/*
 integration/couchbase:
 - couchbase/**/*
+integration/crewai:
+- crewai/**/*
 integration/cri:
 - cri/**/*
 integration/crio:
@@ -182,6 +183,8 @@ integration/directory:
 - directory/**/*
 integration/disk:
 - disk/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
@@ -324,6 +327,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/kaspersky:
+- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
@@ -356,6 +361,8 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
+integration/kubevirt:
+- kubevirt/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
 integration/kubevirt_controller:
@@ -374,6 +381,8 @@ integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
+integration/linux_audit_logs:
+- linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/mailchimp:
@@ -668,6 +677,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/watchguard_firebox:
+- watchguard_firebox/**/*
 integration/wazuh:
 - wazuh/**/*
 integration/weaviate:
@@ -686,6 +697,8 @@ integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
 - winkmem/**/*
+integration/wlan:
+- wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:

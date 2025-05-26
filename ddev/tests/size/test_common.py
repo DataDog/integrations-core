@@ -177,8 +177,8 @@ def test_get_files_grouped_and_with_versions():
         return file_sizes[Path(path)]
 
     with (
-        patch("os.walk", return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output]),
-        patch("os.path.getsize", side_effect=mock_getsize),
+        patch("ddev.cli.size.utils.common_funcs.os.walk", return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.getsize", side_effect=mock_getsize),
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),
         patch("ddev.cli.size.utils.common_funcs.extract_version_from_about_py", return_value="1.2.3"),
@@ -213,7 +213,7 @@ def test_get_gitignore_files():
     mock_gitignore = f"__pycache__{os.sep}\n*.log\n"  # Sample .gitignore file
     repo_path = "fake_repo"
     with patch("builtins.open", mock_open(read_data=mock_gitignore)):
-        with patch("os.path.exists", return_value=True):
+        with patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True):
             ignored_patterns = get_gitignore_files(repo_path)
     assert ignored_patterns == ["__pycache__" + os.sep, "*.log"]
 
@@ -240,7 +240,7 @@ def test_save_csv():
         {"Name": "module,with,comma", "Size_Bytes": 456, "Size": "2 B"},
     ]
 
-    with patch("builtins.open", mock_file):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
         save_csv(mock_app, modules, "output.csv")
 
     mock_file.assert_called_once_with("output.csv", "w", encoding="utf-8")
@@ -261,7 +261,7 @@ def test_save_json():
         {"name": "mod3", "size": "300"},
     ]
 
-    with patch("builtins.open", mock_file):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
         save_json(mock_app, "output.json", modules)
 
     mock_file.assert_called_once_with("output.json", "w", encoding="utf-8")
@@ -284,7 +284,7 @@ def test_save_markdown():
         {"Name": "module2", "Size_Bytes": 456, "Size": "4 B", "Type": "Dependency", "Platform": "linux-x86_64"},
     ]
 
-    with patch("builtins.open", mock_file):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
         save_markdown(mock_app, "Status", modules, "output.md")
 
     mock_file.assert_called_once_with("output.md", "a", encoding="utf-8")
@@ -308,7 +308,7 @@ def test_extract_version_from_about_py_pathlib():
     fake_path = Path("some") / "module" / "__about__.py"
     fake_content = "__version__ = '1.2.3'\n"
 
-    with patch("builtins.open", mock_open(read_data=fake_content)):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
         version = extract_version_from_about_py(str(fake_path))
 
     assert version == "1.2.3"
@@ -318,7 +318,7 @@ def test_extract_version_from_about_py_no_version_pathlib():
     fake_path = Path("another") / "module" / "__about__.py"
     fake_content = "version = 'not_defined'\n"
 
-    with patch("builtins.open", mock_open(read_data=fake_content)):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
         version = extract_version_from_about_py(str(fake_path))
 
     assert version == ""
@@ -338,10 +338,10 @@ def test_get_org():
     mock_app.config_file.path = mock_path
 
     with (
-        patch("builtins.open", mock_open(read_data=toml_data)),
+        patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=toml_data)),
         patch.object(mock_path, "open", mock_open(read_data=toml_data)),
     ):
-        result = get_org(mock_app)
+        result = get_org(mock_app, "default")
 
     expected = {
         "api_key": "test_api_key",

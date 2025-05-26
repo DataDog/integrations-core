@@ -750,7 +750,7 @@ def send_metrics_to_dd(
     api.Metric.send(metrics=metrics)
 
 
-def get_org(app: Application, org: Optional[str] = "default") -> dict[str, str]:
+def get_org(app: Application, org: str) -> dict[str, str]:
     config_path: Path = app.config_file.path
 
     current_section = None
