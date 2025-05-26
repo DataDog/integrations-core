@@ -96,8 +96,8 @@ pipeline:
           sourceType: tag
           target: dirname
           targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+          preserveSource: true
+          overrideOnConflict: true
         - type: grok-parser
           name: Task Attributes Parser
           enabled: true
