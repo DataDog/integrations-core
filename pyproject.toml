@@ -110,7 +110,7 @@ ban-relative-imports = "all"
 "tests/models/config_models/deprecations.py" = ["E501"]
 
 [tool.ddev]
-repo = "integrations-core"
+repo = "core"
 
 [project]
 name = "integrations-core"

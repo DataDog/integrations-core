@@ -20,20 +20,11 @@ def repo_to_override(app: Application) -> str:
         pyproject_metadata,
     )
 
-    repos_map = {
-        ValidRepo.CORE: "core",
-        ValidRepo.EXTRAS: "extras",
-        ValidRepo.INTERNAL: "internal",
-        ValidRepo.AGENT: "agent",
-        ValidRepo.MARKETPLACE: "marketplace",
-        ValidRepo.INTEGRATIONS_INTERNAL_CORE: "integrations-internal-core",
-    }
-
     try:
         metadata = pyproject_metadata()
         if metadata is None:
             raise RepoNotFoundError()
-        repo = repos_map[metadata.repo]
+        repo = metadata.repo.value
     except (PyProjectNotFoundError, RepoNotFoundError):
         app.display_error(
             "The current repo could not be inferred. Either this is not a repository or the root of "
@@ -42,7 +33,7 @@ def repo_to_override(app: Application) -> str:
 
         repo = app.prompt(
             "What repo are you trying to override? ",
-            type=click.Choice(list(repos_map.values())),
+            type=click.Choice([item.value for item in ValidRepo]),
             show_choices=True,
         )
     except InvalidMetadataError as e:

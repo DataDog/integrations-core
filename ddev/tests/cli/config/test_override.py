@@ -16,7 +16,7 @@ from tests.helpers.runner import CliRunner, Result
 def repo_with_ddev_tool_config(repository_as_cwd: ClonedRepo) -> Generator[ClonedRepo, None, None]:
     pyproject_path = repository_as_cwd.path / "pyproject.toml"
     pyproject = load_toml_file(pyproject_path)
-    pyproject["tool"]["ddev"] = {"repo": "integrations-core"}
+    pyproject["tool"]["ddev"] = {"repo": "core"}
     dump_toml_data(pyproject, pyproject_path)
 
     yield repository_as_cwd
@@ -162,4 +162,4 @@ def test_misconfigured_pyproject_fails(
     result = ddev("config", "override")
     assert result.exit_code == 1
     assert "Invalid ddev metadata found in pyproject.toml" in result.output
-    assert "[tool.ddev.repo] is 'wrong-repo': Input should be 'integrations-core'" in result.output
+    assert "[tool.ddev.repo] is 'wrong-repo': Input should be 'core'" in result.output

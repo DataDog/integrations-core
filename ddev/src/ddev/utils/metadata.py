@@ -10,10 +10,10 @@ from ddev.utils.git import GitRepository
 
 
 class ValidRepo(Enum):
-    CORE = "integrations-core"
-    EXTRAS = "integrations-extras"
-    INTERNAL = "integrations-internal"
-    AGENT = "datadog-agent"
+    CORE = "core"
+    EXTRAS = "extras"
+    INTERNAL = "internal"
+    AGENT = "agent"
     MARKETPLACE = "marketplace"
     INTEGRATIONS_INTERNAL_CORE = "integrations-internal-core"
 
