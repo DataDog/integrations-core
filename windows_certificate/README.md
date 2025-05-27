@@ -2,19 +2,19 @@
 
 ## Overview
 
-This check monitors the Local Machine certificates in the [Windows Certificate Store][1] for ceritificate expiration.
+This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] for ceritificate expiration.
 
 ## Setup
 
 ### Installation
 
-The Windows Certificate Store check is included in the [Datadog Agent][2] package. Please see the next section to configure the check.
+The Windows Certificate Store integration is included in the [Datadog Agent][2] package. Please see the next section to configure.
 
 ### Configuration
 
 Edit the `windows_certificate.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample windows_certificate.d/conf.yaml][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
 
-The check can monitor the expiration of all certiificates in a given store or selectively monitor a few certificates by a given list of strings matching with the certificate subjects. Enter the store name as found in `HKEY_LOCAL_MACHINE\Software\Microsoft\SystemCertificates`.
+The integration can monitor the expiration of all certificates in a given store or selectively monitor specific certificates from a given list of strings matching with the certificate subjects. The store names that are available for monitoring are listed in `HKEY_LOCAL_MACHINE\Software\Microsoft\SystemCertificates`.
 
 This example configuration monitors all certificates in the local machine's `ROOT` store:
 
