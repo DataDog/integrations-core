@@ -1,0 +1,38 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b53ac38a-5ec9-4ad7-bc86-58be53f3c5ee",
+  "app_id": "box",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Box enterprise events",
+    "title": "Box",
+    "media": [],
+    "classifier_tags": [
+      "Category::Collaboration",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 45990845,
+      "source_type_name": "Box",
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -17,6 +17,7 @@ from typing import Literal, Optional, Type, TypedDict
 import matplotlib.pyplot as plt
 import requests
 import squarify
+from datadog import api, initialize
 from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
@@ -54,39 +55,33 @@ class CommitEntryPlatformWithDelta(CommitEntryWithDelta):
 
 
 class CLIParameters(TypedDict):
-    app: Application
-    platform: str
-    version: str
-    compressed: bool
-    csv: bool
-    markdown: bool
-    json: bool
-    save_to_png_path: Optional[str]
-    show_gui: bool
+    app: Application  # Main application instance for CLI operations
+    platform: str  # Target platform for analysis (e.g. linux-aarch64)
+    version: str  # Target Python version for analysis
+    compressed: bool  # Whether to analyze compressed file sizes
+    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    show_gui: bool  # Whether to display interactive visualization
 
 
 class CLIParametersTimeline(TypedDict):
-    app: Application
-    module: str
-    threshold: Optional[int]
-    compressed: bool
-    csv: bool
-    markdown: bool
-    json: bool
-    save_to_png_path: Optional[str]
-    show_gui: bool
+    app: Application  # Main application instance for CLI operations
+    module: str  # Name of module to analyze
+    threshold: Optional[int]  # Minimum size threshold for filtering
+    compressed: bool  # Whether to analyze compressed file sizes
+    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    show_gui: bool  # Whether to display interactive visualization
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
-    type: Literal["integration"]
-    first_commit: str
-    platform: None
+    type: Literal["integration"]  # Specifies this is for integration analysis
+    first_commit: str  # Starting commit hash for timeline analysis
+    platform: None  # Platform not needed for integration analysis
 
 
 class InitialParametersTimelineDependency(CLIParametersTimeline):
-    type: Literal["dependency"]
-    first_commit: None
-    platform: str
+    type: Literal["dependency"]  # Specifies this is for dependency analysis
+    first_commit: None  # No commit needed for dependency analysis
+    platform: str  # Target platform for dependency analysis
 
 
 def get_valid_platforms(repo_path: Path | str) -> set[str]:
@@ -322,44 +317,19 @@ def format_modules(
     modules: list[FileDataEntry],
     platform: str,
     py_version: str,
-    multiple_plats_and_vers: bool,
-) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion]:
     """
     Formats the modules list, adding platform and Python version information.
-
-    If the modules list is empty, returns a default empty entry.
     """
-    if modules == [] and not multiple_plats_and_vers:
-        empty_entry: FileDataEntry = {
-            "Name": "",
-            "Version": "",
-            "Size_Bytes": 0,
-            "Size": "",
-            "Type": "",
-        }
-        return [empty_entry]
-    elif modules == []:
-        empty_entry_with_platform: FileDataEntryPlatformVersion = {
-            "Name": "",
-            "Version": "",
-            "Size_Bytes": 0,
-            "Size": "",
-            "Type": "",
-            "Platform": "",
-            "Python_Version": "",
-        }
-        return [empty_entry_with_platform]
-    elif multiple_plats_and_vers:
-        new_modules: list[FileDataEntryPlatformVersion] = [
-            {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
-        ]
-        return new_modules
-    else:
-        return modules
+    new_modules: list[FileDataEntryPlatformVersion] = [
+        {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
+    ]
+    return new_modules
 
 
-def print_json(
+def save_json(
     app: Application,
+    file_path: str,
     modules: (
         list[FileDataEntry]
         | list[FileDataEntryPlatformVersion]
@@ -367,33 +337,31 @@ def print_json(
         | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
-    printed_yet = False
-    app.display("[")
-    for row in modules:
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            if printed_yet:
-                app.display(",")
-            app.display(json.dumps(row, default=str))
-            printed_yet = True
+    if modules == []:
+        return
 
-    app.display("]")
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(modules, f, default=str, indent=2)
+    app.display(f"JSON file saved to {file_path}")
 
 
-def print_csv(
+def save_csv(
     app: Application,
-    modules: (
-        list[FileDataEntry]
-        | list[FileDataEntryPlatformVersion]
-        | list[CommitEntryWithDelta]
-        | list[CommitEntryPlatformWithDelta]
-    ),
+    modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
+    file_path: str,
 ) -> None:
+    if modules == []:
+        return
+
     headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
-    app.display(",".join(headers))
 
-    for row in modules:
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            app.display(",".join(format(str(row.get(h, ""))) for h in headers))
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(",".join(headers) + "\n")
+
+        for row in modules:
+            f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
+
+    app.display(f"CSV file saved to {file_path}")
 
 
 def format(s: str) -> str:
@@ -403,61 +371,129 @@ def format(s: str) -> str:
     return f'"{s}"' if "," in s else s
 
 
-def print_markdown(
+def save_markdown(
     app: Application,
     title: str,
-    modules: (
-        list[FileDataEntry]
-        | list[FileDataEntryPlatformVersion]
-        | list[CommitEntryWithDelta]
-        | list[CommitEntryPlatformWithDelta]
-    ),
+    modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
+    file_path: str,
 ) -> None:
-    if all(str(value).strip() in ("", "0", "0001-01-01") for value in modules[0].values()):
-        return  # skip empty table
+    if modules == []:
+        return
 
     headers = [k for k in modules[0].keys() if "Bytes" not in k]
 
+    # Group modules by platform and version
+    grouped_modules = {(modules[0].get("Platform", ""), modules[0].get("Python_Version", "")): [modules[0]]}
+    for module in modules[1:]:
+        platform = module.get("Platform", "")
+        version = module.get("Python_Version", "")
+        key = (platform, version)
+        if key not in grouped_modules:
+            grouped_modules[key] = []
+        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in module.values()):
+            grouped_modules[key].append(module)
+
     lines = []
-    lines.append(f"### {title}")
-    lines.append("| " + " | ".join(headers) + " |")
-    lines.append("| " + " | ".join("---" for _ in headers) + " |")
-    for row in modules:
-        lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+    lines.append(f"# {title}")
+    lines.append("")
+
+    for (platform, version), group in grouped_modules.items():
+        if platform and version:
+            lines.append(f"## Platform: {platform}, Python Version: {version}")
+        elif platform:
+            lines.append(f"## Platform: {platform}")
+        elif version:
+            lines.append(f"## Python Version: {version}")
+        else:
+            lines.append("## Other")
+
+        lines.append("")
+        lines.append("| " + " | ".join(headers) + " |")
+        lines.append("| " + " | ".join("---" for _ in headers) + " |")
+        for row in group:
+            lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+        lines.append("")
 
     markdown = "\n".join(lines)
-    app.display_markdown(markdown)
+
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(markdown)
+    app.display(f"Markdown table saved to {file_path}")
 
 
 def print_table(
     app: Application,
     mode: str,
-    modules: (
-        list[FileDataEntry]
-        | list[FileDataEntryPlatformVersion]
-        | list[CommitEntryWithDelta]
-        | list[CommitEntryPlatformWithDelta]
-    ),
+    modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
 ) -> None:
+    if modules == []:
+        return
+
     columns = [col for col in modules[0].keys() if "Bytes" not in col]
     modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
     for i, row in enumerate(modules):
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            for key in columns:
-                modules_table[key][i] = str(row.get(key, ""))
+        for key in columns:
+            modules_table[key][i] = str(row.get(key, ""))
 
     app.display_table(mode, modules_table)
 
 
+def export_format(
+    app: Application,
+    format: list[str],
+    modules: list[FileDataEntryPlatformVersion],
+    mode: Literal["status", "diff"],
+    platform: Optional[str],
+    version: Optional[str],
+    compressed: bool,
+) -> None:
+    size_type = "compressed" if compressed else "uncompressed"
+    for output_format in format:
+        if output_format == "csv":
+            csv_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.csv"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.csv"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
+                )
+            )
+            save_csv(app, modules, csv_filename)
+
+        elif output_format == "json":
+            json_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.json"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.json"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
+                )
+            )
+            save_json(app, json_filename, modules)
+
+        elif output_format == "markdown":
+            markdown_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.md"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.md"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
+                )
+            )
+            save_markdown(app, "Status", modules, markdown_filename)
+
+
 def plot_treemap(
-    modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
+    modules: list[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
-    mode: Literal["status", "diff"] = "status",
+    mode: Literal["status", "diff"],
     path: Optional[str] = None,
 ) -> None:
-    if not any(str(value).strip() not in ("", "0") for value in modules[0].values()):
-        # table is empty
+    if modules == []:
         return
 
     # Initialize figure and axis
@@ -484,10 +520,10 @@ def plot_treemap(
     plt.subplots_adjust(right=0.8)
     plt.tight_layout()
 
-    if show:
-        plt.show()
     if path:
         plt.savefig(path, bbox_inches="tight", format="png")
+    if show:
+        plt.show()
 
 
 def plot_status_treemap(
@@ -655,6 +691,89 @@ def draw_treemap_rects_with_labels(
             )
 
 
+def send_metrics_to_dd(
+    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool
+) -> None:
+    metric_name = (
+        "datadog.agent_integrations.size_analyzer.compressed"
+        if compressed
+        else "datadog.agent_integrations.size_analyzer.uncompressed"
+    )
+    config_file_info = get_org(app, org)
+    if not is_everything_committed():
+        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    if 'api_key' not in config_file_info:
+        raise RuntimeError("No API key found in config file")
+    if 'site' not in config_file_info:
+        raise RuntimeError("No site found in config file")
+
+    timestamp = get_last_commit_timestamp()
+
+    metrics = []
+
+    for item in modules:
+        metrics.append(
+            {
+                "metric": metric_name,
+                "type": "gauge",
+                "points": [(timestamp, item["Size_Bytes"])],
+                "tags": [
+                    f"name:{item['Name']}",
+                    f"type:{item['Type']}",
+                    f"name_type:{item['Type']}({item['Name']})",
+                    f"version:{item['Version']}",
+                    f"platform:{item['Platform']}",
+                    "team:agent-integrations",
+                ],
+            }
+        )
+
+    initialize(
+        api_key=config_file_info["api_key"],
+        api_host=f"https://api.{config_file_info['site']}",
+    )
+
+    api.Metric.send(metrics=metrics)
+
+
+def get_org(app: Application, org: str) -> dict[str, str]:
+    config_path: Path = app.config_file.path
+
+    current_section = None
+    org_data = {}
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            # Detect section header
+            if line.startswith("[") and line.endswith("]"):
+                current_section = line[1:-1]
+                continue
+
+            if current_section == f"orgs.{org}":
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    key = key.strip()
+                    value = value.strip().strip('"')
+                    org_data[key] = value
+    if not org_data:
+        raise ValueError(f"Organization '{org}' not found in config")
+    return org_data
+
+
+def is_everything_committed() -> bool:
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+    return result.stdout.strip() == ""
+
+
+def get_last_commit_timestamp() -> int:
+    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
+    return int(result.stdout.strip())
+
+
 class WrongDependencyFormat(Exception):
     def __init__(self, mensaje: str) -> None:
         super().__init__(mensaje)
@@ -703,8 +822,13 @@ class GitRepo:
             if time:
                 return self._run(f'git log --since="{time}" --reverse --pretty=format:%H -- {module_path}')
             elif not initial and not final:
+                # Get all commits from first to latest
                 return self._run(f"git log --reverse --pretty=format:%H -- {module_path}")
+            elif not initial:
+                # Get commits from first commit up to specified final commit
+                return self._run(f"git log --reverse --pretty=format:%H ..{final} -- {module_path}")
             elif not final:
+                # Get commits from specified initial commit up to latest
                 return self._run(f"git log --reverse --pretty=format:%H {initial}..HEAD -- {module_path}")
             else:
                 try:
