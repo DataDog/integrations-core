@@ -3,7 +3,7 @@
 	"created_at": "2025-05-27",
 	"last_updated_at": "2025-05-27",
 	"title": "Error rate is elevated",
-	"description": "Redis clients interact with the server using commands, and a spike in errors may indicate misconfigured clients, authentication failures, or denied commands. This monitor tracks the number of command errors per second and alerts when the error rate exceeds 5/sec over 5 minutes — helping detect issues that could degrade application reliability.",
+	"description": "This monitor tracks Redis command errors per second. It triggers when error rate exceeds 5/sec, which may indicate misconfigurations, failed AUTH attempts, or denied commands.",
 	"definition": {
 		"id": 173301042,
 		"name": "[Redis] Error rate elevated",
