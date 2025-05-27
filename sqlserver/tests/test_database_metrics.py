@@ -32,8 +32,8 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
-    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
+    SqlserverTableSizeMetrics,
 )
 from datadog_checks.sqlserver.utils import Database
 
@@ -1299,7 +1299,6 @@ def test_sqlserver_database_files_metrics(
                 ] + tags
                 for metric_name, metric_value in metrics:
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
-
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
