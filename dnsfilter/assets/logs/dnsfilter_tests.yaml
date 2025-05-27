@@ -1,0 +1,238 @@
+id: dnsfilter
+tests:
+  - sample: |-
+      {
+        "id": 2800,
+        "time": "2025-05-23 05:20:24.085",
+        "fqdn": "gum.criteo.com",
+        "networkid": 8397000,
+        "request_address": "10.0.0.1",
+        "domain": "criteo.com",
+        "result": "allowed",
+        "threat": false,
+        "categories": [
+          40
+        ],
+        "server_id": 212800,
+        "server_address": "10.0.0.2",
+        "method": 20,
+        "responsetime": 0,
+        "agentid": "69290bde-69c4-4205-b320-56a8712b9abc",
+        "agentname": "AssetTag-EID",
+        "agenttype": "agent",
+        "agent_type_raw": "windows",
+        "local_ipv4_address": "172.0.0.1",
+        "local_ipv6_address": "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+        "local_user_id": 4568300,
+        "lan_device_name": null,
+        "policy_id": 1259000,
+        "policy_name": "Your First Policy",
+        "scheduled_policy_id": 56611,
+        "scheduled_policy_name": "test-DD",
+        "collection_id": 12500,
+        "collection_name": "testing collection",
+        "collections": [
+          12500,
+          12580
+        ],
+        "collections_names": [
+          "testing collection",
+          "Blocked Requests"
+        ],
+        "mac_address": "c0b883203abc",
+        "application_id": 572,
+        "application_name": "Hao123",
+        "application_category_id": 8,
+        "application_category_name": "Portal",
+        "protocol": "udp",
+        "question_type": "A",
+        "code": "NOERROR",
+        "region": "BOM",
+        "network_name": "Your First Network",
+        "local_user_name": "John",
+        "local_user_login": "ASSETTAG-EID\\John",
+        "local_user_remote_id": null,
+        "categories_names": [
+          "Content Servers"
+        ],
+        "method_name": "Category",
+        "server_name": null
+      }
+    result: null
+  - sample: |-
+      {
+        "id": 2100,
+        "time": "2025-04-22 08:38:53.161",
+        "fqdn": "www.cricketbettingpro.com",
+        "networkid": 8305000,
+        "request_address": "10.0.0.1",
+        "domain": "cricketbettingpro.com",
+        "result": "blocked",
+        "threat": true,
+        "categories": [
+          52
+        ],
+        "server_id": 212800,
+        "server_address": "10.0.0.2",
+        "method": 36,
+        "responsetime": 0,
+        "agentid": "2b63f879-3439-43e5-86b6-d46f0f12cabc",
+        "agentname": "WIN11-50-8-1",
+        "agenttype": "agent",
+        "agent_type_raw": "windows",
+        "local_ipv4_address": "10.50.8.1",
+        "local_ipv6_address": "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+        "local_user_id": 4532000,
+        "lan_device_name": null,
+        "policy_id": 1249100,
+        "policy_name": "Your First Policy",
+        "scheduled_policy_id": 56600,
+        "scheduled_policy_name": "test-DD",
+        "collection_id": 12500,
+        "collection_name": "testing collection",
+        "collections": [
+          12500,
+          12580
+        ],
+        "collections_names": [
+          "testing collection",
+          "Blocked Requests"
+        ],
+        "mac_address": "00505692e336",
+        "application_id": 570,
+        "application_name": "Hao123",
+        "application_category_id": 8,
+        "application_category_name": "Portal",
+        "protocol": "udp",
+        "question_type": "A",
+        "code": "NOERROR",
+        "region": "BOM",
+        "network_name": "Your First Network",
+        "local_user_name": "admin",
+        "local_user_login": "WIN11-50-8-1\\admin",
+        "local_user_remote_id": null,
+        "categories_names": [
+          "Phishing"
+        ],
+        "method_name": "Security",
+        "server_name": null
+      }
+    result: null
+  - sample: |-
+      {
+        "id": 8200,
+        "time": "2025-04-22 08:39:23.988",
+        "fqdn": "www.chalmerset.byethost6.com",
+        "networkid": 8305000,
+        "request_address": "10.0.0.1",
+        "domain": "byethost6.com",
+        "result": "allowed",
+        "threat": true,
+        "categories": [
+          83
+        ],
+        "server_id": 212800,
+        "server_address": "10.0.0.2",
+        "method": 22,
+        "responsetime": 451,
+        "agentid": "2b63f879-3439-43e5-86b6-d46f0f12cabc",
+        "agentname": "WIN11-50-8-1",
+        "agenttype": "agent",
+        "agent_type_raw": "windows",
+        "local_ipv4_address": "10.50.8.1",
+        "local_ipv6_address": "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+        "local_user_id": 4532000,
+        "lan_device_name": null,
+        "policy_id": 1249100,
+        "policy_name": "Your First Policy",
+        "scheduled_policy_id": 56600,
+        "scheduled_policy_name": "test-DD",
+        "collection_id": 12500,
+        "collection_name": "testing collection",
+        "collections": [
+          12500,
+          12580
+        ],
+        "collections_names": [
+          "testing collection",
+          "Blocked Requests"
+        ],
+        "mac_address": "00505692e123",
+        "application_id": 570,
+        "application_name": "Hao123",
+        "application_category_id": 8,
+        "application_category_name": "Portal",
+        "protocol": "udp",
+        "question_type": "HTTPS",
+        "code": "NOERROR",
+        "region": "BOM",
+        "network_name": "Your First Network",
+        "local_user_name": "admin",
+        "local_user_login": "WIN11-50-8-1\\admin",
+        "local_user_remote_id": null,
+        "categories_names": [
+          "Suspicious & Deceptive"
+        ],
+        "method_name": "Security Category",
+        "server_name": null
+      }
+    result: null
+  - sample: |-
+      {
+        "id": 2600,
+        "time": "2025-05-19 11:54:37.118",
+        "fqdn": "wwwassuranceretraite.fr",
+        "networkid": 8397500,
+        "request_address": "10.0.0.1",
+        "domain": "wwwassuranceretraite.fr",
+        "result": "blocked",
+        "threat": false,
+        "categories": [
+          24
+        ],
+        "server_id": 212800,
+        "server_address": "10.0.0.2",
+        "method": 39,
+        "responsetime": 301,
+        "agentid": "ca652fb5-f2e9-499d-8f8d-466aa8db5abc",
+        "agentname": "AssetTag-EID",
+        "agenttype": "agent",
+        "agent_type_raw": "windows",
+        "local_ipv4_address": "192.169.190.1",
+        "local_ipv6_address": "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+        "local_user_id": 4682000,
+        "lan_device_name": null,
+        "policy_id": 1259000,
+        "policy_name": "Your First Policy",
+        "scheduled_policy_id": 56600,
+        "scheduled_policy_name": "test-DD",
+        "collection_id": 12500,
+        "collection_name": "testing collection",
+        "collections": [
+          12500,
+          12580
+        ],
+        "collections_names": [
+          "testing collection",
+          "Blocked Requests"
+        ],
+        "mac_address": "c0b88320cabc",
+        "application_id": 570,
+        "application_name": "Hao123",
+        "application_category_id": 8,
+        "application_category_name": "Portal",
+        "protocol": "tcp",
+        "question_type": "AAAA",
+        "code": "NOERROR",
+        "region": "BOM",
+        "network_name": "Your First Network",
+        "local_user_name": "John",
+        "local_user_login": "ASSETTAG-EID\\John",
+        "local_user_remote_id": null,
+        "categories_names": [
+          "Parked Sites & Domains"
+        ],
+        "method_name": "Category",
+        "server_name": null
+      }
+    result: null
