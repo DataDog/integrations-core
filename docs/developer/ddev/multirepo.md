@@ -22,12 +22,12 @@ The `ddev config override` command creates the `.ddev.toml` file in your working
 # pyproject.toml
 
 [tool.ddev]
-repo = "integrations-core"
+repo = "core"
 # The valid options for this value are
-# "integrations-core"
-# "integrations-extras"
-# "integrations-internal"
-# "datadog-agent"
+# "core"
+# "extras"
+# "internal"
+# "agent"
 # "marketplace"
 # "integrations-internal-core"
 ```
