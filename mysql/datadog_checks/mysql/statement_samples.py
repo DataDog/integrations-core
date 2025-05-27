@@ -34,7 +34,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .util import (
     DatabaseConfigurationError,
     StatementTruncationState,
-    connect_with_autocommit,
+    connect_with_session_variables,
     get_truncation_state,
     warning_with_tags,
 )
@@ -280,7 +280,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
+            self._db = connect_with_session_variables(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):

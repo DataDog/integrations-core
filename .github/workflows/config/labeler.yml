@@ -159,6 +159,8 @@ integration/couch:
 - couch/**/*
 integration/couchbase:
 - couchbase/**/*
+integration/crewai:
+- crewai/**/*
 integration/cri:
 - cri/**/*
 integration/crio:
@@ -181,6 +183,8 @@ integration/directory:
 - directory/**/*
 integration/disk:
 - disk/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
@@ -399,6 +403,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_dns:
+- microsoft_dns/**/*
 integration/microsoft_sysmon:
 - microsoft_sysmon/**/*
 integration/milvus:
@@ -673,6 +679,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/watchguard_firebox:
+- watchguard_firebox/**/*
 integration/wazuh:
 - wazuh/**/*
 integration/weaviate:
