@@ -142,7 +142,7 @@ def diff_mode(
         params["app"].display_error(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
-        formatted_modules = format_modules(integrations + dependencies, params["platform"], params["version"])
+        return []
     else:
         formatted_modules = format_modules(integrations + dependencies, params["platform"], params["version"])
         formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)

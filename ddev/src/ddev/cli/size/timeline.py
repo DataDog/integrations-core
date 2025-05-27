@@ -84,33 +84,34 @@ def timeline(
         transient=True,
         console=console,
     ) as progress:
-        module = name  # module is the name of the integration or the dependency
-        if (
-            initial_commit
-            and final_commit
-            and len(initial_commit) < MINIMUM_LENGTH_COMMIT
-            and len(final_commit) < MINIMUM_LENGTH_COMMIT
-        ):
-            raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
-        elif initial_commit and len(initial_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter(
-                f"Initial commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.", param_hint="initial"
-            )
-        elif final_commit and len(final_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter(
-                f"Final commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.", param_hint="final"
-            )
-        elif final_commit and initial_commit and final_commit == initial_commit:
-            raise click.BadParameter("Commit hashes must be different")
-        if format:
-            for fmt in format:
-                if fmt not in ["png", "csv", "markdown", "json"]:
-                    raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
-        task = progress.add_task("[cyan]Calculating timeline...", total=None)
-        url = app.repo.path
+        try:
+            module = name  # module is the name of the integration or the dependency
+            if (
+                initial_commit
+                and final_commit
+                and len(initial_commit) < MINIMUM_LENGTH_COMMIT
+                and len(final_commit) < MINIMUM_LENGTH_COMMIT
+            ):
+                raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
+            elif initial_commit and len(initial_commit) < MINIMUM_LENGTH_COMMIT:
+                raise click.BadParameter(
+                    f"Initial commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+                    param_hint="initial",
+                )
+            elif final_commit and len(final_commit) < MINIMUM_LENGTH_COMMIT:
+                raise click.BadParameter(
+                    f"Final commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.", param_hint="final"
+                )
+            elif final_commit and initial_commit and final_commit == initial_commit:
+                raise click.BadParameter("Commit hashes must be different")
+            if format:
+                for fmt in format:
+                    if fmt not in ["png", "csv", "markdown", "json"]:
+                        raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
+            task = progress.add_task("[cyan]Calculating timeline...", total=None)
+            url = app.repo.path
 
-        with GitRepo(url) as gitRepo:
-            try:
+            with GitRepo(url) as gitRepo:
                 if final_commit and type == "dependency":
                     date_str, _, _ = gitRepo.get_commit_metadata(final_commit)
                     date = datetime.strptime(date_str, "%b %d %Y").date()
@@ -232,9 +233,9 @@ def timeline(
                     if format:
                         export_format(app, format, modules, None, module, compressed)
 
-            except Exception as e:
-                progress.stop()
-                app.abort(str(e))
+        except Exception as e:
+            progress.stop()
+            app.abort(str(e))
 
 
 @overload
@@ -281,10 +282,14 @@ def timeline_mode(
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    treemap_path = f"treemap_{params['platform']}.png" if params["format"] and "png" in params["format"] else None
+    timeline_path = (
+        f"timeline_{params['module']}_{params['platform']}.png"
+        if params["platform"] and params["format"] and "png" in params["format"]
+        else f"timeline_{params['module']}.png" if params["format"] and "png" in params["format"] else None
+    )
 
-    if params["show_gui"] or treemap_path:
-        plot_linegraph(formatted_modules, params["module"], params["platform"], params["show_gui"], treemap_path)
+    if params["show_gui"] or timeline_path:
+        plot_linegraph(formatted_modules, params["module"], params["platform"], params["show_gui"], timeline_path)
 
     return formatted_modules
 
@@ -627,44 +632,14 @@ def format_modules(
     """
     Formats the modules list, adding platform and Python version information if needed.
 
-    If the modules list is empty, returns a default empty entry (with or without platform information).
-
     Args:
         modules: List of modules to format.
         platform: Platform string to add to each entry if needed.
-        version: Python version string to add to each entry if needed.
-        i: Index of the current platform, version) combination being processed.
-           If None, it means the data is being processed for only one platform.
 
     Returns:
         A list of formatted entries.
     """
-    if modules == [] and platform:
-        empty_module_platform: CommitEntryPlatformWithDelta = {
-            "Size_Bytes": 0,
-            "Version": "",
-            "Date": datetime.min.date(),
-            "Author": "",
-            "Commit_Message": "",
-            "Commit_SHA": "",
-            "Delta_Bytes": 0,
-            "Delta": " ",
-            "Platform": "",
-        }
-        return [empty_module_platform]
-    elif modules == []:
-        empty_module: CommitEntryWithDelta = {
-            "Size_Bytes": 0,
-            "Version": "",
-            "Date": datetime.min.date(),
-            "Author": "",
-            "Commit_Message": "",
-            "Commit_SHA": "",
-            "Delta_Bytes": 0,
-            "Delta": " ",
-        }
-        return [empty_module]
-    elif platform:
+    if platform:
         new_modules: list[CommitEntryPlatformWithDelta] = [{**entry, "Platform": platform} for entry in modules]
         return new_modules
     else:
@@ -829,7 +804,7 @@ def plot_linegraph(
         show: If True, displays the plot interactively.
         path: If provided, saves the plot to this file path.
     """
-    if not any(str(value).strip() not in ("", "0", "0001-01-01") for value in modules[0].values()):  # table is empty
+    if modules == []:
         return
 
     dates = [entry["Date"] for entry in modules]

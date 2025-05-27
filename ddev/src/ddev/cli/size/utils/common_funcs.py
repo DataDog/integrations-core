@@ -320,26 +320,11 @@ def format_modules(
 ) -> list[FileDataEntryPlatformVersion]:
     """
     Formats the modules list, adding platform and Python version information.
-
-    If the modules list is empty, returns a default empty entry.
     """
-
-    if modules == []:
-        empty_entry_with_platform: FileDataEntryPlatformVersion = {
-            "Name": "",
-            "Version": "",
-            "Size_Bytes": 0,
-            "Size": "",
-            "Type": "",
-            "Platform": "",
-            "Python_Version": "",
-        }
-        return [empty_entry_with_platform]
-    else:
-        new_modules: list[FileDataEntryPlatformVersion] = [
-            {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
-        ]
-        return new_modules
+    new_modules: list[FileDataEntryPlatformVersion] = [
+        {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
+    ]
+    return new_modules
 
 
 def save_json(
@@ -352,12 +337,11 @@ def save_json(
         | list[CommitEntryPlatformWithDelta]
     ),
 ) -> None:
-    filtered_modules = [
-        row for row in modules if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values())
-    ]
+    if modules == []:
+        return
 
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(filtered_modules, f, default=str, indent=2)
+        json.dump(modules, f, default=str, indent=2)
     app.display(f"JSON file saved to {file_path}")
 
 
@@ -366,14 +350,16 @@ def save_csv(
     modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     file_path: str,
 ) -> None:
+    if modules == []:
+        return
+
     headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(",".join(headers) + "\n")
 
         for row in modules:
-            if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-                f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
+            f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
 
     app.display(f"CSV file saved to {file_path}")
 
@@ -391,9 +377,8 @@ def save_markdown(
     modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     file_path: str,
 ) -> None:
-
-    if all(str(value).strip() in ("", "0", "0001-01-01") for value in modules[0].values()):
-        return  # skip empty table
+    if modules == []:
+        return
 
     headers = [k for k in modules[0].keys() if "Bytes" not in k]
 
@@ -441,12 +426,14 @@ def print_table(
     mode: str,
     modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
 ) -> None:
+    if modules == []:
+        return
+
     columns = [col for col in modules[0].keys() if "Bytes" not in col]
     modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
     for i, row in enumerate(modules):
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in row.values()):
-            for key in columns:
-                modules_table[key][i] = str(row.get(key, ""))
+        for key in columns:
+            modules_table[key][i] = str(row.get(key, ""))
 
     app.display_table(mode, modules_table)
 
@@ -506,8 +493,7 @@ def plot_treemap(
     mode: Literal["status", "diff"],
     path: Optional[str] = None,
 ) -> None:
-    if not any(str(value).strip() not in ("", "0") for value in modules[0].values()):
-        # table is empty
+    if modules == []:
         return
 
     # Initialize figure and axis
