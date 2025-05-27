@@ -604,6 +604,11 @@ jobs:
         path: installers
         merge-multiple: true
 
+    # Publish wheels to PyPI using Trusted Publishers.
+    # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+    # This job needs to run from within the pypi-ddev environment. PyPi validates the
+    # workflow file name, environment and repository the request is comming from to
+    # provide the valid JWT token.
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
       with:

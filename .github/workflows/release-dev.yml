@@ -38,6 +38,11 @@ jobs:
     - name: Build dev package
       run: ddev release build datadog_checks_dev
 
+    # Publish wheels to PyPI using Trusted Publishers.
+    # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+    # This job needs to run from within the pypi-datadog-checks-dev environment. PyPi
+    # validates the workflow file name, environment and repository the request is
+    # comming from to provide the valid JWT token.
     - name: Release dev package to PyPI
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
       with:
