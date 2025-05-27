@@ -3,7 +3,7 @@
 	"created_at": "2025-05-27",
 	"last_updated_at": "2025-05-27",
 	"title": "High number of SERVFAIL responses from a server",
-	"description": "SERVFAIL response in DNSFilter indicates that the DNS server failed to complete the request, which may prevent users from accessing websites or online services, leading to potential disruptions in connectivity. This monitor tracks and alerts when high number of SERVFAIL responses from a server are detected, helping to avoid user disruption or degraded network performance",
+	"description": "This monitor alerts on high SERVFAIL DNS responses, indicating the DNS server failed to complete requests. It helps prevent user access issues, service disruptions, and degraded network performance.",
 	"definition": {
 		"id": 173190960,
 		"name": "High number of SERVFAIL responses from a server",
