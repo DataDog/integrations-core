@@ -65,7 +65,7 @@ Follow these steps to install Sysmon:
     - Control which events to monitor
     - Filter events based on processes, paths, etc.
 
-    Enabling too many Sysmon event types can lead to excessive data ingestion and unnecessary log noise. Community resources such as [sysmon-modular][9] and the [SwiftOnSecurity Sysmon config][10] provide recommended configurations, including examples of event inclusions and exclusions. These are intended as a starting point and can be referred to when tuning your own configuration.
+    Enabling too many Sysmon event types can lead to excessive data ingestion. Community resources such as [sysmon-modular][9] and the [SwiftOnSecurity Sysmon config][10] provide recommended configurations, including examples of event inclusions and exclusions. These are intended as a starting point and can be referred to when tuning your own configuration.
 
 3. Execute the command as admin from the extracted folder:
 
