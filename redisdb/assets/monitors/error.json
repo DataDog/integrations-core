@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-05-27",
+	"last_updated_at": "2025-05-27",
+	"title": "Error rate is elevated",
+	"description": "Redis clients interact with the server using commands, and a spike in errors may indicate misconfigured clients, authentication failures, or denied commands. This monitor tracks the number of command errors per second and alerts when the error rate exceeds 5/sec over 5 minutes — helping detect issues that could degrade application reliability.",
+	"definition": {
+		"id": 173301042,
+		"name": "[Redis] Error rate elevated",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:redis.errors.per_sec{integration:redis} > 5",
+		"message": "## 🚨 What’s happening\n\nHigh Redis error rate detected (more than 5 errors per second over 5 minutes).\n\nRedis is returning errors for client commands at an elevated rate. This may signal misconfigured applications, authentication issues, or denied commands — all of which can disrupt application logic and degrade system reliability.\n\n---\n\n## 📈 Impact\n\nIf left unresolved, a high error rate can lead to:\n\n- Failed read/write operations from your application\n- Increased latency due to retries and fallbacks\n- Broken user experiences or data inconsistencies\n- Cascading failures in downstream systems\n\n---\n\n## 🛠️ Runbook\n\n### Initial Troubleshooting Steps\n\n1. Check recent error trends in Redis error metrics.\n2. Review logs or dashboards for:\n   - AUTH failures\n   - Invalid or restricted commands\n   - Redis ACL or role changes\n3. Cross-reference `redis.commands.*` and `redis.clients.*` to pinpoint problematic patterns.\n4. Validate that client applications are using correct credentials and command syntax.\n\n---\n\n### Cause and Resolution\n\nCause | Resolution\n------|-----------\nFailed AUTH attempts | Ensure clients use correct credentials and Redis ACL settings.\nApplication bug or misconfiguration | Fix command usage or update client libraries.\nSecurity policy changes | Roll back or refine ACL/role settings.\nCommand misuse by external systems | Audit external integrations or rate-limit where needed.\n\n---\n\n### 👥 Who should be notified?\n\nPlease notify the appropriate team:  \n`@slack-yourteam-alerts`\n",
+		"tags": [
+			"integration:redis"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5
+			},
+			"notify_audit": false,
+			"evaluation_delay": 300,
+			"require_full_window": true,
+			"include_tags": true,
+			"silenced": {},
+			"avalanche_window": 20,
+			"on_missing_data": "default"
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:redis"
+	]
+}
