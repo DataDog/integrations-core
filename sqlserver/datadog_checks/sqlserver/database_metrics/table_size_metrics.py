@@ -50,10 +50,6 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
     def include_table_size_metrics(self) -> bool:
         return self.config.database_metrics_config["table_size_metrics"]["enabled"]
 
-    # @property
-    # def include_table_size_metrics_tempdb(self) -> bool:
-    #     return self.config.database_metrics_config["table_size_metrics"]["enabled_tempdb"]
-
     @property
     def collection_interval(self) -> int:
         '''
@@ -66,10 +62,12 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
     def databases(self):
         '''
         Returns a list of databases to collect table size metrics for.
-        By default, tempdb is excluded.
+        tempdb is excluded.
         '''
         if not self._databases:
             raise ConfigurationError("No databases configured for table size metrics")
+        if 'tempdb' in self._databases:
+            self._databases.remove('tempdb')
         return self._databases
 
     @property
