@@ -50,14 +50,12 @@ class TestTLSCiphers:
     )
     def test_cipher_construction(self, instance, expected_ciphers):
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        mock_socket = mock.MagicMock()
 
-        with (
-            mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers,
-            mock.patch('datadog_checks.base.utils.http.create_socket_connection', return_value=mock_socket),
-        ):
-            http.fetch_intermediate_certs('https://www.google.com')
+        # Mock SSL context creation before RequestsWrapper initialization
+        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
+            RequestsWrapper(instance, init_config)
+
+            # Verify that set_ciphers was called with the expected ciphers during TLS context creation
             mock_set_ciphers.assert_called_once_with(expected_ciphers)
 
 
@@ -177,7 +175,7 @@ class TestLogger:
     def test_default(self, caplog):
         check = AgentCheck('test', {}, [{}])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -191,7 +189,7 @@ class TestLogger:
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -208,7 +206,7 @@ class TestLogger:
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -223,7 +221,7 @@ class TestLogger:
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
