@@ -114,7 +114,8 @@ def test_config_kerberos_keytab_file():
     assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
     with mock.patch(
-        'requests.Session.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', ''))
+        'requests.Session.get',
+        side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
     ):
         response = http.get('https://www.google.com')
         assert response.text == '/test/file'
