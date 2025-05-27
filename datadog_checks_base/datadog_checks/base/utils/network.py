@@ -1,7 +1,4 @@
 import socket
-import ssl
-
-from requests.adapters import HTTPAdapter, PoolManager
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
@@ -34,16 +31,3 @@ def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, t
             raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
 
         raise
-
-
-class CertAdapter(HTTPAdapter):
-    def __init__(self, **kwargs):
-        self.certs = kwargs['certs']
-        super(CertAdapter, self).__init__()
-
-    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        context = ssl.create_default_context()
-        for cert in self.certs:
-            context.load_verify_locations(cadata=cert)
-        pool_kwargs['ssl_context'] = context
-        self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block, strict=True, **pool_kwargs)
