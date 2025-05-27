@@ -1,9 +1,12 @@
 from enum import Enum, auto
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union
+
 
 class TagType(Enum):
     """Enum for different types of tags"""
+
     KEYLESS = auto()
+
 
 class TagManager:
     def __init__(self) -> None:
@@ -35,7 +38,6 @@ class TagManager:
             key = self._keyless
 
         target_tags = self._internal_tags if internal else self._tags
-        target_cache = self._cached_internal_tag_list if internal else self._cached_tag_list
 
         if replace or key not in target_tags:
             target_tags[key] = [value]

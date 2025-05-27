@@ -18,7 +18,7 @@ class TestTagManager:
             ('test_key', 'test_value', True, {}, {'test_key': ['test_value']}),
             (None, 'test_value', False, {TagType.KEYLESS: ['test_value']}, {}),
             (None, 'test_value', True, {}, {TagType.KEYLESS: ['test_value']}),
-        ]
+        ],
     )
     def test_set_tag(self, key, value, internal, expected_tags, expected_internal_tags):
         """Test setting tags with various combinations of key, value, and internal status"""
@@ -64,18 +64,9 @@ class TestTagManager:
                 False,
                 {'test_key': ['value2']},
                 {},
-                'deleting specific value'
+                'deleting specific value',
             ),
-            (
-                'test_key',
-                ['value1', 'value2'],
-                'test_key',
-                None,
-                False,
-                {},
-                {},
-                'deleting all values for key'
-            ),
+            ('test_key', ['value1', 'value2'], 'test_key', None, False, {}, {}, 'deleting all values for key'),
             (
                 None,
                 ['value1', 'value2'],
@@ -84,18 +75,9 @@ class TestTagManager:
                 False,
                 {TagType.KEYLESS: ['value2']},
                 {},
-                'deleting specific keyless value'
+                'deleting specific keyless value',
             ),
-            (
-                None,
-                ['value1', 'value2'],
-                None,
-                None,
-                False,
-                {},
-                {},
-                'deleting all keyless values'
-            ),
+            (None, ['value1', 'value2'], None, None, False, {}, {}, 'deleting all keyless values'),
             (
                 'test_key',
                 ['value1', 'value2'],
@@ -104,11 +86,13 @@ class TestTagManager:
                 True,
                 {},
                 {'test_key': ['value2']},
-                'deleting specific internal value'
+                'deleting specific internal value',
             ),
-        ]
+        ],
     )
-    def test_delete_tag(self, key, values, delete_key, delete_value, internal, expected_tags, expected_internal_tags, description):
+    def test_delete_tag(
+        self, key, values, delete_key, delete_value, internal, expected_tags, expected_internal_tags, description
+    ):
         """Test various tag deletion scenarios"""
         tag_manager = TagManager()
         # Set up initial tags
@@ -136,12 +120,30 @@ class TestTagManager:
     @pytest.mark.parametrize(
         'initial_tags,tag_list,replace,expected_tags,description',
         [
-            ([], ['key1:value1', 'key2:value2', 'value3'], False, ['key1:value1', 'key2:value2', 'value3'], 'setting new tags'),
+            (
+                [],
+                ['key1:value1', 'key2:value2', 'value3'],
+                False,
+                ['key1:value1', 'key2:value2', 'value3'],
+                'setting new tags',
+            ),
             (['key1:old_value'], ['key1:new_value'], True, ['key1:new_value'], 'replacing existing tags'),
-            (['key1:old_value'], ['key1:new_value'], False, ['key1:new_value', 'key1:old_value'], 'appending to existing tags'),
+            (
+                ['key1:old_value'],
+                ['key1:new_value'],
+                False,
+                ['key1:new_value', 'key1:old_value'],
+                'appending to existing tags',
+            ),
             ([], ['key1:value1', 'key1:value1'], False, ['key1:value1'], 'setting duplicate values'),
-            ([], ['key1:value1', 'value2', 'key2:value3'], False, ['key1:value1', 'key2:value3', 'value2'], 'setting mixed format tags'),
-        ]
+            (
+                [],
+                ['key1:value1', 'value2', 'key2:value3'],
+                False,
+                ['key1:value1', 'key2:value3', 'value2'],
+                'setting mixed format tags',
+            ),
+        ],
     )
     def test_set_tags_from_list(self, initial_tags, tag_list, replace, expected_tags, description):
         """Test various tag list setting scenarios"""
@@ -164,31 +166,11 @@ class TestTagManager:
     @pytest.mark.parametrize(
         'regular_tags,internal_tags,include_internal,expected_tags',
         [
-            (
-                {'key1': ['value1']},
-                {'key2': ['value2']},
-                True,
-                ['key1:value1', 'key2:value2']
-            ),
-            (
-                {'key1': ['value1']},
-                {'key2': ['value2']},
-                False,
-                ['key1:value1']
-            ),
-            (
-                {'key1': ['value1']},
-                {'key1': ['value2']},
-                True,
-                ['key1:value1', 'key1:value2']
-            ),
-            (
-                {'key1': ['value1']},
-                {'key1': ['value2']},
-                False,
-                ['key1:value1']
-            ),
-        ]
+            ({'key1': ['value1']}, {'key2': ['value2']}, True, ['key1:value1', 'key2:value2']),
+            ({'key1': ['value1']}, {'key2': ['value2']}, False, ['key1:value1']),
+            ({'key1': ['value1']}, {'key1': ['value2']}, True, ['key1:value1', 'key1:value2']),
+            ({'key1': ['value1']}, {'key1': ['value2']}, False, ['key1:value1']),
+        ],
     )
     def test_get_tags(self, regular_tags, internal_tags, include_internal, expected_tags):
         """Test getting tags with various combinations of regular and internal tags"""
@@ -216,7 +198,7 @@ class TestTagManager:
         tag_manager.set_tag('internal_key', 'internal_value', internal=True)
 
         # First call should generate both caches
-        first_result = tag_manager.get_tags(include_internal=True)
+        _ = tag_manager.get_tags(include_internal=True)
         assert tag_manager._cached_tag_list is not None
         assert tag_manager._cached_internal_tag_list is not None
 
