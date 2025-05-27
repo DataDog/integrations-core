@@ -27,6 +27,7 @@ instances:
     ## optional configs:
     # max_ttl: 30 # max traderoute TTL, default is 30
     # timeout: 10 # timeout in seconds of traceroute calls, default is 10s
+    # tcp_method: syn # traceroute method, default is syn
 
   - hostname: <another_endpoint>
     protocol: UDP
@@ -35,6 +36,12 @@ instances:
       - "tag_key:tag_value"
       - "tag_key2:tag_value2"
 ```
+#### Note for Windows hosts
+Windows Server support tcp_methods syn, and syn_socket (syn is recomended).
+
+Windows Client OS only support syn_socket as raw sockets are not supported on Windows Clients. 
+
+
 
 ## Data Collected
 
