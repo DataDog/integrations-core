@@ -134,8 +134,7 @@ tagger-image-builder:
     - if: $CI_COMMIT_TAG
       when: never
     - if: $CI_COMMIT_BRANCH == 'master'
-      when: always
-    - changes:
+      changes:
         - .gitlab/tagger/**/*
         - ddev/**/*
         - .gitlab-ci.yml
@@ -155,8 +154,7 @@ validate-log-intgs-builder:
     - if: $CI_COMMIT_TAG
       when: never
     - if: $CI_COMMIT_BRANCH == 'master'
-      when: always
-    - changes:
+      changes:
         - .gitlab/validate-logs-intgs/**/*
         - .gitlab-ci.yml
   script:
