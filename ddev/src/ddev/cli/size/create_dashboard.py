@@ -21,7 +21,9 @@ def create_dashboard(
     dd_org: str,
 ) -> None:
     """
-    Creates a dashboard with the metrics on the Datadog platform
+    Creates a Datadog dashboard to visualize size metrics for integrations and dependencies.
+    A new dashboard is created on each run. This command does not send data to Datadog.
+    To send metrics, use: `ddev size status --to-dd-org <org>`.
     """
     try:
         config_file_info = get_org(app, dd_org)
