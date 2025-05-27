@@ -120,7 +120,7 @@ def test_mysql_version_set(aggregator, dd_run_check, instance_basic):
     dd_run_check(mysql_check, cancel=False)
     dd_run_check(mysql_check, cancel=True)
     assert mysql_check.version is not None
-    assert mysql_check.tags.count('dbms_flavor:{}'.format(mysql_check.version.flavor.lower())) == 1
+    assert mysql_check.tag_manager.get_tags().count('dbms_flavor:{}'.format(mysql_check.version.flavor.lower())) == 1
 
 
 @pytest.mark.e2e
@@ -803,6 +803,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     expected_tags = tags.METRIC_TAGS + [
         "database_hostname:{}".format(expected_database_hostname),
         "database_instance:{}".format(expected_database_instance),
+        "dbms_flavor:{}".format(MYSQL_FLAVOR.lower()),
     ]
 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
@@ -881,7 +882,7 @@ def test_propagate_agent_tags(
         check = MySql(common.CHECK_NAME, init_config, [instance_basic])
         assert check._config._should_propagate_agent_tags(instance_basic, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
-            assert all(tag in check.tags for tag in agent_tags)
+            assert all(tag in check.tag_manager.get_tags() for tag in agent_tags)
             dd_run_check(check)
             aggregator.assert_service_check(
                 'mysql.can_connect',

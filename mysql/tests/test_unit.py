@@ -456,26 +456,20 @@ def test_update_runtime_aurora_tags():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
     # Initial state - no tags
-    assert 'replication_role:writer' not in mysql_check.tags
-    assert 'replication_role:writer' not in mysql_check._non_internal_tags
+    assert 'replication_role:writer' not in mysql_check.tag_manager.get_tags()
 
     # First check - writer role
     aurora_tags = ['replication_role:writer']
     mysql_check._update_runtime_aurora_tags(aurora_tags)
-    assert 'replication_role:writer' in mysql_check.tags
-    assert 'replication_role:writer' in mysql_check._non_internal_tags
-    assert len([t for t in mysql_check.tags if t.startswith('replication_role:')]) == 1
-    assert len([t for t in mysql_check._non_internal_tags if t.startswith('replication_role:')]) == 1
+    assert 'replication_role:writer' in mysql_check.tag_manager.get_tags()
+    assert len([t for t in mysql_check.tag_manager.get_tags() if t.startswith('replication_role:')]) == 1
 
     # Simulate failover - reader role
     aurora_tags = ['replication_role:reader']
     mysql_check._update_runtime_aurora_tags(aurora_tags)
-    assert 'replication_role:reader' in mysql_check.tags
-    assert 'replication_role:reader' in mysql_check._non_internal_tags
-    assert 'replication_role:writer' not in mysql_check.tags
-    assert 'replication_role:writer' not in mysql_check._non_internal_tags
-    assert len([t for t in mysql_check.tags if t.startswith('replication_role:')]) == 1
-    assert len([t for t in mysql_check._non_internal_tags if t.startswith('replication_role:')]) == 1
+    assert 'replication_role:reader' in mysql_check.tag_manager.get_tags()
+    assert 'replication_role:writer' not in mysql_check.tag_manager.get_tags()
+    assert len([t for t in mysql_check.tag_manager.get_tags() if t.startswith('replication_role:')]) == 1
 
 
 @pytest.mark.parametrize(
