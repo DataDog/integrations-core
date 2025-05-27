@@ -125,3 +125,6 @@ benchmark_*.svg
 
 ## Direnv
 .envrc
+
+## Local overrides for ddev
+.ddev.toml
