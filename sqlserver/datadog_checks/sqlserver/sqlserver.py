@@ -44,8 +44,8 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
-    SqlserverTempDBFileSpaceUsageMetrics,
     SqlserverTableSizeMetrics,
+    SqlserverTempDBFileSpaceUsageMetrics,
     SQLServerXESessionMetrics,
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks

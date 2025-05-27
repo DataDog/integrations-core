@@ -484,7 +484,8 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     assert 'master' in seen_databases
     if database_autodiscovery:
         assert 'datadog_test-1' in seen_databases
-        
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_fraction_counters(aggregator, dd_run_check, instance_docker, caplog):

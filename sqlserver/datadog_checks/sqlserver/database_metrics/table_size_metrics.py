@@ -11,25 +11,25 @@ from .base import SqlserverDatabaseMetricsBase
 TABLE_SIZE_STATS_QUERY = {
     "name": "sys.dm_db_partition_stats",
     "query": """
-    SELECT 
+    SELECT
         t.name AS table_name,
         s.name AS schema_name,
         db_name() AS database_name,
         SUM(p.row_count) AS row_count,
-        CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS total_size,
-        CAST(SUM(a.used_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS used_size,
-        CAST(SUM(a.data_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS data_size
-    FROM 
+        CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS total_size,
+        CAST(SUM(a.used_pages) * 8.0 AS DECIMAL(18,2)) AS used_size,
+        CAST(SUM(a.data_pages) * 8.0 AS DECIMAL(18,2)) AS data_size
+    FROM
         sys.tables t
-    INNER JOIN 
+    INNER JOIN
         sys.schemas s ON t.schema_id = s.schema_id
-    INNER JOIN 
+    INNER JOIN
         sys.indexes i ON t.object_id = i.object_id
-    INNER JOIN 
+    INNER JOIN
         sys.dm_db_partition_stats p ON i.object_id = p.object_id AND i.index_id = p.index_id
-    INNER JOIN 
+    INNER JOIN
         sys.allocation_units a ON p.partition_id = a.container_id
-    GROUP BY 
+    GROUP BY
         t.name, s.name
 """,
     "columns": [
@@ -88,9 +88,7 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}("
-            f"enabled={self.enabled}, "
-            f"collection_interval={self.collection_interval})"
+            f"{self.__class__.__name__}(" f"enabled={self.enabled}, " f"collection_interval={self.collection_interval})"
         )
 
     def _build_query_executors(self):
