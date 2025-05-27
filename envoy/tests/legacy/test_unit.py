@@ -189,7 +189,7 @@ def test_metadata_with_exception(
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.get', side_effect=exception):
+    with mock.patch('requests.Session.get', side_effect=exception):
         check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(*log_call_parameters)
