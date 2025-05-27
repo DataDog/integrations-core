@@ -62,7 +62,8 @@
     },
     "monitors": {
       "Memory consumption is high": "assets/monitors/high_mem.json",
-      "Command latency is high": "assets/monitors/cmd_latency.json"
+      "Command latency is high": "assets/monitors/cmd_latency.json",
+      "Error rate is elevated": "assets/monitors/error.json" 
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
