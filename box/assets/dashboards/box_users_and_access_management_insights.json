@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -132,7 +132,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -177,7 +177,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:LOGIN $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @evt.name:LOGIN $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -235,7 +235,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:FAILED_LOGIN $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @evt.name:FAILED_LOGIN $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -292,7 +292,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -370,7 +370,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -439,7 +439,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -526,7 +526,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -600,86 +600,43 @@
                                 {
                                     "queries": [
                                         {
-                                            "data_source": "aggregate_filtered_query",
-                                            "compute": [
-                                                {
-                                                    "name": "compute_result",
-                                                    "aggregation": "count"
-                                                }
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email"
+                                            },
+                                            "indexes": [
+                                                "*"
                                             ],
                                             "group_by": [
                                                 {
                                                     "facet": "@usr.name",
                                                     "limit": 50,
-                                                    "should_exclude_missing": true,
                                                     "sort": {
                                                         "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
+                                                        "order": "desc"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 },
                                                 {
                                                     "facet": "@source.name",
                                                     "limit": 50,
-                                                    "should_exclude_missing": true,
                                                     "sort": {
                                                         "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
+                                                        "order": "desc"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "name": "query1",
-                                            "base_query": {
-                                                "name": "base_query",
-                                                "data_source": "logs",
-                                                "search": {
-                                                    "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
-                                                },
-                                                "indexes": [
-                                                    "*"
-                                                ],
-                                                "storage": "hot"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
-                                            "filter_query": {
-                                                "name": "filter_query",
-                                                "data_source": "logs",
-                                                "search": {
-                                                    "query": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip"
-                                                },
-                                                "indexes": [],
-                                                "storage": "hot",
-                                                "compute": [
-                                                    {
-                                                        "aggregation": "count",
-                                                        "metric": "count",
-                                                        "name": "filter_query_compute"
-                                                    }
-                                                ],
-                                                "group_by": [
-                                                    {
-                                                        "facet": "@source.name",
-                                                        "limit": 1000,
-                                                        "sort": {
-                                                            "aggregation": "count",
-                                                            "metric": "count",
-                                                            "order": "desc"
-                                                        }
-                                                    }
-                                                ]
-                                            },
-                                            "filters": [
-                                                {
-                                                    "base_attribute": "@usr.name",
-                                                    "filter_attribute": "@source.name",
-                                                    "exclude": true
-                                                }
-                                            ]
+                                            "storage": "hot"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "sort": {
-                                        "count": 500,
+                                        "count": 2500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -725,7 +682,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @box_event_category:user $initiator_name $event_name $initiator_email $initiator_ip",
+                                        "query_string": "source:box-cloud @box_event_category:user $initiator_user_name $event_name $initiator_user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -795,7 +752,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -861,7 +818,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -902,86 +859,43 @@
                                 {
                                     "queries": [
                                         {
-                                            "data_source": "aggregate_filtered_query",
-                                            "compute": [
-                                                {
-                                                    "name": "compute_result",
-                                                    "aggregation": "count"
-                                                }
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
+                                            },
+                                            "indexes": [
+                                                "*"
                                             ],
                                             "group_by": [
                                                 {
                                                     "facet": "@usr.name",
                                                     "limit": 50,
-                                                    "should_exclude_missing": true,
                                                     "sort": {
                                                         "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
+                                                        "order": "desc"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 },
                                                 {
                                                     "facet": "@source.user_name",
                                                     "limit": 50,
-                                                    "should_exclude_missing": true,
                                                     "sort": {
                                                         "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
+                                                        "order": "desc"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "name": "query1",
-                                            "base_query": {
-                                                "name": "base_query",
-                                                "data_source": "logs",
-                                                "search": {
-                                                    "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
-                                                },
-                                                "indexes": [
-                                                    "*"
-                                                ],
-                                                "storage": "hot"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
-                                            "filter_query": {
-                                                "name": "filter_query",
-                                                "data_source": "logs",
-                                                "search": {
-                                                    "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
-                                                },
-                                                "indexes": [],
-                                                "storage": "hot",
-                                                "compute": [
-                                                    {
-                                                        "aggregation": "count",
-                                                        "metric": "count",
-                                                        "name": "filter_query_compute"
-                                                    }
-                                                ],
-                                                "group_by": [
-                                                    {
-                                                        "facet": "@source.user_name",
-                                                        "limit": 1000,
-                                                        "sort": {
-                                                            "aggregation": "count",
-                                                            "metric": "count",
-                                                            "order": "desc"
-                                                        }
-                                                    }
-                                                ]
-                                            },
-                                            "filters": [
-                                                {
-                                                    "base_attribute": "@usr.name",
-                                                    "filter_attribute": "@source.user_name",
-                                                    "exclude": false
-                                                }
-                                            ]
+                                            "storage": "hot"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "sort": {
-                                        "count": 500,
+                                        "count": 2500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1031,7 +945,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1100,7 +1014,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1177,7 +1091,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1254,7 +1168,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip"
+                                                "query": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1328,7 +1242,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @box_event_category:(application OR other) $initiator_name $event_name $initiator_email $initiator_ip",
+                                        "query_string": "source:box-cloud @box_event_category:(application OR other) $initiator_user_name $event_name $initiator_user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1388,20 +1302,14 @@
             "default": "*"
         },
         {
-            "name": "initiator_name",
+            "name": "initiator_user_name",
             "prefix": "@usr.name",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "initiator_email",
+            "name": "initiator_user_email",
             "prefix": "@usr.email",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "initiator_ip",
-            "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
         }

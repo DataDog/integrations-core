@@ -2,9 +2,7 @@
 
 [Box][1] is a cloud-based file storage and collaboration platform that allows users to securely share, manage, and access files from anywhere.
 
-This integration ingests the following logs:
-
-- **Enterprise Events**: Enterprise events provide a detailed record of user activities (like uploads, downloads, sharing), administrative actions and shield events in an enterprise Box instance.
+This integration ingests **Enterprise Events** detailed logs of user actions, admin activities, and Shield events within a Box enterprise instance.
 
 **Note**: [Box Shield][6] must be enabled on your Box Enterprise account to access security insights and threat detection data.
 
@@ -14,16 +12,18 @@ This integration gathers enterprise events and forwards them to Datadog for seam
 
 ### Prerequisites
 
-- Box Business or higher plan required.
+- This integration requires a Box Business or higher plan.
 
 ### Generate API Credentials in Box
 
-1. Log into Box and go to the [Developer Console][3]. Select **Create Platform App**.
-2. Choose **Custom App**, enter required app info, then click **Next**, select **Server Authentication (with Client Credentials Grant)** as the authentication method, and then click **Create App**.
-3. Go to the **Configuration** tab, select **App + Enterprise Access** under App Access Level, and check **Generate user access tokens** under Advanced Features.
+1. Log into Box and go to the [Developer Console][3]. 
+2. Select **Create Platform App**, Choose **Custom App**, enter required app info, then click **Next**.
+3. Select **Server Authentication (with Client Credentials Grant)** as the authentication method, and then click **Create App**.
+3. Go to the **Configuration** tab, select **App + Enterprise Access** under **App Access Level**, and check **Generate user access tokens** under **Advanced Features**, and then click **Save Changes**.
 4. In the **Authorization** tab, click **Review and Submit**, enter a brief app description, and click **Submit**.
-5. Copy the **Enterprise ID** from the **General** tab, and the **Client ID** and **Client Secret** from the **Configuration** tab.
-6. Navigate to the [Platform Apps Manager][4] in the Admin Console. Locate your app under **Server Authentication Apps**, click on **`...` (More)**, and select **Authorize App**. In the popup, click **Authorize** to confirm.
+5. Get the **Enterprise ID** from the **General** tab, and the **Client ID** and **Client Secret** from the **Configuration** tab.
+6. Navigate to the [Platform Apps Manager][4] in the Admin Console. 
+7. Locate your app under **Server Authentication Apps**, click on **`...` (More)**, and select **Authorize App**. In the popup, click **Authorize** to confirm.
 
 ### Connect your Box Account to Datadog
 
@@ -36,7 +36,7 @@ This integration gathers enterprise events and forwards them to Datadog for seam
 
 2. Click the Save button to save your settings.
 
-**Note**: Monthly API call limits are outlined on the [Box Pricing Page][7]. If you need to purchase additional volume, please contact [Box Support][8].
+**Note**: Monthly API call limits are listed on the [Box Pricing Page][7]. To purchase additional capacity, please reach out to [Box Support][8]
 
 ## Data Collected
 

@@ -25,7 +25,7 @@
             "id": 7394940963234776,
             "definition": {
                 "type": "note",
-                "content": "**[Box](https://www.box.com)** is a cloud-based file storage and collaboration platform that allows users to securely share, manage, and access files from anywhere.\n\nThis dashboard provides visibility into Box Shield insights, including threat detection, anomalous behavior, access policy violations, and data protection activities, etc. It helps strengthen security posture by highlighting potential risks and enforcing compliance controls.\n\n**Note**: [Box Shield](https://www.box.com/shield) must be enabled on your Box Enterprise account to access security insights and threat detection data.\n\nFor more information, see the [Box Documentation](https://docs.datadoghq.com/integrations/box/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "**[Box](https://www.box.com)** is a cloud-based file storage and collaboration platform that allows users to securely share, manage, and access files from anywhere.\n\nThis dashboard provides visibility into Box Shield insights, including threat detection, anomalous behavior, access policy violations, and data protection activities, etc. It helps strengthen security posture by highlighting potential risks.\n\n**Note**: [Box Shield](https://www.box.com/shield) must be enabled on your Box Enterprise account to access security insights and threat detection data.\n\nFor more information, see the [Box Documentation](https://docs.datadoghq.com/integrations/box/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -132,7 +132,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -188,7 +188,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -255,7 +255,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -299,7 +299,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -368,7 +368,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -444,7 +444,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -513,7 +513,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -597,7 +597,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip",
+                                        "query_string": "source:box-cloud @evt.name:SHIELD_ALERT $user_name $user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -679,7 +679,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -730,7 +730,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -738,7 +738,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@additional_details.shield_alert.alert_summary.malware_info.threat_info.threat_name",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -756,11 +756,11 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -799,7 +799,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -807,7 +807,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@additional_details.shield_alert.alert_summary.malware_info.threat_info.source",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -825,11 +825,11 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -868,7 +868,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -876,7 +876,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@additional_details.shield_alert.alert_summary.malware_info.file_info.name",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -894,11 +894,11 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -937,7 +937,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -945,7 +945,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@additional_details.shield_alert.alert_summary.upload_activity.item_path",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -963,11 +963,11 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
+                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1005,7 +1005,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1013,7 +1013,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@additional_details.shield_alert.alert_summary.upload_activity.item_type",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -1034,10 +1034,11 @@
                                     },
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "sort": {
+                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1050,7 +1051,7 @@
                             ],
                             "type": "sunburst",
                             "legend": {
-                                "type": "automatic"
+                                "type": "inline"
                             }
                         },
                         "layout": {
@@ -1074,7 +1075,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1082,7 +1083,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@additional_details.shield_alert.alert_summary.upload_activity.ip_info.country_code",
-                                                    "limit": 10,
+                                                    "limit": 250,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -1100,11 +1101,11 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 250,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1141,7 +1142,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $event_name $user_email $ip",
+                                        "query_string": "source:box-cloud @evt.name:SHIELD_ALERT @additional_details.shield_alert.rule_category:\"Malicious Content\" $user_name $user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1215,7 +1216,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1281,7 +1282,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1326,7 +1327,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1396,7 +1397,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1463,7 +1464,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_SHARED_LINK_ACCESS_BLOCKED $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_SHARED_LINK_ACCESS_BLOCKED $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1521,7 +1522,7 @@
                     {
                         "id": 6415364822529396,
                         "definition": {
-                            "title": "Top Blocked File Download Attempts",
+                            "title": "Top Blocked Files with Download Attempts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1532,7 +1533,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_DOWNLOAD_BLOCKED $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_DOWNLOAD_BLOCKED $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1601,7 +1602,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_DOWNLOAD_BLOCKED $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_DOWNLOAD_BLOCKED $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1670,7 +1671,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_EXTERNAL_COLLAB_*_BLOCKED* $user_name $event_name $user_email $ip"
+                                                "query": "source:box-cloud @box_event_category:shield @evt.name:SHIELD_EXTERNAL_COLLAB_*_BLOCKED* $user_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1763,7 +1764,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $event_name $user_email $ip",
+                                        "query_string": "source:box-cloud @box_event_category:shield -@evt.name:SHIELD_ALERT $user_name $user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1817,12 +1818,6 @@
     ],
     "template_variables": [
         {
-            "name": "event_name",
-            "prefix": "@evt.name",
-            "available_values": [],
-            "default": "*"
-        },
-        {
             "name": "user_name",
             "prefix": "@usr.name",
             "available_values": [],
@@ -1831,12 +1826,6 @@
         {
             "name": "user_email",
             "prefix": "@usr.email",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "ip",
-            "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
         }
