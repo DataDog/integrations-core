@@ -81,7 +81,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     """
     mock_http_response(status_code=404)
     check = vLLMCheck("vllm", {}, [instance])
-    with pytest.raises(Exception, match='requests.Session.exceptions.HTTPError"):
+    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
