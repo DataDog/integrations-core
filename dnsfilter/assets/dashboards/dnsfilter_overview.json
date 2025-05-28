@@ -1,6 +1,6 @@
 {
     "title": "DNSFilter - Overview",
-    "description": "This dashboard provides a comprehensive summary of DNS Traffic logs.",
+    "description": "This dashboard provides a comprehensive summary of DNSFilter Traffic logs.",
     "widgets": [
         {
             "id": 7323852778988876,
@@ -26,7 +26,7 @@
             "id": 8262886595283344,
             "definition": {
                 "type": "note",
-                "content": "DNSFilter is a cloud-based content filtering and threat protection by blocking internet threats at the DNS layer. It protects organizations by preventing access to malicious domains, phishing sites, and other cyber threats, ensuring a safer internet experience.\n\nThis dashboard provides a comprehensive summary of DNS Traffic logs.\n\nFor more information, see the [DNSFilter Integration Documentation](https://docs.datadoghq.com/integrations/dnsfilter/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "DNSFilter is a cloud-based content filtering and threat protection by blocking internet threats at the DNS layer. It protects organizations by preventing access to malicious domains, phishing sites, and other cyber threats, ensuring a safer internet experience.\n\nThis dashboard provides a comprehensive summary of DNSFilter Traffic logs.\n\nFor more information, see the [DNSFilter Integration Documentation](https://docs.datadoghq.com/integrations/dnsfilter/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -105,57 +105,6 @@
                         }
                     },
                     {
-                        "id": 3537847577249516,
-                        "definition": {
-                            "title": "Total Threats",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $result $user_name"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
                         "id": 6779344682720819,
                         "definition": {
                             "title": "Total Allowed Requests",
@@ -200,7 +149,7 @@
                             "precision": 2
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 3,
                             "y": 0,
                             "width": 3,
                             "height": 4
@@ -244,6 +193,57 @@
                                             "value": 0,
                                             "palette": "custom_bg",
                                             "custom_bg_color": "#f3dbc4"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3537847577249516,
+                        "definition": {
+                            "title": "Total Threats",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $result $user_name"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
                                         }
                                     ]
                                 }
