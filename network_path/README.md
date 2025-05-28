@@ -37,9 +37,9 @@ instances:
       - "tag_key2:tag_value2"
 ```
 #### Note for Windows hosts
-Windows Server support tcp_methods syn, and syn_socket (syn is recomended).
+Windows Server supports tcp_methods syn, and syn_socket (syn is recomended).
 
-Windows Client OS only support syn_socket as raw sockets are not supported on Windows Clients. 
+Windows Client OS only supports syn_socket as raw sockets are not supported on Windows Clients. 
 
 
 
