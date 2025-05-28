@@ -61,7 +61,7 @@ Follow these steps to install Sysmon:
       </Sysmon>
     ```
 
-    **Note:** Sysmon is highly configurable using the configuration (XML) file which allows you to:
+    **Note:** Sysmon is highly configurable using the XML configuration file, which allows you to:
     - Control which events to monitor
     - Filter events based on processes, paths, etc.
 
