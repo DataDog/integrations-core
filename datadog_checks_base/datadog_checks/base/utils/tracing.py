@@ -111,53 +111,54 @@ def configure_tracer(tracer, self_check):
     If not set or invalid, defaults to 0 (no sampling).
     The tracer context is only set at entry point functions so we can attach a trace root to the span.
     """
-    apm_tracing_enabled = False
-    context_provider = None
+    pass
+    # apm_tracing_enabled = False
+    # context_provider = None
 
-    integration_tracing, integration_tracing_exhaustive = tracing_enabled()
-    if integration_tracing or integration_tracing_exhaustive:
-        apm_tracing_enabled = True
+    # integration_tracing, integration_tracing_exhaustive = tracing_enabled()
+    # if integration_tracing or integration_tracing_exhaustive:
+    #     apm_tracing_enabled = True
 
-    dd_parent_id = None
-    dd_trace_id = None
-    try:
-        # If the check has a dd_trace_id and dd_parent_id, we can use it to create a trace root
-        if hasattr(self_check, "instance") and self_check.instance:
-            dd_trace_id = self_check.instance.get("dd_trace_id", None)
-            dd_parent_id = self_check.instance.get("dd_parent_span_id", None)
-        elif hasattr(self_check, "instances") and self_check.instances and len(self_check.instances) > 0:
-            dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
-            dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
-    except (AttributeError, ValueError, TypeError):
-        pass
+    # dd_parent_id = None
+    # dd_trace_id = None
+    # try:
+    #     # If the check has a dd_trace_id and dd_parent_id, we can use it to create a trace root
+    #     if hasattr(self_check, "instance") and self_check.instance:
+    #         dd_trace_id = self_check.instance.get("dd_trace_id", None)
+    #         dd_parent_id = self_check.instance.get("dd_parent_span_id", None)
+    #     elif hasattr(self_check, "instances") and self_check.instances and len(self_check.instances) > 0:
+    #         dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
+    #         dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
+    # except (AttributeError, ValueError, TypeError):
+    #     pass
 
-    try:
-        if dd_trace_id and dd_parent_id:
-            from ddtrace.context import Context
+    # try:
+    #     if dd_trace_id and dd_parent_id:
+    #         from ddtrace.context import Context
 
-            apm_tracing_enabled = True
-            context_provider = Context(
-                trace_id=dd_trace_id,
-                span_id=dd_parent_id,
-            )
-    except ImportError:
-        pass
+    #         apm_tracing_enabled = True
+    #         context_provider = Context(
+    #             trace_id=dd_trace_id,
+    #             span_id=dd_parent_id,
+    #         )
+    # except ImportError:
+    #     pass
 
-    try:
-        # Update the tracer configuration to make sure we trace only if we really need to
-        tracer.configure(
-            appsec_enabled=False,
-            enabled=apm_tracing_enabled,
-        )
+    # try:
+    #     # Update the tracer configuration to make sure we trace only if we really need to
+    #     tracer.configure(
+    #         appsec_enabled=False,
+    #         enabled=apm_tracing_enabled,
+    #     )
 
-        # If the current trace context is not set or is set to an empty trace_id, activate the context provider
-        current_context = tracer.current_trace_context()
-        if (
-            current_context is None or (current_context is not None and len(current_context.trace_id) == 0)
-        ) and context_provider:
-            tracer.context_provider.activate(context_provider)
-    except Exception:
-        pass
+    #     # If the current trace context is not set or is set to an empty trace_id, activate the context provider
+    #     current_context = tracer.current_trace_context()
+    #     if (
+    #         current_context is None or (current_context is not None and len(current_context.trace_id) == 0)
+    #     ) and context_provider:
+    #         tracer.context_provider.activate(context_provider)
+    # except Exception:
+    #     pass
 
 
 def tracing_enabled():
