@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 octopus_deploy.api.can_connect,gauge,,,,Whether or not the check can connect to the Octopus Deploy API.,-1,octopus_deploy,octopus_deploy api,,
 octopus_deploy.deployment.completed_time,gauge,,second,,Duration of deployment.,-1,octopus_deploy,octopus_deploy deploy dur,,
 octopus_deploy.deployment.count,gauge,,,,Number of deployments monitored.,-1,octopus_deploy,octopus_deploy deploy count,,
-octopus_deploy.deployment.executing,gauge,,second,,Whether or not the deployment is currently executing.,-1,octopus_deploy,octopus_deploy deploy executing,,
+octopus_deploy.deployment.executing,gauge,,,,Whether or not the deployment is currently executing.,-1,octopus_deploy,octopus_deploy deploy executing,,
 octopus_deploy.deployment.executing_time,gauge,,second,,How long the deployment has been executing.,-1,octopus_deploy,octopus_deploy deploy dur,,
 octopus_deploy.deployment.queued,gauge,,second,,Whether or not the deployment is currently in the queue.,-1,octopus_deploy,octopus_deploy deploy queue,,
 octopus_deploy.deployment.queued_time,gauge,,second,,Time deployment was in queue.,-1,octopus_deploy,octopus_deploy deploy queue,,
