@@ -72,7 +72,7 @@ instances:
     # pid_file: <PID_FILE>
 
     ## @param exact_match - boolean - optional - default: true
-    ## If you want to match your `search_string` on a substring within the list of process names, 
+    ## If you want to match your `search_string` against the exact full process name within the list of process names, 
     ## set this to true. This is equivalent to running `ps -e` on Linux or `Get-Process` on Windows.
     ##
     ## If you want to match your `search_string` on a substring within the list of process names
