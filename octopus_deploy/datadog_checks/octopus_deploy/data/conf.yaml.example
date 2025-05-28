@@ -90,7 +90,7 @@ instances:
 
     ## @param spaces - mapping - optional
     ## Optional configuration to indicate the spaces to process. If not configured,
-    ## all spaces and their corresponding project groups and projects are processed.
+    ## all spaces and their corresponding project groups and projects are be processed.
     ##
     ## The 'include' key indicates the regular expressions of the spaces for reporting metrics 
     ## and the configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
@@ -286,7 +286,7 @@ instances:
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
-    ## Metrics defined in `exclude` take precedence in case of overlap.
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
     #
     # metric_patterns:
     #   include:
