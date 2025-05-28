@@ -12,10 +12,10 @@ You can connect Okta Workflows to Datadog using one of the following authenticat
 
 #### Option A: Using OAuth
 1. Log in to the [Okta Admin Console][2].
-2. Navigate to Applications > API Services Integrations > Add Integrations > Datadog.
+2. Navigate to **Applications** > **API Services Integrations** > **Add Integrations** > **Datadog**.
 3. Upon installation, you will be provided with a set of client ID and client secret credentials. Copy these credentials.
 
-#### Option B: Using API Token
+#### Option B: Using an API Token
 1. Log in to the [Okta Admin Console][2] as a user with the [Read-only administrators][3] role.
 2. Follow the steps in [this guide][5] to generate an API token.
 
