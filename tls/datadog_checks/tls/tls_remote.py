@@ -178,8 +178,16 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
                 context.verify_mode = ssl.CERT_NONE
+                ciphers = self.agent_check.tls_context_wrapper.config.get('tls_ciphers')
+                if ciphers:
+                    if 'ALL' in ciphers:
+                        updated_ciphers = "ALL"
+                    else:
+                        updated_ciphers = ":".join(ciphers)
+
+                    context.set_ciphers(updated_ciphers)
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
