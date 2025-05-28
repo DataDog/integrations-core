@@ -20,7 +20,7 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
         -Dcom.sun.management.jmxremote.port=9090
         -Dcom.sun.management.jmxremote.rmi.port=9090
-        -Djava.rmi.server.hostname=0.0.0.0
+        -Djava.rmi.server.hostname=localhost
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
   weblogic-managed-server-1:
     build:
@@ -43,7 +43,7 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
         -Dcom.sun.management.jmxremote.port=9091
         -Dcom.sun.management.jmxremote.rmi.port=9091
-        -Djava.rmi.server.hostname=0.0.0.0
+        -Djava.rmi.server.hostname=localhost
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
       MANAGED_SERV_NAME: managed-server1
     command: 'startManagedServer.sh'
@@ -68,7 +68,7 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
         -Dcom.sun.management.jmxremote.port=9092
         -Dcom.sun.management.jmxremote.rmi.port=9092
-        -Djava.rmi.server.hostname=0.0.0.0
+        -Djava.rmi.server.hostname=localhost
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
       MANAGED_SERV_NAME: managed-server2
     command: 'startManagedServer.sh'

@@ -23,7 +23,7 @@ DEFAULT_CLIENT_NAME = "unknown"
 
 
 class Redis(AgentCheck):
-    db_key_pattern = re.compile(r'^db\d+')
+    db_key_pattern = re.compile(r'^db\d+$')
     slave_key_pattern = re.compile(r'^slave\d+')
     subkeys = ['keys', 'expires']
 
@@ -175,9 +175,6 @@ class Redis(AgentCheck):
                     'username',
                     'password',
                     'socket_timeout',
-                    'connection_pool',
-                    'charset',
-                    'errors',
                     'unix_socket_path',
                     'ssl',
                     'ssl_certfile',
@@ -516,7 +513,11 @@ class Redis(AgentCheck):
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
 
         # Get all slowlog entries
-        slowlogs = conn.slowlog_get(max_slow_entries)
+        try:
+            slowlogs = conn.slowlog_get(max_slow_entries)
+        except redis.ResponseError:
+            self.log.debug("Unable to collect slow log: SLOWLOG GET disabled in some managed Redis.")
+            return
 
         # Find slowlog entries between last timestamp and now using start_time
         slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen]

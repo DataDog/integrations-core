@@ -2,6 +2,37 @@
 
 <!-- towncrier release notes start -->
 
+## 22.13.1 / 2025-05-19
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
+## 22.13.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Include foreign tables in DBM agent schema collection ([#20137](https://github.com/DataDog/integrations-core/pull/20137))
+* Make owner of schemas to be ignored during collection configurable ([#20153](https://github.com/DataDog/integrations-core/pull/20153))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Fixed bug where we fail to explain parameterized queries that have no parameters. *Note: Does not include fix from 22.12.1* ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+
+## 22.12.1 / 2025-05-19 / Agent 7.66.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix. *Note: This fix is not included in 22.13.0* ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
+## 22.12.0 / 2025-05-14
+
+***Added***:
+
+* Add exclude_hostname option to specs ([#20259](https://github.com/DataDog/integrations-core/pull/20259))
+
 ## 22.11.0 / 2025-04-22
 
 ***Added***:
@@ -29,7 +60,7 @@
 * Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
 * Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
 
-## 22.8.0 / 2025-03-19
+## 22.8.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:
 
