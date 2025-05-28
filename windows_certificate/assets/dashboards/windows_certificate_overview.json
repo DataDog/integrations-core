@@ -20,14 +20,15 @@
     "widgets": [
         {
             "definition": {
-                "banner_img": "/static/images/logos/windows_small.svg",
-                "layout_type": "ordered",
-                "show_title": true,
-                "title": "Windows Certificate Store",
-                "type": "group",
-                "widgets": []
+                "has_background": true,
+                "has_border": true,
+                "horizontal_align": "center",
+                "sizing": "contain",
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/windows-certificate_large.svg",
+                "vertical_align": "center"
             },
-            "id": 1332720998004105,
+            "id": 4652925140828556,
             "layout": {
                 "height": 5,
                 "width": 4,
@@ -81,7 +82,7 @@
                         "id": 6717423497232037,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 3,
                             "x": 4,
                             "y": 0
                         }
@@ -150,7 +151,7 @@
                         "id": 3226539913664578,
                         "layout": {
                             "height": 1,
-                            "width": 4,
+                            "width": 3,
                             "x": 4,
                             "y": 2
                         }
@@ -160,7 +161,7 @@
             "id": 3432759619201891,
             "layout": {
                 "height": 5,
-                "width": 8,
+                "width": 7,
                 "x": 4,
                 "y": 0
             }
