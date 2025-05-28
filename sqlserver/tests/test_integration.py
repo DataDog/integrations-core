@@ -13,7 +13,6 @@ from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import SQLConnectionError
 from datadog_checks.sqlserver.const import (
     DATABASE_INDEX_METRICS,
-    TABLE_SIZE_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
     INSTANCE_METRICS_DATABASE,
@@ -21,6 +20,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
+    TABLE_SIZE_METRICS,
 )
 
 from .common import (
@@ -453,7 +453,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
 
         # These require extra setup to test
-        if mname not in DATABASE_INDEX_METRICS and mname not in TABLE_SIZE_METRICS:
+        if mname not in DATABASE_INDEX_METRICS and mname not in [m[0] for m in TABLE_SIZE_METRICS]:
             aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
