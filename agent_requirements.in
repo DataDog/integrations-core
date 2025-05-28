@@ -9,7 +9,7 @@ cachetools==6.0.0
 clickhouse-cityhash==1.0.2.4
 clickhouse-driver==0.2.9
 cm-client==45.0.4
-confluent-kafka==2.10.0
+confluent-kafka==2.8.0
 cryptography==45.0.3
 ddtrace==3.8.0
 dnspython==2.7.0
