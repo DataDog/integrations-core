@@ -27,6 +27,8 @@ REPO_OPTIONS_MAP = {
     '-x': 'here',
 }
 
+# If we add or remove a new repo choice, make sure to keep the
+# enum in ddev/src/ddev/utils/metadata.py in sync.
 REPO_CHOICES = {
     'core': 'integrations-core',
     'extras': 'integrations-extras',
