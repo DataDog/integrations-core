@@ -67,7 +67,7 @@ Follow these steps to install Sysmon:
 
     Enabling too many Sysmon event types can lead to excessive data ingestion. Community resources such as [sysmon-modular][9] and the [SwiftOnSecurity Sysmon config][10] provide recommended configurations, including examples of event inclusions and exclusions. These are intended as a starting point, and you can refer to them when tuning your own configuration.
 
-3. Execute the command as admin from the extracted folder:
+3. Run the following command as admin from the extracted folder:
 
     ```powershell
       .\Sysmon -i [<configfile>]
