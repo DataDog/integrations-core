@@ -62,17 +62,17 @@ To configure this check for an Agent running on a host:
         #
         # send_ndm_metadata: false
 
-        #Enable collection of Cisco ACI fault logs
+        #Enable collection of Cisco ACI fault logs (Requires send_ndm_metadata to be enabled).
 
         ## @param send_faultinst_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
         
-        send_faultinst_faults: false
+        #send_faultinst_faults: false
 
         ## @param send_faultdelegate_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
 
-       send_faultdelegate_faults: false
+        #send_fault_delegate_faults: false
           
    ```
 
@@ -126,6 +126,8 @@ Specific supported vendor profiles for this integration can be found on the [net
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Cisco ACI faults
+
+**Note**: Requires `send_ndm_metadata` to be enabled.
 
 Cisco ACI faults are collected by the Agent and stored in Datadog as logs. They can be viewed from the [Cisco ACI dashboard][15], or by filtering for `source:cisco-aci` in the [Log Explorer][16].
 
