@@ -17,7 +17,7 @@ After it collects the logs, ESET Protect channels them into Datadog for analysis
 
 To install the ESET Protect integration, run the following Agent installation command and the following steps. For more information, see the [Integration Management][5] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.65.0.
+**Note**: This step is not necessary for Agent version >= 7.68.0.
 
 Linux command:
 
