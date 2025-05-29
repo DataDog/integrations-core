@@ -238,6 +238,18 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.repo_server.redis.request.duration.seconds.count',
     'argocd.repo_server.redis.request.duration.seconds.sum',
     'argocd.repo_server.redis.request.count',
+    'argocd.commit_server.git.request.duration.seconds.bucket',
+    'argocd.commit_server.git.request.duration.seconds.count',
+    'argocd.commit_server.git.request.duration.seconds.sum',
+    'argocd.commit_server.commit.request.duration.seconds.bucket',
+    'argocd.commit_server.commit.request.duration.seconds.count',
+    'argocd.commit_server.commit.request.duration.seconds.sum',
+    'argocd.commit_server.userinfo.request.duration.seconds.bucket',
+    'argocd.commit_server.userinfo.request.duration.seconds.count',
+    'argocd.commit_server.userinfo.request.duration.seconds.sum',
+    'argocd.commit_server.commit.pending.request.total',
+    'argocd.commit_server.git.request.count',
+    'argocd.commit_server.commit.request.count',
 ]
 
 general = general_gauges + general_counters + general_summaries
