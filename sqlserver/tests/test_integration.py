@@ -269,7 +269,7 @@ def test_autodiscovery_db_service_checks(
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
-            assert c.tags.sort() == critical_tags.sort()
+            assert sorted(c.tags) == sorted(critical_tags)
     if service_check_enabled:
         assert db_critical_exists
 
@@ -615,7 +615,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/datadog_test-1',
+            'stubbed.hostname',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -632,7 +632,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/datadog_test-1',
+            'stubbed.hostname',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -649,7 +649,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost',
+            'stubbed.hostname',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -667,7 +667,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/master',
+            'stubbed.hostname',
             {},
             [],
         ),
@@ -676,7 +676,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'master',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/master',
+            'stubbed.hostname',
             {},
             [],
         ),
@@ -685,7 +685,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             '',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/master',
+            'stubbed.hostname',
             {
                 'aws': {
                     'instance_endpoint': 'foo.aws.com',
@@ -791,9 +791,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "sqlserver"
-    assert len(event['tags']) == 2
+    assert len(event['tags']) == 5
     assert event['tags'][0] == 'optional:tag1'
-    assert event['tags'][1].startswith('sqlserver_servername:')
+    assert any(tag.startswith('sqlserver_servername:') for tag in event['tags'])
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {
@@ -920,19 +920,174 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 6
+    assert len(sqlserver_check.static_info_cache.keys()) == 7
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually clear static information cache
     sqlserver_check.static_info_cache.clear()
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 6
+    assert len(sqlserver_check.static_info_cache.keys()) == 7
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
     sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 6
+    assert len(sqlserver_check.static_info_cache.keys()) == 7
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_docker, caplog):
+    """Test that XE sessions collect and process events properly."""
+    # Configure instance to enable XE collection
+    instance = copy(instance_docker)
+    instance['dbm'] = True
+    instance['xe_collection'] = {
+        'query_completions': {
+            'enabled': True,
+            'collection_interval': 0.1,
+        },
+        'query_errors': {
+            'enabled': True,
+            'collection_interval': 0.1,
+        },
+    }
+    # Ensure raw query collection is enabled
+    instance['collect_raw_query_statement'] = {"enabled": True, "cache_max_size": 100, "samples_per_hour_per_query": 10}
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+
+    # Run check once to initialize sessions if needed
+    dd_run_check(check)
+
+    # Execute a query that will be captured (long enough to exceed the threshold)
+    test_query = "WAITFOR DELAY '00:00:02'; SELECT 1;"
+    bob_conn.execute_with_retries(test_query)
+
+    # Execute a query that will generate an error
+    error_query = "SELECT 1/0;"  # Division by zero error
+    try:
+        bob_conn.execute_with_retries(error_query)
+    except:
+        pass  # We expect this to fail
+
+    # Run check again to collect the events
+    dd_run_check(check)
+
+    # Get events from the platform events API
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+
+    # Filter completion events (now each event may contain multiple query details)
+    query_completion_batches = [
+        e
+        for e in dbm_activity
+        if e.get('dbm_type') == 'query_completion' and 'datadog_query_completions' in str(e.get('event_source', ''))
+    ]
+
+    # Filter error events (now each event may contain multiple query details)
+    error_batches = [
+        e
+        for e in dbm_activity
+        if e.get('dbm_type') == 'query_error' and 'datadog_query_errors' in str(e.get('event_source', ''))
+    ]
+
+    # We should have at least one batch of completion events
+    assert len(query_completion_batches) > 0, "No query completion batches collected"
+
+    # We should have at least one batch of error events
+    assert len(error_batches) > 0, "No error event batches collected"
+
+    # Extract all individual completion events from batches
+    query_completion_events = []
+    for batch in query_completion_batches:
+        events = batch.get('sqlserver_query_completions', [])
+        if events:
+            query_completion_events.extend(events)
+
+    # Extract all individual error events from batches
+    error_events = []
+    for batch in error_batches:
+        events = batch.get('sqlserver_query_errors', [])
+        if events:
+            error_events.extend(events)
+
+    # We should have at least one query completion event
+    assert len(query_completion_events) > 0, "No query completion events collected"
+
+    # We should have at least one error event
+    assert len(error_events) > 0, "No error events collected"
+
+    # Verify specific query completion event details
+    found_test_query = False
+    for event in query_completion_events:
+        # Look at query_details field which contains the XE event info
+        query_details = event.get('query_details', {})
+        sql_text = query_details.get('sql_text', '')
+
+        if "WAITFOR DELAY" in sql_text and "SELECT 1" in sql_text:
+            found_test_query = True
+            # Check for expected properties
+            assert "bob" in query_details.get('username', ''), "Username 'bob' not found in event"
+            assert 'duration_ms' in query_details, "Duration not found in event"
+            # The duration should be at least 2000ms (2 seconds)
+            duration = float(query_details.get('duration_ms', 0))
+            assert duration >= 2000, f"Expected duration >= 2000ms, but got {duration}ms"
+            # Verify raw_query_signature is present when collect_raw_query is enabled
+            assert 'raw_query_signature' in query_details, "raw_query_signature not found in query details"
+            assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
+
+            # Verify primary_sql_field is present
+            assert 'primary_sql_field' in query_details, "primary_sql_field not found in query details"
+            assert query_details.get('primary_sql_field') in [
+                'batch_text',
+                'sql_text',
+                'statement',
+            ], f"Unexpected primary_sql_field value: {query_details.get('primary_sql_field')}"
+
+            # Verify metadata is present
+            assert 'metadata' in query_details, "metadata not found in query details"
+            metadata = query_details.get('metadata', {})
+            assert isinstance(metadata, dict), "metadata is not a dictionary"
+            assert 'tables' in metadata, "tables not found in metadata"
+            assert 'commands' in metadata, "commands not found in metadata"
+            assert 'comments' in metadata, "comments not found in metadata"
+
+    assert found_test_query, "Could not find our specific test query in the completion events"
+
+    # Verify specific error event details
+    found_error_query = False
+    for event in error_events:
+        # Look at query_details field which contains the XE event info
+        query_details = event.get('query_details', {})
+        sql_text = query_details.get('sql_text', '')
+
+        if "SELECT 1/0" in sql_text:
+            found_error_query = True
+            # Check for expected properties
+            assert "bob" in query_details.get('username', ''), "Username 'bob' not found in error event"
+            assert "Divide by zero" in query_details.get('message', ''), "Expected error message not found"
+            assert query_details.get('error_number') == 8134, "Expected error number 8134 not found"
+            # Verify raw_query_signature is present when collect_raw_query is enabled
+            assert 'raw_query_signature' in query_details, "raw_query_signature not found in error query details"
+            assert query_details.get('raw_query_signature'), "raw_query_signature is empty"
+
+            # Verify primary_sql_field is present
+            assert 'primary_sql_field' in query_details, "primary_sql_field not found in error query details"
+            assert query_details.get('primary_sql_field') in [
+                'batch_text',
+                'sql_text',
+                'statement',
+            ], f"Unexpected primary_sql_field value: {query_details.get('primary_sql_field')}"
+
+            # Verify metadata is present
+            assert 'metadata' in query_details, "metadata not found in error query details"
+            metadata = query_details.get('metadata', {})
+            assert isinstance(metadata, dict), "metadata is not a dictionary"
+            assert 'tables' in metadata, "tables not found in metadata"
+            assert 'commands' in metadata, "commands not found in metadata"
+            assert 'comments' in metadata, "comments not found in metadata"
+
+    assert found_error_query, "Could not find our specific error query in the error events"

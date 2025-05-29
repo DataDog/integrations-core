@@ -92,7 +92,7 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://karpenter.sh/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/karpenter/datadog_checks/karpenter/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/openmetrics/

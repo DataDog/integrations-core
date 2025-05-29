@@ -266,7 +266,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/ibmdb/python-ibmdb
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent

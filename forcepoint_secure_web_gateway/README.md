@@ -30,8 +30,11 @@ The Forcepoint Secure Web Gateway integration gathers these logs and forwards th
 
     d. Click **OK** to save the changes. Your application is added to the list, but its status is still **Pending**.
 6. Select your application's name in the **Application** column to open the **Edit Application** dialog.
+    
     a. Click the **Token Authorization URL** to authorize your current permission and get an access token.
+    
     b. On the **Requested Access** page, select **Approve** for the application permission settings. 
+    
     c. For each permitted user, send them the Token Authorization URL and have them approve their access.
 7. After approval, the user is given an access token that is unique to that user and that the user must keep. This access token is required to configure integration with Datadog. The token is valid forever and must be included in each request for authorization.
 8. Once access has been approved, the application's status changes to **Authorized**.

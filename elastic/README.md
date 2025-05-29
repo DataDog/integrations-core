@@ -36,6 +36,16 @@ To configure this check for an Agent running on a host:
      ## fetch statistics from the nodes and information about the cluster health.
      #
      - url: http://localhost:9200
+
+      ## @param username - string - optional
+      ## The username to use if services are behind basic or digest auth.
+      #
+      # username: <USERNAME>
+
+      ## @param password - string - optional
+      ## The password to use if services are behind basic or NTLM auth.
+      #
+      # password: <PASSWORD>
    ```
 
     **Notes**:
@@ -423,6 +433,7 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
 - `slm_stats` sends **elasticsearch.slm.\*** metrics
+- `cat_allocation_stats` sends **elasticsearch.disk.\*** metrics
 
 ### Metrics
 
@@ -447,7 +458,7 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location

@@ -139,10 +139,12 @@ files:
       description: Express warning threshold for the HTTP check in days
       value:
         type: integer
+        example: 14
     - name: days_critical
       description: Express critical threshold for the HTTP check in days
       value:
         type: integer
+        example: 7
     - name: seconds_warning
       description: |
         Alternatively to days_warning, seconds_warning expresses
