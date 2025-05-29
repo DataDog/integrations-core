@@ -1,0 +1,11 @@
+name: Microsoft DNS
+files:
+- name: microsoft_dns.yaml
+  options:
+  - template: logs
+    example:
+    - type: windows_event
+      channel_path: "Microsoft-Windows-DNSServer/Audit"
+      source: microsoft-dns
+      service: microsoft-dns
+      sourcecategory: windowsevent

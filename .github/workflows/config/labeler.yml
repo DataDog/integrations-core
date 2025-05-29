@@ -91,6 +91,8 @@ integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
 - boundary/**/*
+integration/box:
+- box/**/*
 integration/brevo:
 - brevo/**/*
 integration/btrfs:
@@ -403,6 +405,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_dns:
+- microsoft_dns/**/*
 integration/microsoft_sysmon:
 - microsoft_sysmon/**/*
 integration/milvus:

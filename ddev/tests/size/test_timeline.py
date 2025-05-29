@@ -16,9 +16,12 @@ from ddev.cli.size.timeline import (
 
 def test_get_compressed_files():
     with (
-        patch("os.walk", return_value=[(os.path.join("fake_repo", "datadog_checks"), [], ["__about__.py"])]),
-        patch("os.path.relpath", return_value=os.path.join("datadog_checks", "__about__.py")),
-        patch("os.path.exists", return_value=True),
+        patch(
+            "ddev.cli.size.timeline.os.walk",
+            return_value=[(os.path.join("fake_repo", "datadog_checks"), [], ["__about__.py"])],
+        ),
+        patch("ddev.cli.size.timeline.os.path.relpath", return_value=os.path.join("datadog_checks", "__about__.py")),
+        patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.is_valid_integration", return_value=True),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
@@ -48,9 +51,12 @@ def test_get_compressed_files_deleted_only():
 
     with (
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
-        patch("os.walk", return_value=[]),
-        patch("os.path.relpath", side_effect=lambda path, _: path.replace(f"{repo_path}{os.sep}", "")),
-        patch("os.path.exists", return_value=False),
+        patch("ddev.cli.size.timeline.os.walk", return_value=[]),
+        patch(
+            "ddev.cli.size.timeline.os.path.relpath",
+            side_effect=lambda path, _: path.replace(f"{repo_path}{os.sep}", ""),
+        ),
+        patch("ddev.cli.size.timeline.os.path.exists", return_value=False),
     ):
         file_data = get_files(repo_path, module, commit, date, author, message, [], True)
 
@@ -101,7 +107,7 @@ def test_trim_modules_keep_some_remove_some():
 def test_get_dependency():
     content = """dep1 @ https://example.com/dep1/dep1-1.1.1-.whl
 dep2 @ https://example.com/dep2/dep2-1.1.2-.whl"""
-    with patch("builtins.open", mock_open(read_data=content)):
+    with patch("ddev.cli.size.timeline.open", mock_open(read_data=content)):
         url, version = get_dependency_data(Path("some") / "path" / "file.txt", "dep2")
         assert (url, version) == ("https://example.com/dep2/dep2-1.1.2-.whl", "1.1.2")
 
@@ -116,9 +122,9 @@ def make_mock_response(size):
 
 def test_get_dependency_size():
     mock_response = make_mock_response("45678")
-    with patch("requests.head", return_value=mock_response):
+    with patch("ddev.cli.size.timeline.requests.head", return_value=mock_response):
         info = get_dependency_size(
-            "https://example.com/file-1.1.1-.whl",
+            "https://example.com/dep1/dep1-1.1.1-.whl",
             "1.1.1",
             "abc1234",
             datetime(2025, 4, 4).date(),
@@ -138,11 +144,14 @@ def test_get_dependency_size():
 
 def test_get_compressed_dependencies():
     with (
-        patch("os.path.exists", return_value=True),
-        patch("os.path.isdir", return_value=True),
-        patch("os.path.isfile", return_value=True),
-        patch("os.listdir", return_value=["linux-x86_64_3.12.txt"]),
-        patch("ddev.cli.size.timeline.get_dependency_data", return_value=("https://example.com/dep1.whl", '1.1.1')),
+        patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
+        patch("ddev.cli.size.timeline.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.timeline.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.timeline.os.listdir", return_value=["linux-x86_64_3.12.txt"]),
+        patch(
+            "ddev.cli.size.timeline.get_dependency_data",
+            return_value=("https://example.com/dep1/dep1-1.1.1-.whl", '1.1.1'),
+        ),
         patch("ddev.cli.size.timeline.requests.head", return_value=make_mock_response("12345")),
     ):
         result = get_dependencies(
