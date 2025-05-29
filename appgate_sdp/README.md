@@ -4,7 +4,7 @@
 
 This check monitors [Appgate SDP][1] through the Datadog Agent. 
 
-- Monitors the health and performance of Appgate SDP appliances, controllers, and gateways by collecting key metrics via the Datadog Agent.
+- Monitors the health and performance of Appgate SDP appliances, controllers, and gateways by collecting key metrics.
 - Provides visibility into resource utilization, active connections, session counts, and license usage to help ensure secure and efficient access management.
 - Enables proactive alerting and troubleshooting by tracking critical indicators such as CPU, memory, disk usage, and system events across distributed environments.
 
