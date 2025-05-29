@@ -187,7 +187,7 @@ spec:
   features:
     gpu:
       enabled: true
-# for operator versions 1.14.x and 1.15.x  add this section
+  # for operator versions 1.14.x and 1.15.x  add this section
   override:
     nodeAgent:
       containers:
@@ -196,7 +196,7 @@ spec:
             # add this env var, if using operator version 1.14.x
             - name: DD_ENABLE_NVML_DETECTION
               value: "true" 
-             # add this env var, if using operator versions 1.14.x or 1.15.x
+            # add this env var, if using operator versions 1.14.x or 1.15.x
             - name: DD_COLLECT_GPU_TAGS
               value: "true" 
 ```
@@ -224,7 +224,7 @@ spec:
             env:
               - name: DD_GPU_MONITORING_ENABLED
                 value: "true"
-           # add this env var, if using operator version 1.14.x      
+          # add this env var, if using operator version 1.14.x      
           agent:
             env:
               - name: DD_ENABLE_NVML_DETECTION
