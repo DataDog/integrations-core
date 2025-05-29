@@ -229,7 +229,7 @@ spec:
             env:
               - name: DD_ENABLE_NVML_DETECTION
                 value: "true" 
-          # add this env var, if using operator versions 1.14.x or 1.15.x
+              # add this env var, if using operator versions 1.14.x or 1.15.x
               - name: DD_COLLECT_GPU_TAGS
                 value: "true"
 ```
