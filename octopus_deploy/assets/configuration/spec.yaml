@@ -24,7 +24,7 @@ files:
         all spaces and their corresponding project groups and projects are processed.
 
         The 'include' key indicates the regular expressions of the spaces for reporting metrics 
-        and the  configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
+        and the configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
         that enables or disables metric collection for the project groups matching that condition. For further details
         see the next section, 'project-groups'. If no configuration associated with the key is indicated with the regular
         expression, they are processed with the default configuration.
