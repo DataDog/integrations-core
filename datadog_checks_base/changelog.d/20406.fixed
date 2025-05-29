@@ -1,1 +1,1 @@
-Fix handing of special float values like inf in configs.
+Fix handling of special float values like inf in configs.
