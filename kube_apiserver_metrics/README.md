@@ -37,8 +37,7 @@ You can review all available configuration options in the [kube_apiserver_metric
 You can annotate the kubernetes service in your `default` namespace with the following:
 
 <!-- xxx tabs xxx -->
-
-<!-- xxx tab "Annotations v2 (for Datadog Agent v7.36+)" -->
+<!-- xxx tab "Annotations v2 (for Datadog Agent v7.36)" xxx -->
 
 ```yaml
 ad.datadoghq.com/endpoints.checks: |
@@ -55,7 +54,7 @@ ad.datadoghq.com/endpoints.checks: |
 
 <!-- xxz tab xxx -->
 
-<!-- xxx tab "Annotations v1 (for Datadog Agent < v7.36)" -->
+<!-- xxx tab "Annotations v1 (for Datadog Agent < v7.36)" xxx -->
 
 ```yaml
 annotations:
@@ -80,7 +79,7 @@ Provide a [configuration][13] to your Cluster Agent to setup a Cluster Check:
 
 <!-- xxx tabs xxx -->
 
-<!-- xxx tab "Helm" -->
+<!-- xxx tab "Helm" xxx -->
 
 ```yaml
 clusterAgent:
@@ -98,7 +97,7 @@ clusterAgent:
 
 <!-- xxz tab xxx -->
 
-<!-- xxx tab "Operator" -->
+<!-- xxx tab "Operator" xxx -->
 
 ```yaml
 spec:
