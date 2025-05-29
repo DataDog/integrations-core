@@ -1490,7 +1490,8 @@ class AgentCheck(object):
 
         decoded = stdout.strip().decode()
         try:
-            special_values = {"nan": float("nan"), "inf": float("inf"), "-inf": float("-inf")}
+            # Handle special values like nan, inf, -inf, which are not valid Python literals.
+            special_values = {"nan": float("nan"), "inf": float("inf")}
             return eval(decoded, special_values)
         # a single, literal unquoted string
         except Exception:
