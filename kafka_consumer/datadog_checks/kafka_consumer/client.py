@@ -177,13 +177,15 @@ class KafkaClient:
         return desc.state.name
 
     def get_message(self, topic, partition, offset):
-        consumer = self.__create_consumer('datadog')
-        consumer.assign([TopicPartition(topic, partition, offset)])
-        message = consumer.poll(timeout=1)
-        consumer.close()
+        self.open_consumer('datadog')
+        self._consumer.assign([TopicPartition(topic, partition, offset)])
+        message = self._consumer.poll(timeout=1)
+        self._consumer.close()
         if message is None:
             return None
         return message.value()
 
+
+
 def close_admin_client(self):
-        self._kafka_client = None
+    self._kafka_client = None

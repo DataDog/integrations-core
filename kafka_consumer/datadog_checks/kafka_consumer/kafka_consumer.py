@@ -4,6 +4,7 @@
 import json
 from collections import defaultdict
 from time import time
+
 import yaml
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -32,23 +33,55 @@ class KafkaCheck(AgentCheck):
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
 
-
     def log_message(self):
         print("logging message")
-        yamlConfig = datadog_agent.get_remote_config("test changed")
-        print("yaml config  ", yamlConfig, type(yamlConfig))
-        parsedConfig = yaml.safe_load(str(yamlConfig))
+        yaml_config = datadog_agent.get_remote_config("test changed")
+#         yaml_config = """
+# configs:
+#   - topic: marvel
+#     partition: 0
+#     offset: 0
+#     n_messages: 1
+# """
+        print("yaml config  ", yaml_config, type(yaml_config))
+        parsedConfig = yaml.safe_load(str(yaml_config))
         print("parsed config is ", parsedConfig)
         for cfg in parsedConfig.get("configs", []):
             print("config is ", cfg)
+            if not 'kafka' in cfg:
+                print("skipping config without kafka key")
+                continue
+            cfg = cfg['kafka']
             topic = cfg.get("topic", None)
             partition = cfg.get("partition", None)
-            offset = cfg.get("offset", None)
-            print("topic is ", topic, "partition is ", partition, "offset is ", offset)
-            if topic is None or partition is None or offset is None:
+            offset = cfg.get("start_offset", None)
+            n_messages = cfg.get("n_messages", None)
+            cluster = cfg.get("cluster", None)
+            print("topic is ", topic, "partition is ", partition, "offset is ", offset, "n_messages is ", n_messages, "cluster is ", cluster)
+            if topic is None or partition is None or offset is None or n_messages is None or cluster is None:
+                print("skipping config with missing keys")
                 continue
             message = self.client.get_message(topic, partition, offset)
-            self.send_event("Kafka message", message, ["topic:{}".format(topic), "partition:{}".format(partition), "offset:{}".format(offset)], 'kafka', "", severity="info")
+            self.send_event(
+                "Kafka message",
+                message,
+                ["topic:{}".format(topic), "partition:{}".format(partition), "offset:{}".format(offset)],
+                'kafka',
+                "",
+                severity="info",
+            )
+            data = {
+                'timestamp': int(time()),
+                'technology': 'kafka',
+                'cluster': str(cluster),
+                'topic': str(topic),
+                'partition': str(partition),
+                'offset': str(offset),
+                'data': 'logging message',
+            }
+            print("data is ", data)
+            self.send_log(data)
+            self.send_log({'message': 'foo piotr', 'timestamp': 1722958617.2842212})
             print("message is ", message)
         # print("now the last message")
         # message = self.client.get_message('marvel', 0, 75)
@@ -57,81 +90,35 @@ class KafkaCheck(AgentCheck):
 
     def check(self, _):
         """The main entrypoint of the check."""
-        # Fetch Kafka consumer offsets
-
-        consumer_offsets = {}
-
+        print("Starting kafka_consumer check")
         try:
-            self.client.request_metadata_update()
-        except:
-            raise Exception(
-                "Unable to connect to the AdminClient. This is likely due to an error in the configuration."
-            )
-
-        try:
-            # Fetch consumer offsets
-            # Expected format: {consumer_group: {(topic, partition): offset}}
+            # Get consumer offsets
+            print("Getting consumer offsets")
             consumer_offsets = self.get_consumer_offsets()
-        except Exception:
-            self.log.exception("There was a problem collecting consumer offsets from Kafka.")
-            # don't raise because we might get valid broker offsets
+            print(f"Got consumer offsets: {consumer_offsets}")
 
-        # Fetch the broker highwater offsets
-        highwater_offsets = {}
-        broker_timestamps = defaultdict(dict)
-        cluster_id = ""
-        persistent_cache_key = "broker_timestamps_"
-        try:
-            if len(consumer_offsets) < self._context_limit:
-                # Fetch highwater offsets
-                # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
-                if self._data_streams_enabled:
-                    broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
-                    self._add_broker_timestamps(broker_timestamps, highwater_offsets)
-                    self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
-            else:
-                self.warning("Context limit reached. Skipping highwater offset collection.")
-        except Exception:
-            self.log.exception("There was a problem collecting the highwater mark offsets.")
-            # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
-            if self.config._close_admin_client:
-                self.client.close_admin_client()
-            raise
+            # Get highwater offsets
+            print("Getting highwater offsets")
+            highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
+            print(f"Got highwater offsets: {highwater_offsets}")
+            print(f"Cluster ID: {cluster_id}")
 
-        total_contexts = sum(len(v) for v in consumer_offsets.values()) + len(highwater_offsets)
-        self.log.debug(
-            "Total contexts: %s, Consumer offsets: %s, Highwater offsets: %s",
-            total_contexts,
-            consumer_offsets,
-            highwater_offsets,
-        )
-        if total_contexts >= self._context_limit:
-            self.warning(
-                """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
-                check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
-                and partitions you wish to monitor.""",
-                total_contexts,
-                self._context_limit,
+            # Report metrics
+            print("Reporting metrics")
+            self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
+            self.report_consumer_offsets_and_lag(
+                consumer_offsets,
+                highwater_offsets,
+                self._context_limit - len(highwater_offsets),
+                {},
+                cluster_id,
             )
-
-        self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
-        self.report_consumer_offsets_and_lag(
-            consumer_offsets,
-            highwater_offsets,
-            self._context_limit - len(highwater_offsets),
-            broker_timestamps,
-            cluster_id,
-        )
-
-        try:
+            print("Finished reporting metrics")
             self.log_message()
-        except Exception as e:
-            print("oops", e)
-            self.log.exception("Error retrieving payload from Kafka for Data Streams %s", str(e))
 
-        if self.config._close_admin_client:
-            self.client.close_admin_client()
+        except Exception as e:
+            print(f"Error in check: {e}")
+            raise
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
