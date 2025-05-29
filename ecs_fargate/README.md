@@ -18,8 +18,6 @@ The Task Metadata endpoint is only available from within the task definition its
 
 The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
 
-**Note**: Cloud Network Monitoring (CNM) is not supported for ECS Fargate.
-
 ## Setup
 
 The following steps cover setup of the Datadog Container Agent within Amazon ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
