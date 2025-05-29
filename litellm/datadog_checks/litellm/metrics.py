@@ -1,0 +1,40 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+METRICS = {
+    'litellm_spend_metric': "spend.metric",
+    'litellm_total_tokens': "total.tokens",
+    'litellm_input_tokens': "input.tokens",
+    'litellm_output_tokens': "output.tokens",
+    'litellm_team_max_budget_metric': "team.max_budget.metric",
+    'litellm_remaining_team_budget_metric': "remaining.team_budget.metric",
+    'litellm_team_budget_remaining_hours_metric': "team.budget.remaining_hours.metric",
+    'litellm_api_key_max_budget_metric': "api.key.max_budget.metric",
+    'litellm_remaining_api_key_budget_metric': "remaining.api_key.budget.metric",
+    'litellm_api_key_budget_remaining_hours_metric': "api.key.budget.remaining_hours.metric",
+    'litellm_remaining_api_key_requests_for_model': "remaining.api_key.requests_for_model",
+    'litellm_remaining_api_key_tokens_for_model': "remaining.api_key.tokens_for_model",
+    'litellm_proxy_failed_requests_metric': "proxy.failed_requests.metric",
+    'litellm_proxy_total_requests_metric': "proxy.total_requests.metric",
+    'litellm_deployment_success_responses': "deployment.success_responses",
+    'litellm_deployment_failure_responses': "deployment.failure_responses",
+    'litellm_deployment_total_requests': "deployment.total_requests",
+    'litellm_remaining_requests_metric': "remaining_requests.metric",
+    'litellm_remaining_tokens': "remaining_tokens",
+    'litellm_deployment_state': "deployment.state",
+    'litellm_deployment_latency_per_output_token': "deployment.latency_per_output_token",
+    'litellm_deployment_cooled_down': "deployment.cooled_down",
+    'litellm_deployment_successful_fallbacks': "deployment.successful_fallbacks",
+    'litellm_deployment_failed_fallbacks': "deployment.failed_fallbacks",
+    'litellm_request_total_latency_metric': "request.total_latency.metric",
+    'litellm_overhead_latency_metric': "overhead_latency.metric",
+    'litellm_llm_api_latency_metric': "llm.api.latency.metric",
+    'litellm_llm_api_time_to_first_token_metric': "llm.api.time_to_first_token.metric",
+    'litellm_input_tokens_metric': "input_tokens.metric",
+    'litellm_output_tokens_metric': "output_tokens.metric",
+    'litellm_not_a_premium_user_metric': "not_a_premium_user.metric",
+    # Deprecated
+    'litellm_llm_api_failed_requests_metric': "llm.api.failed_requests.metric",
+    'litellm_requests_metric': "requests.metric",
+}
