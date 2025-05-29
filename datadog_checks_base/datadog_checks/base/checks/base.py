@@ -1479,7 +1479,7 @@ class AgentCheck(object):
         import sys
 
         process = subprocess.Popen(
-            [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
+            [sys.executable, '-c', 'import sys, yaml; print(repr(yaml.safe_load(sys.stdin.read())))'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
