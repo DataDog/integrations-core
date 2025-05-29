@@ -51,7 +51,9 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
     if check.version < V12:
         return
 
-    plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(DB_NAME, query, query, query)
+    plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        DB_NAME, query, query, "7231596c8b5536d1"
+    )
     assert plan_dict is not None
     assert explain_err_code == expected_explain_err_code
     assert err is None
@@ -111,7 +113,10 @@ def test_explain_parameterized_queries_version_below_12(integration_check, dbm_i
         return
 
     plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-        DB_NAME, "SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1", ""
+        DB_NAME,
+        "SELECT * FROM pg_settings WHERE name = $1",
+        "SELECT * FROM pg_settings WHERE name = $1",
+        "7231596c8b5536d1",
     )
     assert plan_dict is None
     assert explain_err_code == DBExplainError.parameterized_query
@@ -133,7 +138,10 @@ def test_explain_parameterized_queries_create_prepared_statement_exception(integ
         side_effect=psycopg2.errors.DatabaseError("unexpected exception"),
     ):
         plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-            DB_NAME, "SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1", ""
+            DB_NAME,
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "7231596c8b5536d1",
         )
         assert plan_dict is None
         assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
@@ -155,7 +163,9 @@ def test_explain_parameterized_queries_explain_prepared_statement_exception(inte
         side_effect=psycopg2.errors.DatabaseError("unexpected exception"),
     ):
         query = "SELECT * FROM pg_settings WHERE name = $1"
-        plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(DB_NAME, query, query, "")
+        plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
+            DB_NAME, query, query, "7231596c8b5536d1"
+        )
         assert plan_dict is None
         assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
         assert err is not None
@@ -184,7 +194,10 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
         return_value=None,
     ):
         plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-            DB_NAME, "SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1", ""
+            DB_NAME,
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "7231596c8b5536d1",
         )
         assert plan_dict is None
         assert explain_err_code == DBExplainError.no_plan_returned_with_prepared_statement
