@@ -18,11 +18,11 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
 5. Click **Create a custom app**, provide the necessary details and click **Create app**.
 6. Click **Configure Admin API Scopes** under the Overview tab.
 7. In the **Admin API access scopes section**, select the following scopes:
-    - **read_orders** 
-    - **read_products** 
-    - **read_customers** 
-    - **read_content** 
-    - **read_price_rules** 
+    - **read_orders**
+    - **read_products**
+    - **read_customers**
+    - **read_content**
+    - **read_price_rules**
 8. Click **Save** to apply the changes.
 9. Click **Install app** and get the **Access Token** from the **Admin API access token** section.
 
@@ -36,7 +36,7 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
 
 ## Data Collected
 
-### Logs 
+### Logs
 
 The Shopify integration collects and forwards Event, Product, Customer, and Order logs to Datadog.
 
@@ -54,7 +54,8 @@ The Shopify integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+This integration is not managed by Shopify. For assistance, please contact
+[Datadog support][3].
 
 [1]: https://www.shopify.com/
 [2]: https://www.shopify.com/in/store-login

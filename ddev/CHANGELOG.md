@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 11.3.0 / 2025-04-30
+
+***Added***:
+
+* Add support for license-expression when retrieving licenses from PyPi ([#20117](https://github.com/DataDog/integrations-core/pull/20117))
+
+***Fixed***:
+
+* Diasble tag signing in unit tests for release agent CLI command ([#19971](https://github.com/DataDog/integrations-core/pull/19971))
+
 ## 11.2.0 / 2025-02-26
 
 ***Added***:

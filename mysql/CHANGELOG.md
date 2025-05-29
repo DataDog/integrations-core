@@ -2,6 +2,74 @@
 
 <!-- towncrier release notes start -->
 
+## 15.5.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Add support for IAM authentication with MySQL ([#20176](https://github.com/DataDog/integrations-core/pull/20176))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Make the pymysql connection ping() to reconnect for metadata collection. Sometimes, when a connection is held by pymysql for a long time without being used (such as during settings collection), the connection gets closed unexpectedly and attempting to re-use it will fail unless we validate that the connection is still valid. ([#20092](https://github.com/DataDog/integrations-core/pull/20092))
+* Fix duplicate explain plan sampling on idle clients and incorrect event timestamp ([#20095](https://github.com/DataDog/integrations-core/pull/20095))
+* Fixes incorrect replica counts when querying from performance_schema.threads ([#20172](https://github.com/DataDog/integrations-core/pull/20172))
+* Check for performance_schema enabled automatically instead of requiring `replication_non_blocking_status` config option when retrieving replica counts ([#20198](https://github.com/DataDog/integrations-core/pull/20198))
+
+## 15.4.0 / 2025-05-14
+
+***Added***:
+
+* Add exclude_hostname option to specs ([#20259](https://github.com/DataDog/integrations-core/pull/20259))
+
+## 15.3.1 / 2025-05-07
+
+***Fixed***:
+
+* Remove duplicate idle MySQL activity rows ([#20222](https://github.com/DataDog/integrations-core/pull/20222))
+
+## 15.3.0 / 2025-04-22
+
+***Added***:
+
+* Print permission mySQL warning ([#20090](https://github.com/DataDog/integrations-core/pull/20090))
+
+***Fixed***:
+
+* Include database_instance for MySQL schema data ([#20089](https://github.com/DataDog/integrations-core/pull/20089))
+
+## 15.2.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+
+## 15.1.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 15.0.0 / 2025-04-17
+
+***Changed***:
+
+* Warning for missing explain_plan function ([#19908](https://github.com/DataDog/integrations-core/pull/19908))
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Add blocking queries support for MySQL 8 ([#20008](https://github.com/DataDog/integrations-core/pull/20008))
+* added configurable limit to index metric collection ([#20012](https://github.com/DataDog/integrations-core/pull/20012))
+* Blocking queries for older MySQL 5.7 ([#20068](https://github.com/DataDog/integrations-core/pull/20068))
+* Add blocking queries support for MariaDB ([#20074](https://github.com/DataDog/integrations-core/pull/20074))
+
+***Fixed***:
+
+* Fix Aurora replication role tags being appended instead of updated during failover events. ([#20048](https://github.com/DataDog/integrations-core/pull/20048))
+
 ## 14.8.0 / 2025-03-26
 
 ***Added***:

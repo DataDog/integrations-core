@@ -60,6 +60,6 @@ events and Auth metrics. Sensitive data are removed and sent to Datadog.
 Need help? Contact [Datadog support][3].
 
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
 

@@ -69,7 +69,7 @@ The instructions below show you how to configure the task using the [Amazon Web 
 
 [4]: https://aws.amazon.com/console
 [12]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 
 {{< /site-region >}}
 partial -->
@@ -84,7 +84,7 @@ partial -->
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
 
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 {{< /site-region >}}
 partial -->
 3. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
@@ -118,7 +118,7 @@ You can use [AWS CloudFormation][6] templating to configure your Fargate contain
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 Update this CloudFormation template below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
 
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 {{< /site-region >}}
 partial -->
 
@@ -146,6 +146,89 @@ Lastly, include your other application containers within the `ContainerDefinitio
 
 For more information on CloudFormation templating and syntax, see the [AWS CloudFormation task definition documentation][43].
 
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "CDK" xxx -->
+##### Datadog CDK Task Definition
+
+You can use the [Datadog CDK Constructs][72] to configure your ECS Fargate task definition. Use the `DatadogECSFargate` construct to instrument your containers for desired Datadog features. This is supported in TypeScript, JavaScript, Python, and Go.
+
+<!-- partial
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+Update this construct definition below with your [Datadog API Key][41]. In addition, include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) property if necessary, as this defaults to `datadoghq.com` if you don't set it.
+
+[41]: https://app.datadoghq.com/organization-settings/api-keys
+{{< /site-region >}}
+partial -->
+
+```typescript
+const ecsDatadog = new DatadogECSFargate({
+  apiKey: <DATADOG_API_KEY>
+  site: <DATADOG_SITE>
+});
+```
+
+Then, define your task definition using [`FargateTaskDefinitionProps`][65].
+
+```typescript
+const fargateTaskDefinition = ecsDatadog.fargateTaskDefinition(
+  this,
+  <TASK_ID>,
+  <FARGATE_TASK_DEFINITION_PROPS>
+);
+```
+
+Lastly, include your other application containers by adding your [`ContainerDefinitionOptions`][66].
+
+```typescript
+fargateTaskDefinition.addContainer(<CONTAINER_ID>, <CONTAINER_DEFINITION_OPTIONS>);
+```
+
+For more information on the `DatadogECSFargate` construct instrumentation and syntax, see the [Datadog ECS Fargate CDK documentation][67].
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Terraform" xxx -->
+##### Datadog Terraform Task Definition
+
+You can use the [Datadog ECS Fargate Terraform module][71] to configure your containers for Datadog. This Terraform module wraps the [`aws_ecs_task_definition`][68] resource and automatically instruments your task definition for Datadog. Pass your input arguments into the Datadog ECS Fargate Terraform module in a similiar manner as to the `aws_ecs_task_definition`. Make sure to include your task `family` and `container_definitions`.
+
+<!-- partial
+{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
+Update this Terraform module below with your [Datadog API Key][41]. As well as include the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}) environment variable if necessary, as this defaults to `datadoghq.com` if you don't set it.
+
+[41]: https://app.datadoghq.com/organization-settings/api-keys
+{{< /site-region >}}
+partial -->
+
+```hcl
+module "ecs_fargate_task" {
+  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  version = "1.0.0"
+
+  # Configure Datadog
+  dd_api_key = <DATADOG_API_KEY>
+  dd_site    = <DATADOG_SITE>
+  dd_dogstatsd = {
+    enabled = true,
+  }
+  dd_apm = {
+    enabled = true,
+  }
+
+  # Configure Task Definition
+  family                   = <TASK_FAMILY>
+  container_definitions    = <CONTAINER_DEFINITIONS>
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+}
+```
+
+Lastly, include your other application containers within the `ContainerDefinitions` and deploy through Terraform.
+
+For more information on the Terraform module, see the [Datadog ECS Fargate Terraform documentation][74].
 
 <!-- xxz tab xxx -->
 
@@ -220,6 +303,41 @@ Resources:
 ```
 
 For more information on CloudFormation templating and syntax, see the [AWS CloudFormation ECS service documentation][44].
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "CDK" xxx -->
+##### AWS CDK Replica Service
+
+In the CDK code you can reference the `fargateTaskDefinition` resource created in the previous example into the `FargateService` resource being created. After this, specify your `Cluster`, `DesiredCount`, and any other parameters necessary for your application in your replica service.
+
+```typescript
+const service = new ecs.FargateService(this, <SERVICE_ID>, {
+  <CLUSTER>,
+  fargateTaskDefinition,
+  desiredCount: 1
+});
+```
+
+For more information on the CDK ECS service construct and syntax, see the [AWS CDK ECS Service documentation][69].
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Terraform" xxx -->
+##### AWS Terraform Replica Service
+
+In the Terraform code you can reference the `aws_ecs_task_definition` resource created in the previous example within the `aws_ecs_service` resource being created. Then, specify your `Cluster`, `DesiredCount`, and any other parameters necessary for your application in your replica service.
+
+```hcl
+resource "aws_ecs_service" <SERVICE_ID> {
+  name            = <SERVICE_NAME>
+  cluster         = <CLUSTER_ID>
+  task_definition = module.ecs_fargate_task.arn
+  desired_count   = 1
+}
+```
+
+For more information on the Terraform ECS service module and syntax, see the [AWS Terraform ECS service documentation][70].
 
 <!-- xxz tab xxx -->
 
@@ -894,6 +1012,51 @@ partial -->
 
 For more information on CloudFormation templating and syntax, see the [AWS CloudFormation documentation][43].
 
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "CDK" xxx -->
+##### Datadog ECS Fargate CDK Construct
+
+To enable logging through the [Datadog ECS Fargate CDK][67] construct, configure the `logCollection` property as seen below:
+
+```typescript
+const ecsDatadog = new DatadogECSFargate({
+  apiKey: <DATADOG_API_KEY>,
+  site: <DATADOG_SITE>,
+  logCollection: {
+    isEnabled: true,
+  }
+});
+```
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Terraform" xxx -->
+##### Datadog ECS Fargate Terraform Module
+
+To enable logging through the [Datadog ECS Fargate Terraform][71] module, configure the `dd_log_collection` input argument as seen below:
+
+```hcl
+module "ecs_fargate_task" {
+  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  version = "1.0.0"
+
+  # Configure Datadog
+  dd_api_key = <DATADOG_API_KEY>
+  dd_site    = <DATADOG_SITE>
+  dd_log_collection = {
+    enabled = true,
+  }
+
+  # Configure Task Definition
+  family                   = <TASK_FAMILY>
+  container_definitions    = <CONTAINER_DEFINITIONS>
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+}
+```
 
 <!-- xxz tab xxx -->
 
@@ -1018,6 +1181,7 @@ Need help? Contact [Datadog support][18].
 - Blog post: [Monitor AWS Fargate for Windows containerized apps][40]
 - Blog post: [Monitor processes running on AWS Fargate with Datadog][58]
 - Blog post: [Monitor AWS Batch on Fargate with Datadog][63]
+- Documentation: [Trace API Gateway when proxying requests to ECS Fargate][73]
 
 [1]: http://docs.datadoghq.com/integrations/eks_fargate
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
@@ -1043,7 +1207,7 @@ Need help? Contact [Datadog support][18].
 [22]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [23]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
 [24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
-[25]: https://app.datadoghq.com/logs
+[25]: /logs
 [26]: https://docs.datadoghq.com/monitors/monitor_types/
 [27]: https://docs.datadoghq.com/infrastructure/livecontainers/?tab=linuxwindows
 [28]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html
@@ -1059,7 +1223,7 @@ Need help? Contact [Datadog support][18].
 [38]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [39]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
 [40]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
-[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: /organization-settings/api-keys
 [42]: https://docs.datadoghq.com/resources/json/datadog-agent-ecs-fargate.json
 [43]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
@@ -1074,7 +1238,7 @@ Need help? Contact [Datadog support][18].
 [53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
 [54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
-[56]: https://app.datadoghq.com/process
+[56]: /process
 [57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
 [58]: https://www.datadoghq.com/blog/monitor-fargate-processes/
 [59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
@@ -1083,3 +1247,13 @@ Need help? Contact [Datadog support][18].
 [62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
 [63]: https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/
 [64]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=ecs#full-configuration
+[65]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.FargateTaskDefinitionProps.html
+[66]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.ContainerDefinitionOptions.html
+[67]: https://github.com/DataDog/datadog-cdk-constructs/blob/main/src/ecs/fargate/README.md
+[68]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition
+[69]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.FargateService.html
+[70]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service
+[71]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest
+[72]: https://github.com/datadog/datadog-cdk-constructs/
+[73]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
+[74]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest/submodules/ecs_fargate
