@@ -9,6 +9,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+
+    environment: pypi-datadog-checks-base
+
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -30,8 +35,16 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Release base package
-      run: ddev release upload -s datadog_checks_base
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN_BASE_2 }}
+    - name: Build base package
+      run: ddev release build datadog_checks_base
+
+    # Publish wheels to PyPI using Trusted Publishers.
+    # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+    # This job needs to run from within the pypi-datadog-checks-base environment. PyPi
+    # validates the workflow file name, environment and repository the request is
+    # comming from to provide the valid JWT token.
+    - name: Release base package to PyPI
+      uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+      with:
+        skip-existing: true
+        packages-dir: datadog_checks_base/dist

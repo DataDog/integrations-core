@@ -2,13 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 37.12.0 / 2025-05-28
+
+***Added***:
+
+* Bump ddtrace to 3.7.2 ([#20358](https://github.com/DataDog/integrations-core/pull/20358))
+
+***Fixed***:
+
+* Fix tracemalloc usage error ([#20355](https://github.com/DataDog/integrations-core/pull/20355))
+
+## 37.11.0 / 2025-05-15
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
 ## 37.10.1 / 2025-04-30
 
 ***Fixed***:
 
 * Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
 
-## 37.10.0 / 2025-04-17
+## 37.10.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 

@@ -8,7 +8,7 @@
 		"id": 157628372,
 		"name": "High Number of Errored Conversations Detected",
 		"type": "query alert",
-		"query": "sum(last_1d):sum:genesys.callback.errored_conversations_count{*}.as_count() + sum:genesys.chat.errored_conversations_count{*}.as_count() + sum:genesys.email.errored_conversations_count{*}.as_count() + sum:genesys.message.errored_conversations_count{*}.as_count() + sum:genesys.voice.errored_conversations_count{*}.as_count() > 100",
+		"query": "sum(last_1d):sum:genesys_cloud.callback.errored_conversations_count{*}.as_count() + sum:genesys_cloud.chat.errored_conversations_count{*}.as_count() + sum:genesys_cloud.email.errored_conversations_count{*}.as_count() + sum:genesys_cloud.message.errored_conversations_count{*}.as_count() + sum:genesys_cloud.voice.errored_conversations_count{*}.as_count() > 100",
 		"message": "{{#is_alert}}\nErrored conversations refer to the number of active sessions aborted due to an Edge or adapter error event.\n\nHigh number of errored conversations has been detected. Please review and take necessary action.\n{{/is_alert}}",
 		"tags": [
 			"source:genesys"
