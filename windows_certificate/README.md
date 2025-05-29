@@ -2,17 +2,17 @@
 
 ## Overview
 
-This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] for ceritificate expiration.
+This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] to check whether any of have expired.
 
 ## Setup
 
 ### Installation
 
-The Windows Certificate Store integration is included in the [Datadog Agent][2] package. Please see the next section to configure.
+The Windows Certificate Store integration is included in the [Datadog Agent][2] package but requires configuration (see instructions below).
 
 ### Configuration
 
-Edit the `windows_certificate.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample windows_certificate.d/conf.yaml][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
+Edit the `windows_certificate.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [`sample windows_certificate.d/conf.yaml`][4] for all available configuration options. When you are done editing the configuration file, [restart the Agent][5] to load the new configuration.
 
 The integration can monitor the expiration of all certificates in a given store or selectively monitor specific certificates from a given list of strings matching with the certificate subjects. The store names that are available for monitoring are listed in `HKEY_LOCAL_MACHINE\Software\Microsoft\SystemCertificates`.
 
@@ -22,7 +22,7 @@ This example configuration monitors all certificates in the local machine's `ROO
 instances:
   - certificate_store: ROOT
 ```
-This example configuraiton monitors ceritificates in `ROOT` that have `microsoft` or `verisign` in the subject:
+This example configuration monitors certificates in `ROOT` that have `microsoft` or `verisign` in the subject:
 ```yaml
 instances:
   - certificate_store: ROOT
@@ -30,7 +30,7 @@ instances:
       - microsoft
       - verisign
 ```
-The parameters `days_warning` and `days_critical` are used to specify the number of days before certificate expiration from which the service check `windows_certificate.cert_expiration` begins emitting WARNING/CRITICAL. In the below example the service check will emit a WARNING when a certificate is 10 days from expiring and CRITICAL when it is 5 days away from expiring:
+The parameters `days_warning` and `days_critical` are used to specify the number of days before certificate expiration from which the service check `windows_certificate.cert_expiration` begins emitting WARNING/CRITICAL alerts. In the below example the service check emits a WARNING alert when a certificate is 10 days from expiring and CRITICAL when it is 5 days away from expiring:
 ```yaml
 instances:
   - certificate_store: ROOT
