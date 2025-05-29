@@ -31,10 +31,12 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             self.check_initializations.append(self.configure_additional_transformers)
 
     def get_default_config(self):
-
         config = {
             'rename_labels': RENAMED_LABELS,
         }
+
+        # We want to keep the existing metric name logic as-is so no standard dashboard or
+        # a custom dashboard defined customers are not impacted.
 
         if int(self.build_version.split('.')[0]) < 7:
             config['metrics'] = [METRIC_MAP]
@@ -73,6 +75,12 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         return "7.2.0.0"
 
     def configure_additional_transformers(self):
+        # we are setting up the transformer for the metrics that are defined in the METRIC_NAME_PATTERN
+        # Objective is to apply transformer to rename metric in datadog standard pattern
+        # so we dont need to add a static mapping for each metric
+        # Example:
+        # aerospike_namespace_master_objects -> aerospike.namespace.master_objects
+
         for metric, data in METRIC_NAME_PATTERN.items():
             self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
                 metric, self.configure_transformer_for_metric(metric, **data), pattern=True

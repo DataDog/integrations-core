@@ -60,6 +60,8 @@ METRIC_MAP = {
     'aerospike_xdr_success': 'xdr.success',
 }
 
+# We are using this to rename the metrics to datadog standard pattern
+# keeping metric-type as gauge so new dasahboards are consistent with grafana dashboards already used by customers
 METRIC_NAME_PATTERN = {
     r'^aerospike_(namespace)_(.*)$': {
         'metric_type': 'gauge',
