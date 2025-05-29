@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 35.1.0 / 2025-05-27
+
+***Added***:
+
+* Update release tag to ensure that tags are fetched before getting the list of tags ([#20292](https://github.com/DataDog/integrations-core/pull/20292))
+
 ## 35.0.1 / 2025-04-30
 
 ***Fixed***:

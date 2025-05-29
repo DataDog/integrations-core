@@ -2,7 +2,6 @@
 
 [envs.default]
 # If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
-# Also bump the LIBRDKAFKA_VERSION version in this file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
   "python -m pip install --no-binary confluent-kafka confluent-kafka==2.8.0",

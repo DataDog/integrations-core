@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+from redis.exceptions import ResponseError
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -102,3 +103,63 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
 
     # Assert that the `redis.net.commands` metric was sent
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])
+
+
+def test_check_all_available_config_options(check, aggregator, redis_instance, dd_run_check):
+    """
+    The check should should create a connection with the supported config options
+    """
+
+    connection_args = {
+        'db': 1,
+        'username': 'user',
+        'password': 'devops-best-friend',
+        'socket_timeout': 5,
+        'host': 'localhost',
+        'port': '6379',
+        'unix_socket_path': '/path',
+        'ssl': True,
+        'ssl_certfile': '/path',
+        'ssl_keyfile': '/path',
+        'ssl_ca_certs': '/path',
+        'ssl_cert_reqs': 0,
+    }
+    redis_instance.update(connection_args)
+
+    redis_check = check(redis_instance)
+    with mock.patch('redis.Redis') as redis_conn:
+        dd_run_check(redis_check)
+        assert redis_conn.call_args.kwargs == connection_args
+
+
+def test_slowlog_quiet_failure(check, aggregator, redis_instance):
+    """
+    The check should not fail if the slowlog command fails with redis.ResponseError
+    """
+    redis_check = check(redis_instance)
+
+    # Mock the connection object returned by _get_conn
+    mock_conn = mock.MagicMock()
+    mock_conn.slowlog_get.side_effect = ResponseError('ERR unknown command `SLOWLOG`')
+    mock_conn.config_get.return_value = {'slowlog-max-len': '128'}
+
+    with mock.patch.object(redis_check, '_get_conn', return_value=mock_conn):
+        redis_check._check_slowlog()
+        # Assert that no metrics were sent
+        aggregator.assert_metric('redis.slowlog.micros', count=0)
+
+
+def test_slowlog_loud_failure(check, redis_instance):
+    """
+    The check should fail if the slowlog command fails for any other reason
+    """
+    redis_check = check(redis_instance)
+
+    # Mock the connection object returned by _get_conn
+    mock_conn = mock.MagicMock()
+    mock_conn.slowlog_get.side_effect = RuntimeError('Some other error')
+    mock_conn.config_get.return_value = {'slowlog-max-len': '128'}
+
+    with mock.patch.object(redis_check, '_get_conn', return_value=mock_conn):
+        with pytest.raises(RuntimeError, match='Some other error'):
+            redis_check._check_slowlog()

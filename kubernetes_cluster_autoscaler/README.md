@@ -45,7 +45,12 @@ prometheus.io/scrape: true
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. 
 
-The only parameter required for configuring the `kubernetes_cluster_autoscaler` check is `openmetrics_endpoint`. This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8085`. To configure a different port, use the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+The only parameters required for configuring the `kubernetes_cluster_autoscaler` check are:
+
+* CONTAINER_NAME
+  Name of the container of the cluster autoscaler controller.
+* `openmetrics_endpoint`
+  This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8085`. To configure a different port, use the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
 
 ```yaml
 apiVersion: v1
@@ -54,7 +59,7 @@ kind: Pod
 metadata:
   name: '<POD_NAME>'
   annotations:
-    ad.datadoghq.com/controller.checks: |
+    ad.datadoghq.com/<CONTAINER_NAME>.checks: |
       {
         "kubernetes_cluster_autoscaler": {
           "init_config": {},
@@ -68,7 +73,7 @@ metadata:
     # (...)
 spec:
   containers:
-    - name: 'controller'
+    - name: '<CONTAINER_NAME>'
 # (...)
 ```
 

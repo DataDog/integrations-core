@@ -51,6 +51,11 @@ files:
       value:
         type: boolean
         example: False
+    - name: collect_seff_stats
+      description: Whether or not to collect seff statistics.
+      value:
+        type: boolean
+        example: False
     - name: sinfo_collection_level
       description: |
         The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and

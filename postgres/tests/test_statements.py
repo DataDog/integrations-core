@@ -613,7 +613,7 @@ def test_successful_explain(
     assert db_explain_error is None
     assert err is None
 
-    plan, *rest = check.statement_samples._run_and_track_explain(dbname, query, query, query)
+    plan, *rest = check.statement_samples._run_and_track_explain(dbname, query, query, "7231596c8b5536d1")
     assert plan is not None
 
     plan = plan['Plan']
@@ -701,7 +701,7 @@ def test_failed_explain_handling(
     assert err is None
 
     for _ in range(failed_explain_test_repeat_count):
-        check.statement_samples._run_and_track_explain(dbname, query, query, query)
+        check.statement_samples._run_and_track_explain(dbname, query, query, "7231596c8b5536d1")
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
@@ -1518,7 +1518,9 @@ def test_statement_run_explain_errors(
     check._connect()
 
     run_one_check(check)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        "datadog_test", query, query, "7231596c8b5536d1"
+    )
     run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
@@ -1572,7 +1574,9 @@ def test_statement_run_explain_parameterized_queries(
         return
 
     run_one_check(check)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        "datadog_test", query, query, "7231596c8b5536d1"
+    )
     run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code

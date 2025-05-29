@@ -504,7 +504,7 @@
         {
             "id": 2358358132143955,
             "definition": {
-                "title": "Scheduling Attemps",
+                "title": "Scheduling Attempts",
                 "type": "group",
                 "background_color": "vivid_green",
                 "show_title": true,

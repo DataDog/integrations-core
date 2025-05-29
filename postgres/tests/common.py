@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.postgres.util import (
     CHECKSUM_METRICS,
     NEWER_14_METRICS,
@@ -500,3 +501,8 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
     ]
     for metric_name in _iterate_metric_name(STAT_IO_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)
+
+
+def check_metrics_metadata(aggregator):
+    exclude = ['dd.postgres.operation.time']
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)

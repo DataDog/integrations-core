@@ -1,3 +1,44 @@
+## Datadog Agent version [7.66.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7660)
+
+* Active Directory [4.2.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
+* Amazon Kafka [6.5.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* ASP.NET [4.2.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
+* Celery [1.0.0](https://github.com/DataDog/integrations-core/blob/master/celery/CHANGELOG.md)
+* Datadog Checks Base [37.10.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [4.5.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* Citrix Hypervisor [5.1.1](https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/CHANGELOG.md)
+* Disk [7.1.0](https://github.com/DataDog/integrations-core/blob/master/disk/CHANGELOG.md)
+* .NET CLR [4.2.0](https://github.com/DataDog/integrations-core/blob/master/dotnetclr/CHANGELOG.md)
+* Elasticsearch [8.2.0](https://github.com/DataDog/integrations-core/blob/master/elastic/CHANGELOG.md)
+* ESXi [3.0.1](https://github.com/DataDog/integrations-core/blob/master/esxi/CHANGELOG.md)
+* Exchange Server [4.2.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
+* FoundationDB [3.2.1](https://github.com/DataDog/integrations-core/blob/master/foundationdb/CHANGELOG.md)
+* Gunicorn [4.1.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
+* HTTP [11.3.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM MQ [8.2.0](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md)
+* IIS [5.2.0](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
+* Infiniband [1.1.0](https://github.com/DataDog/integrations-core/blob/master/infiniband/CHANGELOG.md)
+* MongoDB [9.1.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.4.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md) **BREAKING CHANGE**
+* OpenStack Controller [8.4.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* PDH [4.2.0](https://github.com/DataDog/integrations-core/blob/master/pdh_check/CHANGELOG.md)
+* Postgres [22.12.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* RabbitMQ [7.2.0](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/CHANGELOG.md)
+* RiakCS [4.4.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
+* SNMP [10.0.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* Snowflake [7.5.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* SQL Server [22.3.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* SSH [4.2.1](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
+* TLS [4.4.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* vSphere [8.3.0](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+* Windows Event Log [5.2.0](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/CHANGELOG.md)
+* Windows Service [6.2.0](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
+* WMI [3.2.0](https://github.com/DataDog/integrations-core/blob/master/wmi_check/CHANGELOG.md)
+
+## Datadog Agent version [7.65.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7652)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.65.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7651)
 
 * There were no integration updates for this version of the Agent.

@@ -1,0 +1,37 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "7a896a43-4a2e-4be0-a62d-289b1baf70e1",
+    "app_id": "dnsfilter",
+    "display_on_public_website": false,
+    "tile": {
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "<FILL IN - A brief description of what this offering provides>",
+      "title": "DNSFilter",
+      "media": [],
+      "classifier_tags": [
+        "Category::Log Collection",
+        "Category::Security",
+        "Submitted Data Type::Logs",
+        "Offering::Integration"
+      ]
+    },
+    "assets": {
+      "integration": {
+        "auto_install": false,
+        "source_type_id": 46402079,
+        "source_type_name": "DNSFilter",
+        "events": {
+          "creates_events": false
+        }
+      }
+    },
+    "author": {
+      "support_email": "help@datadoghq.com",
+      "name": "Datadog",
+      "homepage": "https://www.datadoghq.com",
+      "sales_email": "info@datadoghq.com"
+    }
+  }

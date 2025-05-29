@@ -47,7 +47,7 @@ def get_truncation_state(statement):
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
 
 
-def connect_with_autocommit(**connect_args):
+def connect_with_session_variables(**connect_args):
     db = pymysql.connect(**connect_args)
     with closing(db.cursor(CommenterCursor)) as cursor:
         # PyMYSQL only sets autocommit if it receives a different value from the server
@@ -55,7 +55,9 @@ def connect_with_autocommit(**connect_args):
         # but there are cases where the server will not send a correct value for autocommit, so we
         # set it explicitly to ensure it's set correctly
         cursor.execute("SET AUTOCOMMIT=1")
-
+        # Lower the lock wait timeout to avoid deadlocks on metadata locks. By default this is a year.
+        # https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_lock_wait_timeout
+        cursor.execute("SET LOCK_WAIT_TIMEOUT=5")
     return db
 
 
