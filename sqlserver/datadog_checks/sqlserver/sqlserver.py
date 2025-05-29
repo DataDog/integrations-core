@@ -44,6 +44,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
     SQLServerXESessionMetrics,
 )
@@ -83,6 +84,7 @@ from datadog_checks.sqlserver.const import (
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_FULL_SERVERNAME,
     STATIC_INFO_INSTANCENAME,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_RDS,
@@ -340,6 +342,8 @@ class SQLServer(AgentCheck):
                 tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
             if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
                 tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
+            if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
+                tag_dict['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
             self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
 
@@ -394,6 +398,7 @@ class SQLServer(AgentCheck):
                             )
                             self.static_info_cache[STATIC_INFO_SERVERNAME] = servername
                             self.static_info_cache[STATIC_INFO_INSTANCENAME] = instancename
+                            self.static_info_cache[STATIC_INFO_FULL_SERVERNAME] = full_servername
 
                             self.tags.append("sqlserver_servername:{}".format(servername))
                             self.non_internal_tags.append("sqlserver_servername:{}".format(servername))
@@ -883,6 +888,7 @@ class SQLServer(AgentCheck):
             SqlserverIndexUsageMetrics,
             SqlserverDBFragmentationMetrics,
             SqlserverDatabaseFilesMetrics,
+            SqlserverTableSizeMetrics,
         ]
 
     @property

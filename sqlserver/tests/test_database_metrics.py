@@ -32,6 +32,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
 )
 from datadog_checks.sqlserver.utils import Database
@@ -920,7 +921,6 @@ def test_sqlserver_db_fragmentation_metrics(
         instance_docker_metrics['database_metrics']['db_fragmentation_metrics'][
             'collection_interval'
         ] = db_fragmentation_metrics_interval
-    print(instance_docker_metrics)
     mocked_results = [
         [
             ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
@@ -1299,6 +1299,63 @@ def test_sqlserver_database_files_metrics(
                 ] + tags
                 for metric_name, metric_value in metrics:
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_table_size_metrics', [True, False])
+def test_sqlserver_table_size_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_table_size_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'table_size_metrics': {'enabled': include_table_size_metrics},
+    }
+
+    mocked_results = [
+        ('table1', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table2', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table3', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table4', 'dbo', 'datadog_test-1', 100, 1024, 500, 200),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check.databases = {Database(db) for db in AUTODISCOVERY_DBS}
+
+    execute_query_handler_mocked = mock.MagicMock()
+    execute_query_handler_mocked.return_value = mocked_results
+
+    table_size_metrics = SqlserverTableSizeMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        databases=AUTODISCOVERY_DBS,
+    )
+
+    sqlserver_check._database_metrics = [table_size_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_table_size_metrics:
+        assert table_size_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags
+        for mock_row in mocked_results:
+            table_name, schema, database, *metric_values = mock_row
+            metrics = zip(table_size_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'table:{table_name}',
+                f'schema:{schema}',
+                f'database:{database}',
+            ] + tags
+            # check that the aggregator got the mocked metrics
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
 @pytest.mark.integration
