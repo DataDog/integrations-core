@@ -33,7 +33,6 @@
                         "id": 8289666179599236,
                         "definition": {
                             "title": "Total number of Plaid Logs",
-                            "title": "Total number of Plaid Logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -72,19 +71,14 @@
                             "y": 0,
                             "width": 3,
                             "height": 3
-                            "width": 3,
-                            "height": 3
                         }
                     },
                     {
                         "id": 5198861967020346,
-                        "id": 5198861967020346,
                         "definition": {
-                            "title": "Networks Used",
                             "title": "Networks Used",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "type": "toplist",
                             "requests": [
                                 {
@@ -92,35 +86,15 @@
                                         "palette": "dog_classic"
                                     },
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "dog_classic"
-                                    },
-                                    "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "name": "query1",
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
                                                 "query": "source:plaid_logs"
                                             },
-                                            "search": {
-                                                "query": "source:plaid_logs"
-                                            },
                                             "indexes": [
                                                 "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@network",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
                                             ],
                                             "group_by": [
                                                 {
@@ -160,31 +134,9 @@
                             "custom_links": [],
                             "style": {
                                 "scaling": "relative"
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "custom_links": [],
-                            "style": {
-                                "scaling": "relative"
                             }
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 0,
                             "x": 3,
                             "y": 0,
                             "width": 3,
@@ -193,22 +145,10 @@
                     },
                     {
                         "id": 1901817483012866,
-                        "id": 1901817483012866,
                         "definition": {
-                            "title": "Currencies used",
                             "title": "Currencies used",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
                             "show_legend": false,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -233,21 +173,10 @@
                                         {
                                             "alias": "Plaid Investment Transactions",
                                             "formula": "query3"
-                                            "alias": "Plaid Transfer",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Plaid Recurring Transfer",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Plaid Investment Transactions",
-                                            "formula": "query3"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "name": "query2",
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
@@ -268,28 +197,13 @@
                                                     "should_exclude_missing": true
                                                 }
                                             ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@iso_currency_code",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "iso_currency_code"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
                                             "compute": {
-                                                "aggregation": "count",
-                                                "metric": "iso_currency_code"
                                                 "aggregation": "count",
                                                 "metric": "iso_currency_code"
                                             },
                                             "storage": "hot"
                                         },
                                         {
-                                            "name": "query1",
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
@@ -310,29 +224,10 @@
                                                     "should_exclude_missing": true
                                                 }
                                             ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@iso_currency_code",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "iso_currency_code"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
                                             "compute": {
                                                 "aggregation": "count",
                                                 "metric": "iso_currency_code"
-                                                "aggregation": "count",
-                                                "metric": "iso_currency_code"
                                             },
-                                            "storage": "hot"
-                                        },
-                                        {
-                                            "name": "query3",
-                                            "data_source": "logs",
                                             "storage": "hot"
                                         },
                                         {
@@ -378,31 +273,15 @@
                             "x": 0,
                             "y": 3,
                             "width": 6,
-                            "height": 4
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
+                            "height": 5
                         }
                     },
                     {
                         "id": 491873656711604,
-                        "id": 491873656711604,
                         "definition": {
-                            "title": "Plaid logs timeline",
                             "title": "Plaid logs timeline",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
                             "show_legend": true,
                             "legend_layout": "horizontal",
                             "legend_columns": [
@@ -418,7 +297,6 @@
                                     "formulas": [
                                         {
                                             "alias": "Count",
-                                            "alias": "Count",
                                             "formula": "query1"
                                         }
                                     ],
@@ -433,7 +311,6 @@
                                                 "*"
                                             ],
                                             "group_by": [],
-                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -441,23 +318,7 @@
                                         }
                                     ],
                                     "response_format": "timeseries",
-                                    "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
                                         "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
@@ -476,10 +337,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
-                            "y": 7,
+                            "y": 8,
                             "width": 6,
-                            "height": 4
+                            "height": 5
                         }
                     }
                 ]
@@ -488,25 +348,20 @@
                 "x": 6,
                 "y": 0,
                 "width": 6,
-                "height": 12
-                "height": 12
+                "height": 14
             }
         },
         {
-            "id": 6888657947628120,
             "id": 6888657947628120,
             "definition": {
                 "type": "note",
                 "content": "Plaid specializes in financial technology by offering APIs that allow developers to integrate banking services into their applications. By connecting users' bank accounts to apps, Plaid enables features like account verification, transaction history retrieval, and balance checks. This functionality is crucial for various applications, including budgeting tools, personal finance management, and payment processing.",
                 "background_color": "orange",
-                "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
                 "vertical_align": "center",
                 "show_tick": true,
-                "show_tick": true,
                 "tick_pos": "50%",
-                "tick_edge": "top",
                 "tick_edge": "top",
                 "has_padding": true
             },
@@ -563,9 +418,7 @@
         },
         {
             "id": 6396584169657892,
-            "id": 6396584169657892,
             "definition": {
-                "title": "Currencies used",
                 "title": "Currencies used",
                 "title_size": "16",
                 "title_align": "left",
@@ -630,86 +483,7 @@
                 "x": 0,
                 "y": 10,
                 "width": 2,
-                "height": 2
-            }
-        },
-        {
-            "id": 6872091701376976,
-            "definition": {
-                "title": "Transfer Timelines",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "horizontal",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "name": "query1",
-                                "data_source": "logs",
-                                "search": {
-                                    "query": "source:plaid_logs"
-                                },
-                                "indexes": [
-                                    "*"
-                                ],
-                                "group_by": [
-                                    {
-                                        "facet": "@iso_currency_code",
-                                        "limit": 10,
-                                        "sort": {
-                                            "aggregation": "count",
-                                            "order": "desc",
-                                            "metric": "iso_currency_code"
-                                        },
-                                        "should_exclude_missing": true
-                                    }
-                                ],
-                                "compute": {
-                                    "aggregation": "count",
-                                    "metric": "iso_currency_code"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "style": {
-                            "palette": "datadog16"
-                        },
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "type": "sunburst",
-                "legend": {
-                    "type": "automatic"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 10,
-                "width": 2,
-                "height": 2
+                "height": 4
             }
         },
         {
@@ -737,7 +511,6 @@
                         ],
                         "queries": [
                             {
-                                "name": "query1",
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
@@ -785,7 +558,7 @@
                 "x": 2,
                 "y": 10,
                 "width": 4,
-                "height": 2
+                "height": 4
             }
         },
         {
@@ -977,7 +750,7 @@
                             "x": 0,
                             "y": 2,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1043,7 +816,7 @@
                             "x": 6,
                             "y": 4,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1110,7 +883,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 6,
+                            "y": 5,
                             "width": 6,
                             "height": 2
                         }
@@ -1119,9 +892,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 14,
                 "width": 12,
-                "height": 9
+                "height": 8
             }
         },
         {
@@ -2156,7 +1929,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 22,
                 "width": 12,
                 "height": 14,
                 "is_column_break": true
@@ -2493,7 +2266,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 35,
+                "y": 36,
                 "width": 12,
                 "height": 8
             }
