@@ -430,6 +430,23 @@ files:
             - name: enabled
               type: boolean
               example: false
+        - name: table_size_metrics
+          description: |
+            Configure collection of table size metrics.
+
+            Set `table_size_metrics.enabled` to true to enable collection of table size metrics. 
+            Does not collect tempdb metrics.
+            Defaults to false.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: collection_interval
+              type: integer
+              example: 600
+              display_default: 600
     - name: agent_jobs
       description: Configure collection of SQL Server Agent jobs events and metrics
       options:

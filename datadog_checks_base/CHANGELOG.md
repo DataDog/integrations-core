@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 37.12.0 / 2025-05-28
+
+***Added***:
+
+* Bump ddtrace to 3.7.2 ([#20358](https://github.com/DataDog/integrations-core/pull/20358))
+
+***Fixed***:
+
+* Fix tracemalloc usage error ([#20355](https://github.com/DataDog/integrations-core/pull/20355))
+
 ## 37.11.0 / 2025-05-15
 
 ***Added***:
