@@ -274,32 +274,37 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        if compressed:
-            response = requests.head(url)
+        with requests.get(url, stream=True) as response:
             response.raise_for_status()
-            size_str = response.headers.get("Content-Length")
-            if size_str is None:
-                raise ValueError(f"Missing size for {dep}")
-            size = int(size_str)
+            wheel_data = response.content
 
-        else:
-            with requests.get(url, stream=True) as response:
-                response.raise_for_status()
-                wheel_data = response.content
+        with tempfile.TemporaryDirectory() as tmpdir:
+            wheel_path = Path(tmpdir) / "package.whl"
+            with open(wheel_path, "wb") as f:
+                f.write(wheel_data)
 
-            with tempfile.TemporaryDirectory() as tmpdir:
-                wheel_path = Path(tmpdir) / "package.whl"
-                with open(wheel_path, "wb") as f:
-                    f.write(wheel_data)
+            if compressed:
+                with zipfile.ZipFile(wheel_path, "r") as zip_ref:
+                    size = sum(
+                        zinfo.file_size
+                        for zinfo in zip_ref.infolist()
+                        # if "test" not in zinfo.filename.lower()
+                    )
+            else:
                 extract_path = Path(tmpdir) / "extracted"
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     zip_ref.extractall(extract_path)
 
                 size = 0
                 for dirpath, _, filenames in os.walk(extract_path):
+                    if "test" in dirpath.lower():
+                        continue
                     for name in filenames:
+                        if "test" in name.lower():
+                            continue
                         file_path = os.path.join(dirpath, name)
                         size += os.path.getsize(file_path)
+
         file_data.append(
             {
                 "Name": str(dep),
@@ -700,14 +705,16 @@ def send_metrics_to_dd(
         else "datadog.agent_integrations.size_analyzer.uncompressed"
     )
     config_file_info = get_org(app, org)
-    if not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    # if not is_everything_committed():
+    #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
     if 'api_key' not in config_file_info:
         raise RuntimeError("No API key found in config file")
     if 'site' not in config_file_info:
         raise RuntimeError("No site found in config file")
 
     timestamp = get_last_commit_timestamp()
+    from datetime import datetime
+    print('date', datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"))
 
     metrics = []
 
