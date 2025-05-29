@@ -21,10 +21,10 @@ files:
       display_priority: 5
       description: |
         Optional configuration to indicate the spaces to process. If not configured,
-        all spaces and their corresponding project groups and projects are be processed.
+        all spaces and their corresponding project groups and projects are processed.
 
         The 'include' key indicates the regular expressions of the spaces for reporting metrics 
-        and the configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
+        and the  configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
         that enables or disables metric collection for the project groups matching that condition. For further details
         see the next section, 'project-groups'. If no configuration associated with the key is indicated with the regular
         expression, they are processed with the default configuration.
@@ -121,7 +121,7 @@ files:
         properties:
           - name: limit
             description: |
-              Maximum number of project groups to be processed.
+              Maximum number of project groups processed.
             type: integer
           - name: include
             type: array
@@ -169,7 +169,7 @@ files:
         properties:
           - name: limit
             description: |
-              Maximum number of projects to be processed.
+              Maximum number of projects processed.
             type: integer
           - name: include
             type: array
@@ -218,7 +218,7 @@ files:
         properties:
           - name: limit
             description: |
-              Maximum number of environments to be processed.
+              Maximum number of environments processed.
             type: integer
           - name: include
             type: array
