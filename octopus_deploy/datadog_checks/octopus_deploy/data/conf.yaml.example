@@ -90,7 +90,7 @@ instances:
 
     ## @param spaces - mapping - optional
     ## Optional configuration to indicate the spaces to process. If not configured,
-    ## all spaces and their corresponding project groups and projects are be processed.
+    ## all spaces and their corresponding project groups and projects are processed.
     ##
     ## The 'include' key indicates the regular expressions of the spaces for reporting metrics 
     ## and the configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
