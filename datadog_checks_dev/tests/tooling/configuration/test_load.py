@@ -59,6 +59,7 @@ def test_no_name():
 def test_no_version():
     spec = get_spec(
         """
+        files: []
         """
     )
     spec.load()
@@ -80,6 +81,7 @@ def test_version_not_string():
 def test_version_loaded():
     spec = get_spec(
         """
+        {}
         """,
         version='0.0.0',
     )
