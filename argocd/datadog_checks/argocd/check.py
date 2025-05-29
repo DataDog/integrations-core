@@ -11,6 +11,7 @@ from .metrics import (
     API_SERVER_METRICS,
     APPLICATION_CONTROLLER_METRICS,
     APPSET_CONTROLLER_METRICS,
+    COMMIT_SERVER_METRICS,
     NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
@@ -21,12 +22,14 @@ from .metrics import (
     APPSET_CONTROLLER_NAMESPACE,
     REPO_SERVER_NAMESPACE,
     NOTIFICATIONS_CONTROLLER_NAMESPACE,
+    COMMIT_SERVER_NAMESPACE,
 ) = [
     'argocd.api_server',
     'argocd.app_controller',
     'argocd.appset_controller',
     'argocd.repo_server',
     'argocd.notifications_controller',
+    'argocd.commit_server',
 ]
 
 
@@ -45,6 +48,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         api_server_endpoint = self.instance.get("api_server_endpoint")
         repo_server_endpoint = self.instance.get("repo_server_endpoint")
         notifications_controller_endpoint = self.instance.get("notifications_controller_endpoint")
+        commit_server_endpoint = self.instance.get("commit_server_endpoint")
 
         if (
             not app_controller_endpoint
@@ -52,11 +56,12 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             and not repo_server_endpoint
             and not api_server_endpoint
             and not notifications_controller_endpoint
+            and not commit_server_endpoint
         ):
             raise ConfigurationError(
                 "Must specify at least one of the following:"
                 "`app_controller_endpoint`, `appset_controller_endpoint`, `repo_server_endpoint`, `api_server_endpoint`"
-                " or `notifications_controller_endpoint`."
+                " or `notifications_controller_endpoint` or `commit_server_endpoint`."
             )
 
         if app_controller_endpoint:
@@ -82,6 +87,10 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     NOTIFICATIONS_CONTROLLER_NAMESPACE,
                     NOTIFICATIONS_CONTROLLER_METRICS,
                 )
+            )
+        if commit_server_endpoint:
+            self.scraper_configs.append(
+                self.generate_config(commit_server_endpoint, COMMIT_SERVER_NAMESPACE, COMMIT_SERVER_METRICS)
             )
 
     def generate_config(self, endpoint, namespace, metrics):
