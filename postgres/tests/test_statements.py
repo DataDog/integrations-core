@@ -584,6 +584,44 @@ failed_explain_test_repeat_count = 5
 
 
 @pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM pg_class",
+        "SET LOCAL datestyle TO postgres; SELECT * FROM pg_class",
+    ],
+)
+def test_successful_explain(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+):
+    dbname = "datadog_test"
+    # Don't need metrics for this one
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # run check so all internal state is correctly initialized
+    run_one_check(check)
+
+    # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
+    aggregator.reset()
+
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error is None
+    assert err is None
+
+    plan, *rest = check.statement_samples._run_and_track_explain(dbname, query, query, "7231596c8b5536d1")
+    assert plan is not None
+
+    plan = plan['Plan']
+    assert plan['Node Type'] == 'Seq Scan'
+    assert plan['Relation Name'] == 'pg_class'
+
+
+@pytest.mark.parametrize(
     "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
         (
@@ -663,7 +701,7 @@ def test_failed_explain_handling(
     assert err is None
 
     for _ in range(failed_explain_test_repeat_count):
-        check.statement_samples._run_and_track_explain(dbname, query, query, query)
+        check.statement_samples._run_and_track_explain(dbname, query, query, "7231596c8b5536d1")
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
@@ -1480,7 +1518,9 @@ def test_statement_run_explain_errors(
     check._connect()
 
     run_one_check(check)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        "datadog_test", query, query, "7231596c8b5536d1"
+    )
     run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
@@ -1534,7 +1574,9 @@ def test_statement_run_explain_parameterized_queries(
         return
 
     run_one_check(check)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        "datadog_test", query, query, "7231596c8b5536d1"
+    )
     run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
