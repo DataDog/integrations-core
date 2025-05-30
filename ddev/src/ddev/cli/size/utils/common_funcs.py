@@ -286,9 +286,7 @@ def get_dependencies_sizes(
             if compressed:
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     size = sum(
-                        zinfo.file_size
-                        for zinfo in zip_ref.infolist()
-                        # if "test" not in zinfo.filename.lower()
+                        zinfo.compress_size for zinfo in zip_ref.infolist() if "test" not in zinfo.filename.lower()
                     )
             else:
                 extract_path = Path(tmpdir) / "extracted"
@@ -461,7 +459,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.csv"
                     if version
-                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
+                    else f"{platform}_{size_type}_{mode}.csv"
+                    if platform
+                    else f"{size_type}_{mode}.csv"
                 )
             )
             save_csv(app, modules, csv_filename)
@@ -473,7 +473,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.json"
                     if version
-                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
+                    else f"{platform}_{size_type}_{mode}.json"
+                    if platform
+                    else f"{size_type}_{mode}.json"
                 )
             )
             save_json(app, json_filename, modules)
@@ -485,7 +487,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.md"
                     if version
-                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
+                    else f"{platform}_{size_type}_{mode}.md"
+                    if platform
+                    else f"{size_type}_{mode}.md"
                 )
             )
             save_markdown(app, "Status", modules, markdown_filename)
@@ -707,14 +711,15 @@ def send_metrics_to_dd(
     config_file_info = get_org(app, org)
     # if not is_everything_committed():
     #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
-    if 'api_key' not in config_file_info:
+    if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
-    if 'site' not in config_file_info:
+    if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
     timestamp = get_last_commit_timestamp()
     from datetime import datetime
-    print('date', datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"))
+
+    print("date", datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"))
 
     metrics = []
 
