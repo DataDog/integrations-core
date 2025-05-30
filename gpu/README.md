@@ -174,7 +174,7 @@ helm install -f values.yaml -f values-gpu.yaml datadog-gpu datadog
 
 #### Datadog Operator
 
-_**Minimal required operator version: 1.14**_
+_**Minimum required operator version: 1.14**_
 
 To enable the GPU feature in clusters where all the nodes have GPUs, set the `features.gpu.enabled` parameter in the DatadogAgent manifest:
 
