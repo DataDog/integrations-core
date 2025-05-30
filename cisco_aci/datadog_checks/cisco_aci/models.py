@@ -160,6 +160,8 @@ class LldpAdjAttributes(BaseModel):
     @computed_field
     @property
     def remote_port_index(self) -> int:
+        if self.remote_port_id is None:
+            return None
         return helpers.get_index_from_eth_id(self.remote_port_id)
 
 
