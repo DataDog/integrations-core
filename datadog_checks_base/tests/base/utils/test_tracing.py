@@ -5,20 +5,20 @@
 import os
 from contextlib import contextmanager
 
-import mock
-import pytest
+# import mock
+# import pytest
 
 from datadog_checks.base.stubs import aggregator
 from datadog_checks.base.utils.tracing import (
-    AGENT_CHECK_DEFAULT_TRACED_METHODS,
-    INTEGRATION_TRACING_SERVICE_NAME,
+    # AGENT_CHECK_DEFAULT_TRACED_METHODS,
+    # INTEGRATION_TRACING_SERVICE_NAME,
     traced_class,
 )
 
-try:
-    from ddtrace.constants import ERROR_MSG, ERROR_TYPE
-except ImportError:
-    from ddtrace.ext.errors import ERROR_MSG, ERROR_TYPE
+# try:
+#     from ddtrace.constants import ERROR_MSG, ERROR_TYPE
+# except ImportError:
+#     from ddtrace.ext.errors import ERROR_MSG, ERROR_TYPE
 
 
 class MockAgentCheck(object):
