@@ -3,6 +3,96 @@ metric_id: iboss
 backend_only: false
 facets:
   - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Web Access
+    name: Method
+    path: http.method
+    source: log
+  - groups:
+      - Web Access
+    name: Status Code
+    path: http.status_code
+    source: log
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url
+    source: log
+  - groups:
+      - Web Access
+    name: URL Host
+    path: http.url_details.host
+    source: log
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url_details.path
+    source: log
+  - groups:
+      - Web Access
+    name: URL scheme
+    path: http.url_details.scheme
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
       - Web Access
     name: Client IP
     path: network.client.ip
@@ -11,6 +101,41 @@ facets:
       - Web Access
     name: Client Port
     path: network.client.port
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
     source: log
   - groups:
       - Web Access
@@ -23,51 +148,11 @@ facets:
     path: network.destination.port
     source: log
   - groups:
-      - Event
-    name: Event Name
-    path: evt.name
-    source: log
-  - groups:
       - User
     name: User Name
     path: usr.name
     source: log
-  - groups:
-      - Web Access
-    name: URL Path
-    path: http.url
-    source: log
-  - groups:
-      - Web Access
-    name: Method
-    path: http.method
-    source: log
-  - groups:
-      - Web Access
-    name: URL scheme
-    path: http.url_details.scheme
-    source: log
-  - groups:
-      - Web Access
-    name: URL Path
-    path: http.url_details.path
-    source: log
-  - groups:
-      - Web Access
-    name: URL Host
-    path: http.url_details.host
-    source: log
-  - groups:
-      - Web Access
-    name: Status Code
-    path: http.status_code
-    source: log
-  - groups:
-      - Web Access
-    name: User-Agent
-    path: http.useragent
-    source: log
-  - description: ""
+  - description: ''
     facetType: range
     groups:
       - iboss
@@ -203,7 +288,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: " Map `username` to `usr.name`"
+      name: Map `username` to `usr.name`
       enabled: true
       sources:
         - username
@@ -219,7 +304,7 @@ pipeline:
         query: "@evt.name:(WEB_LOG OR DLP)"
       processors:
         - type: attribute-remapper
-          name: " Map `url` to `http.url`"
+          name: Map `url` to `http.url`
           enabled: true
           sources:
             - url
@@ -229,7 +314,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: " Map `requestMethod` to `http.method`"
+          name: Map `requestMethod` to `http.method`
           enabled: true
           sources:
             - requestMethod
@@ -340,7 +425,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: " Map `proxyTotalTime` to `iboss.proxyTotalTime`"
+      name: Map `proxyTotalTime` to `iboss.proxyTotalTime`
       enabled: true
       sources:
         - proxyTotalTime
