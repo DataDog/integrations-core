@@ -108,6 +108,8 @@ For Helm configurations where all the nodes have GPUs, you can set up the Datado
 
 ```yaml
 datadog:
+  enable_nvml_detection: true
+  collect_gpu_tags: true
   gpuMonitoring:
     enabled: true
 ```
@@ -142,6 +144,8 @@ Additionally, if you need to select nodes based on the presence of a label key, 
 # GPU-specific values-gpu.yaml (for GPU nodes)
 datadog:
   kubeStateMetricsEnabled: false # Disabled as we're joining an existing Cluster Agent
+  enable_nvml_detection: true
+  collect_gpu_tags: true
   gpuMonitoring:
     enabled: true
 
