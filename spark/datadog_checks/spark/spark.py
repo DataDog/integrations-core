@@ -412,7 +412,7 @@ class SparkCheck(AgentCheck):
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
             except JSONDecodeError:
                 self.log.debug(
-                    'Skipping metrics for %s from app %s due to unparseable JSON payload.', property, app_name
+                    'Skipping metrics for %s from app %s due to unparsable JSON payload.', property, app_name
                 )
                 continue
 
@@ -698,7 +698,7 @@ class SparkCheck(AgentCheck):
 
         soup = BeautifulSoup(html_content, 'html.parser')
         redirect_link = None
-        for link in soup.findAll('a'):
+        for link in soup.find_all('a'):
             href = link.get('href')
             if 'proxyapproved' in href:
                 redirect_link = href
