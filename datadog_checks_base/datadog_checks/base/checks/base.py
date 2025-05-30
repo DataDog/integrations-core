@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import ast
 import copy
 import functools
 import importlib
@@ -1479,7 +1480,7 @@ class AgentCheck(object):
         import sys
 
         process = subprocess.Popen(
-            [sys.executable, '-c', 'import sys, yaml; print(repr(yaml.safe_load(sys.stdin.read())))'],
+            [sys.executable, '-c', 'import sys, yaml; print(yaml.safe_load(sys.stdin.read()))'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -1488,11 +1489,59 @@ class AgentCheck(object):
         if process.returncode != 0:
             raise ValueError(f'Failed to load config: {stderr.decode()}')
 
-        decoded = stdout.strip().decode()
+        decoded_string = stdout.strip().decode()
+
+        # We need to process inf and nan in a special way since they are not valid Python literals.
+        # We'll replace them with placeholders to avoid parsing errors, and then restore them after parsing.
+
+        INF_PLACEHOLDER = '__PYTHON_INF__'
+        NEG_INF_PLACEHOLDER = '__PYTHON_NEG_INF__'
+        NAN_PLACEHOLDER = '__PYTHON_NAN__'
+
+        # AST Transformer to replace inf/nan names with placeholder constants
+        class _SpecialFloatValuesTransformer(ast.NodeTransformer):
+            def visit_Name(self, node: ast.Name) -> ast.AST:
+                if node.id == 'inf':
+                    return ast.Constant(value=INF_PLACEHOLDER)
+                elif node.id == 'nan':
+                    return ast.Constant(value=NAN_PLACEHOLDER)
+                return node
+
+            def visit_UnaryOp(self, node: ast.UnaryOp) -> ast.AST:
+                if isinstance(node.op, ast.USub) and isinstance(node.operand, ast.Name) and node.operand.id == 'inf':
+                    return ast.Constant(value=NEG_INF_PLACEHOLDER)
+                return self.generic_visit(node)
+
+        # Helper to restore placeholder strings to actual float values
+        def _restore_special_floats(data: Any) -> Any:
+            if isinstance(data, dict):
+                return {key: _restore_special_floats(value) for key, value in data.items()}
+            elif isinstance(data, list):
+                return [_restore_special_floats(item) for item in data]
+            elif isinstance(data, str):
+                if data == INF_PLACEHOLDER:
+                    return float('inf')
+                elif data == NEG_INF_PLACEHOLDER:
+                    return float('-inf')
+                elif data == NAN_PLACEHOLDER:
+                    return float('nan')
+            return data
+
         try:
-            # Handle special values like nan, inf, -inf, which are not valid Python literals.
-            special_values = {"nan": float("nan"), "inf": float("inf")}
-            return eval(decoded, special_values)
-        # a single, literal unquoted string
+            if not decoded_string:
+                return None
+
+            # Parse the string as a Python expression
+            ast_node = ast.parse(decoded_string, mode='eval').body
+
+            # Replace inf/nan with placeholders
+            transformer = _SpecialFloatValuesTransformer()
+            transformed_ast_node = transformer.visit(ast_node)
+
+            # Evaluate the AST node to get the actual value
+            data_with_placeholders = ast.literal_eval(transformed_ast_node)
+
+            # Restore placeholders to actual float values
+            return _restore_special_floats(data_with_placeholders)
         except Exception:
-            return decoded
+            return decoded_string

@@ -83,6 +83,13 @@ def test_parse_special_values_in_load_config():
     assert "number" in config
     assert math.isnan(config["number"])
 
+    # Assert that a string with an inf inside it is parsed as a string
+    assert AgentCheck.load_config("string: \"hi inf\"") == {"string": "hi inf"}
+    assert AgentCheck.load_config("string: hi inf") == {"string": "hi inf"}
+    assert AgentCheck.load_config("string: \"this inf is in the middle\"") == {"string": "this inf is in the middle"}
+    assert AgentCheck.load_config("string: this inf is in the middle") == {"string": "this inf is in the middle"}
+    assert AgentCheck.load_config("string: infinity") == {"string": "infinity"}
+
 
 def test_persistent_cache(datadog_agent):
     check = AgentCheck()
