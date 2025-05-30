@@ -71,6 +71,7 @@ SERVICE_CHECK_NAME = 'can_connect'
 
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
+    HA_SUPPORTED = True
 
     def __new__(cls, name, init_config, instances):
         # type: (Type[VSphereCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
@@ -1039,7 +1040,7 @@ class VSphereCheck(AgentCheck):
         # type: (...) -> None
         resource_metric_suffix = MOR_TYPE_AS_STRING[resource_type]
         mor_name = to_string(mor_props.get('name', 'unknown'))
-        hostname = mor_props.get('hostname', 'unknown')
+        hostname = mor_props.get('hostname')
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:

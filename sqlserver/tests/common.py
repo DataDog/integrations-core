@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE_AO,
     INSTANCE_METRICS_DATABASE_SINGLE,
+    TABLE_SIZE_METRICS,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
@@ -36,11 +37,14 @@ def get_local_driver():
     we need to define the 'FreeTDS' driver in odbcinst.ini
     """
     if ON_MACOS:
-        return '/usr/local/lib/libtdsodbc.so'
+        return '/opt/homebrew/Cellar/freetds/1.4.26/lib/libtdsodbc.so'
     elif ON_WINDOWS:
         return '{ODBC Driver 18 for SQL Server}'
     else:
-        return '{ODBC Driver 18 for SQL Server}'
+        driver = os.environ.get('LINUX_SQLSERVER_DRIVER')
+        if not driver or driver == 'odbc':
+            return '{ODBC Driver 18 for SQL Server}'
+        return f'{driver}'
 
 
 HOST = get_docker_hostname()
@@ -94,6 +98,7 @@ EXPECTED_DEFAULT_METRICS = (
             DATABASE_METRICS,
             DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
+            TABLE_SIZE_METRICS,
         )
     ]
     + DATABASE_INDEX_METRICS

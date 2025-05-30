@@ -2,7 +2,21 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2025-03-19
+## 3.3.0 / 2025-05-15
+
+***Added***:
+
+* Tag FoundationDB process metrics with process class, assigned roles ([#19682](https://github.com/DataDog/integrations-core/pull/19682))
+* Introduce a `foundationdb.processes_per_role` gauge tagged by process role/class ([#19706](https://github.com/DataDog/integrations-core/pull/19706))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 3.2.1 / 2025-04-17 / Agent 7.66.0
+
+***Fixed***:
+
+* Honor `tags` instance configuration in FoundationDB integration ([#19771](https://github.com/DataDog/integrations-core/pull/19771))
+
+## 3.2.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:
 

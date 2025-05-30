@@ -7,7 +7,6 @@ import re
 
 import psycopg2
 
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.cursor import CommenterDictCursor
 
@@ -22,7 +21,7 @@ PARAM_TYPES_COUNT_QUERY = '''\
 SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
 
-EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
+EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}{parameters}'
 
 EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
 
@@ -73,7 +72,7 @@ class ExplainParameterizedQueries:
         self._explain_function = explain_function
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def explain_statement(self, dbname, statement, obfuscated_statement):
+    def explain_statement(self, dbname, statement, obfuscated_statement, query_signature):
         if self._check.version < V12:
             # if pg version < 12, skip explaining parameterized queries because
             # plan_cache_mode is not supported
@@ -85,9 +84,12 @@ class ExplainParameterizedQueries:
             return None, DBExplainError.parameterized_query, '{}'.format(type(e))
         self._set_plan_cache_mode(dbname)
 
-        query_signature = compute_sql_signature(obfuscated_statement)
         try:
             self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        except psycopg2.errors.IndeterminateDatatype as e:
+            return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+        except psycopg2.errors.UndefinedFunction as e:
+            return None, DBExplainError.undefined_function, '{}'.format(type(e))
         except Exception as e:
             # if we fail to create a prepared statement, we cannot explain the query
             return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
@@ -140,19 +142,25 @@ class ExplainParameterizedQueries:
         return rows[0][0] if rows else 0
 
     @tracked_method(agent_check_getter=agent_check_getter)
+    def _generate_prepared_statement_query(self, dbname: str, query_signature: str) -> str:
+        parameters = ""
+        num_params = self._get_number_of_parameters_for_prepared_statement(dbname, query_signature)
+
+        if num_params > 0:
+            null_parameters = ','.join('null' for _ in range(num_params))
+            parameters = f"({null_parameters})"
+
+        return EXECUTE_PREPARED_STATEMENT_QUERY.format(prepared_statement=query_signature, parameters=parameters)
+
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        null_parameter = ','.join(
-            'null' for _ in range(self._get_number_of_parameters_for_prepared_statement(dbname, query_signature))
-        )
-        execute_prepared_statement_query = EXECUTE_PREPARED_STATEMENT_QUERY.format(
-            prepared_statement=query_signature, generic_values=null_parameter
-        )
+        prepared_statement_query = self._generate_prepared_statement_query(dbname, query_signature)
         try:
             return self._execute_query_and_fetch_rows(
                 dbname,
                 EXPLAIN_QUERY.format(
                     explain_function=self._explain_function,
-                    statement=execute_prepared_statement_query,
+                    statement=prepared_statement_query,
                 ),
             )
         except Exception as e:

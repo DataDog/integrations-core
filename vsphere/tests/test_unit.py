@@ -11,7 +11,7 @@ from pyVmomi import vim, vmodl
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS, PROPERTY_METRICS_BY_RESOURCE_TYPE
 
 from .common import (
     EVENTS,
@@ -2835,6 +2835,29 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
     dd_run_check(check)
     aggregator.assert_metric('vsphere.datastore.summary.freeSpace', count=1, value=305, tags=base_tags)
     aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
+
+
+def test_historical_property_metrics_empty_hostname(
+    aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex
+):
+    historical_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    # assert historical metrics sent with empty hostname
+    # these can be submitted with the agent hostname if empty_default_hostname is False, but that logic is
+    # in the agent code https://github.com/DataDog/datadog-agent/blob/7.65.x/pkg/aggregator/sender.go#L209-L211
+    aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.enabled', hostname='')
+    aggregator.assert_metric('vsphere.datastore.summary.capacity', hostname='')
+
+    historical_resources_with_property_metrics = ['cluster', 'datastore']
+    for resource_type in historical_resources_with_property_metrics:
+        metrics = PROPERTY_METRICS_BY_RESOURCE_TYPE[resource_type]
+        for metric in metrics:
+            aggregator.assert_metric(f"vsphere.{resource_type}.{metric}", hostname='')
 
 
 def test_property_metrics_resource_filters(

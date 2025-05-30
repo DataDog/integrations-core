@@ -129,7 +129,12 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     _assert_complex_config(
         aggregator,
         tags.SC_TAGS + tags.database_instance_resource_tags(dd_default_hostname),
-        tags.METRIC_TAGS + [f'database_hostname:{dd_default_hostname}', 'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower())],
+        tags.METRIC_TAGS
+        + [
+            f'database_hostname:{dd_default_hostname}',
+            f'database_instance:{dd_default_hostname}',
+            'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+        ],
         hostname=dd_default_hostname,
         e2e=True,
     )
@@ -436,6 +441,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     expected_tags = [
         'database_hostname:{}'.format(mysql_check.database_hostname),
+        'database_instance:{}'.format(expected_hostname),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
@@ -774,7 +780,7 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
         (True, None),
         (False, None),
         (True, 'forced_hostname'),
-        (True, 'forced_hostname'),
+        (False, 'forced_hostname'),
     ],
 )
 @pytest.mark.integration
@@ -787,18 +793,30 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
         instance_complex['query_activity'] = {'collection_interval': 0.1}
         instance_complex['query_samples'] = {'collection_interval': 0.1}
         instance_complex['query_metrics'] = {'collection_interval': 0.1}
+
+    expected_host = expected_database_hostname = expected_database_instance = "stubbed.hostname"
     if reported_hostname:
         instance_complex['reported_hostname'] = reported_hostname
-    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+        expected_host = reported_hostname
+        expected_database_instance = reported_hostname
+
+    expected_tags = tags.METRIC_TAGS + [
+        "database_hostname:{}".format(expected_database_hostname),
+        "database_instance:{}".format(expected_database_instance),
+    ]
+
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+
     assert event is not None
     assert event['host'] == expected_host
+    assert event['database_instance'] == expected_database_instance
+    assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "mysql"
-    assert event['tags'].sort() == tags.METRIC_TAGS.sort()
+    assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {
@@ -848,6 +866,7 @@ def test_propagate_agent_tags(
         instance_basic.get('tags', [])
         + [
             'database_hostname:stubbed.hostname',
+            'database_instance:forced_hostname',
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
             'dd.internal.resource:database_instance:forced_hostname',

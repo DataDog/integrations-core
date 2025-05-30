@@ -28,6 +28,8 @@ from datadog_checks.postgres.statements import (
     PG_STAT_STATEMENTS_TIMING_COLUMNS,
     PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17,
     PostgresStatementMetrics,
+    StatementMetrics,
+    _row_key,
 )
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
@@ -582,6 +584,44 @@ failed_explain_test_repeat_count = 5
 
 
 @pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM pg_class",
+        "SET LOCAL datestyle TO postgres; SELECT * FROM pg_class",
+    ],
+)
+def test_successful_explain(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+):
+    dbname = "datadog_test"
+    # Don't need metrics for this one
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # run check so all internal state is correctly initialized
+    run_one_check(check)
+
+    # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
+    aggregator.reset()
+
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error is None
+    assert err is None
+
+    plan, *rest = check.statement_samples._run_and_track_explain(dbname, query, query, "7231596c8b5536d1")
+    assert plan is not None
+
+    plan = plan['Plan']
+    assert plan['Node Type'] == 'Seq Scan'
+    assert plan['Relation Name'] == 'pg_class'
+
+
+@pytest.mark.parametrize(
     "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
         (
@@ -661,7 +701,7 @@ def test_failed_explain_handling(
     assert err is None
 
     for _ in range(failed_explain_test_repeat_count):
-        check.statement_samples._run_and_track_explain(dbname, query, query, query)
+        check.statement_samples._run_and_track_explain(dbname, query, query, "7231596c8b5536d1")
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
@@ -758,7 +798,7 @@ def test_failed_explain_handling(
             "FROM persons WHERE city = %s",
             # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
             # looking at the length in bytes when testing for truncated statements
-            u'\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC',
+            u'\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac',
             "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
@@ -1478,7 +1518,9 @@ def test_statement_run_explain_errors(
     check._connect()
 
     run_one_check(check)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        "datadog_test", query, query, "7231596c8b5536d1"
+    )
     run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
@@ -1532,7 +1574,9 @@ def test_statement_run_explain_parameterized_queries(
         return
 
     run_one_check(check)
-    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        "datadog_test", query, query, "7231596c8b5536d1"
+    )
     run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
@@ -2058,6 +2102,41 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
     aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
+
+
+@pytest.mark.parametrize(
+    "prev_row,curr_row,expected_included",
+    [
+        # Base case - normal increase in calls and duration
+        ({"calls": 5, "total_time": 100}, {"calls": 6, "total_time": 120}, True),
+        # Test case - no change in calls but duration increased
+        ({"calls": 5, "total_time": 100}, {"calls": 5, "total_time": 120}, False),
+        # Test case - calls=0 with duration>0
+        ({"calls": 0, "total_time": 0}, {"calls": 0, "total_time": 50}, False),
+    ],
+)
+def test_statement_metrics_execution_indicators(prev_row, curr_row, expected_included):
+    """Test that queries are only included in results if execution indicators (calls) have increased."""
+    # Setup
+    state = StatementMetrics()
+    metrics = {"calls", "total_time"}
+    execution_indicators = ["calls"]
+
+    # Add query signature and other required fields
+    prev_row.update({"query_signature": "test_query", "datname": "test_db", "rolname": "test_role"})
+    curr_row.update({"query_signature": "test_query", "datname": "test_db", "rolname": "test_role"})
+
+    # First run to establish baseline
+    state.compute_derivative_rows([prev_row], metrics, key=_row_key, execution_indicators=execution_indicators)
+
+    # Second run to test the behavior
+    result = state.compute_derivative_rows([curr_row], metrics, key=_row_key, execution_indicators=execution_indicators)
+
+    # Verify
+    assert bool(result) == expected_included
+    if result:
+        assert result[0]["calls"] == curr_row["calls"] - prev_row["calls"]
+        assert result[0]["total_time"] == curr_row["total_time"] - prev_row["total_time"]
 
 
 @requires_over_13

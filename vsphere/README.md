@@ -20,7 +20,7 @@ Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of
 
 [Restart the Agent][5] to start sending vSphere metrics and events to Datadog.
 
-**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up to point to a vSphere appliance server. Update your `<HOSTNAME>` for each instance accordingly.
+**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up to point to a vSphere appliance server. Update your `<HOSTNAME>` for each instance accordingly. You only need to configurate the vSphere integration once to collect metrics about your entire vCenter.
 
 ### Compatibility
 
@@ -66,7 +66,7 @@ To enable property metrics, configure the following option:
 collect_property_metrics: true
 ```
 
-Property metrics are prefixed by the resource name. For example, host property metrics metrics are prefixed with `vsphere.host.*`, and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
+Property metrics are prefixed by the resource name. For example, host property metrics are prefixed with `vsphere.host.*`, and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
 
 
 ### Events
@@ -111,7 +111,7 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -36,8 +36,8 @@ You can review all available configuration options in the [kube_apiserver_metric
 
 You can annotate the kubernetes service in your `default` namespace with the following:
 
-{{< tabs >}}
-{{% tab "Annotations v2 (for Datadog Agent v7.36+)" %}}
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Annotations v2 (for Datadog Agent v7.36)" xxx -->
 
 ```yaml
 ad.datadoghq.com/endpoints.checks: |
@@ -49,11 +49,12 @@ ad.datadoghq.com/endpoints.checks: |
         }
       ]
     }
-  } 
-
+  }
 ```
-{{% /tab %}}
-{{% tab "Annotations v1 (for Datadog Agent < v7.36)" %}}
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Annotations v1 (for Datadog Agent < v7.36)" xxx -->
 
 ```yaml
 annotations:
@@ -62,8 +63,9 @@ annotations:
   ad.datadoghq.com/endpoints.instances:
     '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics"}]'
 ```
-{{% /tab %}}
-{{< /tabs >}}
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s). 
 
@@ -75,8 +77,10 @@ You can also run the check by configuring the endpoints directly in the `kube_ap
 
 Provide a [configuration][13] to your Cluster Agent to setup a Cluster Check:
 
-{{< tabs >}} 
-{{% tab "Helm" %}}
+<!-- xxx tabs xxx -->
+
+<!-- xxx tab "Helm" xxx -->
+
 ```yaml
 clusterAgent:
   confd:
@@ -90,9 +94,10 @@ clusterAgent:
       instances:
         - prometheus_url: "https://%%host%%:%%port%%/metrics"
 ```
-{{% /tab %}}
 
-{{% tab "Operator" %}}
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Operator" xxx -->
 
 ```yaml
 spec:
@@ -111,8 +116,10 @@ spec:
             instances:
               - prometheus_url: "https://%%host%%:%%port%%/metrics"
 ```
-{{% /tab %}}
-{{< /tabs >}}
+
+<!-- xxz tab xxx -->
+
+<!-- xxz tabs xxx -->
 
 These configurations trigger the Agent to make a request to the `kubernetes` service in the `default` namespace at its defined Endpoint IP Addresses and defined port.
 
@@ -140,7 +147,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kube_apiserver_metrics/images/screenshot.png
 [2]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#set-up-cluster-checks
