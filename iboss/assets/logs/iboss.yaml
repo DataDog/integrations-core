@@ -161,8 +161,8 @@ facets:
     source: log
     type: double
     unit:
-      name: millisecond
       family: time
+      name: millisecond
 pipeline:
   type: pipeline
   name: iboss
