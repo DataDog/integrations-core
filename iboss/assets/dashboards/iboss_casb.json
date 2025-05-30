@@ -26,7 +26,7 @@
             "id": 7290077549808446,
             "definition": {
                 "type": "note",
-                "content": "**[iboss](https://www.iboss.com/)** provides secure internet access and Zero Trust enforcement for users anywhere. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.\n\nThis dashboard provides a comprehensive overview of CASB activities.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides a comprehensive overview of CASB activities.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -236,7 +236,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 0,
@@ -380,7 +380,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 0,
@@ -524,7 +524,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 0,

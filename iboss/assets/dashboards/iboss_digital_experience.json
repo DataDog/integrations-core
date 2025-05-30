@@ -1,6 +1,6 @@
 {
     "title": "iboss - Digital Experience",
-    "description": "This dashboard provides real-time insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets.\n",
+    "description": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets.\n",
     "widgets": [
         {
             "id": 4051130684011850,
@@ -19,14 +19,15 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 3
+                "height": 3,
+                "is_column_break": true
             }
         },
         {
             "id": 7698910360951864,
             "definition": {
                 "type": "note",
-                "content": "**[iboss](https://www.iboss.com/)** provides secure internet access and Zero Trust enforcement for users anywhere. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.\n\nThis dashboard provides real-time insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -612,7 +613,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 6,
@@ -869,7 +870,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 6,
@@ -1126,7 +1127,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 6,
@@ -1383,7 +1384,7 @@
                         ]
                     }
                 ],
-                "has_search_bar": "auto"
+                "has_search_bar": "always"
             },
             "layout": {
                 "x": 6,

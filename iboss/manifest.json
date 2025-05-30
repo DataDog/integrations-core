@@ -10,7 +10,48 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into iboss platform data.",
     "title": "iboss",
-    "media": [],
+    "media": [
+      {
+        "caption": "iboss - Overview",
+        "image_url": "images/iboss_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Web and DLP Events",
+        "image_url": "images/iboss_web_and_dlp_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Audit events",
+        "image_url": "images/iboss_audit_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Gateway Performance",
+        "image_url": "images/iboss_gateway_performance.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Digital Experience",
+        "image_url": "images/iboss_digital_experience.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Web Analytics",
+        "image_url": "images/iboss_web_analytics.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Bandwidth",
+        "image_url": "images/iboss_bandwidth.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "iboss - Zero Trust",
+        "image_url": "images/iboss_zero_trust.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
@@ -51,6 +92,15 @@
       "iboss - Zero Trust": "assets/dashboards/iboss_zero_trust.json",
       "iboss - Threat": "assets/dashboards/iboss_threat.json",
       "iboss - CASB": "assets/dashboards/iboss_casb.json"
+    },
+    "monitors": {
+      "Anomalous increase in gateway requests per second detected": "assets/monitors/anomalous_increase_in_gateway_requests_per_second_detected.json",
+      "Excessive bandwidth usage detected": "assets/monitors/excessive_bandwidth_usage_detected.json",
+      "High average application peer time detected": "assets/monitors/high_average_application_peer_time_detected.json",
+      "High gateway load detected": "assets/monitors/high_gateway_load_detected.json",
+      "High proxy error rate detected": "assets/monitors/high_proxy_error_rate_detected.json",
+      "High proxy response time detected": "assets/monitors/high_proxy_response_time_detected.json",
+      "High rate of unprevented threats detected": "assets/monitors/high_rate_of_unprevented_threats_detected.json"
     },
     "logs": {
       "source": "iboss"

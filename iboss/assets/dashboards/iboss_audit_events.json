@@ -1,6 +1,6 @@
 {
     "title": "iboss - Audit Events",
-    "description": "This dashboard provide insights into audit and agent registration events in iboss, offering visibility into admin actions, policy changes, and device onboarding for improved security and compliance.",
+    "description": "This dashboard provides insights into audit and agent registration events in iboss, offering visibility into admin actions, policy changes, and device onboarding for improved security and compliance.",
     "widgets": [
         {
             "id": 80178177366926,
@@ -26,7 +26,7 @@
             "id": 8149798550171738,
             "definition": {
                 "type": "note",
-                "content": "**[iboss](https://www.iboss.com/)** provides secure internet access and Zero Trust enforcement for users anywhere. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.\n\nThis dashboard provide insights into audit and agent registration events in iboss, offering visibility into admin actions, policy changes, and device onboarding for improved security and compliance.\n- **Audit Activity Insights**: Tracks administrative and user actions within iboss, including changes to configurations, policies, and user roles.\n- **Agent Registration Insights**: Captures events when endpoint agents register or connect to the iboss cloud\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides insights into audit and agent registration events in iboss, offering visibility into admin actions, policy changes, and device onboarding for improved security and compliance.\n- **Audit Activity Insights**: Tracks administrative and user actions within iboss, including changes to configurations, policies, and user roles.\n- **Agent Registration Insights**: Captures events when endpoint agents register or connect to the iboss cloud\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -191,7 +191,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT -@usr.name:\"-\" $user_name"
                                             },
                                             "indexes": [
                                                 "*"

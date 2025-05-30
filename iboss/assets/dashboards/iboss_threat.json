@@ -26,7 +26,7 @@
             "id": 1717103428126246,
             "definition": {
                 "type": "note",
-                "content": "**[iboss](https://www.iboss.com/)** provides secure internet access and Zero Trust enforcement for users anywhere. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.\n\nThis dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -393,7 +393,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 2,
@@ -534,7 +534,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 2,
@@ -598,7 +598,8 @@
                 "x": 0,
                 "y": 14,
                 "width": 12,
-                "height": 7
+                "height": 7,
+                "is_column_break": true
             }
         },
         {
@@ -693,7 +694,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 2,
@@ -764,7 +765,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 7,
@@ -856,7 +857,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 2,
@@ -927,7 +928,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 7,

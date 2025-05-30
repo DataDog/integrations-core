@@ -26,7 +26,7 @@
             "id": 1345468243126336,
             "definition": {
                 "type": "note",
-                "content": "**[iboss](https://www.iboss.com/)** provides secure internet access and Zero Trust enforcement for users anywhere. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.\n\nThis dashboard provides a comprehensive overview of web activity, enabling organizations to monitor user behavior, detect policy violations, and optimize web usage.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides a comprehensive overview of web activity, enabling organizations to monitor user behavior, detect policy violations, and optimize web usage.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -344,7 +344,6 @@
                             "title": "Trending Search Terms",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -394,7 +393,6 @@
                             "title": "Most Triggered Suspicious Terms",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -451,7 +449,6 @@
                             "title": "Most Triggered Liability Terms",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -508,7 +505,6 @@
                             "title": "Top Filter Avoidance Terms",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1028,7 +1024,7 @@
                                     ]
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "has_search_bar": "always"
                         },
                         "layout": {
                             "x": 0,
