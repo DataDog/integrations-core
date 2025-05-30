@@ -1,0 +1,47 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "7916a8a2-b94d-439f-a8f6-2e2dd447e046",
+  "app_id": "iboss",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into iboss platform data.",
+    "title": "iboss",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 46175258,
+      "source_type_name": "iboss",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "iboss.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
