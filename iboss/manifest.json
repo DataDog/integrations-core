@@ -28,6 +28,9 @@
       "auto_install": true,
       "source_type_id": 46175258,
       "source_type_name": "iboss",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "events": {
         "creates_events": false
       },
@@ -35,19 +38,19 @@
         "prefix": "iboss.",
         "check": "iboss.gateway_performance.total_request_count",
         "metadata_path": "metadata.csv"
-      },
-      "dashboards": {
-        "iboss - Overview": "assets/dashboards/iboss_overview.json",
-        "iboss - Web & DLP Events": "assets/dashboards/iboss_web_and_dlp_events.json",
-        "iboss - Audit events": "assets/dashboards/iboss_audit_events.json",
-        "iboss - Gateway Performance": "assets/dashboards/iboss_gateway_performance.json",
-        "iboss - Digital Experience": "assets/dashboards/iboss_digital_experience.json",
-        "iboss - Web Analytics": "assets/dashboards/iboss_web_analytics.json",
-        "iboss - bandwidth": "assets/dashboards/iboss_bandwidth.json",
-        "iboss - Zero Trust": "assets/dashboards/iboss_zero_trust.json",
-        "iboss - Threat": "assets/dashboards/iboss_threat.json",
-        "iboss - CASB": "assets/dashboards/iboss_casb.json"
       }
+    },
+    "dashboards": {
+      "iboss - Overview": "assets/dashboards/iboss_overview.json",
+      "iboss - Web & DLP Events": "assets/dashboards/iboss_web_and_dlp_events.json",
+      "iboss - Audit events": "assets/dashboards/iboss_audit_events.json",
+      "iboss - Gateway Performance": "assets/dashboards/iboss_gateway_performance.json",
+      "iboss - Digital Experience": "assets/dashboards/iboss_digital_experience.json",
+      "iboss - Web Analytics": "assets/dashboards/iboss_web_analytics.json",
+      "iboss - bandwidth": "assets/dashboards/iboss_bandwidth.json",
+      "iboss - Zero Trust": "assets/dashboards/iboss_zero_trust.json",
+      "iboss - Threat": "assets/dashboards/iboss_threat.json",
+      "iboss - CASB": "assets/dashboards/iboss_casb.json"
     },
     "logs": {
       "source": "iboss"
