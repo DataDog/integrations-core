@@ -359,7 +359,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             sc = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
-                sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
+                sc_id = '{}/{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''), check.get('Node', ''))
                 status = STATUS_SC.get(check['Status'])
                 if status is None:
                     status = self.UNKNOWN
