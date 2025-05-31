@@ -34,6 +34,20 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
+def test_collect_extensions(integration_check, dbm_instance, aggregator):
+    check = integration_check(dbm_instance)
+    check.check(dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'pg_extension'), None)
+    assert event is not None
+    assert event['host'] == "stubbed.hostname"
+    assert event['dbms'] == "postgres"
+    assert event['kind'] == "pg_extension"
+    assert len(event["metadata"]) > 0
+    assert set(event["metadata"][0].keys()) == {'id', 'name', 'owner', 'relocatable', 'schema_name', 'version'}
+    assert next((k for k in event['metadata'] if k['name'].startswith('plpgsql')), None) is not None
+
+
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_settings"]['ignored_settings_patterns'] = ['max_wal%']
     check = integration_check(dbm_instance)
