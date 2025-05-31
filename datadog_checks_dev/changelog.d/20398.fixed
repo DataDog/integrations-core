@@ -1,0 +1,1 @@
+Stop relying on manifest.json to validate spec.yaml. Also stop checking the 'name' field in spec.yaml.

@@ -12,6 +12,7 @@ from ...config_validator.validator import validate_config
 from ...config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ExampleConsumer
+from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
@@ -67,7 +68,7 @@ def config(ctx, check, sync, verbose):
             echo_debug(f"Skipping validation for check: {check}; can't process manifest")
             continue
 
-        spec_file_path = manifest.get_config_spec()
+        spec_file_path = path_join(get_root(), check, 'assets', 'configuration', 'spec.yaml')
         if not file_exists(spec_file_path):
             example_location = get_data_directory(check)
 
