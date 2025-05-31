@@ -84,6 +84,26 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     check = integration_check(dbm_instance)
     assert check._config.dbm_enabled == dbm_enabled
 
+def test_char_encoding(
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+):
+    dbname = "datadog_test"
+    user = "bob"
+    password = "bob"
+    query = "INSERT INTO persons (lastname) VALUES (convert_from('\xd0'::bytea, 'LATIN1'))"
+
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    conn.cursor().execute(query)
+    conn.cursor().execute("SELECT lastname FROM persons");
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    run_one_check(check)
+    conn.cursor().execute("SELECT lastname FROM persons");
+    run_one_check(check)
+
 
 @requires_over_10
 def test_statement_metrics_multiple_pgss_rows_single_query_signature(
