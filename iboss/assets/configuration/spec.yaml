@@ -1,0 +1,10 @@
+name: iboss
+files:
+- name: iboss.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp/udp
+      port: <port>
+      source: iboss
+      service: iboss
