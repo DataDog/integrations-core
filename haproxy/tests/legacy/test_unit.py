@@ -433,7 +433,7 @@ def test_version_failure(aggregator, check, datadog_agent):
     filepath = os.path.join(os.path.dirname(common.HERE), 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.get') as m:
+    with mock.patch('requests.Session.get') as m:
         m.side_effect = [RuntimeError("Ooops"), mock.Mock(content=data)]
         haproxy_check.check(config)
 
