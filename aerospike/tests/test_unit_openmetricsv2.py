@@ -84,6 +84,11 @@ def _test_check_from_v7(aggregator, dd_run_check, instance_openmetrics_v2, mock_
 
             aggregator.assert_metric_has_tag_prefix(metric_name, 'aerospike_cluster')
             aggregator.assert_metric_has_tag_prefix(metric_name, 'aerospike_service')
+            
+            # latency metric should have le tag representing bucket
+            # 1,2,4,8,16,32..., 65k
+            if "aerospike.latencies" in metric_name and "_bucket" in metric_name:
+                aggregator.assert_metric_has_tag_prefix(metric_name, 'le')
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
