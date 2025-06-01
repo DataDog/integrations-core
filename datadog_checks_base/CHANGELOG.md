@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 37.13.0 / 2025-05-29
+
+***Added***:
+
+* Add TagManager class to dbm base utils ([#20397](https://github.com/DataDog/integrations-core/pull/20397))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
 ## 37.12.0 / 2025-05-28
 
 ***Added***:
