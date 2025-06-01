@@ -195,7 +195,7 @@ aerospike.namespace.batch_sub_read_not_found,gauge,,,,[OpenMetricsV2 and Aerospi
 aerospike.namespace.batch_sub_read_success,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] The number of successful batch-index read sub transactions.,0,aerospike,,,
 aerospike.namespace.batch_sub_read_timeout,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] The number of batch-index read sub transactions that timed out.,0,aerospike,,,
 aerospike.namespace.batch_sub_tsvc_error,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] The number of batch-index read sub transactions that failed with an error in the transaction service before attempting to handle the transaction.,0,aerospike,,,
-aerospike.namespace.batch_sub_tsvc_timeout,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] The number of batch-index read sub transactions that timed out in the transaction service before attempting to handle the transaction.,0,aerospike,,, 
+aerospike.namespace.batch_sub_tsvc_timeout,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] The number of batch-index read sub transactions that timed out in the transaction service before attempting to handle the transaction.,0,aerospike,,,
 aerospike.namespace.batch_sub_udf_complete,gauge,,,,[OpenMetricsV2 and Aerospike v6.0+] Number of completed batch-index UDF subtransactions (for scan/query background UDF jobs),0,aerospike,,,
 aerospike.namespace.batch_sub_udf_error,gauge,,,,[OpenMetricsV2 and Aerospike v6.0+] Number of failed batch-index UDF subtransactions (for scan/query background UDF jobs). Does not include timeouts,0,aerospike,,,
 aerospike.namespace.batch_sub_udf_filtered_out,gauge,,,,[OpenMetricsV2 and Aerospike v6.0+] Number of batch-index UDF subtransactions that did not happen because the record was filtered out with Filter Expressions.,0,aerospike,,,
