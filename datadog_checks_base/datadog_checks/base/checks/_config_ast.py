@@ -2,10 +2,10 @@ import ast
 from enum import Enum
 from typing import Any
 
-
 # This module is used to parse and modify the config AST before it is loaded.
-# It is used to handle special float values (inf, -inf, nan) and replace them with placeholders since those 
+# It is used to handle special float values (inf, -inf, nan) and replace them with placeholders since those
 # are not valid Python literals.
+
 
 class SpecialFloatPlaceholder(str, Enum):
     INF = '__PYTHON_INF__'

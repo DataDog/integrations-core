@@ -92,6 +92,7 @@ unicodedata: _module_unicodedata = lazy_loader.load('unicodedata')
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
+
 @traced_class
 class AgentCheck(object):
     """

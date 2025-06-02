@@ -21,15 +21,18 @@ from datadog_checks.base.checks import _config_ast
 def test_ast_config_parse_values(input_str, expected_value):
     assert _config_ast.parse(input_str) == expected_value
 
+
 def test_ast_config_parse_nan():
     assert _config_ast.parse("nan") != _config_ast.parse("nan")
     assert math.isnan(_config_ast.parse("nan"))
+
 
 def test_ast_config_parse_dict_with_specials():
     result = _config_ast.parse("{'a': inf, 'b': -inf, 'c': nan}")
     assert result['a'] == float('inf')
     assert result['b'] == float('-inf')
     assert math.isnan(result['c'])
+
 
 def test_ast_config_parse_invalid():
     # Should return the original string if parsing fails
