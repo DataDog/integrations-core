@@ -37,7 +37,18 @@
         "prefix": "proxmox.",
         "check": "",
         "metadata_path": "metadata.csv"
-      }
+      },
+      "process_signatures": [
+        "pmxcfs",
+        "pve-firewall",
+        "pve-ha-crm",
+        "pve-ha-lrm",
+        "pveproxy",
+        "pvedaemon",
+        "pvescheduler",
+        "pvestatd",
+        "qmeventd"
+      ]
     }
   },
   "author": {
