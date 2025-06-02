@@ -132,10 +132,10 @@ def test_statement_metrics(
     ) as m_get_runtime_aurora_tags:
         m_obfuscate_sql.side_effect = _obfuscate_sql
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = []
+        m_get_runtime_aurora_tags.return_value = {}
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
 
         # Run a query
         run_query(query)
@@ -433,10 +433,10 @@ def test_statement_samples_collect(
         mysql_check, '_get_runtime_aurora_tags', passthrough=True
     ) as m_get_runtime_aurora_tags:
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = []
+        m_get_runtime_aurora_tags.return_value = {}
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
 
         logger.debug("running first check")
         dd_run_check(mysql_check)
