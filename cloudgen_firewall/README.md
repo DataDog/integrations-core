@@ -1,13 +1,8 @@
-# Agent Check: cloudgen_firewall
+# Agent Integration: cloudgen_firewall
 
 ## Overview
 
-This check monitors [cloudgen_firewall][1].
-
-Include a high level overview of what this integration does:
-- Barracuda CloudGen Firewall is a next-generation firewall (NGFW) that combines traditional firewall functions with advanced security and networking features to protect and optimize distributed networks
-- This integration enables real-time security visibility, faster incident response, and smarter analytics by combining Barracuda's threat prevention with Datadog's modern observability platform.
-- The integration will monitor traffic, threats, authentication, VPN, system and so on enriching them with real-time analytics and alerts in Datadog. This helps customer in security Posture, incident detection & response time and enhance operational awareness. 
+This integration monitors [cloudgen_firewall][1].
 
 ## Setup
 
@@ -46,9 +41,32 @@ You should see traffic from the cloudGen Firwewall IP address. if not, check fir
 
 cloudgen_firewall does not include any metrics.
 
+### Log Collection
+
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Add this configuration block to your `cloudgen_firewall.d/conf.yaml` file to start collecting your cloudgen_firewall logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path:  /var/log/cloudgen_firewall.log
+          source: cloudgen_firewall
+          service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+3. [Restart the Agent][4].
+
 ### Events
 
-cloudgen_firewall include recognizable events like messages (eg. login failed, rule hits). These can be surfaced as datadog events with parsing.
+The cloudgen_firewall integration include recognizable events like messages (eg. login failed, rule hits). These can be surfaced as datadog events with parsing.
 
 ## Troubleshooting
 
@@ -57,3 +75,7 @@ Need help? Contact [Datadog support][3].
 [1]: https://www.barracuda.com/products/network-protection/cloudgen-firewall
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://app.datadoghq.com/integrations?search=barracuda_cloudgen_firewall
+[6]: https://github.com/DataDog/integrations-core/blob/master/cloudgen_firewall/assets/service_checks.json
+
