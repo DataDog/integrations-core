@@ -68,7 +68,7 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_up{$aerospike_cluster,$aerospike_service} by {build}",
+                "query": "sum:aerospike.node.up{$aerospike_cluster,$aerospike_service} by {build}",
                 "aggregator": "last"
               }
             ],
@@ -97,23 +97,23 @@
         "type": "treemap",
         "requests": [
           {
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
             "queries": [
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "max:aerospike.aerospike_node_stats_cluster_size{$aerospike_cluster} by {aerospike_cluster}",
+                "query": "max:aerospike.node_stats.cluster_size{$aerospike_cluster} by {aerospike_cluster}",
                 "aggregator": "last"
               }
             ],
             "response_format": "scalar",
             "style": {
               "palette": "datadog16"
-            }
+            },
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
           }
         ]
       },
@@ -151,7 +151,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_dead_partitions{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.dead_partitions{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -200,7 +200,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_unavailable_partitions{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.unavailable_partitions{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -245,23 +245,28 @@
             }
           },
           {
-            "id": 6292946237122578,
+            "id": 6454895762570484,
             "definition": {
-              "title": "Migration TX Remaining (total)",
+              "title": "RX Remaining",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
               "requests": [
                 {
-                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_tx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.migrate_rx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
+                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "comparator": ">=",
@@ -272,16 +277,6 @@
                       "comparator": ">=",
                       "value": 1,
                       "palette": "white_on_yellow"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit"
-                        }
-                      },
-                      "formula": "query1"
                     }
                   ]
                 }
@@ -305,7 +300,7 @@
           {
             "id": 6255688183355644,
             "definition": {
-              "title": "Migrations RX Active (total)",
+              "title": "RX Active",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -316,7 +311,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_rx_partitions_active{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.migrate_rx_partitions_active{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -361,28 +356,23 @@
             }
           },
           {
-            "id": 6454895762570484,
+            "id": 6292946237122578,
             "definition": {
-              "title": "Migration RX Remaining (total)",
+              "title": "TX Remaining",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
+                  "response_format": "scalar",
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_rx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.migrate_tx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
-                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "comparator": ">=",
@@ -393,6 +383,16 @@
                       "comparator": ">=",
                       "value": 1,
                       "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit"
+                        }
+                      },
+                      "formula": "query1"
                     }
                   ]
                 }
@@ -416,7 +416,7 @@
           {
             "id": 7221991800148516,
             "definition": {
-              "title": "Migration TX Active (total)",
+              "title": "TX Active",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -427,7 +427,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_tx_partitions_active{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.migrate_tx_partitions_active{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -524,7 +524,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_effective_is_quiesced{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.effective_is_quiesced{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -573,7 +573,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_pending_quiesce{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}",
+                      "query": "sum:aerospike.namespace.pending_quiesce{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}",
                       "aggregator": "last"
                     }
                   ],
@@ -631,7 +631,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:aerospike.aerospike_namespace_stop_writes{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "max:aerospike.namespace.stop_writes{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -684,7 +684,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_hwm_breached{$aerospike_cluster,$aerospike_service,$ns}",
+                      "query": "sum:aerospike.namespace.hwm_breached{$aerospike_cluster,$aerospike_service,$ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -735,7 +735,7 @@
     {
       "id": 5129900346401998,
       "definition": {
-        "title": "Client Connections",
+        "title": "Client",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -750,7 +750,7 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_stats_client_connections{$aerospike_cluster,$aerospike_service}",
+                "query": "sum:aerospike.node_stats.client_connections{$aerospike_cluster,$aerospike_service}",
                 "aggregator": "last"
               }
             ],
@@ -793,7 +793,7 @@
     {
       "id": 7891090331928794,
       "definition": {
-        "title": "Fabric Connections",
+        "title": "Fabric",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -804,7 +804,7 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_stats_fabric_connections{$aerospike_cluster,$aerospike_service}",
+                "query": "sum:aerospike.node_stats.fabric_connections{$aerospike_cluster,$aerospike_service}",
                 "aggregator": "last"
               }
             ],
@@ -856,7 +856,7 @@
     {
       "id": 4503778555779368,
       "definition": {
-        "title": "Heartbeat Connections",
+        "title": "Heartbeat",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -867,7 +867,7 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_stats_heartbeat_connections{$aerospike_cluster,$aerospike_service}",
+                "query": "sum:aerospike.node_stats.heartbeat_connections{$aerospike_cluster,$aerospike_service}",
                 "aggregator": "last"
               }
             ],
@@ -941,12 +941,12 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_stats_fabric_connections_opened{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                "query": "sum:aerospike.node_stats.fabric_connections_opened{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
               },
               {
                 "data_source": "metrics",
                 "name": "query2",
-                "query": "sum:aerospike.aerospike_node_stats_fabric_connections_closed{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                "query": "sum:aerospike.node_stats.fabric_connections_closed{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
               }
             ],
             "response_format": "timeseries",
@@ -1001,12 +1001,12 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_stats_client_connections_opened{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                "query": "sum:aerospike.node_stats.client_connections_opened{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
               },
               {
                 "data_source": "metrics",
                 "name": "query2",
-                "query": "sum:aerospike.aerospike_node_stats_client_connections_closed{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                "query": "sum:aerospike.node_stats.client_connections_closed{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
               }
             ],
             "response_format": "timeseries",
@@ -1061,12 +1061,12 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_node_stats_heartbeat_connections_opened{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                "query": "sum:aerospike.node_stats.heartbeat_connections_opened{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
               },
               {
                 "data_source": "metrics",
                 "name": "query2",
-                "query": "sum:aerospike.aerospike_node_stats_heartbeat_connections_closed{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                "query": "sum:aerospike.node_stats.heartbeat_connections_closed{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
               }
             ],
             "response_format": "timeseries",
@@ -1121,12 +1121,12 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_namespace_effective_is_quiesced{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                "query": "sum:aerospike.namespace.effective_is_quiesced{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
               },
               {
                 "data_source": "metrics",
                 "name": "query2",
-                "query": "sum:aerospike.aerospike_namespace_pending_quiesce{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                "query": "sum:aerospike.namespace.pending_quiesce{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
               }
             ],
             "response_format": "timeseries",
@@ -1164,7 +1164,6 @@
           "min",
           "max"
         ],
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
@@ -1178,7 +1177,7 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "sum:aerospike.aerospike_xdr_lag{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                "query": "sum:aerospike.xdr.lag{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
               }
             ],
             "response_format": "timeseries",
@@ -1294,77 +1293,77 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_client_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_client_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_client_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_client_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:aerospike.aerospike_namespace_client_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:aerospike.aerospike_namespace_client_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:aerospike.aerospike_namespace_client_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:aerospike.aerospike_namespace_client_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query9",
-                      "query": "sum:aerospike.aerospike_namespace_client_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query10",
-                      "query": "sum:aerospike.aerospike_namespace_client_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query11",
-                      "query": "sum:aerospike.aerospike_namespace_client_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query12",
-                      "query": "sum:aerospike.aerospike_namespace_client_lang_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_lang_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query13",
-                      "query": "sum:aerospike.aerospike_namespace_client_udf_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_udf_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query14",
-                      "query": "sum:aerospike.aerospike_namespace_client_udf_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_udf_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query15",
-                      "query": "sum:aerospike.aerospike_namespace_client_udf_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_udf_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1471,77 +1470,77 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query9",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query10",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query11",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query12",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_lang_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_lang_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query13",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_udf_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.as_rate().rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_udf_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.as_rate().rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query14",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_udf_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.as_rate().rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_udf_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.as_rate().rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query15",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_udf_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_udf_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1688,127 +1687,127 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query9",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query10",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query11",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query12",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_read_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query13",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_read_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query14",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query15",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_read_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query16",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_write_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query17",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_write_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query18",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_write_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query19",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_delete_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query20",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_delete_filtered_out{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query21",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_delete_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query22",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_delete_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query23",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_batch_sub_tsvc_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_batch_sub_tsvc_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query24",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_tsvc_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_tsvc_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query25",
-                      "query": "sum:aerospike.aerospike_namespace_from_proxy_tsvc_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.from_proxy_tsvc_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1871,22 +1870,22 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_client_proxy_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_proxy_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_client_proxy_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_proxy_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_proxy_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_proxy_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_proxy_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_proxy_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1973,52 +1972,52 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_long_basic_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_long_basic_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_long_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_long_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_short_basic_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_short_basic_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_short_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_short_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_aggr_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_aggr_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_aggr_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_aggr_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_udf_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_udf_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_udf_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_udf_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query9",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_ops_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_ops_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query10",
-                      "query": "sum:aerospike.aerospike_namespace_pi_query_ops_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.pi_query_ops_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2105,52 +2104,52 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_long_basic_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_long_basic_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_long_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_long_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_short_basic_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_short_basic_timeout{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_short_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_short_basic_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_aggr_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_aggr_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_aggr_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_aggr_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_udf_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_udf_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_udf_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_udf_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query9",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_ops_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_ops_bg_abort{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query10",
-                      "query": "sum:aerospike.aerospike_namespace_si_query_ops_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.si_query_ops_bg_error{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2205,12 +2204,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_rx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.migrate_rx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_tx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.migrate_tx_partitions_remaining{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2261,7 +2260,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_migrate_fresh_partitions{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns,storage_engine}"
+                      "query": "sum:aerospike.namespace.migrate_fresh_partitions{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns,storage_engine}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2313,7 +2312,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_evicted_objects{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.evicted_objects{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2351,7 +2350,6 @@
                 "min",
                 "max"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -2365,7 +2363,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_hwm_breached{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.hwm_breached{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2420,12 +2418,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_batch_sub_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.batch_sub_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_client_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.client_read_not_found{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2476,12 +2474,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_latencies_write_ms_bucket{$aerospike_cluster,$aerospike_service,$ns, le:_inf} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.latencies.write_ms_bucket{$aerospike_cluster,$aerospike_service,$ns, le:_inf} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_latencies_write_ms_bucket{$aerospike_cluster,$aerospike_service,$ns, le:4} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.latencies.write_ms_bucket{$aerospike_cluster,$aerospike_service,$ns, le:4} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2535,12 +2533,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_unavailable_partitions{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.unavailable_partitions{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_dead_partitions{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.dead_partitions{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2599,17 +2597,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_dup_res_ask{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.dup_res_ask{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_dup_res_respond_read{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.dup_res_respond_read{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_dup_res_respond_no_read{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
+                      "query": "sum:aerospike.namespace.dup_res_respond_no_read{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2694,22 +2692,22 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_data_used_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_used_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_data_total_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_total_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_data_used_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_used_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_data_total_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_total_bytes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2753,41 +2751,65 @@
                   "formulas": [
                     {
                       "alias": "topk used",
-                      "formula": "top(query1, 10, 'last', 'desc')"
+                      "formula": "top(query1, 10, 'last', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "bottomk used",
-                      "formula": "top(query2, 10, 'last', 'asc')"
+                      "formula": "top(query2, 10, 'last', 'asc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "topk avaialable",
-                      "formula": "top(query3, 10, 'last', 'desc')"
+                      "formula": "top(query3, 10, 'last', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "bottomk available",
-                      "formula": "top(query4, 10, 'last', 'asc')"
+                      "formula": "top(query4, 10, 'last', 'asc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_data_used_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_used_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_data_used_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_used_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_namespace_data_avail_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_avail_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_namespace_data_avail_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.data_avail_pct{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2818,7 +2840,7 @@
         "x": 0,
         "y": 20,
         "width": 12,
-        "height": 1,
+        "height": 3,
         "is_column_break": true
       }
     },
@@ -2850,41 +2872,65 @@
                   "formulas": [
                     {
                       "alias": "Process CPU",
-                      "formula": "top(query1, 10, 'last', 'desc')"
+                      "formula": "top(query1, 10, 'last', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "Total CPU",
-                      "formula": "top(query2, 10, 'last', 'desc')"
+                      "formula": "top(query2, 10, 'last', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "User CPU",
-                      "formula": "top(query3, 10, 'last', 'desc')"
+                      "formula": "top(query3, 10, 'last', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "Kernel CPU",
-                      "formula": "top(query4, 10, 'last', 'desc')"
+                      "formula": "top(query4, 10, 'last', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_node_stats_process_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.process_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_node_stats_system_total_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.system_total_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_node_stats_system_user_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.system_user_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_node_stats_system_kernel_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.system_kernel_cpu_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2960,17 +3006,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_node_stats_heap_allocated_kbytes{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.heap_allocated_kbytes{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_node_stats_heap_active_kbytes{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.heap_active_kbytes{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_node_stats_heap_mapped_kbytes{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.heap_mapped_kbytes{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3037,12 +3083,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_node_stats_system_free_mem_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.system_free_mem_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_node_stats_system_free_mem_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.system_free_mem_pct{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3071,9 +3117,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 21,
+        "y": 23,
         "width": 12,
-        "height": 1
+        "height": 3
       }
     },
     {
@@ -3111,7 +3157,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_storage_engine_file_defrag_q{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.storage_engine_file_defrag_q{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3166,12 +3212,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_storage_engine_file_defrag_reads{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.storage_engine_file_defrag_reads{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_namespace_storage_engine_file_defrag_writes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.namespace.storage_engine_file_defrag_writes{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3298,42 +3344,42 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_bulk_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_bulk_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_bulk_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_bulk_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_rw_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_rw_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_rw_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_rw_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_ctrl_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_ctrl_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_ctrl_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_ctrl_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query7",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_meta_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_meta_send_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query8",
-                      "query": "sum:aerospike.aerospike_node_stats_fabric_meta_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
+                      "query": "sum:aerospike.node_stats.fabric_meta_recv_rate{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3383,7 +3429,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_namespace_effective_replication_factor{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
+                      "query": "sum:aerospike.namespace.effective_replication_factor{$aerospike_cluster,$aerospike_service,$ns} by {aerospike_cluster,aerospike_service,ns}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3412,9 +3458,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 22,
+        "y": 26,
         "width": 12,
-        "height": 1
+        "height": 5
       }
     }
   ],

@@ -55,7 +55,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_sindex_entries{$aerospike_cluster, $ns, $sindex} by {sindex}",
+                      "query": "sum:aerospike.sindex.entries{$aerospike_cluster, $ns, $sindex} by {sindex}",
                       "aggregator": "last"
                     }
                   ],
@@ -103,13 +103,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aerospike.aerospike_sindex_used_bytes{$aerospike_cluster, $ns, $sindex}",
+                      "query": "avg:aerospike.sindex.used_bytes{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:aerospike.aerospike_sindex_memory_used{$aerospike_cluster, $ns, $sindex}",
+                      "query": "avg:aerospike.sindex.memory_used{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     }
                   ],
@@ -150,13 +150,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_sindex_entries{$aerospike_cluster, $ns, $sindex}",
+                      "query": "sum:aerospike.sindex.entries{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "max:aerospike.aerospike_namespace_effective_replication_factor{$aerospike_cluster, $ns}",
+                      "query": "max:aerospike.namespace.effective_replication_factor{$aerospike_cluster, $ns}",
                       "aggregator": "last"
                     }
                   ],
@@ -208,7 +208,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_sindex_entries_per_rec{$aerospike_cluster, $ns, $sindex}",
+                      "query": "sum:aerospike.sindex.entries_per_rec{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     }
                   ],
@@ -249,7 +249,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_sindex_entries_per_bval{$aerospike_cluster, $ns, $sindex}",
+                      "query": "sum:aerospike.sindex.entries_per_bval{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     }
                   ],
@@ -297,7 +297,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:aerospike.aerospike_sindex_load_time{$aerospike_cluster, $ns, $sindex}",
+                      "query": "max:aerospike.sindex.load_time{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     }
                   ],
@@ -351,7 +351,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:aerospike.aerospike_sindex_load_pct{$aerospike_cluster, $ns, $sindex}",
+                      "query": "min:aerospike.sindex.load_pct{$aerospike_cluster, $ns, $sindex}",
                       "aggregator": "last"
                     }
                   ],
@@ -417,7 +417,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aerospike.aerospike_sindex_stat_gc_recs{$aerospike_cluster, $ns, $sindex}.rollup(sum, 300)"
+                      "query": "sum:aerospike.sindex.stat_gc_recs{$aerospike_cluster, $ns, $sindex}.rollup(sum, 300)"
                     }
                   ],
                   "response_format": "timeseries",
