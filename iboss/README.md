@@ -14,7 +14,7 @@ Visualize detailed insights into these logs through the out-of-the-box dashboard
 
 This integration ingests the following metrics:
 
-- **Gateway Performace** : Metrics provide insights into request volumes, resource utilization, processing times, and error counts to monitor the health and efficiency of iboss gateways.
+- **Gateway Performance** : Metrics provide insights into request volumes, resource utilization, processing times, and error counts to monitor the health and efficiency of iboss gateways.
 - **Bandwidth** : Metrics provide information about data usage across domains, users, locations, and protocols, enabling monitoring of network traffic volume and flow patterns.
 - **Digital Experience** : Metrics provide insights into user experience by measuring connection times between clients, proxies, and servers across users, assets, and locations.
 - **Web** : Metrics provide visibility into user web activity, including site visits, blocks, malware detections, and search trends, to support usage analysis and policy effectiveness.
@@ -36,7 +36,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 1. Login to iboss portal as System Administrator.
 2. Go to **Home** > **System Administrators**.
-3. Swith to **Role-Based Access Control** tab.
+3. Switch to **Role-Based Access Control** tab.
 4. Click on **Add Custom RBAC Group**.
 5. Add **Display Name** for the RBAC.
 6. In the **General Info & Permissions** tab, enable only the **Reporting & Analytics** option to limit permissions to reporting only. Next, go to the **Reporting & Analytics Permissions** tab and choose **Full Administrator** from the **Permission Type** dropdown to allow complete access within the reporting module.

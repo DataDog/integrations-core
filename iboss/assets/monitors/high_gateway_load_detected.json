@@ -9,7 +9,7 @@
 		"name": "High gateway load detected",
 		"type": "query alert",
 		"query": "avg(last_5m):avg:iboss.gateway_performance.cpu_utilization{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name} >= 95",
-		"message": "{{#is_warning}}⚠️ **Warning**: Gateway load has exceeded the warning threshold on **{{gateway_name.name}}**.\n\n- **Current Load**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n{{/is_warning}}\n\n{{#is_alert}}🚨 **Alert**: Gateway load has exceeded the alert threshold on **{{gateway_name.name}}**.\n\n- **Current Load**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n{{/is_alert}}\n\n@raj.shah@crestdatasys.com",
+		"message": "{{#is_warning}}⚠️ **Warning**: Gateway load has exceeded the warning threshold on **{{gateway_name.name}}**.\n\n- **Current Load**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n{{/is_warning}}\n\n{{#is_alert}}🚨 **Alert**: Gateway load has exceeded the alert threshold on **{{gateway_name.name}}**.\n\n- **Current Load**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n{{/is_alert}}\n\n@example@example.com",
 		"tags": [
 			"integration:iboss"
 		],
