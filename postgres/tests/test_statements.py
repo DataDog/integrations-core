@@ -84,24 +84,24 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     check = integration_check(dbm_instance)
     assert check._config.dbm_enabled == dbm_enabled
 
-def test_char_encoding(
+def test_char_encoding_pgss(
     integration_check,
     dbm_instance,
-    datadog_agent,
 ):
     dbname = "datadog_test"
-    user = "bob"
-    password = "bob"
+    user = "dd_admin"
+    password = "dd_admin"
     query = "INSERT INTO persons (lastname) VALUES (convert_from('\xd0'::bytea, 'LATIN1'))"
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
     conn.cursor().execute(query)
-    conn.cursor().execute("SELECT lastname FROM persons");
+    conn.cursor().execute("SET client_encoding = 'LATIN1'")
+    conn.cursor().execute("select 'é'")
     check = integration_check(dbm_instance)
     check._connect()
 
     run_one_check(check)
-    conn.cursor().execute("SELECT lastname FROM persons");
+    conn.cursor().execute("select 'é'")
     run_one_check(check)
 
 
@@ -740,6 +740,44 @@ def test_failed_explain_handling(
         tags=expected_tags,
         hostname='stubbed.hostname',
     )
+
+def test_samples_encoding(
+    aggregator,
+    integration_check,
+    dbm_instance,
+):
+    dbm_instance['query_metrics']['enabled'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    dbname = 'datadog_test'
+    user = 'bob'
+    password = 'bob'
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    try:
+        conn.cursor().execute("SET client_encoding='LATIN1'")
+        query = "select 'é'"
+        conn.cursor().execute(query)
+        run_one_check(check)
+
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+        expected_query = query
+
+        # Find matching events by checking if the expected query starts with the event statement. Using this
+        # instead of a direct equality check covers cases of truncated statements
+        matching = [
+            e
+            for e in dbm_samples
+            if e['db']['statement'].encode("utf-8") in expected_query.encode("utf-8") and e['dbm_type'] == 'plan'
+        ]
+
+        assert len(matching) == 1, "missing captured event"
+        event = matching[0]
+        # we expect to get a duration because the connections are in "idle" state
+        assert event['duration']
+    finally:
+        pass
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
