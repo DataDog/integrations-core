@@ -334,6 +334,10 @@ coverage:
         target: 75
         flags:
         - kong
+      KrakenD:
+        target: 75
+        flags:
+        - krakend
       KubeVirt_API:
         target: 75
         flags:
@@ -1218,6 +1222,11 @@ flags:
     paths:
     - kong/datadog_checks/kong
     - kong/tests
+  krakend:
+    carryforward: true
+    paths:
+    - krakend/datadog_checks/krakend
+    - krakend/tests
   kube_apiserver_metrics:
     carryforward: true
     paths:

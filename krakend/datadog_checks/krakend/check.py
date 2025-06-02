@@ -11,7 +11,6 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 
 
 class KrakendCheck(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'krakend'
 
