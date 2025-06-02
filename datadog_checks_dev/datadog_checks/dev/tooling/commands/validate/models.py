@@ -108,6 +108,7 @@ def models(ctx, check, sync, verbose):
         else:
             spec_path = path_join(root, check, 'assets', 'configuration', 'spec.yaml')
             if not file_exists(spec_path):
+            	echo_debug(f"Skipping validation for check: {check}; 'spec.yaml' file doesn't exist")
                 continue
 
             source = check
