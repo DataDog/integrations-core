@@ -35,7 +35,9 @@ def upload_historical_metrics(DATE_FROM: str, ORG: str) -> None:
 
                 for i, commit in enumerate(commits, 1):
                     date, _, _ = gitRepo.get_commit_metadata(commit)
-                    progress.update(commit_task, description=f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})")
+                    progress.update(
+                        commit_task, description=f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})"
+                    )
                     gitRepo.checkout_commit(commit)
 
                     result = subprocess.run(
@@ -44,8 +46,9 @@ def upload_historical_metrics(DATE_FROM: str, ORG: str) -> None:
                         text=True,
                         capture_output=True,
                     )
-                    # print("[UNCOMP STDOUT]", result.stdout)
-                    # print("[UNCOMP STDERR]", result.stderr)
+                    if result.returncode != 0:
+                        console.print(f"[red]Error in commit {commit}: {result.stderr}")
+                        continue
 
                     result = subprocess.run(
                         ["ddev", "size", "status", "--compressed", "--to-dd-org", ORG],
@@ -53,8 +56,9 @@ def upload_historical_metrics(DATE_FROM: str, ORG: str) -> None:
                         text=True,
                         capture_output=True,
                     )
-                    # print("[COMP STDOUT]", result.stdout)
-                    # print("[COMP STDERR]", result.stderr)
+                    if result.returncode != 0:
+                        console.print(f"[red]Error in commit {commit}: {result.stderr}")
+                        continue
 
                     progress.advance(commit_task)
                 progress.update(commit_task, description="[green]All commits processed!")

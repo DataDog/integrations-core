@@ -279,14 +279,15 @@ def get_dependencies_sizes(
             wheel_data = response.content
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            wheel_path = Path(tmpdir) / "package.whl"
+            wheel_path = Path(tmpdir) / "package"
             with open(wheel_path, "wb") as f:
                 f.write(wheel_data)
-
             if compressed:
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     size = sum(
-                        zinfo.compress_size for zinfo in zip_ref.infolist() if "test" not in zinfo.filename.lower()
+                        zinfo.compress_size
+                        for zinfo in zip_ref.infolist()
+                        if not is_excluded_from_wheel(zinfo.filename)
                     )
             else:
                 extract_path = Path(tmpdir) / "extracted"
@@ -295,12 +296,14 @@ def get_dependencies_sizes(
 
                 size = 0
                 for dirpath, _, filenames in os.walk(extract_path):
-                    if "test" in dirpath.lower():
+                    rel_dir = os.path.relpath(dirpath, extract_path)
+                    if is_excluded_from_wheel(rel_dir):
                         continue
                     for name in filenames:
-                        if "test" in name.lower():
+                        file_path = os.path.join(dirpath, name)  # solo si es blob??
+                        rel_file = os.path.relpath(file_path, extract_path)
+                        if is_excluded_from_wheel(rel_file):
                             continue
-                        file_path = os.path.join(dirpath, name)
                         size += os.path.getsize(file_path)
 
         file_data.append(
@@ -314,6 +317,58 @@ def get_dependencies_sizes(
         )
 
     return file_data
+
+
+def is_excluded_from_wheel(path: str) -> bool:
+    excluded_test_paths = [
+        os.path.normpath(path)
+        for path in [
+            'idlelib/idle_test',
+            'bs4/tests',
+            'Cryptodome/SelfTest',
+            'gssapi/tests',
+            'keystoneauth1/tests',
+            'openstack/tests',
+            'os_service_types/tests',
+            'pbr/tests',
+            'pkg_resources/tests',
+            'psutil/tests',
+            'securesystemslib/_vendor/ed25519/test_data',
+            'setuptools/_distutils/tests',
+            'setuptools/tests',
+            'simplejson/tests',
+            'stevedore/tests',
+            'supervisor/tests',
+            'test',  # cm-client
+            'vertica_python/tests',
+            'websocket/tests',
+        ]
+    ]
+
+    type_annot_libraries = [
+        'krb5',
+        'Cryptodome',
+        'ddtrace',
+        'pyVmomi',
+        'gssapi',
+    ]
+    # print('path:', path)
+    rel_path = Path(path).as_posix()
+
+    # Test folders
+    for test_folder in excluded_test_paths:
+        if rel_path == test_folder or rel_path.startswith(test_folder + '/'):
+            return True
+
+    # Python type annotations
+    path_parts = Path(rel_path).parts
+    if path_parts:
+        dependency_name = path_parts[0]
+        if dependency_name in type_annot_libraries:
+            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+                return True
+
+    return False
 
 
 def format_modules(
@@ -459,9 +514,7 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.csv"
                     if version
-                    else f"{platform}_{size_type}_{mode}.csv"
-                    if platform
-                    else f"{size_type}_{mode}.csv"
+                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
                 )
             )
             save_csv(app, modules, csv_filename)
@@ -473,9 +526,7 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.json"
                     if version
-                    else f"{platform}_{size_type}_{mode}.json"
-                    if platform
-                    else f"{size_type}_{mode}.json"
+                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
                 )
             )
             save_json(app, json_filename, modules)
@@ -487,9 +538,7 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.md"
                     if version
-                    else f"{platform}_{size_type}_{mode}.md"
-                    if platform
-                    else f"{size_type}_{mode}.md"
+                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
                 )
             )
             save_markdown(app, "Status", modules, markdown_filename)
