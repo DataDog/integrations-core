@@ -122,9 +122,13 @@ def create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map,
         else:
             if lldp_attrs.remote_port_index is None:
                 logger.warning(
-                    "skipping LLDP link with missing remote port index for device %s, local port %s",
+                    "skipping LLDP link with missing remote port index for device %s, local port %s; remote device: name=%s, id=%s, ip=%s, interface=%s",
                     local_device_id,
                     lldp_attrs.local_port_id,
+                    lldp_attrs.sys_name,
+                    lldp_attrs.chassis_id_v,
+                    lldp_attrs.mgmt_ip,
+                    lldp_attrs.port_id_v,
                 )
                 continue
             link_id = f"{local_device_id}:{get_raw_id(lldp_attrs.local_port_id)}.{lldp_attrs.remote_port_index}"
