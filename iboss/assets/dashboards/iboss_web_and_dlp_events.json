@@ -55,7 +55,7 @@
                     {
                         "id": 5209140670357329,
                         "definition": {
-                            "title": "Total Traffic",
+                            "title": "Total Traffic Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -110,7 +110,7 @@
                     {
                         "id": 2695237892062571,
                         "definition": {
-                            "title": "Traffic by Action Over Time",
+                            "title": "Traffic Events by Action Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
