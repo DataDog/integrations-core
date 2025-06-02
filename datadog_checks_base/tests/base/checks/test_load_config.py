@@ -24,32 +24,21 @@ class TestLoadConfig:
         [
             ("boolean: true", {"boolean": True}),
             ("boolean: false", {"boolean": False}),
-        ],
-    )
-    def test_load_config_booleans(self, yaml_str, expected_object):
-        assert AgentCheck.load_config(yaml_str) == expected_object
-
-    @pytest.mark.parametrize(
-        'yaml_str, expected_object',
-        [
             ("number: .inf", {"number": float("inf")}),
             ("number: .INF", {"number": float("inf")}),
             ("number: -.inf", {"number": float("-inf")}),
             ("number: +.inf", {"number": float("inf")}),
             ("number: -.INF", {"number": float("-inf")}),
-        ],
-    )
-    def test_load_config_infinities(self, yaml_str, expected_object):
-        assert AgentCheck.load_config(yaml_str) == expected_object
-
-    @pytest.mark.parametrize(
-        'yaml_str, expected_object',
-        [
             ("number: 0xF", {"number": 15.0}),  # Hexadecimal
             ("number: 0b1111", {"number": 15.0}),  # Binary
+            ('string: "hi inf"', {"string": "hi inf"}),
+            ("string: hi inf", {"string": "hi inf"}),
+            ('string: "this inf is in the middle"', {"string": "this inf is in the middle"}),
+            ("string: this inf is in the middle", {"string": "this inf is in the middle"}),
+            ("string: infinity", {"string": "infinity"}),
         ],
     )
-    def test_load_config_numeric_bases(self, yaml_str, expected_object):
+    def test_load_config_values(self, yaml_str, expected_object):
         assert AgentCheck.load_config(yaml_str) == expected_object
 
     @pytest.mark.parametrize(
@@ -58,21 +47,11 @@ class TestLoadConfig:
             ("number: !!int 1 ", "number", 1, int),
             ("number: !!float 1 ", "number", 1.0, float),
             ("string: !!str inf", "string", "inf", str),
-        ],
-    )
-    def test_load_config_explicit_types(self, yaml_str, expected_key, expected_value, expected_type):
-        config = AgentCheck.load_config(yaml_str)
-        assert config == {expected_key: expected_value}
-        assert isinstance(config[expected_key], expected_type)
-
-    @pytest.mark.parametrize(
-        'yaml_str, expected_key, expected_value, expected_type',
-        [
             ("string: inf", "string", "inf", str),
             ('string: ".inf"', "string", ".inf", str),
         ],
     )
-    def test_load_config_string_special_keywords(self, yaml_str, expected_key, expected_value, expected_type):
+    def test_load_config_explicit_types(self, yaml_str, expected_key, expected_value, expected_type):
         config = AgentCheck.load_config(yaml_str)
         assert config == {expected_key: expected_value}
         assert isinstance(config[expected_key], expected_type)
@@ -81,19 +60,6 @@ class TestLoadConfig:
         config = AgentCheck.load_config("number: .nan")
         assert "number" in config
         assert math.isnan(config["number"])
-
-    @pytest.mark.parametrize(
-        'yaml_str, expected_object',
-        [
-            ('string: "hi inf"', {"string": "hi inf"}),
-            ("string: hi inf", {"string": "hi inf"}),
-            ('string: "this inf is in the middle"', {"string": "this inf is in the middle"}),
-            ("string: this inf is in the middle", {"string": "this inf is in the middle"}),
-            ("string: infinity", {"string": "infinity"}),
-        ],
-    )
-    def test_load_config_string_containing_special_keywords(self, yaml_str, expected_object):
-        assert AgentCheck.load_config(yaml_str) == expected_object
 
 
 class TestAstConfig:
