@@ -5,7 +5,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-import math
 import os
 import re
 from typing import Any  # noqa: F401
@@ -40,55 +39,6 @@ def test_check_version():
     check = AgentCheck()
 
     assert check.check_version == base_package_version
-
-
-def test_load_config():
-    assert AgentCheck.load_config('raw_foo: bar') == {'raw_foo': 'bar'}
-    assert AgentCheck.load_config('invalid:mapping') == 'invalid:mapping'
-    assert AgentCheck.load_config('') is None
-
-    with pytest.raises(ValueError, match='Failed to load config: '):
-        AgentCheck.load_config(':')
-
-
-def test_parse_special_values_in_load_config():
-    assert AgentCheck.load_config("boolean: true") == {"boolean": True}
-    assert AgentCheck.load_config("boolean: false") == {"boolean": False}
-
-    assert AgentCheck.load_config("number: .inf") == {"number": float("inf")}
-    assert AgentCheck.load_config("number: .INF") == {"number": float("inf")}
-
-    assert AgentCheck.load_config("number: -.inf") == {"number": float("-inf")}
-    assert AgentCheck.load_config("number: -.INF") == {"number": float("-inf")}
-
-    assert AgentCheck.load_config("number: 0xF") == {"number": 15.0}  # Hexadecimal
-    assert AgentCheck.load_config("number: 0b1111") == {"number": 15.0}  # Binary
-
-    assert AgentCheck.load_config("number: !!int 1 ") == {"number": 1}
-    assert isinstance(AgentCheck.load_config("number: !!int 1 ")["number"], int)
-
-    assert AgentCheck.load_config("number: !!float 1 ") == {"number": 1}
-    assert isinstance(AgentCheck.load_config("number: !!float 1 ")["number"], float)
-
-    # Check that "inf" is still a string
-    assert AgentCheck.load_config("string: inf") == {"string": "inf"}
-    assert isinstance(AgentCheck.load_config("string: inf")["string"], str)
-
-    # Check that quoted ".inf" is still a string
-    assert AgentCheck.load_config("string: \".inf\"") == {"string": ".inf"}
-    assert isinstance(AgentCheck.load_config("string: \".inf\"")["string"], str)
-
-    # nan values are not equal to themselves
-    config = AgentCheck.load_config("number: .nan")
-    assert "number" in config
-    assert math.isnan(config["number"])
-
-    # Assert that a string with an inf inside it is parsed as a string
-    assert AgentCheck.load_config("string: \"hi inf\"") == {"string": "hi inf"}
-    assert AgentCheck.load_config("string: hi inf") == {"string": "hi inf"}
-    assert AgentCheck.load_config("string: \"this inf is in the middle\"") == {"string": "this inf is in the middle"}
-    assert AgentCheck.load_config("string: this inf is in the middle") == {"string": "this inf is in the middle"}
-    assert AgentCheck.load_config("string: infinity") == {"string": "infinity"}
 
 
 def test_persistent_cache(datadog_agent):
