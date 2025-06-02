@@ -176,7 +176,6 @@ class SqlserverActivity(DBMAsyncJob):
 
     def __init__(self, check, config: SQLServerConfig):
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
         self._obfuscator_options_for_tail_text = to_native_string(
@@ -322,7 +321,7 @@ class SqlserverActivity(DBMAsyncJob):
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
-                "ddtags": ",".join(self.tags),
+                "ddtags": ",".join(self._check.tag_manager.get_tags()),
                 'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
@@ -461,7 +460,7 @@ class SqlserverActivity(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
+            "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time.time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),

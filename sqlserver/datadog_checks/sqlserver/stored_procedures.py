@@ -73,7 +73,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self.log = check.log
         self._config = config
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         collection_interval = float(
             self._config.procedure_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -152,7 +151,6 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self.tags,
             'cloud_metadata': self._check.cloud_metadata,
             'kind': 'procedure_metrics',
             'sqlserver_rows': rows,

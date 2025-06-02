@@ -478,7 +478,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_databases.add(tags_by_key['database_name'])
         assert tags_by_key['object_name'].lower() != 'none'
 
@@ -496,25 +496,25 @@ def test_table_size_metrics(aggregator, dd_run_check, instance_docker, database_
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.table.row_count"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['table'].lower() != 'none'
         assert tags_by_key['schema'].lower() != 'none'
 
     for m in aggregator.metrics("sqlserver.table.data_size"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['table'].lower() != 'none'
         assert tags_by_key['schema'].lower() != 'none'
 
     for m in aggregator.metrics("sqlserver.table.total_size"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['table'].lower() != 'none'
         assert tags_by_key['schema'].lower() != 'none'
 
     for m in aggregator.metrics("sqlserver.table.used_size"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['table'].lower() != 'none'
         assert tags_by_key['schema'].lower() != 'none'
@@ -549,7 +549,7 @@ def test_custom_metrics_fraction_counters(aggregator, dd_run_check, instance_doc
     dd_run_check(sqlserver_check)
     seen_plan_type = set()
     for m in aggregator.metrics("sqlserver.custom.plan_cache_test"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_plan_type.add(tags_by_key['plan_type'])
         assert tags_by_key['optional_tag'].lower() == 'tagx'
     assert 'SQL Plans' in seen_plan_type
@@ -565,7 +565,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.tempdb.file_space_usage.free_space"):
-        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        tags_by_key = dict([t.split(':') for t in m.tags])
         seen_databases.add(tags_by_key['database'])
         assert tags_by_key['database_id']
 

@@ -110,7 +110,6 @@ class XESessionBase(DBMAsyncJob):
 
     def __init__(self, check, config, session_name):
         self.session_name = session_name
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self._check = check
         self._log = check.log
         self._config = config
@@ -450,7 +449,7 @@ class XESessionBase(DBMAsyncJob):
             "dbm_type": self._determine_dbm_type(),
             "event_source": self.session_name,
             "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
+            "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time() * 1000,
             "sqlserver_version": self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -582,7 +581,7 @@ class XESessionBase(DBMAsyncJob):
                 "dbm_type": self._determine_dbm_type(),
                 "event_source": self.session_name,
                 "collection_interval": self.collection_interval,
-                "ddtags": self.tags,
+                "ddtags": self._check.tag_manager.get_tags(),
                 "timestamp": time() * 1000,
                 "sqlserver_version": self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                 "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -780,7 +779,7 @@ class XESessionBase(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
             "event_source": self.session_name,
-            "ddtags": ",".join(self.tags),
+            "ddtags": ",".join(self._check.tag_manager.get_tags()),
             'service': self._config.service,
             "db": db_fields,
             "sqlserver": sqlserver_fields,

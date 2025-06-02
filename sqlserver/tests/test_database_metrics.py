@@ -1008,7 +1008,7 @@ def test_sqlserver_db_fragmentation_metrics(
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
                     if db_fragmentation_object_names:
                         for m in aggregator.metrics(metric_name):
-                            tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+                            tags_by_key = dict([t.split(':') for t in m.tags])
                             assert tags_by_key['object_name'].lower() in db_fragmentation_object_names
                 if not include_db_fragmentation_metrics_tempdb:
                     assert database_name != 'tempdb'
