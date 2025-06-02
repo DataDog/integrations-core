@@ -3,6 +3,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import math
+from contextlib import nullcontext
 
 import pytest
 
@@ -11,31 +12,45 @@ from datadog_checks.base.checks import _config_ast
 
 
 class TestLoadConfig:
-    def test_load_config(self):
-        assert AgentCheck.load_config('raw_foo: bar') == {'raw_foo': 'bar'}
-        assert AgentCheck.load_config('invalid:mapping') == 'invalid:mapping'
-        assert AgentCheck.load_config('') is None
-
-        with pytest.raises(ValueError, match='Failed to load config: '):
-            AgentCheck.load_config(':')
+    @pytest.mark.parametrize(
+        "config_input,expectation",
+        [
+            pytest.param('raw_foo: bar', nullcontext({'raw_foo': 'bar'}), id="valid_yaml"),
+            pytest.param('invalid:mapping', nullcontext('invalid:mapping'), id="invalid_yaml_returned_as_string"),
+            pytest.param('', nullcontext(None), id="empty_string_returns_none"),
+            pytest.param(':', pytest.raises(ValueError, match='Failed to load config: '), id="invalid_yaml_raises_error"),
+        ],
+    )
+    def test_load_config(self, config_input, expectation):
+        with expectation as expected_result:
+            result = AgentCheck.load_config(config_input)
+            assert result == expected_result
 
     @pytest.mark.parametrize(
         'yaml_str, expected_object',
         [
-            ("boolean: true", {"boolean": True}),
-            ("boolean: false", {"boolean": False}),
-            ("number: .inf", {"number": float("inf")}),
-            ("number: .INF", {"number": float("inf")}),
-            ("number: -.inf", {"number": float("-inf")}),
-            ("number: +.inf", {"number": float("inf")}),
-            ("number: -.INF", {"number": float("-inf")}),
-            ("number: 0xF", {"number": 15.0}),  # Hexadecimal
-            ("number: 0b1111", {"number": 15.0}),  # Binary
-            ('string: "hi inf"', {"string": "hi inf"}),
-            ("string: hi inf", {"string": "hi inf"}),
-            ('string: "this inf is in the middle"', {"string": "this inf is in the middle"}),
-            ("string: this inf is in the middle", {"string": "this inf is in the middle"}),
-            ("string: infinity", {"string": "infinity"}),
+            pytest.param("boolean: true", {"boolean": True}, id="boolean_true"),
+            pytest.param("boolean: false", {"boolean": False}, id="boolean_false"),
+            pytest.param("number: .inf", {"number": float("inf")}, id="number_inf"),
+            pytest.param("number: .INF", {"number": float("inf")}, id="number_capital_inf"),
+            pytest.param("number: -.inf", {"number": float("-inf")}, id="number_neg_inf"),
+            pytest.param("number: +.inf", {"number": float("inf")}, id="number_plus_inf"),
+            pytest.param("number: -.INF", {"number": float("-inf")}, id="number_capital_neg_inf"),
+            pytest.param("number: 0xF", {"number": 15.0}, id="number_hex"),
+            pytest.param("number: 0b1111", {"number": 15.0}, id="number_binary"),
+            pytest.param('string: "hi inf"', {"string": "hi inf"}, id="string_inf_quoted"),
+            pytest.param("string: hi inf", {"string": "hi inf"}, id="string_inf_not_quoted"),
+            pytest.param(
+                'string: "this inf is in the middle"',
+                {"string": "this inf is in the middle"},
+                id="string_inf_in_the_middle_quoted",
+            ),
+            pytest.param(
+                "string: this inf is in the middle",
+                {"string": "this inf is in the middle"},
+                id="string_inf_in_the_middle_not_quoted",
+            ),
+            pytest.param("string: infinity", {"string": "infinity"}, id="string_infinity"),
         ],
     )
     def test_load_config_values(self, yaml_str, expected_object):
@@ -44,11 +59,11 @@ class TestLoadConfig:
     @pytest.mark.parametrize(
         'yaml_str, expected_key, expected_value, expected_type',
         [
-            ("number: !!int 1 ", "number", 1, int),
-            ("number: !!float 1 ", "number", 1.0, float),
-            ("string: !!str inf", "string", "inf", str),
-            ("string: inf", "string", "inf", str),
-            ('string: ".inf"', "string", ".inf", str),
+            pytest.param("number: !!int 1 ", "number", 1, int, id="number_int"),
+            pytest.param("number: !!float 1 ", "number", 1.0, float, id="number_float"),
+            pytest.param("string: !!str inf", "string", "inf", str, id="string_str_inf"),
+            pytest.param("string: inf", "string", "inf", str, id="string_inf"),
+            pytest.param('string: ".inf"', "string", ".inf", str, id="string_inf_quoted"),
         ],
     )
     def test_load_config_explicit_types(self, yaml_str, expected_key, expected_value, expected_type):
@@ -63,14 +78,21 @@ class TestLoadConfig:
 
 
 class TestAstConfig:
-    def test_ast_config_parse_inf(self):
-        assert _config_ast.parse("inf") == float("inf")
-        assert _config_ast.parse("-inf") == float("-inf")
-        assert _config_ast.parse("nan") != _config_ast.parse("nan")
+    @pytest.mark.parametrize(
+        'input_str, expected_value',
+        [
+            pytest.param("inf", float("inf"), id="positive_inf"),
+            pytest.param("-inf", float("-inf"), id="negative_inf"),
+            pytest.param("1", 1, id="integer"),
+            pytest.param("hello inf", "hello inf", id="string_with_inf"),
+        ],
+    )
+    def test_ast_config_parse_values(self, input_str, expected_value):
+        assert _config_ast.parse(input_str) == expected_value
 
-    def test_parse_values_without_special_keywords(self):
-        assert _config_ast.parse("1") == 1
-        assert _config_ast.parse("hello inf") == "hello inf"
+    def test_ast_config_parse_nan(self):
+        assert _config_ast.parse("nan") != _config_ast.parse("nan")
+        assert math.isnan(_config_ast.parse("nan"))
 
     def test_ast_config_parse_dict_with_specials(self):
         result = _config_ast.parse("{'a': inf, 'b': -inf, 'c': nan}")
