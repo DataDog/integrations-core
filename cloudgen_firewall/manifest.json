@@ -49,7 +49,9 @@
       "events": {
         "creates_events": false
       },
-      "service_checks": {
+      "metrics": {
+        "prefix": "cloudgen_firewall",
+        "check": "",
         "metadata_path": "metadata.csv"
       }
     },
