@@ -26,7 +26,7 @@
             "id": 3572596914767264,
             "definition": {
                 "type": "note",
-                "content": "DNSFilter is a cloud-based content filtering and threat protection by blocking internet threats at the DNS layer. It protects organizations by preventing access to malicious domains, phishing sites, and other cyber threats, ensuring a safer internet experience.\n\nThis dashboard displays information about allowed and blocked DNS requests, threats, domains accessed, policies, networks, and other DNS-related traffic data.\n\nFor more information, see the [DNSFilter Integration Documentation](https://docs.datadoghq.com/integrations/dnsfilter/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "DNSFilter is a cloud-based content filtering tool that blocks internet threats at the DNS layer. It helps protect organizations by preventing access to malicious domains, phishing sites, and other cyber threats, ensuring a safer and more secure internet experience.\n\nThis dashboard displays information about allowed and blocked DNS requests, threats, domains accessed, policies, networks, and other DNS-related traffic data.\n\nFor more information, see the [DNSFilter Integration Documentation](https://docs.datadoghq.com/integrations/dnsfilter/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
