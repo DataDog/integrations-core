@@ -30,6 +30,7 @@ from ..console import (
     abort,
     annotate_display_queue,
     annotate_error,
+    echo_debug,
     echo_failure,
     echo_info,
     echo_success,
@@ -108,7 +109,7 @@ def models(ctx, check, sync, verbose):
         else:
             spec_path = path_join(root, check, 'assets', 'configuration', 'spec.yaml')
             if not file_exists(spec_path):
-            	echo_debug(f"Skipping validation for check: {check}; 'spec.yaml' file doesn't exist")
+                echo_debug(f"Skipping validation for check: {check}; 'spec.yaml' file doesn't exist")
                 continue
 
             source = check
