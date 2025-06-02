@@ -26,7 +26,7 @@ Visualize detailed insights into these metrics through the out-of-the-box dashbo
 
 ## Setup
 
-**Note**: This steps are only required for collecting metrics.
+**Note**: These steps are only required for collecting metrics.
 
 ### Generate API credentials in iboss
 
@@ -56,12 +56,19 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 ### Connect your iboss Account to Datadog
 
-1. Add your Email Address, and Password.
+1. Add your iboss Email Address, and Password.
 
-   | Parameters      | Description                                             |
-   | --------------- | ------------------------------------------------------- |
-   | Email Address   | The Email Address of your iboss account.                |
-   | Password        | The Password of your iboss account.                     |
+   | Parameters                        | Description                                                                          |
+   | --------------------------------- | ------------------------------------------------------------------------------------ |
+   | Email Address                     | The Email Address of your iboss account.                                             |
+   | Password                          | The Password of your iboss account.                                                  |
+   | Get Gateway Performance Metrics   | Enable to collect Gateway Performance Metrics from iboss. The default value is True. |
+   | Get Bandwidth Metrics             | Enable to collect Bandwidth Metrics from iboss. The default value is True.           |
+   | Get Digital Experience Metrics    | Enable to collect Digital Experience Metrics from iboss. The default value is True.  |
+   | Get Web Metrics                   | Enable to collect Web Metrics from iboss. The default value is True.                 |
+   | Get CASB Metrics                  | Enable to collect CASB Metrics from iboss. The default value is True.                |
+   | Get Threat Metrics                | Enable to collect Threat Metrics from iboss. The default value is True.              |
+   | Get Zero Trust Metrics            | Enable to collect Zero Trust Metrics from iboss. The default value is True.          |
 
 2. Click **Save**.
 

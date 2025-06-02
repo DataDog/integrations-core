@@ -175,14 +175,17 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - <46>Apr 21 08:52:10 cn1759625052-15-7vnsr30179.ibosscloud.com
-          {"exception":"-","totalByteUsage":"0","policyLayers":"-","sourcePort":"0","resourceId":"-","contentTypeHeader":"-","callout":"0","privateIp":"-","sAction":"Allowed","sourceIpAddress":"-","subjectId":"-","responseCode":"0","proxyTimeSinceEpoch":"-","authStepUp":"false","productVersion":"10.3.3.70","ztScore":"0","proxyRule":"-","clientPeerTime":"-","totalByteCount":"0","host":"-","stealth":"0","action":"Allowed","uriPath":"-","computerMacAddress":"00:00:00:00:00:00","iboss":"cn-1793905901-78-vnsg13776.ibosscloud.com","ztPolicyName":"-","proxyPeerResponseTime":"-","tlsVersion":"-","ipAddress":"-","resourceName":"-","localProxyPort":"0","logSubType":"-","ibossIpAddress":"149.19.43.19","mde":"-","lastname":"-","macAddress":"00:00:00:00:00:00","ztPolicyId":"-","filename":"-","filteringGroupName":"-","cncFlag":"0","proxyDnsLookupTime":"-","identityProviderName":"-","proxyTotalTime":"-","destinationPort":"0","logType":"AUDIT","extension":"-","firstname":"-","scheme":"-","reportingGroup":"0","requestMethod":"-","description":"-","policyTrace":"-","categoryName":"-","directionName":"-","sandBoxDecoded":"-","urlLogId":"5168","sandboxResult":"-","computerName":"-","assetId":"-","audit":"1","genericSandboxResult":"-","useTime":"0","identityProviderUUID":"-","upstreamByteUsage":"0","proxyResponseTime":"-","applicationName":"-","direction":"0","malware":"0","chatGPTMessage":"-","proxyTransactionStartTime":"-","userAgent":"-","publicIp":"-","url":"User
-          logged
-          in","logTime":"2025-04-21","referrerUrl":"-","sha256Sum":"-","uriQuery":"-","serverPeerTime":"-","downstreamByteUsage":"0","dlpKeywords":"-","location":"default","time":"08:52:10","vendorAccountId":"313117","username":"@ca-nilay.modi@crestdata.ai","heuristicScore":"0"}
+        - <46>May 28 06:45:51 test.ibosscloud.com
+          {"exception":"-","totalByteUsage":"5404","policyLayers":"Gmail|Github|Non
+          Enterprise Owned|Microsoft CASB Unsanctioned
+          Applications","sourcePort":"27993","resourceId":"-","contentTypeHeader":"-","callout":"0","privateIp":"10.20.10.20","sAction":"Allowed","sourceIpAddress":"10.20.10.20","subjectId":"test","responseCode":"200","proxyTimeSinceEpoch":"10","authStepUp":"false","productVersion":"10.3.3.125","ztScore":"0","proxyRule":"Test","clientPeerTime":"10","totalByteCount":"5404","host":"example-test.com","stealth":"0","action":"Allowed","uriPath":"/","computerMacAddress":"00:00:00:00:00:00","iboss":"test.ibosscloud.com","ztPolicyName":"Non
+          Enterprise
+          Owned","proxyPeerResponseTime":"123","tlsVersion":"-","ipAddress":"10.20.30.20","resourceName":"-","localProxyPort":"80","logSubType":"MALWARE_SOURCE","ibossIpAddress":"10.20.30.40","mde":"-","lastname":"-","macAddress":"00:00:00:00:00:00","ztPolicyId":"zt-policy-id-1","filename":"-","filteringGroupName":"Default","cncFlag":"0","proxyDnsLookupTime":"347","identityProviderName":"-","proxyTotalTime":"248","destinationPort":"80","logType":"WEB_LOG","extension":"cc","firstname":"-","scheme":"http","reportingGroup":"0","requestMethod":"GET","description":"-","policyTrace":"-","categoryName":"Malware","directionName":"outbound","sandBoxDecoded":"-","urlLogId":"8532","computerName":"TEST-ASSET","assetId":"asset-id-1","audit":"0","useTime":"602","identityProviderUUID":"auto-login","upstreamByteUsage":"2974","proxyResponseTime":"602","applicationName":"C:\\\\chrome.exe","direction":"2","malware":"1","chatGPTMessage":"-","proxyTransactionStartTime":"1748414749.895","userAgent":"Edg/136.0.0.0","publicIp":"10.20.20.10","url":"http://example-test.com/","logTime":"2025-05-28","referrerUrl":"-","sha256Sum":"-","uriQuery":"-","serverPeerTime":"123","downstreamByteUsage":"2430","dlpKeywords":"-","location":"us-central","time":"06:45:50","vendorAccountId":"313117","username":"test-user","heuristicScore":"0"}
       grok:
         supportRules: ""
-        matchRules: event_logs_parsing_rule <%{integer}>%{date("MMM dd hh:mm:ss")}
-          %{notSpace:hostname} %{data::json}
+        matchRules: event_logs_parsing_rule <%{integer}>(%{date("MMM dd
+          hh:mm:ss")}|%{date("MMM  d hh:mm:ss")}) %{notSpace:hostname}
+          %{data::json}
     - type: grok-parser
       name: Parsing `categoryName` attribute
       enabled: true
