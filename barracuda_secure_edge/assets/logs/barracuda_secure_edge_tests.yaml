@@ -1,0 +1,23 @@
+id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+tests:
+  - sample: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login
+      localhost_hapair_daemon from 127.0.0.1 : Allowed."
+    result: null
+  - sample: "2025 04 02 10:15:51 +00:00 Notice   127.0.0.1:48945 login succeeded:
+      localhost_CloudGen-WAN Valid password and valid challenge"
+    result: null
+  - sample: "2025 04 02 12:15:19 +00:00 Info     Allow:
+      LOUT|TCP|p1|169.254.128.2|62498|00:0c:29:ca:a2:5a|169.254.128.1|1809|orac\
+      le-vp1||PASSALL|0|169.254.128.2|169.254.128.1|0|1|0|0|0|0||||||"
+    result: null
+  - sample: "2025 03 31 13:14:18 +00:00 Info     xdhcp1.0[5145]: starting up dhcpcd
+      connection for provider with linkname xdhcp1.0 "
+    result: null
+  - sample: "2025 04 01 06:05:29 +00:00 Info     sshd: Connection from 10.10.16.1
+      port 55827 on 10.10.16.116 port 22"
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
