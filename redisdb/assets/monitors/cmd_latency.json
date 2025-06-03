@@ -5,21 +5,20 @@
 	"title": "Command latency is high",
 	"description": "Redis is built for speed, and command latency is a key performance indicator. This monitor tracks the 99th percentile of command latency to catch slowdowns early, helping prevent cascading delays across your systems.",
 	"definition": {
-		"id": 173213351,
 		"name": "[Redis] High command latency (p99)",
 		"type": "query alert",
-		"query": "avg(last_5m):avg:redis.net.latency_ms.p99{integration:redis} > 20",
-		"message": "## 🚨 What’s happening\n\nHigh Redis command latency detected (p99 > 20ms for 5 minutes).\n\nRedis is experiencing elevated command latency, which suggests that operations are not responding within expected thresholds. This could be caused by internal contention, blocked commands, slow clients, or downstream pressure from connected services.\n\n---\n\n## 📈 Impact\n\nIncreased command latency can lead to:\n\n- Slower application performance and timeouts\n- Delayed cache reads/writes\n- Poor user experience in latency-sensitive applications\n- Potential cascading effects on dependent systems\n\n---\n\n## 🛠️ Runbook\n\n### Initial Troubleshooting Steps\n\n1. **Identify the affected Redis node**.\n2. Go to [**Redis integration metrics**](https://app.datadoghq.com/monitors/manage?filter=redis) in Datadog.\n3. Review these metrics:\n   - `redis.net.latency_ms.p99`\n   - `redis.commands.per_sec`\n   - `redis.clients.blocked`\n   - Host-level CPU/memory/disk metrics\n4. Check for slow logs or blocked clients.\n5. Ensure no network congestion or saturation between Redis and calling services.\n\n---\n\n### Cause and Resolution\n\nCause | Resolution\n------|-----------\nCommand backlog or slow queries | Investigate slow logs and blocked clients.\nHigh memory or CPU pressure | Scale the node or optimize Redis configuration.\nNetwork degradation | Check latency and packet loss metrics.\nMisbehaving client | Identify traffic spike source or connection issues.\n\n---\n\n### 👥 Who should be notified?\n\nPlease route to the appropriate team: \n`@slack-yourteam-alerts`\n",
+		"query": "avg(last_5m):avg:redis.slowlog.micros.95percentile{*} > 20",
+		"message": "## 🚨 What’s happening\n\nHigh Redis command latency detected (p95 > 20ms for 5 minutes).\n\nRedis is experiencing elevated command latency, which suggests that operations are not responding within expected thresholds. This could be caused by internal contention, blocked commands, slow clients, or downstream pressure from connected services.\n\n---\n\n## 📈 Impact\n\nIncreased command latency can lead to:\n\n- Slower application performance and timeouts\n- Delayed cache reads/writes\n- Poor user experience in latency-sensitive applications\n- Potential cascading effects on dependent systems\n\n---\n\n## 🛠️ Runbook\n\n### Initial Troubleshooting Steps\n\n1. **Identify the affected Redis node**.\n2. Go to [**Redis integration metrics**](https://app.datadoghq.com/monitors/manage?filter=redis) in Datadog.\n3. Review these metrics:\n   - `redis.net.latency_ms.p99`\n   - `redis.commands.per_sec`\n   - `redis.clients.blocked`\n   - Host-level CPU/memory/disk metrics\n4. Check for slow logs or blocked clients.\n5. Ensure no network congestion or saturation between Redis and calling services.\n\n---\n\n### Cause and Resolution\n\nCause | Resolution\n------|-----------\nCommand backlog or slow queries | Investigate slow logs and blocked clients.\nHigh memory or CPU pressure | Scale the node or optimize Redis configuration.\nNetwork degradation | Check latency and packet loss metrics.\nMisbehaving client | Identify traffic spike source or connection issues.\n\n---\n\n### 👥 Who should be notified?\n\nPlease route to the appropriate team: \n`@slack-yourteam-alerts`\n",
 		"tags": [
-			"integration:redis"
+			"integration:redisdb"
 		],
 		"options": {
 			"thresholds": {
-				"critical": 20
+				"critical": 20000
 			},
 			"notify_audit": false,
 			"evaluation_delay": 300,
-			"require_full_window": true,
+			"require_full_window": false,
 			"include_tags": true,
 			"silenced": {},
 			"avalanche_window": 20,
