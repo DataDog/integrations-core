@@ -62,9 +62,10 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace,
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match="Must specify at least one of the following:"
-        "`app_controller_endpoint`, `appset_controller_endpoint`, `repo_server_endpoint`, `api_server_endpoint` or"
-        " `notifications_controller_endpoint` or `commit_server_endpoint`.",
+        match=(
+            "Must specify at least one of the following: `app_controller_endpoint`, `appset_controller_endpoint`, "
+            "`api_server_endpoint`, `repo_server_endpoint`, `notifications_controller_endpoint`, `commit_server_endpoint`"
+        ),
     ):
         check = ArgocdCheck('argocd', {}, [{}])
         dd_run_check(check)
