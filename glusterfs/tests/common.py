@@ -7,7 +7,7 @@ GLUSTER_VERSION = os.getenv("GLUSTER_VERSION")
 
 CHECK = "glusterfs"
 INSTANCE = {"use_sudo": False}
-E2E_INIT_CONFIG = {"gstatus_path": "/usr/local/bin/gstatus"}
+E2E_INIT_CONFIG = {}
 CONFIG = {"init_config": E2E_INIT_CONFIG, "instances": [INSTANCE]}
 
 EXPECTED_METRICS = [
