@@ -107,6 +107,8 @@ $set_environment_variables = <<SCRIPT
 tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
 
 export DD_API_KEY="{os.environ.get("DD_API_KEY")}"
+export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
+
 EOF
 SCRIPT
 
@@ -120,7 +122,7 @@ Vagrant.configure("2") do |config|
   # This is used for staging local packages for installation.
   # config.vm.synced_folder ".", "/vagrant" # Ensure the temp dir itself is synced to /vagrant
   config.vm.synced_folder "{self.config_file.parent}", "{self._config_mount_dir}"
-  config.vm.network "private_network", type: "dhcp"
+  config.vm.network "private_network", ip: "172.30.1.5"
 
   config.vm.define "{vm_hostname}" do |node|
     node.vm.hostname = "{vm_hostname}"
@@ -201,14 +203,14 @@ end
         # This is a basic approach. More complex sudo needs might require specific command metadata.
         if not self._is_windows_vm and self.metadata.get("vagrant_command_needs_sudo", True):
             if not inner_cmd_list or inner_cmd_list[0] != "sudo":
-                inner_cmd_list.insert(0, "sudo")
+                inner_cmd_list.insert(0, "sudo -E")
 
         inner_cmd_str = " ".join(shlex.quote(part) for part in inner_cmd_list)
-        host_command = ["vagrant", "ssh", self._vm_name, "-c", inner_cmd_str]
+        host_command = ["vagrant", "ssh", self._vm_name, "-c", inner_cmd_str.replace("'", "")]
         return host_command
 
     def _captured_process(self, host_command: list[str], **kwargs) -> subprocess.CompletedProcess:
-        kwargs.setdefault("check", False)  # Caller should handle errors based on returncode
+        kwargs.setdefault("check", False)
 
         return self.platform.run_command(
             host_command,
@@ -358,17 +360,18 @@ end
             )
         print(f"Vagrant VM `{self._vm_name}` started successfully.\n{stdout}")
 
-        # Execute start_commands (guest commands)
         if start_guest_commands:
             print(f"Running start-up commands in VM `{self._vm_name}`...")
             for guest_cmd_str in start_guest_commands:
                 cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
                 formatted_host_cmd = self._format_command(cmd_parts_guest)
-                process = self._captured_process(formatted_host_cmd)
+                shell = True if "|" in guest_cmd_str or "$" in guest_cmd_str else False
+
+                print(f"Running command: {' '.join(formatted_host_cmd)} with shell: {shell}")
+                process = self._captured_process(formatted_host_cmd, shell=shell)
                 stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
                 stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
                 if process.returncode:
-                    self._show_logs()
                     raise RuntimeError(
                         f"Failed to run start-up command `{' '.join(cmd_parts_guest)}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
                         f"Stdout:\n{stdout}\nStderr:\n{stderr}"

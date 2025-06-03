@@ -148,9 +148,6 @@ def start(
     agent_env_vars = _get_agent_env_vars(app.config.org.config, metadata, extra_env_vars, dogstatsd)
 
     try:
-        import pdb
-
-        pdb.set_trace()
         agent.start(agent_build=agent_build, local_packages=local_packages, env_vars=agent_env_vars)
     except Exception as e:
         from ddev.cli.env.stop import stop
