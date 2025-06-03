@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
+    TABLE_SIZE_METRICS,
 )
 
 from .common import (
@@ -452,7 +453,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
 
         # These require extra setup to test
-        if mname not in DATABASE_INDEX_METRICS:
+        if mname not in DATABASE_INDEX_METRICS and mname not in [m[0] for m in TABLE_SIZE_METRICS]:
             aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
@@ -480,6 +481,43 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
         tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
         seen_databases.add(tags_by_key['database_name'])
         assert tags_by_key['object_name'].lower() != 'none'
+
+    assert 'master' in seen_databases
+    if database_autodiscovery:
+        assert 'datadog_test-1' in seen_databases
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_autodiscovery', [True, False])
+def test_table_size_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
+    instance_docker['database_autodiscovery'] = database_autodiscovery
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(sqlserver_check)
+    seen_databases = set()
+    for m in aggregator.metrics("sqlserver.table.row_count"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+        assert tags_by_key['schema'].lower() != 'none'
+
+    for m in aggregator.metrics("sqlserver.table.data_size"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+        assert tags_by_key['schema'].lower() != 'none'
+
+    for m in aggregator.metrics("sqlserver.table.total_size"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+        assert tags_by_key['schema'].lower() != 'none'
+
+    for m in aggregator.metrics("sqlserver.table.used_size"):
+        tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+        seen_databases.add(tags_by_key['database'])
+        assert tags_by_key['table'].lower() != 'none'
+        assert tags_by_key['schema'].lower() != 'none'
 
     assert 'master' in seen_databases
     if database_autodiscovery:
@@ -920,21 +958,21 @@ def test_check_static_information_expire(aggregator, dd_run_check, init_config, 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 6
+    assert len(sqlserver_check.static_info_cache.keys()) == 7
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually clear static information cache
     sqlserver_check.static_info_cache.clear()
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 6
+    assert len(sqlserver_check.static_info_cache.keys()) == 7
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
     # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
     sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
     dd_run_check(sqlserver_check)
     assert sqlserver_check.static_info_cache is not None
-    assert len(sqlserver_check.static_info_cache.keys()) == 6
+    assert len(sqlserver_check.static_info_cache.keys()) == 7
     assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
 
 
