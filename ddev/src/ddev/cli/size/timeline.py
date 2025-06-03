@@ -282,11 +282,12 @@ def timeline_mode(
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    timeline_path = (
-        f"timeline_{params['module']}_{params['platform']}.png"
-        if params["platform"] and params["format"] and "png" in params["format"]
-        else f"timeline_{params['module']}.png" if params["format"] and "png" in params["format"] else None
-    )
+    timeline_path = None
+    if params["format"] and "png" in params["format"]:
+        filename = f"timeline_{params['module']}"
+        if params["platform"]:
+            filename = f"{filename}_{params['platform']}"
+        timeline_path = os.path.join("size_timeline_visualizations", f"{filename}.png")
 
     if params["show_gui"] or timeline_path:
         plot_linegraph(
@@ -295,7 +296,7 @@ def timeline_mode(
             params["module"],
             params["platform"],
             params["show_gui"],
-            "size_timeline_visualizations" + os.sep + timeline_path,
+            timeline_path,
         )
 
     return formatted_modules

@@ -154,11 +154,9 @@ def diff_mode(
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    treemap_path = (
-        f"treemap_{params['platform']}_{params['version']}.png"
-        if params["format"] and "png" in params["format"]
-        else None
-    )
+    treemap_path = None
+    if params["format"] and "png" in params["format"]:
+        treemap_path = os.path.join("size_diff_visualizations", f"treemap_{params['platform']}_{params['version']}.png")
 
     if params["show_gui"] or treemap_path:
         plot_treemap(
@@ -167,7 +165,7 @@ def diff_mode(
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "diff",
-            "size_diff_visualizations" + os.sep + treemap_path,
+            treemap_path,
         )
 
     return formatted_modules
