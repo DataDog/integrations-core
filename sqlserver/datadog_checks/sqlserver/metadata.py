@@ -57,7 +57,6 @@ class SqlserverMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
         self.log = check.log
         self._config = config
         self.collection_interval = self._config.settings_config.get(
