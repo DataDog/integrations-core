@@ -1093,7 +1093,7 @@
                         "id": 666821597255175,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates the ESET Protect logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates ESET Protect logs to detect threats to your environment in real time. If you don't see signals, ensure you've enabled [Datadog Cloud SIEM](/security).",
                             "background_color": "vivid_blue",
                             "font_size": "14",
                             "text_align": "left",

@@ -1,6 +1,6 @@
 {
     "title": "ESET Protect - Audit Events",
-    "description": "This dashboard provides information about the Audit events.",
+    "description": "This dashboard provides information about Audit events.",
     "widgets": [
         {
             "id": 2574567647507322,
