@@ -115,6 +115,9 @@ def instance_docker(instance_docker_defaults):
                 'master_files_metrics': {
                     'enabled': True,
                 },
+                'table_size_metrics': {
+                    'enabled': True,
+                },
             },
             'disable_generic_tags': True,
         }

@@ -44,6 +44,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
     SQLServerXESessionMetrics,
 )
@@ -887,6 +888,7 @@ class SQLServer(AgentCheck):
             SqlserverIndexUsageMetrics,
             SqlserverDBFragmentationMetrics,
             SqlserverDatabaseFilesMetrics,
+            SqlserverTableSizeMetrics,
         ]
 
     @property

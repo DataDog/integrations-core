@@ -197,6 +197,15 @@ class ServerStateMetrics(BaseModel):
     enabled: Optional[bool] = Field(None, examples=[True])
 
 
+class TableSizeMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[600])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
 class TaskSchedulerMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -239,6 +248,7 @@ class DatabaseMetrics(BaseModel):
     primary_log_shipping_metrics: Optional[PrimaryLogShippingMetrics] = None
     secondary_log_shipping_metrics: Optional[SecondaryLogShippingMetrics] = None
     server_state_metrics: Optional[ServerStateMetrics] = None
+    table_size_metrics: Optional[TableSizeMetrics] = None
     task_scheduler_metrics: Optional[TaskSchedulerMetrics] = None
     tempdb_file_space_usage_metrics: Optional[TempdbFileSpaceUsageMetrics] = None
     xe_metrics: Optional[XeMetrics] = None

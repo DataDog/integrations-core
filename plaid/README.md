@@ -42,6 +42,7 @@ Configure the Datadog endpoint to forward Plaid logs to Datadog.
 
 | Plaid Parameters | Description |
 |----------|----------|
+| Plaid API URL | API URL of Plaid. | 
 | Client ID | Client of the Plaid account. |
 | Secret | Secret of the Plaid account |
 | Access Token | Access Token of the Plaid account |

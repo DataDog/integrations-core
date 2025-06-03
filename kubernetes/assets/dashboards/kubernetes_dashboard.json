@@ -352,7 +352,8 @@
                             "tags": [
                                 "$scope",
                                 "$node",
-                                "$label"
+                                "$label",
+                                "$cluster"
                             ]
                         },
                         "layout": {
@@ -379,7 +380,8 @@
                                 "*",
                                 "$node",
                                 "$label",
-                                "$scope"
+                                "$scope",
+                                "$cluster"
                             ]
                         },
                         "layout": {
