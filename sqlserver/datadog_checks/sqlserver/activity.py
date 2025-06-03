@@ -175,7 +175,6 @@ class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
         self.log = check.log
         self._config = config
         self._obfuscator_options_for_tail_text = to_native_string(
