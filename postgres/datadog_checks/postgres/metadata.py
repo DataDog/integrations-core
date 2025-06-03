@@ -35,12 +35,12 @@ DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 # spective catalog tables.
 PG_EXTENSION_INFO_QUERY = """
 SELECT
-e.oid id,
-e.extname name,
-r.rolname owner,
-ns.nspname schema_name,
-e.extrelocatable relocatable,
-e.extversion version
+e.oid AS id,
+e.extname AS name,
+r.rolname AS owner,
+ns.nspname AS schema_name,
+e.extrelocatable AS relocatable,
+e.extversion AS version
 FROM pg_extension e
 LEFT JOIN pg_namespace ns on e.extnamespace = ns.oid
      JOIN pg_roles r ON e.extowner = r.oid;
