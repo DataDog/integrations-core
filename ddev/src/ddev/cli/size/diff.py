@@ -140,7 +140,7 @@ def diff_mode(
     dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
 
     if integrations + dependencies == []:
-        params["app"].display_error(
+        params["app"].display(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
         return []
@@ -152,7 +152,7 @@ def diff_mode(
                 module["Size"] = f"+{module['Size']}"
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Status", formatted_modules)
+        print_table(params["app"], "Diff", formatted_modules)
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
