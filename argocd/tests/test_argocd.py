@@ -64,7 +64,8 @@ def test_empty_instance(dd_run_check):
         Exception,
         match=(
             "Must specify at least one of the following: `app_controller_endpoint`, `appset_controller_endpoint`, "
-            "`api_server_endpoint`, `repo_server_endpoint`, `notifications_controller_endpoint`, `commit_server_endpoint`"
+            "`api_server_endpoint`, `repo_server_endpoint`, `notifications_controller_endpoint`, "
+            "`commit_server_endpoint`"
         ),
     ):
         check = ArgocdCheck('argocd', {}, [{}])
