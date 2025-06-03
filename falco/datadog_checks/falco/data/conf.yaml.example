@@ -1,0 +1,6 @@
+init_config:
+  # No global options yet
+
+instances:
+  - url: http://localhost:8765/metrics
+    # Add any instance-specific options here 
