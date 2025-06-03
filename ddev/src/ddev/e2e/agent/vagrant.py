@@ -94,8 +94,10 @@ class VagrantAgent(AgentInterface):
         # self.config_file is the host path to the integration's specific config file, e.g., .../data/conf.yaml
         # self._config_mount_dir is the target directory on the guest, e.g., /etc/datadog-agent/conf.d/my_integration.d
         # host_config_file_abs = str(self.config_file.resolve())
-        # host_config_dir_abs = str(self.config_file.parent.resolve())
-        # guest_config_target_dir = self._config_mount_dir  # This is already OS-specific via its own definition
+        host_config_dir_abs = str(self.config_file.parent.resolve())
+        guest_config_target_dir = self._config_mount_dir  # This is already OS-specific via its own definition
+        #   if self.config_file.is_file():
+        # volumes.append(f"{self.config_file.parent}:{self._config_mount_dir}")
 
         return f"""\
 # -*- mode: ruby -*-
@@ -117,7 +119,7 @@ Vagrant.configure("2") do |config|
   # is synced to /vagrant on Linux guest or C:\\vagrant on Windows guest.
   # This is used for staging local packages for installation.
   # config.vm.synced_folder ".", "/vagrant" # Ensure the temp dir itself is synced to /vagrant
-
+  config.vm.synced_folder "{self.config_file.parent}", "{self._config_mount_dir}"
   config.vm.network "private_network", type: "dhcp"
 
   config.vm.define "{vm_hostname}" do |node|
@@ -458,6 +460,10 @@ end
                 f"Stderr: {process_destroy.stderr.decode('utf-8', errors='replace') if process_destroy.stderr else 'N/A'}"
             )
         print(f"VM {self._vm_name} destroyed.")
+
+        # delete the temp vagrant dir
+        shutil.rmtree(self._temp_vagrant_dir)
+        print(f"Vagrant working directory deleted: {self._temp_vagrant_dir}")
 
     def restart(self) -> None:
         # Restarts the entire VM
