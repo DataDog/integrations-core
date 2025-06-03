@@ -45,32 +45,24 @@ jobs:
 
 
     - name: Measure disk usage differences from last commit (uncompressed)
-      if: false  # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       run: | 
-        mkdir -p diff_visualizations
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
-        ddev size diff $BEFORE $AFTER --csv > diff-uncompressed.csv
-        ddev size diff $BEFORE $AFTER  --save_to_png_path diff_visualizations/diff-uncompressed-linux.png > diff-uncompressed.txt
+        ddev size diff $BEFORE $AFTER > diff-uncompressed.txt
+        ddev size diff $BEFORE $AFTER  --format png,csv,markdown
         cat diff-uncompressed.txt
         echo "# Size diff (uncompressed)" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        cat diff-uncompressed.txt >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat diff-uncompressed.md >> $GITHUB_STEP_SUMMARY
 
     - name: Measure disk usage differences from last commit (compressed)
-      if: false  # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       run: | 
-        mkdir -p diff_visualizations
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
-        ddev size diff $BEFORE $AFTER --compressed --csv > diff-compressed.csv
-        ddev size diff $BEFORE $AFTER --compressed  --save_to_png_path diff_visualizations/diff-compressed-linux.png > diff-compressed.txt
+        ddev size diff $BEFORE $AFTER --compressed > diff-compressed.txt
+        ddev size diff $BEFORE $AFTER --compressed  --format png,csv,markdown
         cat diff-compressed.txt
         echo "# Size diff (compressed)" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        cat diff-compressed.txt >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat diff-compressed.md >> $GITHUB_STEP_SUMMARY
 
     - name: Upload file sizes (uncompressed)
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -87,19 +79,17 @@ jobs:
         if-no-files-found: error
   
     - name: Upload file sizes diff (uncompressed)
-      if: false # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: diff-uncompressed.csv
-        path: diff-uncompressed.csv
+        name: compressed_diff.csv
+        path: compressed_diff.csv
         if-no-files-found: error     
 
     - name: Upload file sizes diff (compressed)
-      if: false  # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: diff-compressed.csv
-        path: diff-compressed.csv
+        name: compressed_diff.csv
+        path: compressed_diff.csv
         if-no-files-found: error
 
     - name: Upload status PNGs
@@ -110,10 +100,9 @@ jobs:
         if-no-files-found: error
 
     - name: Upload diff PNGs
-      if: false # Disabled for now: size difference can be misleading due to dependencies not being built in the same PR
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: diff-visuals
-        path: diff_visualizations/
+        path: size_diff_visualizations/
         if-no-files-found: error
     
