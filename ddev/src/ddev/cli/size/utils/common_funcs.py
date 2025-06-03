@@ -472,7 +472,7 @@ def save_markdown(
             lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
         lines.append("")
 
-    markdown = "\n".join(lines) + '\n'
+    markdown = "\n".join(lines) 
 
     with open(file_path, "a", encoding="utf-8") as f:
         f.write(markdown)

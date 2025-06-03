@@ -33,9 +33,7 @@ jobs:
         ddev size status  --format png,csv,markdown
         cat size-uncompressed.txt
         echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
         cat uncompressed_status.md >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
   
     - name: Measure disk usage (compressed)
       run: |
@@ -43,9 +41,7 @@ jobs:
         ddev size status --compressed  --format png,csv,markdown
         cat size-compressed.txt
         echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
         cat compressed_status.md >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
 
 
     - name: Measure disk usage differences from last commit (uncompressed)
