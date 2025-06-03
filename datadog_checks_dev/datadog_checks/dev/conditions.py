@@ -225,7 +225,7 @@ class CheckVMLogs(CheckCommandOutput):
         """
         Checks if the provided patterns are present in docker logs
 
-        :param identifier: The docker image identifier
+        :param identifier: The VM instance identifier
         :param patterns: List of patterns to match
         :param matches: How many of the provided patterns need to match, it can be a number or "all"
         :param stdout: Whether to search for the provided patterns in stdout

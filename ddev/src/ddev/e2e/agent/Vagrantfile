@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Get VM name from environment variable VM_NAME
+  # Default to 'default_vagrant_vm' if not set
+  vm_hostname = ENV['VM_NAME'] || 'default_vagrant_vm'
+
+  config.vm.box = "net9/ubuntu-24.04-arm64"
+  config.vm.box_version = "1.1"
+
+  config.vm.network "private_network", type: "dhcp"
+
+  config.vm.define vm_hostname do |node|
+    node.vm.hostname = vm_hostname
+    node.vm.provision "shell", inline: <<-SHELL
+      # Basic setup, can be expanded as needed
+      apt update
+      echo "VM #{vm_hostname} is ready"
+    SHELL
+  end
+end 

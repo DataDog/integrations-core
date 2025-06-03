@@ -4,18 +4,21 @@
 from .config import read_env_data
 from .docker import DockerInterface
 from .local import LocalAgentInterface
+from .vagrant import VagrantInterface
 
 
 def derive_interface(env_type):
-    if env_type == 'docker':
+    if env_type == "docker":
         return DockerInterface
-    elif env_type == 'local':
+    elif env_type == "local":
         return LocalAgentInterface
+    elif env_type == "vagrant":
+        return VagrantInterface
 
 
 def create_interface(check, env):
     possible_config, possible_metadata = read_env_data(check, env)
-    possible_metadata.setdefault('env_type', 'docker')
-    interface = derive_interface(possible_metadata['env_type'])
+    possible_metadata.setdefault("env_type", "docker")
+    interface = derive_interface(possible_metadata["env_type"])
 
     return interface(check, env, config=possible_config, metadata=possible_metadata)

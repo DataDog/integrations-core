@@ -47,7 +47,7 @@ def aggregator():
         try:
             from datadog_checks.base.stubs import aggregator as __aggregator
         except ImportError:
-            raise ImportError('datadog-checks-base is not installed!')
+            raise ImportError("datadog-checks-base is not installed!")
 
     __aggregator.reset()
     return __aggregator
@@ -61,18 +61,18 @@ def datadog_agent():
         try:
             from datadog_checks.base.stubs import datadog_agent as __datadog_agent
         except ImportError:
-            raise ImportError('datadog-checks-base is not installed!')
+            raise ImportError("datadog-checks-base is not installed!")
 
     __datadog_agent.reset()
     return __datadog_agent
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def dd_environment_runner(request):
     # Skip the runner if the skip environment variable is specified
-    do_skip = os.getenv(SKIP_ENVIRONMENT) == 'true'
+    do_skip = os.getenv(SKIP_ENVIRONMENT) == "true"
 
-    testing_plugin = os.getenv(TESTING_PLUGIN) == 'true'
+    testing_plugin = os.getenv(TESTING_PLUGIN) == "true"
 
     # Do nothing if no e2e action is triggered and continue with tests
     if not testing_plugin and not e2e_active() and not do_skip:  # no cov
@@ -91,9 +91,9 @@ def dd_environment_runner(request):
         config = request.getfixturevalue(E2E_FIXTURE_NAME)
     except Exception as e:
         # pytest doesn't export this exception class so we have to do some introspection
-        if e.__class__.__name__ == 'FixtureLookupError':
+        if e.__class__.__name__ == "FixtureLookupError":
             # Make it explicit for our command
-            pytest.exit('NO E2E FIXTURE AVAILABLE')
+            pytest.exit("NO E2E FIXTURE AVAILABLE")
 
         raise
 
@@ -105,37 +105,37 @@ def dd_environment_runner(request):
 
         # Support only defining the agent_type for ease-of-use
         if isinstance(possible_metadata, str):
-            metadata['agent_type'] = possible_metadata
+            metadata["agent_type"] = possible_metadata
         else:
             metadata.update(possible_metadata)
 
     # Inject any log configuration
-    logs_config = get_state('logs_config', [])
+    logs_config = get_state("logs_config", [])
     if logs_config:
         config = format_config(config)
-        config['logs'] = logs_config
+        config["logs"] = logs_config
 
-    agent_type = metadata.get('agent_type')
+    agent_type = metadata.get("agent_type")
 
     # Mount any volumes for Docker
-    if agent_type == 'docker':
-        docker_volumes = get_state('docker_volumes', [])
+    if agent_type == "docker":
+        docker_volumes = get_state("docker_volumes", [])
         if docker_volumes:
-            metadata.setdefault('docker_volumes', []).extend(docker_volumes)
+            metadata.setdefault("docker_volumes", []).extend(docker_volumes)
 
     # Save any environment variables
-    metadata['e2e_env_vars'] = get_env_vars(raw=True)
+    metadata["e2e_env_vars"] = get_env_vars(raw=True)
 
-    data = {'config': config, 'metadata': metadata}
+    data = {"config": config, "metadata": metadata}
 
-    message_template = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'
+    message_template = "DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE"
 
     if testing_plugin:
         return message_template.format(serialize_data(data))
     else:  # no cov
         # Exit testing and pass data back up to command
         if E2E_RESULT_FILE in os.environ:
-            with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
+            with open(os.environ[E2E_RESULT_FILE], "w", encoding="utf-8") as f:
                 f.write(json.dumps(data))
 
             # Rather than exiting we skip every test to avoid the following output:
@@ -158,13 +158,13 @@ if not all([set_up_env(), tear_down_env()]):
         # Skipping every test displays an `s` for each even when using
         # the minimum verbosity so we force zero output
         if report.skipped:
-            return 'skipped', '', ''
+            return "skipped", "", ""
 
 
 @pytest.fixture
 def dd_agent_check(request, aggregator, datadog_agent):
     if not e2e_testing():
-        pytest.skip('Not running E2E tests')
+        pytest.skip("Not running E2E tests")
 
     # Lazily import to reduce plugin load times for everyone
     from datadog_checks.dev import TempDir, run_command
@@ -172,56 +172,56 @@ def dd_agent_check(request, aggregator, datadog_agent):
     def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
         while True:
-            if os.path.isfile(os.path.join(root, 'pyproject.toml')) or os.path.isfile(os.path.join(root, 'setup.py')):
+            if os.path.isfile(os.path.join(root, "pyproject.toml")) or os.path.isfile(os.path.join(root, "setup.py")):
                 check = os.path.basename(root)
                 break
 
             new_root = os.path.dirname(root)
             if new_root == root:
-                raise OSError('No Datadog Agent check found')
+                raise OSError("No Datadog Agent check found")
 
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ['HATCH_ENV_ACTIVE']
+        env = os.environ["HATCH_ENV_ACTIVE"]
 
-        check_command = [python_path, '-m', 'ddev', 'env', 'agent', check, env, 'check', '--json']
+        check_command = [python_path, "-m", "ddev", "env", "agent", check, env, "check", "--json"]
 
         if config:
             config = format_config(config)
-            config_file = os.path.join(temp_dir, '{}-{}-{}.json'.format(check, env, urlsafe_b64encode(os.urandom(6))))
+            config_file = os.path.join(temp_dir, "{}-{}-{}.json".format(check, env, urlsafe_b64encode(os.urandom(6))))
 
-            with open(config_file, 'wb') as f:
-                output = json.dumps(config).encode('utf-8')
+            with open(config_file, "wb") as f:
+                output = json.dumps(config).encode("utf-8")
                 f.write(output)
-            check_command.extend(['--config-file', config_file])
+            check_command.extend(["--config-file", config_file])
 
         # TODO: remove these legacy flags when all usage of this fixture is migrated
-        if 'rate' in kwargs:
-            kwargs['check_rate'] = kwargs.pop('rate')
+        if "rate" in kwargs:
+            kwargs["check_rate"] = kwargs.pop("rate")
 
-        if 'times' in kwargs:
-            kwargs['check_times'] = kwargs.pop('times')
+        if "times" in kwargs:
+            kwargs["check_times"] = kwargs.pop("times")
 
         for key, value in kwargs.items():
             if value is not False:
-                check_command.append('--{}'.format(key.replace('_', '-')))
+                check_command.append("--{}".format(key.replace("_", "-")))
 
                 if value is not True:
                     check_command.append(str(value))
 
         result = run_command(check_command, capture=True)
 
-        matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+        matches = re.findall(r"((?:\{ \[|\[).*?\n(?:\} \]|\]))", result.stdout, re.DOTALL)
 
         if not matches:
             message_parts = []
-            debug_result = run_command(['docker', 'logs', 'dd_{}_{}'.format(check, env)], capture=True)
+            debug_result = run_command(["docker", "logs", "dd_{}_{}".format(check, env)], capture=True)
             if not debug_result.code:
                 message_parts.append(debug_result.stdout + debug_result.stderr)
 
             message_parts.append(result.stdout + result.stderr)
-            raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
+            raise ValueError("{}\nCould not find valid check output".format("\n".join(message_parts)))
 
         for raw_json in matches:
             try:
@@ -233,7 +233,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
         return aggregator
 
     # Give an explicit name so we don't shadow other uses
-    with TempDir('dd_agent_check') as temp_dir:
+    with TempDir("dd_agent_check") as temp_dir:
         yield run_check
 
 
@@ -250,13 +250,13 @@ def dd_run_check():
         if error:
             error = json.loads(error)[0]
             if extract_message:
-                raise Exception(error['message'])
+                raise Exception(error["message"])
             else:
-                exc_lines = ['']
-                exc_lines.extend(error['traceback'].splitlines())
-                raise Exception('\n'.join(exc_lines))
+                exc_lines = [""]
+                exc_lines.extend(error["traceback"].splitlines())
+                raise Exception("\n".join(exc_lines))
 
-        return ''
+        return ""
 
     yield run_check
 
@@ -267,17 +267,17 @@ def dd_run_check():
             pass
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dd_get_state():
     return get_state
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dd_save_state():
     return save_state
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dd_default_hostname():
     import socket
 
@@ -292,7 +292,7 @@ def mock_http_response(mocker):
         from ..http import MockResponse
 
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.get'), return_value=MockResponse(*args, **kwargs)
+        kwargs.pop("method", "requests.get"), return_value=MockResponse(*args, **kwargs)
     )
 
 
@@ -304,18 +304,18 @@ def mock_performance_objects(mocker, dd_default_hostname):
     ):
         import win32pdh
 
-        mocker.patch('win32pdh.OpenQuery')
-        mocker.patch('win32pdh.CollectQueryData')
-        mocker.patch('win32pdh.AddCounter', side_effect=lambda _, path: path)
-        mocker.patch('win32pdh.AddEnglishCounter', side_effect=lambda _, path: path)
-        mocker.patch('win32pdh.RemoveCounter')
-        mocker.patch('win32pdh.EnumObjects', return_value=list(perf_objects))
+        mocker.patch("win32pdh.OpenQuery")
+        mocker.patch("win32pdh.CollectQueryData")
+        mocker.patch("win32pdh.AddCounter", side_effect=lambda _, path: path)
+        mocker.patch("win32pdh.AddEnglishCounter", side_effect=lambda _, path: path)
+        mocker.patch("win32pdh.RemoveCounter")
+        mocker.patch("win32pdh.EnumObjects", return_value=list(perf_objects))
 
         def enum_object_items(data_source, machine_name, object_name, detail_level):
             instances, counter_values = perf_objects[object_name]
             return list(counter_values), instances if instances != [None] else []
 
-        mocker.patch('win32pdh.EnumObjectItems', side_effect=enum_object_items)
+        mocker.patch("win32pdh.EnumObjectItems", side_effect=enum_object_items)
 
         counters = {}
         for object_name, data in perf_objects.items():
@@ -335,7 +335,7 @@ def mock_performance_objects(mocker, dd_default_hostname):
                     counters[win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))] = values[0]
                 else:
                     # Multiple instance counter
-                    counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, '*', None, 0, counter_name))
+                    counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, "*", None, 0, counter_name))
                     instance_values_wildcard = {}
                     for instance_name, index, value in zip(instances, instance_indices, values):
                         # Add single instance counter (in case like IIS is using exact per-instnace wildcard)
@@ -361,27 +361,27 @@ def mock_performance_objects(mocker, dd_default_hostname):
 
                     counters[counter_path_wildcard] = instance_values_wildcard
 
-        validate_path_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.validate_path'
+        validate_path_fn_name = "datadog_checks.base.checks.windows.perf_counters.counter.validate_path"
         mocker.patch(validate_path_fn_name, side_effect=lambda x, y, path: True if path in counters else False)
-        mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
-        get_counter_values_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values'
+        mocker.patch("win32pdh.GetFormattedCounterValue", side_effect=lambda path, _: (None, counters[path]))
+        get_counter_values_fn_name = "datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values"
         mocker.patch(get_counter_values_fn_name, side_effect=lambda path, _: counters[path])
 
     return mock_perf_objects
 
 
-TestType = namedtuple('TestType', 'name description filepath_match')
+TestType = namedtuple("TestType", "name description filepath_match")
 TEST_TYPES = (
-    TestType('unit', 'marker for unit tests', 'test_unit'),
-    TestType('integration', 'marker for integration tests', 'test_integration'),
-    TestType('e2e', 'marker for end-to-end tests', 'test_e2e'),
+    TestType("unit", "marker for unit tests", "test_unit"),
+    TestType("integration", "marker for integration tests", "test_integration"),
+    TestType("e2e", "marker for end-to-end tests", "test_e2e"),
 )
 
 
 def pytest_configure(config):
     # pytest will emit warnings if these aren't registered ahead of time
     for ttype in TEST_TYPES:
-        config.addinivalue_line('markers', '{}: {}'.format(ttype.name, ttype.description))
+        config.addinivalue_line("markers", "{}: {}".format(ttype.name, ttype.description))
 
     config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
 

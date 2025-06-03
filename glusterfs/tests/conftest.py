@@ -8,7 +8,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import WaitFor, run_command, vm_run
+from datadog_checks.dev import WaitFor, run_command
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import CheckVMLogs
@@ -19,11 +19,19 @@ from .common import CONFIG, INSTANCE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()  # Reusing this as it will provide localhost on GitHub Actions
-PRIMARY_VM = "gluster-node-1"
-SECONDARY_VM = "gluster-node-2"
+PRIMARY_VM = "gluster-node"
 
 E2E_METADATA = {
+    "agent_type": "vagrant",
+    "vagrant_vm_name": "gluster-node",
+    "vagrant_guest_os": "linux",
     "start_commands": [
+        "sudo apt update",
+        "sudo apt install -y software-properties-common",
+        "sudo add-apt-repository -y ppa:gluster/glusterfs-9",
+        "sudo apt install -y glusterfs-server glusterfs-client",
+        "sudo systemctl start glusterd",
+        "sudo systemctl enable glusterd",
     ],
 }
 
@@ -31,26 +39,18 @@ E2E_METADATA = {
 @pytest.fixture(scope="session")
 def dd_environment():
     if platform.system() == "Darwin" and not ON_CI:
-        vagrant_file = os.path.join(HERE, "vm", "Vagrantfile")
+        # vagrant_file = os.path.join(HERE, "vm", "Vagrantfile")
 
-        log_patterns = ["GlusterFS started"]
-        vm_conditions = []
-        vm_conditions.append(CheckVMLogs(PRIMARY_VM, log_patterns))
-        vm_conditions.append(CheckVMLogs(SECONDARY_VM, log_patterns))
-        vm_conditions.append(WaitFor(setup_gluster_cluster))
-
-        with vm_run(
-            vm_definition=vagrant_file,
-            conditions=vm_conditions,
-            down=teardown_gluster_cluster,
-            attempts=1,
-            attempts_wait=15,
-            primary_vm=PRIMARY_VM,
-        ):
-            vm_config = copy.deepcopy(CONFIG)
-            yield vm_config, E2E_METADATA
+        # log_patterns = ["Gluster Setup Ready"]
+        # vm_conditions = []
+        # # vm_conditions.append(CheckVMLogs(PRIMARY_VM, log_patterns))
+        # # vm_conditions.append(CheckVMLogs(SECONDARY_VM, log_patterns))
+        # # vm_conditions.append(WaitFor(setup_gluster_cluster))
+        vm_config = copy.deepcopy(CONFIG)
+        yield vm_config, E2E_METADATA
     else:
         raise Exception("VMs are only supported on Mac OS arm64")
+
 
 @pytest.fixture
 def instance():
