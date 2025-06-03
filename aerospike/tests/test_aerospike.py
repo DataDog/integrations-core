@@ -15,6 +15,7 @@ from .common import (
     AEROSPIKE_V7,
     EXPECTED_PROMETHEUS_METRICS,
     EXPECTED_PROMETHEUS_METRICS_5_6,
+    EXPECTED_PROMETHEUS_METRICS_7,
     INDEXES_METRICS,
     LATENCIES_METRICS,
     LAZY_METRICS,
@@ -85,9 +86,6 @@ def test_e2e(dd_agent_check, instance):
 @pytest.mark.e2e
 def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     version_parts = [int(p) for p in VERSION.split('.')]
-    # We apply these checks only if customer is running Aerospike Server version below 7.x
-    if version_parts[0] >= AEROSPIKE_V7:
-        return
 
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
 
@@ -96,12 +94,16 @@ def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
 
     aggregator.assert_service_check('aerospike.openmetrics.health', AgentCheck.OK, tags=tags)
 
-    for metric in EXPECTED_PROMETHEUS_METRICS:
-        aggregator.assert_metric(metric, tags=tags)
-
-    if version_parts >= [5, 6]:
-        for metric in EXPECTED_PROMETHEUS_METRICS_5_6:
+    if version_parts[0] >= AEROSPIKE_V7:
+        for metric in EXPECTED_PROMETHEUS_METRICS_7:
             aggregator.assert_metric(metric, tags=tags)
+    else:
+        for metric in EXPECTED_PROMETHEUS_METRICS:
+            aggregator.assert_metric(metric, tags=tags)
+
+        if version_parts >= [5, 6]:
+            for metric in EXPECTED_PROMETHEUS_METRICS_5_6:
+                aggregator.assert_metric(metric, tags=tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
