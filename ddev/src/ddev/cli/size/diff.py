@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -161,11 +162,12 @@ def diff_mode(
 
     if params["show_gui"] or treemap_path:
         plot_treemap(
+            params["app"],
             formatted_modules,
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "diff",
-            treemap_path,
+            "size_diff_visualizations" + os.sep + treemap_path,
         )
 
     return formatted_modules

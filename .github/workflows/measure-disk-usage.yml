@@ -1,7 +1,7 @@
 name: Measure Disk Usage
 
 on:
-  push:
+  pull_request:
     branches:
     - master 
 env:
@@ -29,24 +29,22 @@ jobs:
         ddev config set repo core
     - name: Measure disk usage (uncompressed)
       run: | 
-        mkdir -p status_visualizations
-        ddev size status --csv > size-uncompressed.csv
-        ddev size status  --save_to_png_path status_visualizations/uncompressed.png > size-uncompressed.txt
+        ddev size status >> size-uncompressed.txt
+        ddev size status  --format png,csv,markdown
         cat size-uncompressed.txt
         echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-        cat size-uncompressed.txt >> $GITHUB_STEP_SUMMARY
+        cat uncompressed_status.md >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
   
     - name: Measure disk usage (compressed)
       run: |
-        mkdir -p status_visualizations
-        ddev size status --csv --compressed > size-compressed.csv
-        ddev size status --compressed  --save_to_png_path status_visualizations/compressed.png > size-compressed.txt
+        ddev size status --compressed > size-compressed.txt
+        ddev size status --compressed  --format png,csv,markdown
         cat size-compressed.txt
         echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-        cat size-compressed.txt >> $GITHUB_STEP_SUMMARY
+        cat compressed_status.md >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
 
 
@@ -81,15 +79,15 @@ jobs:
     - name: Upload file sizes (uncompressed)
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: size-uncompressed.csv
-        path: size-uncompressed.csv
+        name: uncompressed_status.csv
+        path: uncompressed_status.csv
         if-no-files-found: error
 
     - name: Upload file sizes (compressed)
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: size-compressed.csv
-        path: size-compressed.csv
+        name: compressed_status.csv
+        path: compressed_status.csv
         if-no-files-found: error
   
     - name: Upload file sizes diff (uncompressed)
@@ -112,7 +110,7 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: size-visuals
-        path: status_visualizations/
+        path: size_status_visualizations/
         if-no-files-found: error
 
     - name: Upload diff PNGs

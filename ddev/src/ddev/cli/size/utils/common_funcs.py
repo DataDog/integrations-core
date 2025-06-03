@@ -545,6 +545,7 @@ def export_format(
 
 
 def plot_treemap(
+    app: Application,
     modules: list[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
@@ -579,7 +580,9 @@ def plot_treemap(
     plt.tight_layout()
 
     if path:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         plt.savefig(path, bbox_inches="tight", format="png")
+        app.display(f"Treemap saved to {path}")
     if show:
         plt.show()
 
@@ -750,14 +753,15 @@ def draw_treemap_rects_with_labels(
 
 
 def send_metrics_to_dd(
-    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool
+    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, key: str, compressed: bool
 ) -> None:
     metric_name = (
         "datadog.agent_integrations.size_analyzer.compressed"
         if compressed
         else "datadog.agent_integrations.size_analyzer.uncompressed"
     )
-    config_file_info = get_org(app, org)
+
+    config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
     # if not is_everything_committed():
     #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
     if "api_key" not in config_file_info:

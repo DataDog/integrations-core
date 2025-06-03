@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -29,6 +30,7 @@ console = Console(stderr=True)
 
 @click.command()
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
@@ -40,6 +42,7 @@ def status(
     format: list[str],
     show_gui: bool,
     to_dd_org: str,
+    to_dd_key: str,
 ) -> None:
     """
     Show the current size of all integrations and dependencies.
@@ -52,10 +55,12 @@ def status(
             raise ValueError(f"Invalid platform: {platform}")
         elif version and version not in valid_versions:
             raise ValueError(f"Invalid version: {version}")
-        if format:
+        elif format:
             for fmt in format:
                 if fmt not in ["png", "csv", "markdown", "json"]:
                     raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
+        elif to_dd_org and not to_dd_key:
+            raise ValueError("Specify either --to-dd-org or --to-dd-key, not both")
         modules_plat_ver: list[FileDataEntryPlatformVersion] = []
         platforms = valid_platforms if platform is None else [platform]
         versions = valid_versions if version is None else [version]
@@ -78,8 +83,8 @@ def status(
 
         if format:
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
-        if to_dd_org:
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed)
+        if to_dd_org or to_dd_key:
+            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed)
     except Exception as e:
         app.abort(str(e))
 
@@ -107,11 +112,12 @@ def status_mode(
 
     if params["show_gui"] or treemap_path:
         plot_treemap(
+            params["app"],
             formatted_modules,
             f"Disk Usage Status for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "status",
-            treemap_path,
+            "size_status_visualizations" + os.sep + treemap_path,
         )
 
     return formatted_modules

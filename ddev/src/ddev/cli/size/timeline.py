@@ -289,7 +289,14 @@ def timeline_mode(
     )
 
     if params["show_gui"] or timeline_path:
-        plot_linegraph(formatted_modules, params["module"], params["platform"], params["show_gui"], timeline_path)
+        plot_linegraph(
+            params["app"],
+            formatted_modules,
+            params["module"],
+            params["platform"],
+            params["show_gui"],
+            "size_timeline_visualizations" + os.sep + timeline_path,
+        )
 
     return formatted_modules
 
@@ -788,6 +795,7 @@ def export_format(
 
 
 def plot_linegraph(
+    app: Application,
     modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     module: str,
     platform: Optional[str],
@@ -821,7 +829,9 @@ def plot_linegraph(
     plt.tight_layout()
 
     if path:
-        plt.savefig(path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        plt.savefig(path, bbox_inches="tight", format="png")
+        app.display(f"Linegraph saved to {path}")
     if show:
         plt.show()
     plt.close()
