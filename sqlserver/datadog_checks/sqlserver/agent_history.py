@@ -103,7 +103,6 @@ def agent_check_getter(self):
 
 class SqlserverAgentHistory(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
         self.log = check.log
         self._config = config
         collection_interval = float(self._config.agent_jobs_config.get('collection_interval', 15))
