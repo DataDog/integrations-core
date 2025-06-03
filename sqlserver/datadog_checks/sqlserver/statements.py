@@ -565,7 +565,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = copy.copy(self._check.tag_manager.get_tags())
+            tags = self._check.tag_manager.get_tags()
             if 'database_name' in row:
                 tags += ["db:{}".format(row['database_name'])]
             yield {
@@ -645,7 +645,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
-                tags = copy.copy(self._check.tag_manager.get_tags())
+                tags = self._check.tag_manager.get_tags()
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text

@@ -322,7 +322,17 @@ class SQLServer(AgentCheck):
         if self._database_identifier is None:
             template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
             # Copy self.tag_manager._tags and map values to single values instead of lists
-            tag_dict = {k: v[0] if isinstance(v, list) and v else v for k, v in self.tag_manager._tags.items()}
+            tag_dict = {}
+            tags = self.tag_manager.get_tags()
+            # sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
             tag_dict['resolved_hostname'] = self.resolved_hostname
             tag_dict['host'] = str(self.host)
             tag_dict['port'] = str(self.port) if self.port is not None else None
