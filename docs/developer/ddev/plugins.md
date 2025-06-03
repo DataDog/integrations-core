@@ -1,6 +1,6 @@
 # Plugins
 
------
+---
 
 ### Style
 
@@ -83,15 +83,15 @@ To do so, use the following fixtures:
 - `dd_save_state` - When executing the necessary steps to spin up an environment you may use this to save any
   object that can be serialized to JSON. For example:
 
-    ```python
-    dd_save_state('my_data', {'foo': 'bar'})
-    ```
+  ```python
+  dd_save_state('my_data', {'foo': 'bar'})
+  ```
 
 - `dd_get_state` - This may be used to retrieve the data:
 
-    ```python
-    my_data = dd_get_state('my_data', default={})
-    ```
+  ```python
+  my_data = dd_get_state('my_data', default={})
+  ```
 
 #### Mock HTTP response
 
@@ -121,23 +121,23 @@ is desired. This fixture is responsible for starting and stopping environments a
 
 1. It `yield`s a single `dict` representing the default configuration the Agent will use. It must be either:
 
-    - a single instance
-    - a full configuration with top level keys `instances`, `init_config`, etc.
+   - a single instance
+   - a full configuration with top level keys `instances`, `init_config`, etc.
 
-    Additionally, you can pass a second `dict` containing [metadata](#metadata).
+   Additionally, you can pass a second `dict` containing [metadata](#metadata).
 
 1. The setup logic must occur before the `yield` and the tear down logic must occur after it. Also, both steps must only
    execute based on the value of environment variables.
 
-    - Setup - only if `DDEV_E2E_UP` is not set to `false`
-    - Tear down - only if `DDEV_E2E_DOWN` is not set to `false`
+   - Setup - only if `DDEV_E2E_UP` is not set to `false`
+   - Tear down - only if `DDEV_E2E_DOWN` is not set to `false`
 
-    !!! note
-        The provided [Docker](test.md#docker) and [Terraform](test.md#terraform) environment runner utilities will do this automatically for you.
+   !!! note
+   The provided [Docker](test.md#docker) and [Terraform](test.md#terraform) environment runner utilities will do this automatically for you.
 
 #### Metadata
 
-- `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default) and `local`.
+- `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default), `local` and `vagrant`.
 - `env_vars` - A `dict` of environment variables and their values that will be present when starting the Agent.
 - `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
 - `docker_platform` - The container architecture to use if `env_type` is `docker`. Currently, we support `linux` (default) and `windows`.
