@@ -59,6 +59,15 @@ def config(ctx, check, sync, verbose):
 
     echo_waiting(f'Validating default configuration files for {len(checks)} checks...')
     for check in checks:
+        if check in (
+            'ddev',
+            'datadog_checks_dev',
+            'datadog_checks_base',
+            'datadog_checks_dependency_provider',
+            'datadog_checks_downloader',
+        ):
+            echo_info(f'Skipping {check}, it does not need an Agent-level config.')
+            continue
         check_display_queue = []
 
         spec_file_path = path_join(get_root(), check, 'assets', 'configuration', 'spec.yaml')
