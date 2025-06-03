@@ -159,6 +159,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
             'service': self._config.service,
+            'tags': self._check.tag_manager.get_tags(),
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)

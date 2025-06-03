@@ -49,6 +49,7 @@ class BaseSqlServerMetric(object):
         self.instance = cfg_instance.get('instance_name', '')
         self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
+        self.tags = cfg_instance.get('tags', []) or []
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
@@ -105,7 +106,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
             object_name = object_name.strip()
             if counter_name.strip() == self.sql_name:
                 matched = False
-                metric_tags = list(self._check.tag_manager.get_tags())
+                metric_tags = list(self.tags)
 
                 if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
                     (instance_name == self.instance or instance_name == self.physical_db_name)
@@ -198,7 +199,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
                     self.base_name,
                 )
 
-            metric_tags = list(self._check.tag_manager.get_tags())
+            metric_tags = list(self.tags)
             if self.instance == ALL_INSTANCES:
                 metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
             self.report_fraction(
@@ -271,7 +272,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
 
         self.log.debug("Value for %s %s is %s", self.sql_name, self.column, value)
         metric_name = '{}.{}'.format(self.metric_name, self.column)
-        self.report_function(metric_name, value, tags=self._check.tag_manager.get_tags())
+        self.report_function(metric_name, value, tags=self.tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-io-virtual-file-stats-transact-sql
@@ -333,7 +334,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
                 'database_id:{}'.format(str(dbid).strip()),
                 'file_id:{}'.format(str(fid).strip()),
             ]
-            metric_tags.extend(self._check.tag_manager.get_tags())
+            metric_tags.extend(self.tags)
             metric_name = '{}.{}'.format(self.metric_name, self.column)
             self.report_function(metric_name, report_value, tags=metric_tags)
 
@@ -365,7 +366,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
 
         for memory_node_id, column_val in sum_by_memory_node_id.items():
             metric_tags = ['memory_node_id:{}'.format(memory_node_id)]
-            metric_tags.extend(self._check.tag_manager.get_tags())
+            metric_tags.extend(self.tags)
             metric_name = '{}.{}'.format(self.metric_name, self.column)
             self.report_function(metric_name, column_val, tags=metric_tags)
 

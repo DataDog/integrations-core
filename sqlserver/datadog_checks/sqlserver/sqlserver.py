@@ -145,9 +145,6 @@ class SQLServer(AgentCheck):
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
-        self.initialize_connection()
-        self.load_static_information()
-
         self.databases = set()
         self.autodiscovery_query = None
         self._ad_last_check = 0
@@ -173,6 +170,8 @@ class SQLServer(AgentCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
+        self.check_initializations.append(self.initialize_connection)
+        self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
         self.check_initializations.append(self.initialize_xe_session_handlers)
@@ -220,7 +219,7 @@ class SQLServer(AgentCheck):
             )
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
-        tags = self._check.tag_manager.get_tags() + (extra_tags or [])
+        tags = self.tag_manager.get_tags() + (extra_tags or [])
         return QueryExecutor(
             executor,
             self,
@@ -273,9 +272,11 @@ class SQLServer(AgentCheck):
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
                 if "azure_sql_server_database" in r_type and db_instance:
-                    self.tag_manager.set_tag("dd.internal.resource", "{}:{}".format(r_type, db_instance), replace=True)
+                    self.tag_manager.set_tag(
+                        "dd.internal.resource:{}".format(r_type), "{}".format(db_instance), replace=True
+                    )
                 else:
-                    self.tag_manager.set_tag("dd.internal.resource", "{}:{}".format(r_type, name), replace=True)
+                    self.tag_manager.set_tag("dd.internal.resource:{}".format(r_type), "{}".format(name), replace=True)
         # finally, emit a `database_instance` resource for this instance
         self.tag_manager.set_tag(
             "dd.internal.resource:database_instance",
@@ -325,7 +326,9 @@ class SQLServer(AgentCheck):
             tag_dict['resolved_hostname'] = self.resolved_hostname
             tag_dict['host'] = str(self.host)
             tag_dict['port'] = str(self.port) if self.port is not None else None
-            tag_dict['database'] = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            database = self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+            if database is not None:
+                tag_dict['database'] = database
             if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
                 tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
             if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
@@ -440,8 +443,6 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        if self.connection is not None:
-            return
         # Initialize the connection object once
         self.connection = Connection(
             init_config=self.init_config,
@@ -1069,7 +1070,7 @@ class SQLServer(AgentCheck):
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
                 "integration_version": __version__,
-                "tags": self._check.tag_manager.get_tags(),
+                "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

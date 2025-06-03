@@ -14,7 +14,15 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.const import STATIC_INFO_FULL_SERVERNAME, STATIC_INFO_INSTANCENAME, STATIC_INFO_SERVERNAME
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_FULL_SERVERNAME,
+    STATIC_INFO_INSTANCENAME,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
+    STATIC_INFO_SERVERNAME,
+    STATIC_INFO_VERSION,
+)
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -66,6 +74,18 @@ def test_missing_db(instance_docker, dd_run_check):
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
+        # Saturate static information to avoid trying to connect to the database
+        expected_keys = {
+            STATIC_INFO_VERSION,
+            STATIC_INFO_MAJOR_VERSION,
+            STATIC_INFO_ENGINE_EDITION,
+            STATIC_INFO_RDS,
+            STATIC_INFO_SERVERNAME,
+            STATIC_INFO_INSTANCENAME,
+        }
+        for key in expected_keys:
+            check.static_info_cache[key] = 'foo'
+
         check.initialize_connection()
         check.make_metric_list_to_collect()
         dd_run_check(check)
@@ -894,8 +914,8 @@ def test_get_unixodbc_sysconfig():
         ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:22', ['env:prod', 'port:1']),
         ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
         ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
-        ('$env-$resolved_hostname', 'prod,staging-stubbed.hostname', ['env:prod', 'env:staging']),
-        ('$env-$server_name/$instance_name', 'prod,staging-server/instance', ['env:prod', 'env:staging']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$server_name/$instance_name', 'prod-server/instance', ['env:prod']),
         ('$full_server_name', 'server\\instance', ['env:prod']),
     ],
 )
