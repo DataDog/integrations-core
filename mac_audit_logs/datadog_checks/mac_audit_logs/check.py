@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import subprocess
+from datetime import datetime
+from typing import List, Tuple
 from xml.etree.ElementTree import ParseError
 
 from lxml import etree
@@ -13,8 +15,6 @@ from datadog_checks.base.errors import (
     ConfigValueError,
 )
 from datadog_checks.base.utils.time import get_timestamp
-from datetime import datetime
-from typing import List, Tuple
 
 from . import constants, utils
 
@@ -70,7 +70,9 @@ class MacAuditLogsCheck(AgentCheck):
                 last_record_datetime = utils.time_string_to_datetime_utc(last_record_time)
 
                 if end_time_str == "crash_recovery":
-                    if last_record_datetime <= start_time and start_time >= utils.time_string_to_datetime_utc(utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)):
+                    if last_record_datetime <= start_time and start_time >= utils.time_string_to_datetime_utc(
+                        utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)
+                    ):
                         relevant_files.append((start_time, file_name))
                     continue
 
@@ -154,7 +156,7 @@ class MacAuditLogsCheck(AgentCheck):
                 # Once set to None skipping logic will be not intiated
                 if last_record_milli_sec == milli_sec_value:
                     last_record_milli_sec = None
-                
+
                 datetime_aware = utils.get_datetime_aware(time_value, timezone_offset)
 
                 cursor = {}
@@ -162,12 +164,14 @@ class MacAuditLogsCheck(AgentCheck):
                 cursor["file_name"] = file
 
                 if log_index + 1 == total_entries:
-                    # Set `record_milli_sec` to None and `is_file_collection_completed` to True when reach the last entry of the file
-                    # This indicates the successfull execution of the perticular file
+                    # Set `record_milli_sec` to None and `is_file_collection_completed` to True
+                    # when reach the last entry of the file. This indicates the successfull
+                    # execution of the perticular file
                     cursor["record_milli_sec"] = None
                     cursor["is_file_collection_completed"] = True
                 else:
-                    # Set `record_milli_sec` to milli second  time value of record and `is_file_collection_completed` to False for remaining entries
+                    # Set `record_milli_sec` to milli second  time value of record and
+                    # `is_file_collection_completed` to False for remaining entries
                     # This indictes the ongoing execution of the file
                     cursor["record_milli_sec"] = milli_sec_value
                     cursor["is_file_collection_completed"] = False
@@ -206,9 +210,9 @@ class MacAuditLogsCheck(AgentCheck):
             start_time_str, end_time_str = file.split(".")
 
             # Skip execution of the file if it is not falls within the time range
-            if end_time_str != "crash_recovery" and utils.time_string_to_datetime_utc(end_time_str) < utils.time_string_to_datetime_utc(
-                utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)
-            ):
+            if end_time_str != "crash_recovery" and utils.time_string_to_datetime_utc(
+                end_time_str
+            ) < utils.time_string_to_datetime_utc(utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)):
                 err_message = (
                     f"Skipping the log collection of {file} file as logs are not within the "
                     f"last {constants.HOURS_OFFSET} hours timeframe."
@@ -219,12 +223,14 @@ class MacAuditLogsCheck(AgentCheck):
             # Skip the file if it has been already processed
             if previous_cursor and (
                 (last_collected_file_name == file and previous_cursor["is_file_collection_completed"])
-                or
-                (
+                or (
                     utils.time_string_to_datetime_utc(start_time_str)
                     <= utils.time_string_to_datetime_utc(last_record_time)
-                    and (end_time_str != "crash_recovery" and utils.time_string_to_datetime_utc(end_time_str)
-                    == utils.time_string_to_datetime_utc(last_record_time))
+                    and (
+                        end_time_str != "crash_recovery"
+                        and utils.time_string_to_datetime_utc(end_time_str)
+                        == utils.time_string_to_datetime_utc(last_record_time)
+                    )
                     and last_collected_file_name != file
                 )
             ):
