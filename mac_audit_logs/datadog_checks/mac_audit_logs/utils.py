@@ -6,10 +6,10 @@ from datetime import datetime, timedelta, timezone
 from . import constants
 
 
-def get_utc_timestamp_minus_18_hours() -> str:
+def get_utc_timestamp_minus_hours(hours: int) -> str:
     current_utc_time = datetime.now(timezone.utc)
-    time_18_hours_ago = current_utc_time - timedelta(hours=18)
-    return time_18_hours_ago.strftime("%Y%m%d%H%M%S")
+    time_delta_hours_ago = current_utc_time - timedelta(hours=hours)
+    return time_delta_hours_ago.strftime(constants.FILE_TIMESTAMP_FORMAT)
 
 
 def time_string_to_datetime_utc(time_string) -> datetime:
@@ -41,4 +41,4 @@ def convert_local_to_utc_timezone_timestamp_str(time_string: str, tz_offset: str
     offset = _parse_timezone_offset(tz_offset)
     utc_dt = local_dt - offset
 
-    return utc_dt.strftime("%Y%m%d%H%M%S")
+    return utc_dt.strftime(constants.FILE_TIMESTAMP_FORMAT)

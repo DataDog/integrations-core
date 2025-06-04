@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import pytest
 
-INSTANCE = {"min_collection_interval": 50.0, "MONITOR": True, "IP": "10.10.10.10", "PORT": 15423}
+INSTANCE = {"min_collection_interval": 15.0, "MONITOR": True, "AUDIT_LOGS_DIR_PATH": "/var/audit"}
 
 
 @pytest.fixture(scope='session')
