@@ -47,16 +47,16 @@ class AgentInterface(ABC):
     def python_version(self) -> tuple[int, int]:
         import re
 
-        if match := re.search(r"^py(\d)\.(\d+)", self.env):
+        if match := re.search(r'^py(\d)\.(\d+)', self.env):
             return int(match.group(1)), int(match.group(2))
 
         from ddev.repo.constants import PYTHON_VERSION
 
-        major, minor = PYTHON_VERSION.split(".")
+        major, minor = PYTHON_VERSION.split('.')
         return int(major), int(minor)
 
     def get_id(self) -> str:
-        return f"{self.integration.name}_{self.env}"
+        return f'{self.integration.name}_{self.env}'
 
     @abstractmethod
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None: ...
