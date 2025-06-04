@@ -233,6 +233,7 @@ class CheckVMLogs(CheckCommandOutput):
         :param attempts: How many times to try searching for the patterns
         :param wait: How long, in seconds, to wait between attempts
         """
+        # TODO: add support for different providers other than VirtualBox, it will be needed to add support for windows on arm64
         command = ["VBoxManage", "showvminfo", identifier, "--log", "0"]
 
         super(CheckVMLogs, self).__init__(
