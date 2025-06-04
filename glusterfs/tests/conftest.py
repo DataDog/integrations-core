@@ -3,23 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
-import platform
 from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import WaitFor, run_command
-from datadog_checks.dev import get_docker_hostname
-from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.conditions import CheckVMLogs
-
-ON_CI = running_on_ci()
-
 from .common import CONFIG, INSTANCE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HOST = get_docker_hostname()  # Reusing this as it will provide localhost on GitHub Actions
-PRIMARY_VM = "gluster-node"
 
 E2E_METADATA = {
     "agent_type": "vagrant",
@@ -43,11 +33,8 @@ E2E_METADATA = {
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    if platform.system() == "Darwin" and not ON_CI:
-        vm_config = copy.deepcopy(CONFIG)
-        yield vm_config, E2E_METADATA
-    else:
-        raise Exception("VMs are only supported on Mac OS arm64")
+    vm_config = copy.deepcopy(CONFIG)
+    yield vm_config, E2E_METADATA
 
 
 @pytest.fixture
