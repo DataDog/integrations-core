@@ -8,7 +8,7 @@
 		"id": 173408479,
 		"name": "Anomalous increase in gateway requests per second detected",
 		"type": "query alert",
-		"query": "avg(last_1d):anomalies(per_second(sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name}), 'agile', 2, direction='above', interval=300, alert_window='last_1h', seasonality='hourly', timezone='utc', count_default_zero='true') >= 1",
+		"query": "avg(last_1d):anomalies(throughput(sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name}), 'agile', 2, direction='above', interval=300, alert_window='last_1h', seasonality='hourly', timezone='utc', count_default_zero='true') >= 1",
 		"message": "{{#is_warning}}\n⚠️ **Warning**: Anomalous increase in **gateway requests per second** detected on **{{gateway_name.name}}**.\n\n📈 Recent values are **{{value}}**, breaching the warning threshold.\n\n{{/is_warning}}\n\n{{#is_alert}}\n🚨 **Alert**: Significant anomaly in **gateway requests per second** detected on **{{gateway_name.name}}**\n\n📈 Recent values are **{{value}}**, breaching the alert threshold.\n\n{{/is_alert}}\n\n\n@example@example.com",
 		"tags": [
 			"integration:iboss"

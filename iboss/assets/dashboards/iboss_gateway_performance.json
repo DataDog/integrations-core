@@ -231,6 +231,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -248,7 +249,7 @@
                                                 "palette": "cool",
                                                 "palette_index": 4
                                             },
-                                            "formula": "per_second(query2)"
+                                            "formula": "throughput(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -707,6 +708,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -720,7 +722,7 @@
                                                 }
                                             },
                                             "alias": "Requests",
-                                            "formula": "per_second(query2)"
+                                            "formula": "throughput(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1101,6 +1103,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1114,7 +1117,7 @@
                                                 }
                                             },
                                             "alias": "Requests",
-                                            "formula": "per_second(query2)"
+                                            "formula": "throughput(query2)"
                                         }
                                     ],
                                     "queries": [
