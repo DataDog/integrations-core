@@ -211,6 +211,36 @@ class CheckDockerLogs(CheckCommandOutput):
         )
         self.identifier = identifier
 
+class CheckVMLogs(CheckCommandOutput):
+    def __init__(
+        self,
+        identifier,  # type: str
+        patterns,  # type: Union[str, List[str]]
+        matches=1,  # type: Union[str, int]
+        stdout=True,  # type: bool
+        stderr=True,  # type: bool
+        attempts=60,  # type: int
+        wait=1,  # type: int
+    ):
+        """
+        Checks if the provided patterns are present in docker logs
+
+        :param identifier: The VM instance identifier
+        :param patterns: List of patterns to match
+        :param matches: How many of the provided patterns need to match, it can be a number or "all"
+        :param stdout: Whether to search for the provided patterns in stdout
+        :param stderr: Whether to search for the provided patterns in stderr
+        :param attempts: How many times to try searching for the patterns
+        :param wait: How long, in seconds, to wait between attempts
+        """
+        # TODO: add support for different providers other than VirtualBox, it will be needed to add support for windows on arm64
+        command = ["VBoxManage", "showvminfo", identifier, "--log", "0"]
+
+        super(CheckVMLogs, self).__init__(
+            command, patterns, matches=matches, stdout=stdout, stderr=stderr, attempts=attempts, wait=wait
+        )
+        self.identifier = identifier
+
 
 class WaitForPortListening(WaitFor):
     """Wait until a server is available on `host:port`."""
