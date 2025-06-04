@@ -124,17 +124,24 @@ def test_mysql_version_set(aggregator, dd_run_check, instance_basic):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
+def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     aggregator = dd_agent_check(instance_complex)
+
+    expected_metric_tags = tags.METRIC_TAGS + (
+        f'database_hostname:{dd_default_hostname}',
+        f'database_instance:{dd_default_hostname}',
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    )
+    if MYSQL_FLAVOR == 'mysql':
+        with root_conn.cursor() as cursor:
+            cursor.execute("SELECT @@server_uuid")
+            server_uuid = cursor.fetchone()[0]
+            expected_metric_tags += ('server_uuid:{}'.format(server_uuid),)
+
     _assert_complex_config(
         aggregator,
         tags.SC_TAGS + tags.database_instance_resource_tags(dd_default_hostname),
-        tags.METRIC_TAGS
-        + (
-            f'database_hostname:{dd_default_hostname}',
-            f'database_instance:{dd_default_hostname}',
-            'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-        ),
+        expected_metric_tags,
         hostname=dd_default_hostname,
         e2e=True,
     )
