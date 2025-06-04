@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
-from os import environ
 
 import pytest
 from packaging.version import parse as parse_version
@@ -11,7 +10,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.mysql import MySql
 
 from . import common
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
 from .utils import deep_compare
 
 
@@ -107,7 +106,7 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
-    is_maria_db = environ.get('MYSQL_FLAVOR') == 'mariadb'
+    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
         "default_character_set_name": "normalized_value",
@@ -653,6 +652,18 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     actual_payloads = {}
 
+    expected_tags = (
+        'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
+        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+        'port:13306',
+        'tag1:value1',
+        'tag2:value2',
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
+
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
@@ -661,15 +672,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
         assert (schema_event.get("flavor") == "MariaDB") or (schema_event.get("flavor") == "MySQL")
-        assert sorted(schema_event["tags"]) == [
-            'database_hostname:stubbed.hostname',
-            'database_instance:stubbed.hostname',
-            'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-            'dd.internal.resource:database_instance:stubbed.hostname',
-            'port:13306',
-            'tag1:value1',
-            'tag2:value2',
-        ]
+        assert sorted(schema_event["tags"]) == sorted(expected_tags)
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']

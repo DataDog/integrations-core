@@ -103,7 +103,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     _assert_complex_config(
         aggregator,
         tags.SC_TAGS + tags.database_instance_resource_tags('stubbed.hostname'),
-        tags.METRIC_TAGS_WITH_RESOURCE,
+        tags.metrics_tags_with_resource(mysql_check),
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -338,6 +338,8 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
         )
 
+    expected_tags = tags.metrics_tags_with_resource(mysql_check)
+
     # Test metrics
     for mname in testable_metrics:
         # These two are currently not guaranteed outside of a Linux
@@ -349,7 +351,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ('schema:testdb',), at_least=1)
+            aggregator.assert_metric(mname, tags=expected_tags + ('schema:testdb',), at_least=1)
 
         # Adding condition to no longer test for os_log_fsyncs in mariadb 10.8+
         # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
@@ -370,15 +372,11 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
             continue
 
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ('schema:testdb',), count=1)
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ('schema:information_schema',), count=1
-            )
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ('schema:performance_schema',), count=1
-            )
+            aggregator.assert_metric(mname, tags=expected_tags + ('schema:testdb',), count=1)
+            aggregator.assert_metric(mname, tags=expected_tags + ('schema:information_schema',), count=1)
+            aggregator.assert_metric(mname, tags=expected_tags + ('schema:performance_schema',), count=1)
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
+            aggregator.assert_metric(mname, tags=expected_tags, at_least=0)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
@@ -567,8 +565,8 @@ def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_custom_queries])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS_WITH_RESOURCE)
-    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('alice.age', value=25, tags=tags.metrics_tags_with_resource(mysql_check))
+    aggregator.assert_metric('bob.age', value=20, tags=tags.metrics_tags_with_resource(mysql_check))
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -606,8 +604,8 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
     for m in internal_metrics:
         aggregator.assert_metric(m, at_least=0)
 
-    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS_WITH_RESOURCE)
-    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('alice.age', value=25, tags=tags.metrics_tags_with_resource(check))
+    aggregator.assert_metric('bob.age', value=20, tags=tags.metrics_tags_with_resource(check))
     aggregator.assert_all_metrics_covered()
 
 
@@ -622,8 +620,12 @@ def test_additional_status(aggregator, dd_run_check, instance_additional_status)
     if (
         MYSQL_FLAVOR.lower() == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.10')
     ) or MYSQL_FLAVOR.lower() == 'mysql':
-        aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
-    aggregator.assert_metric('mysql.innodb.row_lock_time', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+        aggregator.assert_metric(
+            'mysql.innodb.rows_read', metric_type=1, tags=tags.metrics_tags_with_resource(mysql_check)
+        )
+    aggregator.assert_metric(
+        'mysql.innodb.row_lock_time', metric_type=1, tags=tags.metrics_tags_with_resource(mysql_check)
+    )
 
 
 @pytest.mark.integration
@@ -632,9 +634,13 @@ def test_additional_variable(aggregator, dd_run_check, instance_additional_varia
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_variable])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE)
     aggregator.assert_metric(
-        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE
+        'mysql.performance.long_query_time', metric_type=0, tags=tags.metrics_tags_with_resource(mysql_check)
+    )
+    aggregator.assert_metric(
+        'mysql.performance.innodb_flush_log_at_trx_commit',
+        metric_type=0,
+        tags=tags.metrics_tags_with_resource(mysql_check),
     )
 
 
@@ -645,10 +651,13 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
     dd_run_check(mysql_check)
 
     aggregator.assert_metric(
-        'mysql.performance.longer_query_time', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=0
+        'mysql.performance.longer_query_time', metric_type=0, tags=tags.metrics_tags_with_resource(mysql_check), count=0
     )
     aggregator.assert_metric(
-        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=1
+        'mysql.performance.innodb_flush_log_at_trx_commit',
+        metric_type=0,
+        tags=tags.metrics_tags_with_resource(mysql_check),
+        count=1,
     )
 
 
@@ -661,10 +670,10 @@ def test_additional_status_already_queried(aggregator, dd_run_check, instance_st
     dd_run_check(mysql_check)
 
     aggregator.assert_metric(
-        'mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=0
+        'mysql.performance.open_files_test', metric_type=0, tags=tags.metrics_tags_with_resource(mysql_check), count=0
     )
     aggregator.assert_metric(
-        'mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=1
+        'mysql.performance.open_files', metric_type=0, tags=tags.metrics_tags_with_resource(mysql_check), count=1
     )
 
     assert (
@@ -682,7 +691,7 @@ def test_additional_var_already_queried(aggregator, dd_run_check, instance_var_a
     dd_run_check(mysql_check)
 
     aggregator.assert_metric(
-        'mysql.myisam.key_buffer_size', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=1
+        'mysql.myisam.key_buffer_size', metric_type=0, tags=tags.metrics_tags_with_resource(mysql_check), count=1
     )
 
     assert (
@@ -806,6 +815,9 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
+
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
