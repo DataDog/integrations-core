@@ -12,7 +12,7 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-
+# test
 def read_metadata_rows(metadata_file):
     """
     Iterate over the rows of a `metadata.csv` file.
