@@ -53,8 +53,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         self.scraper_configs = []
         for endpoint_key, namespace, metrics in endpoint_configs:
-            endpoint = self.instance.get(endpoint_key)
-            if endpoint:
+            if endpoint := self.instance.get(endpoint_key):
                 config = self.generate_config(endpoint, namespace, metrics)
                 self.scraper_configs.append(config)
 
