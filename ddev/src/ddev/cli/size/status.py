@@ -59,7 +59,7 @@ def status(
             for fmt in format:
                 if fmt not in ["png", "csv", "markdown", "json"]:
                     raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
-        elif to_dd_org and not to_dd_key:
+        elif to_dd_org and to_dd_key:
             raise ValueError("Specify either --to-dd-org or --to-dd-key, not both")
         modules_plat_ver: list[FileDataEntryPlatformVersion] = []
         platforms = valid_platforms if platform is None else [platform]

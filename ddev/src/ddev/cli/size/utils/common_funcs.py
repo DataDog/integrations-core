@@ -10,6 +10,7 @@ import tempfile
 import zipfile
 import zlib
 from datetime import date
+import time
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, Optional, Type, TypedDict
@@ -755,11 +756,8 @@ def draw_treemap_rects_with_labels(
 def send_metrics_to_dd(
     app: Application, modules: list[FileDataEntryPlatformVersion], org: str, key: str, compressed: bool
 ) -> None:
-    metric_name = (
-        "datadog.agent_integrations.size_analyzer.compressed"
-        if compressed
-        else "datadog.agent_integrations.size_analyzer.uncompressed"
-    )
+    metric_name = "datadog.agent_integrations.size_analyzer"
+    size_type = "compressed" if compressed else "uncompressed"
 
     config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
     # if not is_everything_committed():
@@ -769,7 +767,7 @@ def send_metrics_to_dd(
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    timestamp = get_last_commit_timestamp()
+    timestamp = get_last_commit_timestamp() 
     from datetime import datetime
 
     print("date", datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"))
@@ -786,9 +784,11 @@ def send_metrics_to_dd(
                     f"name:{item['Name']}",
                     f"type:{item['Type']}",
                     f"name_type:{item['Type']}({item['Name']})",
+                    f"python_version:{item['Python_Version']}",
                     f"version:{item['Version']}",
                     f"platform:{item['Platform']}",
                     "team:agent-integrations",
+                    f"compression:{size_type}",
                 ],
             }
         )
