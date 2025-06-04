@@ -1,0 +1,34 @@
+{
+	"version": 2,
+	"created_at": "2025-06-04",
+	"last_updated_at": "2025-06-04",
+	"title": "[Postgres] Database is unavailable",
+	"description": "A PostgreSQL availability monitor ensures that your application can reliably access its database. This monitor helps you detect issues—like crashes, high load, or network problems—as soon as they happen, so your team can respond quickly and reduce impact on users.",
+	"definition": {
+		"name": "[Postgres] Database {{db.name}} is unavailable",
+		"type": "query alert",
+		"query": "avg(last_5m):default_zero(avg:postgresql.connections{*} by {db}) + 1 <= 1",
+		"message": "### 🧾 What's Happening\n\nWe have detected that the production PostgreSQL database (`db-prod.postgres.internal`) is currently **unavailable**. This may be due to a service crash, high resource usage, or network connectivity issues.\n\n### ⚠️ Impact\n\n-   Application services that rely on the database are currently degraded or non-functional.\n-   End users may experience failed requests, timeouts, or inability to access key features.\n-   Background jobs and API integrations may also be affected.\n\n### 🛠 Runbook\n\n**1. Verify the database status**\nsystemctl status postgresql\njournalctl -u postgresql --since \"15 minutes ago\"\n\n**2. Check system resources**\ndf -h      # Check disk space  \nfree -m    # Check memory\n\n**3. Inspect PostgreSQL logs**\nLocation: `/var/log/postgresql/` or `/var/lib/pgsql/data/pg_log/`\nLook for:\n\n-   FATAL errors\n-   max connections reached\n-   unexpected shutdowns\n\n**4. Check connection limits (if accessible via psql):**\nSELECT max_conn, numbackends FROM pg_stat_database;\n\n**5. Restart PostgreSQL (if safe to do):**\nsudo systemctl restart postgresql\n\n**6. Failover to standby (if configured):**\npg_ctl promote -D /path/to/data\n\n**7. Communicate:**\n-   Update team Slack channel and incident status page\n-   Log all actions taken for postmortem\n@khang.truong@datadoghq.com",
+		"tags": [
+			"integration:postgres"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {},
+			"avalanche_window": 20
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:postgres"
+	]
+}
