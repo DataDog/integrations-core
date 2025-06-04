@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest  # noqa: I001
+
 from datadog_checks.base import AgentCheck, ConfigurationError  # noqa: F401
 from datadog_checks.mac_audit_logs import MacAuditLogsCheck, constants, utils
 
