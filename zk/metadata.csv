@@ -265,5 +265,5 @@ zookeeper.write_final_proc_time_ms,gauge,,,,[zookeeper version 3.6+ only] Histog
 zookeeper.write_final_proc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only] Total count of write_final_proc_time_ms,0,zookeeper,
 zookeeper.write_final_proc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only] Sum of write_final_proc_time_ms,0,zookeeper,
 zookeeper.znode_count,gauge,,node,,The number of znodes in the ZooKeeper namespace (the data).,0,zookeeper,nodes
-zookeeper.zxid.count,gauge,,,,,0,zookeeper,,
-zookeeper.zxid.epoch,gauge,,,,,0,zookeeper,,
+zookeeper.zxid.count,gauge,,,,,0,zookeeper,
+zookeeper.zxid.epoch,gauge,,,,,0,zookeeper,
