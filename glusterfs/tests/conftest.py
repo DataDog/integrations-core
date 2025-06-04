@@ -27,7 +27,7 @@ E2E_METADATA = {
     "start_commands": [
         "sudo apt update",
         "sudo apt install -y software-properties-common",
-        "sudo add-apt-repository -y ppa:gluster/glusterfs-9",
+        "sudo add-apt-repository -y ppa:gluster/glusterfs-7",
         "sudo apt install -y glusterfs-server glusterfs-client",
         "sudo systemctl start glusterd",
         "sudo systemctl enable glusterd",
