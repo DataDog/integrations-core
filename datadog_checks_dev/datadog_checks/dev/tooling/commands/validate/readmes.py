@@ -54,6 +54,11 @@ def readmes(ctx, check, format_links):
         display_queue = []
         readme_path = get_readme_file(integration)
 
+        if not os.path.exists(readme_path) and repo in ('extras', 'marketplace'):
+            # We are in the process of migrating extras and marketplace to manage READMEs in the Publishing Platform.
+            # We'll revisit this validation once we know for sure how we handle READMEs in the new world.
+            continue
+
         # Validate the README itself
         validate_readme(integration, repo, display_queue, files_failed, readme_counter)
 
