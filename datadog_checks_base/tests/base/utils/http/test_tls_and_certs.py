@@ -8,7 +8,7 @@ import mock
 import pytest
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils.http import HTTPAdapterWrapper, RequestsWrapper
+from datadog_checks.base.utils.http import TlsContextAdapter, RequestsWrapper
 from datadog_checks.base.utils.tls import TlsContextWrapper
 
 pytestmark = [pytest.mark.unit]
@@ -288,7 +288,7 @@ class TestTlsContext:
         assert isinstance(http.tls_context_wrapper, TlsContextWrapper)
 
     def test_session_uses_tls_context_adapter(self):
-        """Test that the session uses HTTPAdapterWrapper for consistent TLS configuration."""
+        """Test that the session uses TlsContextAdapter for consistent TLS configuration."""
         instance = {'tls_verify': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
@@ -296,7 +296,7 @@ class TestTlsContext:
         session = http.session
         https_adapter = session.get_adapter('https://example.com')
 
-        assert isinstance(https_adapter, HTTPAdapterWrapper)
+        assert isinstance(https_adapter, TlsContextAdapter)
         assert https_adapter.tls_context_wrapper is http.tls_context_wrapper
 
     def test_tls_ciphers_applied_consistently(self):

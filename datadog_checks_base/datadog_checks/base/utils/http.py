@@ -118,7 +118,7 @@ KERBEROS_STRATEGIES = {}
 UDS_SCHEME = 'unix'
 
 
-class HTTPAdapterWrapper(requests.adapters.HTTPAdapter):
+class TlsContextAdapter(requests.adapters.HTTPAdapter):
     """
     HTTPS adapter that uses TlsContextWrapper to create SSL contexts.
     This ensures consistent TLS configuration across all HTTPS requests.
@@ -126,12 +126,32 @@ class HTTPAdapterWrapper(requests.adapters.HTTPAdapter):
 
     def __init__(self, tls_context_wrapper, **kwargs):
         self.tls_context_wrapper = tls_context_wrapper
-        super(HTTPAdapterWrapper, self).__init__()
+        super(TlsContextAdapter, self).__init__()
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         # Use the TLS context from TlsContextWrapper
         pool_kwargs['ssl_context'] = self.tls_context_wrapper.tls_context
-        return super(HTTPAdapterWrapper, self).init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
+        return super(TlsContextAdapter, self).init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
+
+    def cert_verify(self, conn, url, verify, cert):
+        """
+        This method is overridden to ensure that the SSL context
+        is configured on the integration side.
+        """
+        pass
+
+    def build_connection_pool_key_attributes(self, request, verify, cert=None):
+        """
+        This method is overridden according to the requests library's 
+        expectations to ensure that the custom SSL context is passed to urllib3.
+        """
+        # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
+        host_params, _ = super(TlsContextAdapter, self).build_connection_pool_key_attributes(request, verify, cert)
+        context = self.context
+        if verify != (self.context.verify_mode == ssl.CERT_REQUIRED):
+            # TODO: Handle the case where `verify` is not the same as the context's verify mode.
+            context = ssl.create_default_context()
+        return host_params, {"ssl_context":context}
 
 
 class ResponseWrapper(ObjectProxy):
@@ -412,11 +432,6 @@ class RequestsWrapper(object):
             new_options['headers'] = new_options['headers'].copy()
             new_options['headers'].update(extra_headers)
 
-        if new_options['verify'] != self.tls_context_wrapper.config['tls_verify']:
-            # The verify option needs to be synchronized
-            self.tls_context_wrapper.config['tls_verify'] = new_options['verify']
-            self.tls_context_wrapper.refresh_tls_context()
-
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
@@ -463,7 +478,7 @@ class RequestsWrapper(object):
                 session = requests.Session()
                 for option, value in self.options.items():
                     setattr(session, option, value)
-                certadapter = HTTPAdapterWrapper(self.tls_context_wrapper)
+                certadapter = TlsContextAdapter(self.tls_context_wrapper)
                 session.mount(url, certadapter)
             else:
                 session = self.session
@@ -568,15 +583,15 @@ class RequestsWrapper(object):
         session = requests.Session()
 
         # Use TlsContextHTTPSAdapter for consistent TLS configuration
-        https_adapter = HTTPAdapterWrapper(self.tls_context_wrapper)
+        https_adapter = TlsContextAdapter(self.tls_context_wrapper)
 
         # Enables HostHeaderSSLAdapter if needed
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
         if self.tls_use_host_header:
             # Create a combined adapter that supports both TLS context and host headers
-            class TlsContextHostHeaderAdapter(HTTPAdapterWrapper, _http_utils.HostHeaderSSLAdapter):
+            class TlsContextHostHeaderAdapter(TlsContextAdapter, _http_utils.HostHeaderSSLAdapter):
                 def __init__(self, tls_context_wrapper, **kwargs):
-                    HTTPAdapterWrapper.__init__(self, tls_context_wrapper, **kwargs)
+                    TlsContextAdapter.__init__(self, tls_context_wrapper, **kwargs)
                     _http_utils.HostHeaderSSLAdapter.__init__(self, **kwargs)
 
                 def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
