@@ -1,0 +1,66 @@
+id: bitwarden
+tests:
+  - sample: |-
+      {
+        "event": {
+          "object": "event",
+          "type": 1504,
+          "itemId": null,
+          "collectionId": null,
+          "groupId": null,
+          "policyId": null,
+          "memberId": "111aaa11-a1a1-1111-a11a-a1aa00111111",
+          "actingUserId": "11aa11a1-1212-11a1-11a1-a2aa25aa2",
+          "installationId": null,
+          "date": "2025-04-29T08:57:59.6413435Z",
+          "device": 9,
+          "ipAddress": "100.100.100.100",
+          "secretId": null,
+          "serviceAccountId": null
+        },
+        "enrichment_details": {
+          "actingUser": {
+            "name": "Jimmy",
+            "email": "jimmy@abc.com",
+            "type": 0
+          },
+          "member": {
+            "name": "Gini",
+            "email": "gini123@abc.com",
+            "type": 1
+          },
+          "group": null
+        }
+      }
+    result: null
+  - sample: |-
+      {
+        "event": {
+          "object": "event",
+          "type": 1400,
+          "itemId": null,
+          "collectionId": null,
+          "groupId": "a1111a-aa11-a11-1a11-a1111aa",
+          "policyId": null,
+          "memberId": null,
+          "actingUserId": "111aaa11-a1a1-1111-a11a-a1aa00111111",
+          "installationId": null,
+          "date": "2025-04-25T09:28:30.4884417Z",
+          "device": 9,
+          "ipAddress": "100.100.100.100",
+          "secretId": null,
+          "serviceAccountId": null
+        },
+        "enrichment_details": {
+          "actingUser": {
+            "name": "Jimmy",
+            "email": "jimmy@abc.com",
+            "type": 0
+          },
+          "member": null,
+          "group": {
+            "name": "Administrators"
+          }
+        }
+      }
+    result: null

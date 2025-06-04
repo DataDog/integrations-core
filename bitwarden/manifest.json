@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Gain insights into the Bitwarden event logs",
     "title": "Bitwarden",
     "media": [],
     "classifier_tags": [
@@ -26,6 +26,14 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Bitwarden Overview": "assets/dashboards/bitwarden_overview.json",
+      "Bitwarden - User & Organization Insights": "assets/dashboards/bitwarden_user_and_organization_insights.json",
+      "Bitwarden - Vault Insights": "assets/dashboards/bitwarden_vault_insights.json"
+    },
+    "logs": {
+      "source": "bitwarden"
     }
   },
   "author": {
