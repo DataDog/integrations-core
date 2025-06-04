@@ -33,6 +33,21 @@ class GitRepository:
     def repo_root(self) -> Path:
         return self.__repo_root
 
+    @property
+    def worktrees(self) -> list[str]:
+        from ddev.utils.fs import Path
+
+        worktree_output = self.capture('worktree', 'list', '--porcelain')
+        worktrees = [
+            Path(line.split()[1]).relative_to(self.repo_root.resolve()).name
+            for line in worktree_output.splitlines()
+            if line.startswith('worktree')
+        ]
+
+        # Avoid returning empty strings. The root of the repo is always a worktree and
+        # the name of "." (the root of the repo relative to itself) is ""
+        return [worktree for worktree in worktrees if worktree]
+
     def current_branch(self) -> str:
         return self.capture('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
@@ -87,7 +102,12 @@ class GitRepository:
                 changed_files.add(line)
 
         # Untracked
-        changed_files.update(self.capture('ls-files', '--others', '--exclude-standard').splitlines())
+        # Remove worktrees as they can be untracked and should not be taken into account
+        changed_files.update(
+            untracked_file
+            for untracked_file in self.capture('ls-files', '--others', '--exclude-standard').splitlines()
+            if not any(untracked_file.startswith(worktree) for worktree in self.worktrees)
+        )
 
         return sorted(changed_files, key=lambda relative_path: (-relative_path.count('/'), relative_path))
 

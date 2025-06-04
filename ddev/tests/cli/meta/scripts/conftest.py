@@ -12,11 +12,13 @@ NEW_PYTHON_VERSION = "3.13"
 
 
 @pytest.fixture
-def fake_repo(tmp_path_factory, config_file, ddev):
+def fake_repo(tmp_path_factory, config_file, ddev, mocker):
     repo_path = tmp_path_factory.mktemp('integrations-core')
     repo = Repository('integrations-core', str(repo_path))
 
-    config_file.model.repos['core'] = str(repo.path)
+    mocker.patch.object(Repository, 'worktrees', new_callable=mocker.PropertyMock, return_value=[])
+
+    config_file.model.repos["core"] = str(repo.path)
     config_file.save()
 
     write_file(

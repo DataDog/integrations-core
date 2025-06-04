@@ -261,6 +261,7 @@ class TestNew:
                 'M ddev/pyproject.toml',
                 '',
                 '',
+                '',
                 'M ddev/pyproject.toml',
                 '',
                 '',
