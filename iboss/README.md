@@ -132,9 +132,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    - **Log Format**: Select **JSON** from the dropdown.
    - **Transfer Interval**: Select **Continuous** from the dropdown.
    - **Field Delimiter**: Select **SPACE** from the dropdown.
-   - **Send DLP Logs**: Set to Enabled to send DLP logs.
-   - **Send Web Logs**: Set to Enabled to send Web logs.
-   - **Send Audit Logs**: Set to Enabled to send audit logs.
+   - **Send DLP/Web/DNS/Malware/Audit Logs**: Set to Enable based on the preference for sending logs.
    - **Fields to Forward**: Add all the fields except **DLP Base64 Encoded Meta Data**, **Base64 Encoded Meta Data** and **Chat GPT Message**.
      <br>After entering the required details, click **Add Service**.
 
