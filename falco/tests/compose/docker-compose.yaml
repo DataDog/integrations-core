@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  falco:
+    image: falcosecurity/falco:latest
+    container_name: falco
+    privileged: true  # Required for Falco to access the host kernel
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - SYS_PTRACE
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - /proc:/host/proc:ro
+      - /etc:/host/etc:ro
+      - /lib/modules:/host/lib/modules:ro
+      - /dev:/dev
+      - ./falco.yaml:/etc/falco/falco.yaml:ro  # Your custom config with metrics enabled
+    ports:
+      - "8765:8765"  # Expose the default Falco webserver port
