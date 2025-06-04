@@ -836,7 +836,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ('job:' + job,)
         )
 
 
@@ -858,31 +858,31 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ('job:' + job,)
         )
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + [
+    return dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-    ]
+    )
 
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
 def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
+    return dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-    ]
+    )
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])

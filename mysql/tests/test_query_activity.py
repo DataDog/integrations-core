@@ -540,14 +540,14 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
 def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
+    return dbm_instance['tags'] + (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-    ]
+    )
 
 
 @pytest.mark.integration
