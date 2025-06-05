@@ -510,7 +510,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _process_tags(self, data, map, tags):
         for tag_info in map:
-            value = data[tag_info["index"]]
+            index = tag_info['index']
+            if index >= len(data):
+                self.log.debug("Index %d out of range for tag '%s'. Skipping.", index, tag_info['name'])
+                continue
+            value = data[index]
 
             # Strip parantheses
             if value.startswith('(') and value.endswith(')'):
@@ -542,7 +546,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _process_metrics(self, data, metrics_map, tags):
         for metric_info in metrics_map["metrics"]:
-            metric_value_str = data[metric_info["index"]]
+            index = metric_info['index']
+            if index >= len(data):
+                self.log.debug("Index %d out of range for metric '%s'. Skipping.", index, metric_info["name"])
+                continue
+            metric_value_str = data[index]
 
             if metric_value_str.strip() == '':
                 self.log.debug("Empty metric value for '%s'. Skipping.", metric_info["name"])
