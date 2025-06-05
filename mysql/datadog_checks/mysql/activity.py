@@ -145,7 +145,6 @@ def agent_check_getter(self):
 
 
 class MySQLActivity(DBMAsyncJob):
-
     DEFAULT_COLLECTION_INTERVAL = 10
     MAX_PAYLOAD_BYTES = 19e6
 

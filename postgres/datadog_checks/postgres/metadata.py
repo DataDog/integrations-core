@@ -401,8 +401,7 @@ class PostgresMetadata(DBMAsyncJob):
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             self._log.debug(
-                                "Tables found for schema '{schema}' in database '{database}':"
-                                "{tables}".format(
+                                "Tables found for schema '{schema}' in database '{database}': {tables}".format(
                                     schema=database["schemas"],
                                     database=dbname,
                                     tables=[table["name"] for table in tables],
@@ -459,8 +458,9 @@ class PostgresMetadata(DBMAsyncJob):
             regex = re.compile(re_str)
             if regex.search(name):
                 self._log.debug(
-                    "Excluding {metadata_type} {name} from metadata collection "
-                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                    "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
+                        metadata_type=metadata_type, name=name, re_str=re_str
+                    )
                 )
                 return False
 
@@ -473,8 +473,9 @@ class PostgresMetadata(DBMAsyncJob):
             regex = re.compile(re_str)
             if regex.search(name):
                 self._log.debug(
-                    "Including {metadata_type} {name} in metadata collection "
-                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                    "Including {metadata_type} {name} in metadata collection because of {re_str}".format(
+                        metadata_type=metadata_type, name=name, re_str=re_str
+                    )
                 )
                 return True
         return False

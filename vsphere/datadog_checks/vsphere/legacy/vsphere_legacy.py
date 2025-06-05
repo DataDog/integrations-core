@@ -409,7 +409,6 @@ class VSphereLegacyCheck(AgentCheck):
         content = server_instance.content
 
         with VSphereLegacyCheck.create_container_view(server_instance, resources) as view_ref:
-
             # Object used to query MORs as well as the attributes we require in one API call
             # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
             collector = content.propertyCollector
@@ -790,8 +789,7 @@ class VSphereLegacyCheck(AgentCheck):
         if instance.get("all_metrics") is not None and instance.get("collection_level") is not None:
             if log_warning:
                 self.log.warning(
-                    "Using both `all_metrics` and `collection_level` configuration flag."
-                    " `all_metrics` will be ignored."
+                    "Using both `all_metrics` and `collection_level` configuration flag. `all_metrics` will be ignored."
                 )
             return False
 

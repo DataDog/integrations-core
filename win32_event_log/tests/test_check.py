@@ -187,6 +187,6 @@ def test_sid(aggregator, dd_run_check, new_check, instance):
     check = new_check(instance)
     dd_run_check(check)
 
-    assert any(
-        'sid:NT AUTHORITY\\SYSTEM' in event['tags'] for event in aggregator.events
-    ), 'Unable to find any expected `sid` tags'  # no cov
+    assert any('sid:NT AUTHORITY\\SYSTEM' in event['tags'] for event in aggregator.events), (
+        'Unable to find any expected `sid` tags'
+    )  # no cov

@@ -15,12 +15,10 @@ from .metrics import CITADEL_METRICS, GALLEY_METRICS, GENERIC_METRICS, MESH_METR
 
 
 class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
-
     DEFAULT_METRIC_LIMIT = 0
     SOURCE_TYPE_NAME = 'istio'
 
     def __init__(self, name, init_config, instances):
-
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
         if instances is not None:

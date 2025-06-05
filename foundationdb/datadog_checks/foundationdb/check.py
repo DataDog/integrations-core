@@ -42,7 +42,7 @@ class FoundationdbCheck(AgentCheck):
 
     def fdb_status_data(self):
         self.construct_database()
-        return self._db[u'\xff\xff/status/json'.encode(u'latin-1')]
+        return self._db['\xff\xff/status/json'.encode('latin-1')]
 
     def check(self, _):
         status_data = self.fdb_status_data()

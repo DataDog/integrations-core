@@ -245,8 +245,9 @@ class PostgresConfig:
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                         raise ConfigurationError(
-                            'Collector method {} is not known. '
-                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                            'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
+                                cap_mtype
+                            )
                         )
 
                     m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)

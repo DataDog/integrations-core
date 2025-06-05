@@ -1153,10 +1153,10 @@ class TestRunJob:
         # Create modified XML with specific timestamp
         modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
 
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=modified_xml
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=modified_xml),
         ):
-
             # Process events directly to set timestamp
             events = query_completion_handler._process_events(modified_xml)
             if events:
@@ -1178,10 +1178,11 @@ class TestRunJob:
             return '{}'
 
         # Mock all necessary methods
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
-        ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit, patch(
-            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit,
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload),
         ):
             # Run the job
             query_completion_handler.run_job()
@@ -1242,16 +1243,14 @@ class TestRunJob:
 
         # Create a spy on the _create_event_payload method to capture what would be created
         # for each individual event before batching
-        with patch.object(
-            query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
-        ) as mock_create_payload, patch.object(
-            query_completion_handler, 'session_exists', return_value=True
-        ), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
-        ), patch.object(
-            query_completion_handler._check, 'database_monitoring_query_activity'
-        ) as mock_submit, patch(
-            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        with (
+            patch.object(
+                query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
+            ) as mock_create_payload,
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit,
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload),
         ):
             # Run the job
             query_completion_handler.run_job()

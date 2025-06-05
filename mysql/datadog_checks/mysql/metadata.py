@@ -138,9 +138,7 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting database settings.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
@@ -151,9 +149,7 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
     def shut_down(self):

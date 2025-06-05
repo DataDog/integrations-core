@@ -36,9 +36,12 @@ def test_get_tcp_stats_failure():
         instance = copy.deepcopy(common.INSTANCE)
         check_instance = WindowsNetwork('network', {}, [instance])
 
-        with mock.patch(
-            'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=ctypes.WinError()
-        ), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
+        with (
+            mock.patch(
+                'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=ctypes.WinError()
+            ),
+            mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric,
+        ):
             check_instance.check({})
             submit_netmetric.assert_not_called()
 
@@ -125,9 +128,10 @@ def test_check_psutil_no_collect_connection_state(aggregator):
     instance['collect_connection_state'] = False
     check_instance = WindowsNetwork('network', {}, [instance])
 
-    with mock.patch.object(check_instance, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(
-        check_instance, '_cx_counters_psutil'
-    ) as _cx_counters_psutil:
+    with (
+        mock.patch.object(check_instance, '_cx_state_psutil') as _cx_state_psutil,
+        mock.patch.object(check_instance, '_cx_counters_psutil') as _cx_counters_psutil,
+    ):
         check_instance.check({})
 
         _cx_state_psutil.assert_not_called()
@@ -139,9 +143,10 @@ def test_check_psutil_collect_connection_state(aggregator):
     instance['collect_connection_state'] = True
     check_instance = WindowsNetwork('network', {}, [instance])
 
-    with mock.patch.object(check_instance, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(
-        check_instance, '_cx_counters_psutil'
-    ) as _cx_counters_psutil:
+    with (
+        mock.patch.object(check_instance, '_cx_state_psutil') as _cx_state_psutil,
+        mock.patch.object(check_instance, '_cx_counters_psutil') as _cx_counters_psutil,
+    ):
         check_instance._collect_cx_state = True
         check_instance.check({})
         _cx_state_psutil.assert_called_once_with(tags=[])

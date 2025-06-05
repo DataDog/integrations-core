@@ -236,7 +236,7 @@ STANDARD_PROMETHEUS_METRICS = {
     ),
     'server_cleanup_lastStarted_startTimestamp_milliseconds': 'server.cleanup.lastStarted.startTimestamp.milliseconds',
     'system_load_average_1m': 'system.load.average.1m',
-    'teamcity_cache_InvestigationTestRunsHolder_projectScopes': 'cache.InvestigationTestRunsHolder' '.projectScopes',
+    'teamcity_cache_InvestigationTestRunsHolder_projectScopes': 'cache.InvestigationTestRunsHolder.projectScopes',
     'teamcity_cache_InvestigationTestRunsHolder_testNames': 'cache.InvestigationTestRunsHolder.testNames',
     'teamcity_cache_InvestigationTestRunsHolder_testRuns': 'cache.InvestigationTestRunsHolder.testRuns',
     'users_active': 'users.active',

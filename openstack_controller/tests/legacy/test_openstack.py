@@ -33,13 +33,12 @@ def test_parse_uptime_string(aggregator):
     instance['tags'] = ['optional:tag1']
     init_config = common.MOCK_CONFIG['init_config']
     check = OpenStackControllerLegacyCheck('openstack_controller', init_config, [instance])
-    response = u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
+    response = ' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     uptime_parsed = check._parse_uptime_string(response)
     assert uptime_parsed == [0.04, 0.14, 0.19]
 
 
 def test_api_error_log_no_password(check, instance, caplog):
-
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
             with mock.patch('datadog_checks.base.utils.http.requests.post') as req:
