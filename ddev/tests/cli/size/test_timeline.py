@@ -25,7 +25,7 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.plt.show"),
         patch("ddev.cli.size.timeline.plt.savefig"),
@@ -264,7 +264,7 @@ def test_timeline_invalid_platform(ddev):
         patch("ddev.cli.size.timeline.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
     ):
         result = ddev(
@@ -298,7 +298,7 @@ def test_timeline_integration_no_changes(ddev):
         patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=[]),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
     ):
         assert (
@@ -420,7 +420,7 @@ def test_timeline_integration_not_found(ddev):
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.module_exists", return_value=False),
         patch("ddev.cli.size.utils.common_funcs.plt.show"),
@@ -455,7 +455,7 @@ def test_timeline_dependency_missing_no_platform(ddev):
         patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
@@ -492,7 +492,7 @@ def test_timeline_dependency_missing_for_platform(ddev, app):
         patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
@@ -535,7 +535,7 @@ def test_timeline_dependency_no_changes(ddev, app):
         patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
