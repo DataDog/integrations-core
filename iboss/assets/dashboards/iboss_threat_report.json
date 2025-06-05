@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Threat",
+    "title": "iboss - Threat Report",
     "description": "This dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations.\n",
     "widgets": [
         {

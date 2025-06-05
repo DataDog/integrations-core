@@ -156,8 +156,41 @@ facets:
     facetType: range
     groups:
       - iboss
+    name: Client Peer Time
+    path: iboss.clientPeerTime
+    source: log
+    type: double
+    unit:
+      family: time
+      name: millisecond
+  - description: ''
+    facetType: range
+    groups:
+      - iboss
+    name: Proxy DNS Lookup Time
+    path: iboss.proxyDnsLookupTime
+    source: log
+    type: double
+    unit:
+      family: time
+      name: millisecond
+  - description: ''
+    facetType: range
+    groups:
+      - iboss
     name: Proxy Total Time
     path: iboss.proxyTotalTime
+    source: log
+    type: double
+    unit:
+      family: time
+      name: millisecond
+  - description: ''
+    facetType: range
+    groups:
+      - iboss
+    name: Server Peer Time
+    path: iboss.serverPeerTime
     source: log
     type: double
     unit:
@@ -300,6 +333,56 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `iboss` to `serverComputerName`
+      enabled: true
+      sources:
+        - iboss
+      sourceType: attribute
+      target: serverComputerName
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: " Map `proxyTotalTime` to `iboss.proxyTotalTime`"
+      enabled: true
+      sources:
+        - proxyTotalTime
+      sourceType: attribute
+      target: iboss.proxyTotalTime
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: " Map `clientPeerTime` to `iboss.clientPeerTime`"
+      enabled: true
+      sources:
+        - clientPeerTime
+      sourceType: attribute
+      target: iboss.clientPeerTime
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: " Map `serverPeerTime` to `iboss.serverPeerTime`"
+      enabled: true
+      sources:
+        - serverPeerTime
+      sourceType: attribute
+      target: iboss.serverPeerTime
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: " Map `proxyDnsLookupTime` to `iboss.proxyDnsLookupTime`"
+      enabled: true
+      sources:
+        - proxyDnsLookupTime
+      sourceType: attribute
+      target: iboss.proxyDnsLookupTime
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: pipeline
       name: Parse Web and DLP logs
       enabled: true
@@ -417,23 +500,22 @@ pipeline:
           target: http.useragent_details
           encoded: false
           combineVersionDetails: false
-    - type: attribute-remapper
-      name: Map `iboss` to `serverComputerName`
+    - type: pipeline
+      name: Extract Search Keyword
       enabled: true
-      sources:
-        - iboss
-      sourceType: attribute
-      target: serverComputerName
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `proxyTotalTime` to `iboss.proxyTotalTime`
-      enabled: true
-      sources:
-        - proxyTotalTime
-      sourceType: attribute
-      target: iboss.proxyTotalTime
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
+      filter:
+        query: '@evt.name:WEB_LOG @http.url_details.path:"/search"'
+      processors:
+        - type: grok-parser
+          name: extracting keyword from URL query string
+          enabled: true
+          source: http.url_details.queryString
+          samples:
+            - q=test1&oq=test2
+            - q=test1&sq=test2&oq=test3
+            - q=test1
+            - oq=test2&q=test1
+          grok:
+            supportRules: ""
+            matchRules: extract_search_keyword
+              (q=%{regex("[^&]+"):search_keyword}(&%{data})*|%{regex(".*(?=&q=)")}&q=%{regex("[^&]+"):search_keyword}(&%{data})*)

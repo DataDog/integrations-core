@@ -1,7 +1,7 @@
 id: iboss
 tests:
  -
-  sample: "<46>May  6 06:14:53 test.ibosscloud.com {\"exception\":\"-\",\"totalByteUsage\":\"2903\",\"policyLayers\":\"Bitdefender|DLP Test|Gmail|Github|dd-test-resource|Non Enterprise Owned|Microsoft CASB Unsanctioned Applications\",\"sourcePort\":\"4890\",\"resourceId\":\"-\",\"contentTypeHeader\":\"-\",\"callout\":\"0\",\"privateIp\":\"10.20.10.20\",\"sAction\":\"Soft-blocked\",\"sourceIpAddress\":\"10.20.10.20\",\"subjectId\":\"example\",\"responseCode\":\"302\",\"proxyTimeSinceEpoch\":\"41\",\"authStepUp\":\"false\",\"productVersion\":\"10.3.3.125\",\"ztScore\":\"0\",\"proxyRule\":\"DLP Rule Settings\",\"clientPeerTime\":\"41\",\"totalByteCount\":\"2903\",\"host\":\"example.com\",\"stealth\":\"0\",\"action\":\"Soft-blocked\",\"uriPath\":\"/example-path\",\"computerMacAddress\":\"00:00:00:00:00:00\",\"iboss\":\"example.ibosscloud.com\",\"ztPolicyName\":\"Non Enterprise Owned\",\"proxyPeerResponseTime\":\"-\",\"tlsVersion\":\"-\",\"ipAddress\":\"10.20.10.30\",\"resourceName\":\"-\",\"localProxyPort\":\"80\",\"logSubType\":\"-\",\"ibossIpAddress\":\"10.20.20.20\",\"mde\":\"-\",\"lastname\":\"-\",\"macAddress\":\"00:00:00:00:00:00\",\"ztPolicyId\":\"test-id-1\",\"filename\":\"-\",\"filteringGroupName\":\"Default\",\"cncFlag\":\"0\",\"proxyDnsLookupTime\":\"-\",\"identityProviderName\":\"-\",\"proxyTotalTime\":\"-\",\"destinationPort\":\"443\",\"logType\":\"WEB_LOG\",\"extension\":\"com\",\"firstname\":\"-\",\"scheme\":\"https\",\"reportingGroup\":\"0\",\"requestMethod\":\"GET\",\"description\":\"Website is part of Microsoft CASB Unsanctioned Applications blocklist. ZeroTrust Policy: Non Enterprise Owned\",\"policyTrace\":\"-\",\"categoryName\":\"Search Engines;Social Media\",\"directionName\":\"outbound\",\"sandBoxDecoded\":\"-\",\"urlLogId\":\"4028\",\"computerName\":\"TEST-COMPUTER\",\"assetId\":\"test-asset-id\",\"audit\":\"0\",\"useTime\":\"6\",\"identityProviderUUID\":\"auto-login\",\"upstreamByteUsage\":\"1250\",\"proxyResponseTime\":\"6\",\"applicationName\":\"C\\\\\\\\chrome.exe\",\"direction\":\"2\",\"malware\":\"0\",\"chatGPTMessage\":\"-\",\"proxyTransactionStartTime\":\"1748240093.321\",\"userAgent\":\"Edg/136.0.0.0\",\"publicIp\":\"10.20.30.20\",\"url\":\"https://example.com/example-path?locale=en-US\",\"logTime\":\"2025-05-26\",\"referrerUrl\":\"test.com\",\"sha256Sum\":\"-\",\"uriQuery\":\"locale=en-US\",\"serverPeerTime\":\"-\",\"downstreamByteUsage\":\"1653\",\"dlpKeywords\":\"-\",\"location\":\"us-central\",\"time\":\"06:14:53\",\"vendorAccountId\":\"313117\",\"username\":\"test-user\",\"heuristicScore\":\"0\"}"
+  sample: "<46>May  6 06:14:53 test.ibosscloud.com {\"exception\":\"-\",\"totalByteUsage\":\"2903\",\"policyLayers\":\"Bitdefender|DLP Test|Gmail|Github|dd-test-resource|Non Enterprise Owned|Microsoft CASB Unsanctioned Applications\",\"sourcePort\":\"4890\",\"resourceId\":\"-\",\"contentTypeHeader\":\"-\",\"callout\":\"0\",\"privateIp\":\"10.20.10.20\",\"sAction\":\"Soft-blocked\",\"sourceIpAddress\":\"10.20.10.20\",\"subjectId\":\"example\",\"responseCode\":\"302\",\"proxyTimeSinceEpoch\":\"41\",\"authStepUp\":\"false\",\"productVersion\":\"10.3.3.125\",\"ztScore\":\"0\",\"proxyRule\":\"DLP Rule Settings\",\"clientPeerTime\":\"41\",\"totalByteCount\":\"2903\",\"host\":\"example.com\",\"stealth\":\"0\",\"action\":\"Soft-blocked\",\"uriPath\":\"/search\",\"computerMacAddress\":\"00:00:00:00:00:00\",\"iboss\":\"example.ibosscloud.com\",\"ztPolicyName\":\"Non Enterprise Owned\",\"proxyPeerResponseTime\":\"-\",\"tlsVersion\":\"-\",\"ipAddress\":\"10.20.10.30\",\"resourceName\":\"-\",\"localProxyPort\":\"80\",\"logSubType\":\"-\",\"ibossIpAddress\":\"10.20.20.20\",\"mde\":\"-\",\"lastname\":\"-\",\"macAddress\":\"00:00:00:00:00:00\",\"ztPolicyId\":\"test-id-1\",\"filename\":\"-\",\"filteringGroupName\":\"Default\",\"cncFlag\":\"0\",\"proxyDnsLookupTime\":\"-\",\"identityProviderName\":\"-\",\"proxyTotalTime\":\"-\",\"destinationPort\":\"443\",\"logType\":\"WEB_LOG\",\"extension\":\"com\",\"firstname\":\"-\",\"scheme\":\"https\",\"reportingGroup\":\"0\",\"requestMethod\":\"GET\",\"description\":\"Website is part of Microsoft CASB Unsanctioned Applications blocklist. ZeroTrust Policy: Non Enterprise Owned\",\"policyTrace\":\"-\",\"categoryName\":\"Search Engines;Social Media\",\"directionName\":\"outbound\",\"sandBoxDecoded\":\"-\",\"urlLogId\":\"4028\",\"computerName\":\"TEST-COMPUTER\",\"assetId\":\"test-asset-id\",\"audit\":\"0\",\"useTime\":\"6\",\"identityProviderUUID\":\"auto-login\",\"upstreamByteUsage\":\"1250\",\"proxyResponseTime\":\"6\",\"applicationName\":\"C\\\\\\\\chrome.exe\",\"direction\":\"2\",\"malware\":\"0\",\"chatGPTMessage\":\"-\",\"proxyTransactionStartTime\":\"1748240093.321\",\"userAgent\":\"Edg/136.0.0.0\",\"publicIp\":\"10.20.30.20\",\"url\":\"https://example.com/search?locale=en-US&q=test\",\"logTime\":\"2025-05-26\",\"referrerUrl\":\"test.com\",\"sha256Sum\":\"-\",\"uriQuery\":\"locale=en-US&q=test\",\"serverPeerTime\":\"-\",\"downstreamByteUsage\":\"1653\",\"dlpKeywords\":\"-\",\"location\":\"us-central\",\"time\":\"06:14:53\",\"vendorAccountId\":\"313117\",\"username\":\"test-user\",\"heuristicScore\":\"0\"}"
   result:
     custom:
       action: "Soft-blocked"
@@ -36,11 +36,11 @@ tests:
         method: "GET"
         status_category: "Redirection"
         status_code: "302"
-        url: "https://example.com/example-path?locale=en-US"
+        url: "https://example.com/search?locale=en-US&q=test"
         url_details:
           host: "example.com"
-          path: "/example-path"
-          queryString: "locale=en-US"
+          path: "/search"
+          queryString: "locale=en-US&q=test"
           scheme: "https"
         useragent: "Edg/136.0.0.0"
         useragent_details:
@@ -56,6 +56,9 @@ tests:
           os:
             family: "Other"
       iboss:
+        proxyDnsLookupTime: "-"
+        proxyPeerResponseTime: "-"
+        proxyResponseTime: "6"
         proxyTotalTime: "-"
       ibossIpAddress: "10.20.20.20"
       identityProviderName: "-"
@@ -83,9 +86,6 @@ tests:
       policyTrace: "-"
       privateIp: "10.20.10.20"
       productVersion: "10.3.3.125"
-      proxyDnsLookupTime: "-"
-      proxyPeerResponseTime: "-"
-      proxyResponseTime: "6"
       proxyRule: "DLP Rule Settings"
       proxyTimeSinceEpoch: "41"
       proxyTransactionStartTime: "1748240093.321"
@@ -96,6 +96,7 @@ tests:
       resourceName: "-"
       sAction: "Soft-blocked"
       sandBoxDecoded: "-"
+      search_keyword: "test"
       serverComputerName: "example.ibosscloud.com"
       serverPeerTime: "-"
       sha256Sum: "-"
@@ -114,7 +115,7 @@ tests:
       ztPolicyId: "test-id-1"
       ztPolicyName: "Non Enterprise Owned"
       ztScore: "0"
-    message: "<46>May  6 06:14:53 test.ibosscloud.com {\"exception\":\"-\",\"totalByteUsage\":\"2903\",\"policyLayers\":\"Bitdefender|DLP Test|Gmail|Github|dd-test-resource|Non Enterprise Owned|Microsoft CASB Unsanctioned Applications\",\"sourcePort\":\"4890\",\"resourceId\":\"-\",\"contentTypeHeader\":\"-\",\"callout\":\"0\",\"privateIp\":\"10.20.10.20\",\"sAction\":\"Soft-blocked\",\"sourceIpAddress\":\"10.20.10.20\",\"subjectId\":\"example\",\"responseCode\":\"302\",\"proxyTimeSinceEpoch\":\"41\",\"authStepUp\":\"false\",\"productVersion\":\"10.3.3.125\",\"ztScore\":\"0\",\"proxyRule\":\"DLP Rule Settings\",\"clientPeerTime\":\"41\",\"totalByteCount\":\"2903\",\"host\":\"example.com\",\"stealth\":\"0\",\"action\":\"Soft-blocked\",\"uriPath\":\"/example-path\",\"computerMacAddress\":\"00:00:00:00:00:00\",\"iboss\":\"example.ibosscloud.com\",\"ztPolicyName\":\"Non Enterprise Owned\",\"proxyPeerResponseTime\":\"-\",\"tlsVersion\":\"-\",\"ipAddress\":\"10.20.10.30\",\"resourceName\":\"-\",\"localProxyPort\":\"80\",\"logSubType\":\"-\",\"ibossIpAddress\":\"10.20.20.20\",\"mde\":\"-\",\"lastname\":\"-\",\"macAddress\":\"00:00:00:00:00:00\",\"ztPolicyId\":\"test-id-1\",\"filename\":\"-\",\"filteringGroupName\":\"Default\",\"cncFlag\":\"0\",\"proxyDnsLookupTime\":\"-\",\"identityProviderName\":\"-\",\"proxyTotalTime\":\"-\",\"destinationPort\":\"443\",\"logType\":\"WEB_LOG\",\"extension\":\"com\",\"firstname\":\"-\",\"scheme\":\"https\",\"reportingGroup\":\"0\",\"requestMethod\":\"GET\",\"description\":\"Website is part of Microsoft CASB Unsanctioned Applications blocklist. ZeroTrust Policy: Non Enterprise Owned\",\"policyTrace\":\"-\",\"categoryName\":\"Search Engines;Social Media\",\"directionName\":\"outbound\",\"sandBoxDecoded\":\"-\",\"urlLogId\":\"4028\",\"computerName\":\"TEST-COMPUTER\",\"assetId\":\"test-asset-id\",\"audit\":\"0\",\"useTime\":\"6\",\"identityProviderUUID\":\"auto-login\",\"upstreamByteUsage\":\"1250\",\"proxyResponseTime\":\"6\",\"applicationName\":\"C\\\\\\\\chrome.exe\",\"direction\":\"2\",\"malware\":\"0\",\"chatGPTMessage\":\"-\",\"proxyTransactionStartTime\":\"1748240093.321\",\"userAgent\":\"Edg/136.0.0.0\",\"publicIp\":\"10.20.30.20\",\"url\":\"https://example.com/example-path?locale=en-US\",\"logTime\":\"2025-05-26\",\"referrerUrl\":\"test.com\",\"sha256Sum\":\"-\",\"uriQuery\":\"locale=en-US\",\"serverPeerTime\":\"-\",\"downstreamByteUsage\":\"1653\",\"dlpKeywords\":\"-\",\"location\":\"us-central\",\"time\":\"06:14:53\",\"vendorAccountId\":\"313117\",\"username\":\"test-user\",\"heuristicScore\":\"0\"}"
+    message: "<46>May  6 06:14:53 test.ibosscloud.com {\"exception\":\"-\",\"totalByteUsage\":\"2903\",\"policyLayers\":\"Bitdefender|DLP Test|Gmail|Github|dd-test-resource|Non Enterprise Owned|Microsoft CASB Unsanctioned Applications\",\"sourcePort\":\"4890\",\"resourceId\":\"-\",\"contentTypeHeader\":\"-\",\"callout\":\"0\",\"privateIp\":\"10.20.10.20\",\"sAction\":\"Soft-blocked\",\"sourceIpAddress\":\"10.20.10.20\",\"subjectId\":\"example\",\"responseCode\":\"302\",\"proxyTimeSinceEpoch\":\"41\",\"authStepUp\":\"false\",\"productVersion\":\"10.3.3.125\",\"ztScore\":\"0\",\"proxyRule\":\"DLP Rule Settings\",\"clientPeerTime\":\"41\",\"totalByteCount\":\"2903\",\"host\":\"example.com\",\"stealth\":\"0\",\"action\":\"Soft-blocked\",\"uriPath\":\"/search\",\"computerMacAddress\":\"00:00:00:00:00:00\",\"iboss\":\"example.ibosscloud.com\",\"ztPolicyName\":\"Non Enterprise Owned\",\"proxyPeerResponseTime\":\"-\",\"tlsVersion\":\"-\",\"ipAddress\":\"10.20.10.30\",\"resourceName\":\"-\",\"localProxyPort\":\"80\",\"logSubType\":\"-\",\"ibossIpAddress\":\"10.20.20.20\",\"mde\":\"-\",\"lastname\":\"-\",\"macAddress\":\"00:00:00:00:00:00\",\"ztPolicyId\":\"test-id-1\",\"filename\":\"-\",\"filteringGroupName\":\"Default\",\"cncFlag\":\"0\",\"proxyDnsLookupTime\":\"-\",\"identityProviderName\":\"-\",\"proxyTotalTime\":\"-\",\"destinationPort\":\"443\",\"logType\":\"WEB_LOG\",\"extension\":\"com\",\"firstname\":\"-\",\"scheme\":\"https\",\"reportingGroup\":\"0\",\"requestMethod\":\"GET\",\"description\":\"Website is part of Microsoft CASB Unsanctioned Applications blocklist. ZeroTrust Policy: Non Enterprise Owned\",\"policyTrace\":\"-\",\"categoryName\":\"Search Engines;Social Media\",\"directionName\":\"outbound\",\"sandBoxDecoded\":\"-\",\"urlLogId\":\"4028\",\"computerName\":\"TEST-COMPUTER\",\"assetId\":\"test-asset-id\",\"audit\":\"0\",\"useTime\":\"6\",\"identityProviderUUID\":\"auto-login\",\"upstreamByteUsage\":\"1250\",\"proxyResponseTime\":\"6\",\"applicationName\":\"C\\\\\\\\chrome.exe\",\"direction\":\"2\",\"malware\":\"0\",\"chatGPTMessage\":\"-\",\"proxyTransactionStartTime\":\"1748240093.321\",\"userAgent\":\"Edg/136.0.0.0\",\"publicIp\":\"10.20.30.20\",\"url\":\"https://example.com/search?locale=en-US&q=test\",\"logTime\":\"2025-05-26\",\"referrerUrl\":\"test.com\",\"sha256Sum\":\"-\",\"uriQuery\":\"locale=en-US&q=test\",\"serverPeerTime\":\"-\",\"downstreamByteUsage\":\"1653\",\"dlpKeywords\":\"-\",\"location\":\"us-central\",\"time\":\"06:14:53\",\"vendorAccountId\":\"313117\",\"username\":\"test-user\",\"heuristicScore\":\"0\"}"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1748240093000
@@ -169,6 +170,9 @@ tests:
           os:
             family: "Other"
       iboss:
+        proxyDnsLookupTime: "-"
+        proxyPeerResponseTime: "-"
+        proxyResponseTime: "-"
         proxyTotalTime: "-"
       ibossIpAddress: "10.20.20.20"
       identityProviderName: "-"
@@ -196,9 +200,6 @@ tests:
       policyTrace: "-"
       privateIp: "10.20.10.20"
       productVersion: "10.3.3.125"
-      proxyDnsLookupTime: "-"
-      proxyPeerResponseTime: "-"
-      proxyResponseTime: "-"
       proxyRule: "DLP Test"
       proxyTimeSinceEpoch: "-"
       proxyTransactionStartTime: "-"
@@ -264,6 +265,9 @@ tests:
       host: "-"
       hostname: "test.ibosscloud.com"
       iboss:
+        proxyDnsLookupTime: "-"
+        proxyPeerResponseTime: "-"
+        proxyResponseTime: "-"
         proxyTotalTime: "-"
       ibossIpAddress: "10.20.20.20"
       identityProviderName: "-"
@@ -293,9 +297,6 @@ tests:
       policyTrace: "-"
       privateIp: "-"
       productVersion: "10.3.3.125"
-      proxyDnsLookupTime: "-"
-      proxyPeerResponseTime: "-"
-      proxyResponseTime: "-"
       proxyRule: "-"
       proxyTimeSinceEpoch: "-"
       proxyTransactionStartTime: "-"

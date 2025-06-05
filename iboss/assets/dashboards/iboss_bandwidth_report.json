@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Bandwidth",
+    "title": "iboss - Bandwidth Report",
     "description": "This dashboard provides a comprehensive analysis of network bandwidth consumption across domains, applications, countries, locations, protocols, and users.",
     "widgets": [
         {
