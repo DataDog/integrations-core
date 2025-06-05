@@ -196,7 +196,7 @@ def mock_http_responses(url, **_params):
         '/metrics/detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
         '/metrics/detailed?family=queue_delivery_metrics': 'detailed-queue_delivery_metrics.txt',
         (
-            '/metrics/detailed?family=queue_consumer_count' '&family=queue_coarse_metrics'
+            '/metrics/detailed?family=queue_consumer_count&family=queue_coarse_metrics'
         ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
         (
             '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'

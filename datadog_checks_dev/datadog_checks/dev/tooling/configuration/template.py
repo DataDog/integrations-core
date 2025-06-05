@@ -52,7 +52,9 @@ class ConfigTemplates:
                 if branch in data:
                     data = data[branch]
                 else:
-                    raise ValueError(f"Template `{'/'.join(path_parts)}` has no element `{'.'.join(branches[:i + 1])}`")
+                    raise ValueError(
+                        f"Template `{'/'.join(path_parts)}` has no element `{'.'.join(branches[: i + 1])}`"
+                    )
             elif isinstance(data, list):
                 for item in data:
                     if isinstance(item, dict) and item.get('name') == branch:

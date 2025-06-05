@@ -189,7 +189,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
     if MYSQL_REPLICATION == 'group':
-
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):

@@ -49,7 +49,6 @@ class GlusterfsCheck(AgentCheck):
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def get_gstatus_output(self, cmd):
-
         res = subprocess.run(cmd.split(), capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
 

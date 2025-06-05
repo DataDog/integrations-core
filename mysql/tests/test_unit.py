@@ -379,7 +379,6 @@ def set_up_submitter_unit_test():
 
 
 def test_submit_data():
-
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
     dataSubmitter.store_db_infos(
@@ -421,10 +420,14 @@ def test_submit_data():
 def test_fetch_throws():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
-    with mock.patch('time.time', side_effect=[0, 9999999]), mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._get_tables',
-        return_value=[{"name": "mytable1"}, {"name": "mytable2"}],
-    ), mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]):
+    with (
+        mock.patch('time.time', side_effect=[0, 9999999]),
+        mock.patch(
+            'datadog_checks.mysql.databases_data.DatabasesData._get_tables',
+            return_value=[{"name": "mytable1"}, {"name": "mytable2"}],
+        ),
+        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
+    ):
         with pytest.raises(StopIteration):
             databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
 
@@ -432,11 +435,14 @@ def test_fetch_throws():
 def test_submit_is_called_if_too_many_columns():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
-    with mock.patch('time.time', side_effect=[0, 0]), mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]
-    ), mock.patch('datadog_checks.mysql.databases_data.SubmitData.submit') as mocked_submit, mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data',
-        return_value=(1000_000, {"name": "my_table"}),
+    with (
+        mock.patch('time.time', side_effect=[0, 0]),
+        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
+        mock.patch('datadog_checks.mysql.databases_data.SubmitData.submit') as mocked_submit,
+        mock.patch(
+            'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data',
+            return_value=(1000_000, {"name": "my_table"}),
+        ),
     ):
         databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
         assert mocked_submit.call_count == 2

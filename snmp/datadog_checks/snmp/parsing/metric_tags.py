@@ -4,6 +4,7 @@
 """
 Helpers to parse the `metric_tags` section of a config file.
 """
+
 import re
 from typing import Dict, List, NamedTuple, TypedDict
 
@@ -89,8 +90,9 @@ def parse_metric_tag(metric_tag):
         parsed_metric_tag = _parse_regex_metric_tag(metric_tag)
     else:
         raise ConfigurationError(
-            'A metric tag must specify either a tag, '
-            'or a mapping of tags and a regular expression: {}'.format(metric_tag)
+            'A metric tag must specify either a tag, or a mapping of tags and a regular expression: {}'.format(
+                metric_tag
+            )
         )
     return parsed_metric_tag
 

@@ -268,7 +268,6 @@ def select_hatch_envs(
     latest,
     env_filter_re,
 ):
-
     available_envs = get_available_hatch_envs(check, sort, e2e_tests_only=e2e_tests_only)
 
     if style or format_style:
