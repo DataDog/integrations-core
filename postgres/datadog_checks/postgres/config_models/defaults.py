@@ -157,7 +157,7 @@ def instance_table_count_limit():
 
 
 def instance_tag_replication_role():
-    return False
+    return True
 
 
 def instance_use_global_custom_queries():
