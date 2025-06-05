@@ -22,6 +22,9 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_SERVERNAME,
+)
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
@@ -122,6 +125,7 @@ def test_collect_load_activity(
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     if collect_raw_query_statement:
         instance["collect_raw_query_statement"] = {"enabled": True}
         expected_instance_tags.add("raw_query_statement:enabled")
@@ -185,6 +189,8 @@ def test_collect_load_activity(
     # and shutdown executor
     fred_conn.close()
     executor.shutdown(wait=True)
+
+    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -824,7 +830,12 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
 
 
 def _expected_dbm_instance_tags(check):
-    return check._config.tags
+    return check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
 
 
 @pytest.mark.integration
