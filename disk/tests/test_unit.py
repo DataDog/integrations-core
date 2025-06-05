@@ -107,9 +107,12 @@ def psutil_mocks():
     else:
         mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
 
-    with mock.patch('psutil.disk_partitions', return_value=[MockPart()], __name__='disk_partitions'), mock.patch(
-        'psutil.disk_usage', return_value=MockDiskMetrics(), __name__='disk_usage'
-    ), mock.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics()), mock_statvfs:
+    with (
+        mock.patch('psutil.disk_partitions', return_value=[MockPart()], __name__='disk_partitions'),
+        mock.patch('psutil.disk_usage', return_value=MockDiskMetrics(), __name__='disk_usage'),
+        mock.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics()),
+        mock_statvfs,
+    ):
         yield
 
 
@@ -347,9 +350,11 @@ def test_get_devices_label_options():
     c_blkid_cache = Disk('disk', {}, [{'blkid_cache_file': 'filepath'}])
 
     prefix_fun = "datadog_checks.disk.disk.Disk._get_devices_label_from_"
-    with mock.patch(prefix_fun + "lsblk", return_value="lsblk"), mock.patch(
-        prefix_fun + "blkid", return_value="blkid"
-    ), mock.patch(prefix_fun + "blkid_cache", return_value="blkid_cache"):
+    with (
+        mock.patch(prefix_fun + "lsblk", return_value="lsblk"),
+        mock.patch(prefix_fun + "blkid", return_value="blkid"),
+        mock.patch(prefix_fun + "blkid_cache", return_value="blkid_cache"),
+    ):
         assert c_lsblk._get_devices_label() == "lsblk"
         assert c_blkid._get_devices_label() == "blkid"
         assert c_blkid_cache._get_devices_label() == "blkid_cache"
@@ -454,9 +459,10 @@ def test_timeout_config(aggregator, dd_run_check):
     def no_timeout(fun):
         return lambda *args: fun(args)
 
-    with mock.patch('psutil.disk_partitions', return_value=[MockPart()]), mock.patch(
-        'datadog_checks.disk.disk.timeout', return_value=no_timeout
-    ) as mock_timeout:
+    with (
+        mock.patch('psutil.disk_partitions', return_value=[MockPart()]),
+        mock.patch('datadog_checks.disk.disk.timeout', return_value=no_timeout) as mock_timeout,
+    ):
         dd_run_check(c)
 
     mock_timeout.assert_called_with(TIMEOUT_VALUE)
@@ -481,9 +487,11 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics,
     m = MockDiskMetrics()
     m.total = 0
 
-    with mock.patch('psutil.disk_partitions', return_value=[MockPart(), MockPart(mountpoint="/faulty")]), mock.patch(
-        'psutil.disk_usage', return_value=m, __name__='disk_usage'
-    ), mock.patch('datadog_checks.disk.disk.timeout', return_value=faulty_timeout):
+    with (
+        mock.patch('psutil.disk_partitions', return_value=[MockPart(), MockPart(mountpoint="/faulty")]),
+        mock.patch('psutil.disk_usage', return_value=m, __name__='disk_usage'),
+        mock.patch('datadog_checks.disk.disk.timeout', return_value=faulty_timeout),
+    ):
         dd_run_check(c)
 
     # Check that the warning is called once for the faulty disk

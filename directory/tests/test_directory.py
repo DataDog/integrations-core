@@ -242,7 +242,6 @@ def test_file_metrics_many(aggregator):
                     if i < 5:
                         file_tag = [filetagname + ":%s" % os.path.normpath("{}/many/aalog_{}.log".format(temp_dir, i))]
                     elif i >= 45:
-
                         file_tag = [filetagname + ":%s" % os.path.normpath("{}/many/zzlog_{}.log".format(temp_dir, i))]
                     else:
                         continue
@@ -256,7 +255,6 @@ def test_file_metrics_many(aggregator):
                 # Files in 'temp_dir/many/'
                 file_tag = []
                 if config.get('recursive'):
-
                     for i in range(0, 15):
                         # Files in 'temp_dir/many/subfolder' < 20 therefore all gets `filename`
                         if i < 2:
@@ -370,7 +368,6 @@ def test_os_error_mid_walk_emits_error_and_continues(aggregator, caplog):
 
 def test_no_recursive_symlink_loop(aggregator):
     with temp_directory() as tdir:
-
         # Setup dir and files
         dir2 = os.path.join(tdir, 'fixture_dir2')
         dir3 = os.path.join(tdir, 'fixture_dir2', 'fixture_dir3')
@@ -448,7 +445,6 @@ def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_siz
         return value
 
     with temp_directory() as tdir:
-
         # Setup dir and files
         os.makedirs(str(tdir) + "/main")
         os.makedirs(str(tdir) + "/othr")

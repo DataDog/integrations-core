@@ -355,7 +355,7 @@ def test_relocated_procfs(aggregator, dd_run_check):
                     'cancelled_write_bytes: 0\n'
                 ),
             },
-            'stat': ("cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\n" "btime 1448632481\n"),
+            'stat': ("cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\nbtime 1448632481\n"),
         }
     )
 
@@ -374,9 +374,12 @@ def test_relocated_procfs(aggregator, dd_run_check):
     process = ProcessCheck(common.CHECK_NAME, config['init_config'], config['instances'])
 
     try:
-        with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(
-            'psutil._psutil_linux', create=True
-        ), patch('psutil._psutil_posix', create=True):
+        with (
+            patch('socket.AF_PACKET', create=True),
+            patch('sys.platform', 'linux'),
+            patch('psutil._psutil_linux', create=True),
+            patch('psutil._psutil_posix', create=True),
+        ):
             dd_run_check(process)
     finally:
         shutil.rmtree(my_procfs)
