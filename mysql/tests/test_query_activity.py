@@ -118,14 +118,17 @@ def test_activity_collection(
     assert activity['dbm_type'] == 'activity'
     assert activity['ddsource'] == 'mysql'
     assert activity['ddagentversion'], "missing agent version"
-    assert set(activity['ddtags']) == {
+    expected_tags = (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
         'tag1:value1',
         'tag2:value2',
         'port:13306',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-    }
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        expected_tags += ("server_uuid:{}".format(check.server_uuid),)
+    assert sorted(activity['ddtags']) == sorted(expected_tags)
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
     assert activity['mysql_activity'], "should have at least one activity row"
@@ -428,7 +431,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check._query_activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.mysql.async_job.inactive_stop",
-        tags=_expected_dbm_job_err_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance, check),
         hostname='',
     )
 
@@ -447,7 +450,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.mysql.async_job.cancel",
-        tags=_expected_dbm_job_err_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance, check),
     )
 
 
@@ -539,8 +542,8 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + (
+def _expected_dbm_job_err_tags(dbm_instance, check):
+    _tags = dbm_instance['tags'] + (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
         'job:query-activity',
@@ -548,6 +551,9 @@ def _expected_dbm_job_err_tags(dbm_instance):
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+    return _tags
 
 
 @pytest.mark.integration
