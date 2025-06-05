@@ -401,8 +401,7 @@ class PostgresMetadata(DBMAsyncJob):
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             self._log.debug(
-                                "Tables found for schema '{schema}' in database '{database}':"
-                                "{tables}".format(
+                                "Tables found for schema '{schema}' in database '{database}': {tables}".format(
                                     schema=database["schemas"],
                                     database=dbname,
                                     tables=[table["name"] for table in tables],

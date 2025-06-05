@@ -34,7 +34,6 @@ ADDITIONAL_METRICS_MAPPING = {
 
 
 class ProxysqlCheck(AgentCheck):
-
     SERVICE_CHECK_NAME = "can_connect"
     __NAMESPACE__ = "proxysql"
 
