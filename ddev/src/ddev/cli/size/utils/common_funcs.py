@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -12,17 +14,19 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
 
-import matplotlib.pyplot as plt
 import requests
 import squarify
 from datadog import api, initialize
-from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
 
 METRIC_VERSION = 2
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.patches import Patch
 
 
 class FileDataEntry(TypedDict):
@@ -522,7 +526,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.csv"
                     if version
-                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
+                    else f"{platform}_{size_type}_{mode}.csv"
+                    if platform
+                    else f"{size_type}_{mode}.csv"
                 )
             )
             save_csv(app, modules, csv_filename)
@@ -534,7 +540,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.json"
                     if version
-                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
+                    else f"{platform}_{size_type}_{mode}.json"
+                    if platform
+                    else f"{size_type}_{mode}.json"
                 )
             )
             save_json(app, json_filename, modules)
@@ -546,7 +554,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.md"
                     if version
-                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
+                    else f"{platform}_{size_type}_{mode}.md"
+                    if platform
+                    else f"{size_type}_{mode}.md"
                 )
             )
             save_markdown(app, "Status", modules, markdown_filename)
@@ -560,6 +570,8 @@ def plot_treemap(
     mode: Literal["status", "diff"],
     path: Optional[str] = None,
 ) -> None:
+    import matplotlib.pyplot as plt
+
     if modules == []:
         return
 
@@ -598,6 +610,9 @@ def plot_treemap(
 def plot_status_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
     # Calculate the area of the rectangles
     sizes = [mod["Size_Bytes"] for mod in modules]
     norm_sizes = squarify.normalize_sizes(sizes, 100, 100)
@@ -629,6 +644,9 @@ def plot_status_treemap(
 def plot_diff_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
     # Define the colors for each type
     cmap_pos = plt.get_cmap("Oranges")
     cmap_neg = plt.get_cmap("Blues")
@@ -689,11 +707,14 @@ def scale_colors_treemap(area: float, max_area: float) -> float:
 
 
 def draw_treemap_rects_with_labels(
-    ax: plt.Axes,
+    ax: Axes,
     rects: list[dict],
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
     colors: list[tuple[float, float, float, float]],
 ) -> None:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+
     """
     Draw treemap rectangles with their assigned colors and optional text labels.
 
@@ -707,7 +728,7 @@ def draw_treemap_rects_with_labels(
         x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
 
         # Draw the rectangle with a white border
-        ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
+        ax.add_patch(Rectangle((x, y), dx, dy, color=color, ec="white"))
 
         # Determine font size based on rectangle area
         MIN_FONT_SIZE = 6
