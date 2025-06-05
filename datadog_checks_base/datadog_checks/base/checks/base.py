@@ -48,6 +48,7 @@ from ..utils.common import ensure_bytes, to_native_string
 from ..utils.fips import enable_fips
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tracing import traced_class
+from ._config_ast import parse as _parse_ast_config
 
 if AGENT_RUNNING:
     from ..log import CheckLoggingAdapter, init_logging
@@ -1488,9 +1489,4 @@ class AgentCheck(object):
         if process.returncode != 0:
             raise ValueError(f'Failed to load config: {stderr.decode()}')
 
-        decoded = stdout.strip().decode()
-        try:
-            return eval(decoded)
-        # a single, literal unquoted string
-        except Exception:
-            return decoded
+        return _parse_ast_config(stdout.strip().decode())

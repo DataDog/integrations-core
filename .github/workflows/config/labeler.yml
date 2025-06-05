@@ -297,6 +297,8 @@ integration/ibm_mq:
 - ibm_mq/**/*
 integration/ibm_was:
 - ibm_was/**/*
+integration/iboss:
+- iboss/**/*
 integration/ignite:
 - ignite/**/*
 integration/iis:
@@ -693,6 +695,8 @@ integration/win32_event_log:
 - win32_event_log/**/*
 integration/wincrashdetect:
 - wincrashdetect/**/*
+integration/windows_certificate:
+- windows_certificate/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
 integration/windows_registry:
