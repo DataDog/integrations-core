@@ -344,7 +344,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: " Map `proxyTotalTime` to `iboss.proxyTotalTime`"
+      name: Map `proxyTotalTime` to `iboss.proxyTotalTime`
       enabled: true
       sources:
         - proxyTotalTime
@@ -354,7 +354,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: " Map `clientPeerTime` to `iboss.clientPeerTime`"
+      name: Map `clientPeerTime` to `iboss.clientPeerTime`
       enabled: true
       sources:
         - clientPeerTime
@@ -364,7 +364,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: " Map `serverPeerTime` to `iboss.serverPeerTime`"
+      name: Map `serverPeerTime` to `iboss.serverPeerTime`
       enabled: true
       sources:
         - serverPeerTime
@@ -374,7 +374,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: " Map `proxyDnsLookupTime` to `iboss.proxyDnsLookupTime`"
+      name: Map `proxyDnsLookupTime` to `iboss.proxyDnsLookupTime`
       enabled: true
       sources:
         - proxyDnsLookupTime
