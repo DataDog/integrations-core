@@ -44,7 +44,9 @@ ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
 @click.argument('target_spec', required=False)
 @click.argument('pytest_args', nargs=-1)
 @click.option('--lint', '-s', is_flag=True, help='Run only lint & style checks')
+@click.option('--lint-unsafe', '-su', is_flag=True, help='Run only lint & style checks showing unsafe fixes')
 @click.option('--fmt', '-fs', is_flag=True, help='Run only the code formatter')
+@click.option('--fmt-unsafe', '-fsu', is_flag=True, help='Run the code formatter with unsafe fixes')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
@@ -65,7 +67,9 @@ def test(
     target_spec: str | None,
     pytest_args: tuple[str, ...],
     lint: bool,
+    lint_unsafe: bool,
     fmt: bool,
+    fmt_unsafe: bool,
     bench: bool,
     latest: bool,
     coverage: bool,
@@ -153,7 +157,7 @@ def test(
         global_env_vars['DD_API_KEY'] = api_key
 
     # Only enable certain functionality when running standard tests
-    standard_tests = not (lint or fmt or bench or latest)
+    standard_tests = not (lint or lint_unsafe or fmt or fmt_unsafe or bench or latest)
 
     # Keep track of environments so that they can first be removed if requested
     chosen_environments = []
@@ -164,9 +168,15 @@ def test(
     elif lint:
         chosen_environments.append('lint')
         base_command.extend(('--env', 'lint', '--', 'all'))
+    elif lint_unsafe:
+        chosen_environments.append('lint')
+        base_command.extend(('--env', 'lint', '--', 'style-unsafe'))
     elif fmt:
         chosen_environments.append('lint')
         base_command.extend(('--env', 'lint', '--', 'fmt'))
+    elif fmt_unsafe:
+        chosen_environments.append('lint')
+        base_command.extend(('--env', 'lint', '--', 'fmt-unsafe'))
     elif bench:
         filter_data = json.dumps({'benchmark-env': True})
         base_command.extend(('--filter', filter_data, '--', 'benchmark'))

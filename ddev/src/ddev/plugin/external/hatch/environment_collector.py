@@ -86,7 +86,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
     def finalize_config(self, config):
-
         for env_name, env_config in config.items():
             is_template_env = env_name == 'default'
             is_test_env = env_config.setdefault('test-env', is_template_env)
@@ -125,29 +124,43 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts.setdefault('benchmark', '_dd-benchmark')
 
     def get_initial_config(self):
+        from string import Template
+
         settings_dir = '.' if self.is_dev_package else '..'
+        lint_template = Template('ruff check $options --config $settings_dir/pyproject.toml .')
+        fmt_template = Template('ruff format $options --config $settings_dir/pyproject.toml .')
+
         lint_env = {
             'detached': True,
             'scripts': {
                 'style': [
-                    f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'ruff check --config {settings_dir}/pyproject.toml .',
+                    lint_template.substitute(options='', settings_dir=settings_dir),
+                    fmt_template.substitute(options='--diff --check', settings_dir=settings_dir),
+                ],
+                'style-unsafe': [
+                    lint_template.substitute(options='--diff --unsafe-fixes', settings_dir=settings_dir),
+                    fmt_template.substitute(options='--diff --check', settings_dir=settings_dir),
                 ],
                 'fmt': [
-                    f'black . --config {settings_dir}/pyproject.toml',
-                    f'ruff check --config {settings_dir}/pyproject.toml --fix .',
+                    lint_template.substitute(options='--fix', settings_dir=settings_dir),
+                    fmt_template.substitute(options='', settings_dir=settings_dir),
                     'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
-                    'black cannot fix, these will need to be fixed manually.\')"',
-                    'style',
+                    'that cannot be fixed automatically and might need manual intervention.\')"',
+                ],
+                'fmt-unsafe': [
+                    lint_template.substitute(options='--fix --unsafe-fixes', settings_dir=settings_dir),
+                    fmt_template.substitute(options='', settings_dir=settings_dir),
+                    'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
+                    'that cannot be fixed automatically (even with --unsafe-fixes) and might need '
+                    'manual intervention.\')"',
                 ],
                 'all': ['style'],
             },
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
-                'black==25.1.0',
                 'ruff==0.11.10',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==2.10.6',
+                'pydantic==2.11.5',
             ],
         }
         config = {'lint': lint_env}
