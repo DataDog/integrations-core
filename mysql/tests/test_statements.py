@@ -156,7 +156,7 @@ def test_statement_metrics(
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
     assert set(event['tags']) == expected_tags
@@ -425,7 +425,7 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
@@ -836,7 +836,8 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.inactive_stop",
+            tags=_expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,),
         )
 
 
@@ -858,31 +859,37 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
         )
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + [
+def _expected_dbm_instance_tags(dbm_instance, check):
+    _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-    ]
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+    return _tags
 
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
+def _expected_dbm_job_err_tags(dbm_instance, check):
+    _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-    ]
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+    return _tags
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
