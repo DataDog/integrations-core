@@ -18,6 +18,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
+    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -82,7 +83,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_autocommit  # noqa: F401
+from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
 from .version_utils import get_version
 
 try:
@@ -119,7 +120,8 @@ class MySql(AgentCheck):
         self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
         self._config = MySQLConfig(self.instance, init_config)
-        self.tags = self._config.tags
+        self.tag_manager = TagManager()
+        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
         self.cloud_metadata = self._config.cloud_metadata
 
@@ -144,9 +146,6 @@ class MySql(AgentCheck):
         )  # type: TTLCache
 
         self._runtime_queries_cached = None
-        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
-        # go through the agent internal metrics submission processing those tags
-        self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
 
@@ -185,7 +184,7 @@ class MySql(AgentCheck):
         if self._database_identifier is None:
             template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
             tag_dict = {}
-            tags = self.tags.copy()
+            tags = self.tag_manager.get_tags()
             # sort tags to ensure consistent ordering
             tags.sort()
             for t in tags:
@@ -234,26 +233,31 @@ class MySql(AgentCheck):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
-        self.tags.append("database_hostname:{}".format(self.database_hostname))
-        self.tags.append("database_instance:{}".format(self.database_identifier))
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
+        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
-            self.tags.append(
-                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "gcp_sql_database_instance:{}:{}".format(
                     self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
-                )
+                ),
             )
         if self.cloud_metadata.get("aws") is not None:
-            self.tags.append(
-                "dd.internal.resource:aws_rds_instance:{}".format(
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "aws_rds_instance:{}".format(
                     self.cloud_metadata.get("aws")["instance_endpoint"],
-                )
+                ),
             )
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "aws_rds_instance:{}".format(self.resolved_hostname),
+            )
             self.cloud_metadata["aws"] = {
                 "instance_endpoint": self.resolved_hostname,
             }
@@ -262,32 +266,21 @@ class MySql(AgentCheck):
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
-                self.tags.append(
-                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
+                self.tag_manager.set_tag(
+                    "dd.internal.resource",
+                    "{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"]),
                 )
         # finally, emit a `database_instance` resource for this instance
-        self.tags.append(
-            "dd.internal.resource:database_instance:{}".format(
+        self.tag_manager.set_tag(
+            "dd.internal.resource",
+            "database_instance:{}".format(
                 self.database_identifier,
-            )
+            ),
         )
 
     def set_version(self, db):
-        version = get_version(db)
-        if version == self.version:
-            return
-
-        if self.version and self.version.flavor != version.flavor:
-            try:
-                self.tags.remove('dbms_flavor:{}'.format(self.version.flavor.lower()))
-            except ValueError:
-                pass
-
-        self.version = version
-        if not self.version.flavor:
-            return
-
-        self.tags.append('dbms_flavor:{}'.format(self.version.flavor.lower()))
+        self.version = get_version(db)
+        self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
@@ -344,7 +337,7 @@ class MySql(AgentCheck):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
 
     def debug_stats_kwargs(self, tags=None):
-        tags = self.tags + self._get_debug_tags() + (tags or [])
+        tags = self.tag_manager.get_tags() + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
             "hostname": self.resolved_hostname,
@@ -384,7 +377,7 @@ class MySql(AgentCheck):
                     self.check_userstat_enabled(db)
 
                 # Metric collection
-                tags = copy.deepcopy(self.tags)
+                tags = self.tag_manager.get_tags()
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
@@ -410,13 +403,6 @@ class MySql(AgentCheck):
         finally:
             self._conn = None
             self._report_warnings()
-
-    # _set_database_instance_tags sets the tag list for the `database_instance` resource
-    # based on metadata that is collected on check start. This ensures that we see tags such as
-    # `replication_role` appear on the database_instance as a host tag.
-    def _set_database_instance_tags(self, aurora_tags):
-        tags = copy.deepcopy(self._non_internal_tags)
-        return list(set(tags) | set(aurora_tags))
 
     def cancel(self):
         self._statement_samples.cancel()
@@ -524,7 +510,7 @@ class MySql(AgentCheck):
             server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
-        ] + self.tags
+        ] + self.tag_manager.get_tags()
         if not self.disable_generic_tags:
             service_check_tags.append('server:{0}'.format(server))
         return service_check_tags
@@ -535,7 +521,7 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = connect_with_autocommit(**connect_args)
+            db = connect_with_session_variables(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
@@ -686,7 +672,7 @@ class MySql(AgentCheck):
                         collected_metric,
                     )
                 else:
-                    additional_status_dict[status_dict["name"]] = (status_dict["metric_name"], status_dict["type"])
+                    additional_status_dict[status_name] = (status_metric, status_dict["type"])
             metrics.update(additional_status_dict)
 
         if len(self._config.additional_variable) > 0:
@@ -771,7 +757,9 @@ class MySql(AgentCheck):
                     ]
                     if above_802 and len(replica_results) > 2:
                         additional_tags.append('member_role:{}'.format(replica_results[2]))
-                    self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self.tags)
+                    self.gauge(
+                        'mysql.replication.group.member_status', 1, tags=additional_tags + self.tag_manager.get_tags()
+                    )
 
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
@@ -803,7 +791,9 @@ class MySql(AgentCheck):
                     vars_to_submit.update(GROUP_REPLICATION_VARS_8_0_2)
 
                 # Submit metrics now, so it's possible to attach `channel_name` tag
-                self._submit_metrics(vars_to_submit, results, self.tags + ['channel_name:{}'.format(r[0])])
+                self._submit_metrics(
+                    vars_to_submit, results, self.tag_manager.get_tags() + ['channel_name:{}'.format(r[0])]
+                )
 
                 return vars_to_submit
         except Exception as e:
@@ -866,7 +856,7 @@ class MySql(AgentCheck):
         self.gauge(
             name=self.SLAVE_SERVICE_CHECK_NAME,
             value=1 if status == AgentCheck.OK else 0,
-            tags=self.tags + additional_tags,
+            tags=self.tag_manager.get_tags() + additional_tags,
             hostname=self.reported_hostname,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
@@ -981,13 +971,13 @@ class MySql(AgentCheck):
             self.log.exception("Error while running %s", query)
 
     def _get_runtime_aurora_tags(self, db):
-        runtime_tags = []
+        runtime_tags = {}
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
                 if replication_role in {'writer', 'reader'}:
-                    runtime_tags.append('replication_role:' + replication_role)
+                    runtime_tags['replication_role'] = replication_role
         except Exception:
             self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
         return runtime_tags
@@ -998,15 +988,11 @@ class MySql(AgentCheck):
         First removes any existing Aurora runtime tags by key name, then adds the new tags.
         """
         # Extract tag keys from aurora_tags to identify which tags to remove
-        aurora_tag_keys = {tag.split(':')[0] for tag in aurora_tags}
-
-        # Remove existing Aurora runtime tags from both tag lists
-        self.tags = [tag for tag in self.tags if tag.split(':')[0] not in aurora_tag_keys]
-        self._non_internal_tags = [tag for tag in self._non_internal_tags if tag.split(':')[0] not in aurora_tag_keys]
-
-        # Add the new Aurora tags using set operations
-        self.tags = list(set(self.tags) | set(aurora_tags))
-        self._non_internal_tags = list(set(self._non_internal_tags) | set(aurora_tags))
+        for tag, value in aurora_tags.items():
+            self.tag_manager.set_tag(tag, value, replace=True)
+        self.tag_manager.set_tag(
+            "dd.internal.resource", "database_instance:{}".format(self.database_identifier), replace=True
+        )
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -1251,7 +1237,7 @@ class MySql(AgentCheck):
                 query_exec_time_95th_per = row[0]
 
                 return query_exec_time_95th_per
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+        except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.InterfaceError) as e:
             self.warning("95th percentile performance metrics unavailable at this time: %s", e)
             return None
 
@@ -1417,7 +1403,7 @@ class MySql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,
                 'integration_version': __version__,
-                "tags": self._non_internal_tags,
+                "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

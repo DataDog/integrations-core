@@ -1,1 +1,0 @@
-Fix cpu count for sinfo node by using the correct query parameter
