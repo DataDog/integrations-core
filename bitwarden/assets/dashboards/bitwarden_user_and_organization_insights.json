@@ -1731,7 +1731,6 @@
                             "title": "Master Password Reset Event Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -2430,6 +2429,7 @@
                             "title": "Organization Event Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2458,6 +2458,10 @@
                                         },
                                         {
                                             "field": "@enrichment_details.actingUser.userType",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.client.ip",
                                             "width": "auto"
                                         },
                                         {
