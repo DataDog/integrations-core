@@ -1,0 +1,123 @@
+[
+    {
+      "enrichment_details": {
+        "actingUser": {
+          "userType": "Owner",
+          "type": 0
+        }
+      },
+      "hostname": "bitwarden",
+      "evt": {
+        "name": "Organization_PurgedVault"
+      },
+      "eventCategory": "organization-events",
+      "usr": {
+        "name": "James",
+        "id": "b11-1111-11b1-11b1-b1b111b1b1b1",
+        "email": "James@abc.com"
+      },
+      "service": "event-logs",
+      "threat_intel": {
+        "indicators_matched": [
+          "IP"
+        ],
+        "results": [
+          {
+            "indicator": "10.10.100.10",
+            "additional_data": {
+              "tunnels": [
+                {
+                  "anonymous": false,
+                  "type": "PROXY",
+                  "operator": "ABC_PROXY"
+                }
+              ],
+              "as": {
+                "number": 11111,
+                "organization": "ABC Inc"
+              },
+              "infrastructure": "DATACENTER",
+              "organization": "ABC Inc.",
+              "client": {
+                "types": [
+                  "DESKTOP"
+                ],
+                "count": 4
+              },
+              "location": {
+                "country": "IN",
+                "city": "Delhi",
+                "state": "National Capital Territory of Delhi"
+              }
+            },
+            "source": {
+              "name": "abc",
+              "type": "managed",
+              "url": "https://abc.us"
+            },
+            "type": "IP",
+            "category": "corp_vpn",
+            "intention": "benign"
+          }
+        ]
+      },
+      "event": {
+        "date": "2025-05-27T08:54:00.5122626Z",
+        "deviceType": "Chrome",
+        "itemId": "110a0aa4-111a-4cd0-8027-a1aa00a11111",
+        "type": 1601,
+        "device": 9,
+        "object": "event"
+      },
+      "network": {
+        "ip": {
+          "attributes": [
+            {
+              "ip": "10.10.100.10",
+              "source": [
+                "@network.client.ip",
+                "@network.client.geoip.ipAddress"
+              ]
+            }
+          ],
+          "list": [
+            "10.10.100.10"
+          ]
+        },
+        "client": {
+          "geoip": {
+            "continent": {
+              "code": "AS",
+              "name": "Asia"
+            },
+            "country": {
+              "name": "India",
+              "iso_code": "IN"
+            },
+            "subdivision": {
+              "name": "Delhi",
+              "iso_code": "IN-DL"
+            },
+            "as": {
+              "number": "AS11111",
+              "route": "10.10.100.0/24",
+              "domain": "ABC.com",
+              "name": "ABC Inc",
+              "type": "hosting"
+            },
+            "city": {
+              "name": "Delhi"
+            },
+            "timezone": "Asia/Kolkata",
+            "ipAddress": "10.10.100.10",
+            "location": {
+              "latitude": 28,
+              "longitude": 77
+            }
+          },
+          "ip": "10.10.100.10",
+          "is_private_network_ip": false
+        }
+      }
+    }
+  ]

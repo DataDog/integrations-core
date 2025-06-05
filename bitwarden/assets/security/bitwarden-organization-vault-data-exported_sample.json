@@ -1,0 +1,87 @@
+[
+  {
+    "enrichment_details": {
+      "actingUser": {
+        "userType": "Owner",
+        "type": 0
+      },
+      "member": "",
+      "group": ""
+    },
+    "evt": {
+      "name": "Organization_UserExportedVault"
+    },
+    "eventCategory": "organization-events",
+    "usr": {
+      "name": "James",
+      "id": "b11-1111-11b1-11b1-b1b111b1b1b1",
+      "email": "James@abc.com"
+    },
+    "service": "event-logs",
+    "event": {
+      "date": "2025-05-28T12:14:48.211Z",
+      "serviceAccountId": "",
+      "deviceType": "Chrome",
+      "groupId": "",
+      "secretId": "",
+      "type": 1602,
+      "itemId": "",
+      "policyId": "",
+      "installationId": "",
+      "collectionId": "",
+      "device": 9,
+      "object": "event",
+      "memberId": ""
+    },
+    "network": {
+      "ip": {
+        "attributes": [
+          {
+            "ip": "10.10.10.11",
+            "source": [
+              "@network.client.ip",
+              "@network.client.geoip.ipAddress"
+            ]
+          }
+        ],
+        "list": [
+          "10.10.10.11"
+        ]
+      },
+      "client": {
+        "geoip": {
+          "continent": {
+            "code": "AS",
+            "name": "Asia"
+          },
+          "country": {
+            "name": "India",
+            "iso_code": "IN"
+          },
+          "subdivision": {
+            "name": "Maharashtra",
+            "iso_code": "IN-MH"
+          },
+          "as": {
+            "number": "AS11111",
+            "route": "10.10.10.0/24",
+            "domain": "Abc.com",
+            "name": "Abc Inc",
+            "type": "hosting"
+          },
+          "city": {
+            "name": "Mumbai"
+          },
+          "timezone": "Asia/Kolkata",
+          "ipAddress": "10.10.10.11",
+          "location": {
+            "latitude": 19,
+            "longitude": 72
+          }
+        },
+        "ip": "10.10.10.11",
+        "is_private_network_ip": false
+      }
+    }
+  }
+]

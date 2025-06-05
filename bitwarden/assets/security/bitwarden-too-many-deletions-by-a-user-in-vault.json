@@ -1,0 +1,46 @@
+{
+    "name": "Bitwarden too many deletions by a user in vault",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "mitre_platform:windows",
+        "technique:T1485-data-destruction",
+        "tactic:TA0040-impact",
+        "mitre_platform:saas",
+        "mitre_platform:linux",
+        "source:bitwarden",
+        "security:attack",
+        "mitre_platform:cloud"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "deletion_by_a_user_in_vault",
+            "query": "source:bitwarden service:event-logs @event.type:(1102 OR 1104)",
+            "groupByFields": [
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "deletion_by_a_user_in_vault > 5",
+            "name": "Too many deletion by a user in vault",
+            "status": "Medium",
+            "notifications": []
+        }
+    ]
+}

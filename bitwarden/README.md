@@ -28,7 +28,7 @@ This integration seamlessly collects event logs, channeling them into Datadog fo
     | Parameters                            | Description                                                  |
     | ------------------------------------- | ------------------------------------------------------------ |
     | Instance type                         | Cloud or Self-hosted                                         |
-    | Self-hosted instance domain           | The domain of your self-hosted Bitwarden instance(required only for self-hosted Bitwarden instance). It must be publicly accessible via HTTPS only. Example: 123.123.123.123                                |
+    | Self-hosted instance domain           | The domain of your self-hosted Bitwarden instance(Required only for self-hosted Bitwarden setups). The instance must be publicly accessible via HTTPS. Example: vault.example.com, 123.123.123.123:8443.                                                                                              |
     | Client ID                             | Client ID from Bitwarden Admin Console                       |
     | Client Secret                         | Client Secret from Bitwarden Admin Console                   |
 

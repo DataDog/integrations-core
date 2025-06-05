@@ -1,0 +1,46 @@
+{
+    "name": "Bitwarden organization vault data exported",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "mitre_platform:windows",
+        "technique:T1555-credentials-from-password-stores",
+        "tactic:TA0006-credential-access",
+        "mitre_platform:saas",
+        "mitre_platform:linux",
+        "source:bitwarden",
+        "security:attack",
+        "mitre_platform:cloud"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "organization_vault_data_exported",
+            "query": "source:bitwarden service:event-logs @event.type:1602",
+            "groupByFields": [
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "organization_vault_data_exported > 0",
+            "name": "Organization vault data exported",
+            "status": "High",
+            "notifications": []
+        }
+    ]
+}
