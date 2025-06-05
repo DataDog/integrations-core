@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 
+from tests.helpers.mocks import MockPopen
+
 
 class MockEnvVars:
     def __init__(self, env_vars=None):
@@ -17,6 +19,7 @@ class MockEnvVars:
 
 def test_env_vars_repo(ddev, helpers, data_dir, write_result_file, mocker):
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': {}, 'config': {}}))
+    mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
     with mock.patch('ddev.utils.structures.EnvVars', side_effect=MockEnvVars):
         result = ddev('env', 'test', 'postgres', 'py3.12')
         assert result.exit_code == 0, result.output
