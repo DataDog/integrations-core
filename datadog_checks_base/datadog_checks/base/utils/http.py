@@ -147,7 +147,7 @@ class TlsContextAdapter(requests.adapters.HTTPAdapter):
         """
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
         host_params, _ = super(TlsContextAdapter, self).build_connection_pool_key_attributes(request, verify, cert)
-        context = self.context
+        context = self.tls_context_wrapper.tls_context
         if verify != (self.context.verify_mode == ssl.CERT_REQUIRED):
             # TODO: Handle the case where `verify` is not the same as the context's verify mode.
             context = ssl.create_default_context()
