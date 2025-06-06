@@ -549,8 +549,10 @@ def test_config(test_case, extra_config, expected_http_kwargs, mocker):
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
-        r.get.return_value = mock.MagicMock(status_code=200)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session') as session:
+        mock_session = mock.MagicMock()
+        session.return_value = mock_session
+        mock_session.get.return_value = mock.MagicMock(status_code=200)
 
         check.check(None)
 
@@ -564,4 +566,4 @@ def test_config(test_case, extra_config, expected_http_kwargs, mocker):
             'allow_redirects': mock.ANY,
         }
         http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('/v1/status/leader', **http_wargs)
+        mock_session.get.assert_called_with('/v1/status/leader', **http_wargs)
