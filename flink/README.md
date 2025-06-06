@@ -16,9 +16,32 @@ No additional installation is needed on your server.
 
 #### Metric collection
 
-1. Configure the [Datadog HTTP Reporter][2] in Flink.
+{{% site-region region="us3" %}}
 
-     In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5]:
+1. Configure the [StatsD reporter][1] in Flink.
+
+   In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines:
+
+   ```yaml
+   metrics.reporter.stsd.factory.class: org.apache.flink.metrics.statsd.StatsDReporterFactory
+   metrics.reporter.stsd.host: datadog-agent
+   metrics.reporter.stsd.port: 8125
+   metrics.reporter.stsd.interval: 60 SECONDS 
+    ```
+
+2. Ensure DogStatsD/StatsD is enabled within Datadog Agent and consider setting `DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true` for containerized environments.
+
+3. Restart Flink to start sending your Flink metrics to Datadog.
+
+[1]: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/metric_reporters/#statsd
+
+{{% /site-region %}}
+
+{{% site-region region="us1,us3,us5,eu,ap1" %}}
+
+1. Configure the [Datadog HTTP Reporter][1] in Flink.
+
+     In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][2]:
 
     ```yaml
     metrics.reporter.dghttp.factory.class: org.apache.flink.metrics.datadog.DatadogHttpReporterFactory
@@ -49,11 +72,16 @@ No additional installation is needed on your server.
 
 4. Restart Flink to start sending your Flink metrics to Datadog.
 
+[1]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
+[2]: /organization-settings/api-keys
+
+{{% /site-region %}}
+
 #### Log collection
 
 _Available for Agent >6.0_
 
-1. Flink uses the `log4j` logger by default. To enable logging to a file, customize the format by editing the `log4j*.properties` configuration files in the `conf/` directory of the Flink distribution. See the [Flink logging documentation][13] for information on which configuration file is relevant for your setup. See [Flink's repository][6] for default configurations.
+1. Flink uses the `log4j` logger by default. To enable logging to a file, customize the format by editing the `log4j*.properties` configuration files in the `conf/` directory of the Flink distribution. See the [Flink logging documentation][12] for information on which configuration file is relevant for your setup. See [Flink's repository][5] for default configurations.
 
 2. By default, the integration pipeline supports the following layout pattern:
 
@@ -63,7 +91,7 @@ _Available for Agent >6.0_
 
      An example of a valid timestamp is: `2020-02-03 18:43:12,251`.
 
-     Clone and edit the [integration pipeline][7] if you have a different format.
+     Clone and edit the [integration pipeline][6] if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -71,7 +99,7 @@ _Available for Agent >6.0_
    logs_enabled: true
    ```
 
-4. Uncomment and edit the logs configuration block in your `flink.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample flink.d/conf.yaml][8] for all available configuration options.
+4. Uncomment and edit the logs configuration block in your `flink.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample flink.d/conf.yaml][7] for all available configuration options.
 
    ```yaml
    logs:
@@ -86,17 +114,17 @@ _Available for Agent >6.0_
        #    name: new_log_start_with_date
    ```
 
-5. [Restart the Agent][9].
+5. [Restart the Agent][8].
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `flink` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `flink` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][11] for a list of metrics provided by this integration.
+See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -108,19 +136,18 @@ Flink does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][11].
 
 
 [1]: https://flink.apache.org/
 [2]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
 [4]: /account/settings/agent/latest
-[5]: /organization-settings/api-keys
-[6]: https://github.com/apache/flink/tree/release-1.16/flink-dist/src/main/flink-bin/conf
-[7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[8]: https://github.com/DataDog/integrations-core/blob/master/flink/datadog_checks/flink/data/conf.yaml.example
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
-[12]: https://docs.datadoghq.com/help/
-[13]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
+[5]: https://github.com/apache/flink/tree/release-1.16/flink-dist/src/main/flink-bin/conf
+[6]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[7]: https://github.com/DataDog/integrations-core/blob/master/flink/datadog_checks/flink/data/conf.yaml.example
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
+[11]: https://docs.datadoghq.com/help/
+[12]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
