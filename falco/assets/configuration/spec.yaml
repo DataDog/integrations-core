@@ -1,4 +1,4 @@
-name: falco
+name: Falco
 files:
 - name: falco.yaml
   options:

@@ -218,6 +218,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Falco:
+        target: 75
+        flags:
+        - falco
       Fluentd:
         target: 75
         flags:
@@ -594,10 +598,6 @@ coverage:
         target: 75
         flags:
         - sonarqube
-      sonatype_nexus:
-        target: 75
-        flags:
-        - sonatype_nexus
       Spark:
         target: 75
         flags:
@@ -758,6 +758,10 @@ coverage:
         target: 75
         flags:
         - nvidia_nim
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       tibco_ems:
         target: 75
         flags:
@@ -1052,6 +1056,11 @@ flags:
     paths:
     - external_dns/datadog_checks/external_dns
     - external_dns/tests
+  falco:
+    carryforward: true
+    paths:
+    - falco/datadog_checks/falco
+    - falco/tests
   fluentd:
     carryforward: true
     paths:

@@ -1,19 +1,16 @@
 import os
 
+from datadog_checks.dev import get_docker_hostname
 
-from datadog_checks.dev import get_docker_hostname, get_here
-
-HERE = get_here()
+HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 HOST = get_docker_hostname()
 PORT = 8765
 
 
-def get_fixture_path(filename):
-    return os.path.join(HERE, 'fixtures', filename)
-
 URL = 'http://{}:{}'.format(HOST, PORT)
-DEFAULT_INSTANCE = {'openmetrics_endpoint': '{}/metrics'.format(URL)}
+INSTANCE_CONFIG = {'openmetrics_endpoint': '{}/metrics'.format(URL)}
+CUSTOM_TAGS = ['optional:tag1']
 
 METRICS = [
     'falco.container.info',
@@ -24,8 +21,3 @@ METRICS = [
     'falco.container.info.duration.sum.count',
     'falco.container.info.duration.sum.count',
 ]
-
-
-
-
-
