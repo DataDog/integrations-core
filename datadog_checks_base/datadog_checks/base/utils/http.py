@@ -6,7 +6,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-import ssl
 import warnings
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
@@ -141,12 +140,12 @@ class TlsContextAdapter(requests.adapters.HTTPAdapter):
 
     def build_connection_pool_key_attributes(self, request, verify, cert=None):
         """
-        This method is overridden according to the requests library's 
+        This method is overridden according to the requests library's
         expectations to ensure that the custom SSL context is passed to urllib3.
         """
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
         host_params, _ = super(TlsContextAdapter, self).build_connection_pool_key_attributes(request, verify, cert)
-        return host_params, {"ssl_context":self.tls_context}
+        return host_params, {"ssl_context": self.tls_context}
 
 
 class ResponseWrapper(ObjectProxy):
@@ -187,7 +186,7 @@ class RequestsWrapper(object):
         'request_size',
         'tls_protocols_allowed',
         'tls_config',
-        'tls_context'
+        'tls_context',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -621,7 +620,6 @@ class RequestsWrapper(object):
         else:
             # Use TlsContextHTTPSAdapter for consistent TLS configuration
             https_adapter = TlsContextAdapter(context)
-
 
         session.mount('https://', https_adapter)
 
