@@ -300,7 +300,10 @@ class TestTlsContext:
 
     def test_tls_ciphers_applied_consistently(self):
         """Test that tls_ciphers are applied consistently."""
-        instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384', 'TLS_RSA_WITH_AES_128_GCM_SHA256']}
+        instance = {
+            'tls_verify': True,
+            'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384', 'TLS_RSA_WITH_AES_128_GCM_SHA256'],
+        }
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -333,11 +336,10 @@ class TestTlsContext:
             mock_context = mock.MagicMock()
             mock_create_context.return_value = mock_context
             RequestsWrapper(instance, init_config)
-            
+
             # Verify that the default ciphers are set
             assert mock_context.set_ciphers.call_count == 1
             assert mock_context.set_ciphers.called_with('ALL')
-
 
     def test_host_header_compatibility(self):
         """Test that host header functionality works with TLS context unification."""
