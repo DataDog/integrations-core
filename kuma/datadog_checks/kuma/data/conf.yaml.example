@@ -154,14 +154,14 @@ instances:
     #
     # non_cumulative_histogram_buckets: false
 
-    ## @param histogram_buckets_as_distributions - boolean - optional - default: true
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
     ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
     ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
     ##
     ## Learn more about distribution metrics:
     ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
     #
-    # histogram_buckets_as_distributions: true
+    # histogram_buckets_as_distributions: false
 
     ## @param collect_counters_with_distributions - boolean - optional - default: false
     ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
