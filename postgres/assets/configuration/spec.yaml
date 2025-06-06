@@ -349,10 +349,11 @@ files:
         type: string
         example: /usr/local/pgsql/data
     - name: tag_replication_role
+      hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
       value:
         type: boolean
-        example: false
+        example: true
     - name: table_count_limit
       description: The maximum number of tables to collect metrics from.
       value:
