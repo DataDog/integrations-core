@@ -5,9 +5,9 @@ import re
 
 import click
 
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_check_files
-from ..console import CONTEXT_SETTINGS, annotate_warning, echo_info, echo_warning
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, annotate_warning, echo_info, echo_warning
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate check style for python files')

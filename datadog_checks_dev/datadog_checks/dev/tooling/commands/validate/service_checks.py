@@ -7,12 +7,8 @@ import re
 
 import click
 
-from ....fs import file_exists, read_file, write_file
-from ...constants import get_root
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_manifest_file, parse_version_parts
-from ..console import (
+from datadog_checks.dev.fs import file_exists, read_file, write_file
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_display_queue,
@@ -21,6 +17,10 @@ from ..console import (
     echo_info,
     echo_success,
 )
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.manifest_utils import Manifest
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_manifest_file, parse_version_parts
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 SERVICE_CHECK_NAMES = ['ok', 'warning', 'critical', 'unknown']

@@ -3,7 +3,8 @@ from posixpath import join
 
 import jsonschema
 
-from .....constants import get_root
+from datadog_checks.dev.tooling.constants import get_root
+
 from .utils import find_profile_in_path, get_all_profiles_for_directories, get_profile
 
 

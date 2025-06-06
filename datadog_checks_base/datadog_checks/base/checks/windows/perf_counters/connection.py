@@ -9,7 +9,7 @@ import win32api
 import win32pdh
 import win32wnet
 
-from ....errors import ConfigTypeError
+from datadog_checks.base.errors import ConfigTypeError
 
 
 class NetworkResources:
