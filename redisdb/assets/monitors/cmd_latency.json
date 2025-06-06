@@ -17,7 +17,7 @@
 				"critical": 20000
 			},
 			"notify_audit": false,
-			"evaluation_delay": 300,
+			"evaluation_delay": 0,
 			"require_full_window": false,
 			"include_tags": true,
 			"silenced": {},
