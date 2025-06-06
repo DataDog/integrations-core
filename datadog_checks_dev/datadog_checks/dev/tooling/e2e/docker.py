@@ -297,6 +297,8 @@ class DockerInterface(object):
         if not self.agent_build:
             return
 
+        print("starting agent container in docker.py")
+
         env_vars = {
             # Agent 6 will simply fail without an API key
             'DD_API_KEY': self.api_key,

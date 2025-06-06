@@ -54,39 +54,107 @@ class KafkaCheck(AgentCheck):
             cfg = cfg['kafka']
             topic = cfg.get("topic", None)
             partition = cfg.get("partition", None)
-            offset = cfg.get("start_offset", None)
+            start_offset = cfg.get("start_offset", None)
             n_messages = cfg.get("n_messages", None)
             cluster = cfg.get("cluster", None)
-            print("topic is ", topic, "partition is ", partition, "offset is ", offset, "n_messages is ", n_messages, "cluster is ", cluster)
-            if topic is None or partition is None or offset is None or n_messages is None or cluster is None:
+            print("topic is ", topic, "partition is ", partition, "offset is ", start_offset, "n_messages is ", n_messages, "cluster is ", cluster)
+            if topic is None or partition is None or start_offset is None or n_messages is None or cluster is None:
                 print("skipping config with missing keys")
                 continue
-            message = self.client.get_message(topic, partition, offset)
-            self.send_event(
-                "Kafka message",
-                message,
-                ["topic:{}".format(topic), "partition:{}".format(partition), "offset:{}".format(offset)],
-                'kafka',
-                "",
-                severity="info",
-            )
-            data = {
-                'timestamp': int(time()),
-                'technology': 'kafka',
-                'cluster': str(cluster),
-                'topic': str(topic),
-                'partition': str(partition),
-                'offset': str(offset),
-                'data': 'logging message',
-            }
-            print("data is ", data)
-            self.send_log(data)
-            self.send_log({'message': 'foo piotr', 'timestamp': 1722958617.2842212})
-            print("message is ", message)
+            config_id = "{}_{}_{}_{}".format(topic, partition, start_offset, n_messages)
+            if self._messages_have_been_retrieved(config_id):
+                print("messages already retrieved for config_id {}".format(config_id))
+                continue
+            for offset in range(start_offset, start_offset + n_messages):
+                print("getting message for topic {}, partition {}, offset {}".format(topic, partition, offset))
+                message = self.client.get_message(topic, partition, offset)
+                # self.send_event(
+                #     "Kafka message",
+                #     message,
+                #     ["topic:{}".format(topic), "partition:{}".format(partition), "offset:{}".format(offset)],
+                #     'kafka',
+                #     "",
+                #     severity="info",
+                # )
+                # proto_schema = """
+                #         syntax = "proto3";
+                #
+                #         message Person {
+                #             string name = 1;
+                #             int32 age = 2;
+                #             double transaction_amount = 3;
+                #             string currency = 4;
+                #         }
+                #         """
+                try :
+                    # decoded_message = self.deserialize_message(message, 'protobuf', proto_schema)
+                    decoded_message = self.deserialize_message(message, 'json')
+                    data = {
+                        'timestamp': int(time()),
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'topic': str(topic),
+                        'partition': str(partition),
+                        'offset': str(offset),
+                        'message_value': decoded_message,
+                    }
+                except Exception as e:
+                    data = {
+                        'timestamp': int(time()),
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'topic': str(topic),
+                        'partition': str(partition),
+                        'offset': str(offset),
+                        'message': "Message format not supported" + str(message),
+                    }
+                print("data is ", data)
+                self.send_log(data)
+                print("message is ", message)
+            self._mark_messages_retrieved(config_id)
         # print("now the last message")
         # message = self.client.get_message('marvel', 0, 75)
         # self.send_event("Kafka message", message, ["topic:marvel","partition:0","offset:75"], 'kafka', "", severity="info")
         # print("message is ", message)
+
+    def deserialize_message(self, message, format='json', schema=None):
+        """Deserialize a message from Kafka. Supports JSON and Protobuf formats.
+        
+        Args:
+            message: Raw message bytes from Kafka
+            format: Either 'json' or 'protobuf'
+            schema: Protobuf schema definition string (only needed for protobuf format)
+        """
+        if format == 'json':
+            decoded = message.decode('utf-8')
+            json.loads(decoded) # Validate JSON
+            return decoded
+        elif format == 'protobuf':
+            if not schema:
+                raise ValueError("Schema is required for protobuf format")
+            
+            # Create a new module in memory to hold the generated code
+            from google.protobuf import descriptor_pb2
+            from google.protobuf.compiler import plugin_pb2
+            from google.protobuf.descriptor_pool import DescriptorPool
+            from google.protobuf.message_factory import MessageFactory
+            
+            # Parse schema and create descriptor
+            pool = DescriptorPool()
+            desc = descriptor_pb2.FileDescriptorProto()
+            desc.ParseFromString(schema)
+            pool.Add(desc)
+            
+            # Create message factory and get message class
+            factory = MessageFactory(pool)
+            message_class = factory.GetPrototype(pool.FindMessageTypeByName(desc.message_type[0].name))
+            
+            # Parse message using generated class
+            parsed = message_class()
+            parsed.ParseFromString(message)
+            return str(parsed)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -199,6 +267,30 @@ class KafkaCheck(AgentCheck):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
+    def _messages_have_been_retrieved(self, config_id):
+        """Check if messages have been retrieved for the given config ID."""
+        try:
+            content = self.read_persistent_cache("get_messages_cache")
+            if content:
+                config_ids = set(content.split(","))
+                return config_id in config_ids
+        except Exception as e:
+            self.log.warning('Could not read persistent cache: %s', str(e))
+        return False
+
+    def _mark_messages_retrieved(self, config_id):
+        """Mark that messages have been retrieved for the given config ID."""
+        try:
+            content = self.read_persistent_cache("get_messages_cache")
+            if content:
+                config_ids = set(content.split(","))
+            else:
+                config_ids = set()
+            config_ids.add(config_id)
+            self.write_persistent_cache("get_messages_cache", ",".join(config_ids))
+        except Exception as e:
+            self.log.warning('Could not write to persistent cache: %s', str(e))
+
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
@@ -228,6 +320,7 @@ class KafkaCheck(AgentCheck):
     def report_consumer_offsets_and_lag(
         self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps, cluster_id
     ):
+        print("reporting consumer lag")
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
@@ -255,6 +348,7 @@ class KafkaCheck(AgentCheck):
                 partitions = self.client.get_partitions_for_topic(topic)
                 self.log.debug("Received partitions %s for topic %s", partitions, topic)
                 if partitions is not None and partition in partitions:
+                    print("reported consumer offsets")
                     # report consumer offset if the partition is valid because even if leaderless
                     # the consumer offset will be valid once the leader failover completes
                     self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
@@ -274,6 +368,7 @@ class KafkaCheck(AgentCheck):
                     producer_offset = highwater_offsets[(topic, partition)]
                     consumer_lag = producer_offset - consumer_offset
                     if reported_contexts < contexts_limit:
+                        print("reported consumer lag")
                         self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
                         self.log.debug('%s consumer lag reported with %s tags', consumer_lag, consumer_group_tags)
                         reported_contexts += 1
@@ -300,6 +395,7 @@ class KafkaCheck(AgentCheck):
                     if consumer_timestamp is None or producer_timestamp is None:
                         continue
                     lag = producer_timestamp - consumer_timestamp
+                    print("reported")
                     self.gauge('estimated_consumer_lag', lag, tags=consumer_group_tags)
                     reported_contexts += 1
                 else:

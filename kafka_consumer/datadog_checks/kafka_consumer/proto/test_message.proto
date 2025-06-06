@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package test;
+
+message TestMessage {
+  string key = 1;
+  int32 number = 2;
+  repeated string values = 3;
+  map<string, string> metadata = 4;
+} 

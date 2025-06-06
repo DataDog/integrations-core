@@ -57,6 +57,7 @@ def dd_environment():
             yield {
                 'instances': [common.E2E_INSTANCE],
                 'init_config': {'kafka_timeout': 30},
+                'logs': [{'type': 'integration', 'source': 'kafka_consumer', 'service': 'kafka_consumer'}],
             }, common.E2E_METADATA
 
 

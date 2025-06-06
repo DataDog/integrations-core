@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.4.0",
+    "protobuf>=4.25.1",
 ]
 dynamic = [
     "version",

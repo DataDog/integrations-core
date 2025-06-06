@@ -106,6 +106,7 @@ class DockerAgent(AgentInterface):
         return self._container_name
 
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
+        print("starting agent container")
         from ddev.e2e.agent.constants import AgentEnvVars
 
         if not agent_build:
@@ -144,6 +145,9 @@ class DockerAgent(AgentInterface):
         env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
         env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
 
+        # Configure logs disk usage ratio (10% of available space)
+        env_vars['DD_LOGS_CONFIG_DISK_USAGE_RATIO'] = '0.1'
+
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
                 env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy
@@ -154,6 +158,9 @@ class DockerAgent(AgentInterface):
 
         if not self._is_windows_container:
             volumes.append('/proc:/host/proc')
+            # Add logs volume for Linux containers
+            print("adding volume for logs")
+            volumes.append('/tmp/dd-log-buffer:/opt/datadog-agent/run/integrations')
 
         ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
         # Only mount the volume if the initial configuration is not set to `None`.

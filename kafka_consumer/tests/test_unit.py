@@ -414,6 +414,90 @@ def test_get_interpolated_timestamp():
 
 
 @pytest.mark.parametrize(
+    'message,format,schema,expected,should_raise',
+    [
+        # Test JSON messages
+        pytest.param(
+            b'{"key": "value", "number": 42}',
+            'json',
+            None,
+            '{"key": "value", "number": 42}',
+            False,
+            id='valid json message',
+        ),
+        pytest.param(
+            b'{"key": "value", "number": 42',  # Missing closing brace
+            'json',
+            None,
+            None,
+            True,
+            id='invalid json message',
+        ),
+        pytest.param(
+            b'\xff\xfe\xfd',  # Invalid UTF-8 sequence
+            'json',
+            None,
+            None,
+            True,
+            id='non-utf8 message',
+        ),
+        # Test Protobuf messages
+        pytest.param(
+            b'\x0a\x05value\x10\x2a\x1a\x05hello\x1a\x05world\x22\x0c\x0a\x03key\x12\x05value',
+            'protobuf',
+            '''
+            syntax = "proto3";
+            package test;
+            message TestMessage {
+                string key = 1;
+                int32 number = 2;
+                repeated string values = 3;
+                map<string, string> metadata = 4;
+            }
+            ''',
+            'key: "value"\nnumber: 42\nvalues: "hello"\nvalues: "world"\nmetadata {\n  key: "key"\n  value: "value"\n}',
+            False,
+            id='valid protobuf message',
+        ),
+        pytest.param(
+            b'\x0a\x05value\x10\x2a\x1a\x05hello\x1a\x05world\x22\x0c\x0a\x03key\x12\x05value\xff',  # Extra byte
+            'protobuf',
+            '''
+            syntax = "proto3";
+            package test;
+            message TestMessage {
+                string key = 1;
+                int32 number = 2;
+                repeated string values = 3;
+                map<string, string> metadata = 4;
+            }
+            ''',
+            None,
+            True,
+            id='invalid protobuf message',
+        ),
+        pytest.param(
+            b'\x0a\x05value\x10\x2a',
+            'protobuf',
+            None,  # Missing schema
+            None,
+            True,
+            id='protobuf without schema',
+        ),
+    ],
+)
+def test_deserialize_message(message, format, schema, expected, should_raise, check):
+    kafka_consumer_check = check({})
+    
+    if should_raise:
+        with pytest.raises(Exception):
+            kafka_consumer_check.deserialize_message(message, format=format, schema=schema)
+    else:
+        result = kafka_consumer_check.deserialize_message(message, format=format, schema=schema)
+        assert result == expected
+
+
+@pytest.mark.parametrize(
     'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
     [
         pytest.param(

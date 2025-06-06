@@ -38,16 +38,128 @@ class Producer(StoppableThread):
         while not self._shutdown_event.is_set():
             for partition in PARTITIONS:
                 try:
-                    producer.produce('marvel', b"Peter Parker", partition=partition)
-                    producer.produce('marvel', b"Bruce Banner", partition=partition)
-                    producer.produce('marvel', b"Tony Stark", partition=partition)
-                    producer.produce('marvel', b"Johhny Blaze", partition=partition)
-                    producer.produce('marvel', b"\xc2BoomShakalaka", partition=partition)
-                    producer.produce('dc', b"Diana Prince", partition=partition)
-                    producer.produce('dc', b"Bruce Wayne", partition=partition)
-                    producer.produce('dc', b"Clark Kent", partition=partition)
-                    producer.produce('dc', b"Arthur Curry", partition=partition)
-                    producer.produce('dc', b"\xc2ShakalakaBoom", partition=partition)
+                    # Define protobuf schema for messages
+                    # proto_schema = """
+                    # syntax = "proto3";
+                    #
+                    # message Person {
+                    #     string name = 1;
+                    #     int32 age = 2;
+                    #     double transaction_amount = 3;
+                    #     string currency = 4;
+                    # }
+                    # """
+                    # print("producing protobuf messages")
+                    #
+                    # # Import protobuf libraries
+                    # from google.protobuf import descriptor_pb2
+                    # from google.protobuf.descriptor_pool import DescriptorPool
+                    # from google.protobuf.message_factory import MessageFactory
+                    # print("import done")
+                    #
+                    # # Create descriptor and message factory
+                    # pool = DescriptorPool()
+                    # desc = descriptor_pb2.FileDescriptorProto()
+                    # desc.name = "person.proto"
+                    # desc.package = "test"
+                    # desc.syntax = "proto3"
+                    #
+                    # message = desc.message_type.add()
+                    # message.name = "Person"
+                    #
+                    # # Add fields
+                    # name_field = message.field.add()
+                    # name_field.name = "name"
+                    # name_field.number = 1
+                    # name_field.type = descriptor_pb2.FieldDescriptorProto.TYPE_STRING
+                    # name_field.label = descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+                    #
+                    # age_field = message.field.add()
+                    # age_field.name = "age"
+                    # age_field.number = 2
+                    # age_field.type = descriptor_pb2.FieldDescriptorProto.TYPE_INT32
+                    # age_field.label = descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+                    #
+                    # amount_field = message.field.add()
+                    # amount_field.name = "transaction_amount"
+                    # amount_field.number = 3
+                    # amount_field.type = descriptor_pb2.FieldDescriptorProto.TYPE_DOUBLE
+                    # amount_field.label = descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+                    #
+                    # currency_field = message.field.add()
+                    # currency_field.name = "currency"
+                    # currency_field.number = 4
+                    # currency_field.type = descriptor_pb2.FieldDescriptorProto.TYPE_STRING
+                    # currency_field.label = descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+                    #
+                    # pool.Add(desc)
+                    # factory = MessageFactory(pool)
+                    # Person = factory.GetPrototype(pool.FindMessageTypeByName("Person"))
+                    #
+                    # # Create and serialize protobuf messages
+                    # marvel_messages = [
+                    #     {"name": "Peter Parker", "age": 18, "transaction_amount": 123.0, "currency": "dollar"},
+                    #     {"name": "Bruce Banner", "age": 45, "transaction_amount": 456.0, "currency": "dollar"},
+                    #     {"name": "Tony Stark", "age": 35, "transaction_amount": 789.0, "currency": "dollar"},
+                    #     {"name": "Johnny Blaze", "age": 30, "transaction_amount": 321.0, "currency": "dollar"},
+                    #     {"name": "BoomShakalaka", "age": 25, "transaction_amount": 654.0, "currency": "dollar"}
+                    # ]
+                    #
+                    # dc_messages = [
+                    #     {"name": "Diana Prince", "age": 28, "transaction_amount": 987.0, "currency": "dollar"},
+                    #     {"name": "Bruce Wayne", "age": 32, "transaction_amount": 147.0, "currency": "dollar"},
+                    #     {"name": "Clark Kent", "age": 29, "transaction_amount": 258.0, "currency": "dollar"},
+                    #     {"name": "Arthur Curry", "age": 33, "transaction_amount": 369.0, "currency": "dollar"},
+                    #     {"name": "ShakalakaBoom", "age": 27, "transaction_amount": 741.0, "currency": "dollar"}
+                    # ]
+                    #
+                    # # Produce Marvel messages
+                    # for msg in marvel_messages:
+                    #     person = Person()
+                    #     person.name = msg["name"]
+                    #     person.age = msg["age"]
+                    #     person.transaction_amount = msg["transaction_amount"]
+                    #     person.currency = msg["currency"]
+                    #     producer.produce('marvel', person.SerializeToString(), partition=partition)
+                    #
+                    # # Produce DC messages
+                    # for msg in dc_messages:
+                    #     person = Person()
+                    #     person.name = msg["name"]
+                    #     person.age = msg["age"]
+                    #     person.transaction_amount = msg["transaction_amount"]
+                    #     person.currency = msg["currency"]
+                    #     producer.produce('dc', person.SerializeToString(), partition=partition)
+                    producer.produce('marvel', b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Tony Stark", "age": 35, "transaction_amount": 789, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Johnny Blaze", "age": 30, "transaction_amount": 321, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "BoomShakalaka", "age": 25, "transaction_amount": 654, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Steve Rogers", "age": 100, "transaction_amount": 555, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Thor Odinson", "age": 1500, "transaction_amount": 888, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Natasha Romanoff", "age": 35, "transaction_amount": 444, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Clint Barton", "age": 40, "transaction_amount": 333, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Doctor Strange", "age": 42, "transaction_amount": 777, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Black Panther", "age": 35, "transaction_amount": 999, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Carol Danvers", "age": 45, "transaction_amount": 666, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Scott Lang", "age": 45, "transaction_amount": 222, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Wanda Maximoff", "age": 30, "transaction_amount": 888, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Vision", "age": 3, "transaction_amount": 111, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "\xe6\x98\x9f\xe7\x88\xb5 Peter Quill", "age": 38, "transaction_amount": 444, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Gamora", "age": 29, "transaction_amount": 555, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Drax", "age": 40, "transaction_amount": 333, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Rocket Raccoon", "age": 8, "transaction_amount": 777, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Groot", "age": 5, "transaction_amount": 222, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Nick Fury", "age": 70, "transaction_amount": 888, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Loki", "age": 1054, "transaction_amount": 666, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Deadpool", "age": 35, "transaction_amount": 444, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Professor X", "age": 65, "transaction_amount": 999, "currency": "dollar"}', partition=partition)
+                    producer.produce('marvel', b'{"name": "Wolverine", "age": 137, "transaction_amount": 777, "currency": "dollar"}', partition=partition)
+                    producer.produce('dc', b'{"name": "Diana Prince", "age": 28, "transaction_amount": 987, "currency": "dollar"}', partition=partition)
+                    producer.produce('dc', b'{"name": "Bruce Wayne", "age": 32, "transaction_amount": 147, "currency": "dollar"}', partition=partition)
+                    producer.produce('dc', b'{"name": "Clark Kent", "age": 29, "transaction_amount": 258, "currency": "dollar"}', partition=partition)
+                    producer.produce('dc', b'{"name": "Arthur Curry", "age": 33, "transaction_amount": 369, "currency": "dollar"}', partition=partition)
+                    producer.produce('dc', b'{"name": "ShakalakaBoom", "age": 27, "transaction_amount": 741, "currency": "dollar"}', partition=partition)
 
                     # This topic is not consumed by `my_consumer`, and shouldn't show up in consumer.offset
                     producer.produce('unconsumed_topic', b"extra message 1", partition=partition)
