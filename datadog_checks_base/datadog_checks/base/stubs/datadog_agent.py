@@ -52,7 +52,7 @@ class DatadogAgentStub(object):
             key = (check_id, name)
             if key in self._metadata:
                 actual[name] = self._metadata[key]
-        assert data == actual
+        assert data == actual, f'Expected metadata: {data}; actual metadata: {actual}'
 
     def assert_metadata_count(self, count):
         metadata_items = len(self._metadata)
