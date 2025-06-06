@@ -248,7 +248,7 @@ class TestAIAChasing:
 
     def test_fetch_intermediate_certs_tls_ciphers(self):
         """Test that fetch_intermediate_certs uses the correct ciphers."""
-        instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_128_CBC_SHA']}
+        instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384']}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -264,14 +264,14 @@ class TestAIAChasing:
                 mock_wrapped_socket = mock.MagicMock()
                 mock_context.wrap_socket.return_value.__enter__.return_value = mock_wrapped_socket
                 mock_wrapped_socket.getpeercert.return_value = b'fake_cert_data'
-                mock_wrapped_socket.version.return_value = 'TLSv1.2'
+                mock_wrapped_socket.version.return_value = 'TLSv1.3'
 
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
                     http.fetch_intermediate_certs('example.com', 443)
 
                 # Verify set_ciphers was called with the correct cipher list
-                mock_context.set_ciphers.assert_called_once_with('TLS_RSA_WITH_AES_128_CBC_SHA')
+                mock_context.set_ciphers.assert_called_once_with('TLS_RSA_WITH_AES_256_GCM_SHA384')
 
 
 class TestTlsContext:
@@ -300,14 +300,14 @@ class TestTlsContext:
 
     def test_tls_ciphers_applied_consistently(self):
         """Test that tls_ciphers are applied consistently."""
-        instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_256_CBC_SHA']}
+        instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384', 'TLS_RSA_WITH_AES_128_GCM_SHA256']}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         # Verify the TLS context wrapper has the cipher configuration
         assert http.tls_config['tls_ciphers'] == [
-            'TLS_RSA_WITH_AES_128_CBC_SHA',
-            'TLS_RSA_WITH_AES_256_CBC_SHA',
+            'TLS_RSA_WITH_AES_256_GCM_SHA384',
+            'TLS_RSA_WITH_AES_128_GCM_SHA256',
         ]
 
         # Verify the session adapter uses the same TLS context
@@ -323,13 +323,29 @@ class TestTlsContext:
                 IANA_TO_OPENSSL_NAME.get(cipher) in c.get('name') for c in https_adapter.tls_context.get_ciphers()
             )
 
+    def test_default_tls_ciphers(self):
+        """Test that default TLS ciphers are applied when none are specified."""
+        instance = {'tls_verify': True}
+        init_config = {}
+
+        # Mock the TLS context creation to avoid file operations
+        with mock.patch('datadog_checks.base.utils.http.create_tls_context') as mock_create_context:
+            mock_context = mock.MagicMock()
+            mock_create_context.return_value = mock_context
+            RequestsWrapper(instance, init_config)
+            
+            # Verify that the default ciphers are set
+            assert mock_context.set_ciphers.call_count == 1
+            assert mock_context.set_ciphers.called_with('ALL')
+
+
     def test_host_header_compatibility(self):
         """Test that host header functionality works with TLS context unification."""
         instance = {
             'tls_use_host_header': True,
             'headers': {'Host': 'custom-host.example.com'},
             'tls_verify': True,
-            'tls_ciphers': ['TLS_RSA_WITH_AES_128_CBC_SHA'],
+            'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384'],
         }
         init_config = {}
         http = RequestsWrapper(instance, init_config)
@@ -375,7 +391,7 @@ class TestTlsContext:
             'tls_validate_hostname': True,
             'tls_ignore_warning': False,
             'tls_protocols_allowed': ['TLSv1.2', 'TLSv1.3'],
-            'tls_ciphers': ['TLS_RSA_WITH_AES_128_CBC_SHA'],
+            'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384'],
         }
         init_config = {}
 
@@ -395,4 +411,4 @@ class TestTlsContext:
 
             # Verify TLS context wrapper has the right config
             assert http.tls_config['tls_verify'] is True
-            assert http.tls_config['tls_ciphers'] == ['TLS_RSA_WITH_AES_128_CBC_SHA']
+            assert http.tls_config['tls_ciphers'] == ['TLS_RSA_WITH_AES_256_GCM_SHA384']
