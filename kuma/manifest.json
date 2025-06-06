@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Kuma is a modern control plane for Microservices & Service Mesh for both K8s and VMs, with support for multiple meshes in one cluster.",
+    "description": "Collect metrics and logs from Kuma, an Open Source service mesh for Kubernetes and VMs.",
     "title": "Kuma",
     "media": [],
     "classifier_tags": [
