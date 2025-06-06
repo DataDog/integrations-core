@@ -350,9 +350,7 @@ def _create_explain_procedure(conn, schema):
         EXECUTE stmt;
         DEALLOCATE PREPARE stmt;
     END;
-    """.format(
-            schema=schema
-        )
+    """.format(schema=schema)
     )
     if schema != 'datadog':
         cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))

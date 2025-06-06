@@ -56,6 +56,7 @@ zk_max_file_descriptor_count    4096
 ```
 
 """
+
 import re
 import socket
 import struct
@@ -146,7 +147,7 @@ class ZookeeperCheck(AgentCheck):
                 message = None
             else:
                 status = AgentCheck.WARNING
-                message = u'Response from the server: %s' % ruok
+                message = 'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -183,7 +184,7 @@ class ZookeeperCheck(AgentCheck):
                     message = None
                 else:
                     status = AgentCheck.CRITICAL
-                    message = u"Server is in %s mode but check expects %s mode" % (
+                    message = "Server is in %s mode but check expects %s mode" % (
                         mode,
                         ' or '.join(self.expected_mode),
                     )
@@ -346,7 +347,7 @@ class ZookeeperCheck(AgentCheck):
         # Mode: leader
         _, value = buf.readline().split(':')
         mode = value.strip().lower()
-        tags = [u'mode:' + mode]
+        tags = ['mode:' + mode]
 
         # Node count: 487
         _, value = buf.readline().split(':')

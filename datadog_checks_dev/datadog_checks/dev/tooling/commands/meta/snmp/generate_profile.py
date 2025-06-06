@@ -311,7 +311,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
             'textFilter': False and (lambda symbol, text: text) or None,
             'writeMibs': True,
             'ignoreErrors': False,
-        }
+        },
     )
 
     return processed

@@ -18,7 +18,6 @@ from datadog_checks.mapreduce.metrics import (
 
 
 class MapReduceCheck(AgentCheck):
-
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     # Default Settings
@@ -114,7 +113,6 @@ class MapReduceCheck(AgentCheck):
         job_counter = {}
 
         if init_config.get('general_counters'):
-
             # Parse the custom metrics
             for counter_group in init_config['general_counters']:
                 counter_group_name = counter_group.get('counter_group_name')
@@ -155,7 +153,6 @@ class MapReduceCheck(AgentCheck):
         job_counter = {}
 
         if init_config.get('job_specific_counters'):
-
             # Parse the custom metrics
             for job in init_config['job_specific_counters']:
                 job_name = job.get('job_name')
@@ -222,7 +219,6 @@ class MapReduceCheck(AgentCheck):
 
         if metrics_json.get('apps'):
             if metrics_json['apps'].get('app') is not None:
-
                 for app_json in metrics_json['apps']['app']:
                     app_id = app_json.get('id')
                     tracking_url = app_json.get('trackingUrl')
@@ -248,21 +244,18 @@ class MapReduceCheck(AgentCheck):
         running_jobs = {}
 
         for app_name, tracking_url in running_apps.values():
-
             metrics_json = self._rest_request_to_json(
                 tracking_url, self.MAPREDUCE_JOBS_PATH, self.MAPREDUCE_SERVICE_CHECK
             )
 
             if metrics_json.get('jobs'):
                 if metrics_json['jobs'].get('job'):
-
                     for job_json in metrics_json['jobs']['job']:
                         job_id = job_json.get('id')
                         job_name = job_json.get('name')
                         user_name = job_json.get('user')
 
                         if job_id and job_name and user_name:
-
                             # Build the structure to hold the information for each job ID
                             running_jobs[str(job_id)] = {
                                 'job_name': str(job_name),
@@ -300,7 +293,6 @@ class MapReduceCheck(AgentCheck):
 
                 if metrics_json.get('jobCounters'):
                     if metrics_json['jobCounters'].get('counterGroup'):
-
                         # Cycle through all the counter groups for this job
                         for counter_group in metrics_json['jobCounters']['counterGroup']:
                             group_name = counter_group.get('counterGroupName')
@@ -343,14 +335,12 @@ class MapReduceCheck(AgentCheck):
         Return a dictionary of {task_id: 'tracking_url'} for each MapReduce task
         """
         for job_stats in running_jobs.values():
-
             metrics_json = self._rest_request_to_json(
                 job_stats['tracking_url'], 'tasks', self.MAPREDUCE_SERVICE_CHECK, tags=addl_tags
             )
 
             if metrics_json.get('tasks'):
                 if metrics_json['tasks'].get('task'):
-
                     for task in metrics_json['tasks']['task']:
                         task_type = task.get('type')
 

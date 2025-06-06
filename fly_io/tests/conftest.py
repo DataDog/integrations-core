@@ -95,7 +95,6 @@ def mock_responses():
 @pytest.fixture
 def mock_http_call(mock_responses):
     def call(method, url, file='response', headers=None, params=None):
-
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response

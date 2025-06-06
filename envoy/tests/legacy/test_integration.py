@@ -37,7 +37,7 @@ def test_success(aggregator, check, dd_run_check):
                     all(any(tag in mt for mt in m.tags) for tag in tag_set)
                     for m in collected_metrics
                     if len(m.tags) > 1
-                ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
+                ), 'tags ' + str(expected_tags) + ' not found in ' + metric
 
         metrics_collected += len(collected_metrics)
     assert metrics_collected >= 445

@@ -31,7 +31,6 @@ class ScyllaCheck(OpenMetricsBaseCheck):
             return super(ScyllaCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
-
         instance = instances[0]
 
         endpoint = instance.get('prometheus_url')

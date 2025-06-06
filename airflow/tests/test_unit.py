@@ -31,7 +31,6 @@ def test_service_checks_healthy_exp(aggregator, json_resp, expected_healthy_stat
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value=None):
-
         with mock.patch('datadog_checks.base.utils.http.requests') as req:
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [json_resp]
@@ -60,7 +59,6 @@ def test_service_checks_healthy_stable(
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
-
         with mock.patch('datadog_checks.base.utils.http.requests') as req:
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [
@@ -100,7 +98,6 @@ def test_dag_task_ongoing_duration(aggregator, task_instance):
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
-
         with mock.patch('datadog_checks.base.utils.http.requests') as req:
             mock_resp = mock.MagicMock(status_code=200)
             mock_resp.json.side_effect = [

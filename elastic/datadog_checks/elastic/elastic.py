@@ -272,7 +272,6 @@ class ESCheck(AgentCheck):
         self._get_index_search_stats(admin_forwarder, base_tags)
 
     def _get_template_metrics(self, admin_forwarder, base_tags):
-
         try:
             template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
         except requests.exceptions.RequestException as e:

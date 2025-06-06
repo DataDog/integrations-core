@@ -378,7 +378,7 @@ class RequestsWrapper(object):
 
     def _request(self, method, url, options):
         if self.log_requests:
-            self.logger.debug(u'Sending %s request to %s', method.upper(), url)
+            self.logger.debug('Sending %s request to %s', method.upper(), url)
 
         if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
             options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
@@ -390,7 +390,7 @@ class RequestsWrapper(object):
         new_options = self.populate_options(options)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug(u'An unverified HTTPS request is being made to %s', url)
+            self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
@@ -416,7 +416,7 @@ class RequestsWrapper(object):
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
                     response.raise_for_status()
                 except Exception as e:
-                    self.logger.debug(u'Renewing auth token, as an error occurred: %s', e)
+                    self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:

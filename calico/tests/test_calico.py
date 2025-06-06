@@ -13,7 +13,6 @@ from .utils import get_fixture_path
 
 @pytest.mark.unit
 def test_check(aggregator, dd_run_check, mock_http_response):
-
     mock_http_response(file_path=get_fixture_path('calico.txt'))
     check = CalicoCheck('calico', {}, [common.MOCK_CALICO_INSTANCE])
     dd_run_check(check)

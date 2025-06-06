@@ -4,6 +4,7 @@
 """
 Helpers for parsing the `metrics` section of a config file.
 """
+
 import re
 from logging import Logger  # noqa: F401
 from typing import Dict, List, NamedTuple, Optional, Pattern, Sequence, TypedDict, Union, cast

@@ -20,7 +20,6 @@ SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 
 
 class CiscoACICheck(AgentCheck):
-
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'pwd': {'name': 'password'}}
     HA_SUPPORTED = True
 
