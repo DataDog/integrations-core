@@ -22,7 +22,7 @@ from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.utils import _http_utils
-from datadog_checks.base.utils.tls import TlsContextWrapper
+from datadog_checks.base.utils.tls import create_tls_context
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -120,17 +120,16 @@ UDS_SCHEME = 'unix'
 
 class TlsContextAdapter(requests.adapters.HTTPAdapter):
     """
-    HTTPS adapter that uses TlsContextWrapper to create SSL contexts.
+    HTTPS adapter that uses SSL contexts.
     This ensures consistent TLS configuration across all HTTPS requests.
     """
 
-    def __init__(self, tls_context_wrapper, **kwargs):
-        self.tls_context_wrapper = tls_context_wrapper
+    def __init__(self, tls_context, **kwargs):
+        self.tls_context = tls_context
         super(TlsContextAdapter, self).__init__()
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        # Use the TLS context from TlsContextWrapper
-        pool_kwargs['ssl_context'] = self.tls_context_wrapper.tls_context
+        pool_kwargs['ssl_context'] = self.tls_context
         return super(TlsContextAdapter, self).init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
 
     def cert_verify(self, conn, url, verify, cert):
@@ -147,11 +146,7 @@ class TlsContextAdapter(requests.adapters.HTTPAdapter):
         """
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
         host_params, _ = super(TlsContextAdapter, self).build_connection_pool_key_attributes(request, verify, cert)
-        context = self.tls_context_wrapper.tls_context
-        if verify != (self.context.verify_mode == ssl.CERT_REQUIRED):
-            # TODO: Handle the case where `verify` is not the same as the context's verify mode.
-            context = ssl.create_default_context()
-        return host_params, {"ssl_context":context}
+        return host_params, {"ssl_context":self.tls_context}
 
 
 class ResponseWrapper(ObjectProxy):
@@ -191,7 +186,8 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
-        'tls_context_wrapper',
+        'tls_config',
+        'tls_context'
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -387,8 +383,9 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
-        # Create TLS context wrapper for consistent TLS configuration
-        self.tls_context_wrapper = TlsContextWrapper(config, remapper)
+        # Create TLS context for consistent TLS configuration
+        self.tls_context = create_tls_context(config)
+        self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -441,11 +438,17 @@ class RequestsWrapper(object):
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
+
+            new_context = self._get_new_context(url, new_options)
             if persist:
-                request_method = getattr(self.session, method)
+                session = self.session
+                if new_context is not None:
+                    # If the context has changed, we need to create a new adapter
+                    certadapter = TlsContextAdapter(new_context)
+                    session.mount(url, certadapter)
             else:
-                # Create a new session for non-persistent requests
-                request_method = getattr(self.create_session(), method)
+                session = self.create_session(tls_context=new_context)
+            request_method = getattr(session, method)
 
             if self.auth_token_handler:
                 try:
@@ -460,6 +463,35 @@ class RequestsWrapper(object):
 
             return ResponseWrapper(response, self.request_size)
 
+    def _get_new_context(self, url, new_options):
+        """
+        Creates a new TLS context if the new request options differ from the default ones.
+        """
+        # If `verify` or `cert` options differ from the defaults, a new adapter is created.
+        if new_options.get('verify') == self.options['verify'] and new_options.get('cert') == self.options['cert']:
+            return
+        # If the URL is not HTTPS, no need to update the TLS context.
+        if not url.startswith('https'):
+            return
+
+        request_overrides = {}
+        if new_options.get('verify') != self.options['verify']:
+            if new_options.get('verify') is True:
+                request_overrides["tls_verify"] = True
+            elif new_options.get('verify') is False:
+                request_overrides["tls_verify"] = False
+            elif isinstance(new_options.get('verify'), str):
+                request_overrides["tls_verify"] = True
+                request_overrides["tls_ca_cert"] = new_options.get('verify')
+        if new_options.get('cert') != self.options['cert']:
+            if isinstance(new_options.get('cert'), str):
+                request_overrides["tls_cert"] = new_options.get('cert')
+            elif isinstance(new_options.get('cert'), tuple) and len(new_options.get('cert')) == 2:
+                request_overrides["tls_cert"] = new_options.get('cert')[0]
+                request_overrides["tls_private_key"] = new_options.get('cert')[1]
+
+        return create_tls_context(self.tls_config, overrides=request_overrides)
+
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
             response = request_method(url, **new_options)
@@ -471,17 +503,14 @@ class RequestsWrapper(object):
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
-            self.tls_context_wrapper.config['tls_ca_cert'] = certs
-            self.tls_context_wrapper.refresh_tls_context()
+            new_context = create_tls_context(self.tls_config, overrides={'tls_ca_cert': certs})
             # retry the connection via session object
             if not persist:
-                session = requests.Session()
-                for option, value in self.options.items():
-                    setattr(session, option, value)
-                certadapter = TlsContextAdapter(self.tls_context_wrapper)
-                session.mount(url, certadapter)
+                session = self.create_session(new_context)
             else:
                 session = self.session
+                certadapter = TlsContextAdapter(new_context)
+                session.mount(url, certadapter)
             request_method = getattr(session, method)
             response = request_method(url, **new_options)
         return response
@@ -509,18 +538,7 @@ class RequestsWrapper(object):
 
         with sock:
             try:
-                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                # Override verify mode for intermediate cert discovery
-                context.verify_mode = ssl.CERT_NONE
-                # Set the ciphers
-                ciphers = self.tls_context_wrapper.config.get('tls_ciphers')
-                if ciphers:
-                    if 'ALL' in ciphers:
-                        updated_ciphers = "ALL"
-                    else:
-                        updated_ciphers = ":".join(ciphers)
-
-                    context.set_ciphers(updated_ciphers)
+                context = create_tls_context(self.tls_config, overrides={'tls_verify': False})
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -579,29 +597,31 @@ class RequestsWrapper(object):
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
 
-    def create_session(self):
+    def create_session(self, tls_context=None):
         session = requests.Session()
-
-        # Use TlsContextHTTPSAdapter for consistent TLS configuration
-        https_adapter = TlsContextAdapter(self.tls_context_wrapper)
+        context = self.tls_context if tls_context is None else tls_context
 
         # Enables HostHeaderSSLAdapter if needed
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
         if self.tls_use_host_header:
             # Create a combined adapter that supports both TLS context and host headers
             class TlsContextHostHeaderAdapter(TlsContextAdapter, _http_utils.HostHeaderSSLAdapter):
-                def __init__(self, tls_context_wrapper, **kwargs):
-                    TlsContextAdapter.__init__(self, tls_context_wrapper, **kwargs)
+                def __init__(self, tls_context, **kwargs):
+                    TlsContextAdapter.__init__(self, tls_context, **kwargs)
                     _http_utils.HostHeaderSSLAdapter.__init__(self, **kwargs)
 
                 def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
                     # Use TLS context from wrapper
-                    pool_kwargs['ssl_context'] = self.tls_context_wrapper.tls_context
+                    pool_kwargs['ssl_context'] = self.tls_context
                     return _http_utils.HostHeaderSSLAdapter.init_poolmanager(
                         self, connections, maxsize, block=block, **pool_kwargs
                     )
 
-            https_adapter = TlsContextHostHeaderAdapter(self.tls_context_wrapper)
+            https_adapter = TlsContextHostHeaderAdapter(context)
+        else:
+            # Use TlsContextHTTPSAdapter for consistent TLS configuration
+            https_adapter = TlsContextAdapter(context)
+
 
         session.mount('https://', https_adapter)
 

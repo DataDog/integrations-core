@@ -32,11 +32,58 @@ STANDARD_FIELDS = {
 }
 
 
+def create_tls_context(config, overrides=None):
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
+    # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
+    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+
+    if overrides is not None:
+        config = config.copy()
+        config.update(overrides)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
+    context.check_hostname = config['tls_verify'] and config.get('tls_validate_hostname', True)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
+    context.verify_mode = ssl.CERT_REQUIRED if config['tls_verify'] else ssl.CERT_NONE
+
+    ciphers = config.get('tls_ciphers')
+    if ciphers:
+        if 'ALL' in ciphers:
+            updated_ciphers = "ALL"
+        else:
+            updated_ciphers = ":".join(ciphers)
+
+        context.set_ciphers(updated_ciphers)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
+    ca_cert = config['tls_ca_cert']
+    if ca_cert:
+        ca_cert = os.path.expanduser(ca_cert)
+        if os.path.isdir(ca_cert):
+            context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
+        else:
+            context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
+    else:
+        context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
+    client_cert, client_key = config['tls_cert'], config['tls_private_key']
+    client_key_pass = config['tls_private_key_password']
+    if client_key:
+        client_key = os.path.expanduser(client_key)
+    if client_cert:
+        client_cert = os.path.expanduser(client_cert)
+        context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
+
+    return context
+
+
 class TlsContextWrapper(object):
     __slots__ = ('logger', 'config', 'tls_context')
 
     def __init__(self, instance, remapper=None, overrides=None):
-        # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]], Dict[AnyStr, Any]) -> None
         default_fields = dict(STANDARD_FIELDS)
 
         # Override existing config options if there exists any overrides
@@ -98,53 +145,8 @@ class TlsContextWrapper(object):
                 del config[unique_name]
 
         self.config = config
-        self.tls_context = self._create_tls_context()
-
-    def _create_tls_context(self):
-        # type: () -> ssl.SSLContext
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-        # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
-        context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-        context.check_hostname = self.config['tls_verify'] and self.config.get('tls_validate_hostname', True)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-        context.verify_mode = ssl.CERT_REQUIRED if self.config['tls_verify'] else ssl.CERT_NONE
-
-        ciphers = self.config.get('tls_ciphers')
-        if ciphers:
-            if 'ALL' in ciphers:
-                updated_ciphers = "ALL"
-            else:
-                updated_ciphers = ":".join(ciphers)
-
-            context.set_ciphers(updated_ciphers)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-        ca_cert = self.config['tls_ca_cert']
-        if ca_cert:
-            ca_cert = os.path.expanduser(ca_cert)
-            if os.path.isdir(ca_cert):
-                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
-            else:
-                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-        else:
-            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-        client_cert, client_key = self.config['tls_cert'], self.config['tls_private_key']
-        client_key_pass = self.config['tls_private_key_password']
-        if client_key:
-            client_key = os.path.expanduser(client_key)
-        if client_cert:
-            client_cert = os.path.expanduser(client_cert)
-            context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
-
-        return context
+        self.tls_context = create_tls_context(self.config)
 
     def refresh_tls_context(self):
         # type: () -> None
-        self.tls_context = self._create_tls_context()
+        self.tls_context = create_tls_context(self.config)
