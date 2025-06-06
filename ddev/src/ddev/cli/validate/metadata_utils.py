@@ -196,6 +196,7 @@ VALID_UNIT_NAMES = {
     'terawatt',
     'view',
     'microdollar',
+    'nanodollar',
     'euro',
     'pound',
     'penny',
