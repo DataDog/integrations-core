@@ -26,7 +26,7 @@ from .version_utils import V9_4, V10, V14
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 QUERYID_TO_CALLS_QUERY = """
 SELECT queryid, calls

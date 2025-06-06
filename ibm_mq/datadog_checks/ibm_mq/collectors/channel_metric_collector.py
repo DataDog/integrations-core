@@ -5,9 +5,8 @@ from typing import Callable, Dict, List  # noqa: F401
 
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
-
-from .. import metrics
-from ..config import IBMMQConfig  # noqa: F401
+from datadog_checks.ibm_mq import metrics
+from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
 
 try:
     import pymqi
