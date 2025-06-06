@@ -5,7 +5,7 @@ set -exu
 # Packages which must be built from source
 always_build=()
 
-if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
+if false && [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # confluent-kafka and librdkafka need to be compiled from source to get kerberos support
     # The librdkafka version needs to stay in sync with the confluent-kafka version,
     # thus we extract the version from the requirements file.
