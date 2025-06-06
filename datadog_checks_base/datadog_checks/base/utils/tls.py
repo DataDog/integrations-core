@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import os
-import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
 
 from ..config import is_affirmative
+from .http import create_ssl_context
 
 if TYPE_CHECKING:
     from ..types import InstanceType  # noqa: F401
@@ -97,8 +96,8 @@ class TlsContextWrapper(object):
                 del config[unique_name]
 
         self.config = config
-        self.tls_context = create_tls_context(self.config)
+        self.tls_context = create_ssl_context(self.config)
 
     def refresh_tls_context(self):
         # type: () -> None
-        self.tls_context = create_tls_context(self.config)
+        self.tls_context = create_ssl_context(self.config)

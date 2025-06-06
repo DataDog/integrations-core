@@ -116,6 +116,7 @@ KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
 
+
 def create_ssl_context(config, overrides=None):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
