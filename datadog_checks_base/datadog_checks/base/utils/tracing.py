@@ -10,9 +10,8 @@ from typing import TYPE_CHECKING
 import lazy_loader
 
 from datadog_checks.base.agent import datadog_agent
-
-from ..config import is_affirmative
-from ..utils.common import to_native_string
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 
 if TYPE_CHECKING:
     import inspect as _module_inspect
