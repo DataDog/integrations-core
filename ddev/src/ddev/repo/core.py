@@ -44,6 +44,10 @@ class Repository:
         return self.__integrations
 
     @cached_property
+    def worktrees(self) -> list[str]:
+        return self.git.worktrees
+
+    @cached_property
     def config(self) -> RepositoryConfig:
         from ddev.repo.config import RepositoryConfig
 
@@ -80,7 +84,7 @@ class IntegrationRegistry:
             return self.__cache[name]
 
         path = self.repo.path / name
-        if not path.is_dir():
+        if not (path.is_dir() and path.name not in self.repo.worktrees):
             raise OSError(f'Integration does not exist: {Path(self.repo.path.name, name)}')
 
         integration = Integration(path, self.repo.path, self.repo.config)
@@ -176,6 +180,10 @@ class IntegrationRegistry:
             return
 
         for path in sorted(self.repo.path.iterdir()):
+            # Ignore any directory that is a worktree
+            if path.name in self.repo.worktrees:
+                continue
+
             integration = self.__get_from_path(path)
             if selected and integration.name not in selected:
                 continue

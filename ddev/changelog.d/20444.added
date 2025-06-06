@@ -1,0 +1,1 @@
+Add support for worktrees. Ddev now understand and differentiate worktrees from other packages
