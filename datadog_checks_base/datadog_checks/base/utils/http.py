@@ -171,11 +171,11 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
     This ensures consistent TLS configuration across all HTTPS requests.
     """
 
-    def __init__(self, ssl_context, is_custom_context=False, **kwargs):
+    def __init__(self, ssl_context, has_custom_context=False, **kwargs):
         self.ssl_context = ssl_context
         # This is used to determine if the adapter was created with a custom context
         # for the purpose of reverting to the default context when needed.
-        self.is_custom_context = is_custom_context
+        self.has_custom_context = has_custom_context
         super(SSLContextAdapter, self).__init__()
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
@@ -494,11 +494,11 @@ class RequestsWrapper(object):
                 session = self.session
                 if new_context is not None:
                     # If the context has changed, we need to create a new adapter
-                    certadapter = SSLContextAdapter(new_context, is_custom_context=True)
+                    certadapter = SSLContextAdapter(new_context, has_custom_context=True)
                     session.mount(url, certadapter)
                 else:
                     current_adapter = session.get_adapter(url)
-                    if isinstance(current_adapter, SSLContextAdapter) and current_adapter.is_custom_context:
+                    if isinstance(current_adapter, SSLContextAdapter) and current_adapter.has_custom_context:
                         # If we are using a custom context, we need to revert to the original context
                         certadapter = SSLContextAdapter(self.ssl_context)
                         session.mount(url, certadapter)
