@@ -1,0 +1,184 @@
+
+Understanding metadata for agent-integrations
+
+A – Metrics metadata
+
+Before anything else read all of these:
+https://github.com/DataDog/devops/wiki/Declarative-Integration-Pipeline#metrics-metadata-pipeline (moved here)
+https://github.com/DataDog/devops/wiki/Metrics-Metadata (moved here)
+https://docs.datadoghq.com/developers/metrics/types/
+https://docs.datadoghq.com/developers/metrics/
+https://docs.datadoghq.com/developers/metrics/type_modifiers/
+
+Those documentation pages should provide all the necessary information to understand what metadata are and how they are useful. This document goes more in depth, describing Datadog’s internals around metadata.
+
+What are metrics metadata
+On postgres
+They provide additional information to the backend about the metrics. Such information includes the metric type (count, rate, gauge), the units, a description and more. You can find an example here: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
+
+Our job is to keep those csv files in sync with what integrations are submitting but also to synchronize those files with the backend (see below). Metadata are stored per-org, what uniquely identifies a given metadata entry is the tuple (org_id, metric_name). The “synchronization” part inserts metadata from the csv into the database with org_id = -1.
+All those entries are called “catalog” metadata, they are considered the default when an org doesn’t have custom metadata.
+
+Custom metadata will be created for the org for any of these reasons:
+Submitting metrics that don’t already have catalog metadata.
+Submitting a metric for the first time with a type that is different from the catalog one.
+Submitting metrics with a type that is different than the cached value (which should be the catalog metadata except if the catalog was updated).
+Manually updating metadata in the metrics_explorer.
+
+It is always hard and dangerous to update metadata, especially the metric type. In any case the only metric type that really matters is the one sent via the API as it (usually) takes precedence.
+
+To be precise, the API type is what will matter eventually. If you change the metric type from the metrics summary page, your new type will be used for some time. But after a day or so, the caches expire and the API type takes precedence again.
+
+
+Types & Overrides:
+* no metadata + no type during submission will create a other  type per org and you will be able to change it in the ui as many time as you want
+ *if you have a medatada with type gauge  + no type during submission, then it will populate a global metadata type table. If you change in the ui the type it will override per org and you and change it this way as many time as you want
+* if you don’t have a metadata but you submit a type during submission then it will create a type per org and you won’t be able to change it with the UI
+* if you have a metadata and you also have a type  during submission, the type used during submission wins and you won’t be able to override it in the UI.
+
+
+The agent always submits a type with metrics.
+
+Q. Can we drop type from the CSV then?
+After you do that the default will become type='' and not type=count
+So that means one override will be per org+metric
+That:
+- Increase reads / writes to the metadata table
+- Means you cannot update the default for ppl
+if no type provided in csv then default type = '' and one override will be created for each org / metric pair
+
+On Nicky/HMS-Resolver
+On the intake side, nicky receives the payload from the agent and uses HMS resolver to resolve (and cache) the metrics metadata.
+
+In very simple terms, nicky receives the json payload and reads the metadata from it (on the intake side, metadata simply are the combination of metric name, interval, unit_name and per_unit_name). If the metadata is already in the cache and matches what’s received, nicky does nothing with it. Otherwise, Nicky stores metadata through HMS resolver (both in HMS cache and in postgres).
+
+In more detailed terms
+
+Nicky will first check if its negative cache contains the pair “org_id/metric_name”. This cache has a 1min TTL and is used to prevent a huge ton of lookups. If the metric is already in the cache, nicky doesn’t do anything with the received metadata information.
+For a new metric or after one expiration of the negative cache, nicky pursues and will check metadata existence from a second LayeredCache (first in memory then in redis). This cache never expires as far as I can tell. If the fetched metadata is equal to the one in the payload, Nicky will first update its negative cache (to say “I’ve fetched that metric”) and will stop processing here . Equality is defined here (only on metric name, interval and units)
+From here, processing is given to HMS resolver. Nicky asks it to create or update all the remaining metadata from the payload. HMS answers with the list of updated metadata.
+Nicky uses the HMS answer to update its main cache (but not the negative cache).
+
+HMS-resolver will update the postgres database when it’s needed as defined here and here.
+For some reason the stored postgres procedures differs from what is defined in postgres, The code is here:
+
+https://gist.github.com/FlorianVeaux/0c03e2a7a20ad4de1a97016cb0e35535
+
+HMS-resolver does the following:
+
+Checks if the requested metadata is already in its cache, if it is and if it matches the intake metadata, returns it.
+Otherwise HMS-resolver will use the postgres procedure to create/update metadata based on the catalog entry and will return the inserted metadata (which is a combination of intake metadata and the catalog metadata).
+
+
+What all of that means is that the source of truth for to decide whether or not to create new metadata is what is inside Nicky cache, then the HMS cache, then only postgres.
+But because neither Nicky’s metadata cache nore HMS-resolver cache have any expiry date, the value in the postgres database is almost never used. If you update the metrics_metadata table for a given org and a given metric, the change won’t be read until the metric is submitted with a different metadata that doesn’t match what’s in the cache.
+
+
+Visual summary here.
+
+Metric types
+
+For agent based integrations, one has to understand that there are three definitions of a metric type, depending on the perspective.
+
+From the agent perspective
+Each integration submits a metric using it’s python API. Submission can be one of ‘rate’, ‘gauge’, ‘count’, ‘monotonic_count’, ‘histogram’, ‘submit_histogram_bucket’.
+The agent will precompute and aggregate some of the values. Check the official documentation here for up to date details:  https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/?tab=count
+
+
+From the intake perspective
+The agent sends a json payload to our intake, where each entry looks like this: 
+   {
+      "metric":"system.fs.inodes.total",
+      "points":[
+         [
+            1583174180,
+            4.88245288e+09
+         ]
+      ],
+      "tags":[
+
+
+      ],
+      "host":"COMP11178.local",
+      "device":"/dev/disk1s1",
+      "type":"gauge",
+      "interval":0,
+      "source_type_name":"System"
+   }
+
+You can see that the Agent sends a metric type with the payload. The mapping is something along those lines:
+
+Self.count -> count
+Self.counter -> rate
+Self.gauge -> gauge
+Self.histogram -> gauge for all aggregates/quantiles except “.count” that is a rate
+self .monotonic_count -> count
+Self.rate -> gauge
+
+Why is the api type different than the submission type? Let’s take an example with a metric counting the total number of requests. This metric is inherently a monotonic counter, but you probably want to submit it as a rate because the most meaningful information is to see the number of requests per second. By using `self.rate` the agent will compute for you the number of requests per second and send that to the backend as a gauge. 
+
+When a metric is received, the intake can decide to create/update custom per-org metadata for this metric if any of the following conditions is true:
+The metric doesn’t have catalog metadata.
+The metric has catalog metadata but its type is different than the API type.
+
+Basically this means that the value of `metric_type` in the metadata.csv doesn’t have a lot of value as the submitted type prevails.
+
+From the query perspective
+Once the backend is aware of the metrics metadata things will behave differently. When creating a dashboard monitor, the following will happen:
+Count metrics queries will be suffixed with as_count by default
+Rate metrics queries will be suffixed with as_rate by default
+Gauge metrics queries won’t be suffixed with anything.
+
+`as_count` and `as_rate` modifiers have different effects based on the metric type.
+Reference here: https://docs.datadoghq.com/developers/metrics/type_modifiers/?tab=count
+
+
+The interval
+The field represents the sampling interval of a metric. It makes the most sense for custom code that is instrumented with `datadogpy`. A good example would be a counter that is incremented every time a specific function is run. The value of the counter is then sent to datadog every 10 seconds with dogstatsd and the counter is reset and so on and so forth. On the datadog application, you’ll see one datapoint every 10 seconds, and the value means the number of times this function was called in the last 10 seconds.
+
+If the interval is set correctly to 10 seconds in the metadata, and if you suffix your query with `as_rate`, datadog will know how to compute the number of calls per second.
+
+Agent integrations work differently as they “pull” the latest data from a service and submit it on a regular schedule. Our ‘counts’ almost never make sense. The only example I have is MapR where MapR pushes metrics (like mapr.db.flushes) into a kafka stream on a regular interval. And the agent consumes that stream potentially reading more or less than once this very same metric.
+
+The interval is also used the other way around for `rate` (in the metadata) metrics. By default rate will be suffixed with `as_rate` (which graphs the raw value), and when suffixing with `as_count`, the backend will know how to move from `requests-per-second` to request by using the interval value.
+
+The interval is also used when displaying any metric in “bars” mode, the width of each bar will not be smaller than the interval value.
+
+
+
+
+
+
+How to set the interval value in the metadata.csv ?
+You can usually ignore it in most situations:
+The minimum bucket size for time aggregation is 30seconds, which is usually longer than any check run. If an integration is known to run for more than that, it may be worth considering a bigger interval value to prevent gaps in graphs.
+Count metrics displayed with the `as_rate` modifier can never be correct for everybody as the interval between data points is not known in advance.
+The interval used for conversion between rates and counts. Necessary for metrics with the in-app rate type. If your metric is a JMX-derived metric (or any metric submitted via dogstatsd for that matter), you must have 10 as the metric's interval (regardless of in-app type).
+
+Workflow for integrations team
+
+A metric name should always be fixed and hardcoded in the code. Each row of the metadata.csv describes a single metric name, so it can’t take into account variable metric names. Also this is generally a bad practice for datadog, a text information that is variable is usually reported as a tag.
+
+For each metric that the integration can submit, you need to add an entry in the metadata.csv with the following information.
+metric_name: the exact name of the metric (acts as the unique row identifier)
+metric_type: Should be one of ‘gauge’, ‘count’ or ‘rate’ (see the metric type section)
+interval: Used by the backend to compute “as_count” as “as_rate” correctly, for agent based integration it’s unclear what choice to make.
+unit_name/per_unit_name: Used to scale graph accordingly, no impact on monitors.
+description: Used in the metrics explorer to give datadog users more context about a given metric.
+orientation: An integer in {-1, 0, 1}. -1 means smaller values are better, 1 means larger values are better, 0 means no values are better or worse. For example, a metric like dd.dogweb.errors would have an orientation of -1, because less errors is better than more. Very likely not used anywhere.
+integration: A reference to an existing integration. It should match the “display name” from the manifest.json
+short_name: Not sure where this is used.
+
+
+Once the metadata.csv is completed, its content has to be upserted into the database (in each of our environments). Follow the “Declarative Pipeline” instructions for more details about how to do it.
+
+
+Risks:
+It is important to synchronize metadata before customers start to send metrics. Otherwise the backend will generate custom per-org metadata that takes precedence over the catalog metadata and they will be empty (no unit, no description …).
+
+
+Addons:
+https://github.com/DataDog/dd-go/blob/prod/apps/hms-resolver/metadata.go#L169-L218
+https://github.com/DataDog/dd-go/blob/prod/model/metric_metadata.go#L102-L116
+https://github.com/DataDog/dd-go/blob/prod/apps/nicky/metadata_resolver.go
+

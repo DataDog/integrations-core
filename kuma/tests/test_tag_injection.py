@@ -1,0 +1,154 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from pathlib import Path
+from typing import Any, Callable, Dict  # noqa: F401
+
+import pytest
+from prometheus_client.core import CounterMetricFamily, Sample
+
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.kuma import KumaCheck
+from datadog_checks.kuma.check import KumaOpenMetricsScraper
+
+
+@pytest.fixture
+def setup_check(dd_run_check, instance, mock_http_response):
+    """Fixture to set up and run the KumaCheck with a mocked HTTP response."""
+    mock_http_response(
+        file_path=Path(__file__).parent.absolute() / "fixtures" / "metrics" / "control_plane" / "metrics_code_class.txt"
+    )
+    check = KumaCheck('kuma', {}, [instance])
+    dd_run_check(check)
+    return check
+
+
+@pytest.mark.parametrize(
+    'code,expected_class',
+    [
+        pytest.param('200', '2XX', id='2xx-ok'),
+        pytest.param('302', '3XX', id='3xx-found'),
+        pytest.param('401', '4XX', id='4xx-unauthorized'),
+        pytest.param('500', '5XX', id='5xx-internal'),
+    ],
+)
+def test_code_class_injection_valid_codes(aggregator, code, expected_class, setup_check):
+    """Test that valid HTTP status codes get correct code_class tags"""
+    metric_name = 'kuma.api_server.http_requests_inflight'
+    aggregator.assert_metric(metric_name)
+
+    found_metric_for_code = False
+    # Test that the specific code gets correct code_class
+    for metric_point in aggregator.metrics(metric_name):
+        if f'code:{code}' in metric_point.tags:
+            found_metric_for_code = True
+            assert (
+                f'code_class:{expected_class}' in metric_point.tags
+            ), f"Expected code_class:{expected_class} for code:{code}, got tags: {metric_point.tags}"
+    assert found_metric_for_code, f"No metric found for {metric_name} with tag code:{code}"
+
+
+@pytest.mark.parametrize(
+    'edge_code',
+    [
+        pytest.param('20', id='edge-2digit'),
+        pytest.param('2000', id='edge-4digit'),
+        pytest.param('abc', id='edge-non-numeric'),
+        pytest.param('2a0', id='edge-mixed'),
+        pytest.param('', id='edge-empty'),
+    ],
+)
+def test_code_class_injection_edge_cases(aggregator, edge_code, setup_check):
+    """Test that edge case HTTP codes do NOT get code_class tags"""
+    metric_name = 'kuma.api_server.http_requests_inflight'
+    aggregator.assert_metric(metric_name)
+
+    found_metric_for_edge_code = False
+    # Edge cases should NOT have code_class
+    for metric_point in aggregator.metrics(metric_name):
+        if f'code:{edge_code}' in metric_point.tags:
+            found_metric_for_edge_code = True
+            assert not any(
+                'code_class:' in tag for tag in metric_point.tags
+            ), f"Edge case code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
+    # Assert only if the fixture actually produces a metric with this edge_code
+    # The fixture metrics_code_class.txt has specific edge codes.
+    # We expect these metrics to be present.
+    assert found_metric_for_edge_code, f"No metric found for {metric_name} with tag code:{edge_code}"
+
+
+def test_code_class_injection_no_code_label(aggregator, setup_check):
+    """Test that metrics without code label do not get code_class tags"""
+    metric_name = 'kuma.api_server.http_requests_inflight'
+    aggregator.assert_metric(metric_name)  # Ensure the metric name exists
+
+    found_metric_no_code = False
+    # No code label should not have code_class
+    for metric_point in aggregator.metrics(metric_name):
+        if 'handler:/no-code' in metric_point.tags:
+            found_metric_no_code = True
+            assert not any(
+                'code_class:' in tag for tag in metric_point.tags
+            ), f"Metric with handler:/no-code should not have code_class, got tags: {metric_point.tags}"
+    assert found_metric_no_code, f"No metric found for {metric_name} with tag handler:/no-code"
+
+
+@pytest.mark.parametrize(
+    'code,expected_class',
+    [
+        pytest.param('200', '2XX', id='2xx-ok'),
+        pytest.param('302', '3XX', id='3xx-found'),
+        pytest.param('401', '4XX', id='4xx-unauthorized'),
+        pytest.param('500', '5XX', id='5xx-internal'),
+        pytest.param('20', None, id='edge-2digit'),
+        pytest.param('2000', None, id='edge-4digit'),
+        pytest.param('abc', None, id='edge-non-numeric'),
+        pytest.param('2a0', None, id='edge-mixed'),
+        pytest.param('', None, id='edge-empty'),
+        pytest.param(None, None, id='edge-no-code'),
+    ],
+)
+def test_code_class_injection_unit(code, expected_class):
+    """Unit test for the _inject_code_class method"""
+
+    metric = CounterMetricFamily('test_metric', 'Test metric')
+    if code is not None:
+        sample = Sample('test_metric', {'code': code}, 1.0, None)
+    else:
+        sample = Sample('test_metric', {}, 1.0, None)
+    metric.samples = [sample]
+
+    modified_metric = KumaOpenMetricsScraper.inject_code_class(metric)
+    sample = modified_metric.samples[0]
+
+    if expected_class:
+        assert (
+            sample.labels.get('code_class') == expected_class
+        ), f"Expected code_class {expected_class} for code {code}"
+    else:
+        assert 'code_class' not in sample.labels, f"Expected no code_class for code {code}"
+
+
+def test_code_class_preserves_labels_and_idempotent():
+    """Test that code_class injection preserves labels and is idempotent"""
+
+    # Test preserving labels
+    metric = CounterMetricFamily('test_metric', 'Test')
+    original_labels = {'code': '200', 'method': 'GET', 'handler': '/api', 'custom': 'value'}
+    metric.samples = [Sample('test_metric', original_labels.copy(), 42.0, None)]
+
+    modified = KumaOpenMetricsScraper.inject_code_class(metric)
+    sample = modified.samples[0]
+
+    # All original labels preserved
+    for k, v in original_labels.items():
+        assert sample.labels[k] == v
+    assert sample.labels['code_class'] == '2XX'
+    assert sample.value == 42.0
+
+    # Test idempotency
+    modified_twice = KumaOpenMetricsScraper.inject_code_class(modified)
+    sample = modified_twice.samples[0]
+    assert sample.labels['code_class'] == '2XX'  # should remain 2XX
+    assert sum(1 for k in sample.labels if k == 'code_class') == 1

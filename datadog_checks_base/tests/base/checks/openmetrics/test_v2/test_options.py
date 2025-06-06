@@ -936,3 +936,75 @@ class TestIgnoreTags:
         )
 
         aggregator.assert_all_metrics_covered()
+
+
+class TestTargetInfoMetricName:
+    def test_custom_target_info_metric_name(self, aggregator, dd_run_check, mock_http_response):
+        """Test that target_info_metric_name can be customized"""
+        check = get_check({'metrics': ['.+'], 'target_info': True, 'target_info_metric_name': 'custom_info'})
+
+        mock_http_response(
+            """
+            # HELP custom_info Custom metadata
+            # TYPE custom_info gauge
+            custom_info{env="prod", region="europe"} 1.0
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            """
+        )
+
+        dd_run_check(check)
+
+        # Assert the custom_info metric
+        aggregator.assert_metric(
+            'test.custom_info',
+            value=1.0,
+            tags=['endpoint:test', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        # Assert that labels from custom_info are propagated to other metrics
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes',
+            value=6396288,
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+    def test_default_target_info_metric_name(self, aggregator, dd_run_check, mock_http_response):
+        """Test that default target_info_metric_name is 'target_info'"""
+        check = get_check({'metrics': ['.+'], 'target_info': True})
+
+        mock_http_response(
+            """
+            # HELP target_info Target metadata
+            # TYPE target_info gauge
+            target_info{env="prod", region="europe"} 1.0
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            """
+        )
+
+        dd_run_check(check)
+
+        # Assert the target_info metric
+        aggregator.assert_metric(
+            'test.target_info',
+            value=1.0,
+            tags=['endpoint:test', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        # Assert that labels from target_info are propagated to other metrics
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes',
+            value=6396288,
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
+            metric_type=aggregator.GAUGE,
+        )
+
+        aggregator.assert_all_metrics_covered()
