@@ -176,7 +176,10 @@ def test_get_previous_iteration_log_cursor_when_cusror_is_not_none(utc_timestamp
 
 @patch('datadog_checks.mac_audit_logs.check.subprocess.Popen')
 def test_fetch_audit_logs(mock_popen, instance):
-    logs = "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n<record time=\"Thu Jun  5 13:51:39 2025\" msec=\" + 154 msec\" > /></record>"
+    logs = (
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n<record time=\"Thu Jun  5 "
+        "13:51:39 2025\" msec=\" + 154 msec\" > /></record>"
+    )
     log_file_entries = logs.split("\n")
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     # Create a mock for the stdout and stderr data
@@ -216,7 +219,11 @@ def test_fetch_audit_logs(mock_popen, instance):
 
 @patch.object(MacAuditLogsCheck, 'send_log')
 def test_process_and_ingest_log_entries_skipping_logs_milli_seconds(mock_send_log, instance):
-    logs = "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 278 msec\" > /></record>\n<record time=\"Thu Jun  5 13:51:42 2025\" msec=\" + 124 msec\" > /></record>"
+    logs = (
+        "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n<record time=\"Thu Jun  5 "
+        "13:51:38 2025\" msec=\" + 278 msec\" > /></record>\n<record time=\"Thu Jun  5 13:51:42 2025\" "
+        "msec=\" + 124 msec\" > /></record>"
+    )
     log_entries = logs.split("\n")
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     check.process_and_ingest_log_entries(log_entries, "20250605082138.20250605082142", "+0530", " + 278 msec")
