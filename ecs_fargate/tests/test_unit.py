@@ -67,7 +67,9 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
     """
     Testing successful fargate check on Linux.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -146,7 +148,9 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
     """
     Testing successful fargate check on Windows.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_windows):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_windows
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -204,7 +208,9 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
     """
     Testing successful fargate check.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_sys_delta):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_sys_delta
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
