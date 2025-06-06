@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import click
 
-from ...manifest_validator.v2.migration import TODO_FILL_IN, migrate_manifest
-from ...utils import get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info, echo_success
+from datadog_checks.dev.tooling.manifest_validator.v2.migration import TODO_FILL_IN, migrate_manifest
+from datadog_checks.dev.tooling.utils import get_valid_integrations
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manifest utilities')

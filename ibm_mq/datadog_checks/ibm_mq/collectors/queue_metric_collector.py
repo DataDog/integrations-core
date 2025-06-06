@@ -6,10 +6,9 @@ from typing import Any, Callable, Dict, List, Set  # noqa: F401
 
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.types import ServiceCheck  # noqa: F401
+from datadog_checks.ibm_mq import metrics
+from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
 from datadog_checks.ibm_mq.metrics import GAUGE
-
-from .. import metrics
-from ..config import IBMMQConfig  # noqa: F401
 
 try:
     import pymqi
@@ -38,9 +37,7 @@ class QueueMetricCollector(object):
         self.service_check = service_check  # type: Callable[[str, ServiceCheck, List[str]], None]
         self.warning = warning  # type: Callable
         self.send_metric = send_metric  # type: Callable[[str, str, Any, List[str]], None]
-        self.send_metrics_from_properties = (
-            send_metrics_from_properties
-        )  # type: Callable[[Dict, Dict, str, List[str]], None]
+        self.send_metrics_from_properties = send_metrics_from_properties  # type: Callable[[Dict, Dict, str, List[str]], None]
         self.log = log  # type: logging.LoggerAdapter
         self.user_provided_queues = set(self.config.queues)  # type: Set[str]
 

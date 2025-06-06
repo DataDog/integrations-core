@@ -7,7 +7,6 @@ from .metrics import METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
-
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'vllm'
@@ -23,7 +22,6 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-
         endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/version")
         response = self.http.get(endpoint)
         response.raise_for_status()

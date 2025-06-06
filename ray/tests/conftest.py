@@ -67,15 +67,18 @@ def dd_environment():
         ],
         wrappers=[create_log_volumes()],
     ):
-        yield {
-            "init_config": {},
-            "instances": [
-                HEAD_INSTANCE,
-                WORKER1_INSTANCE,
-                WORKER2_INSTANCE,
-                WORKER3_INSTANCE,
-            ],
-        }, E2E_METADATA
+        yield (
+            {
+                "init_config": {},
+                "instances": [
+                    HEAD_INSTANCE,
+                    WORKER1_INSTANCE,
+                    WORKER2_INSTANCE,
+                    WORKER3_INSTANCE,
+                ],
+            },
+            E2E_METADATA,
+        )
 
 
 @pytest.fixture

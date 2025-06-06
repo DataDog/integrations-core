@@ -53,8 +53,9 @@ class TestTLSCiphers:
         http = RequestsWrapper(instance, init_config)
         mock_socket = mock.MagicMock()
 
-        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers, mock.patch(
-            'datadog_checks.base.utils.http.create_socket_connection', return_value=mock_socket
+        with (
+            mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers,
+            mock.patch('datadog_checks.base.utils.http.create_socket_connection', return_value=mock_socket),
         ):
             http.fetch_intermediate_certs('https://www.google.com')
             mock_set_ciphers.assert_called_once_with(expected_ciphers)

@@ -72,10 +72,13 @@ def mock_fs():
     # inside of counter and hw_counters exist.
     # The mock_glob function is used to mock the glob pattern function.
     # The mock_open function is used to mock the open function and return the mock file content.
-    with mock.patch('os.path.exists') as mock_ib_dir, mock.patch('os.path.isdir') as mock_ib_sub_dir, mock.patch(
-        'os.listdir'
-    ) as mock_counter_dir, mock.patch('glob.glob') as mock_glob, mock.patch('builtins.open') as mock_open:
-
+    with (
+        mock.patch('os.path.exists') as mock_ib_dir,
+        mock.patch('os.path.isdir') as mock_ib_sub_dir,
+        mock.patch('os.listdir') as mock_counter_dir,
+        mock.patch('glob.glob') as mock_glob,
+        mock.patch('builtins.open') as mock_open,
+    ):
         mock_ib_dir.return_value = True
         mock_ib_sub_dir.side_effect = _is_valid_directory
         mock_counter_dir.side_effect = _get_directory_contents
