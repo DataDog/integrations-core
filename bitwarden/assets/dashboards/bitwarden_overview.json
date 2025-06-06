@@ -71,7 +71,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -133,7 +133,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -176,7 +176,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -245,7 +245,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -315,7 +315,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -385,7 +385,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -455,7 +455,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(item-events OR collection-events OR user-events OR organization-events OR group-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -526,7 +526,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:bitwarden service:event-logs @eventCategory:(user-events OR collection-events OR item-events OR group-events OR organization-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category"
+                                                "query": "source:bitwarden service:event-logs @eventCategory:(user-events OR collection-events OR item-events OR group-events OR organization-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category"
                                             },
                                             "indexes": [
                                                 "*"
@@ -587,13 +587,12 @@
                             "title": "Event Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:bitwarden service:event-logs @eventCategory:(user-events OR collection-events OR item-events OR group-events OR organization-events) $acting_user_name $acting_user_email $event_name $acting_user_type $group_name $acting_user_ip $event_category",
+                                        "query_string": "source:bitwarden service:event-logs @eventCategory:(user-events OR collection-events OR item-events OR group-events OR organization-events) $acting_user_name $acting_user_email $event_type $acting_user_type $group_name $acting_user_ip $event_category",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1176,8 +1175,8 @@
             "default": "*"
         },
         {
-            "name": "event_name",
-            "prefix": "@evt.name",
+            "name": "event_type",
+            "prefix": "@event.type",
             "available_values": [],
             "default": "*"
         },
