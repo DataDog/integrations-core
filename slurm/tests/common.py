@@ -578,6 +578,67 @@ SINFO_MAP = {
     ]
 }
 
+# normal*|up|c2|0/1/2/3|1000|N/A
+SINFO_LEVEL_2_MAP = {
+    'metrics': [
+        {
+            'name': 'slurm.sinfo.node.enabled',
+            'value': 1,
+            'tags': [],
+        },
+        {
+            'name': 'slurm.node.cpu.allocated',
+            'value': 0,
+            'tags': [
+                'slurm_cluster_name:N/A',
+                'slurm_node_name:c2',
+                'slurm_partition_name:normal',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.cpu.idle',
+            'value': 1,
+            'tags': [
+                'slurm_cluster_name:N/A',
+                'slurm_node_name:c2',
+                'slurm_partition_name:normal',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.cpu.other',
+            'value': 2,
+            'tags': [
+                'slurm_cluster_name:N/A',
+                'slurm_node_name:c2',
+                'slurm_partition_name:normal',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.cpu.total',
+            'value': 3,
+            'tags': [
+                'slurm_cluster_name:N/A',
+                'slurm_node_name:c2',
+                'slurm_partition_name:normal',
+                'slurm_default_partition:true',
+            ],
+        },
+        {
+            'name': 'slurm.node.memory',
+            'value': 1000,
+            'tags': [
+                'slurm_cluster_name:N/A',
+                'slurm_node_name:c2',
+                'slurm_partition_name:normal',
+                'slurm_default_partition:true',
+            ],
+        },
+    ]
+}
+
 SQUEUE_MAP = {
     'metrics': [
         {
