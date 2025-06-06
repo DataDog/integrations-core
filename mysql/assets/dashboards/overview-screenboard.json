@@ -1,15 +1,15 @@
 {
   "title": "MySQL",
-  "description": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.\n\nTo learn more about our MySQL integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+  "description": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.\n\nTo learn more about our MySQL integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications. (cloned)",
   "widgets": [
     {
       "id": 2101495049883950,
       "definition": {
         "title": "About MySQL",
         "title_align": "center",
-        "type": "group",
         "banner_img": "/static/images/integration_dashboard/mysql_hero_1.jpeg",
         "show_title": false,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -68,8 +68,8 @@
       "definition": {
         "title": "Basic Activity Monitor",
         "title_align": "center",
-        "type": "group",
         "background_color": "white",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -81,8 +81,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:mysql.net.aborted_connects{$scope}",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": "<=",
@@ -93,6 +91,20 @@
                       "comparator": ">",
                       "palette": "white_on_red",
                       "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:mysql.net.aborted_connects{$scope}",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "reduce(equiv_otel(query1), 'avg')"
                     }
                   ]
                 }
@@ -115,8 +127,19 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:mysql.net.connections{$scope}",
-                  "aggregator": "avg"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:mysql.net.connections{$scope}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "reduce(equiv_otel(query1), 'avg')"
+                    }
+                  ]
                 }
               ],
               "precision": 2
@@ -137,8 +160,15 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:mysql.net.max_connections{$scope}",
-                  "aggregator": "avg"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:mysql.net.max_connections{$scope}",
+                      "aggregator": "avg"
+                    }
+                  ]
                 }
               ],
               "autoscale": true,
@@ -165,8 +195,8 @@
       "definition": {
         "title": "Performance",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -176,7 +206,6 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
-              "legend_size": "0",
               "legend_layout": "auto",
               "legend_columns": [
                 "avg",
@@ -194,12 +223,12 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.slow_queries{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -297,8 +326,8 @@
       "definition": {
         "title": "Throughput",
         "title_align": "center",
-        "type": "group",
         "background_color": "blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -308,7 +337,6 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
-              "legend_size": "0",
               "legend_layout": "auto",
               "legend_columns": [
                 "avg",
@@ -320,13 +348,18 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_select{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
@@ -371,13 +404,18 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_insert{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
@@ -428,12 +466,12 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_update{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -478,13 +516,18 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_delete{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
@@ -546,8 +589,8 @@
       "definition": {
         "title": "MySQL Resource Utilization",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_green",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -570,11 +613,10 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "equiv_otel(query1)"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.threads_running{$scope}",
@@ -626,11 +668,10 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "equiv_otel(query1)"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.threads_connected{$scope}",
@@ -703,12 +744,11 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Cache Utilization"
+                      "alias": "Cache Utilization",
+                      "formula": "equiv_otel(query1)"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.key_cache_utilization{$scope} by {service}",
@@ -760,16 +800,15 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Data Reads"
+                      "alias": "Data Reads",
+                      "formula": "equiv_otel(query1)"
                     },
                     {
-                      "formula": "query2",
-                      "alias": "Data Writes"
+                      "alias": "Data Writes",
+                      "formula": "equiv_otel(query2)"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.data_reads{$scope}",
@@ -826,20 +865,19 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Available Buffer Pool"
+                      "alias": "Available Buffer Pool",
+                      "formula": "equiv_otel(query1)"
                     },
                     {
-                      "formula": "query2",
-                      "alias": "Used Buffer Pool"
+                      "alias": "Used Buffer Pool",
+                      "formula": "equiv_otel(query2)"
                     },
                     {
-                      "formula": "query3",
-                      "alias": "Total Buffer Pool"
+                      "alias": "Total Buffer Pool",
+                      "formula": "equiv_otel(query3)"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.buffer_pool_free{$scope}",
@@ -901,20 +939,19 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Total Pages"
+                      "alias": "Total Pages",
+                      "formula": "equiv_otel(query1)"
                     },
                     {
-                      "formula": "query2",
-                      "alias": "Free Pages"
+                      "alias": "Free Pages",
+                      "formula": "equiv_otel(query2)"
                     },
                     {
-                      "formula": "query3",
-                      "alias": "Pages Data"
+                      "alias": "Pages Data",
+                      "formula": "equiv_otel(query3)"
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_total{$scope}",
@@ -992,8 +1029,8 @@
       "definition": {
         "title": "System Resource Utilization",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_orange",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1358,6 +1395,12 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 20,
+        "width": 12,
+        "height": 6
       }
     },
     {
@@ -1365,8 +1408,8 @@
       "definition": {
         "title": "Logs",
         "title_align": "center",
-        "type": "group",
         "background_color": "white",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1375,20 +1418,44 @@
               "title": "Error Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:mysql  $scope status:error",
-              "sort": {
-                "column": "time",
-                "order": "desc"
-              },
-              "columns": [
-                "core_host",
-                "core_service"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:mysql $scope status:error",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
               ],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "type": "list_stream"
             },
             "layout": {
               "x": 0,
@@ -1403,20 +1470,44 @@
               "title": "All Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:mysql $scope",
-              "sort": {
-                "column": "time",
-                "order": "desc"
-              },
-              "columns": [
-                "core_host",
-                "core_service"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:mysql $scope",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
               ],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "type": "list_stream"
             },
             "layout": {
               "x": 6,
@@ -1426,17 +1517,23 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 5
       }
     }
   ],
   "template_variables": [
     {
       "name": "scope",
+      "available_values": [],
       "default": "*"
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": false,
   "notify_list": [],
   "reflow_type": "fixed"
 }
