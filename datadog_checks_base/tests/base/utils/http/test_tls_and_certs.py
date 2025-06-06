@@ -8,8 +8,7 @@ import mock
 import pytest
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils.http import TlsContextAdapter, RequestsWrapper
-from datadog_checks.base.utils.tls import TlsContextWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, TlsContextAdapter
 
 pytestmark = [pytest.mark.unit]
 
@@ -321,8 +320,7 @@ class TestTlsContext:
         for cipher in instance['tls_ciphers']:
             # At least one entry's name field should match the OpenSSL name
             assert any(
-                IANA_TO_OPENSSL_NAME.get(cipher) in c.get('name')
-                for c in https_adapter.tls_context.get_ciphers()
+                IANA_TO_OPENSSL_NAME.get(cipher) in c.get('name') for c in https_adapter.tls_context.get_ciphers()
             )
 
     def test_host_header_compatibility(self):
