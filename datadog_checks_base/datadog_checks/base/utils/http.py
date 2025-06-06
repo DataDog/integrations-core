@@ -144,23 +144,37 @@ def create_ssl_context(config, overrides=None):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
     ca_cert = config['tls_ca_cert']
-    if ca_cert:
-        ca_cert = os.path.expanduser(ca_cert)
-        if os.path.isdir(ca_cert):
-            context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
+    try:
+        if ca_cert:
+            ca_cert = os.path.expanduser(ca_cert)
+            if os.path.isdir(ca_cert):
+                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
+            else:
+                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
         else:
-            context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-    else:
-        context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+    except FileNotFoundError:
+        LOGGER.warning(
+            'TLS CA certificate file not found: %s. '
+            'Please check the `tls_ca_cert` configuration option.',
+            ca_cert,
+        )
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
     client_cert, client_key = config['tls_cert'], config['tls_private_key']
     client_key_pass = config['tls_private_key_password']
-    if client_key:
-        client_key = os.path.expanduser(client_key)
-    if client_cert:
-        client_cert = os.path.expanduser(client_cert)
-        context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
+    try:
+        if client_key:
+            client_key = os.path.expanduser(client_key)
+        if client_cert:
+            client_cert = os.path.expanduser(client_cert)
+            context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
+    except FileNotFoundError:
+        LOGGER.warning(
+            'TLS client certificate file not found: %s. '
+            'Please check the `tls_cert` configuration option.',
+            client_cert,
+        )
 
     return context
 
