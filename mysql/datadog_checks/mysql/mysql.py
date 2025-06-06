@@ -97,7 +97,7 @@ except ImportError:
 try:
     import datadog_agent
 except ImportError:
-    from datadog_checks.stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class MySql(AgentCheck):
