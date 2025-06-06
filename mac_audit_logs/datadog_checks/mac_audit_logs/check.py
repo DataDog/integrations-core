@@ -63,14 +63,15 @@ class MacAuditLogsCheck(AgentCheck):
             if file_name.count(".") == 1:
                 start_time_str, end_time_str = file_name.split(".")
 
-                if end_time_str == "not_terminated":
-                    continue
-
                 start_time = utils.time_string_to_datetime_utc(start_time_str)
                 last_record_datetime = utils.time_string_to_datetime_utc(last_record_time)
 
+                if end_time_str == "not_terminated":
+                    relevant_files.append((start_time, file_name))
+                    continue
+
                 if end_time_str == "crash_recovery":
-                    if last_record_datetime <= start_time and start_time >= utils.time_string_to_datetime_utc(
+                    if start_time >= utils.time_string_to_datetime_utc(
                         utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)
                     ):
                         relevant_files.append((start_time, file_name))
@@ -85,7 +86,7 @@ class MacAuditLogsCheck(AgentCheck):
                 err_message = f"File {file_name} does not have the expected file format."
                 self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
 
-        relevant_files.sort(key=lambda x: x[0])
+        relevant_files.sort(key=lambda x: (x[1].endswith('.not_terminated'), x[0]))
         return relevant_files
 
     def get_previous_iteration_log_cursor(self, previous_cursor) -> Tuple[str, str, str]:
@@ -147,13 +148,13 @@ class MacAuditLogsCheck(AgentCheck):
                 time_value = data_xml.get("time")
                 milli_sec_value = data_xml.get("msec")
 
-                # This condition is used to reduce the duplicasy of the records.
-                # Skip records until not find the last ingested record mili second time value
+                # This condition is used to reduce the duplicacy of the records.
+                # Skip records until not find the last ingested record milli second time value
                 if last_record_milli_sec and last_record_milli_sec != milli_sec_value:
                     continue
 
                 # Set the `last_record_milli_sec` None when reach the last ingested record's milli second time value
-                # Once set to None skipping logic will be not intiated
+                # Once set to None skipping logic will be not initiated
                 if last_record_milli_sec == milli_sec_value:
                     last_record_milli_sec = None
 
@@ -165,14 +166,14 @@ class MacAuditLogsCheck(AgentCheck):
 
                 if log_index + 1 == total_entries:
                     # Set `record_milli_sec` to None and `is_file_collection_completed` to True
-                    # when reach the last entry of the file. This indicates the successfull
-                    # execution of the perticular file
+                    # when reach the last entry of the file. This indicates the successful
+                    # execution of the particular file
                     cursor["record_milli_sec"] = None
                     cursor["is_file_collection_completed"] = True
                 else:
-                    # Set `record_milli_sec` to milli second  time value of record and
+                    # Set `record_milli_sec` to millisecond  time value of record and
                     # `is_file_collection_completed` to False for remaining entries
-                    # This indictes the ongoing execution of the file
+                    # This indicates the ongoing execution of the file
                     cursor["record_milli_sec"] = milli_sec_value
                     cursor["is_file_collection_completed"] = False
 
@@ -210,7 +211,7 @@ class MacAuditLogsCheck(AgentCheck):
             start_time_str, end_time_str = file.split(".")
 
             # Skip execution of the file if it is not falls within the time range
-            if end_time_str != "crash_recovery" and utils.time_string_to_datetime_utc(
+            if end_time_str not in ["not_terminated", "crash_recovery"] and utils.time_string_to_datetime_utc(
                 end_time_str
             ) < utils.time_string_to_datetime_utc(utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)):
                 err_message = (
@@ -220,22 +221,29 @@ class MacAuditLogsCheck(AgentCheck):
                 self.log.info(constants.LOG_TEMPLATE.format(message=err_message))
                 continue
 
-            # Skip the file if it has been already processed
-            if previous_cursor and (
-                (last_collected_file_name == file and previous_cursor["is_file_collection_completed"])
-                or (
-                    utils.time_string_to_datetime_utc(start_time_str)
+            if previous_cursor:
+                cursor_file_start_time_str, cursor_file_end_time_str = last_collected_file_name.split(".")
+                # If last proccessed file is `not_terminated`, Skip the already processed files
+                if (
+                    cursor_file_end_time_str == "not_terminated"
+                    and previous_cursor["is_file_collection_completed"]
+                    and cursor_file_start_time_str == start_time_str
+                    and last_record_time == end_time_str
+                ):
+                    self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
+                    continue
+
+                # Skip the file if it has been already processed
+                if (last_collected_file_name == file and previous_cursor["is_file_collection_completed"]) or (
+                    end_time_str not in ["not_terminated", "crash_recovery"]
+                    and utils.time_string_to_datetime_utc(start_time_str)
                     <= utils.time_string_to_datetime_utc(last_record_time)
-                    and (
-                        end_time_str != "crash_recovery"
-                        and utils.time_string_to_datetime_utc(end_time_str)
-                        == utils.time_string_to_datetime_utc(last_record_time)
-                    )
+                    and utils.time_string_to_datetime_utc(end_time_str)
+                    == utils.time_string_to_datetime_utc(last_record_time)
                     and last_collected_file_name != file
-                )
-            ):
-                self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
-                continue
+                ):
+                    self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
+                    continue
 
             # Prepare time filter argument for auditreduce command. Set `last_record_time` as a value if
             # the first file to be processed otherwise set this to start-time of file
@@ -288,6 +296,14 @@ class MacAuditLogsCheck(AgentCheck):
 
             # Collect all the files from `audit_logs_dir_path` path which falls under the time range
             relevant_files = self.collect_relevant_files(last_record_time)
+
+            if (
+                relevant_files
+                and previous_cursor
+                and not previous_cursor["is_file_collection_completed"]
+                and relevant_files[-1] == last_collected_file_name
+            ):
+                relevant_files = [relevant_files[-1]]
 
             self.collect_data_from_files(
                 relevant_files,
