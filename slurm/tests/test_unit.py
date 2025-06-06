@@ -94,7 +94,7 @@ def test_sinfo_processing(mock_get_subprocess_output, instance, aggregator):
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
-def test_sinfo_level_2_processing(mock_get_subprocess_output, instance, aggregator):
+def test_sinfo_level_2_processing(mock_get_subprocess_output, instance, aggregator, caplog):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 2
     instance['collect_gpu_stats'] = False
@@ -111,7 +111,12 @@ def test_sinfo_level_2_processing(mock_get_subprocess_output, instance, aggregat
         mock_output_partition_info,
         mock_output_main,
     ]
-    check.check(None)
+
+    with caplog.at_level('DEBUG'):
+        check.check(None)
+        assert "out of range for tag" not in caplog.text
+        assert "out of range for metric" not in caplog.text
+
     for metric in SINFO_LEVEL_2_MAP['metrics']:
         aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
 
