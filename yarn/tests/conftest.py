@@ -68,7 +68,10 @@ def mocked_auth_request():
         assert 'auth' in kwargs, 'Missing "auth" argument in requests.Session.get(...) call'
 
         # Make sure we've got the correct username and password
-        assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password in requests.Session.get"
+        assert kwargs['auth'] == (
+            TEST_USERNAME,
+            TEST_PASSWORD,
+        ), "Incorrect username or password in requests.Session.get"
 
         # Return mocked request.get(...)
         return requests_get_mock(*args, **kwargs)
