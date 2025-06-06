@@ -250,8 +250,8 @@ def mock_http_api(monkeypatch):
         http = MockHttpV7()
     else:
         http = MockHttpV6()
-    monkeypatch.setattr('requests.get', MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', MagicMock(side_effect=http.post))
+    monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=http.post))
     yield http
 
 

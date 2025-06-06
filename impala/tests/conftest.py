@@ -100,7 +100,7 @@ def mock_metrics(request):
         content = fixture_file.read()
 
     with mock.patch(
-        "requests.get",
+        "requests.Session.get",
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: content.split("\n"),

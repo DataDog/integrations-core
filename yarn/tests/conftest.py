@@ -57,7 +57,7 @@ def instance():
 
 @pytest.fixture
 def mocked_request():
-    with patch("requests.get", new=requests_get_mock):
+    with patch("requests.Session.get", new=requests_get_mock):
         yield
 
 
@@ -65,15 +65,15 @@ def mocked_request():
 def mocked_auth_request():
     def requests_auth_get(*args, **kwargs):
         # Make sure we're passing in authentication
-        assert 'auth' in kwargs, 'Missing "auth" argument in requests.get(...) call'
+        assert 'auth' in kwargs, 'Missing "auth" argument in requests.Session.get(...) call'
 
         # Make sure we've got the correct username and password
-        assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password in requests.get"
+        assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password in requests.Session.get"
 
         # Return mocked request.get(...)
         return requests_get_mock(*args, **kwargs)
 
-    with patch("requests.get", new=requests_auth_get):
+    with patch("requests.Session.get", new=requests_auth_get):
         yield
 
 
@@ -85,7 +85,7 @@ def mocked_bad_cert_request():
 
     def requests_bad_cert_get(*args, **kwargs):
         # Make sure we're passing in the 'verify' argument
-        assert 'verify' in kwargs, 'Missing "verify" argument in requests.get(...) call'
+        assert 'verify' in kwargs, 'Missing "verify" argument in requests.Session.get(...) call'
 
         if kwargs['verify']:
             raise SSLError("certificate verification failed for {}".format(args[0]))
@@ -93,7 +93,7 @@ def mocked_bad_cert_request():
         # Return the actual response
         return requests_get_mock(*args, **kwargs)
 
-    with patch("requests.get", new=requests_bad_cert_get):
+    with patch("requests.Session.get", new=requests_bad_cert_get):
         yield
 
 

@@ -27,7 +27,7 @@ def test_get_pr_approvers(github_response, expected_approvers):
     mock_response.json.return_value = github_response
 
     with mock.patch(
-        "requests.get",
+        "requests.Session.get",
         return_value=mock_response,
     ):
         assert get_pr_approvers("integrations-core", "42", {}) == expected_approvers

@@ -127,5 +127,5 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         return mock.MagicMock(json=mock_json, status_code=mock_status_code)
 
     mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.get', mock_get)
+    monkeypatch.setattr('requests.Session.get', mock_get)
     return mock_get
