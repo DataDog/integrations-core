@@ -8,13 +8,13 @@ import mock
 import pytest
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils.http import RequestsWrapper, TlsContextAdapter
+from datadog_checks.base.utils.http import RequestsWrapper, SSLContextAdapter
 
 pytestmark = [pytest.mark.unit]
 
 IANA_TO_OPENSSL_NAME = {
-    'TLS_RSA_WITH_AES_128_CBC_SHA': 'AES128-SHA',
-    'TLS_RSA_WITH_AES_256_CBC_SHA': 'AES256-SHA',
+    'TLS_RSA_WITH_AES_256_GCM_SHA384': 'AES256-GCM-SHA384',
+    'TLS_RSA_WITH_AES_128_GCM_SHA256': 'AES128-GCM-SHA256',
 }
 
 
@@ -274,20 +274,20 @@ class TestAIAChasing:
                 mock_context.set_ciphers.assert_called_once_with('TLS_RSA_WITH_AES_256_GCM_SHA384')
 
 
-class TestTlsContext:
-    """Test the core TLS context functionality."""
+class TestSSLContext:
+    """Test the core SSL context functionality."""
 
-    def test_requests_wrapper_creates_tls_context(self):
+    def test_requests_wrapper_creates_ssl_context(self):
         """Test that RequestsWrapper creates an SSLContext instance."""
         instance = {'tls_verify': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert hasattr(http, 'tls_context')
-        assert isinstance(http.tls_context, ssl.SSLContext)
+        assert hasattr(http, 'ssl_context')
+        assert isinstance(http.ssl_context, ssl.SSLContext)
 
-    def test_session_uses_tls_context_adapter(self):
-        """Test that the session uses TlsContextAdapter for consistent TLS configuration."""
+    def test_session_uses_ssl_context_adapter(self):
+        """Test that the session uses SSLContextAdapter for consistent TLS configuration."""
         instance = {'tls_verify': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
@@ -295,35 +295,29 @@ class TestTlsContext:
         session = http.session
         https_adapter = session.get_adapter('https://example.com')
 
-        assert isinstance(https_adapter, TlsContextAdapter)
-        assert https_adapter.tls_context is http.tls_context
+        assert isinstance(https_adapter, SSLContextAdapter)
+        assert https_adapter.ssl_context is http.ssl_context
 
     def test_tls_ciphers_applied_consistently(self):
         """Test that tls_ciphers are applied consistently."""
-        instance = {
-            'tls_verify': True,
-            'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384', 'TLS_RSA_WITH_AES_128_GCM_SHA256'],
-        }
+        instance = {'tls_verify': True, 'tls_ciphers': list(IANA_TO_OPENSSL_NAME.keys())}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         # Verify the TLS context wrapper has the cipher configuration
-        assert http.tls_config['tls_ciphers'] == [
-            'TLS_RSA_WITH_AES_256_GCM_SHA384',
-            'TLS_RSA_WITH_AES_128_GCM_SHA256',
-        ]
+        assert http.tls_config['tls_ciphers'] == instance['tls_ciphers']
 
         # Verify the session adapter uses the same TLS context
         session = http.session
         https_adapter = session.get_adapter('https://example.com')
 
-        assert isinstance(https_adapter, TlsContextAdapter)
-        assert https_adapter.tls_context is http.tls_context
+        assert isinstance(https_adapter, SSLContextAdapter)
+        assert https_adapter.ssl_context is http.ssl_context
         # Verify that the ciphers are set correctly in the TLS context
         for cipher in instance['tls_ciphers']:
             # At least one entry's name field should match the OpenSSL name
             assert any(
-                IANA_TO_OPENSSL_NAME.get(cipher) in c.get('name') for c in https_adapter.tls_context.get_ciphers()
+                IANA_TO_OPENSSL_NAME.get(cipher) in c.get('name') for c in https_adapter.ssl_context.get_ciphers()
             )
 
     def test_default_tls_ciphers(self):
@@ -331,15 +325,13 @@ class TestTlsContext:
         instance = {'tls_verify': True}
         init_config = {}
 
-        # Mock the TLS context creation to avoid file operations
-        with mock.patch('datadog_checks.base.utils.http.create_tls_context') as mock_create_context:
-            mock_context = mock.MagicMock()
-            mock_create_context.return_value = mock_context
+        # Mock the SSLContext creation
+        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
             RequestsWrapper(instance, init_config)
 
             # Verify that the default ciphers are set
-            assert mock_context.set_ciphers.call_count == 1
-            assert mock_context.set_ciphers.called_with('ALL')
+            assert mock_set_ciphers.call_count == 1
+            assert mock_set_ciphers.call_args[0][0] == 'ALL'
 
     def test_host_header_compatibility(self):
         """Test that host header functionality works with TLS context unification."""
@@ -356,9 +348,9 @@ class TestTlsContext:
         https_adapter = session.get_adapter('https://example.com')
 
         # Should be the combined adapter that supports both TLS context and host headers
-        assert hasattr(https_adapter, 'tls_context')
-        assert https_adapter.tls_context is http.tls_context
-        assert 'TlsContextHostHeaderAdapter' in str(type(https_adapter))
+        assert hasattr(https_adapter, 'ssl_context')
+        assert https_adapter.ssl_context is http.ssl_context
+        assert 'SSLContextHostHeaderAdapter' in str(type(https_adapter))
 
     def test_remapper_functionality_preserved(self):
         """Test that config remapping functionality is preserved with TLS context unification."""
@@ -373,7 +365,7 @@ class TestTlsContext:
         init_config = {}
 
         # Mock the TLS context creation to avoid file operations
-        with mock.patch('datadog_checks.base.utils.http.create_tls_context') as mock_create_context:
+        with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_context:
             mock_context = mock.MagicMock()
             mock_create_context.return_value = mock_context
 
@@ -398,7 +390,7 @@ class TestTlsContext:
         init_config = {}
 
         # Mock the TLS context creation to avoid file operations
-        with mock.patch('datadog_checks.base.utils.http.create_tls_context') as mock_create_context:
+        with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_context:
             mock_context = mock.MagicMock()
             mock_create_context.return_value = mock_context
 
