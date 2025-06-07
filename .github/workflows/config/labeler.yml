@@ -509,6 +509,8 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proxmox:
+- proxmox/**/*
 integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
