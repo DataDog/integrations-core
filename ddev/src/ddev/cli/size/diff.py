@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -139,7 +140,7 @@ def diff_mode(
     dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
 
     if integrations + dependencies == []:
-        params["app"].display_error(
+        params["app"].display(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
         return []
@@ -151,16 +152,15 @@ def diff_mode(
                 module["Size"] = f"+{module['Size']}"
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Status", formatted_modules)
+        print_table(params["app"], "Diff", formatted_modules)
 
-    treemap_path = (
-        f"treemap_{params['platform']}_{params['version']}.png"
-        if params["format"] and "png" in params["format"]
-        else None
-    )
+    treemap_path = None
+    if params["format"] and "png" in params["format"]:
+        treemap_path = os.path.join("size_diff_visualizations", f"treemap_{params['platform']}_{params['version']}.png")
 
     if params["show_gui"] or treemap_path:
         plot_treemap(
+            params["app"],
             formatted_modules,
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],

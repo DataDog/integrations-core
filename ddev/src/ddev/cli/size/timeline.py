@@ -282,14 +282,22 @@ def timeline_mode(
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    timeline_path = (
-        f"timeline_{params['module']}_{params['platform']}.png"
-        if params["platform"] and params["format"] and "png" in params["format"]
-        else f"timeline_{params['module']}.png" if params["format"] and "png" in params["format"] else None
-    )
+    timeline_path = None
+    if params["format"] and "png" in params["format"]:
+        filename = f"timeline_{params['module']}"
+        if params["platform"]:
+            filename = f"{filename}_{params['platform']}"
+        timeline_path = os.path.join("size_timeline_visualizations", f"{filename}.png")
 
     if params["show_gui"] or timeline_path:
-        plot_linegraph(formatted_modules, params["module"], params["platform"], params["show_gui"], timeline_path)
+        plot_linegraph(
+            params["app"],
+            formatted_modules,
+            params["module"],
+            params["platform"],
+            params["show_gui"],
+            timeline_path,
+        )
 
     return formatted_modules
 
@@ -788,6 +796,7 @@ def export_format(
 
 
 def plot_linegraph(
+    app: Application,
     modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     module: str,
     platform: Optional[str],
@@ -821,7 +830,9 @@ def plot_linegraph(
     plt.tight_layout()
 
     if path:
-        plt.savefig(path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        plt.savefig(path, bbox_inches="tight", format="png")
+        app.display(f"Linegraph saved to {path}")
     if show:
         plt.show()
     plt.close()
