@@ -397,8 +397,8 @@ jobs:
       if: always()
       run: |-
         mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        if [[ -d ${{ inputs.target }}/.junit ]]; then
-          mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target }}/junit ]]; then
+          mv ${{ inputs.target }}/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
         fi
 
     - name: Upload test results
