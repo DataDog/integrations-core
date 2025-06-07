@@ -79,8 +79,7 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
             for name, versions in version_updates.items():
                 for package_version, python_versions in versions.items():
                     app.display_error(
-                        f'{name} can be updated to version {package_version} '
-                        f'on {" and ".join(sorted(python_versions))}'
+                        f'{name} can be updated to version {package_version} on {" and ".join(sorted(python_versions))}'
                     )
             app.abort()
         else:

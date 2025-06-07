@@ -456,7 +456,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.csv"
                     if version
-                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
+                    else f"{platform}_{size_type}_{mode}.csv"
+                    if platform
+                    else f"{size_type}_{mode}.csv"
                 )
             )
             save_csv(app, modules, csv_filename)
@@ -468,7 +470,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.json"
                     if version
-                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
+                    else f"{platform}_{size_type}_{mode}.json"
+                    if platform
+                    else f"{size_type}_{mode}.json"
                 )
             )
             save_json(app, json_filename, modules)
@@ -480,7 +484,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.md"
                     if version
-                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
+                    else f"{platform}_{size_type}_{mode}.md"
+                    if platform
+                    else f"{size_type}_{mode}.md"
                 )
             )
             save_markdown(app, "Status", modules, markdown_filename)

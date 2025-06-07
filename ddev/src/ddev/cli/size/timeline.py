@@ -285,7 +285,9 @@ def timeline_mode(
     timeline_path = (
         f"timeline_{params['module']}_{params['platform']}.png"
         if params["platform"] and params["format"] and "png" in params["format"]
-        else f"timeline_{params['module']}.png" if params["format"] and "png" in params["format"] else None
+        else f"timeline_{params['module']}.png"
+        if params["format"] and "png" in params["format"]
+        else None
     )
 
     if params["show_gui"] or timeline_path:
