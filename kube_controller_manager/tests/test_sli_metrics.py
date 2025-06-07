@@ -22,7 +22,7 @@ def mock_metrics():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
@@ -205,7 +205,7 @@ def mock_request():
 
 
 def test_detect_sli_endpoint(mock_metrics, instance):
-    with mock.patch('requests.get') as mock_request:
+    with mock.patch('requests.Session.get') as mock_request:
         mock_request.return_value.status_code = 200
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
         c.check(instance)
@@ -213,7 +213,7 @@ def test_detect_sli_endpoint(mock_metrics, instance):
 
 
 def test_detect_sli_endpoint_404(mock_metrics, instance):
-    with mock.patch('requests.get') as mock_request:
+    with mock.patch('requests.Session.get') as mock_request:
         mock_request.return_value.status_code = 404
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
         c.check(instance)
@@ -221,7 +221,7 @@ def test_detect_sli_endpoint_404(mock_metrics, instance):
 
 
 def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
-    with mock.patch('requests.get') as mock_request:
+    with mock.patch('requests.Session.get') as mock_request:
         mock_request.return_value.status_code = 403
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
         c.check(instance)

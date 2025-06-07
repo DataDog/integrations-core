@@ -688,7 +688,7 @@ def _assert(aggregator, values_and_tags):
 
 @pytest.mark.unit
 def test_yarn(aggregator, dd_run_check):
-    with mock.patch('requests.get', yarn_requests_get_mock):
+    with mock.patch('requests.Session.get', yarn_requests_get_mock):
         c = SparkCheck('spark', {}, [YARN_CONFIG])
         dd_run_check(c)
 
@@ -743,7 +743,7 @@ def test_yarn(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_auth_yarn(aggregator, dd_run_check):
-    with mock.patch('requests.get', yarn_requests_auth_mock):
+    with mock.patch('requests.Session.get', yarn_requests_auth_mock):
         c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
         dd_run_check(c)
 
@@ -763,7 +763,7 @@ def test_auth_yarn(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_mesos(aggregator, dd_run_check):
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
         dd_run_check(c)
         _assert(
@@ -822,7 +822,7 @@ def test_mesos(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_mesos_filter(aggregator, dd_run_check):
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
         dd_run_check(c)
 
@@ -835,7 +835,7 @@ def test_mesos_filter(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_driver_unit(aggregator, dd_run_check):
-    with mock.patch('requests.get', driver_requests_get_mock):
+    with mock.patch('requests.Session.get', driver_requests_get_mock):
         c = SparkCheck('spark', {}, [DRIVER_CONFIG])
         dd_run_check(c)
 
@@ -895,7 +895,7 @@ def test_driver_unit(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_standalone_unit(aggregator, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
         dd_run_check(c)
 
@@ -947,7 +947,7 @@ def test_standalone_unit(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_STAGE_DISABLED])
         dd_run_check(c)
 
@@ -996,7 +996,7 @@ def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
 @pytest.mark.unit
 def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
-    with mock.patch('requests.get', proxy_with_warning_page_mock):
+    with mock.patch('requests.Session.get', proxy_with_warning_page_mock):
         dd_run_check(c)
 
         _assert(
@@ -1048,7 +1048,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_standalone_pre20(aggregator, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_pre20_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
         dd_run_check(c)
 
@@ -1101,7 +1101,7 @@ def test_standalone_pre20(aggregator, dd_run_check):
 
 @pytest.mark.unit
 def test_metadata(aggregator, datadog_agent, dd_run_check):
-    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+    with mock.patch('requests.Session.get', standalone_requests_pre20_get_mock):
         c = SparkCheck(CHECK_NAME, {}, [STANDALONE_CONFIG_PRE_20])
         c.check_id = "test:123"
         dd_run_check(c)
@@ -1127,7 +1127,7 @@ def test_disable_legacy_cluster_tags(aggregator, dd_run_check):
     instance = MESOS_FILTERED_CONFIG
     instance['disable_legacy_cluster_tag'] = True
 
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch('requests.Session.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [instance])
         dd_run_check(c)
 
@@ -1156,7 +1156,7 @@ def test_enable_query_name_tag_for_structured_streaming(
 ):
     instance['enable_query_name_tag'] = True
 
-    with mock.patch('requests.get', requests_get_mock):
+    with mock.patch('requests.Session.get', requests_get_mock):
         c = SparkCheck('spark', {}, [instance])
         dd_run_check(c)
 
@@ -1240,7 +1240,7 @@ def test_do_not_crash_on_single_app_failure():
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
 def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog):
-    with mock.patch('requests.get', return_value=MockResponse("{}")):
+    with mock.patch('requests.Session.get', return_value=MockResponse("{}")):
         with caplog.at_level(logging.WARNING):
             dd_run_check(SparkCheck('spark', {}, [instance]))
 
@@ -1324,7 +1324,7 @@ def test_yarn_no_json_for_app_properties(
         else:
             return yarn_requests_get_mock(url, *args, **kwargs)
 
-    mocker.patch('requests.get', get_without_json)
+    mocker.patch('requests.Session.get', get_without_json)
     dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
     for m in missing_metrics:
         aggregator.assert_metric_has_tag(m, 'app_name:PySparkShell', count=0)

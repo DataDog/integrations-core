@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import os
-import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
 
 from ..config import is_affirmative
+from .http import create_ssl_context
 
 if TYPE_CHECKING:
     from ..types import InstanceType  # noqa: F401
@@ -36,7 +35,6 @@ class TlsContextWrapper(object):
     __slots__ = ('logger', 'config', 'tls_context')
 
     def __init__(self, instance, remapper=None, overrides=None):
-        # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]], Dict[AnyStr, Any]) -> None
         default_fields = dict(STANDARD_FIELDS)
 
         # Override existing config options if there exists any overrides
@@ -98,56 +96,8 @@ class TlsContextWrapper(object):
                 del config[unique_name]
 
         self.config = config
-        self.tls_context = self._create_tls_context()
-
-    def _create_tls_context(self):
-        # type: () -> ssl.SSLContext
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-        # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
-        context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-        context.verify_mode = ssl.CERT_REQUIRED if self.config['tls_verify'] else ssl.CERT_NONE
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-        if context.verify_mode == ssl.CERT_REQUIRED:
-            context.check_hostname = self.config.get('tls_validate_hostname', True)
-        else:
-            context.check_hostname = False
-
-        ciphers = self.config.get('tls_ciphers')
-        if ciphers:
-            if 'ALL' in ciphers:
-                updated_ciphers = "ALL"
-            else:
-                updated_ciphers = ":".join(ciphers)
-
-            context.set_ciphers(updated_ciphers)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-        ca_cert = self.config['tls_ca_cert']
-        if ca_cert:
-            ca_cert = os.path.expanduser(ca_cert)
-            if os.path.isdir(ca_cert):
-                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
-            else:
-                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-        else:
-            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-        # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-        client_cert, client_key = self.config['tls_cert'], self.config['tls_private_key']
-        client_key_pass = self.config['tls_private_key_password']
-        if client_key:
-            client_key = os.path.expanduser(client_key)
-        if client_cert:
-            client_cert = os.path.expanduser(client_cert)
-            context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
-
-        return context
+        self.tls_context = create_ssl_context(self.config)
 
     def refresh_tls_context(self):
         # type: () -> None
-        self.tls_context = self._create_tls_context()
+        self.tls_context = create_ssl_context(self.config)

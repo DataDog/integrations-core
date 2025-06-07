@@ -42,7 +42,7 @@ def test_failing_check(check, aggregator, dd_run_check):
     Testing fargate metadata endpoint error.
     """
     with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=500)
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', return_value=MockResponse('{}', status_code=500)
     ):
         dd_run_check(check)
 
@@ -55,7 +55,7 @@ def test_invalid_response_check(check, aggregator, dd_run_check):
     Testing invalid fargate metadata payload.
     """
     with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=200)
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', return_value=MockResponse('{}', status_code=200)
     ):
         dd_run_check(check)
 
@@ -67,7 +67,7 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
     """
     Testing successful fargate check on Linux.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_linux):
+    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -146,7 +146,7 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
     """
     Testing successful fargate check on Windows.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_windows):
+    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_windows):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -204,7 +204,7 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
     """
     Testing successful fargate check.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_sys_delta):
+    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_sys_delta):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)

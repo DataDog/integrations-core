@@ -126,7 +126,7 @@ def test_extract_index_tags(instance, test_input, expected_tags):
 
 
 def test_unit(dd_run_check, check, instance, mocker, aggregator):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
 
     dd_run_check(check(instance))
 
@@ -142,7 +142,7 @@ def test_unit(dd_run_check, check, instance, mocker, aggregator):
 
 
 def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggregator):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
 
     dd_run_check(check(instance_query))
 

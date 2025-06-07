@@ -74,7 +74,7 @@ class TestCheck:
         # type: (AggregatorStub, Instance) -> None
         check = VoltDBCheck('voltdb', {}, [instance])
 
-        with mock.patch('requests.get', side_effect=requests.RequestException('Something failed')):
+        with mock.patch('requests.Session.get', side_effect=requests.RequestException('Something failed')):
             error = check.run()
 
         assert 'Something failed' in error
@@ -88,7 +88,7 @@ class TestCheck:
 
         resp = requests.Response()
         resp.status_code = 503
-        with mock.patch('requests.get', return_value=resp):
+        with mock.patch('requests.Session.get', return_value=resp):
             error = check.run()
 
         assert '503 Server Error' in error
