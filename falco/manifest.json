@@ -29,6 +29,9 @@
       "auto_install": false,
       "source_type_id": 31431531,
       "source_type_name": "Falco",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "events": {
         "creates_events": false
       },
