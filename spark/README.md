@@ -59,7 +59,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+For containerized environments, see the Autodiscovery Integration Templates, either for [Docker][17] or [Kubernetes][7], for guidance on applying the parameters below.
 
 | Parameter            | Value                                                             |
 | -------------------- | ----------------------------------------------------------------- |
@@ -151,4 +151,5 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/
 [14]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [15]: https://www.datadoghq.com/blog/monitoring-spark
-[16]: https://www.datadoghq.com/blog/spark-emr-monitoring/ 
+[16]: https://www.datadoghq.com/blog/spark-emr-monitoring/
+[17]: https://docs.datadoghq.com/containers/docker/integrations/
