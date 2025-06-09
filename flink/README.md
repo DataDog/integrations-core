@@ -16,7 +16,8 @@ No additional installation is needed on your server.
 
 #### Metric collection
 
-{{% site-region region="gov" %}}
+<!-- partial
+{{< site-region region="gov" >}}
 
 1. Configure the [StatsD reporter][1] in Flink.
 
@@ -35,9 +36,12 @@ No additional installation is needed on your server.
 
 [1]: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/metric_reporters/#statsd
 
-{{% /site-region %}}
+{{< /site-region >}}
+partial -->
 
-{{% site-region region="us1,us3,us5,eu,ap1" %}}
+<!-- partial
+{{< site-region region="us1,us3,us5,eu,ap1" >}}
+
 
 1. Configure the [Datadog HTTP Reporter][1] in Flink.
 
@@ -75,7 +79,8 @@ No additional installation is needed on your server.
 [1]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
 [2]: /organization-settings/api-keys
 
-{{% /site-region %}}
+{{< /site-region >}}
+partial -->
 
 #### Log collection
 
@@ -151,3 +156,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [11]: https://docs.datadoghq.com/help/
 [12]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
+[13]: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/metric_reporters/#statsd
