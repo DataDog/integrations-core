@@ -668,7 +668,7 @@ class MySql(AgentCheck):
                 results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
-        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
+        if self._config.replication_enabled:
             if self.performance_schema_enabled and self._is_group_replication_active(db):
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
@@ -750,8 +750,7 @@ class MySql(AgentCheck):
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
-        replication_channel = self._config.options.get('replication_channel')
-        results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
+        results.update(self._get_replica_stats(db))
         results.update(self._get_replica_status(db, above_560))
         return REPLICA_VARS
 
@@ -1160,26 +1159,28 @@ class MySql(AgentCheck):
             self._is_innodb_engine_enabled_cached = False
         return self._is_innodb_engine_enabled_cached
 
-    def _get_replica_stats(self, db, is_mariadb, replication_channel):
+    def _get_replica_stats(self, db):
         replica_results = defaultdict(dict)
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if is_mariadb and replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
-                cursor.execute(show_replica_status_query(self.version, is_mariadb, replication_channel))
+                if self.is_mariadb and self._config.replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
+                cursor.execute(
+                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
+                )
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)
                 for replica_result in results:
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = replication_channel or replica_result.get('Channel_Name') or 'default'
+                    channel = self._config.replication_channel or replica_result.get('Channel_Name') or 'default'
                     for key, value in replica_result.items():
                         if value is not None:
                             replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
-            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
                 # MariaDB complains when you try to get replica status with a
                 # connection name on the master, without connection name it
                 # responds an empty string as expected.
