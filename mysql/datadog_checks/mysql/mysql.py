@@ -80,6 +80,7 @@ from .queries import (
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
     SQL_SERVER_UUID,
+    show_primary_replication_status_query,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -1161,6 +1162,25 @@ class MySql(AgentCheck):
 
     def _get_replica_stats(self, db):
         replica_results = defaultdict(dict)
+        replica_status = self._get_replica_replication_status(db)
+        for replica_result in replica_status:
+            # MySQL <5.7 does not have Channel_Name.
+            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+            channel = self._config.replication_channel or replica_result.get('Channel_Name') or 'default'
+            for key, value in replica_result.items():
+                if value is not None:
+                    replica_results[key]['channel:{0}'.format(channel)] = value
+        binlog_enabled = self._check_binlog_enabled(db)
+        if binlog_enabled:
+            replica_results.update(binlog_enabled)
+
+        return replica_results
+
+    def _get_replica_replication_status(self, db):
+        results = []
+        if not self._config.replication_enabled:
+            return results
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
                 if self.is_mariadb and self._config.replication_channel:
@@ -1171,13 +1191,6 @@ class MySql(AgentCheck):
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)
-                for replica_result in results:
-                    # MySQL <5.7 does not have Channel_Name.
-                    # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = self._config.replication_channel or replica_result.get('Channel_Name') or 'default'
-                    for key, value in replica_result.items():
-                        if value is not None:
-                            replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
@@ -1189,23 +1202,27 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
+        return results
+
+    def _check_binlog_enabled(self, db):
+        result = {}
+        if not self._config.replication_enabled:
+            return result
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
-                    cursor.execute("SHOW BINARY LOG STATUS;")
-                else:
-                    cursor.execute("SHOW MASTER STATUS;")
+                cursor.execute(show_primary_replication_status_query(self.version, self.is_mariadb))
 
                 binlog_results = cursor.fetchone()
                 if binlog_results:
-                    replica_results.update({'Binlog_enabled': True})
+                    result['Binlog_enabled'] = True
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             if "You are not using binary logging" in str(e):
-                replica_results.update({'Binlog_enabled': False})
+                result['Binlog_enabled'] = False
             else:
                 self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
 
-        return replica_results
+        return result
 
     def _get_replicas_connected_count(self, db, above_560):
         """
