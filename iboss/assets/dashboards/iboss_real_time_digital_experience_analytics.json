@@ -109,7 +109,7 @@
         {
             "id": 1252700507115629,
             "definition": {
-                "title": "Average ApplicationPeer Connection Time Trend",
+                "title": "Average Application Peer Connection Time Trend",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": false,

@@ -1032,15 +1032,16 @@
                                                     "facet": "@network.destination.geoip.continent.name",
                                                     "limit": 1000,
                                                     "sort": {
-                                                        "aggregation": "count",
+                                                        "aggregation": "sum",
                                                         "order": "desc",
-                                                        "metric": "count"
+                                                        "metric": "@totalByteCount"
                                                     },
                                                     "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
-                                                "aggregation": "count"
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
                                             },
                                             "storage": "hot"
                                         }
