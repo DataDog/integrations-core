@@ -9,8 +9,7 @@ PORT = 8765
 
 
 URL = 'http://{}:{}'.format(HOST, PORT)
-INSTANCE_CONFIG = {'openmetrics_endpoint': '{}/metrics'.format(URL)}
-CUSTOM_TAGS = ['optional:tag1']
+INSTANCE = {'openmetrics_endpoint': '{}/metrics'.format(URL)}
 
 METRICS = [
     'falco.container.info',

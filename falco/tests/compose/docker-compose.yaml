@@ -2,9 +2,10 @@ version: '3.8'
 
 services:
   falco:
-    image: falcosecurity/falco:latest
+    image: falcosecurity/falco:0.41.0
+    privileged: true
     container_name: falco
-    privileged: true  # Required for Falco to access the host kernel
+    network_mode: host
     cap_drop:
       - ALL
     cap_add:
@@ -16,7 +17,10 @@ services:
       - /proc:/host/proc:ro
       - /etc:/host/etc:ro
       - /lib/modules:/host/lib/modules:ro
-      - /dev:/dev
+      - /dev:/host/dev:ro
+      - /usr:/host/usr:ro
       - ./falco.yaml:/etc/falco/falco.yaml:ro  # Your custom config with metrics enabled
-    ports:
-      - "8765:8765"  # Expose the default Falco webserver port
+    environment:
+      - FALCO_DRIVER_LOADER=modern-bpf
+      - FALCO_BPF_PROBE_AUTOLOAD=true
+      - FALCO_LOG_LEVEL=debug

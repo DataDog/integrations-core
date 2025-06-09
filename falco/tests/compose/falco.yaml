@@ -1,5 +1,8 @@
 # falco.yaml
 
+engine:
+  kind: modern_ebpf
+
 rules_file:
   - /etc/falco/falco_rules.yaml
 
@@ -13,7 +16,18 @@ stdout_output:
 # Enable Falco metrics
 metrics:
   enabled: true
-  interval: 1s 
+  interval: 1s
+  rules_counters_enabled: true
+  resource_utilization_enabled: true
+  state_counters_enabled: true
+  kernel_event_counters_enabled: true
+  # Enabling `kernel_event_counters_per_cpu_enabled` automatically enables `kernel_event_counters_enabled`
+  kernel_event_counters_per_cpu_enabled: false
+  libbpf_stats_enabled: true
+  plugins_metrics_enabled: true
+  jemalloc_stats_enabled: false
+  convert_memory_to_mb: true
+  include_empty_values: false
 
 plugins:
   - name: container
