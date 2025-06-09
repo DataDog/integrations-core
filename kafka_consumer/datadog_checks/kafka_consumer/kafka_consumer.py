@@ -35,14 +35,13 @@ class KafkaCheck(AgentCheck):
 
     def log_message(self):
         print("logging message")
-        yaml_config = datadog_agent.get_remote_config("test changed")
-#         yaml_config = """
-# configs:
-#   - topic: marvel
-#     partition: 0
-#     offset: 0
-#     n_messages: 1
-# """
+        yaml_config = """
+configs:
+  - topic: marvel
+    partition: 0
+    offset: 0
+    n_messages: 1
+"""
         print("yaml config  ", yaml_config, type(yaml_config))
         parsedConfig = yaml.safe_load(str(yaml_config))
         print("parsed config is ", parsedConfig)
@@ -88,7 +87,7 @@ class KafkaCheck(AgentCheck):
                 #         """
                 try :
                     # decoded_message = self.deserialize_message(message, 'protobuf', proto_schema)
-                    decoded_message = self.deserialize_message(message, 'json')
+                    decoded_message, schema_id = self.deserialize_message_maybe_schema_registry(message, 'json')
                     data = {
                         'timestamp': int(time()),
                         'technology': 'kafka',
@@ -98,6 +97,8 @@ class KafkaCheck(AgentCheck):
                         'offset': str(offset),
                         'message_value': decoded_message,
                     }
+                    if schema_id is not None:
+                        data['schema_id'] = schema_id
                 except Exception as e:
                     data = {
                         'timestamp': int(time()),
@@ -116,6 +117,18 @@ class KafkaCheck(AgentCheck):
         # message = self.client.get_message('marvel', 0, 75)
         # self.send_event("Kafka message", message, ["topic:marvel","partition:0","offset:75"], 'kafka', "", severity="info")
         # print("message is ", message)
+
+    def deserialize_message_maybe_schema_registry(self, message, format='json', schema=None):
+        try:
+            return self.deserialize_message(message, format, schema), None
+        except Exception as e:
+            # maybe schema registry is being used
+            if len(message) < 5 or message[0] != 0x00:
+                raise e
+            # If the message starts with 0x00, schema is probably controlled by a schema registry
+            schema_id = int.from_bytes(message[:4], 'big')
+            message = message[5:]  # Skip the schema ID byte
+            return self.deserialize_message(message, format, schema), schema_id
 
     def deserialize_message(self, message, format='json', schema=None):
         """Deserialize a message from Kafka. Supports JSON and Protobuf formats.
@@ -167,6 +180,8 @@ class KafkaCheck(AgentCheck):
 
             # Get highwater offsets
             print("Getting highwater offsets")
+            self.log.info("instance config is")
+            self.log.info(self.config.instance)
             highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
             print(f"Got highwater offsets: {highwater_offsets}")
             print(f"Cluster ID: {cluster_id}")
