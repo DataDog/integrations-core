@@ -16,7 +16,7 @@ No additional installation is needed on your server.
 
 #### Metric collection
 
-{{% site-region region="us3" %}}
+{{% site-region region="gov" %}}
 
 1. Configure the [StatsD reporter][1] in Flink.
 
