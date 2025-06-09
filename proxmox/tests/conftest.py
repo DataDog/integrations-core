@@ -21,6 +21,11 @@ def instance():
     return INSTANCE
 
 
+@pytest.fixture(scope="session")
+def dd_environment():
+    yield INSTANCE
+
+
 def get_json_value_from_file(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
