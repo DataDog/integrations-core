@@ -19,7 +19,7 @@ No additional installation is needed on your server.
 <!-- partial
 {{< site-region region="gov" >}}
 
-1. Configure the [StatsD reporter][1] in Flink.
+1. Configure the [StatsD reporter][13] in Flink.
 
    In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines:
 
@@ -34,8 +34,6 @@ No additional installation is needed on your server.
 
 3. Restart Flink to start sending your Flink metrics to Datadog.
 
-[1]: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/metric_reporters/#statsd
-
 {{< /site-region >}}
 partial -->
 
@@ -43,7 +41,7 @@ partial -->
 {{< site-region region="us1,us3,us5,eu,ap1" >}}
 
 
-1. Configure the [Datadog HTTP Reporter][1] in Flink.
+1. Configure the [Datadog HTTP Reporter][2] in Flink.
 
      In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][2]:
 
@@ -66,7 +64,7 @@ partial -->
 
      **Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they are submitted as custom metrics.
 
-3. Configure additional [tags][2] in `<FLINK_HOME>/conf/flink-conf.yaml`. Here is an example of custom tags:
+3. Configure additional [tags][14] in `<FLINK_HOME>/conf/flink-conf.yaml`. Here is an example of custom tags:
 
     ```yaml
     metrics.reporter.dghttp.scope.variables.additional: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
@@ -75,9 +73,6 @@ partial -->
      **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
 4. Restart Flink to start sending your Flink metrics to Datadog.
-
-[1]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
-[2]: /organization-settings/api-keys
 
 {{< /site-region >}}
 partial -->
@@ -157,3 +152,4 @@ Need help? Contact [Datadog support][11].
 [11]: https://docs.datadoghq.com/help/
 [12]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
 [13]: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/metric_reporters/#statsd
+[14]: /organization-settings/api-keys
