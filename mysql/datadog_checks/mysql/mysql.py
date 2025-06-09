@@ -79,6 +79,7 @@ from .queries import (
     SQL_REPLICA_WORKER_THREADS,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
+    SQL_SERVER_UUID,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -112,6 +113,7 @@ class MySql(AgentCheck):
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
+        self.server_uuid = None
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -280,7 +282,25 @@ class MySql(AgentCheck):
 
     def set_version(self, db):
         self.version = get_version(db)
+        self.is_mariadb = self.version.flavor == "MariaDB"
         self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
+
+    def set_server_uuid(self, db):
+        # MariaDB does not support server_uuid
+        if self.is_mariadb:
+            return
+        self.server_uuid = self._get_server_uuid(db)
+        if self.server_uuid:
+            self.tag_manager.set_tag("server_uuid", self.server_uuid, replace=True)
+
+    def _get_server_uuid(self, db):
+        with closing(db.cursor(CommenterCursor)) as cursor:
+            try:
+                cursor.execute(SQL_SERVER_UUID)
+                return cursor.fetchone()[0]
+            except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+                self.warning("Error getting server uuid: %s", e)
+                return None
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
@@ -367,11 +387,12 @@ class MySql(AgentCheck):
                 # version collection
                 self.set_version(db)
                 self._send_metadata()
-                self._send_database_instance_metadata()
-
-                self.is_mariadb = self.version.flavor == "MariaDB"
-
                 self._check_database_configuration(db)
+
+                self.set_server_uuid(db)
+
+                # All data collection starts here
+                self._send_database_instance_metadata()
 
                 if self._config.table_rows_stats_enabled:
                     self.check_userstat_enabled(db)
