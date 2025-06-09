@@ -48,11 +48,6 @@
       },
       "events": {
         "creates_events": false
-      },
-      "metrics": {
-        "prefix": "cloudgen_firewall",
-        "check": "",
-        "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {
