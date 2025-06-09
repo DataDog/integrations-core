@@ -122,6 +122,8 @@ class MySql(AgentCheck):
         self._is_aurora = None
         self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
+        self._group_replication_active = None
+        self._binlog_enabled = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -306,6 +308,8 @@ class MySql(AgentCheck):
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
+        self._check_binlog_enabled(db)
+        self._is_group_replication_active(db)
 
     def _check_performance_schema_enabled(self, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -670,7 +674,7 @@ class MySql(AgentCheck):
             metrics.update(TABLE_VARS)
 
         if self._config.replication_enabled:
-            if self.performance_schema_enabled and self._is_group_replication_active(db):
+            if self.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
@@ -835,7 +839,6 @@ class MySql(AgentCheck):
             replica_io_running = any(v.lower().strip() == 'yes' for v in replica_io_running.values())
         if replica_sql_running:
             replica_sql_running = any(v.lower().strip() == 'yes' for v in replica_sql_running.values())
-        binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
         replicas = collect_scalar('Slaves_connected', results)
@@ -845,7 +848,7 @@ class MySql(AgentCheck):
         # If the host act as a source
         source_repl_running_status = AgentCheck.UNKNOWN
         if self._is_source_host(replicas, results):
-            if replicas > 0 and binlog_running:
+            if replicas > 0 and self._binlog_enabled:
                 self.log.debug("Host is master, there are replicas and binlog is running")
                 source_repl_running_status = AgentCheck.OK
             else:
@@ -907,6 +910,11 @@ class MySql(AgentCheck):
         return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _is_group_replication_active(self, db):
+        if not self._config.replication_enabled:
+            self.log.debug("Replication is not enabled, skipping group replication check")
+            self._group_replication_active = False
+            return self._group_replication_active
+
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(SQL_GROUP_REPLICATION_PLUGIN_STATUS)
             r = cursor.fetchone()
@@ -914,9 +922,12 @@ class MySql(AgentCheck):
             # Plugin is installed
             if r is not None and r[0].lower() == 'active':
                 self.log.debug('Group replication plugin is detected and active')
-                return True
-        self.log.debug('Group replication plugin not detected')
-        return False
+                self._group_replication_active = True
+                return self._group_replication_active
+            else:
+                self.log.debug('Group replication plugin not detected')
+                self._group_replication_active = False
+                return self._group_replication_active
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in variables.items():
@@ -1170,10 +1181,6 @@ class MySql(AgentCheck):
             for key, value in replica_result.items():
                 if value is not None:
                     replica_results[key]['channel:{0}'.format(channel)] = value
-        binlog_enabled = self._check_binlog_enabled(db)
-        if binlog_enabled:
-            replica_results.update(binlog_enabled)
-
         return replica_results
 
     def _get_replica_replication_status(self, db):
@@ -1205,9 +1212,9 @@ class MySql(AgentCheck):
         return results
 
     def _check_binlog_enabled(self, db):
-        result = {}
         if not self._config.replication_enabled:
-            return result
+            self._binlog_enabled = False
+            return self._binlog_enabled
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
@@ -1215,14 +1222,15 @@ class MySql(AgentCheck):
 
                 binlog_results = cursor.fetchone()
                 if binlog_results:
-                    result['Binlog_enabled'] = True
+                    self._binlog_enabled = True
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             if "You are not using binary logging" in str(e):
-                result['Binlog_enabled'] = False
+                self._binlog_enabled = False
             else:
                 self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+                self._binlog_enabled = False
 
-        return result
+        return self._binlog_enabled
 
     def _get_replicas_connected_count(self, db, above_560):
         """
