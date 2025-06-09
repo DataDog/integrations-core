@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import ChainMap
 from typing import Any  # noqa: F401
 
 from datadog_checks.base.checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
@@ -13,8 +12,8 @@ class KumaOpenMetricsScraper(OpenMetricsScraper):
     def __init__(self, check, config):
         super().__init__(check, config)
 
-    def consume_metrics_w_target_info(self, runtime_data):
-        metrics = super().consume_metrics_w_target_info(runtime_data)
+    def consume_metrics(self, runtime_data):
+        metrics = super().consume_metrics(runtime_data)
         for metric in metrics:
             yield KumaOpenMetricsScraper.inject_code_class(metric)
 
@@ -42,16 +41,8 @@ class KumaCheck(OpenMetricsBaseCheckV2):
         return {
             "metrics": [METRIC_MAP],
             "rename_labels": RENAME_LABELS_MAP,
-            "target_info": True,
-            "target_info_metric_name": "cp_info",
+            "share_labels": {"cp_info": {"labels": ["instance_id", "version"]}},
         }
-
-    def get_config_with_defaults(self, config):
-        merged = ChainMap(config, self.get_default_config())
-        # Only set histogram_buckets_as_distributions to True if not set by the user (None or missing)
-        if merged.get('histogram_buckets_as_distributions') is None:
-            merged = merged.new_child({'histogram_buckets_as_distributions': True})
-        return merged
 
     def create_scraper(self, config):
         return KumaOpenMetricsScraper(self, self.get_config_with_defaults(config))

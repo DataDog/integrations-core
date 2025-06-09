@@ -38,15 +38,17 @@ def test_code_class_injection_valid_codes(aggregator, code, expected_class, setu
     metric_name = 'kuma.api_server.http_requests_inflight'
     aggregator.assert_metric(metric_name)
 
-    found_metric_for_code = False
-    # Test that the specific code gets correct code_class
-    for metric_point in aggregator.metrics(metric_name):
-        if f'code:{code}' in metric_point.tags:
-            found_metric_for_code = True
-            assert (
-                f'code_class:{expected_class}' in metric_point.tags
-            ), f"Expected code_class:{expected_class} for code:{code}, got tags: {metric_point.tags}"
-    assert found_metric_for_code, f"No metric found for {metric_name} with tag code:{code}"
+    # Test that the specific code gets correct code_class - filter metrics with the code first
+    matching_metrics = [
+        metric_point for metric_point in aggregator.metrics(metric_name) if f'code:{code}' in metric_point.tags
+    ]
+
+    assert matching_metrics, f"No metric found for {metric_name} with tag code:{code}"
+
+    for metric_point in matching_metrics:
+        assert (
+            f'code_class:{expected_class}' in metric_point.tags
+        ), f"Expected code_class:{expected_class} for code:{code}, got tags: {metric_point.tags}"
 
 
 @pytest.mark.parametrize(
@@ -60,38 +62,37 @@ def test_code_class_injection_valid_codes(aggregator, code, expected_class, setu
     ],
 )
 def test_code_class_injection_edge_cases(aggregator, edge_code, setup_check):
-    """Test that edge case HTTP codes do NOT get code_class tags"""
+    """Test cases where code tags should not get code_class tags"""
     metric_name = 'kuma.api_server.http_requests_inflight'
     aggregator.assert_metric(metric_name)
 
-    found_metric_for_edge_code = False
-    # Edge cases should NOT have code_class
-    for metric_point in aggregator.metrics(metric_name):
-        if f'code:{edge_code}' in metric_point.tags:
-            found_metric_for_edge_code = True
-            assert not any(
-                'code_class:' in tag for tag in metric_point.tags
-            ), f"Edge case code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
-    # Assert only if the fixture actually produces a metric with this edge_code
-    # The fixture metrics_code_class.txt has specific edge codes.
-    # We expect these metrics to be present.
-    assert found_metric_for_edge_code, f"No metric found for {metric_name} with tag code:{edge_code}"
+    # These should NOT have code_class - filter metrics with the specific code first
+    matching_metrics = [
+        metric_point for metric_point in aggregator.metrics(metric_name) if f'code:{edge_code}' in metric_point.tags
+    ]
+
+    assert matching_metrics, f"No metric found for {metric_name} with tag code:{edge_code}"
+
+    for metric_point in matching_metrics:
+        assert not any(
+            'code_class:' in tag for tag in metric_point.tags
+        ), f"Code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
 
 
 def test_code_class_injection_no_code_label(aggregator, setup_check):
     """Test that metrics without code label do not get code_class tags"""
     metric_name = 'kuma.api_server.http_requests_inflight'
-    aggregator.assert_metric(metric_name)  # Ensure the metric name exists
+    aggregator.assert_metric(metric_name)
 
-    found_metric_no_code = False
+    found_metric = False
     # No code label should not have code_class
     for metric_point in aggregator.metrics(metric_name):
         if 'handler:/no-code' in metric_point.tags:
-            found_metric_no_code = True
+            found_metric = True
             assert not any(
                 'code_class:' in tag for tag in metric_point.tags
             ), f"Metric with handler:/no-code should not have code_class, got tags: {metric_point.tags}"
-    assert found_metric_no_code, f"No metric found for {metric_name} with tag handler:/no-code"
+    assert found_metric, f"No metric found for {metric_name} with tag handler:/no-code"
 
 
 @pytest.mark.parametrize(

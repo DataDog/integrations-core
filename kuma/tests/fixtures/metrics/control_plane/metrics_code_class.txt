@@ -14,7 +14,7 @@ api_server_http_requests_inflight{code="500",handler="/api/error",method="GET",s
 api_server_http_requests_inflight{code="502",handler="/api/proxy",method="GET",service="",zone="default"} 2
 api_server_http_requests_inflight{code="503",handler="/api/maintenance",method="GET",service="",zone="default"} 1
 
-# Edge cases - these should NOT get code_class tags
+# These should NOT get code_class tags
 api_server_http_requests_inflight{code="20",handler="/edge",method="GET",service="",zone="default"} 1
 api_server_http_requests_inflight{code="2000",handler="/edge",method="GET",service="",zone="default"} 1
 api_server_http_requests_inflight{code="abc",handler="/edge",method="GET",service="",zone="default"} 1

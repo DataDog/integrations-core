@@ -4,7 +4,6 @@
 import os
 import time
 from contextlib import ExitStack
-from copy import deepcopy
 
 import pytest
 import requests
@@ -15,13 +14,6 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
-
-
-@pytest.fixture
-def instance_openmetrics_v2(dd_get_state):
-    openmetrics_v2 = deepcopy(dd_get_state('kuma_instance', default={}))
-    openmetrics_v2['use_openmetrics'] = 'true'
-    return openmetrics_v2
 
 
 def setup_kuma():
@@ -56,14 +48,14 @@ def wait_for_kuma_readiness(api_url, api_port, max_wait=120):
     while time.monotonic() - start_time < max_wait:
         try:
             response = requests.get(config_url, timeout=5)
-            if response.status_code == 200:
+            if response.ok:
                 print(f"Kuma control plane is ready at {config_url} (took {time.monotonic() - start_time} seconds)")
                 return
         except (requests.exceptions.RequestException, requests.exceptions.Timeout):
             pass
 
         print(f"Waiting for Kuma control plane to be ready at {config_url}...")
-        time.sleep(1)
+        time.sleep(0.5)
 
     raise TimeoutError(f"Kuma control plane did not become ready within {max_wait} seconds")
 
@@ -84,17 +76,18 @@ def dd_environment(dd_save_state):
 
             metrics_endpoint = f'http://{kuma_metrics_url}:{kuma_metrics_port}/metrics'
 
-            instance = {
-                'openmetrics_endpoint': metrics_endpoint,
-            }
+            env_instance = {'openmetrics_endpoint': metrics_endpoint}
 
-            dd_save_state("kuma_instance", instance)
+            dd_save_state("kuma_instance", env_instance)
 
-            yield instance
+            yield env_instance
 
 
-@pytest.fixture
-def instance():
-    return {
-        'openmetrics_endpoint': 'http://localhost:5680/metrics',
-    }
+@pytest.fixture(scope='session')
+def instance(dd_get_state):
+    return dd_get_state(
+        'kuma_instance',
+        default={
+            'openmetrics_endpoint': 'http://localhost:5680/metrics',
+        },
+    )

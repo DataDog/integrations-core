@@ -58,9 +58,6 @@ class OpenMetricsScraper:
         # Parse the configuration
         self.endpoint = config['openmetrics_endpoint']
         self.target_info = config.get('target_info', False)
-        self.target_info_metric_name = config.get('target_info_metric_name', 'target_info')
-        if not isinstance(self.target_info_metric_name, str):
-            raise ConfigurationError('Setting `target_info_metric_name` must be a string')
 
         self.metric_transformer = MetricTransformer(self.check, config)
         self.label_aggregator = LabelAggregator(self.check, config)
@@ -311,7 +308,7 @@ class OpenMetricsScraper:
                 continue
 
             # Process target_info metrics
-            if metric.name == self.target_info_metric_name:
+            if metric.name == 'target_info':
                 self.label_aggregator.process_target_info(metric)
 
             yield metric

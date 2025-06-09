@@ -1,3 +1,8 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+
 HISTOGRAM_METRICS = [
     'api_server.http_request_duration_seconds',
     'api_server.http_response_size_bytes',
