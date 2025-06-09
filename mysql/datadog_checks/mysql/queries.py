@@ -52,6 +52,9 @@ SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
 
+SQL_SERVER_UUID = """\
+SELECT @@server_uuid"""
+
 SQL_SERVER_ID_AWS_AURORA = """\
 SHOW VARIABLES LIKE 'aurora_server_id'"""
 
