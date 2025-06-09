@@ -41,7 +41,7 @@
       },
       "metrics": {
         "prefix": "plaid.",
-        "check": "",
+        "check": "plaid.account.iso_currency_code",
         "metadata_path": "metadata.csv"
       }
     },
