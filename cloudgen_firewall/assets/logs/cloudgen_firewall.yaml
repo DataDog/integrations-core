@@ -6,7 +6,7 @@ metric_id: cloudgen-firewall
 # If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - description: ""
+  - description: "identifies the internal unit of log service"
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
@@ -14,7 +14,7 @@ facets:
     path: component
     source: log
     type: string
-  - description: ""
+  - description: "Ip address of the host that generated the log"
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
@@ -22,7 +22,7 @@ facets:
     path: ip
     source: log
     type: string
-  - description: ""
+  - description: "Process name that generated the log"
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
@@ -30,7 +30,7 @@ facets:
     path: process
     source: log
     type: string
-  - description: ""
+  - description: "Process ID of the process that generated the log"
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
@@ -38,7 +38,7 @@ facets:
     path: pid
     source: log
     type: string
-  - description: ""
+  - description: "Session status of the log such as Open, Closed, Blocked, etc."
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
