@@ -123,12 +123,10 @@ def test_code_class_injection_unit(code, expected_class):
     modified_metric = KumaOpenMetricsScraper.inject_code_class(metric)
     sample = modified_metric.samples[0]
 
-    if expected_class:
-        assert (
-            sample.labels.get('code_class') == expected_class
-        ), f"Expected code_class {expected_class} for code {code}"
-    else:
-        assert 'code_class' not in sample.labels, f"Expected no code_class for code {code}"
+    assert (
+        sample.labels.get('code_class') == expected_class, 
+        f"Expected code_class {expected_class} for code {code}"
+    )
 
 
 def test_code_class_preserves_labels_and_idempotent():
