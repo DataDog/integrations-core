@@ -1,4 +1,4 @@
-id: cloudgen_firewall
+id: cloudgen-firewall
 tests:
   - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
       sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
