@@ -751,7 +751,7 @@ class MySql(AgentCheck):
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
         results.update(self._get_replica_stats(db))
-        results.update(self._get_replica_status(db, above_560))
+        results.update(self._get_replicas_connected_count(db, above_560))
         return REPLICA_VARS
 
     def _collect_group_replica_metrics(self, db, results):
@@ -1207,9 +1207,9 @@ class MySql(AgentCheck):
 
         return replica_results
 
-    def _get_replica_status(self, db, above_560):
+    def _get_replicas_connected_count(self, db, above_560):
         """
-        Retrieve the replicas statuses using:
+        Retrieve the count of connected replicas using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
         2. The `information_schema.processlist` table. Blocking
         """
