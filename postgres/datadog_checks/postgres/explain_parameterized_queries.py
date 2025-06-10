@@ -7,7 +7,6 @@ import re
 
 import psycopg2
 
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.cursor import CommenterDictCursor
 
@@ -73,7 +72,7 @@ class ExplainParameterizedQueries:
         self._explain_function = explain_function
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def explain_statement(self, dbname, statement, obfuscated_statement):
+    def explain_statement(self, dbname, statement, obfuscated_statement, query_signature):
         if self._check.version < V12:
             # if pg version < 12, skip explaining parameterized queries because
             # plan_cache_mode is not supported
@@ -85,7 +84,6 @@ class ExplainParameterizedQueries:
             return None, DBExplainError.parameterized_query, '{}'.format(type(e))
         self._set_plan_cache_mode(dbname)
 
-        query_signature = compute_sql_signature(obfuscated_statement)
         try:
             self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
         except psycopg2.errors.IndeterminateDatatype as e:

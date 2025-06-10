@@ -50,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .benchmarks/
-.junit/
+junit/
 .docker/
 
 # Translations
@@ -125,3 +125,6 @@ benchmark_*.svg
 
 ## Direnv
 .envrc
+
+## Local overrides for ddev
+.ddev.toml
