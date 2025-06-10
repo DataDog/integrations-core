@@ -19,7 +19,7 @@ from .test_metrics import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_kuma_check(dd_run_check, instance, mock_http_response):
     mock_http_response(
         file_path=Path(__file__).parent.absolute() / "fixtures" / "metrics" / "control_plane" / "metrics.txt"
@@ -29,33 +29,36 @@ def setup_kuma_check(dd_run_check, instance, mock_http_response):
     dd_run_check(check)
     dd_run_check(check)  # Run check again to ensure that shared tags are set.
 
+
 EXPECTED_SHARED_TAGS = ['instance_id:kuma-control-plane-749c9bbc86-67tqs-7184', 'kuma_version:2.10.1']
 
 
-@pytest.mark.parametrize('suffix', ['.count', '.sum', '.bucket'])
-@pytest.mark.parametrize('histogram', HISTOGRAM_METRICS)
 @pytest.mark.usefixtures("aggregator", "setup_kuma_check")
-def test_histogram_metrics(aggregator, histogram, suffix):
-    aggregator.assert_metric_has_tags('kuma.' + histogram + suffix, EXPECTED_SHARED_TAGS)
-
-
-@pytest.mark.parametrize('suffix', ['.count', '.sum'])
-@pytest.mark.parametrize('summary', SUMMARY_METRICS)
-@pytest.mark.usefixtures("aggregator", "setup_kuma_check")
-def test_summary_metrics(aggregator, summary, suffix):
-    aggregator.assert_metric_has_tags('kuma.' + summary + suffix, EXPECTED_SHARED_TAGS)
-
-
-@pytest.mark.parametrize('gauge', GAUGE_METRICS)
-@pytest.mark.usefixtures("aggregator", "setup_kuma_check")
-def test_gauge_metrics(aggregator, gauge):
-    aggregator.assert_metric_has_tags('kuma.' + gauge, EXPECTED_SHARED_TAGS)
-
-
-@pytest.mark.parametrize('counter', COUNTER_METRICS)
-@pytest.mark.usefixtures("aggregator", "setup_kuma_check")
-def test_counter_metrics(aggregator, counter):
-    aggregator.assert_metric_has_tags('kuma.' + counter + '.count', EXPECTED_SHARED_TAGS)
+@pytest.mark.parametrize(
+    'metrics, suffixes',
+    [
+        pytest.param(HISTOGRAM_METRICS, ['.count', '.sum', '.bucket'], id='histograms'),
+        pytest.param(SUMMARY_METRICS, ['.count', '.sum'], id='summaries'),
+        pytest.param(GAUGE_METRICS, [], id='gauges'),
+        pytest.param(COUNTER_METRICS, ['.count'], id='counters'),
+    ],
+)
+def test_histogram_metrics(aggregator, metrics, suffixes):
+    # Collect all the assertion failures and raise them at the end, so we can see all the missing metrics and tags at once.
+    errors = []
+    for metric_name in metrics:
+        for suffix in suffixes:
+            try:
+                aggregator.assert_metric_has_tags('kuma.' + metric_name + suffix, EXPECTED_SHARED_TAGS)
+            except AssertionError as e:
+                error_message = (
+                    f"--> Assertion failed for: {aggregator.assert_metric_has_tags.__name__}\n"
+                    f"    Args: {metric_name + suffix}\n"
+                    f"    Error: {e}"
+                )
+                errors.append(error_message)
+    if errors:
+        raise AssertionError("Found metric tag mismatches:\n" + "\n".join(errors))
 
 
 @pytest.mark.usefixtures("aggregator", "setup_kuma_check")
