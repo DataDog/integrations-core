@@ -196,7 +196,7 @@ def test_replication_check_status(
 ):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
-    mysql_check._binlog_enabled = True # Set binlog enabled to True for the test
+    mysql_check._binlog_enabled = True  # Set binlog enabled to True for the test
     mocked_results = {
         'Slaves_connected': slaves_connected,
     }

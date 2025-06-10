@@ -866,9 +866,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
         expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
         if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
             expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
-        aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=expected_tags
-        )
+        aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
 
 
 def _expected_dbm_instance_tags(dbm_instance, check):

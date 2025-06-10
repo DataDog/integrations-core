@@ -354,7 +354,9 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     expected_tags = tags.metrics_tags_with_resource(mysql_check)
     if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
         expected_tags += ("cluster_uuid:{}".format(mysql_check.cluster_uuid), "replication_role:replica")
-        assert mysql_check.server_uuid != mysql_check.cluster_uuid, "Server UUID and cluster UUID should not be the same for replica"
+        assert (
+            mysql_check.server_uuid != mysql_check.cluster_uuid
+        ), "Server UUID and cluster UUID should not be the same for replica"
 
     # Test metrics
     for mname in testable_metrics:
