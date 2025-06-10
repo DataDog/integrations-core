@@ -6,15 +6,15 @@ metric_id: barracuda-secure-edge
 # If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - description: ""
+  - description: "Action performed by the Barracuda SecureEdge device."
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: action
-    path: action
+    path: secure_edge_action
     source: log
     type: string
-  - description: ""
+  - description: "Destination IP address of the event."
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -22,15 +22,15 @@ facets:
     path: dest_ip
     source: log
     type: string
-  - description: ""
+  - description: "Event ID associated with the log entry."
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: event_id
-    path: event_id
+    path: secure_edge_event_id
     source: log
     type: string
-  - description: ""
+  - description: "Event name providing context about the log entry."
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -38,23 +38,23 @@ facets:
     path: eventname
     source: log
     type: string
-  - description: ""
+  - description: "level of the log entry, indicating its severity or importance."
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: level
-    path: level
+    path: secure_edge_level
     source: log
     type: string
-  - description: ""
+  - description: "module of the Barracuda SecureEdge device that generated the log entry."
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: module
-    path: module
+    path: secure_edge_module
     source: log
     type: string
-  - description: ""
+  - description: "productname of the Barracuda SecureEdge device that generated the log entry."
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -62,23 +62,23 @@ facets:
     path: productname
     source: log
     type: string
-  - description: ""
+  - description: "Protocol used in the event, such as TCP or UDP."
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: protocol
-    path: protocol
+    path: secure_edge_protocol
     source: log
     type: string
-  - description: ""
+  - description: "Rule that was applied to the event, providing context on how event was handled."
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: rule
-    path: rule
+    path: secure_edge_rule
     source: log
     type: string
-  - description: ""
+  - description: "source IP address of the event, indicating where the event originated."
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -262,7 +262,7 @@ pipeline:
 
           autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
     - type: attribute-remapper
-      name: " Map timestamp to syslog.timestamp"
+      name: Map `timestamp` to `syslog.timestamp`
       enabled: true
       sources:
         - timestamp
@@ -272,7 +272,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: status-remapper
-      name: Status Remapper from Level to Status
+      name: Define `level` as the official status of the log
       enabled: true
       sources:
         - level
@@ -465,12 +465,12 @@ pipeline:
         matchRules: autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
           ZZ"):timestamp}\s+%{word:level}\s+%{word:log_source}:\s+(%{word:event_type})?\s+%{data:message}
     - type: status-remapper
-      name: Remapper level to status
+      name: Define `level` as the official status of the log
       enabled: true
       sources:
         - level
     - type: date-remapper
-      name: "Define `timestamp` as the official date of the log "
+      name: Define `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
