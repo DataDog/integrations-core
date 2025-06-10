@@ -115,6 +115,7 @@ class MySql(AgentCheck):
         self.version = None
         self.is_mariadb = None
         self.server_uuid = None
+        self.cluster_uuid = None
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -384,17 +385,18 @@ class MySql(AgentCheck):
             with self._connect() as db:
                 self._conn = db
 
-                # Update tag set with relevant information
-                if self._get_is_aurora(db):
-                    aurora_tags = self._get_runtime_aurora_tags(db)
-                    self._update_runtime_aurora_tags(aurora_tags)
-
                 # version collection
                 self.set_version(db)
                 self._send_metadata()
                 self._check_database_configuration(db)
 
                 self.set_server_uuid(db)
+                self.set_cluster_tags(db)
+
+                # Update tag set with relevant information
+                if self._get_is_aurora(db):
+                    aurora_tags = self._get_runtime_aurora_tags(db)
+                    self._update_runtime_aurora_tags(aurora_tags)
 
                 # All data collection starts here
                 self._send_database_instance_metadata()
@@ -1174,19 +1176,19 @@ class MySql(AgentCheck):
     def _get_replica_stats(self, db):
         replica_results = defaultdict(dict)
         replica_status = self._get_replica_replication_status(db)
-        for replica_result in replica_status:
+        if replica_status:
             # MySQL <5.7 does not have Channel_Name.
             # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-            channel = self._config.replication_channel or replica_result.get('Channel_Name') or 'default'
-            for key, value in replica_result.items():
+            channel = self._config.replication_channel or replica_status.get('Channel_Name') or 'default'
+            for key, value in replica_status.items():
                 if value is not None:
                     replica_results[key]['channel:{0}'.format(channel)] = value
         return replica_results
 
     def _get_replica_replication_status(self, db):
-        results = []
+        result = {}
         if not self._config.replication_enabled:
-            return results
+            return result
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
@@ -1196,8 +1198,8 @@ class MySql(AgentCheck):
                     show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
                 )
 
-                results = cursor.fetchall()
-                self.log.debug("Getting replication status: %s", results)
+                result = cursor.fetchone()
+                self.log.debug("Getting replication status: %s", result)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
@@ -1209,7 +1211,7 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
-        return results
+        return result
 
     def _check_binlog_enabled(self, db):
         if not self._config.replication_enabled:
@@ -1460,3 +1462,26 @@ class MySql(AgentCheck):
             }
             self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
+    def set_cluster_tags(self, db):
+        if not self._config.replication_enabled:
+            self.log.debug("Replication is not enabled, skipping cluster tags")
+            return
+        if self.is_mariadb:
+            self.log.debug("MariaDB cluster tags are not currently supported")
+            return
+        if self._group_replication_active:
+            self.log.debug("Group replication cluster tags are not currently supported")
+            return
+
+        replica_status = self._get_replica_replication_status(db)
+        if replica_status:
+            self.cluster_uuid = replica_status.get('Source_UUID', replica_status.get('Master_UUID'))
+            if self.cluster_uuid:
+                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
+                self.tag_manager.set_tag('replication_role', "replica", replace=True)
+        else:
+            if self._binlog_enabled:
+                self.cluster_uuid = self.server_uuid
+                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
+                self.tag_manager.set_tag('replication_role', "primary", replace=True)
