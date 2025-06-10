@@ -44,11 +44,14 @@ def test_code_class_injection_valid_codes(aggregator, code, expected_class):
 
     assert matching_metrics, f"No metric found for {metric_name} with tag code:{code}"
 
+    errors = []
     for metric_point in matching_metrics:
-        assert (
-            f'code_class:{expected_class}' in metric_point.tags
-        ), f"Expected code_class:{expected_class} for code:{code}, got tags: {metric_point.tags}"
-
+        expected_tag = f'code_class:{expected_class}'
+        if expected_tag not in metric_point.tags:
+            errors.append(
+                f"Expected '{expected_tag}' for code:{code}. Got tags: {metric_point.tags}"
+            )
+    assert not errors, "Found metric tag mismatches:\n" + "\n".join(errors)
 
 @pytest.mark.parametrize(
     'edge_code',
@@ -73,10 +76,13 @@ def test_code_class_injection_edge_cases(aggregator, edge_code):
 
     assert matching_metrics, f"No metric found for {metric_name} with tag code:{edge_code}"
 
+    errors = []
     for metric_point in matching_metrics:
-        assert not any(
-            'code_class:' in tag for tag in metric_point.tags
-        ), f"Code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
+        if any('code_class:' in tag for tag in metric_point.tags):
+            errors.append(
+                f"Code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
+            )
+    assert not errors, "Found metrics with unexpected code_class tags:\n" + "\n".join(errors)
 
 
 @pytest.mark.usefixtures("aggregator", "setup_check")
@@ -86,14 +92,17 @@ def test_code_class_injection_no_code_label(aggregator):
     aggregator.assert_metric(metric_name)
 
     found_metric = False
+    errors = []
     # No code label should not have code_class
     for metric_point in aggregator.metrics(metric_name):
         if 'handler:/no-code' in metric_point.tags:
             found_metric = True
-            assert not any(
-                'code_class:' in tag for tag in metric_point.tags
-            ), f"Metric with handler:/no-code should not have code_class, got tags: {metric_point.tags}"
+            if any('code_class:' in tag for tag in metric_point.tags):
+                errors.append(
+                    f"Metric with handler:/no-code should not have code_class, got tags: {metric_point.tags}"
+                )
     assert found_metric, f"No metric found for {metric_name} with tag handler:/no-code"
+    assert not errors, "Found metrics with unexpected code_class tags:\n" + "\n".join(errors)
 
 
 @pytest.mark.parametrize(
@@ -139,8 +148,12 @@ def test_code_class_preserves_labels_and_idempotent():
     sample = modified.samples[0]
 
     # All original labels preserved
-    for k, v in original_labels.items():
-        assert sample.labels[k] == v
+    errors = [
+        f"Expected label {k}={v}, got {k}={sample.labels.get(k)}"
+        for k, v in original_labels.items()
+        if sample.labels[k] != v
+    ]
+    assert not errors, "Found label preservation errors:\n" + "\n".join(errors)
     assert sample.labels['code_class'] == '2XX'
     assert sample.value == 42.0
 
