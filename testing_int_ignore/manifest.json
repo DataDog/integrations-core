@@ -1,0 +1,35 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "b53ac38a-5ec9-4ad7-bc86-58be53f3c555",
+    "app_id": "testing-int-ignore",
+    "display_on_public_website": false,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Testing Int Ignore Description",
+        "title": "Testing Int Ignore",
+        "media": [],
+        "classifier_tags": [
+            "Offering::Integration",
+            "Submitted Data Type::Logs"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 45990851,
+            "source_type_name": "Testing Int Ignore",
+            "events": {
+                "creates_events": false
+            }
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    }
+}
