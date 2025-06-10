@@ -14,7 +14,10 @@ METRIC_MAP = {
     # TYPE falcosecurity_falco_evt_source_info gauge
     'falcosecurity_falco_evt_source_info': 'evt.source',
     # TYPE falcosecurity_falco_host_boot_timestamp_nanoseconds gauge
-    'falcosecurity_falco_host_boot_timestamp_nanoseconds': 'host.boot.timestamp',
+    'falcosecurity_falco_host_boot_timestamp_nanoseconds': {
+        'name': 'host.boot.timestamp',
+        'type': 'time_elapsed',
+    },
     # TYPE falcosecurity_falco_host_cpu_usage_ratio gauge
     'falcosecurity_falco_host_cpu_usage_ratio': 'host.cpu.usage.ratio',
     # TYPE falcosecurity_falco_host_memory_used_bytes gauge
