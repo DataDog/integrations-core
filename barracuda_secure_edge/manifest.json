@@ -48,11 +48,6 @@
       },
       "events": {
         "creates_events": false
-      },
-      "metrics": {
-        "prefix": "barracuda_secure_edge",
-        "check": "",
-        "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {
