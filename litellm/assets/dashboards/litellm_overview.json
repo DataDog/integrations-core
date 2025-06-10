@@ -1,1 +1,25 @@
-Please build an out-of-the-box dashboard for your integration following our best practices here: https://datadoghq.dev/integrations-core/guidelines/dashboards/#best-practices
+{
+    "title": "LiteLLM Overview",
+    "description": "[[suggested_dashboards]]",
+    "widgets": [
+        {
+            "id": 1752950349695609,
+            "definition": {
+                "title": "New group",
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 1
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
