@@ -21,8 +21,6 @@ def setup_check(dd_run_check, instance, mock_http_response):
     )
     check = KumaCheck('kuma', {}, [instance])
     dd_run_check(check)
-    return check
-
 
 @pytest.mark.parametrize(
     'code,expected_class',
@@ -33,7 +31,8 @@ def setup_check(dd_run_check, instance, mock_http_response):
         pytest.param('500', '5XX', id='5xx-internal'),
     ],
 )
-def test_code_class_injection_valid_codes(aggregator, code, expected_class, setup_check):
+@pytest.mark.usefixtures("aggregator", "setup_check")
+def test_code_class_injection_valid_codes(aggregator, code, expected_class):
     """Test that valid HTTP status codes get correct code_class tags"""
     metric_name = 'kuma.api_server.http_requests_inflight'
     aggregator.assert_metric(metric_name)
@@ -61,7 +60,8 @@ def test_code_class_injection_valid_codes(aggregator, code, expected_class, setu
         pytest.param('', id='edge-empty'),
     ],
 )
-def test_code_class_injection_edge_cases(aggregator, edge_code, setup_check):
+@pytest.mark.usefixtures("aggregator", "setup_check")
+def test_code_class_injection_edge_cases(aggregator, edge_code):
     """Test cases where code tags should not get code_class tags"""
     metric_name = 'kuma.api_server.http_requests_inflight'
     aggregator.assert_metric(metric_name)
@@ -79,7 +79,8 @@ def test_code_class_injection_edge_cases(aggregator, edge_code, setup_check):
         ), f"Code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
 
 
-def test_code_class_injection_no_code_label(aggregator, setup_check):
+@pytest.mark.usefixtures("aggregator", "setup_check")
+def test_code_class_injection_no_code_label(aggregator):
     """Test that metrics without code label do not get code_class tags"""
     metric_name = 'kuma.api_server.http_requests_inflight'
     aggregator.assert_metric(metric_name)
