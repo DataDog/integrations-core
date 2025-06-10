@@ -45,7 +45,7 @@ EXPECTED_SHARED_TAGS = ['instance_id:kuma-control-plane-749c9bbc86-67tqs-7184', 
 )
 def test_histogram_metrics(aggregator, metrics, suffixes):
     # Collect all the assertion failures and raise them at the end,
-    # so we can see all the missing metrics and tags at once.
+    # so that we can see all the missing metrics and tags at once.
     errors = []
     for metric_name in metrics:
         for suffix in suffixes:
