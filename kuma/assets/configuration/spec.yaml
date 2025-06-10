@@ -9,6 +9,6 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.value.example: http://localhost:5680/metrics
+        openmetrics_endpoint.value.example: http://%%host%%:5680/metrics
         openmetrics_endpoint.description: |
           Set this to the endpoint that Kuma exposes.
