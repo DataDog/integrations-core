@@ -10,7 +10,7 @@ METRIC_MAP = {
     # TYPE falcosecurity_falco_cpu_usage_ratio gauge
     'falcosecurity_falco_cpu_usage_ratio': 'cpu.usage.ratio',
     # TYPE falcosecurity_falco_duration_seconds_total counter
-    'falcosecurity_falco_duration_seconds_total': 'duration.seconds',
+    'falcosecurity_falco_duration_seconds': 'duration.seconds',
     # TYPE falcosecurity_falco_evt_source_info gauge
     'falcosecurity_falco_evt_source_info': 'evt.source',
     # TYPE falcosecurity_falco_host_boot_timestamp_nanoseconds gauge
@@ -50,9 +50,9 @@ METRIC_MAP = {
     # TYPE falcosecurity_falco_memory_vsz_bytes gauge
     'falcosecurity_falco_memory_vsz_bytes': 'memory.vsz',
     # TYPE falcosecurity_falco_outputs_queue_num_drops_total counter
-    'falcosecurity_falco_outputs_queue_num_drops_total': 'outputs.queue.num.drops',
+    'falcosecurity_falco_outputs_queue_num_drops': 'outputs.queue.num.drops',
     # TYPE falcosecurity_falco_rules_matches_total counter
-    'falcosecurity_falco_rules_matches_total': 'rules.matches',
+    'falcosecurity_falco_rules_matches': 'rules.matches',
     # TYPE falcosecurity_falco_sha256_config_files_info gauge
     'falcosecurity_falco_sha256_config_files_info': 'sha256.config.files',
     # TYPE falcosecurity_falco_sha256_rules_files_info gauge
@@ -64,49 +64,49 @@ METRIC_MAP = {
     # TYPE falcosecurity_scap_engine_name_info gauge
     'falcosecurity_scap_engine_name_info': 'scap.engine.name',
     # TYPE falcosecurity_scap_n_added_fds_total counter
-    'falcosecurity_scap_n_added_fds_total': 'scap.n.added.fds',
+    'falcosecurity_scap_n_added_fds': 'scap.n.added.fds',
     # TYPE falcosecurity_scap_n_added_threads_total counter
-    'falcosecurity_scap_n_added_threads_total': 'scap.n.added.threads',
+    'falcosecurity_scap_n_added_threads': 'scap.n.added.threads',
     # TYPE falcosecurity_scap_n_cached_fd_lookups_total counter
-    'falcosecurity_scap_n_cached_fd_lookups_total': 'scap.n.cached.fd.lookups',
+    'falcosecurity_scap_n_cached_fd_lookups': 'scap.n.cached.fd.lookups',
     # TYPE falcosecurity_scap_n_cached_thread_lookups_total counter
-    'falcosecurity_scap_n_cached_thread_lookups_total': 'scap.n.cached.thread.lookups',
+    'falcosecurity_scap_n_cached_thread_lookups': 'scap.n.cached.thread.lookups',
     # TYPE falcosecurity_scap_n_containers_total gauge
     'falcosecurity_scap_n_containers_total': 'scap.n.containers',
     # TYPE falcosecurity_scap_n_drops_buffer_total counter
-    'falcosecurity_scap_n_drops_buffer_total': 'scap.n.drops.buffer',
+    'falcosecurity_scap_n_drops_buffer': 'scap.n.drops.buffer',
     # TYPE falcosecurity_scap_n_drops_full_threadtable_total counter
-    'falcosecurity_scap_n_drops_full_threadtable_total': 'scap.n.drops.full.threadtable',
+    'falcosecurity_scap_n_drops_full_threadtable': 'scap.n.drops.full.threadtable',
     # TYPE falcosecurity_scap_n_drops_scratch_map_total counter
-    'falcosecurity_scap_n_drops_scratch_map_total': 'scap.n.drops.scratch.map',
+    'falcosecurity_scap_n_drops_scratch_map': 'scap.n.drops.scratch.map',
     # TYPE falcosecurity_scap_n_drops_total counter
-    'falcosecurity_scap_n_drops_total': 'scap.n.drops',
+    'falcosecurity_scap_n_drops': 'scap.n.drops',
     # TYPE falcosecurity_scap_n_evts_total counter
-    'falcosecurity_scap_n_evts_total': 'scap.n.evts',
+    'falcosecurity_scap_n_evts': 'scap.n.evts',
     # TYPE falcosecurity_scap_n_failed_fd_lookups_total counter
-    'falcosecurity_scap_n_failed_fd_lookups_total': 'scap.n.failed.fd.lookups',
+    'falcosecurity_scap_n_failed_fd_lookups': 'scap.n.failed.fd.lookups',
     # TYPE falcosecurity_scap_n_failed_thread_lookups_total counter
-    'falcosecurity_scap_n_failed_thread_lookups_total': 'scap.n.failed.thread.lookups',
+    'falcosecurity_scap_n_failed_thread_lookups': 'scap.n.failed.thread.lookups',
     # TYPE falcosecurity_scap_n_fds_total gauge
     'falcosecurity_scap_n_fds_total': 'scap.n.fds',
     # TYPE falcosecurity_scap_n_missing_container_images_total gauge
     'falcosecurity_scap_n_missing_container_images_total': 'scap.n.missing.container.images',
     # TYPE falcosecurity_scap_n_noncached_fd_lookups_total counter
-    'falcosecurity_scap_n_noncached_fd_lookups_total': 'scap.n.noncached.fd.lookups',
+    'falcosecurity_scap_n_noncached_fd_lookups': 'scap.n.noncached.fd.lookups',
     # TYPE falcosecurity_scap_n_noncached_thread_lookups_total counter
-    'falcosecurity_scap_n_noncached_thread_lookups_total': 'scap.n.noncached.thread.lookups',
+    'falcosecurity_scap_n_noncached_thread_lookups': 'scap.n.noncached.thread.lookups',
     # TYPE falcosecurity_scap_n_removed_fds_total counter
-    'falcosecurity_scap_n_removed_fds_total': 'scap.n.removed.fds',
+    'falcosecurity_scap_n_removed_fds': 'scap.n.removed.fds',
     # TYPE falcosecurity_scap_n_removed_threads_total counter
-    'falcosecurity_scap_n_removed_threads_total': 'scap.n.removed.threads',
+    'falcosecurity_scap_n_removed_threads': 'scap.n.removed.threads',
     # TYPE falcosecurity_scap_n_retrieve_evts_drops_total counter
-    'falcosecurity_scap_n_retrieve_evts_drops_total': 'scap.n.retrieve.evts.drops',
+    'falcosecurity_scap_n_retrieve_evts_drops': 'scap.n.retrieve.evts.drops',
     # TYPE falcosecurity_scap_n_retrieved_evts_total counter
-    'falcosecurity_scap_n_retrieved_evts_total': 'scap.n.retrieved.evts',
+    'falcosecurity_scap_n_retrieved_evts': 'scap.n.retrieved.evts',
     # TYPE falcosecurity_scap_n_store_evts_drops_total counter
-    'falcosecurity_scap_n_store_evts_drops_total': 'scap.n.store.evts.drops',
+    'falcosecurity_scap_n_store_evts_drops': 'scap.n.store.evts.drops',
     # TYPE falcosecurity_scap_n_stored_evts_total counter
-    'falcosecurity_scap_n_stored_evts_total': 'scap.n.stored.evts',
+    'falcosecurity_scap_n_stored_evts': 'scap.n.stored.evts',
     # TYPE falcosecurity_scap_n_threads_total gauge
     'falcosecurity_scap_n_threads_total': 'scap.n.threads',
 }
