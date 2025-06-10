@@ -18,7 +18,7 @@ No additional installation is needed on your server.
 
 <!-- partial
 {{< site-region region="gov" >}}
-1. Configure the [StatsD reporter][13] in Flink.
+1. Configure the [StatsD reporter][14] in Flink.
    In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines:
    ```yaml
    metrics.reporter.stsd.factory.class: org.apache.flink.metrics.statsd.StatsDReporterFactory
