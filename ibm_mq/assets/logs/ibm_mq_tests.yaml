@@ -75,51 +75,50 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1100687549000
- -
-  sample: |-
-    06/10/2025 08:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
-                    Host(A.B.C) Installation(Installation1)
-                    VRMF(9.3.0.16) QMgr(QUEUEMGR)
-                    Time(2025-06-10T06:08:56.764Z)
-                    CommentInsert1(COMMENT)
+ - sample: |-
+     06/10/2025 08:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
+                     Host(A.B.C) Installation(Installation1)
+                     VRMF(9.3.0.16) QMgr(QUEUEMGR)
+                     Time(2025-06-10T06:08:56.764Z)
+                     CommentInsert1(COMMENT)
 
-    AMQ9299I: Channel 'CHANNEL' has started.
+     AMQ9299I: Channel 'CHANNEL' has started.
 
-    EXPLANATION:
-    The channel 'CHANNEL' has finished starting.
-    ACTION:
-    No action required.
-    ----- amqrccca.c : 998 --------------------------------------------------------
-  result:
-    custom:
-      error:
-        message: "The channel 'CHANNE:' has finished starting."
-      level: "Error"
-      process: 91319.1
-      system:
-        action: "No action required."
-        app: "runmqch1"
-        host: "A.B.C"
-        installation: "Installation1"
-        user: "mqm"
-      timestamp: 1749535736000
-      vrmf: "9.3.0.16"
-    message: |-
-      06/10/2025 08:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
-                      Host(A.B.C) Installation(Installation1)
-                      VRMF(9.3.0.16) QMgr(QUEUEMGR)
-                      Time(2025-06-10T06:08:56.764Z)
-                      CommentInsert1(COMMENT)
+     EXPLANATION:
+     The channel 'CHANNEL' has finished starting.
+     ACTION:
+     No action required.
+     ----- amqrccca.c : 998 --------------------------------------------------------
+   result:
+     custom:
+       error:
+         message: "The channel 'CHANNE:' has finished starting."
+       level: "Error"
+       process: 91319.1
+       system:
+         action: "No action required."
+         app: "runmqch1"
+         host: "A.B.C"
+         installation: "Installation1"
+         user: "mqm"
+       timestamp: 1749535736000
+       vrmf: "9.3.0.16"
+     message: |-
+       06/10/2025 08:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
+                       Host(A.B.C) Installation(Installation1)
+                       VRMF(9.3.0.16) QMgr(QUEUEMGR)
+                       Time(2025-06-10T06:08:56.764Z)
+                       CommentInsert1(COMMENT)
 
-      AMQ9299I: Channel 'CHANNEL' has started.
+       AMQ9299I: Channel 'CHANNEL' has started.
 
-      EXPLANATION:
-      The channel 'CHANNEL' has finished starting.
-      ACTION:
-      No action required.
-      ----- amqrccca.c : 998 --------------------------------------------------------
-    status: "error"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1749535736000
+       EXPLANATION:
+       The channel 'CHANNEL' has finished starting.
+       ACTION:
+       No action required.
+       ----- amqrccca.c : 998 --------------------------------------------------------
+     status: "error"
+     tags:
+      - "source:LOGS_SOURCE"
+     timestamp: 1749535736000
 
