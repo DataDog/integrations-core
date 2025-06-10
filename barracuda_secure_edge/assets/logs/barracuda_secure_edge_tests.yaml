@@ -1,23 +1,110 @@
-id: barracuda_secure_edge
+id: "barracuda_secure_edge"
 tests:
-  - sample: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login
-      localhost_hapair_daemon from 127.0.0.1 : Allowed."
-    result: null
-  - sample: "2025 04 02 10:15:51 +00:00 Notice   127.0.0.1:48945 login succeeded:
-      localhost_CloudGen-WAN Valid password and valid challenge"
-    result: null
-  - sample: "2025 04 02 12:15:19 +00:00 Info     Allow:
-      LOUT|TCP|p1|169.254.128.2|62498|00:0c:29:ca:a2:5a|169.254.128.1|1809|orac\
-      le-vp1||PASSALL|0|169.254.128.2|169.254.128.1|0|1|0|0|0|0||||||"
-    result: null
-  - sample: "2025 03 31 13:14:18 +00:00 Info     xdhcp1.0[5145]: starting up dhcpcd
-      connection for provider with linkname xdhcp1.0 "
-    result: null
-  - sample: "2025 04 01 06:05:29 +00:00 Info     sshd: Connection from 10.10.16.1
-      port 55827 on 10.10.16.116 port 22"
-    result: null
-
-# The `result` field should be left blank to start. Once you submit your log asset files with
-# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
-# run your raw logs against your pipeline and return the result. If the result output in the
-# validation is accurate, take the output and add it to the `result` field in your test YAML file.
+ -
+  sample: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from 127.0.0.1 : Allowed."
+  result:
+    custom:
+      action: "LOGIN ATTEMPT"
+      id: 5405.0
+      level: "Info"
+      message: "LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from 127.0.0.1 : Allowed."
+      module: "control"
+      syslog:
+        timestamp: 1743421577000
+      timestamp: 1743421577000
+      type: "control"
+      type_id: 5405.0
+    message: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from 127.0.0.1 : Allowed."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421577000
+ -
+  sample: "2025 04 02 10:15:51 +00:00 Notice   127.0.0.1:48945 login succeeded: localhost_CloudGen-WAN Valid password and valid challenge"
+  result:
+    custom:
+      level: "Notice"
+      message: "127.0.0.1:48945 login succeeded: localhost_CloudGen-WAN Valid password and valid challenge"
+      module: "48945 login succeeded"
+      source_ip: "127.0.0.1"
+      source_port: 48945.0
+      syslog:
+        timestamp: 1743588951000
+      timestamp: 1743588951000
+      type: "127.0.0.1"
+    message: "2025 04 02 10:15:51 +00:00 Notice   127.0.0.1:48945 login succeeded: localhost_CloudGen-WAN Valid password and valid challenge"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743588951000
+ -
+  sample: "2025 04 02 12:15:19 +00:00 Info     Allow: LOUT|TCP|p1|169.254.128.2|62498|00:0c:29:ca:a2:5a|169.254.128.1|1809|oracle-vp1||PASSALL|0|169.254.128.2|169.254.128.1|0|1|0|0|0|0||||||"
+  result:
+    custom:
+      action: "Allow"
+      count: 1.0
+      dest_ip: "169.254.128.1"
+      dest_port: 1809.0
+      dest_service: "oracle-vp1"
+      dst_nat: "169.254.128.1"
+      duration: 0.0
+      info: 0.0
+      level: "Info"
+      meesage: "LOUT|TCP|p1|169.254.128.2|62498|00:0c:29:ca:a2:5a|169.254.128.1|1809|oracle-vp1||PASSALL|0|169.254.128.2|169.254.128.1|0|1|0|0|0|0||||||"
+      message: "Allow: LOUT|TCP|p1|169.254.128.2|62498|00:0c:29:ca:a2:5a|169.254.128.1|1809|oracle-vp1||PASSALL|0|169.254.128.2|169.254.128.1|0|1|0|0|0|0||||||"
+      module: "Allow"
+      protocol: "TCP"
+      received_bytes: 0.0
+      received_packets: 0.0
+      rule: "PASSALL"
+      sent_bytes: 0.0
+      sent_packets: 0.0
+      src_if: "p1"
+      src_ip: "169.254.128.2"
+      src_mac: "00:0c:29:ca:a2:5a"
+      src_nat: "169.254.128.2"
+      src_port: 62498.0
+      syslog:
+        timestamp: 1743596119000
+      timestamp: 1743596119000
+      type: "Allow"
+    message: "2025 04 02 12:15:19 +00:00 Info     Allow: LOUT|TCP|p1|169.254.128.2|62498|00:0c:29:ca:a2:5a|169.254.128.1|1809|oracle-vp1||PASSALL|0|169.254.128.2|169.254.128.1|0|1|0|0|0|0||||||"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743596119000
+ -
+  sample: "2025 03 31 13:14:18 +00:00 Info     xdhcp1.0[5145]: starting up dhcpcd connection for provider with linkname xdhcp1.0 "
+  result:
+    custom:
+      level: "Info"
+      message: "xdhcp1.0[5145]: starting up dhcpcd connection for provider with linkname xdhcp1.0"
+      syslog:
+        timestamp: 1743426858000
+      timestamp: 1743426858000
+      type: "xdhcp1.0[5145]"
+    message: "2025 03 31 13:14:18 +00:00 Info     xdhcp1.0[5145]: starting up dhcpcd connection for provider with linkname xdhcp1.0 "
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743426858000
+ -
+  sample: "2025 04 01 06:05:29 +00:00 Info     sshd: Connection from 10.10.16.1 port 55827 on 10.10.16.116 port 22"
+  result:
+    custom:
+      action: "sshd"
+      event_type: "Connection"
+      level: "Info"
+      log_source: "sshd"
+      meesage: "Connection from 10.10.16.1 port 55827 on 10.10.16.116 port 22"
+      message: "from 10.10.16.1 port 55827 on 10.10.16.116 port 22"
+      module: "sshd"
+      syslog:
+        timestamp: 1743487529000
+      timestamp: 1743487529000
+      type: "sshd"
+    message: "2025 04 01 06:05:29 +00:00 Info     sshd: Connection from 10.10.16.1 port 55827 on 10.10.16.116 port 22"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743487529000
