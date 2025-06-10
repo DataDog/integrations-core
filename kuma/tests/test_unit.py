@@ -59,7 +59,7 @@ def test_histogram_metrics(aggregator, metrics, suffixes):
                 )
                 errors.append(error_message)
     if errors:
-        raise AssertionError("Found metric tag mismatches:\n" + "\n".join(errors))
+        raise AssertionError("Found metric or tag mismatches:\n" + "\n".join(errors))
 
 
 @pytest.mark.usefixtures("aggregator", "setup_kuma_check")
