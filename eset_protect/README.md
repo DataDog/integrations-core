@@ -15,7 +15,7 @@ After it collects the logs, ESET Protect channels them into Datadog for analysis
 
 ### Installation
 
-TTo install the ESET Protect integration, run the following Agent installation command. Afterward, follow the steps in the [configuration](#configuration) section to set up log collection. For more information, see the [Integration Management][5] documentation.
+To install the ESET Protect integration, run the following Agent installation command. Afterward, follow the steps in the [configuration](#configuration) section to set up log collection. For more information, see the [Integration Management][5] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.68.0.
 
@@ -117,9 +117,10 @@ Make sure that traffic is bypassed from the configured port if the firewall is e
 
 ### Port already in use
 
-If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
+If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for a PORT-NO value of 514:
 
-On systems using Syslog, if the Agent listens for ESET Protect logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
+On systems using Syslog, if the Agent listens for ESET Protect logs on port 514, the following error can appear in the Agent logs:
+`Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
 By default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
 
