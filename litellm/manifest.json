@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "This integration allows for real-time collection of LiteLLM metrics—such as request performance, usage statistics, error rates, and latency—using Prometheus for enhanced observability and monitoring.",
+    "description": "This integration allows for real-time collection of LiteLLM metrics for enhanced observability and monitoring.",
     "title": "LiteLLM",
     "media": [],
     "classifier_tags": [
@@ -20,7 +20,6 @@
       "Category::Metrics",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
