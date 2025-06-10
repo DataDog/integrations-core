@@ -136,10 +136,8 @@ def test_code_class_injection_unit(code, expected_class):
     assert sample.labels.get('code_class') == expected_class, f"Expected code_class {expected_class} for code {code}"
 
 
-def test_code_class_preserves_labels_and_idempotent():
-    """Test that code_class injection preserves labels and is idempotent"""
-
-    # Test preserving labels
+def test_code_class_preserves_labels():
+    """Test that code_class injection preserves labels"""
     metric = CounterMetricFamily('test_metric', 'Test')
     original_labels = {'code': '200', 'method': 'GET', 'handler': '/api', 'custom': 'value'}
     metric.samples = [Sample('test_metric', original_labels.copy(), 42.0, None)]
@@ -147,7 +145,6 @@ def test_code_class_preserves_labels_and_idempotent():
     modified = KumaOpenMetricsScraper.inject_code_class(metric)
     sample = modified.samples[0]
 
-    # All original labels preserved
     errors = [
         f"Expected label {k}={v}, got {k}={sample.labels.get(k)}"
         for k, v in original_labels.items()
@@ -157,8 +154,12 @@ def test_code_class_preserves_labels_and_idempotent():
     assert sample.labels['code_class'] == '2XX'
     assert sample.value == 42.0
 
-    # Test idempotency
-    modified_twice = KumaOpenMetricsScraper.inject_code_class(modified)
-    sample = modified_twice.samples[0]
-    assert sample.labels['code_class'] == '2XX'  # should remain 2XX
-    assert sum(1 for k in sample.labels if k == 'code_class') == 1
+
+def test_code_class_idempotency():
+    """Test that code_class injection is idempotent"""
+    metric = CounterMetricFamily('test_metric', 'Test')
+    metric.samples = [Sample('test_metric', {'code': '200'}, 1.0, None)]
+
+    first = KumaOpenMetricsScraper.inject_code_class(metric)
+    second = KumaOpenMetricsScraper.inject_code_class(first)
+    assert first.samples[0].labels == second.samples[0].labels
