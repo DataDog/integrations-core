@@ -37,7 +37,7 @@ EXPECTED_SHARED_TAGS = ['instance_id:kuma-control-plane-749c9bbc86-67tqs-7184', 
 def test_histogram_metrics(aggregator, histogram):
     aggregator.assert_metric_has_tags('kuma.' + histogram + '.count', EXPECTED_SHARED_TAGS)
     aggregator.assert_metric_has_tags('kuma.' + histogram + '.sum', EXPECTED_SHARED_TAGS)
-    aggregator.assert_metric_has_tags('kuma.' + histogram + '.count', EXPECTED_SHARED_TAGS)
+    aggregator.assert_metric_has_tags('kuma.' + histogram + '.bucket', EXPECTED_SHARED_TAGS)
 
 
 @pytest.mark.parametrize('summary', SUMMARY_METRICS)
