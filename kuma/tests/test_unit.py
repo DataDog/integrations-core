@@ -32,15 +32,15 @@ def setup_kuma_check(dd_run_check, instance, mock_http_response):
 EXPECTED_SHARED_TAGS = ['instance_id:kuma-control-plane-749c9bbc86-67tqs-7184', 'kuma_version:2.10.1']
 
 
-@pytest.mark.parametrize('histogram', HISTOGRAM_METRICS)
 @pytest.mark.parametrize('suffix', ['.count', '.sum', '.bucket'])
+@pytest.mark.parametrize('histogram', HISTOGRAM_METRICS)
 @pytest.mark.usefixtures("aggregator", "setup_kuma_check")
 def test_histogram_metrics(aggregator, histogram, suffix):
     aggregator.assert_metric_has_tags('kuma.' + histogram + suffix, EXPECTED_SHARED_TAGS)
 
 
-@pytest.mark.parametrize('summary', SUMMARY_METRICS)
 @pytest.mark.parametrize('suffix', ['.count', '.sum'])
+@pytest.mark.parametrize('summary', SUMMARY_METRICS)
 @pytest.mark.usefixtures("aggregator", "setup_kuma_check")
 def test_summary_metrics(aggregator, summary, suffix):
     aggregator.assert_metric_has_tags('kuma.' + summary + suffix, EXPECTED_SHARED_TAGS)
