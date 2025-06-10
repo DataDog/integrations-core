@@ -21,10 +21,12 @@ class KumaOpenMetricsScraper(OpenMetricsScraper):
     def inject_code_class(metric):
         # Patch all samples to add the code_class tag if 'code' is a 3-digit HTTP code
         for sample in metric.samples:
-            code = sample.labels.get('code')
-            if code and isinstance(code, str) and len(code) == 3 and code.isdigit():
-                code_class = f"{code[0]}XX"
-                sample.labels['code_class'] = code_class
+            if (
+                (code := sample.labels.get('code'))
+                and isinstance(code, str)
+                and len(code) == 3 and code.isdigit()
+            ):
+                sample.labels['code_class'] = f"{code[0]}XX"
         return metric
 
 
