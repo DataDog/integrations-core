@@ -19,7 +19,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: IPs
-    path: ip
+    path: ips
     source: log
     type: string
   - description: "Process name that generated the log"
@@ -27,7 +27,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process
-    path: process
+    path: cloudgen_process
     source: log
     type: string
   - description: "Process ID of the process that generated the log"
@@ -35,7 +35,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process ID
-    path: pid
+    path: cloudgen_pid
     source: log
     type: string
   - description: "Session status of the log such as Open, Closed, Blocked, etc."
@@ -43,7 +43,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: session_status
-    path: session_status
+    path: cloudgen_session_status
     source: log
     type: string
 pipeline:
