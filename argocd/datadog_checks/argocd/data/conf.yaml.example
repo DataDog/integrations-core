@@ -71,6 +71,11 @@ instances:
     #
     # notifications_controller_endpoint: http://argocd-notifications-controller:9001/metrics
 
+    ## @param commit_server_endpoint - string - optional
+    ## Endpoint exposing Commit Server's Prometheus metrics.
+    #
+    # commit_server_endpoint: http://argocd-commit-server:8087/metrics
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.

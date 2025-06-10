@@ -317,7 +317,7 @@ class Network(AgentCheck):
         return net_proc_base_location
 
     def _get_metrics(self):
-        return {val: 0 for val in self.cx_state_gauge.values()}
+        return dict.fromkeys(self.cx_state_gauge.values(), 0)
 
     def parse_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
