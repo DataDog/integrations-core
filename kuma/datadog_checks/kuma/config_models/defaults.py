@@ -8,6 +8,14 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_skip_proxy():
+    return False
+
+
+def shared_timeout():
+    return 10
+
+
 def instance_allow_redirects():
     return True
 
