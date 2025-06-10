@@ -76,7 +76,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1100687549000
  - sample: |-
-     06/10/2025 08:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
+     06/10/2025 06:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
                      Host(A.B.C) Installation(Installation1)
                      VRMF(9.3.0.16) QMgr(QUEUEMGR)
                      Time(2025-06-10T06:08:56.764Z)
@@ -104,7 +104,7 @@ tests:
        timestamp: 1749535736000
        vrmf: "9.3.0.16"
      message: |-
-       06/10/2025 08:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
+       06/10/2025 06:08:56 AM - Process(91319.1) User(mqm) Program(runmqchl)
                        Host(A.B.C) Installation(Installation1)
                        VRMF(9.3.0.16) QMgr(QUEUEMGR)
                        Time(2025-06-10T06:08:56.764Z)
