@@ -22,6 +22,7 @@ def setup_check(dd_run_check, instance, mock_http_response):
     check = KumaCheck('kuma', {}, [instance])
     dd_run_check(check)
 
+
 @pytest.mark.parametrize(
     'code,expected_class',
     [
@@ -48,10 +49,9 @@ def test_code_class_injection_valid_codes(aggregator, code, expected_class):
     for metric_point in matching_metrics:
         expected_tag = f'code_class:{expected_class}'
         if expected_tag not in metric_point.tags:
-            errors.append(
-                f"Expected '{expected_tag}' for code:{code}. Got tags: {metric_point.tags}"
-            )
+            errors.append(f"Expected '{expected_tag}' for code:{code}. Got tags: {metric_point.tags}")
     assert not errors, "Found metric tag mismatches:\n" + "\n".join(errors)
+
 
 @pytest.mark.parametrize(
     'edge_code',
@@ -79,9 +79,7 @@ def test_code_class_injection_edge_cases(aggregator, edge_code):
     errors = []
     for metric_point in matching_metrics:
         if any('code_class:' in tag for tag in metric_point.tags):
-            errors.append(
-                f"Code:{edge_code} should not have code_class, got tags: {metric_point.tags}"
-            )
+            errors.append(f"Code:{edge_code} should not have code_class, got tags: {metric_point.tags}")
     assert not errors, "Found metrics with unexpected code_class tags:\n" + "\n".join(errors)
 
 
@@ -98,9 +96,7 @@ def test_code_class_injection_no_code_label(aggregator):
         if 'handler:/no-code' in metric_point.tags:
             found_metric = True
             if any('code_class:' in tag for tag in metric_point.tags):
-                errors.append(
-                    f"Metric with handler:/no-code should not have code_class, got tags: {metric_point.tags}"
-                )
+                errors.append(f"Metric with handler:/no-code should not have code_class, got tags: {metric_point.tags}")
     assert found_metric, f"No metric found for {metric_name} with tag handler:/no-code"
     assert not errors, "Found metrics with unexpected code_class tags:\n" + "\n".join(errors)
 

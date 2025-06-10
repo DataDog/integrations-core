@@ -13,7 +13,6 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 
-
 def setup_kuma():
     kuma_version = os.environ.get("KUMA_VERSION", "2.10.1")
     run_command(["kubectl", "create", "namespace", "kuma-system"])
