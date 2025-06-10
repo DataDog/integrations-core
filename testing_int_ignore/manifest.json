@@ -13,7 +13,8 @@
         "media": [],
         "classifier_tags": [
             "Offering::Integration",
-            "Submitted Data Type::Logs"
+            "Submitted Data Type::Logs",
+            "Category::Log Collection"
         ]
     },
     "assets": {
