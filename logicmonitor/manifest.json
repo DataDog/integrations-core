@@ -1,0 +1,43 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b0a4ae7b-fb1b-4cb0-aeb5-e7eacd0a523d",
+  "app_id": "logicmonitor",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "LogicMonitor is a Cloud-Based Infrastructure Monitoring Platform.",
+    "title": "LogicMonitor",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Category::Event Management"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 628,
+      "source_type_name": "LogicMonitor",
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "logicmonitor.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
