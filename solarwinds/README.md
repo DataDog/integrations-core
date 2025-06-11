@@ -24,7 +24,7 @@ To create a new trigger action in SolarWinds:
         e. Time of Day: Leave as is
         f. Execution Settings: Leave as is
 
-7. Click “Add Action”
+7. Click **Add Action**.
 8. Click the “Reset Actions” step and then repeat steps 4 - 7, using the Reset Action template instead of the Trigger Action template
 9. Click “Next“
 10. Click “Submit“ on the Summary page
