@@ -706,7 +706,7 @@ def test_pg_control(aggregator, integration_check, pg_instance):
 
 
 def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
-    """"
+    """ "
     Makes sure that we don't get the control metrics if the wal_level is set to logical
     """
 
@@ -718,7 +718,6 @@ def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.control.checkpoint_delay', count=0)
     aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=0)
     aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=0)
-
 
     check = integration_check(pg_instance)
     check._get_wal_level = mock.MagicMock(return_value="logical")
