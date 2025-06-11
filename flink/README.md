@@ -35,7 +35,7 @@ No additional installation is needed on your server.
 partial -->
 
 <!-- partial
-{{< site-region region="us1,us3,us5,eu,ap1" >}}
+{{< site-region region="us,us3,us5,eu,ap1" >}}
 
 1. Configure the [Datadog HTTP Reporter][2] in Flink.
 
@@ -69,6 +69,9 @@ partial -->
      **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
 4. Restart Flink to start sending your Flink metrics to Datadog.
+
+[2]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
+[5]: /organization-settings/api-keys
 
 {{< /site-region >}}
 partial -->
