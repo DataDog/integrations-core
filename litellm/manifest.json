@@ -15,8 +15,6 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::AI",
-      "Category::Machine Learning & LLM",
       "Category::Metrics",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
