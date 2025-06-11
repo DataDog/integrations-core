@@ -3,24 +3,14 @@ metric_id: box
 backend_only: false
 facets:
   - groups:
-      - User
-    name: User Name
-    path: usr.name
-    source: log
-  - groups:
-      - User
-    name: User ID
-    path: usr.id
-    source: log
-  - groups:
-      - User
-    name: User Email
-    path: usr.email
-    source: log
-  - groups:
       - Event
     name: Event Name
     path: evt.name
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
     source: log
   - groups:
       - Geoip
@@ -57,6 +47,21 @@ facets:
     name: Client IP
     path: network.client.ip
     source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
 pipeline:
   type: pipeline
   name: Box
@@ -70,7 +75,7 @@ pipeline:
       sources:
         - created_at
     - type: service-remapper
-      name: "Define `service` as the official service of the log "
+      name: Define `service` as the official service of the log
       enabled: true
       sources:
         - service
