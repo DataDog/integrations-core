@@ -35,11 +35,11 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.12.9
+ENV PYTHON3_VERSION=3.12.10
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="45313e4c5f0e8acdec9580161d565cf5fea578e3eabf25df7cc6355bf4afa1ee" \
+ SHA256="15d9c623abfd2165fe816ea1fb385d6ed8cf3c664661ab357f1782e3036a6dac" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON3_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
@@ -158,8 +158,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.12.1" \
- SHA256="7b40ea64947e0b440716a4d7f0b7aa56230a5341c8377d7b609649d4aea8dbcf" \
+ VERSION="8.14.0" \
+ SHA256="5eba3ec2d898919a4b34cc89ace0068d9d09420b8643f265aebac59f8d126203" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

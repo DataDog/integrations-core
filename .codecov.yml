@@ -386,6 +386,10 @@ coverage:
         target: 75
         flags:
         - kubernetes_state
+      Kuma:
+        target: 75
+        flags:
+        - kuma
       Kyoto_Tycoon:
         target: 75
         flags:
@@ -1271,6 +1275,11 @@ flags:
     paths:
     - kubevirt_handler/datadog_checks/kubevirt_handler
     - kubevirt_handler/tests
+  kuma:
+    carryforward: true
+    paths:
+    - kuma/datadog_checks/kuma
+    - kuma/tests
   kyototycoon:
     carryforward: true
     paths:
