@@ -322,11 +322,11 @@ class PostgreSql(AgentCheck):
         if self.wal_level == 'logical':
             self.log.debug("wal_level is logical, adding control checkpoint metrics")
 
-            if self.version < V10:
-                queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
+            if self.version >= V10:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT)
 
             else:
-                queries.append(QUERY_PG_CONTROL_CHECKPOINT)
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
 
         else:
             self.log.debug("wal_level is not logical, skipping control checkpoint metrics")
