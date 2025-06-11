@@ -25,15 +25,15 @@ To create a new trigger action in SolarWinds:
         f. Execution Settings: Leave as is
 
 7. Click **Add Action**.
-8. Click the “Reset Actions” step and then repeat steps 4 - 7, using the Reset Action template instead of the Trigger Action template
-9. Click “Next“
-10. Click “Submit“ on the Summary page
+8. Click the “Reset Actions” step and then repeat steps 4 - 7, using the Reset Action template instead of the Trigger Action template.
+9. Click **Next**.
+10. Click **Submit** on the Summary page.
 
 ### Assign actions to alerts
 
-1. From the Alert Manager view select all the alerts you wish to send to Datadog, then navigate to Assign Action > Assign Trigger Action
-2. Select the Send Alert to Datadog - Trigger action and click Assign
-3. Repeat for Assign Action > Assign Reset Action using the Send Alert to Datadog - Reset action
+1. From the Alert Manager view, select all the alerts you wish to send to Datadog, then navigate to **Assign Action > Assign Trigger Action**.
+2. Select the "Send Alert to Datadog - Trigger" action and click **Assign**.
+3. Repeat for **Assign Action > Assign Reset Action** using the "Send Alert to Datadog - Reset" action.
 
 ### Trigger action body to post
 ``` 
@@ -98,4 +98,6 @@ The SolarWinds integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact Datadog support
+Need help? Contact [Datadog support][1].
+
+[1]: https://docs.datadoghq.com/help
