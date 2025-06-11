@@ -22,6 +22,7 @@ understand trends and issues.
 3. (Create a Client Role with sufficient permission) Click **Client Roles** tab.
 4. Client the **+ Add client role** button.
    1. Check the following boxes to allow minimal read access:
+   ```
       Projects
            Project Assets
                List Projects
@@ -41,6 +42,7 @@ understand trends and issues.
             Environment Management
                 Tags
                     List tags
+   ```
    2. Edit the role name and click **Save changes**.
 7. Client the **API Clients** tab.
 8. Click **+ Add API Client**, and then enter the required information:
