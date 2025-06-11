@@ -79,6 +79,8 @@ from .queries import (
     SQL_REPLICA_WORKER_THREADS,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
+    SQL_SERVER_UUID,
+    show_primary_replication_status_query,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -112,6 +114,8 @@ class MySql(AgentCheck):
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
+        self.server_uuid = None
+        self.cluster_uuid = None
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -119,6 +123,8 @@ class MySql(AgentCheck):
         self._is_aurora = None
         self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
+        self._group_replication_active = None
+        self._binlog_enabled = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -280,11 +286,31 @@ class MySql(AgentCheck):
 
     def set_version(self, db):
         self.version = get_version(db)
+        self.is_mariadb = self.version.flavor == "MariaDB"
         self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
+
+    def set_server_uuid(self, db):
+        # MariaDB does not support server_uuid
+        if self.is_mariadb:
+            return
+        self.server_uuid = self._get_server_uuid(db)
+        if self.server_uuid:
+            self.tag_manager.set_tag("server_uuid", self.server_uuid, replace=True)
+
+    def _get_server_uuid(self, db):
+        with closing(db.cursor(CommenterCursor)) as cursor:
+            try:
+                cursor.execute(SQL_SERVER_UUID)
+                return cursor.fetchone()[0]
+            except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+                self.warning("Error getting server uuid: %s", e)
+                return None
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
+        self._check_binlog_enabled(db)
+        self._is_group_replication_active(db)
 
     def _check_performance_schema_enabled(self, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -359,19 +385,21 @@ class MySql(AgentCheck):
             with self._connect() as db:
                 self._conn = db
 
+                # version collection
+                self.set_version(db)
+                self._send_metadata()
+                self._check_database_configuration(db)
+
+                self.set_server_uuid(db)
+                self.set_cluster_tags(db)
+
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
                     self._update_runtime_aurora_tags(aurora_tags)
 
-                # version collection
-                self.set_version(db)
-                self._send_metadata()
+                # All data collection starts here
                 self._send_database_instance_metadata()
-
-                self.is_mariadb = self.version.flavor == "MariaDB"
-
-                self._check_database_configuration(db)
 
                 if self._config.table_rows_stats_enabled:
                     self.check_userstat_enabled(db)
@@ -647,8 +675,8 @@ class MySql(AgentCheck):
                 results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
-        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
-            if self.performance_schema_enabled and self._is_group_replication_active(db):
+        if self._config.replication_enabled:
+            if self.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
@@ -729,9 +757,8 @@ class MySql(AgentCheck):
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
-        replication_channel = self._config.options.get('replication_channel')
-        results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
-        results.update(self._get_replica_status(db, above_560))
+        results.update(self._get_replica_stats(db))
+        results.update(self._get_replicas_connected_count(db, above_560))
         return REPLICA_VARS
 
     def _collect_group_replica_metrics(self, db, results):
@@ -814,7 +841,6 @@ class MySql(AgentCheck):
             replica_io_running = any(v.lower().strip() == 'yes' for v in replica_io_running.values())
         if replica_sql_running:
             replica_sql_running = any(v.lower().strip() == 'yes' for v in replica_sql_running.values())
-        binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
         replicas = collect_scalar('Slaves_connected', results)
@@ -824,7 +850,7 @@ class MySql(AgentCheck):
         # If the host act as a source
         source_repl_running_status = AgentCheck.UNKNOWN
         if self._is_source_host(replicas, results):
-            if replicas > 0 and binlog_running:
+            if replicas > 0 and self._binlog_enabled:
                 self.log.debug("Host is master, there are replicas and binlog is running")
                 source_repl_running_status = AgentCheck.OK
             else:
@@ -886,6 +912,11 @@ class MySql(AgentCheck):
         return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _is_group_replication_active(self, db):
+        if not self._config.replication_enabled:
+            self.log.debug("Replication is not enabled, skipping group replication check")
+            self._group_replication_active = False
+            return self._group_replication_active
+
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(SQL_GROUP_REPLICATION_PLUGIN_STATUS)
             r = cursor.fetchone()
@@ -893,9 +924,12 @@ class MySql(AgentCheck):
             # Plugin is installed
             if r is not None and r[0].lower() == 'active':
                 self.log.debug('Group replication plugin is detected and active')
-                return True
-        self.log.debug('Group replication plugin not detected')
-        return False
+                self._group_replication_active = True
+                return self._group_replication_active
+            else:
+                self.log.debug('Group replication plugin not detected')
+                self._group_replication_active = False
+                return self._group_replication_active
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in variables.items():
@@ -1139,26 +1173,36 @@ class MySql(AgentCheck):
             self._is_innodb_engine_enabled_cached = False
         return self._is_innodb_engine_enabled_cached
 
-    def _get_replica_stats(self, db, is_mariadb, replication_channel):
+    def _get_replica_stats(self, db):
         replica_results = defaultdict(dict)
+        replica_status = self._get_replica_replication_status(db)
+        if replica_status:
+            # MySQL <5.7 does not have Channel_Name.
+            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+            channel = self._config.replication_channel or replica_status.get('Channel_Name') or 'default'
+            for key, value in replica_status.items():
+                if value is not None:
+                    replica_results[key]['channel:{0}'.format(channel)] = value
+        return replica_results
+
+    def _get_replica_replication_status(self, db):
+        result = {}
+        if not self._config.replication_enabled:
+            return result
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if is_mariadb and replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
-                cursor.execute(show_replica_status_query(self.version, is_mariadb, replication_channel))
+                if self.is_mariadb and self._config.replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
+                cursor.execute(
+                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
+                )
 
-                results = cursor.fetchall()
-                self.log.debug("Getting replication status: %s", results)
-                for replica_result in results:
-                    # MySQL <5.7 does not have Channel_Name.
-                    # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = replication_channel or replica_result.get('Channel_Name') or 'default'
-                    for key, value in replica_result.items():
-                        if value is not None:
-                            replica_results[key]['channel:{0}'.format(channel)] = value
+                result = cursor.fetchone()
+                self.log.debug("Getting replication status: %s", result)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
-            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
                 # MariaDB complains when you try to get replica status with a
                 # connection name on the master, without connection name it
                 # responds an empty string as expected.
@@ -1167,27 +1211,32 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
+        return result
+
+    def _check_binlog_enabled(self, db):
+        if not self._config.replication_enabled:
+            self._binlog_enabled = False
+            return self._binlog_enabled
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
-                    cursor.execute("SHOW BINARY LOG STATUS;")
-                else:
-                    cursor.execute("SHOW MASTER STATUS;")
+                cursor.execute(show_primary_replication_status_query(self.version, self.is_mariadb))
 
                 binlog_results = cursor.fetchone()
                 if binlog_results:
-                    replica_results.update({'Binlog_enabled': True})
+                    self._binlog_enabled = True
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             if "You are not using binary logging" in str(e):
-                replica_results.update({'Binlog_enabled': False})
+                self._binlog_enabled = False
             else:
                 self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+                self._binlog_enabled = False
 
-        return replica_results
+        return self._binlog_enabled
 
-    def _get_replica_status(self, db, above_560):
+    def _get_replicas_connected_count(self, db, above_560):
         """
-        Retrieve the replicas statuses using:
+        Retrieve the count of connected replicas using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
         2. The `information_schema.processlist` table. Blocking
         """
@@ -1413,3 +1462,26 @@ class MySql(AgentCheck):
             }
             self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
+    def set_cluster_tags(self, db):
+        if not self._config.replication_enabled:
+            self.log.debug("Replication is not enabled, skipping cluster tags")
+            return
+        if self.is_mariadb:
+            self.log.debug("MariaDB cluster tags are not currently supported")
+            return
+        if self._group_replication_active:
+            self.log.debug("Group replication cluster tags are not currently supported")
+            return
+
+        replica_status = self._get_replica_replication_status(db)
+        if replica_status:
+            self.cluster_uuid = replica_status.get('Source_UUID', replica_status.get('Master_UUID'))
+            if self.cluster_uuid:
+                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
+                self.tag_manager.set_tag('replication_role', "replica", replace=True)
+        else:
+            if self._binlog_enabled:
+                self.cluster_uuid = self.server_uuid
+                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
+                self.tag_manager.set_tag('replication_role', "primary", replace=True)
