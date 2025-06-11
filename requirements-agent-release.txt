@@ -28,7 +28,7 @@ datadog-celery==1.0.0
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==5.3.0
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.11.0
+datadog-checks-base==37.13.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==7.2.0
 datadog-cilium==5.2.0
@@ -158,7 +158,7 @@ datadog-pgbouncer==8.1.2; sys_platform != 'win32'
 datadog-php-fpm==5.1.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.13.0
+datadog-postgres==22.13.1
 datadog-powerdns-recursor==4.1.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
@@ -186,7 +186,7 @@ datadog-sonarqube==5.2.1
 datadog-sonatype-nexus==1.1.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.0.0
 datadog-spark==6.4.0
-datadog-sqlserver==22.5.0
+datadog-sqlserver==22.6.0
 datadog-squid==4.1.0
 datadog-ssh-check==4.2.1
 datadog-statsd==3.0.0

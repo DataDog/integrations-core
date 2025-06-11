@@ -17,7 +17,7 @@
 * Fixes incorrect replica counts when querying from performance_schema.threads ([#20172](https://github.com/DataDog/integrations-core/pull/20172))
 * Check for performance_schema enabled automatically instead of requiring `replication_non_blocking_status` config option when retrieving replica counts ([#20198](https://github.com/DataDog/integrations-core/pull/20198))
 
-## 15.4.0 / 2025-05-14
+## 15.4.0 / 2025-05-14 / Agent 7.66.0
 
 ***Added***:
 
