@@ -1024,9 +1024,6 @@ class MySql(AgentCheck):
         # Extract tag keys from aurora_tags to identify which tags to remove
         for tag, value in aurora_tags.items():
             self.tag_manager.set_tag(tag, value, replace=True)
-        self.tag_manager.set_tag(
-            "dd.internal.resource", "database_instance:{}".format(self.database_identifier), replace=True
-        )
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
