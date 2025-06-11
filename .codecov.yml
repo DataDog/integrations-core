@@ -218,6 +218,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Falco:
+        target: 75
+        flags:
+        - falco
       Fluentd:
         target: 75
         flags:
@@ -1060,6 +1064,11 @@ flags:
     paths:
     - external_dns/datadog_checks/external_dns
     - external_dns/tests
+  falco:
+    carryforward: true
+    paths:
+    - falco/datadog_checks/falco
+    - falco/tests
   fluentd:
     carryforward: true
     paths:
