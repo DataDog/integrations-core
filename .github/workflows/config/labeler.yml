@@ -209,6 +209,8 @@ integration/elastic:
 - elastic/**/*
 integration/envoy:
 - envoy/**/*
+integration/eset_protect:
+- eset_protect/**/*
 integration/esxi:
 - esxi/**/*
 integration/etcd:
