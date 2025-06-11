@@ -13,8 +13,8 @@ To create a new trigger action in SolarWinds:
 1. Navigate to **Alerts > Manage Alerts**.
 2. Select any alert and click **Edit Alert**, or create a new alert if you do not have any.
 3. Navigate to **Trigger Actions > Add Action**.
-4. Select “Send a GET or POST Request to a Web Server”.
-5. Click “Configure Action”.
+4. Select "Send a GET or POST Request to a Web Server".
+5. Click "Configure Action".
 6. Fill in the Action Pane with the following details:
 
         a. Name of Action: Send Alert to Datadog (or whatever you prefer)
@@ -25,7 +25,7 @@ To create a new trigger action in SolarWinds:
         f. Execution Settings: Leave as is
 
 7. Click **Add Action**.
-8. Click the “Reset Actions” step and then repeat steps 4 - 7, using the Reset Action template instead of the Trigger Action template.
+8. Click the "Reset Actions" step and then repeat steps 4 - 7, using the Reset Action template instead of the Trigger Action template.
 9. Click **Next**.
 10. Click **Submit** on the Summary page.
 
