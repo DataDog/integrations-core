@@ -159,7 +159,6 @@ class PostgreSql(AgentCheck):
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
 
-
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
             return None
@@ -483,14 +482,13 @@ class PostgreSql(AgentCheck):
         if self.is_aurora is None:
             self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
-    
+
     def _get_wal_level(self):
         with self.db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute('SHOW wal_level;')
                 wal_level = cursor.fetchone()[0]
                 return wal_level
-
 
     @property
     def reported_hostname(self):
