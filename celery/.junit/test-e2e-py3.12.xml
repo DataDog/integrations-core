@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.677" timestamp="2025-06-03T15:27:08.870500" hostname="COMP-KYX59G6VPG"><testcase classname="celery.tests.test_e2e" name="test_check_celery_e2e" time="1.037"><failure message="ValueError: Environment `py3.12` for integration `celery` is not running&#10;&#10;Could not find valid check output">tests/test_e2e.py:13: in test_check_celery_e2e
-    aggregator = dd_agent_check(rate=True)
-../datadog_checks_dev/datadog_checks/dev/plugin/pytest.py:224: in run_check
-    raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
-E   ValueError: Environment `py3.12` for integration `celery` is not running
-E   
-E   Could not find valid check output</failure></testcase></testsuite></testsuites>
