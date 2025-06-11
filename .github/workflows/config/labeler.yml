@@ -185,10 +185,10 @@ integration/directory:
 - directory/**/*
 integration/disk:
 - disk/**/*
-integration/dnsfilter:
-- dnsfilter/**/*
 integration/dns_check:
 - dns_check/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
 integration/docusign:
@@ -391,6 +391,8 @@ integration/linux_audit_logs:
 - linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/litellm:
+- litellm/**/*
 integration/mailchimp:
 - mailchimp/**/*
 integration/mapr:
