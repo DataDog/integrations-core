@@ -38,8 +38,7 @@
       "metrics": {
         "prefix": "falco.",
         "check": [
-          "falco.evt.source",
-          "falco.version"
+          "falco.evt.source"
         ],
         "metadata_path": "metadata.csv"
       },
