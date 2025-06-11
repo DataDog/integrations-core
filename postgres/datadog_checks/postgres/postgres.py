@@ -111,6 +111,7 @@ class PostgreSql(AgentCheck):
         self.system_identifier = None
         self.cluster_name = None
         self.is_aurora = None
+        self.wal_level = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
@@ -157,6 +158,7 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -318,10 +320,17 @@ class PostgreSql(AgentCheck):
                 ]
             )
 
-        if self.version < V10:
-            queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
+        if self.wal_level == 'logical':
+            self.log.debug("wal_level is logical, adding control checkpoint metrics")
+
+            if self.version < V10:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
+
+            else:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT)
+
         else:
-            queries.append(QUERY_PG_CONTROL_CHECKPOINT)
+            self.log.debug("wal_level is not logical, skipping control checkpoint metrics")
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
@@ -474,6 +483,14 @@ class PostgreSql(AgentCheck):
         if self.is_aurora is None:
             self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
+    
+    def _get_wal_level(self):
+        with self.db() as conn:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                cursor.execute('SHOW wal_level;')
+                wal_level = cursor.fetchone()[0]
+                return wal_level
+
 
     @property
     def reported_hostname(self):
@@ -1007,6 +1024,9 @@ class PostgreSql(AgentCheck):
             self._connect()
             # We don't want to cache versions between runs to capture minor updates for metadata
             self.load_version()
+
+            # Check wal_level
+            self.wal_level = self._get_wal_level()
 
             # Add raw version as a tag
             tags.append(f'postgresql_version:{self.raw_version}')
