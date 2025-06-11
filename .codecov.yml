@@ -402,6 +402,10 @@ coverage:
         target: 75
         flags:
         - linux_proc_extras
+      LiteLLM:
+        target: 75
+        flags:
+        - litellm
       MapR:
         target: 75
         flags:
@@ -598,10 +602,6 @@ coverage:
         target: 75
         flags:
         - sonarqube
-      sonatype_nexus:
-        target: 75
-        flags:
-        - sonatype_nexus
       Spark:
         target: 75
         flags:
@@ -762,6 +762,10 @@ coverage:
         target: 75
         flags:
         - nvidia_nim
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       tibco_ems:
         target: 75
         flags:
@@ -1296,6 +1300,11 @@ flags:
     paths:
     - linux_proc_extras/datadog_checks/linux_proc_extras
     - linux_proc_extras/tests
+  litellm:
+    carryforward: true
+    paths:
+    - litellm/datadog_checks/litellm
+    - litellm/tests
   mapr:
     carryforward: true
     paths:
