@@ -61,9 +61,10 @@ METRIC_MAP = {
     # TYPE falcosecurity_falco_sha256_rules_files_info gauge
     'falcosecurity_falco_sha256_rules_files_info': 'sha256.rules.files',
     # TYPE falcosecurity_falco_start_timestamp_nanoseconds gauge
-    'falcosecurity_falco_start_timestamp_nanoseconds': 'start.timestamp',
-    # TYPE falcosecurity_falco_version_info gauge
-    'falcosecurity_falco_version_info': 'version',
+    'falcosecurity_falco_start_timestamp_nanoseconds': {
+        'name': 'start.timestamp',
+        'type': 'time_elapsed',
+    },
     # TYPE falcosecurity_scap_engine_name_info gauge
     'falcosecurity_scap_engine_name_info': 'scap.engine.name',
     # TYPE falcosecurity_scap_n_added_fds_total counter
@@ -113,6 +114,11 @@ METRIC_MAP = {
     # TYPE falcosecurity_scap_n_threads_total gauge
     'falcosecurity_scap_n_threads_total': 'scap.n.threads',
 }
+
+# TYPE falcosecurity_falco_version_info gauge
+FALCO_VERSION = {'falcosecurity_falco_version_info': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
+
+METRIC_MAP.update(FALCO_VERSION)
 
 RENAME_LABELS = {
     'version': 'falco_version',

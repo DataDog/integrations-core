@@ -47,7 +47,6 @@ METRICS = [
     'falco.sha256.config.files',
     'falco.sha256.rules.files',
     'falco.start.timestamp',
-    'falco.version',
     'falco.scap.engine.name',
     'falco.scap.n.added.fds.count',
     'falco.scap.n.added.threads.count',

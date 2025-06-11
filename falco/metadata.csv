@@ -51,4 +51,3 @@ falco.scap.n.threads,gauge,,thread,,Current number of threads stored in internal
 falco.sha256.config.files,gauge,,,,SHA256 hash information of Falco configuration files,0,falco,,,
 falco.sha256.rules.files,gauge,,,,SHA256 hash information of Falco rules files,0,falco,,,
 falco.start.timestamp,gauge,,nanosecond,,Timestamp in nanoseconds when Falco started,0,falco,,,
-falco.version,gauge,,,,Falco version information,0,falco,,,

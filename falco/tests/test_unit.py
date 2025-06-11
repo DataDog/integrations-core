@@ -36,3 +36,23 @@ def test_check_falco(dd_run_check, aggregator, instance):
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("falco.openmetrics.health", ServiceCheck.OK)
+
+
+def test_version_metadata(datadog_agent, dd_run_check, mock_http_response, instance):
+    """
+    Test metadata version collection with V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('falco_metrics.txt'))
+    check = FalcoCheck('falco', {}, [instance])
+    check.check_id = 'falco_test'
+    dd_run_check(check)
+    # Version from fixture
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '0',
+        'version.minor': '40',
+        'version.patch': '0',
+        'version.raw': '0.40.0',
+    }
+
+    datadog_agent.assert_metadata('falco_test', version_metadata)
