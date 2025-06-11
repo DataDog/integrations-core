@@ -705,6 +705,31 @@ def test_pg_control(aggregator, integration_check, pg_instance):
     )
 
 
+def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
+    """"
+    Makes sure that we don't get the control metrics if the wal_level is set to logical
+    """
+
+    check = integration_check(pg_instance)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=0)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=0)
+
+
+    check = integration_check(pg_instance)
+    check._get_wal_level = mock.MagicMock(return_value="logical")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
+
+
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
