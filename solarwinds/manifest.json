@@ -12,8 +12,8 @@
     "title": "SolarWinds",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics",
-      "Category::Event Management"
+      "Category::Event Management",
+      "Offering::Integration"
     ]
   },
   "assets": {
