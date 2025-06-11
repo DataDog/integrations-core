@@ -8,7 +8,7 @@ from datadog_checks.dev import get_here
 HERE = get_here()
 
 OM_MOCKED_INSTANCE = {
-    'openmetrics_endpoint': 'http://kyverno:4000/metrics',
+    'openmetrics_endpoint': 'http://litellm:4000/metrics',
     'tags': ['test:tag'],
 }
 
