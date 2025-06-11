@@ -77,6 +77,14 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class AoMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -189,6 +197,15 @@ class ServerStateMetrics(BaseModel):
     enabled: Optional[bool] = Field(None, examples=[True])
 
 
+class TableSizeMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[600])
+    enabled: Optional[bool] = Field(None, examples=[False])
+
+
 class TaskSchedulerMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -231,6 +248,7 @@ class DatabaseMetrics(BaseModel):
     primary_log_shipping_metrics: Optional[PrimaryLogShippingMetrics] = None
     secondary_log_shipping_metrics: Optional[SecondaryLogShippingMetrics] = None
     server_state_metrics: Optional[ServerStateMetrics] = None
+    table_size_metrics: Optional[TableSizeMetrics] = None
     task_scheduler_metrics: Optional[TaskSchedulerMetrics] = None
     tempdb_file_space_usage_metrics: Optional[TempdbFileSpaceUsageMetrics] = None
     xe_metrics: Optional[XeMetrics] = None
@@ -339,6 +357,36 @@ class SchemasCollection(BaseModel):
     max_execution_time: Optional[float] = None
 
 
+class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+
+
+class QueryErrors(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+
+
+class XeCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    debug_sample_events: Optional[int] = None
+    query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -361,6 +409,7 @@ class InstanceConfig(BaseModel):
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
     database_metrics: Optional[DatabaseMetrics] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
@@ -370,6 +419,7 @@ class InstanceConfig(BaseModel):
     driver: Optional[str] = None
     dsn: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: str
     ignore_missing_database: Optional[bool] = None
@@ -396,6 +446,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
+    xe_collection: Optional[XeCollection] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

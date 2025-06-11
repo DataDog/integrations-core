@@ -41,14 +41,19 @@ FROM performance_schema.events_statements_summary_by_digest
 WHERE schema_name IS NOT NULL
 GROUP BY schema_name"""
 
-SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'"
+SQL_REPLICA_WORKER_THREADS = (
+    "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE PROCESSLIST_COMMAND LIKE 'Binlog dump%'"
+)
 
-SQL_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
+SQL_REPLICA_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE 'Binlog dump%'"
 
 SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
+
+SQL_SERVER_UUID = """\
+SELECT @@server_uuid"""
 
 SQL_SERVER_ID_AWS_AURORA = """\
 SHOW VARIABLES LIKE 'aurora_server_id'"""
@@ -256,3 +261,10 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
         return "{0};".format(base_query)
+
+
+def show_primary_replication_status_query(version, is_mariadb):
+    if not is_mariadb and version.version_compatible((8, 4, 0)):
+        return "SHOW BINARY LOG STATUS;"
+    else:
+        return "SHOW MASTER STATUS;"

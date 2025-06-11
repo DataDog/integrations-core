@@ -29,6 +29,7 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_SERVERNAME,
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
@@ -351,11 +352,13 @@ def test_statement_metrics_and_plans(
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
     dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
     instance_tags = dbm_instance.get('tags', [])
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags = set(instance_tags)
     if collect_raw_query_statement:
         dbm_instance["collect_raw_query_statement"] = {"enabled": True}
         expected_instance_tags.add("raw_query_statement:enabled")
-    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
+    expected_instance_tags.add("database_hostname:stubbed.hostname")
+    expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     def _obfuscate_sql(sql_query, options=None):
@@ -396,6 +399,9 @@ def test_statement_metrics_and_plans(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
 
+    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
+
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
@@ -406,7 +412,6 @@ def test_statement_metrics_and_plans(
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     tags = set(payload['tags'])
     assert tags == expected_instance_tags, "wrong instance tags for dbm-metrics event"
-    assert not any("dd.internal" in m for m in tags), "emitted dd.internal metrics from check"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
@@ -903,7 +908,12 @@ PORT = 1432
 
 
 def _expected_dbm_instance_tags(check):
-    return check._config.tags
+    return check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
 
 
 @pytest.mark.parametrize("statement_metrics_enabled", [True, False])

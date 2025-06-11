@@ -77,6 +77,7 @@ SELECT
     sess.host_name as host_name,
     sess.program_name as program_name,
     sess.is_user_process as is_user_process,
+    sess.client_interface_name as client_interface_name,
     {input_buffer_columns}
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
@@ -118,7 +119,8 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
-    sess.is_user_process as is_user_process
+    sess.is_user_process as is_user_process,
+    sess.client_interface_name as client_interface_name
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
@@ -175,8 +177,6 @@ class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
         self._obfuscator_options_for_tail_text = to_native_string(
@@ -317,11 +317,12 @@ class SqlserverActivity(DBMAsyncJob):
 
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
-                "ddtags": ",".join(self.tags),
+                "ddtags": ",".join(self._check.tag_manager.get_tags()),
                 'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
@@ -454,16 +455,17 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
+            "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time.time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             'service': self._config.service,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,

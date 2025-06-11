@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d0c1b332-dc56-46c8-ab6a-048052f91e41",
   "app_id": "infiniband",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -35,6 +35,13 @@
         "check": "infiniband.VL15_dropped",
         "metadata_path": "metadata.csv"
       }
+    },
+    "monitors": {
+      "port_state": "assets/monitors/port_state.json",
+      "physical_state": "assets/monitors/physical_state.json"
+    },
+    "dashboards": {
+      "InfiniBand Overview": "assets/dashboards/infiniband_overview.json"
     }
   },
   "author": {

@@ -99,3 +99,5 @@ RDMA_COUNTERS = {
     "rdma_read_resp_bytes",
     "rdma_read_bytes",
 }
+
+STATUS_COUNTERS = {"state", "phys_state"}  # "4: ACTIVE"  # "5: LinkUp"

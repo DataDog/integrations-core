@@ -1,0 +1,10 @@
+Job ID: 101
+Cluster: foo-test-bar
+User/Group: foo/foo
+State: COMPLETED (exit code 0)
+Cores: 1
+CPU Utilized: 00:00:01
+CPU Efficiency: 20.00% of 00:00:05 core-walltime
+Job Wall-clock time: 00:00:05
+Memory Utilized: 0.00 MB (estimated maximum)
+Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)

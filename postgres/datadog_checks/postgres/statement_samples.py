@@ -30,9 +30,10 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.encoding import decode_with_encodings
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
-from .util import DatabaseConfigurationError, DBExplainError, warning_with_tags
+from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
 from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
@@ -280,6 +281,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
+                if conn.encoding == "SQLASCII":
+                    # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
+                    # so we need to read in the data as bytes and then decode as best we can
+                    psycopg2.extensions.register_type(psycopg2.extensions.BYTES, cursor)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
 
@@ -330,7 +335,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                             self._config.dbname,
                             self._config.pg_stat_activity_view,
                             str(e),
-                            host=self._check.resolved_hostname,
+                            host=self._check.reported_hostname,
                             dbname=self._config.dbname,
                             code=DatabaseConfigurationError.undefined_activity_view.value,
                         ),
@@ -343,16 +348,45 @@ class PostgresStatementSamples(DBMAsyncJob):
         insufficient_privilege_count = 0
         total_count = 0
         normalized_rows = []
-        for row in rows:
+        for raw_row in rows:
             total_count += 1
-            if row.get('backend_type') is not None:
+            row = {}
+            with self._check._get_main_db() as conn:
+                encoding = conn.encoding if conn.encoding != "SQLASCII" else 'utf-8'
+
+            for key, value in raw_row.items():
+                if type(value) is not bytes:
+                    row[key] = value
+                elif key == "query":
+                    try:
+                        # Attempt decoding query in potential encodings
+                        row[key] = decode_with_encodings(value, self._config.query_encodings)
+                    except Exception as e:
+                        # Log the unable to decode query error
+                        self._log.warning("Unable to decode query: %s | Error: %s", value, e)
+                        break
+                else:
+                    try:
+                        # Decode other columns as database encoding, or default to utf-8
+                        try:
+                            row[key] = value.decode(encoding)
+                        except Exception:
+                            # Fallback to trying utf-8
+                            row[key] = value.decode('utf-8', 'backslashreplace')
+                    except Exception as e:
+                        self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
+                        row[key] = "unknown"
+            # We later on fallback to having the statement be set to the backend_type so it's important to only
+            # set it if it is not None
+            if row.get("backend_type") is not None:
+                # backend_type is always a bytea type because it can contain non-UTF8 characters
                 try:
-                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
-                except UnicodeDecodeError:
-                    row['backend_type'] = 'unknown'
-            if (not row['datname'] or not row['query']) and row.get(
-                'backend_type', 'client backend'
-            ) == 'client backend':
+                    row["backend_type"] = row.get("backend_type").tobytes().decode('utf-8', 'backslashreplace')
+                except Exception:
+                    row["backend_type"] = "unknown"
+            if not row.get('query'):
+                continue
+            if (not row.get('datname')) and row.get('backend_type', 'client backend') == 'client backend':
                 continue
             if row['client_addr']:
                 row['client_addr'] = str(row['client_addr'])
@@ -376,7 +410,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 insufficient_privilege_count,
                 tags=self.tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
         return normalized_rows
@@ -406,7 +440,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
         normalized_row['statement'] = obfuscated_query
@@ -432,14 +466,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             "dd.postgres.{}.time".format(method_name),
             (time.time() - start_time) * 1000,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.histogram(
             "dd.postgres.{}.rows".format(method_name),
             row_len,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         datadog_agent.emit_agent_telemetry(
@@ -473,7 +507,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self.tags + ["error:explain-no_plans_possible"] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
             return
@@ -510,35 +544,35 @@ class PostgresStatementSamples(DBMAsyncJob):
             "dd.postgres.collect_statement_samples.time",
             elapsed_ms,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count",
             submitted_count,
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explain_errors_cache.len",
             len(self._explain_errors_cache),
             tags=self.tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
         datadog_agent.emit_agent_telemetry(
@@ -602,7 +636,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         raw_query_event = {
             "timestamp": time.time() * 1000,
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "rqt",
@@ -676,7 +711,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     self._explain_function,
                     DatabaseConfigurationError.undefined_explain_function.value,
                     str(e),
-                    host=self._check.resolved_hostname,
+                    host=self._check.reported_hostname,
                     dbname=dbname,
                     code=DatabaseConfigurationError.undefined_explain_function.value,
                 ),
@@ -705,6 +740,13 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            # When sending potentially non-ascii data, e.g. UTF8, we need to force
+            # the client encoding to UTF-8 to match Python string encoding
+            if conn.encoding == 'SQLASCII':
+                self._log.debug(
+                    "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
+                )
+                conn.set_client_encoding('utf-8')
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
@@ -720,7 +762,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "dd.postgres.run_explain.time",
                     (time.time() - start_time) * 1000,
                     tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                     raw=True,
                 )
                 if not result or len(result) < 1 or len(result[0]) < 1:
@@ -740,7 +782,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
                 raw=True,
             )
         return plan_dict, explain_err_code, err_msg
@@ -748,15 +790,22 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
+
+        orig_statement = statement
+
+        # remove leading SET statements from our SQL
+        if obfuscated_statement[:3].lower() == "set":
+            statement = trim_leading_set_stmts(statement)
+            obfuscated_statement = trim_leading_set_stmts(obfuscated_statement)
+
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
         track_activity_query_size = self._get_track_activity_query_size()
 
-        if (
-            self._get_truncation_state(track_activity_query_size, statement, query_signature)
-            == StatementTruncationState.truncated
-        ):
+        # truncation check is on the original query, not the trimmed version
+        stmt_trunc = self._get_truncation_state(track_activity_query_size, orig_statement, query_signature)
+        if stmt_trunc == StatementTruncationState.truncated:
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -778,7 +827,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             if self._explain_parameterized_queries._is_parameterized_query(statement):
                 if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                     return self._explain_parameterized_queries.explain_statement(
-                        dbname, statement, obfuscated_statement
+                        dbname, statement, obfuscated_statement, query_signature
                     )
                 e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
@@ -830,7 +879,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             1,
             tags=self._dbtags(dbname, "error:explain-{}-{}".format(err_code.value, type(err)))
             + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+            hostname=self._check.reported_hostname,
             raw=True,
         )
 
@@ -872,13 +921,14 @@ class PostgresStatementSamples(DBMAsyncJob):
         statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             obfuscated_plan_event = {
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
                 "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self._check.cloud_metadata,
                 'service': self._config.service,
                 "network": {
                     "client": {
@@ -949,7 +999,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "dd.postgres.statement_samples.error",
                     1,
                     tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
+                    hostname=self._check.reported_hostname,
                     raw=True,
                 )
 
@@ -962,14 +1012,15 @@ class PostgresStatementSamples(DBMAsyncJob):
             row = {key: val for key, val in row.items() if val is not None and key != 'query'}
             active_sessions.append(row)
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
+            "cloud_metadata": self._check.cloud_metadata,
             'service': self._config.service,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,

@@ -42,7 +42,7 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongo"
-    assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
+    assert sorted(mongodb_instance_event['tags']) == sorted(expected_tags)
 
     expected_instance_metadata = {
         "replset_name": replset_name,
@@ -112,7 +112,12 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'hosting_type:self-hosted']
+    expected_tags = [
+        'server:mongodb://testUser2:*****@localhost:27017/test',
+        'sharding_cluster_role:mongos',
+        'hosting_type:self-hosted',
+        'clustername:my_cluster',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongos_check,
@@ -907,7 +912,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = [f'server:{mongo_check._config.clean_server_name}', 'hosting_type:self-hosted']
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
@@ -1092,7 +1097,11 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         'hosting_type:self-hosted',
     ]
 
-    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = replica_tags + [
+        f'server:{mongo_check._config.clean_server_name}',
+        'clustername:my_cluster',
+        'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
@@ -1250,3 +1259,16 @@ def test_integration_custom_metrics_collection_interval(
 
     # No new metrics should be collected as the interval is set to 300 seconds
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags, count=0)
+
+
+def test_integration_skip_free_storage_metrics(instance_integration, aggregator, check, dd_run_check):
+    instance_integration['free_storage_metrics'] = False
+    mongo_check = check(instance_integration)
+
+    with mock_pymongo("standalone"):
+        dd_run_check(mongo_check)
+
+    metrics_categories = [
+        'dbstats-non-free-storage',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])

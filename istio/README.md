@@ -65,9 +65,6 @@ Customize this file with any additional configurations. See the [sample istio.d/
 ##### Control plane configuration
 To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Annotations v1" xxx -->
-
 ```yaml
 ad.datadoghq.com/discovery.checks: |
   {
@@ -81,26 +78,7 @@ ad.datadoghq.com/discovery.checks: |
     }
   }
 ```
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Annotations v2" xxx -->
-
-**Note**: Annotations v2 is supported for Agent v7.36+.
-
-```yaml
-ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
-  {
-    "Istio": {
-      "istiod_endpoint": "http://%%host%%:15014/metrics",
-      "use_openmetrics": "true"
-    }
-  }
-```
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
-
+**Note**: The Autodiscovery Annotations v2 syntax is supported for Agent v7.36+.
 
 This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
@@ -281,7 +259,7 @@ Additional helpful documentation, links, and articles:
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [3]: https://www.datadoghq.com/blog/istio-datadog/
 [4]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[5]: https://app.datadoghq.com/account/settings/agent/latest
+[5]: /account/settings/agent/latest
 [6]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example

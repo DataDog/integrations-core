@@ -14,6 +14,15 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_FULL_SERVERNAME,
+    STATIC_INFO_INSTANCENAME,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
+    STATIC_INFO_SERVERNAME,
+    STATIC_INFO_VERSION,
+)
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -65,6 +74,18 @@ def test_missing_db(instance_docker, dd_run_check):
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
+        # Saturate static information to avoid trying to connect to the database
+        expected_keys = {
+            STATIC_INFO_VERSION,
+            STATIC_INFO_MAJOR_VERSION,
+            STATIC_INFO_ENGINE_EDITION,
+            STATIC_INFO_RDS,
+            STATIC_INFO_SERVERNAME,
+            STATIC_INFO_INSTANCENAME,
+        }
+        for key in expected_keys:
+            check.static_info_cache[key] = 'foo'
+
         check.initialize_connection()
         check.make_metric_list_to_collect()
         dd_run_check(check)
@@ -443,7 +464,12 @@ def test_set_default_driver_conf_linux():
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    check_tags = sqlserver_check._config.tags
+    check_tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
     expected_tags = check_tags + [
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'connection_host:{}'.format(DOCKER_SERVER),
@@ -884,3 +910,32 @@ def test_get_unixodbc_sysconfig():
         "embedded",
         "etc",
     ], "incorrect unix odbc config dir"
+
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:22', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$server_name/$instance_name', 'prod-server/instance', ['env:prod']),
+        ('$full_server_name', 'server\\instance', ['env:prod']),
+    ],
+)
+def test_database_identifier(instance_docker, template, expected, tags):
+    """
+    Test functionality of calculating database_identifier
+    """
+    instance_docker['host'] = 'localhost,22'
+    instance_docker['database_identifier'] = {'template': template}
+    instance_docker['tags'] = tags
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.static_info_cache[STATIC_INFO_SERVERNAME] = 'server'
+    check.static_info_cache[STATIC_INFO_INSTANCENAME] = 'instance'
+    check.static_info_cache[STATIC_INFO_FULL_SERVERNAME] = 'server\\instance'
+    # Reset for recalculation with static info
+    check._database_identifier = None
+
+    assert check.database_identifier == expected
