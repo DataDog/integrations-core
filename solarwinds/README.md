@@ -10,7 +10,7 @@ This integration works by subscribing Datadog to all of your SolarWinds alert no
 
 To create a new trigger action in SolarWinds:
 
-1. Navigate to Alerts > Manage Alerts
+1. Navigate to **Alerts > Manage Alerts**.
 2. Select any alert and click “Edit Alert”, or create a new alert if you do not have any
 3. Navigate to Trigger Actions > Add Action
 4. Select “Send a GET or POST Request to a Web Server”
