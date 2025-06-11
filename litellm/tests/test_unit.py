@@ -15,7 +15,7 @@ from .common import (
 )
 
 
-def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response):
+def test_litellm_mock_metrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
@@ -27,7 +27,7 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.OK)
 
 
-def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
+def test_litellm_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=503)
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception):
