@@ -127,6 +127,7 @@ datadog-lighttpd==5.1.0
 datadog-linkerd==6.1.0
 datadog-linux-audit-logs==1.0.0; sys_platform == 'linux2'
 datadog-linux-proc-extras==4.0.0; sys_platform == 'linux2'
+datadog-litellm==1.0.0
 datadog-mapr==3.0.0; sys_platform == 'linux2'
 datadog-mapreduce==6.1.0
 datadog-marathon==4.1.0; sys_platform != 'win32'
