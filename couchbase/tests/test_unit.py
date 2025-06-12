@@ -72,26 +72,25 @@ def test__get_query_monitoring_data(instance_query):
         ("legacy config", {'user': 'new_foo', 'ssl_verify': False}, {'auth': ('new_foo', 'password'), 'verify': False}),
     ],
 )
-def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, instance):
+def test_config(test_case, extra_config, expected_http_kwargs, instance):
+    """
+    Test that the legacy and new auth configurations are both supported.
+    """
     instance.update(extra_config)
+
     check = Couchbase('couchbase', {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8091/pools/default/tasks', **http_wargs)
+    http_wargs = {
+        'auth': mock.ANY,
+        'cert': mock.ANY,
+        'headers': mock.ANY,
+        'proxies': mock.ANY,
+        'timeout': mock.ANY,
+        'verify': mock.ANY,
+        'allow_redirects': mock.ANY,
+    }
+    http_wargs.update(expected_http_kwargs)
+    assert check.http.options == http_wargs
 
 
 @pytest.mark.parametrize(
