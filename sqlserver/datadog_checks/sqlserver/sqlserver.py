@@ -59,7 +59,7 @@ from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handl
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
 from datadog_checks.sqlserver.__about__ import __version__

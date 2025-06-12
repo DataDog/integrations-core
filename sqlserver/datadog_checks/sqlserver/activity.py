@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
