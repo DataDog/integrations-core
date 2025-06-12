@@ -1,9 +1,5 @@
 id: cloudgen_firewall
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: cloudgen-firewall
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
   - description: "identifies the internal unit of log service"
@@ -11,7 +7,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: component
-    path: component
+    path: cloudgen.firewall.component
     source: log
     type: string
   - description: "Ip address of the host that generated the log"
@@ -19,7 +15,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: IPs
-    path: ips
+    path: cloudgen.firewall.ips
     source: log
     type: string
   - description: "Process name that generated the log"
@@ -27,7 +23,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process
-    path: cloudgen_process
+    path: cloudgen.firewall.process
     source: log
     type: string
   - description: "Process ID of the process that generated the log"
@@ -35,7 +31,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process ID
-    path: cloudgen_pid
+    path: cloudgen.firewall.pid
     source: log
     type: string
   - description: "Session status of the log such as Open, Closed, Blocked, etc."
@@ -43,7 +39,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: session_status
-    path: cloudgen_session_status
+    path: cloudgen.firewall.session_status
     source: log
     type: string
 pipeline:
