@@ -490,7 +490,7 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting vsan metrics collection (query start time: %s).", collect_start_time)
         try:
             t0 = Timer()
-            new_health_metrics, new_performance_metrics = self.query_vsan_metrics(
+            new_health_metrics, new_performance_metrics, to_resource_metadata = self.query_vsan_metrics(
                 collect_start_time - dt.timedelta(hours=2)
             )
             self.gauge(
@@ -581,6 +581,8 @@ class VSphereCheck(AgentCheck):
                             str(hostname),
                             tags,
                         )
+
+            self.send_resources_by_name(to_resource_metadata)
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
@@ -614,8 +616,20 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Skipping vsan metrics for cluster %s because it is not a vsan cluster", cluster.name)
         if not cluster_nested_elts:
             self.log.debug("There are no vsan clusters to collect metrics from, skipping vsan collection")
-            return [], []
+            return [], [], []
         return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
+
+    def send_resources_by_name(self, clusters_data):
+        input_data = {}
+        for cluster in clusters_data:
+            for cluster_tag, cluster_tag_value in cluster.items():
+                if cluster_tag not in input_data:
+                    input_data[cluster_tag] = ''
+                input_data[cluster_tag] += str(cluster_tag_value) + ','
+        for cluster_tag, cluster_tag_value in input_data.items():
+            # we want to remove the last comma to avoid adding an empty '' resource
+            self.log.debug("Sending resource to resource_metadata: %s, %s", cluster_tag, cluster_tag_value.rstrip(','))
+            self.set_metadata(cluster_tag, cluster_tag_value.rstrip(','))
 
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
