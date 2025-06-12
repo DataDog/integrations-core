@@ -156,12 +156,6 @@ def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_ho
     assert result == expected
 
 
-@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.get_log_cursor", return_value=123)
-def test_abc(abc, instance):
-    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    assert check.test() == 123
-
-
 @pytest.mark.unit
 @patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.validate_configurations", return_value=None)
 @patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.get_log_cursor", return_value=log_cursor)
