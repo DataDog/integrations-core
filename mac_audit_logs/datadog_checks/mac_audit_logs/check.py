@@ -305,8 +305,8 @@ class MacAuditLogsCheck(AgentCheck):
             ):
                 relevant_files = [relevant_files[-1]]
                 self.log.debug(
-                    f"Found the same file as the last failed iteration, relevant files: {relevant_files}"
-                )  # noqa: G004
+                    f"Found the same file as the last failed iteration, relevant files: {relevant_files}"  # noqa: G004
+                )
 
             self.collect_data_from_files(
                 relevant_files,
