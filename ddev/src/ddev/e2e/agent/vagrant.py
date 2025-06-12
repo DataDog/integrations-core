@@ -57,11 +57,8 @@ class VagrantAgent(AgentInterface):
         config_file: Path,
     ):
         super().__init__(platform, integration, env, metadata, config_file)
-        # self.platform = platform
-        # self.integration = integration
-        # self.config_file = config_file
-        # self.metadata = metadata
 
+    def _initialize_vagrant(self, **kwargs):
         # Initialize and create the directory for Vagrant files specific to this VM
         home_dir = Path.home()
         self._temp_vagrant_dir = home_dir / ".ddev" / "vagrant" / self._vm_name
@@ -71,7 +68,7 @@ class VagrantAgent(AgentInterface):
         vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
         if not vagrantfile_path.exists():
             print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
-            vagrantfile_content = self._generate_vagrantfile_content()
+            vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
             vagrantfile_path.write_text(vagrantfile_content)
             print(f"Vagrantfile generated at {vagrantfile_path}")
         else:
@@ -80,13 +77,16 @@ class VagrantAgent(AgentInterface):
         # Set VAGRANT_CWD to self.temp_vagrant_dir
         os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
         print(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
+    
+    def _generate_vagrantfile_content(self, **kwargs) -> str:
+        env_vars = kwargs.get("agent_install_env_vars", {})
+        agent_install_env_vars= " ".join([f"{key}=\"{value}\"" for key, value in env_vars.items()]) if env_vars else ""
 
-    def _generate_vagrantfile_content(self) -> str:
         vm_hostname = self._vm_name  # Already sanitized and unique
         vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
         vagrant_sync_type = self.metadata.get("vagrant_sync_type")
-        # vb_memory = self.metadata.get("vagrant_vm_memory", "1024")
-        # vb_cpus = self.metadata.get("vagrant_vm_cpus", "1")
+        vb_memory = self.metadata.get("vagrant_vm_memory", "1024")
+        vb_cpus = self.metadata.get("vagrant_vm_cpus", "1")
 
         # sync_type_option = f', type: "{vagrant_sync_type}"' if vagrant_sync_type else ""  # For synced_folder
 
@@ -108,6 +108,7 @@ tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
 
 export DD_API_KEY="{os.environ.get("DD_API_KEY")}"
 export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
+export DD_SITE="datadoghq.com"
 
 EOF
 SCRIPT
@@ -131,7 +132,8 @@ Vagrant.configure("2") do |config|
 
     node.vm.provision "shell", inline: <<-SHELL, run: "always"
       apt update
-      DD_SITE="datadoghq.com" bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+      echo "DD_ENV_VARS: {agent_install_env_vars}"
+      {agent_install_env_vars} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
       service datadog-agent start && echo "Agent started successfully"
       echo "VM #{vm_hostname} is ready"
     SHELL
@@ -263,7 +265,18 @@ end
         # `agent_build` is part of the interface but less directly used for Vagrant
         # as the VM's "build" (box image) is typically defined in the Vagrantfile.
         # It could be used to select a Vagrant box if multiple are defined and match a pattern.
-        print(f"Starting Vagrant environment for VM: {self._vm_name}.")
+        agent_install_env_vars = {}
+
+        if agent_build:
+            pipeline_id, major_version, arch = agent_build.split("-")
+            agent_install_env_vars["TESTING_APT_URL"] = "s3.amazonaws.com/apttesting.datad0g.com"
+            agent_install_env_vars["TESTING_APT_REPO_VERSION"] = f"pipeline-{pipeline_id}-a{major_version}-{arch} {major_version}"
+            agent_install_env_vars["TESTING_YUM_URL"] = "s3.amazonaws.com/yumtesting.datad0g.com"
+            agent_install_env_vars["TESTING_YUM_VERSION_PATH"] = f"testing/pipeline-{pipeline_id}-a{major_version}/{major_version}"
+
+        self._initialize_vagrant(agent_install_env_vars=agent_install_env_vars)
+
+        print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
 
         # Stage local packages into a `packages` directory in the Current Working Directory.
         # Assumes the Vagrantfile being used will sync this directory.
@@ -425,6 +438,8 @@ end
                 print(f"Successfully ran post-install command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
 
     def stop(self) -> None:
+        return
+        self._initialize_vagrant()
         print(f"Stopping Vagrant VM: {self._vm_name}...")
         stop_guest_commands = self.metadata.get("stop_commands", [])
         if stop_guest_commands:
@@ -470,6 +485,8 @@ end
 
     def restart(self) -> None:
         # Restarts the entire VM
+        self._initialize_vagrant()
+
         print(f"Restarting (reloading) Vagrant VM: {self._vm_name}...")
         reload_cmd_host = ["vagrant", "reload", self._vm_name]
         if self.metadata.get("vagrant_provision_on_reload", True):  # Default to reprovisioning on reload
@@ -488,6 +505,7 @@ end
         # If specific post-reload steps are needed, they might go here or be part of provisioning.
 
     def restart_agent_service(self) -> None:
+        self._initialize_vagrant()
         # Restarts the Datadog Agent service *inside* the VM
         print(f"Restarting Datadog Agent service in VM: {self._vm_name}...")
         if self._is_windows_vm:
@@ -519,6 +537,8 @@ end
 
     def invoke(self, args: list[str]) -> None:
         # Runs an 'agent <command>' inside the VM
+        self._initialize_vagrant()
+
         agent_bin = self.metadata.get("vagrant_agent_binary_path", "/opt/datadog-agent/bin/agent/agent")
         if self._is_windows_vm:
             agent_bin = self.metadata.get(
@@ -533,6 +553,7 @@ end
         self._run_command(host_cmd)
 
     def enter_shell(self) -> None:
+        self._initialize_vagrant()
         print(f"Entering interactive shell for VM: {self._vm_name}...")
         # _format_command with interactive=True gives ['vagrant', 'ssh', self._vm_name]
         host_cmd = self._format_command([], interactive=True)
