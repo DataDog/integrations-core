@@ -196,6 +196,17 @@ facets:
     unit:
       family: time
       name: millisecond
+  - description: ''
+    facetType: range
+    groups:
+      - iboss
+    name: Use Time
+    path: iboss.useTime
+    source: log
+    type: double
+    unit:
+      family: time
+      name: millisecond
 pipeline:
   type: pipeline
   name: iboss
@@ -370,6 +381,16 @@ pipeline:
         - serverPeerTime
       sourceType: attribute
       target: iboss.serverPeerTime
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `useTime` to `iboss.useTime`
+      enabled: true
+      sources:
+        - useTime
+      sourceType: attribute
+      target: iboss.useTime
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
