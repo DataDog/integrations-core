@@ -706,7 +706,7 @@ def test_pg_control(aggregator, integration_check, pg_instance):
 
 
 def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
-    """ "
+    """
     Makes sure that we only get the control checkpoint metrics in the correct environment
     """
 
