@@ -16,6 +16,8 @@ file_names = [
     "20230401000000.20230401120000",
     "20230401120000.20230401123045",
     "20230401123045.crash_recovery",
+    "20230401123047.crash_recovery",
+    "20230401123056.not_terminated",
     "20230401123058.not_terminated",
     "current",
 ]
@@ -146,6 +148,8 @@ def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_ho
         (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401120000"),
         (utils.time_string_to_datetime_utc("20230401120000"), "20230401120000.20230401123045"),
         (utils.time_string_to_datetime_utc("20230401123045"), "20230401123045.crash_recovery"),
+        (utils.time_string_to_datetime_utc("20230401123047"), "20230401123047.crash_recovery"),
+        (utils.time_string_to_datetime_utc("20230401123056"), "20230401123056.not_terminated"),
         (utils.time_string_to_datetime_utc("20230401123058"), "20230401123058.not_terminated"),
     ]
     # Check if the result matches the expected output
