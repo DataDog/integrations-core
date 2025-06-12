@@ -318,7 +318,7 @@ class PostgreSql(AgentCheck):
                     QUERY_PG_UPTIME,
                 ]
             )
-
+            
         if self.is_aurora and self.wal_level != 'logical':
             self.log.debug("logical wal_level is required to use pg_current_wal_lsn() on Aurora")
 
