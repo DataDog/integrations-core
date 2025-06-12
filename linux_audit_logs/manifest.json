@@ -30,6 +30,11 @@
         "caption": "Linux Audit Logs - Overview",
         "image_url": "images/linux_audit_logs_overview_4.png",
         "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - System Call",
+        "image_url": "images/linux_audit_logs_system_call.png",
+        "media_type": "image"
       }
     ],
     "classifier_tags": [
@@ -54,7 +59,8 @@
       }
     },
     "dashboards": {
-      "Linux Audit Logs - Overview": "assets/dashboards/linux_audit_logs_overview.json"
+      "Linux Audit Logs - Overview": "assets/dashboards/linux_audit_logs_overview.json",
+      "Linux Audit Logs - System Call": "assets/dashboards/linux_audit_logs_system_call.json"
     },
     "logs": {
       "source": "linux-audit-logs"
